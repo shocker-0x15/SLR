@@ -53,7 +53,7 @@
 		4634EC391B9B529B0047AE54 /* checker_board_textures.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4634EC061B9B529B0047AE54 /* checker_board_textures.cpp */; };
 		4634EC3A1B9B529B0047AE54 /* constant_textures.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4634EC081B9B529B0047AE54 /* constant_textures.cpp */; };
 		4634EC3B1B9B529B0047AE54 /* image_textures.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4634EC0A1B9B529B0047AE54 /* image_textures.cpp */; };
-		4634EC3D1B9B5DBB0047AE54 /* README.md in Sources */ = {isa = PBXBuildFile; fileRef = 4634EC3C1B9B5DBB0047AE54 /* README.md */; };
+		4634EC3F1B9B60400047AE54 /* README.md in Sources */ = {isa = PBXBuildFile; fileRef = 4634EC3E1B9B60400047AE54 /* README.md */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -178,7 +178,7 @@
 		4634EC091B9B529B0047AE54 /* constant_textures.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = constant_textures.h; sourceTree = "<group>"; };
 		4634EC0A1B9B529B0047AE54 /* image_textures.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = image_textures.cpp; sourceTree = "<group>"; };
 		4634EC0B1B9B529B0047AE54 /* image_textures.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = image_textures.h; sourceTree = "<group>"; };
-		4634EC3C1B9B5DBB0047AE54 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		4634EC3E1B9B60400047AE54 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		46FFDDFD1B9B258400E47537 /* SLR */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = SLR; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -393,6 +393,7 @@
 		46FFDDF41B9B258400E47537 = {
 			isa = PBXGroup;
 			children = (
+				4634EC3E1B9B60400047AE54 /* README.md */,
 				46FFDDFF1B9B258400E47537 /* SLR */,
 				46FFDDFE1B9B258400E47537 /* Products */,
 			);
@@ -409,7 +410,6 @@
 		46FFDDFF1B9B258400E47537 /* SLR */ = {
 			isa = PBXGroup;
 			children = (
-				4634EC3C1B9B5DBB0047AE54 /* README.md */,
 				4634EB8E1B9B529B0047AE54 /* Accelerator */,
 				4634EB901B9B529B0047AE54 /* BasicTypes */,
 				4634EB9A1B9B529B0047AE54 /* BSDFs */,
@@ -497,7 +497,7 @@
 				4634EC3B1B9B529B0047AE54 /* image_textures.cpp in Sources */,
 				4634EC2E1B9B529B0047AE54 /* Scene.cpp in Sources */,
 				4634EC3A1B9B529B0047AE54 /* constant_textures.cpp in Sources */,
-				4634EC3D1B9B5DBB0047AE54 /* README.md in Sources */,
+				4634EC3F1B9B60400047AE54 /* README.md in Sources */,
 				4634EC1A1B9B529B0047AE54 /* SurfaceObject.cpp in Sources */,
 				4634EC1E1B9B529B0047AE54 /* basic_EDFs.cpp in Sources */,
 				4634EC371B9B529B0047AE54 /* MixedSurfaceMaterial.cpp in Sources */,
