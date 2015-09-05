@@ -6,8 +6,8 @@ SLR is a renderer based on Monte Carlo ray tracing.
 
 ##特徴 / Features
 * Unidirectional Path Tracing (with MIS)
-* Adaptive MCMC Progressive Photon Mapping
-* Multiple BSDF Layers
+* Adaptive MCMC Progressive Photon Mapping (buggy)
+* Various BSDF Types (including Mixed and ~~Layered~~(under Dev.) BSDF)
 * Image Based Environmental Light
 * Bump Mapping (Normal Map)
 * Depth of Field
@@ -30,7 +30,9 @@ It requires the following libraries.
 * assimp (currently obtained from GitHub for supporting the .assbin format)
 
 ##注意 / Note
-...
+モデルデータやテクスチャーを読み込むコードが書かれていますが、それらアセットはリポジトリには含まれていません。
+
+There are code for loading a model data and textures, but those assets are NOT included in this repository.
 
 ----
 2015 [@Shocker_0x15](https://twitter.com/Shocker_0x15)
