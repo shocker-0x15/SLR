@@ -65,10 +65,10 @@ void PathTracingRenderer::render(const Scene &scene, const RenderSettings &setti
     uint32_t exportTime = 30000;
     
     for (int s = 0; s < numSamples; ++s) {
-#ifdef NDEBUG
-        ThreadPool threadPool;
-#else
+#ifdef DEBUG
         ThreadPool threadPool(1);
+#else
+        ThreadPool threadPool;
 #endif
         for (int ty = 0; ty < sensor.numTileY(); ++ty) {
             for (int tx = 0; tx < sensor.numTileX(); ++tx) {

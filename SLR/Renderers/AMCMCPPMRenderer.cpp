@@ -294,10 +294,10 @@ void AMCMCPPMRenderer::render(const Scene &scene, const RenderSettings &settings
     uint32_t imageHeight = settings.getInt(RenderSettingItem::ImageHeight);
     ImageSensor sensor(imageWidth, imageHeight);
     
-#ifdef NDEBUG
-    uint32_t numThreads = std::thread::hardware_concurrency();
-#else
+#ifdef DEBUG
     uint32_t numThreads = 1;
+#else
+    uint32_t numThreads = std::thread::hardware_concurrency();
 #endif
     XORShift topRand(settings.getInt(RenderSettingItem::RNGSeed));
     auto mems = std::unique_ptr<ArenaAllocator[]>(new ArenaAllocator[numThreads]);

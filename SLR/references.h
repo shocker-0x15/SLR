@@ -130,6 +130,7 @@ typedef std::shared_ptr<InfiniteSphereNode> InfiniteSphereNodeRef;
 
 struct RenderingData;
 
+// Accelerators
 class BBVH;
 
 // Textures
