@@ -25,8 +25,8 @@ I've confirmed that the program runs correctly on the following environment.
 動作させるにあたっては以下のライブラリが必要です。  
 It requires the following libraries.
 
-* OpenEXR 2.10
-* libpng 1.6.14
+* OpenEXR 2.2
+* libpng 1.6
 * assimp (currently obtained from GitHub for supporting the .assbin format)
 
 ##注意 / Note
