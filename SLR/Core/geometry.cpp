@@ -8,7 +8,7 @@
 #include "geometry.h"
 
 #include "SurfaceObject.h"
-#include "ArenaAllocator.h"
+#include "../Memory/ArenaAllocator.h"
 #include "Transform.h"
 
 const float Ray::Epsilon = 0.0001f;

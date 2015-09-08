@@ -8,7 +8,7 @@
 #include "IBLEmission.h"
 #include "../EDFs/IBLEDF.h"
 #include "../Memory/ArenaAllocator.h"
-#include "textures.h"
+#include "../Core/textures.h"
 #include "../SceneGraph/Scene.h"
 
 Spectrum IBLEmission::emittance(const SurfacePoint &surfPt) const {

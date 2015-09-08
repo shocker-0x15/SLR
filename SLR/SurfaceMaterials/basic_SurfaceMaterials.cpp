@@ -8,7 +8,7 @@
 #include "basic_SurfaceMaterials.h"
 #include "../BSDFs/basic_BSDFs.h"
 #include "../Memory/ArenaAllocator.h"
-#include "textures.h"
+#include "../Core/textures.h"
 
 BSDF* DiffuseReflection::getBSDF(const SurfacePoint &surfPt, ArenaAllocator &mem, float scale) const {
     BSDF* bsdf = nullptr;

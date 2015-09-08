@@ -6,10 +6,10 @@
 //
 
 #include "TriangleMesh.h"
-#include "TriangleMeshNode.h"
-#include "CompensatedSum.h"
-#include "distributions.h"
-#include "SurfaceObject.h"
+#include "../SceneGraph/TriangleMeshNode.h"
+#include "../Core/CompensatedSum.h"
+#include "../Core/distributions.h"
+#include "../Core/SurfaceObject.h"
 
 BoundingBox3D Triangle::bounds() const {
     return BoundingBox3D(m_mesh->m_vertices[m_v[0]].position).unify(m_mesh->m_vertices[m_v[1]].position).unify(m_mesh->m_vertices[m_v[2]].position);

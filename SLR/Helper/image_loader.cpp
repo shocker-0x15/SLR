@@ -28,7 +28,7 @@ bool getEXRInfo(const std::string &filePath, uint32_t* width, uint32_t* height, 
     using namespace Imf;
     using namespace Imath;
     RgbaInputFile file(filePath.c_str());
-    Imf_2_1::Header header = file.header();
+    Imf::Header header = file.header();
     
     Box2i dw = file.dataWindow();
     *width = dw.max.x - dw.min.x + 1;
@@ -43,7 +43,7 @@ bool loadEXR(const std::string &filePath, uint8_t* storage) {
     using namespace Imf;
     using namespace Imath;
     RgbaInputFile file(filePath.c_str());
-    Imf_2_1::Header header = file.header();
+    Imf::Header header = file.header();
     
     Box2i dw = file.dataWindow();
     long width = dw.max.x - dw.min.x + 1;

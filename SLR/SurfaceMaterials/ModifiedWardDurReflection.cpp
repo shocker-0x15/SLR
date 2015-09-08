@@ -8,7 +8,7 @@
 #include "ModifiedWardDurReflection.h"
 #include "../BSDFs/ModifiedWardDurBRDF.h"
 #include "../Memory/ArenaAllocator.h"
-#include "textures.h"
+#include "../Core/textures.h"
 
 BSDF* ModifiedWardDurReflection::getBSDF(const SurfacePoint &surfPt, ArenaAllocator &mem, float scale) const {
     Spectrum R = m_reflectance->evaluate(surfPt.texCoord);

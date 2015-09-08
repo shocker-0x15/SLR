@@ -53,7 +53,8 @@
 		4634EC391B9B529B0047AE54 /* checker_board_textures.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4634EC061B9B529B0047AE54 /* checker_board_textures.cpp */; };
 		4634EC3A1B9B529B0047AE54 /* constant_textures.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4634EC081B9B529B0047AE54 /* constant_textures.cpp */; };
 		4634EC3B1B9B529B0047AE54 /* image_textures.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4634EC0A1B9B529B0047AE54 /* image_textures.cpp */; };
-		4634EC3F1B9B60400047AE54 /* README.md in Sources */ = {isa = PBXBuildFile; fileRef = 4634EC3E1B9B60400047AE54 /* README.md */; };
+		4634EC441B9B62BE0047AE54 /* dlmalloc.c in Sources */ = {isa = PBXBuildFile; fileRef = 4634EC401B9B62BE0047AE54 /* dlmalloc.c */; };
+		4634EC451B9B62BE0047AE54 /* MSpaceAllocator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4634EC421B9B62BE0047AE54 /* MSpaceAllocator.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -179,6 +180,10 @@
 		4634EC0A1B9B529B0047AE54 /* image_textures.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = image_textures.cpp; sourceTree = "<group>"; };
 		4634EC0B1B9B529B0047AE54 /* image_textures.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = image_textures.h; sourceTree = "<group>"; };
 		4634EC3E1B9B60400047AE54 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		4634EC401B9B62BE0047AE54 /* dlmalloc.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = dlmalloc.c; sourceTree = "<group>"; };
+		4634EC411B9B62BE0047AE54 /* dlmalloc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = dlmalloc.h; sourceTree = "<group>"; };
+		4634EC421B9B62BE0047AE54 /* MSpaceAllocator.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MSpaceAllocator.cpp; sourceTree = "<group>"; };
+		4634EC431B9B62BE0047AE54 /* MSpaceAllocator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSpaceAllocator.h; sourceTree = "<group>"; };
 		46FFDDFD1B9B258400E47537 /* SLR */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = SLR; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -311,6 +316,10 @@
 				4634EBD71B9B529B0047AE54 /* ArenaAllocator.h */,
 				4634EBDC1B9B529B0047AE54 /* StackAllocator.cpp */,
 				4634EBDD1B9B529B0047AE54 /* StackAllocator.h */,
+				4634EC401B9B62BE0047AE54 /* dlmalloc.c */,
+				4634EC411B9B62BE0047AE54 /* dlmalloc.h */,
+				4634EC421B9B62BE0047AE54 /* MSpaceAllocator.cpp */,
+				4634EC431B9B62BE0047AE54 /* MSpaceAllocator.h */,
 			);
 			path = Memory;
 			sourceTree = "<group>";
@@ -497,7 +506,6 @@
 				4634EC3B1B9B529B0047AE54 /* image_textures.cpp in Sources */,
 				4634EC2E1B9B529B0047AE54 /* Scene.cpp in Sources */,
 				4634EC3A1B9B529B0047AE54 /* constant_textures.cpp in Sources */,
-				4634EC3F1B9B60400047AE54 /* README.md in Sources */,
 				4634EC1A1B9B529B0047AE54 /* SurfaceObject.cpp in Sources */,
 				4634EC1E1B9B529B0047AE54 /* basic_EDFs.cpp in Sources */,
 				4634EC371B9B529B0047AE54 /* MixedSurfaceMaterial.cpp in Sources */,
@@ -521,6 +529,7 @@
 				4634EC181B9B529B0047AE54 /* RenderSettings.cpp in Sources */,
 				4634EC0E1B9B529B0047AE54 /* ModifiedWardDurBRDF.cpp in Sources */,
 				4634EC391B9B529B0047AE54 /* checker_board_textures.cpp in Sources */,
+				4634EC441B9B62BE0047AE54 /* dlmalloc.c in Sources */,
 				4634EC351B9B529B0047AE54 /* DiffuseEmission.cpp in Sources */,
 				4634EC221B9B529B0047AE54 /* image_loader.cpp in Sources */,
 				4634EC331B9B529B0047AE54 /* AshikhminReflection.cpp in Sources */,
@@ -529,6 +538,7 @@
 				4634EC151B9B529B0047AE54 /* Image.cpp in Sources */,
 				4634EC171B9B529B0047AE54 /* RandomNumberGenerator.cpp in Sources */,
 				4634EC201B9B529B0047AE54 /* MultiEDF.cpp in Sources */,
+				4634EC451B9B62BE0047AE54 /* MSpaceAllocator.cpp in Sources */,
 				4634EC2F1B9B529B0047AE54 /* TriangleMeshNode.cpp in Sources */,
 				4634EC381B9B529B0047AE54 /* ModifiedWardDurReflection.cpp in Sources */,
 				4634EC321B9B529B0047AE54 /* AddedSurfaceMaterial.cpp in Sources */,
@@ -545,7 +555,7 @@
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
 				CLANG_CXX_LIBRARY = "libc++";
-				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_MODULES = NO;
 				CLANG_ENABLE_OBJC_ARC = YES;
 				CLANG_WARN_BOOL_CONVERSION = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
@@ -603,7 +613,7 @@
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
 				CLANG_CXX_LIBRARY = "libc++";
-				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_MODULES = NO;
 				CLANG_ENABLE_OBJC_ARC = YES;
 				CLANG_WARN_BOOL_CONVERSION = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;

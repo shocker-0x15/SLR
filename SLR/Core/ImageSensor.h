@@ -40,9 +40,6 @@ public:
     uint32_t numTileX() const { return (uint32_t)m_numTileX; };
     uint32_t numTileY() const { return (uint32_t)m_numTileY; };
     
-    void SLR();
-    void SLRSeparatedBuffers();
-    
     Spectrum pixel(uint32_t x, uint32_t y) const;
     Spectrum &pixel(uint32_t x, uint32_t y);
     void add(float px, float py, const Spectrum &contribution);

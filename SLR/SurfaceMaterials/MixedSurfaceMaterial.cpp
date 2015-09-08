@@ -8,7 +8,7 @@
 #include "MixedSurfaceMaterial.h"
 #include "../BSDFs/MultiBSDF.h"
 #include "../Memory/ArenaAllocator.h"
-#include "textures.h"
+#include "../Core/textures.h"
 
 BSDF* MixedSurfaceMaterial::getBSDF(const SurfacePoint &surfPt, ArenaAllocator &mem, float scale) const {
     float factor = m_factor->evaluate(surfPt.texCoord);

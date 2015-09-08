@@ -6,8 +6,9 @@
 //
 
 #include "nodes.h"
-#include "SurfaceObject.h"
+#include "../Core/SurfaceObject.h"
 #include "../Memory/ArenaAllocator.h"
+#include "../Core/cameras.h"
 
 bool InternalNode::addChildNode(const NodeRef &node) {
     // Create a shared_ptr for passing it to contains() with a No-Op deleter so that "this" will not be deleted.

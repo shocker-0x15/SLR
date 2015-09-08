@@ -8,7 +8,7 @@
 #include "AshikhminReflection.h"
 #include "../BSDFs/AshikhminBRDF.h"
 #include "../Memory/ArenaAllocator.h"
-#include "textures.h"
+#include "../Core/textures.h"
 
 BSDF* AshikhminSpecularReflection::getBSDF(const SurfacePoint &surfPt, ArenaAllocator &mem, float scale) const {
     Spectrum Rs = m_Rs->evaluate(surfPt.texCoord);

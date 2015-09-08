@@ -8,7 +8,7 @@
 #include "DiffuseEmission.h"
 #include "../EDFs/basic_EDFs.h"
 #include "../Memory/ArenaAllocator.h"
-#include "textures.h"
+#include "../Core/textures.h"
 
 Spectrum DiffuseEmission::emittance(const SurfacePoint &surfPt) const {
     return m_emittance->evaluate(surfPt.texCoord);
