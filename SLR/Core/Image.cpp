@@ -6,7 +6,7 @@
 //
 
 #include "Image.h"
-#include "CompensatedSum.h"
+#include "../BasicTypes/CompensatedSum.h"
 
 std::map<std::string, Image2DRef> Image2D::s_database;
 

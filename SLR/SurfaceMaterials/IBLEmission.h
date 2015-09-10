@@ -20,8 +20,8 @@ public:
     IBLEmission(const Scene* scene, const SpectrumTextureRef &coeffM, const Spectrum &scale) :
     m_scene(scene), m_coeffM(coeffM), m_scale(scale) {};
     
-    Spectrum emittance(const SurfacePoint &surfPt) const override;
-    EDF* getEDF(const SurfacePoint &surfPt, ArenaAllocator &mem, float scale = 1.0f) const override;
+    Spectrum emittance(const SurfacePoint &surfPt, const WavelengthSamples &wls) const override;
+    EDF* getEDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem, float scale = 1.0f) const override;
 };
 
 #endif /* defined(__SLR__IBLEmission__) */

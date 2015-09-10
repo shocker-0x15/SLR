@@ -10,7 +10,7 @@
 
 #include "../defines.h"
 #include "../references.h"
-#include "CompensatedSum.h"
+#include "../BasicTypes/CompensatedSum.h"
 #include "../Helper/bmp_exporter.h"
 
 template <typename RealType>

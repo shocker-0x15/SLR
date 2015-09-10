@@ -14,11 +14,16 @@
 #include <cmath>
 
 #include <iostream>
+#include <iomanip>
 #include <string>
+#include <sstream>
+
 #include <vector>
 #include <map>
 #include <set>
 #include <stack>
+
+#include <limits>
 #include <algorithm>
 #include <memory>
 #include <functional>
@@ -32,6 +37,7 @@
 #else
 #    define SLRAssert(expr, fmt, ...)
 #endif
+
 #define SLRAssert_NotDefined SLRAssert(false, "Not defined!");
 
 // Platform defines
@@ -98,5 +104,7 @@ template <typename T, typename ...ArgTypes>
 std::unique_ptr<T> createUnique(ArgTypes&&... args) {
     return std::unique_ptr<T>(new T(std::forward<ArgTypes>(args)...));
 }
+
+#define Use_Spectral_Representation
 
 #endif

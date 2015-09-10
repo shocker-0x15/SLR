@@ -18,7 +18,7 @@ public:
     ImageSpectrumTexture(const TiledImage2DRef &image) :
     m_data(image) { };
     
-    Spectrum evaluate(const TexCoord2D &tc) const override;
+    Spectrum evaluate(const TexCoord2D &tc, const WavelengthSamples &wls) const override;
     RegularConstantContinuous2D* createIBLImportanceMap() const override;
 };
 

@@ -11,10 +11,10 @@
 #include "../Core/textures.h"
 #include "../SceneGraph/Scene.h"
 
-Spectrum IBLEmission::emittance(const SurfacePoint &surfPt) const {
-    return m_scene->getWorldDiscArea() * m_coeffM->evaluate(surfPt.texCoord) * m_scale;
+Spectrum IBLEmission::emittance(const SurfacePoint &surfPt, const WavelengthSamples &wls) const {
+    return m_scene->getWorldDiscArea() * m_coeffM->evaluate(surfPt.texCoord, wls) * m_scale;
 }
 
-EDF* IBLEmission::getEDF(const SurfacePoint &surfPt, ArenaAllocator &mem, float scale) const {
+EDF* IBLEmission::getEDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem, float scale) const {
     return mem.create<IBLEDF>(m_scene->getWorldDiscArea());
 }

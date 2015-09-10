@@ -10,10 +10,10 @@
 #include "../Memory/ArenaAllocator.h"
 #include "../Core/textures.h"
 
-BSDF* MixedSurfaceMaterial::getBSDF(const SurfacePoint &surfPt, ArenaAllocator &mem, float scale) const {
+BSDF* MixedSurfaceMaterial::getBSDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem, float scale) const {
     float factor = m_factor->evaluate(surfPt.texCoord);
-    BSDF* bsdf0 = m_mat0->getBSDF(surfPt, mem, scale * (1.0f - factor));
-    BSDF* bsdf1 = m_mat1->getBSDF(surfPt, mem, scale * factor);
+    BSDF* bsdf0 = m_mat0->getBSDF(surfPt, wls, mem, scale * (1.0f - factor));
+    BSDF* bsdf1 = m_mat1->getBSDF(surfPt, wls, mem, scale * factor);
     MultiBSDF* bsdf = mem.create<MultiBSDF>();
     bsdf->add(bsdf0);
     bsdf->add(bsdf1);

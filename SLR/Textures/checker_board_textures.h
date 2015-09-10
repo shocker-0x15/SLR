@@ -17,7 +17,7 @@ class CheckerBoardSpectrumTexture : public SpectrumTexture {
 public:
     CheckerBoardSpectrumTexture(const Spectrum &v0, const Spectrum &v1) : m_values{v0, v1} { };
     
-    Spectrum evaluate(const TexCoord2D &tc) const override { return m_values[((int)(tc.u * 2) + (int)(tc.v * 2)) % 2]; };
+    Spectrum evaluate(const TexCoord2D &tc, const WavelengthSamples &wls) const override { return m_values[((int)(tc.u * 2) + (int)(tc.v * 2)) % 2]; };
     RegularConstantContinuous2D* createIBLImportanceMap() const override;
 };
 

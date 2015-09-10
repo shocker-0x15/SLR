@@ -10,26 +10,26 @@
 #include "../Memory/ArenaAllocator.h"
 #include "../Core/textures.h"
 
-BSDF* DiffuseReflection::getBSDF(const SurfacePoint &surfPt, ArenaAllocator &mem, float scale) const {
+BSDF* DiffuseReflection::getBSDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem, float scale) const {
     BSDF* bsdf = nullptr;
     if (m_sigma) {
         float sigma = m_sigma->evaluate(surfPt.texCoord);
         bsdf = nullptr;
     }
     else {
-        bsdf = mem.create<LambertianBRDF>(scale * m_reflectance->evaluate(surfPt.texCoord));
+        bsdf = mem.create<LambertianBRDF>(scale * m_reflectance->evaluate(surfPt.texCoord, wls));
     }
     return bsdf;
 }
 
-BSDF* SpecularReflection::getBSDF(const SurfacePoint &surfPt, ArenaAllocator &mem, float scale) const {
-    Spectrum coeffR = m_coeffR->evaluate(surfPt.texCoord);
-    const Fresnel* fresnel = m_fresnel->getFresnel(surfPt, mem);
+BSDF* SpecularReflection::getBSDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem, float scale) const {
+    Spectrum coeffR = m_coeffR->evaluate(surfPt.texCoord, wls);
+    const Fresnel* fresnel = m_fresnel->getFresnel(surfPt, wls, mem);
     return mem.create<SpecularBRDF>(scale * coeffR, fresnel);
 }
 
-BSDF* SpecularTransmission::getBSDF(const SurfacePoint &surfPt, ArenaAllocator &mem, float scale) const {
-    Spectrum coeffT = m_coeffT->evaluate(surfPt.texCoord);
+BSDF* SpecularTransmission::getBSDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem, float scale) const {
+    Spectrum coeffT = m_coeffT->evaluate(surfPt.texCoord, wls);
     float etaExt = m_etaExt->evaluate(surfPt.texCoord);
     float etaInt = m_etaInt->evaluate(surfPt.texCoord);
     return mem.create<SpecularBTDF>(scale * coeffT, etaExt, etaInt);

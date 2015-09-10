@@ -17,7 +17,7 @@ class ConstantSpectrumTexture : public SpectrumTexture {
 public:
     ConstantSpectrumTexture(const Spectrum &value) : m_value(value) { };
     
-    Spectrum evaluate(const TexCoord2D &tc) const override { return m_value; };
+    Spectrum evaluate(const TexCoord2D &tc, const WavelengthSamples &wls) const override { return m_value; };
     RegularConstantContinuous2D* createIBLImportanceMap() const override;
 };
 

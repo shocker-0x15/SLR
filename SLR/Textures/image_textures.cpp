@@ -9,7 +9,7 @@
 #include "../Core/Image.h"
 #include "../Core/distributions.h"
 
-Spectrum ImageSpectrumTexture::evaluate(const TexCoord2D &tc) const {
+Spectrum ImageSpectrumTexture::evaluate(const TexCoord2D &tc, const WavelengthSamples &wls) const {
     uint32_t x = std::clamp((uint32_t)std::fmod(m_data->width() * tc.u, m_data->width()), 0u, m_data->width() - 1);
     uint32_t y = std::clamp((uint32_t)std::fmod(m_data->height() * tc.v, m_data->height()), 0u, m_data->height() - 1);
     Spectrum ret;

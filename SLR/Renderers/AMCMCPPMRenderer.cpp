@@ -448,11 +448,11 @@ void AMCMCPPMRenderer::DistributedRTJob::kernel(uint32_t threadID) {
             Spectrum weight = (We0 * We1) / (lensResult.areaPDF * WeResult.dirPDF);
             Spectrum C = record(threadID, *scene, px, py, ray, weight, rng, mem);
             SLRAssert(weight.hasNaN() == false && weight.hasInf() == false,
-                     "Unexpected value detected: (%f, %f, %f)\n"
-                     "pix: (%f, %f)", weight.r, weight.g, weight.b, px, py);
+                     "Unexpected value detected: %s\n"
+                     "pix: (%f, %f)", weight.toString().c_str(), px, py);
             SLRAssert(C.hasNaN() == false && C.hasInf() == false,
-                     "Unexpected value detected: (%f, %f, %f)\n"
-                     "pix: (%f, %f)", C.r, C.g, C.b, px, py);
+                     "Unexpected value detected: %s\n"
+                     "pix: (%f, %f)", C.toString().c_str(), px, py);
             
             sensor->add(px, py, C);
         }
@@ -503,7 +503,7 @@ Spectrum AMCMCPPMRenderer::DistributedRTJob::record(uint32_t threadID, const Sce
         if (fs == Spectrum::Zero || fsResult.dirPDF == 0.0f)
             break;
         alpha *= fs * (std::fabs(fsResult.dir_sn.z) / fsResult.dirPDF);
-        SLRAssert(!alpha.hasInf() && !alpha.hasNaN(), "alpha: unexpected value detected: (%f, %f, %f)", alpha.r, alpha.g, alpha.b);
+        SLRAssert(!alpha.hasInf() && !alpha.hasNaN(), "alpha: unexpected value detected: %s", alpha.toString().c_str());
         
         Vector3D dirIn = surfPt.shadingFrame.fromLocal(fsResult.dir_sn);
         ray = Ray(surfPt.p + Ray::Epsilon * dirIn, dirIn, ray.time);
@@ -518,7 +518,7 @@ Spectrum AMCMCPPMRenderer::DistributedRTJob::record(uint32_t threadID, const Sce
         if (surfPt.isEmitting()) {
             EDF* edf = surfPt.createEDF(mem);
             Spectrum Le = surfPt.emittance() * edf->evaluate(EDFQuery(), dirOut_sn);
-            SLRAssert(!Le.hasNaN() && !Le.hasInf(), "Le: unexpected value detected: (%f, %f, %f)", Le.r, Le.g, Le.b);
+            SLRAssert(!Le.hasNaN() && !Le.hasInf(), "Le: unexpected value detected: %s", Le.toString().c_str());
             
             sp += alpha * Le;
         }

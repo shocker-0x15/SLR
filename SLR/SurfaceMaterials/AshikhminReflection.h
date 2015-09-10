@@ -19,7 +19,7 @@ public:
     AshikhminSpecularReflection(const SpectrumTextureRef &Rs, const FloatTextureRef &nu, const FloatTextureRef &nv) :
     m_Rs(Rs), m_nu(nu), m_nv(nv) { };
     
-    BSDF* getBSDF(const SurfacePoint &surfPt, ArenaAllocator &mem, float scale = 1.0f) const override;
+    BSDF* getBSDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem, float scale = 1.0f) const override;
 };
 
 class AshikhminDiffuseReflection : public SurfaceMaterial {
@@ -29,7 +29,7 @@ public:
     AshikhminDiffuseReflection(const SpectrumTextureRef &Rs, const SpectrumTextureRef &Rd) :
     m_Rs(Rs), m_Rd(Rd) { };
     
-    BSDF* getBSDF(const SurfacePoint &surfPt, ArenaAllocator &mem, float scale = 1.0f) const override;
+    BSDF* getBSDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem, float scale = 1.0f) const override;
 };
 
 #endif /* defined(__SLR__AshikhminReflection__) */

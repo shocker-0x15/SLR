@@ -17,10 +17,10 @@ public:
     SurfaceMaterial() { };
     virtual ~SurfaceMaterial() { };
     
-    virtual BSDF* getBSDF(const SurfacePoint &surfPt, ArenaAllocator &mem, float scale = 1.0f) const = 0;
-    virtual Spectrum emittance(const SurfacePoint &surfPt) const { return Spectrum::Zero; };
+    virtual BSDF* getBSDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem, float scale = 1.0f) const = 0;
+    virtual Spectrum emittance(const SurfacePoint &surfPt, const WavelengthSamples &wls) const { return Spectrum::Zero; };
     virtual bool isEmitting() const { return false; };
-    virtual EDF* getEDF(const SurfacePoint &surfPt, ArenaAllocator &mem, float scale = 1.0f) const { SLRAssert(false, "Not implemented."); return nullptr; };
+    virtual EDF* getEDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem, float scale = 1.0f) const { SLRAssert(false, "Not implemented."); return nullptr; };
     
     static SurfaceMaterialRef createMatte(const SpectrumTextureRef &reflectance, const FloatTextureRef &sigma);
     static SurfaceMaterialRef createMetal(const SpectrumTextureRef &coeffR, const SpectrumTextureRef &eta, const SpectrumTextureRef &k);
@@ -34,8 +34,8 @@ public:
 
 class EmitterSurfaceProperty {
 public:
-    virtual Spectrum emittance(const SurfacePoint &surfPt) const = 0;
-    virtual EDF* getEDF(const SurfacePoint &surfPt, ArenaAllocator &mem, float scale = 1.0f) const = 0;
+    virtual Spectrum emittance(const WavelengthSamples &wls, const SurfacePoint &surfPt) const = 0;
+    virtual EDF* getEDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem, float scale = 1.0f) const = 0;
     
     static EmitterSurfacePropertyRef createDiffuseEmitter(const SpectrumTextureRef &emittance);
 };
@@ -47,10 +47,10 @@ public:
     EmitterSurfaceMaterial(const SurfaceMaterialRef &mat, const EmitterSurfacePropertyRef &emit) :
     m_mat(mat), m_emit(emit) {};
     
-    BSDF* getBSDF(const SurfacePoint &surfPt, ArenaAllocator &mem, float scale = 1.0f) const override;
-    Spectrum emittance(const SurfacePoint &surfPt) const override;
+    BSDF* getBSDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem, float scale = 1.0f) const override;
+    Spectrum emittance(const SurfacePoint &surfPt, const WavelengthSamples &wls) const override;
     bool isEmitting() const { return true; };
-    EDF* getEDF(const SurfacePoint &surfPt, ArenaAllocator &mem, float scale) const override;
+    EDF* getEDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem, float scale) const override;
 };
 
 
@@ -59,14 +59,14 @@ public:
     SpatialFresnel() { };
     virtual ~SpatialFresnel() { };
     
-    virtual Fresnel* getFresnel(const SurfacePoint &surfPt, ArenaAllocator &mem) const = 0;
+    virtual Fresnel* getFresnel(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem) const = 0;
 };
 
 class SpatialFresnelNoOp : public SpatialFresnel {
 public:
     SpatialFresnelNoOp() { };
     
-    Fresnel* getFresnel(const SurfacePoint &surfPt, ArenaAllocator &mem) const override;
+    Fresnel* getFresnel(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem) const override;
 };
 
 class SpatialFresnelConductor : public SpatialFresnel {
@@ -75,7 +75,7 @@ class SpatialFresnelConductor : public SpatialFresnel {
 public:
     SpatialFresnelConductor(const SpectrumTextureRef &eta, const SpectrumTextureRef &k) : m_eta(eta), m_k(k) { };
     
-    Fresnel* getFresnel(const SurfacePoint &surfPt, ArenaAllocator &mem) const override;
+    Fresnel* getFresnel(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem) const override;
 };
 
 class SpatialFresnelDielectric : public SpatialFresnel {
@@ -86,7 +86,7 @@ public:
     const FloatTextureRef &etaExt() const { return m_etaExt; };
     const FloatTextureRef &etaInt() const { return m_etaInt; };
     
-    Fresnel* getFresnel(const SurfacePoint &surfPt, ArenaAllocator &mem) const override;
+    Fresnel* getFresnel(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem) const override;
 };
 
 #endif

@@ -19,7 +19,7 @@ public:
     AddedSurfaceMaterial(const SurfaceMaterialRef &m0, const SurfaceMaterialRef &m1) :
     m_mat0(m0), m_mat1(m1) {};
     
-    BSDF* getBSDF(const SurfacePoint &surfPt, ArenaAllocator &mem, float scale = 1.0f) const override;
+    BSDF* getBSDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem, float scale = 1.0f) const override;
 };
 
 #endif /* defined(__SLR__AddedSurfaceMaterial__) */

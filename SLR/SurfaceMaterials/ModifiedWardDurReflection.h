@@ -19,7 +19,7 @@ public:
     ModifiedWardDurReflection(const SpectrumTextureRef &reflectance, const FloatTextureRef &anisoX, const FloatTextureRef &anisoY) :
     m_reflectance(reflectance), m_anisoX(anisoX), m_anisoY(anisoY) { };
     
-    BSDF* getBSDF(const SurfacePoint &surfPt, ArenaAllocator &mem, float scale = 1.0f) const override;
+    BSDF* getBSDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem, float scale = 1.0f) const override;
 };
 
 #endif /* defined(__SLR__ModifiedWardDurReflection__) */

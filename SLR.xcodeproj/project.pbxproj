@@ -70,6 +70,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		460FF8F41BA08A7B0014F4BC /* CompensatedSum.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CompensatedSum.h; sourceTree = "<group>"; };
 		4634EB8F1B9B529B0047AE54 /* BBVH.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BBVH.h; sourceTree = "<group>"; };
 		4634EB911B9B529B0047AE54 /* Matrix4Stack.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Matrix4Stack.h; sourceTree = "<group>"; };
 		4634EB921B9B529B0047AE54 /* Matrix4x4.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Matrix4x4.h; sourceTree = "<group>"; };
@@ -94,7 +95,6 @@
 		4634EBA71B9B529B0047AE54 /* PerspectiveCamera.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PerspectiveCamera.h; sourceTree = "<group>"; };
 		4634EBA91B9B529B0047AE54 /* cameras.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = cameras.cpp; sourceTree = "<group>"; };
 		4634EBAA1B9B529B0047AE54 /* cameras.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cameras.h; sourceTree = "<group>"; };
-		4634EBAB1B9B529B0047AE54 /* CompensatedSum.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CompensatedSum.h; sourceTree = "<group>"; };
 		4634EBAC1B9B529B0047AE54 /* directional_distribution_functions.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = directional_distribution_functions.cpp; sourceTree = "<group>"; };
 		4634EBAD1B9B529B0047AE54 /* directional_distribution_functions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = directional_distribution_functions.h; sourceTree = "<group>"; };
 		4634EBAE1B9B529B0047AE54 /* distributions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = distributions.h; sourceTree = "<group>"; };
@@ -209,6 +209,7 @@
 		4634EB901B9B529B0047AE54 /* BasicTypes */ = {
 			isa = PBXGroup;
 			children = (
+				460FF8F41BA08A7B0014F4BC /* CompensatedSum.h */,
 				4634EB911B9B529B0047AE54 /* Matrix4Stack.h */,
 				4634EB921B9B529B0047AE54 /* Matrix4x4.h */,
 				4634EB931B9B529B0047AE54 /* Normal3.h */,
@@ -253,7 +254,6 @@
 			children = (
 				4634EBA91B9B529B0047AE54 /* cameras.cpp */,
 				4634EBAA1B9B529B0047AE54 /* cameras.h */,
-				4634EBAB1B9B529B0047AE54 /* CompensatedSum.h */,
 				4634EBAC1B9B529B0047AE54 /* directional_distribution_functions.cpp */,
 				4634EBAD1B9B529B0047AE54 /* directional_distribution_functions.h */,
 				4634EBAE1B9B529B0047AE54 /* distributions.h */,

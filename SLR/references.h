@@ -10,6 +10,7 @@
 
 #include <vector>
 #include <memory>
+#include <stdint.h>
 
 // Memory Allocators
 class Allocator;
@@ -19,7 +20,11 @@ class ArenaAllocator;
 class MSpaceAllocator;
 
 // Basic Types
-template <typename RealType> struct SpectrumTemplate;
+template <typename RealType> struct RGBTemplate;
+template <typename RealType> struct RGBStorageTemplate;
+template <typename RealType, uint32_t N> struct WavelengthSamplesTemplate;
+template <typename RealType, uint32_t N> struct SampledSpectrumTemplate;
+template <typename RealType, uint32_t numStrata> struct SpectrumStorageTemplate;
 template <typename RealType> struct Vector3Template;
 template <typename RealType> struct Vector4Template;
 template <typename RealType> struct Normal3Template;
@@ -27,7 +32,14 @@ template <typename RealType> struct Point3Template;
 template <typename RealType> struct Matrix4x4Template;
 template <typename RealType> struct QuaternionTemplate;
 template <typename RealType> struct TexCoord2Template;
-typedef SpectrumTemplate<float> Spectrum;
+#ifdef Use_Spectral_Representation
+typedef SampledSpectrumTemplate<float, 16> Spectrum;
+typedef WavelengthSamplesTemplate<float, 16> WavelengthSamples;
+typedef SpectrumStorageTemplate<float, 16> SpectrumStorage;
+#else
+typedef RGBTemplate<float> Spectrum;
+typedef RGBStorageTemplate<float> SpectrumStorage;
+#endif
 typedef Vector3Template<float> Vector3D;
 typedef Vector3Template<float> Tangent3D;
 typedef Vector3Template<float> Bitangent3D;

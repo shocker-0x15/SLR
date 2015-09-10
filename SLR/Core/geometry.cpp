@@ -34,20 +34,20 @@ bool SurfacePoint::isEmitting() const {
     return obj->isEmitting();
 }
 
-Spectrum SurfacePoint::emittance() const {
-    return obj->emittance(*this);
+Spectrum SurfacePoint::emittance(const WavelengthSamples &wls) const {
+    return obj->emittance(*this, wls);
 }
 
 float SurfacePoint::evaluateAreaPDF() const {
     return obj->evaluateAreaPDF(*this);
 }
 
-BSDF* SurfacePoint::createBSDF(ArenaAllocator &mem) const {
-    return obj->createBSDF(*this, mem);
+BSDF* SurfacePoint::createBSDF(const WavelengthSamples &wls, ArenaAllocator &mem) const {
+    return obj->createBSDF(*this, wls, mem);
 }
 
-EDF* SurfacePoint::createEDF(ArenaAllocator &mem) const {
-    return obj->createEDF(*this, mem);
+EDF* SurfacePoint::createEDF(const WavelengthSamples &wls, ArenaAllocator &mem) const {
+    return obj->createEDF(*this, wls, mem);
 }
 
 SurfacePoint operator*(const StaticTransform &transform, const SurfacePoint &surfPt) {

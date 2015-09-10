@@ -10,10 +10,10 @@
 #include "../Memory/ArenaAllocator.h"
 #include "../Core/textures.h"
 
-Spectrum DiffuseEmission::emittance(const SurfacePoint &surfPt) const {
-    return m_emittance->evaluate(surfPt.texCoord);
+Spectrum DiffuseEmission::emittance(const SurfacePoint &surfPt, const WavelengthSamples &wls) const {
+    return m_emittance->evaluate(surfPt.texCoord, wls);
 }
 
-EDF* DiffuseEmission::getEDF(const SurfacePoint &surfPt, ArenaAllocator &mem, float scale) const {
+EDF* DiffuseEmission::getEDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem, float scale) const {
     return mem.create<DiffuseEDF>();
 }

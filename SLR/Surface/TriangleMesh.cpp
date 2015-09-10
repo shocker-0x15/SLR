@@ -7,7 +7,7 @@
 
 #include "TriangleMesh.h"
 #include "../SceneGraph/TriangleMeshNode.h"
-#include "../Core/CompensatedSum.h"
+#include "../BasicTypes/CompensatedSum.h"
 #include "../Core/distributions.h"
 #include "../Core/SurfaceObject.h"
 

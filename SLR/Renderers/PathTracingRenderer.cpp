@@ -18,7 +18,7 @@
 #include "../Core/geometry.h"
 #include "../Core/SurfaceObject.h"
 #include "../Core/directional_distribution_functions.h"
-#include "../Core/CompensatedSum.h"
+#include "../BasicTypes/CompensatedSum.h"
 #include "../Helper/StopWatch.h"
 
 PathTracingRenderer::PathTracingRenderer() {
@@ -124,13 +124,13 @@ void PathTracingRenderer::Job::kernel(uint32_t threadID) {
             Ray ray(lensResult.surfPt.p, lensResult.surfPt.shadingFrame.fromLocal(WeResult.dirLocal), time);
             Spectrum C = contribution(ray, *scene, rng, mem);
             SLRAssert(C.hasNaN() == false && C.hasInf() == false,
-                     "Unexpected value detected: (%f, %f, %f)\n"
-                     "pix: (%f, %f)", C.r, C.g, C.b, px, py);
+                     "Unexpected value detected: %s\n"
+                     "pix: (%f, %f)", C.toString().c_str(), px, py);
             
             Spectrum weight = (We0 * We1) / (lensResult.areaPDF * WeResult.dirPDF);
             SLRAssert(weight.hasNaN() == false && weight.hasInf() == false,
-                     "Unexpected value detected: (%f, %f, %f)\n"
-                     "pix: (%f, %f)", weight.r, weight.g, weight.b, px, py);
+                     "Unexpected value detected: %s\n"
+                     "pix: (%f, %f)", weight.toString().c_str(), px, py);
             sensor->add(px, py, weight * C);
             
             mem.reset();
@@ -186,14 +186,14 @@ Spectrum PathTracingRenderer::Job::contribution(const Ray &initRay, const Scene 
                 Vector3D shadowDir_l = xpResult.surfPt.shadingFrame.toLocal(-shadowDir);
                 Spectrum Le = M * edf->evaluate(EDFQuery(), shadowDir_l);
                 float lightPDF = lightProb * xpResult.areaPDF;
-                SLRAssert(!Le.hasNaN() && !Le.hasInf(), "Le: unexpected value detected: (%f, %f, %f)", Le.r, Le.g, Le.b);
+                SLRAssert(!Le.hasNaN() && !Le.hasInf(), "Le: unexpected value detected: %s", Le.toString().c_str());
                 
                 Vector3D shadowDir_sn = surfPt.shadingFrame.toLocal(shadowDir);
                 BSDFQuery queryBSDF(dirOut_sn, gNorm_sn);
                 Spectrum fs = bsdf->evaluate(queryBSDF, shadowDir_sn);
                 float bsdfPDF = bsdf->evaluatePDF(queryBSDF, shadowDir_sn) * std::fabs(shadowDir_l.z) / dist2;
                 SLRAssert(!std::isnan(bsdfPDF) && !std::isinf(bsdfPDF), "bsdfPDF: unexpected value detected: %f", bsdfPDF);
-                SLRAssert(!fs.hasNaN() && !fs.hasInf(), "fs: unexpected value detected: (%f, %f, %f)", fs.r, fs.g, fs.b);
+                SLRAssert(!fs.hasNaN() && !fs.hasInf(), "fs: unexpected value detected: %s", fs.toString().c_str());
                 
                 float MISWeight = 1.0f;
                 if (!xpResult.isDeltaPos && !std::isinf(xpResult.areaPDF))
@@ -212,7 +212,7 @@ Spectrum PathTracingRenderer::Job::contribution(const Ray &initRay, const Scene 
         if (fs == Spectrum::Zero || fsResult.dirPDF == 0.0f)
             break;
         alpha *= fs * (std::fabs(fsResult.dir_sn.z) / fsResult.dirPDF);
-        SLRAssert(!alpha.hasInf() && !alpha.hasNaN(), "alpha: unexpected value detected: (%f, %f, %f)", alpha.r, alpha.g, alpha.b);
+        SLRAssert(!alpha.hasInf() && !alpha.hasNaN(), "alpha: unexpected value detected: %s", alpha.toString().c_str());
         
         Vector3D dirIn = surfPt.shadingFrame.fromLocal(fsResult.dir_sn);
         ray = Ray(surfPt.p + Ray::Epsilon * dirIn, dirIn, ray.time);

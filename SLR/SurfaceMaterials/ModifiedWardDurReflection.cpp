@@ -10,8 +10,8 @@
 #include "../Memory/ArenaAllocator.h"
 #include "../Core/textures.h"
 
-BSDF* ModifiedWardDurReflection::getBSDF(const SurfacePoint &surfPt, ArenaAllocator &mem, float scale) const {
-    Spectrum R = m_reflectance->evaluate(surfPt.texCoord);
+BSDF* ModifiedWardDurReflection::getBSDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem, float scale) const {
+    Spectrum R = m_reflectance->evaluate(surfPt.texCoord, wls);
     float anisoX = m_anisoX->evaluate(surfPt.texCoord);
     float anisoY = m_anisoY->evaluate(surfPt.texCoord);
     return mem.create<ModifiedWardDurBRDF>(scale * R, anisoX, anisoY);

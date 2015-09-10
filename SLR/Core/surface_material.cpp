@@ -18,28 +18,28 @@
 #include "../SurfaceMaterials/DiffuseEmission.h"
 #include "../SurfaceMaterials/IBLEmission.h"
 
-Fresnel* SpatialFresnelNoOp::getFresnel(const SurfacePoint &surfPt, ArenaAllocator &mem) const {
+Fresnel* SpatialFresnelNoOp::getFresnel(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem) const {
     return mem.create<FresnelNoOp>();
 }
 
-Fresnel* SpatialFresnelConductor::getFresnel(const SurfacePoint &surfPt, ArenaAllocator &mem) const {
+Fresnel* SpatialFresnelConductor::getFresnel(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem) const {
     return mem.create<FresnelConductor>(m_eta->evaluate(surfPt.texCoord), m_k->evaluate(surfPt.texCoord));
 }
 
-Fresnel* SpatialFresnelDielectric::getFresnel(const SurfacePoint &surfPt, ArenaAllocator &mem) const {
+Fresnel* SpatialFresnelDielectric::getFresnel(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem) const {
     return mem.create<FresnelDielectric>(m_etaExt->evaluate(surfPt.texCoord), m_etaInt->evaluate(surfPt.texCoord));
 }
 
-BSDF* EmitterSurfaceMaterial::getBSDF(const SurfacePoint &surfPt, ArenaAllocator &mem, float scale) const {
-    return m_mat->getBSDF(surfPt, mem);
+BSDF* EmitterSurfaceMaterial::getBSDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem, float scale) const {
+    return m_mat->getBSDF(surfPt, wls, mem);
 };
 
-Spectrum EmitterSurfaceMaterial::emittance(const SurfacePoint &surfPt) const {
-    return m_emit->emittance(surfPt);
+Spectrum EmitterSurfaceMaterial::emittance(const SurfacePoint &surfPt, const WavelengthSamples &wls) const {
+    return m_emit->emittance(wls, surfPt);
 };
 
-EDF* EmitterSurfaceMaterial::getEDF(const SurfacePoint &surfPt, ArenaAllocator &mem, float scale) const {
-    return m_emit->getEDF(surfPt, mem);
+EDF* EmitterSurfaceMaterial::getEDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem, float scale) const {
+    return m_emit->getEDF(surfPt, wls, mem);
 };
 
 
