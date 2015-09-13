@@ -23,7 +23,7 @@ public:
     m_phiAngle(phiAngle), m_thetaAngle(thetaAngle) { };
     
     Spectrum sample(const LensPosQuery &query, const LensPosSample &smp, LensPosQueryResult* result) const override;
-    IDF* createIDF(const SurfacePoint &surfPt, ArenaAllocator &mem) const override;
+    IDF* createIDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem) const override;
 };
 
 class EquirectangularIDF : public IDF {

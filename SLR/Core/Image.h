@@ -23,6 +23,7 @@ protected:
 public:
     Image2D() { };
     Image2D(uint32_t w, uint32_t h, ColorFormat fmt) : m_width(w), m_height(h), m_colorFormat(fmt) { };
+    ~Image2D() { };
     
     template <typename ColFmt>
     const ColFmt &get(uint32_t x, uint32_t y) const { return *(const ColFmt*)getInternal(x, y); };
@@ -105,6 +106,10 @@ class TiledImage2DTemplate : public Image2D {
         std::memcpy(m_data + m_stride * ((ty * m_numTileX + tx) * tileWidth * tileWidth + ly * tileWidth + lx), data, size);
     };
 public:
+    ~TiledImage2DTemplate() {
+        
+    };
+    
     static std::shared_ptr<TiledImage2DTemplate> create(const std::string &filepath, Allocator *mem, bool gammaCorrection = false) {
         if (s_database.count(filepath) > 0) {
             return std::static_pointer_cast<TiledImage2DTemplate>(s_database[filepath]);

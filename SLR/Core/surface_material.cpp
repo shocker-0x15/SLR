@@ -23,7 +23,7 @@ Fresnel* SpatialFresnelNoOp::getFresnel(const SurfacePoint &surfPt, const Wavele
 }
 
 Fresnel* SpatialFresnelConductor::getFresnel(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem) const {
-    return mem.create<FresnelConductor>(m_eta->evaluate(surfPt.texCoord), m_k->evaluate(surfPt.texCoord));
+    return mem.create<FresnelConductor>(m_eta->evaluate(surfPt.texCoord, wls), m_k->evaluate(surfPt.texCoord, wls));
 }
 
 Fresnel* SpatialFresnelDielectric::getFresnel(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem) const {
@@ -35,7 +35,7 @@ BSDF* EmitterSurfaceMaterial::getBSDF(const SurfacePoint &surfPt, const Waveleng
 };
 
 Spectrum EmitterSurfaceMaterial::emittance(const SurfacePoint &surfPt, const WavelengthSamples &wls) const {
-    return m_emit->emittance(wls, surfPt);
+    return m_emit->emittance(surfPt, wls);
 };
 
 EDF* EmitterSurfaceMaterial::getEDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem, float scale) const {

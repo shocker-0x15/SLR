@@ -102,10 +102,12 @@ namespace Assimp {
             diffuseTex = createShared<ImageSpectrumTexture>(image);
         }
         else if (aiMat->Get(AI_MATKEY_COLOR_DIFFUSE, color, nullptr) == aiReturn_SUCCESS) {
-            diffuseTex = createShared<ConstantSpectrumTexture>(inverseGammaCorrection(Spectrum(color[0], color[1], color[2])));
+            InputSpectrumRef sp = createShared<UpsampledContinuousSpectrum>(ColorSpace::sRGB_NonLinear, color[0], color[1], color[2]);
+            diffuseTex = createShared<ConstantSpectrumTexture>(sp);
         }
         else {
-            diffuseTex = createShared<ConstantSpectrumTexture>(Spectrum(1.0f, 0.0f, 1.0f));
+            InputSpectrumRef sp = createShared<UpsampledContinuousSpectrum>(ColorSpace::sRGB_NonLinear, 1.0f, 0.0f, 1.0f);
+            diffuseTex = createShared<ConstantSpectrumTexture>(sp);
         }
         
         return SurfaceMaterial::createMatte(diffuseTex, nullptr);

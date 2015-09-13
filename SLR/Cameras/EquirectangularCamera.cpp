@@ -31,7 +31,7 @@ Spectrum EquirectangularCamera::sample(const LensPosQuery &query, const LensPosS
     return Spectrum::One;
 }
 
-IDF* EquirectangularCamera::createIDF(const SurfacePoint &surfPt, ArenaAllocator &mem) const {
+IDF* EquirectangularCamera::createIDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem) const {
     return mem.create<EquirectangularIDF>(*this);
 }
 

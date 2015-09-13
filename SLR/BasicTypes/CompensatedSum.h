@@ -15,7 +15,7 @@ template <typename RealType>
 struct CompensatedSum {
     RealType result;
     RealType comp;
-    CompensatedSum(const RealType &value = 0) : result(value), comp(0) { };
+    CompensatedSum(const RealType &value) : result(value), comp(0.0) { };
     CompensatedSum &operator=(const RealType &value) {
         result = value;
         comp = 0;

@@ -34,7 +34,7 @@ public:
 
 class EmitterSurfaceProperty {
 public:
-    virtual Spectrum emittance(const WavelengthSamples &wls, const SurfacePoint &surfPt) const = 0;
+    virtual Spectrum emittance(const SurfacePoint &surfPt, const WavelengthSamples &wls) const = 0;
     virtual EDF* getEDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem, float scale = 1.0f) const = 0;
     
     static EmitterSurfacePropertyRef createDiffuseEmitter(const SpectrumTextureRef &emittance);

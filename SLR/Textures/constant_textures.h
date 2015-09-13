@@ -13,11 +13,11 @@
 #include "../Core/textures.h"
 
 class ConstantSpectrumTexture : public SpectrumTexture {
-    Spectrum m_value;
+    InputSpectrumRef m_value;
 public:
-    ConstantSpectrumTexture(const Spectrum &value) : m_value(value) { };
+    ConstantSpectrumTexture(const InputSpectrumRef &value) : m_value(value) { };
     
-    Spectrum evaluate(const TexCoord2D &tc, const WavelengthSamples &wls) const override { return m_value; };
+    Spectrum evaluate(const TexCoord2D &tc, const WavelengthSamples &wls) const override;
     RegularConstantContinuous2D* createIBLImportanceMap() const override;
 };
 

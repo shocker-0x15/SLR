@@ -13,8 +13,6 @@
 #include "../BasicTypes/Spectrum.h"
 #include "../BasicTypes/CompensatedSum.h"
 
-typedef CompensatedSum<SpectrumStorage> SpectrumStorageSum;
-
 class ImageSensor {
     uint8_t* m_data;
     uint8_t** m_separatedData;
@@ -43,18 +41,13 @@ public:
     uint32_t numTileX() const { return (uint32_t)m_numTileX; };
     uint32_t numTileY() const { return (uint32_t)m_numTileY; };
     
-    SpectrumStorageSum pixel(uint32_t x, uint32_t y) const;
-    SpectrumStorageSum &pixel(uint32_t x, uint32_t y);
-    SpectrumStorageSum pixel(uint32_t idx, uint32_t x, uint32_t y) const;
-    SpectrumStorageSum &pixel(uint32_t idx, uint32_t x, uint32_t y);
+    DiscretizedSpectrum pixel(uint32_t x, uint32_t y) const;
+    SpectrumStorage &pixel(uint32_t x, uint32_t y);
+    DiscretizedSpectrum pixel(uint32_t idx, uint32_t x, uint32_t y) const;
+    SpectrumStorage &pixel(uint32_t idx, uint32_t x, uint32_t y);
     
-#ifdef Use_Spectral_Representation
     void add(float px, float py, const WavelengthSamples &wls, const Spectrum &contribution);
     void add(uint32_t idx, float px, float py, const WavelengthSamples &wls, const Spectrum &contribution);
-#else
-    void add(float px, float py, const Spectrum &contribution);
-    void add(uint32_t idx, float px, float py, const Spectrum &contribution);
-#endif
     
     void saveImage(const std::string &filepath, float scale, float* scaleSeparated = nullptr) const;
 };

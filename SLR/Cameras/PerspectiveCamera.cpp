@@ -35,7 +35,7 @@ Spectrum PerspectiveCamera::sample(const LensPosQuery &query, const LensPosSampl
     return Spectrum::One;
 }
 
-IDF* PerspectiveCamera::createIDF(const SurfacePoint &surfPt, ArenaAllocator &mem) const {
+IDF* PerspectiveCamera::createIDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem) const {
     return mem.create<PerspectiveIDF>(*this, Point3D(m_lensRadius * surfPt.u, m_lensRadius * surfPt.v, 0.0f));
 }
 

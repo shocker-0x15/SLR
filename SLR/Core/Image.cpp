@@ -43,7 +43,7 @@ void Image2D::areaAverage(float xLeft, float xRight, float yTop, float yBottom, 
             break;
         }
         case ColorFormat::RGBA16Fx4: {
-            FloatSum sumR, sumG, sumB, sumA;
+            FloatSum sumR(0), sumG(0), sumB(0), sumA(0);
             RGBA16Fx4 pix;
             
             uint32_t corners[] = {xLeftPix, yTopPix, xRightPix, yTopPix, xLeftPix, yBottomPix, xRightPix, yBottomPix};

@@ -17,6 +17,8 @@ enum class ColorFormat {
     RGB_8x4,
     RGBA8x4,
     RGBA16Fx4,
+    uvn16Fx3,
+    uvnA16Fx4,
     Gray8,
     Num
 };

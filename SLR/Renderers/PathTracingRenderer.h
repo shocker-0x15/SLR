@@ -30,7 +30,7 @@ class PathTracingRenderer : public Renderer {
         uint32_t basePixelY;
         
         void kernel(uint32_t threadID);
-        Spectrum contribution(const Ray &initRay, const Scene &scene, RandomNumberGenerator &rng, ArenaAllocator &mem) const;
+        Spectrum contribution(const Scene &scene, const WavelengthSamples &wls, const Ray &initRay, RandomNumberGenerator &rng, ArenaAllocator &mem) const;
     };
 public:
     PathTracingRenderer();

@@ -92,10 +92,15 @@ void buildScene(StopWatch &sw) {
                 diffuseTex = createShared<ImageSpectrumTexture>(image);
             }
             else if (aiMat->Get(AI_MATKEY_COLOR_DIFFUSE, color, nullptr) == aiReturn_SUCCESS) {
-                diffuseTex = createShared<ConstantSpectrumTexture>(inverseGammaCorrection(2.0f * Spectrum(color[0], color[1], color[2])));
+                color[0] *= 2;
+                color[1] *= 2;
+                color[2] *= 2;
+                InputSpectrumRef sp = createShared<UpsampledContinuousSpectrum>(ColorSpace::sRGB_NonLinear, color[0], color[1], color[2]);
+                diffuseTex = createShared<ConstantSpectrumTexture>(sp);
             }
             else {
-                diffuseTex = createShared<ConstantSpectrumTexture>(Spectrum(1.0f, 0.0f, 1.0f));
+                InputSpectrumRef sp = createShared<UpsampledContinuousSpectrum>(ColorSpace::sRGB_NonLinear, 1.0f, 0.0f, 1.0f);
+                diffuseTex = createShared<ConstantSpectrumTexture>(sp);
             }
             
             return SurfaceMaterial::createMatte(diffuseTex, nullptr);
@@ -149,14 +154,20 @@ void buildScene(StopWatch &sw) {
             diffuseTex = createShared<ImageSpectrumTexture>(image);
         }
         else if (aiMat->Get(AI_MATKEY_COLOR_DIFFUSE, color, nullptr) == aiReturn_SUCCESS) {
-            diffuseTex = createShared<ConstantSpectrumTexture>(inverseGammaCorrection(2.0f * Spectrum(color[0], color[1], color[2])));
+            color[0] *= 2;
+            color[1] *= 2;
+            color[2] *= 2;
+            InputSpectrumRef sp = createShared<UpsampledContinuousSpectrum>(ColorSpace::sRGB_NonLinear, color[0], color[1], color[2]);
+            diffuseTex = createShared<ConstantSpectrumTexture>(sp);
         }
         else {
-            diffuseTex = createShared<ConstantSpectrumTexture>(Spectrum(1.0f, 0.0f, 1.0f));
+            InputSpectrumRef sp = createShared<UpsampledContinuousSpectrum>(ColorSpace::sRGB_NonLinear, 1.0f, 0.0f, 1.0f);
+            diffuseTex = createShared<ConstantSpectrumTexture>(sp);
         }
         
         //        return SurfaceMaterial::createMatte(diffuseTex, nullptr);
-        SpectrumTextureRef RsTex = createShared<ConstantSpectrumTexture>(Spectrum(0.025f, 0.025f, 0.025f));
+        InputSpectrumRef sp = createShared<UpsampledContinuousSpectrum>(ColorSpace::sRGB, 0.025f, 0.025f, 0.025f);
+        SpectrumTextureRef RsTex = createShared<ConstantSpectrumTexture>(sp);
         FloatTextureRef shininessTex = createShared<ConstantFloatTexture>(100.0f);
         return SurfaceMaterial::createAshikhminShirley(diffuseTex, RsTex, shininessTex, shininessTex);
     };
@@ -177,14 +188,17 @@ void buildScene(StopWatch &sw) {
             diffuseTex = createShared<ImageSpectrumTexture>(image);
         }
         else if (aiMat->Get(AI_MATKEY_COLOR_DIFFUSE, color, nullptr) == aiReturn_SUCCESS) {
-            diffuseTex = createShared<ConstantSpectrumTexture>(inverseGammaCorrection(Spectrum(color[0], color[1], color[2])));
+            InputSpectrumRef sp = createShared<UpsampledContinuousSpectrum>(ColorSpace::sRGB_NonLinear, color[0], color[1], color[2]);
+            diffuseTex = createShared<ConstantSpectrumTexture>(sp);
         }
         else {
-            diffuseTex = createShared<ConstantSpectrumTexture>(Spectrum(1.0f, 0.0f, 1.0f));
+            InputSpectrumRef sp = createShared<UpsampledContinuousSpectrum>(ColorSpace::sRGB_NonLinear, 1.0f, 0.0f, 1.0f);
+            diffuseTex = createShared<ConstantSpectrumTexture>(sp);
         }
         
         //        return SurfaceMaterial::createMatte(diffuseTex, nullptr);
-        SpectrumTextureRef RsTex = createShared<ConstantSpectrumTexture>(Spectrum(0.025f, 0.025f, 0.025f));
+        InputSpectrumRef sp = createShared<UpsampledContinuousSpectrum>(ColorSpace::sRGB, 0.025f, 0.025f, 0.025f);
+        SpectrumTextureRef RsTex = createShared<ConstantSpectrumTexture>(sp);
         FloatTextureRef shininessTex = createShared<ConstantFloatTexture>(100.0f);
         return SurfaceMaterial::createAshikhminShirley(diffuseTex, RsTex, shininessTex, shininessTex);
     };

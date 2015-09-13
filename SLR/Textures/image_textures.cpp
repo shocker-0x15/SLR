@@ -10,42 +10,59 @@
 #include "../Core/distributions.h"
 
 Spectrum ImageSpectrumTexture::evaluate(const TexCoord2D &tc, const WavelengthSamples &wls) const {
-    uint32_t x = std::clamp((uint32_t)std::fmod(m_data->width() * tc.u, m_data->width()), 0u, m_data->width() - 1);
-    uint32_t y = std::clamp((uint32_t)std::fmod(m_data->height() * tc.v, m_data->height()), 0u, m_data->height() - 1);
+    uint32_t px = std::clamp((uint32_t)std::fmod(m_data->width() * tc.u, m_data->width()), 0u, m_data->width() - 1);
+    uint32_t py = std::clamp((uint32_t)std::fmod(m_data->height() * tc.v, m_data->height()), 0u, m_data->height() - 1);
     Spectrum ret;
     switch (m_data->format()) {
+#ifdef Use_Spectral_Representation
+        case ColorFormat::uvn16Fx3: {
+            break;
+        }
+        case ColorFormat::uvnA16Fx4: {
+            break;
+        }
+        case ColorFormat::Gray8: {
+            const Gray8 &data = m_data->get<Gray8>(px, py);
+            ret = Spectrum(data.v / 255.0f);
+            break;
+        }
+#else
         case ColorFormat::RGB8x3: {
-            const RGB8x3 &data = m_data->get<RGB8x3>(x, y);
+            const RGB8x3 &data = m_data->get<RGB8x3>(px, py);
             ret.r = data.r / 255.0f;
             ret.g = data.g / 255.0f;
             ret.b = data.b / 255.0f;
             break;
         }
         case ColorFormat::RGB_8x4: {
-            const RGB_8x4 &data = m_data->get<RGB_8x4>(x, y);
+            const RGB_8x4 &data = m_data->get<RGB_8x4>(px, py);
             ret.r = data.r / 255.0f;
             ret.g = data.g / 255.0f;
             ret.b = data.b / 255.0f;
             break;
         }
         case ColorFormat::RGBA8x4: {
-            const RGBA8x4 &data = m_data->get<RGBA8x4>(x, y);
+            const RGBA8x4 &data = m_data->get<RGBA8x4>(px, py);
             ret.r = data.r / 255.0f;
             ret.g = data.g / 255.0f;
             ret.b = data.b / 255.0f;
             break;
         }
         case ColorFormat::RGBA16Fx4: {
-            const RGBA16Fx4 &data = m_data->get<RGBA16Fx4>(x, y);
+            const RGBA16Fx4 &data = m_data->get<RGBA16Fx4>(px, py);
             ret.r = data.r;
             ret.g = data.g;
             ret.b = data.b;
             break;
         }
         case ColorFormat::Gray8: {
+            const Gray8 &data = m_data->get<Gray8>(px, py);
+            ret.r = ret.g = ret.b = data.v / 255.0f;
             break;
         }
+#endif
         default:
+            SLRAssert(false, "Image data format is unknown.");
             break;
     }
     return ret;

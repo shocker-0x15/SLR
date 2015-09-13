@@ -19,12 +19,37 @@ class StackAllocator;
 class ArenaAllocator;
 class MSpaceAllocator;
 
-// Basic Types
+// RGB & Spectrum
+template<typename RealType> struct CompensatedSum;
 template <typename RealType> struct RGBTemplate;
 template <typename RealType> struct RGBStorageTemplate;
+template <typename RealType, uint32_t N> struct ContinuousSpectrumTemplate;
+template <typename RealType, uint32_t N> struct RegularContinuousSpectrumTemplate;
+template <typename RealType, uint32_t N> struct UpsampledContinuousSpectrumTemplate;
 template <typename RealType, uint32_t N> struct WavelengthSamplesTemplate;
 template <typename RealType, uint32_t N> struct SampledSpectrumTemplate;
+template <typename RealType, uint32_t N> struct DiscretizedSpectrumTemplate;
 template <typename RealType, uint32_t numStrata> struct SpectrumStorageTemplate;
+#ifdef Use_Spectral_Representation
+typedef ContinuousSpectrumTemplate<float, 16> ContinuousSpectrum;
+typedef RegularContinuousSpectrumTemplate<float, 16> RegularContinuousSpectrum;
+typedef UpsampledContinuousSpectrumTemplate<float, 16> UpsampledContinuousSpectrum;
+typedef WavelengthSamplesTemplate<float, 16> WavelengthSamples;
+typedef SampledSpectrumTemplate<float, 16> Spectrum;
+typedef DiscretizedSpectrumTemplate<float, 16> DiscretizedSpectrum;
+typedef SpectrumStorageTemplate<float, 16> SpectrumStorage;
+
+typedef std::shared_ptr<ContinuousSpectrum> InputSpectrumRef;
+#else
+typedef RGBTemplate<float> Spectrum;
+typedef RGBTemplate<float> DiscretizedSpectrum;
+typedef RGBStorageTemplate<float> SpectrumStorage;
+
+typedef std::shared_ptr<RGBTemplate<float>> InputSpectrumRef;
+#endif
+typedef CompensatedSum<Spectrum> SpectrumSum;
+
+// Basic Types
 template <typename RealType> struct Vector3Template;
 template <typename RealType> struct Vector4Template;
 template <typename RealType> struct Normal3Template;
@@ -32,14 +57,6 @@ template <typename RealType> struct Point3Template;
 template <typename RealType> struct Matrix4x4Template;
 template <typename RealType> struct QuaternionTemplate;
 template <typename RealType> struct TexCoord2Template;
-#ifdef Use_Spectral_Representation
-typedef SampledSpectrumTemplate<float, 16> Spectrum;
-typedef WavelengthSamplesTemplate<float, 16> WavelengthSamples;
-typedef SpectrumStorageTemplate<float, 16> SpectrumStorage;
-#else
-typedef RGBTemplate<float> Spectrum;
-typedef RGBStorageTemplate<float> SpectrumStorage;
-#endif
 typedef Vector3Template<float> Vector3D;
 typedef Vector3Template<float> Tangent3D;
 typedef Vector3Template<float> Bitangent3D;
@@ -49,11 +66,7 @@ typedef Point3Template<float> Point3D;
 typedef Matrix4x4Template<float> Matrix4x4;
 typedef QuaternionTemplate<float> Quaternion;
 typedef TexCoord2Template<float> TexCoord2D;
-
-//
-template<typename RealType> struct CompensatedSum;
 typedef CompensatedSum<float> FloatSum;
-typedef CompensatedSum<Spectrum> SpectrumSum;
 
 // Transforms
 class Transform;

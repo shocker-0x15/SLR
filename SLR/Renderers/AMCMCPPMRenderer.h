@@ -178,6 +178,7 @@ class AMCMCPPMRenderer : public Renderer {
         uint32_t imageWidth;
         uint32_t imageHeight;
         float time;
+        WavelengthSamples wls;
         ArenaAllocator* mems;
         RandomNumberGenerator** rngs;
         HitpointMap* hpMap;
@@ -188,7 +189,7 @@ class AMCMCPPMRenderer : public Renderer {
         uint32_t basePixelY;
         
         void kernel(uint32_t threadID);
-        Spectrum record(uint32_t threadID, const Scene &scene, float px, float py, const Ray &initRay, const Spectrum &initAlpha,
+        Spectrum record(uint32_t threadID, const Scene &scene, const WavelengthSamples &wls, float px, float py, const Ray &initRay, const Spectrum &initAlpha,
                         RandomNumberGenerator &rng, ArenaAllocator &mem) const;
     };
     struct PhotonSplattingJob {
@@ -201,6 +202,7 @@ class AMCMCPPMRenderer : public Renderer {
         const Scene* scene;
         ImageSensor* sensor;
         float time;
+        WavelengthSamples wls;
         float radius;
         ArenaAllocator* mems;
         HitpointMap* hpMap;
@@ -214,7 +216,7 @@ class AMCMCPPMRenderer : public Renderer {
         std::vector<ResultRecord> prevResults;
         
         void kernel(uint32_t threadID);
-        float photonTracing(ArenaAllocator &mem, std::vector<ResultRecord> &results);
+        float photonTracing(const WavelengthSamples &wls, ArenaAllocator &mem, std::vector<ResultRecord> &results);
     };
 public:
     AMCMCPPMRenderer();

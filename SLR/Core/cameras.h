@@ -13,7 +13,8 @@
 
 struct LensPosQuery {
     float time;
-    LensPosQuery(float t) : time(t) { };
+    WavelengthSamples wls;
+    LensPosQuery(float t, const WavelengthSamples &lambdas) : time(t), wls(lambdas) { };
 };
 
 struct LensPosSample {
@@ -37,7 +38,7 @@ public:
     void setTransform(const Transform* t);
     
     virtual Spectrum sample(const LensPosQuery &query, const LensPosSample &smp, LensPosQueryResult* result) const = 0;
-    virtual IDF* createIDF(const SurfacePoint &surfPt, ArenaAllocator &mem) const = 0;
+    virtual IDF* createIDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem) const = 0;
 };
 
 #endif

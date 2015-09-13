@@ -15,13 +15,13 @@
 
 template <typename RealType>
 inline uint32_t sampleDiscrete(const RealType* importances, RealType* sumImportances, RealType* base, uint32_t numImportances, RealType u) {
-    CompensatedSum<RealType> sum;
+    CompensatedSum<RealType> sum(0);
     for (int i = 0; i < numImportances; ++i)
         sum += importances[i];
     *sumImportances = sum.result;
     
     float su = u * sum.result;
-    CompensatedSum<RealType> cum;
+    CompensatedSum<RealType> cum(0);
     for (int i = 0; i < numImportances; ++i) {
         *base = cum.result;
         cum += importances[i];
@@ -95,7 +95,7 @@ public:
         m_CDF = new RealType[m_numValues + 1];
         std::memcpy(m_PMF, values.data(), sizeof(RealType) * m_numValues);
         
-        CompensatedSum<RealType> sum;
+        CompensatedSum<RealType> sum(0);
         m_CDF[0] = 0;
         for (int i = 0; i < m_numValues; ++i) {
             sum += m_PMF[i];
@@ -156,7 +156,7 @@ public:
         for (int i = 0; i < numValues; ++i)
             m_PDF[i] = pickFunc(i);
         
-        CompensatedSum<RealType> sum;
+        CompensatedSum<RealType> sum(0);
         m_CDF[0] = 0;
         for (int i = 0; i < m_numValues; ++i) {
             sum += m_PDF[i] / m_numValues;
@@ -224,7 +224,7 @@ class RegularConstantContinuous2DTemplate {
 public:
     RegularConstantContinuous2DTemplate(uint32_t numD1, uint32_t numD2, const std::function<RealType(uint32_t, uint32_t)> &pickFunc) : m_num1DDists(numD2) {
         m_1DDists = (RegularConstantContinuous1DTemplate<RealType>*)malloc(sizeof(RegularConstantContinuous1DTemplate<RealType>) * numD2);
-        CompensatedSum<RealType> sum;
+        CompensatedSum<RealType> sum(0);
         for (int i = 0; i < numD2; ++i) {
             auto pickFunc1D = std::bind(pickFunc, std::placeholders::_1, i);
             new (m_1DDists + i) RegularConstantContinuous1DTemplate<RealType>(numD1, pickFunc1D);

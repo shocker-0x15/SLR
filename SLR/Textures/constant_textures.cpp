@@ -6,6 +6,11 @@
 //
 
 #include "constant_textures.h"
+#include "../BasicTypes/Spectrum.h"
+
+Spectrum ConstantSpectrumTexture::evaluate(const TexCoord2D &tc, const WavelengthSamples &wls) const {
+    return m_value->evaluate(wls);
+};
 
 RegularConstantContinuous2D* ConstantSpectrumTexture::createIBLImportanceMap() const {
     return nullptr;

@@ -35,7 +35,7 @@ void ImageSensor::init(uint32_t width, uint32_t height) {
     m_numTileX = (width + (s_tileWidth - 1)) >> s_log2_tileWidth;
     m_numTileY = (height + (s_tileWidth - 1)) >> s_log2_tileWidth;
     
-    uint64_t tileSize = sizeof(SpectrumStorageSum) * s_tileWidth * s_tileWidth;
+    uint64_t tileSize = sizeof(SpectrumStorage) * s_tileWidth * s_tileWidth;
     
     m_allocSize = m_numTileX * m_numTileY * tileSize;
     m_data = (uint8_t*)SLR_memalign(m_allocSize, SLR_L1_Cacheline_Size);
@@ -62,50 +62,54 @@ uint32_t ImageSensor::tileHeight() const {
 
 void ImageSensor::clear() {
     for (int i = 0; i < m_allocSize / sizeof(Spectrum); ++i) {
-        SpectrumStorageSum &dst = *((SpectrumStorageSum*)m_data + i);
-        dst = SpectrumStorage(0);
+        SpectrumStorage &dst = *((SpectrumStorage*)m_data + i);
+        dst = SpectrumStorage(0.0);
     }
 }
 
 void ImageSensor::clearSeparatedBuffers() {
     for (int b = 0; b < m_numSeparated; ++b) {
         for (int i = 0; i < m_allocSize / sizeof(SpectrumStorage); ++i) {
-            SpectrumStorageSum &dst = *((SpectrumStorageSum*)m_separatedData[b] + i);
-            dst = SpectrumStorage(0);
+            SpectrumStorage &dst = *((SpectrumStorage*)m_separatedData[b] + i);
+            dst = SpectrumStorage();
         }
     }
 }
 
-SpectrumStorageSum ImageSensor::pixel(uint32_t x, uint32_t y) const {
+DiscretizedSpectrum ImageSensor::pixel(uint32_t x, uint32_t y) const {
     uint32_t tx = x >> s_log2_tileWidth;
     uint32_t ty = y >> s_log2_tileWidth;
     uint32_t lx = x & s_localMask;
     uint32_t ly = y & s_localMask;
-    return *(SpectrumStorageSum*)(m_data + sizeof(SpectrumStorageSum) * ((ty * m_numTileX + tx) * s_tileWidth * s_tileWidth + ly * s_tileWidth + lx));
+    SpectrumStorage &storage = *(SpectrumStorage*)(m_data + sizeof(SpectrumStorage) * ((ty * m_numTileX + tx) * s_tileWidth * s_tileWidth + ly * s_tileWidth + lx));
+    return storage.value;
 }
 
-SpectrumStorageSum &ImageSensor::pixel(uint32_t x, uint32_t y) {
+SpectrumStorage &ImageSensor::pixel(uint32_t x, uint32_t y) {
     uint32_t tx = x >> s_log2_tileWidth;
     uint32_t ty = y >> s_log2_tileWidth;
     uint32_t lx = x & s_localMask;
     uint32_t ly = y & s_localMask;
-    return *(SpectrumStorageSum*)(m_data + sizeof(SpectrumStorageSum) * ((ty * m_numTileX + tx) * s_tileWidth * s_tileWidth + ly * s_tileWidth + lx));
+    SpectrumStorage &storage = *(SpectrumStorage*)(m_data + sizeof(SpectrumStorage) * ((ty * m_numTileX + tx) * s_tileWidth * s_tileWidth + ly * s_tileWidth + lx));
+    return storage;
 }
 
-SpectrumStorageSum ImageSensor::pixel(uint32_t idx, uint32_t x, uint32_t y) const {
+DiscretizedSpectrum ImageSensor::pixel(uint32_t idx, uint32_t x, uint32_t y) const {
     uint32_t tx = x >> s_log2_tileWidth;
     uint32_t ty = y >> s_log2_tileWidth;
     uint32_t lx = x & s_localMask;
     uint32_t ly = y & s_localMask;
-    return *(SpectrumStorageSum*)(m_separatedData[idx] + sizeof(SpectrumStorageSum) * ((ty * m_numTileX + tx) * s_tileWidth * s_tileWidth + ly * s_tileWidth + lx));
+    SpectrumStorage &storage = *(SpectrumStorage*)(m_separatedData[idx] + sizeof(SpectrumStorage) * ((ty * m_numTileX + tx) * s_tileWidth * s_tileWidth + ly * s_tileWidth + lx));
+    return storage.value;
 }
 
-SpectrumStorageSum &ImageSensor::pixel(uint32_t idx, uint32_t x, uint32_t y) {
+SpectrumStorage &ImageSensor::pixel(uint32_t idx, uint32_t x, uint32_t y) {
     uint32_t tx = x >> s_log2_tileWidth;
     uint32_t ty = y >> s_log2_tileWidth;
     uint32_t lx = x & s_localMask;
     uint32_t ly = y & s_localMask;
-    return *(SpectrumStorageSum*)(m_separatedData[idx] + sizeof(SpectrumStorageSum) * ((ty * m_numTileX + tx) * s_tileWidth * s_tileWidth + ly * s_tileWidth + lx));
+    SpectrumStorage &storage = *(SpectrumStorage*)(m_separatedData[idx] + sizeof(SpectrumStorage) * ((ty * m_numTileX + tx) * s_tileWidth * s_tileWidth + ly * s_tileWidth + lx));
+    return storage;
 }
 
 #ifdef Use_Spectral_Representation
@@ -121,13 +125,13 @@ void ImageSensor::add(uint32_t idx, float px, float py, const WavelengthSamples 
     pixel(idx, ipx, ipy).add(wls, contribution);
 }
 #else
-void ImageSensor::add(float px, float py, const Spectrum &contribution) {
+void ImageSensor::add(float px, float py, const WavelengthSamples &wls, const Spectrum &contribution) {
     uint32_t ipx = std::min((uint32_t)px, m_width - 1);
     uint32_t ipy = std::min((uint32_t)py, m_height - 1);
     pixel(ipx, ipy).add(contribution);
 }
 
-void ImageSensor::add(uint32_t idx, float px, float py, const Spectrum &contribution) {
+void ImageSensor::add(uint32_t idx, float px, float py, const WavelengthSamples &wls, const Spectrum &contribution) {
     uint32_t ipx = std::min((uint32_t)px, m_width - 1);
     uint32_t ipy = std::min((uint32_t)py, m_height - 1);
     pixel(idx, ipx, ipy).add(contribution);
@@ -147,10 +151,10 @@ void ImageSensor::saveImage(const std::string &filepath, float scale, float* sca
     uint8_t* bmp = (uint8_t*)malloc(m_height * byteWidth);
     for (int i = 0; i < m_height; ++i) {
         for (int j = 0; j < m_width; ++j) {
-            SpectrumStorageSum pixSum = pixel(j, i).result * scale;
+            CompensatedSum<DiscretizedSpectrum> pixSum = pixel(j, i) * scale;
             for (int b = 0; b < m_numSeparated; ++b)
-                pixSum += pixel(b, j, i).result * scales[b];
-            SpectrumStorage pix = pixSum.result;
+                pixSum += pixel(b, j, i) * scales[b];
+            DiscretizedSpectrum pix = pixSum.result;
             if (pix.hasInf())
                 printf("(%u, %u): has an infinite value!\n", j, i);
             if (pix.hasNaN())
@@ -159,7 +163,7 @@ void ImageSensor::saveImage(const std::string &filepath, float scale, float* sca
             if (Y != 0)
                 pix *= (1.0f - std::exp(-Y)) / Y;
             else
-                pix = SpectrumStorage(0);
+                pix = DiscretizedSpectrum::Zero;
             
             float RGB[3];
             pix.getRGB(RGB);

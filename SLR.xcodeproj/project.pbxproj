@@ -184,6 +184,8 @@
 		4634EC411B9B62BE0047AE54 /* dlmalloc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = dlmalloc.h; sourceTree = "<group>"; };
 		4634EC421B9B62BE0047AE54 /* MSpaceAllocator.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MSpaceAllocator.cpp; sourceTree = "<group>"; };
 		4634EC431B9B62BE0047AE54 /* MSpaceAllocator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSpaceAllocator.h; sourceTree = "<group>"; };
+		46C22EAA1BA46B3D001527A5 /* RGBTypes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RGBTypes.h; sourceTree = "<group>"; };
+		46C22EAB1BA4B172001527A5 /* SpectrumTypes.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SpectrumTypes.h; sourceTree = "<group>"; };
 		46FFDDFD1B9B258400E47537 /* SLR */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = SLR; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -216,6 +218,8 @@
 				4634EB941B9B529B0047AE54 /* Point3.h */,
 				4634EB951B9B529B0047AE54 /* Quaternion.h */,
 				4634EB961B9B529B0047AE54 /* Spectrum.h */,
+				46C22EAA1BA46B3D001527A5 /* RGBTypes.h */,
+				46C22EAB1BA4B172001527A5 /* SpectrumTypes.h */,
 				4634EB971B9B529B0047AE54 /* TexCoord2.h */,
 				4634EB981B9B529B0047AE54 /* Vector3.h */,
 				4634EB991B9B529B0047AE54 /* Vector4.h */,

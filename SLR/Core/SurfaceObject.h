@@ -14,7 +14,8 @@
 
 struct LightPosQuery {
     float time;
-    LightPosQuery(float t) : time(t) { };
+    WavelengthSamples wls;
+    LightPosQuery(float t, const WavelengthSamples &lambdas) : time(t), wls(lambdas) { };
 };
 
 struct LightPosSample {
@@ -38,7 +39,7 @@ public:
     void pop() const { m_hierarchy.pop(); };
     const SurfaceObject* top() const { return m_hierarchy.top(); };
     
-    Spectrum sample(const WavelengthSamples &wls, const LightPosQuery &query, const LightPosSample &smp, LightPosQueryResult* result) const;
+    Spectrum sample(const LightPosQuery &query, const LightPosSample &smp, LightPosQueryResult* result) const;
 };
 
 class SurfaceObject {
@@ -55,7 +56,7 @@ public:
     virtual void selectLight(float u, Light* light, float* prob) const = 0;
     virtual float evaluateProb(const Light &light) const = 0;
     
-    virtual Spectrum sample(const Light &light, const WavelengthSamples &wls, const LightPosQuery &query, const LightPosSample &smp, LightPosQueryResult* result) const = 0;
+    virtual Spectrum sample(const Light &light, const LightPosQuery &query, const LightPosSample &smp, LightPosQueryResult* result) const = 0;
     
     bool intersect(Ray &ray, SurfacePoint* surfPt) const;
     bool testVisiblility(const SurfacePoint &shdP, const SurfacePoint &lightP, float time) const;
@@ -79,7 +80,7 @@ public:
     void selectLight(float u, Light* light, float* prob) const override;
     float evaluateProb(const Light &light) const override;
     
-    Spectrum sample(const Light &light, const WavelengthSamples &wls, const LightPosQuery &query, const LightPosSample &smp, LightPosQueryResult* result) const override;
+    Spectrum sample(const Light &light, const LightPosQuery &query, const LightPosSample &smp, LightPosQueryResult* result) const override;
     
     virtual BSDF* createBSDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem) const;
     
@@ -107,7 +108,7 @@ public:
     bool isEmitting() const override;
     float importance() const override;
     
-    Spectrum sample(const Light &light, const WavelengthSamples &wls, const LightPosQuery &query, const LightPosSample &smp, LightPosQueryResult* result) const override;
+    Spectrum sample(const Light &light, const LightPosQuery &query, const LightPosSample &smp, LightPosQueryResult* result) const override;
     
     BSDF* createBSDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem) const override;
     
@@ -132,7 +133,7 @@ public:
     void selectLight(float u, Light* light, float* prob) const override;
     float evaluateProb(const Light &light) const override;
     
-    Spectrum sample(const Light &light, const WavelengthSamples &wls, const LightPosQuery &query, const LightPosSample &smp, LightPosQueryResult* result) const override;
+    Spectrum sample(const Light &light, const LightPosQuery &query, const LightPosSample &smp, LightPosQueryResult* result) const override;
 };
 
 class TransformedSurfaceObject : public SurfaceObject {
@@ -151,7 +152,7 @@ public:
     void selectLight(float u, Light* light, float* prob) const override;
     float evaluateProb(const Light &light) const override;
     
-    Spectrum sample(const Light &light, const WavelengthSamples &wls, const LightPosQuery &query, const LightPosSample &smp, LightPosQueryResult* result) const override;
+    Spectrum sample(const Light &light, const LightPosQuery &query, const LightPosSample &smp, LightPosQueryResult* result) const override;
     
     void setTransform(const Transform* t) { m_transform = t; };
 };

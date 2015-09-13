@@ -18,7 +18,6 @@
 #include "../Core/geometry.h"
 #include "../Core/SurfaceObject.h"
 #include "../Core/directional_distribution_functions.h"
-#include "../BasicTypes/CompensatedSum.h"
 #include "../Helper/StopWatch.h"
 
 PathTracingRenderer::PathTracingRenderer() {
@@ -111,18 +110,23 @@ void PathTracingRenderer::Job::kernel(uint32_t threadID) {
             float px = basePixelX + lx + rng.getFloat0cTo1o();
             float py = basePixelY + ly + rng.getFloat0cTo1o();
             
-            LensPosQuery lensQuery(time);
+            WavelengthSamples wls;
+            // sample wavelengths
+            // ...
+            // ...
+            
+            LensPosQuery lensQuery(time, wls);
             LensPosSample lensSample(rng.getFloat0cTo1o(), rng.getFloat0cTo1o());
             LensPosQueryResult lensResult;
             Spectrum We0 = camera->sample(lensQuery, lensSample, &lensResult);
             
             IDFSample WeSample(px / imageWidth, py / imageHeight);
             IDFQueryResult WeResult;
-            IDF* idf = camera->createIDF(lensResult.surfPt, mem);
+            IDF* idf = camera->createIDF(lensResult.surfPt, wls, mem);
             Spectrum We1 = idf->sample(WeSample, &WeResult);
             
             Ray ray(lensResult.surfPt.p, lensResult.surfPt.shadingFrame.fromLocal(WeResult.dirLocal), time);
-            Spectrum C = contribution(ray, *scene, rng, mem);
+            Spectrum C = contribution(*scene, wls, ray, rng, mem);
             SLRAssert(C.hasNaN() == false && C.hasInf() == false,
                      "Unexpected value detected: %s\n"
                      "pix: (%f, %f)", C.toString().c_str(), px, py);
@@ -131,19 +135,19 @@ void PathTracingRenderer::Job::kernel(uint32_t threadID) {
             SLRAssert(weight.hasNaN() == false && weight.hasInf() == false,
                      "Unexpected value detected: %s\n"
                      "pix: (%f, %f)", weight.toString().c_str(), px, py);
-            sensor->add(px, py, weight * C);
+            sensor->add(px, py, wls, weight * C);
             
             mem.reset();
         }
     }
 }
 
-Spectrum PathTracingRenderer::Job::contribution(const Ray &initRay, const Scene &scene, RandomNumberGenerator &rng, ArenaAllocator &mem) const {
+Spectrum PathTracingRenderer::Job::contribution(const Scene &scene, const WavelengthSamples &wls, const Ray &initRay, RandomNumberGenerator &rng, ArenaAllocator &mem) const {
     Ray ray = initRay;
     SurfacePoint surfPt;
     Spectrum alpha = Spectrum::One;
     float initY = alpha.luminance();
-    SpectrumSum sp;
+    SpectrumSum sp(Spectrum::Zero);
     uint32_t pathLength = 0;
     
     Intersection isect;
@@ -153,8 +157,8 @@ Spectrum PathTracingRenderer::Job::contribution(const Ray &initRay, const Scene 
     
     Vector3D dirOut_sn = surfPt.shadingFrame.toLocal(-ray.dir);
     if (surfPt.isEmitting()) {
-        EDF* edf = surfPt.createEDF(mem);
-        Spectrum Le = surfPt.emittance() * edf->evaluate(EDFQuery(), dirOut_sn);
+        EDF* edf = surfPt.createEDF(wls, mem);
+        Spectrum Le = surfPt.emittance(wls) * edf->evaluate(EDFQuery(), dirOut_sn);
         sp += alpha * Le;
     }
     if (surfPt.atInfinity)
@@ -163,7 +167,7 @@ Spectrum PathTracingRenderer::Job::contribution(const Ray &initRay, const Scene 
     while (true) {
         ++pathLength;
         Normal3D gNorm_sn = surfPt.shadingFrame.toLocal(surfPt.gNormal);
-        BSDF* bsdf = surfPt.createBSDF(mem);
+        BSDF* bsdf = surfPt.createBSDF(wls, mem);
         
         // Next Event Estimation (explicit light sampling)
         if (bsdf->hasNonDelta()) {
@@ -172,7 +176,7 @@ Spectrum PathTracingRenderer::Job::contribution(const Ray &initRay, const Scene 
             scene.selectLight(rng.getFloat0cTo1o(), &light, &lightProb);
             SLRAssert(!std::isnan(lightProb) && !std::isinf(lightProb), "lightProb: unexpected value detected: %f", lightProb);
             
-            LightPosQuery xpQuery(ray.time);
+            LightPosQuery xpQuery(ray.time, wls);
             LightPosSample xpSample(rng.getFloat0cTo1o(), rng.getFloat0cTo1o());
             LightPosQueryResult xpResult;
             Spectrum M = light.sample(xpQuery, xpSample, &xpResult);
@@ -182,7 +186,7 @@ Spectrum PathTracingRenderer::Job::contribution(const Ray &initRay, const Scene 
             Vector3D shadowDir = xpResult.surfPt.getShadowDirection(surfPt, &dist2);
             
             if (scene.testVisiblility(surfPt, xpResult.surfPt, ray.time)) {
-                EDF* edf = xpResult.surfPt.createEDF(mem);
+                EDF* edf = xpResult.surfPt.createEDF(wls, mem);
                 Vector3D shadowDir_l = xpResult.surfPt.shadingFrame.toLocal(-shadowDir);
                 Spectrum Le = M * edf->evaluate(EDFQuery(), shadowDir_l);
                 float lightPDF = lightProb * xpResult.areaPDF;
@@ -229,12 +233,12 @@ Spectrum PathTracingRenderer::Job::contribution(const Ray &initRay, const Scene 
             float bsdfPDF = fsResult.dirPDF;
             SLRAssert(!std::isnan(bsdfPDF) && !std::isinf(bsdfPDF), "bsdfPDF: unexpected value detected: %f", bsdfPDF);
             
-            EDF* edf = surfPt.createEDF(mem);
-            Spectrum Le = surfPt.emittance() * edf->evaluate(EDFQuery(), dirOut_sn);
+            EDF* edf = surfPt.createEDF(wls, mem);
+            Spectrum Le = surfPt.emittance(wls) * edf->evaluate(EDFQuery(), dirOut_sn);
             float lightProb = scene.evaluateProb(Light(isect.obj));
             float dist2 = surfPt.atInfinity ? 1.0f : sqDistance(ray.org, surfPt.p);
             float lightPDF = lightProb * surfPt.evaluateAreaPDF() * dist2 / std::fabs(dirOut_sn.z);
-            SLRAssert(!Le.hasNaN() && !Le.hasInf(), "Le: unexpected value detected: (%f, %f, %f)", Le.r, Le.g, Le.b);
+            SLRAssert(!Le.hasNaN() && !Le.hasInf(), "Le: unexpected value detected: %s", Le.toString().c_str());
             SLRAssert(!std::isnan(lightProb) && !std::isinf(lightProb), "lightProb: unexpected value detected: %f", lightProb);
             SLRAssert(!std::isnan(lightPDF)/* && !std::isinf(lightPDF)*/, "lightPDF: unexpected value detected: %f", lightPDF);
             
