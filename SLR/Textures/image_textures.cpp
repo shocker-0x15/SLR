@@ -15,10 +15,14 @@ Spectrum ImageSpectrumTexture::evaluate(const TexCoord2D &tc, const WavelengthSa
     Spectrum ret;
     switch (m_data->format()) {
 #ifdef Use_Spectral_Representation
-        case ColorFormat::uvn16Fx3: {
+        case ColorFormat::uvs16Fx3: {
+            const uvs16Fx3 &data = m_data->get<uvs16Fx3>(px, py);
+            ret = UpsampledContinuousSpectrum(data.u, data.v, data.s).evaluate(wls);
             break;
         }
-        case ColorFormat::uvnA16Fx4: {
+        case ColorFormat::uvsA16Fx4: {
+            const uvsA16Fx4 &data = m_data->get<uvsA16Fx4>(px, py);
+            ret = UpsampledContinuousSpectrum(data.u, data.v, data.s).evaluate(wls);
             break;
         }
         case ColorFormat::Gray8: {
@@ -96,6 +100,22 @@ RegularConstantContinuous2D* ImageSpectrumTexture::createIBLImportanceMap() cons
             case ColorFormat::RGBA16Fx4: {
                 RGBA16Fx4 avg = *(RGBA16Fx4*)data;
                 luminance = 0.222485f * avg.r + 0.716905f * avg.g + 0.060610f * avg.b;
+                break;
+            }
+            case ColorFormat::uvs16Fx3: {
+                uvs16Fx3 avg = *(uvs16Fx3*)data;
+                float uvs[3] = {avg.u, avg.v, avg.s};
+                float rgb[3];
+                Upsampling::uvs_to_sRGB(uvs, rgb);
+                luminance = 0.222485f * rgb[0] + 0.716905f * rgb[1] + 0.060610f * rgb[2];
+                break;
+            }
+            case ColorFormat::uvsA16Fx4: {
+                uvsA16Fx4 avg = *(uvsA16Fx4*)data;
+                float uvs[3] = {avg.u, avg.v, avg.s};
+                float rgb[3];
+                Upsampling::uvs_to_sRGB(uvs, rgb);
+                luminance = 0.222485f * rgb[0] + 0.716905f * rgb[1] + 0.060610f * rgb[2];
                 break;
             }
             default:

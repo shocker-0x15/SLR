@@ -229,6 +229,7 @@ void buildScene(StopWatch &sw) {
 
 int main(int argc, const char * argv[]) {
     using namespace std::chrono;
+    DiscretizedSpectrum::init();
     
     StopWatch stopwatch;
     StopWatchHiRes stopwatchHiRes;

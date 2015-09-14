@@ -15,7 +15,7 @@
 #include <cassert>
 
 const size_t sizesOfColorFormats[(uint32_t)ColorFormat::Num] = {
-    sizeof(RGB8x3), sizeof(RGB_8x4), sizeof(RGBA8x4), sizeof(RGBA16Fx4), sizeof(Gray8)
+    sizeof(RGB8x3), sizeof(RGB_8x4), sizeof(RGBA8x4), sizeof(RGBA16Fx4), sizeof(uvs16Fx3), sizeof(uvsA16Fx4), sizeof(Gray8)
 };
 
 enum EXRType {

@@ -17,8 +17,8 @@ enum class ColorFormat {
     RGB_8x4,
     RGBA8x4,
     RGBA16Fx4,
-    uvn16Fx3,
-    uvnA16Fx4,
+    uvs16Fx3,
+    uvsA16Fx4,
     Gray8,
     Num
 };
@@ -27,6 +27,8 @@ struct RGB8x3 { uint8_t r, g, b; };
 struct RGB_8x4 { uint8_t r, g, b, dummy; };
 struct RGBA8x4  { uint8_t r, g, b, a; };
 struct RGBA16Fx4 { half r, g, b, a; };
+struct uvs16Fx3 { half u, v, s; };
+struct uvsA16Fx4 { half u, v, s, a; };
 struct Gray8 { uint8_t v; };
 
 extern const size_t sizesOfColorFormats[(uint32_t)ColorFormat::Num];

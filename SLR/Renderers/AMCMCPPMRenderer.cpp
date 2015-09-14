@@ -357,7 +357,7 @@ void AMCMCPPMRenderer::render(const Scene &scene, const RenderSettings &settings
         float time = timeStart + (timeEnd - timeStart) * topRand.getFloat0cTo1o();
         jobDRT.time = time;
         
-        WavelengthSamples wls;
+        WavelengthSamples wls(topRand.getFloat0cTo1o());
         // sample wavelengths
         // ...
         // ...

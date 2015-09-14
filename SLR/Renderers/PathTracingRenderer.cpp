@@ -110,15 +110,12 @@ void PathTracingRenderer::Job::kernel(uint32_t threadID) {
             float px = basePixelX + lx + rng.getFloat0cTo1o();
             float py = basePixelY + ly + rng.getFloat0cTo1o();
             
-            WavelengthSamples wls;
-            // sample wavelengths
-            // ...
-            // ...
+            WavelengthSamples wls(rng.getFloat0cTo1o());
             
             LensPosQuery lensQuery(time, wls);
             LensPosSample lensSample(rng.getFloat0cTo1o(), rng.getFloat0cTo1o());
             LensPosQueryResult lensResult;
-            Spectrum We0 = camera->sample(lensQuery, lensSample, &lensResult);
+            Spectrum We0 = camera->sample(lensQuery, lensSample, &lensResult) * 29.375f;
             
             IDFSample WeSample(px / imageWidth, py / imageHeight);
             IDFQueryResult WeResult;

@@ -39,6 +39,7 @@ void ImageSensor::init(uint32_t width, uint32_t height) {
     
     m_allocSize = m_numTileX * m_numTileY * tileSize;
     m_data = (uint8_t*)SLR_memalign(m_allocSize, SLR_L1_Cacheline_Size);
+    SLRAssert(m_data, "Failed to allocate frame buffer.");
     
     clear();
 }
@@ -61,7 +62,7 @@ uint32_t ImageSensor::tileHeight() const {
 }
 
 void ImageSensor::clear() {
-    for (int i = 0; i < m_allocSize / sizeof(Spectrum); ++i) {
+    for (int i = 0; i < m_allocSize / sizeof(SpectrumStorage); ++i) {
         SpectrumStorage &dst = *((SpectrumStorage*)m_data + i);
         dst = SpectrumStorage(0.0);
     }

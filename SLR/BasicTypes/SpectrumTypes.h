@@ -13,6 +13,18 @@ struct WavelengthSamplesTemplate {
     RealType lambdas[N];
     uint32_t flags;
     static const uint32_t NumComponents;
+    WavelengthSamplesTemplate() : flags(0) {};
+    WavelengthSamplesTemplate(RealType offset) {
+        SLRAssert(offset >= 0 && offset < 1, "\"offset\" must be in range [0, 1).");
+        for (int i = 0; i < N; ++i)
+            lambdas[i] = WavelengthLowBound + (WavelengthHighBound - WavelengthLowBound) * (i + offset) / N;
+        flags = 0;
+    };
+    WavelengthSamplesTemplate(const RealType* values) {
+        for (int i = 0; i < N; ++i)
+            lambdas[i] = values[i];
+        flags = 0;
+    };
 
     RealType &operator[](uint32_t index) {
         SLRAssert(index < N, "\"index\" is out of range [0, %u].", N - 1);
@@ -39,7 +51,7 @@ struct RegularContinuousSpectrumTemplate : public ContinuousSpectrumTemplate<Rea
 
 template <typename RealType, uint32_t N>
 struct UpsampledContinuousSpectrumTemplate : public ContinuousSpectrumTemplate<RealType, N> {
-    RealType u, v, norm;
+    RealType u, v, scale;
     
     std::function<RealType(RealType)> inverseGammaCorrection = [](RealType value) {
         if (value <= 0.04045)
@@ -47,8 +59,10 @@ struct UpsampledContinuousSpectrumTemplate : public ContinuousSpectrumTemplate<R
         return std::pow((value + 0.055) / 1.055, 2.4);
     };
     
+    UpsampledContinuousSpectrumTemplate(RealType uu, RealType vv, RealType ss) : u(uu), v(vv), scale(ss) {};
+    
     UpsampledContinuousSpectrumTemplate(ColorSpace space, RealType e0, RealType e1, RealType e2) {
-        RealType x, y;
+        RealType x, y, norm;
         switch (space) {
             case ColorSpace::sRGB_NonLinear: {
                 e0 = inverseGammaCorrection(e0);
@@ -67,6 +81,12 @@ struct UpsampledContinuousSpectrumTemplate : public ContinuousSpectrumTemplate<R
             }
             case ColorSpace::XYZ: {
                 norm = e0 + e1 + e2;
+                if (norm == 0) {
+                    u = 6;
+                    v = 4;
+                    scale = 0;
+                    return;
+                }
                 x = e0 / norm;
                 y = e1 / norm;
                 break;
@@ -81,11 +101,14 @@ struct UpsampledContinuousSpectrumTemplate : public ContinuousSpectrumTemplate<R
                 SLRAssert(false, "Invalid color space is specified.");
                 break;
         }
+        scale = norm / Upsampling::EqualEnergyReflectance;
         RealType xy[2] = {x, y};
-        xy_to_uv(xy, &u);
+        Upsampling::xy_to_uv(xy, &u);
+        SLRAssert(!std::isinf(u) && !std::isnan(u) && !std::isinf(v) && !std::isnan(v) && !std::isinf(scale) && !std::isnan(scale), "Invalid value.");
     };
     
     SampledSpectrumTemplate<RealType, N> evaluate(const WavelengthSamples &wls) const override {
+        using namespace Upsampling;
         if (u < 0.0f || u >= GridWidth || v < 0.0f || v >= GridHeight)
             return SampledSpectrumTemplate<RealType, N>::Zero;
     
@@ -181,14 +204,14 @@ struct UpsampledContinuousSpectrumTemplate : public ContinuousSpectrumTemplate<R
             }
         }
 
-        return ret * norm / EqualEnergyReflectance;
+        return ret * scale;
     };
 };
 
 template <typename RealType, uint32_t N>
 struct SampledSpectrumTemplate {
     RealType values[N];
-    static const uint32_t numComponents;
+    static const uint32_t NumComponents;
     
     SampledSpectrumTemplate(RealType v = 0.0f) { for (int i = 0; i < N; ++i) values[i] = v; };
     SampledSpectrumTemplate(const RealType* vals) { for (int i = 0; i < N; ++i) values[i] = vals[i]; };
@@ -364,7 +387,7 @@ struct SampledSpectrumTemplate {
     static const SampledSpectrumTemplate Inf;
     static const SampledSpectrumTemplate NaN;
 };
-template <typename RealType, uint32_t N> const uint32_t SampledSpectrumTemplate<RealType, N>::numComponents = N;
+template <typename RealType, uint32_t N> const uint32_t SampledSpectrumTemplate<RealType, N>::NumComponents = N;
 
 template <typename RealType, uint32_t N>
 const SampledSpectrumTemplate<RealType, N> SampledSpectrumTemplate<RealType, N>::Zero = SampledSpectrumTemplate<RealType, N>(0.0);
@@ -379,7 +402,6 @@ const SampledSpectrumTemplate<RealType, N> SampledSpectrumTemplate<RealType, N>:
 template <typename RealType, uint32_t numStrata>
 struct DiscretizedSpectrumTemplate {
     RealType values[numStrata];
-    static const uint32_t NumStrata;
     
     DiscretizedSpectrumTemplate(RealType v = 0.0f) { for (int i = 0; i < numStrata; ++i) values[i] = v; };
     DiscretizedSpectrumTemplate(const RealType* vals) { for (int i = 0; i < numStrata; ++i) values[i] = vals[i]; };
@@ -492,11 +514,32 @@ struct DiscretizedSpectrumTemplate {
         return false;
     };
     
-    float luminance(RGBColorSpace space = RGBColorSpace::sRGB) const {
-        return 0.0f;
+    RealType luminance(RGBColorSpace space = RGBColorSpace::sRGB) const {
+        RealType sum = 0;
+        for (int i = 0; i < numStrata; ++i)
+            sum += ybar[i] * values[i];
+        return sum / integralCMF;
     };
     
     void getRGB(float RGB[3], RGBColorSpace space = RGBColorSpace::sRGB) const {
+        RealType XYZ[3] = {0, 0, 0};
+        for (int i = 0; i < numStrata; ++i) {
+            XYZ[0] += xbar[i] * values[i];
+            XYZ[1] += ybar[i] * values[i];
+            XYZ[2] += zbar[i] * values[i];
+        }
+        XYZ[0] /= integralCMF;
+        XYZ[1] /= integralCMF;
+        XYZ[2] /= integralCMF;
+        
+        switch (space) {
+            case RGBColorSpace::sRGB:
+                XYZ_to_sRGB(XYZ, RGB);
+                break;
+            default:
+                SLRAssert(false, "Invalid RGB color space is specified.");
+                break;
+        }
     };
     
     std::string toString() const {
@@ -515,8 +558,69 @@ struct DiscretizedSpectrumTemplate {
     static const DiscretizedSpectrumTemplate One;
     static const DiscretizedSpectrumTemplate Inf;
     static const DiscretizedSpectrumTemplate NaN;
+    
+    static const uint32_t NumStrata;
+    static std::unique_ptr<float[]> xbar;
+    static std::unique_ptr<float[]> ybar;
+    static std::unique_ptr<float[]> zbar;
+    static float integralCMF;
+    
+    static void init() {
+        xbar = std::unique_ptr<float[]>(new float[numStrata]);
+        ybar = std::unique_ptr<float[]>(new float[numStrata]);
+        zbar = std::unique_ptr<float[]>(new float[numStrata]);
+        
+        uint32_t sBin = 0;
+        float nextP = float(sBin + 1) / numStrata;
+        float xSum = 0, xPrev = xbar_2deg[0];
+        float ySum = 0, yPrev = ybar_2deg[0];
+        float zSum = 0, zPrev = zbar_2deg[0];
+        const float interval = 1;// nm
+        for (int i = 1; i < NumCMFSamples; ++i) {
+            float curP = float(i) / (NumCMFSamples - 1);
+            float width = interval;
+            float xCur = xbar_2deg[i];
+            float yCur = ybar_2deg[i];
+            float zCur = zbar_2deg[i];
+            if (curP >= nextP) {
+                width = (curP - nextP) * (WavelengthHighBound - WavelengthLowBound);
+                float t = 1 - width / interval;
+                float xIn = xPrev * (1 - t) + xCur * t;
+                float yIn = yPrev * (1 - t) + yCur * t;
+                float zIn = zPrev * (1 - t) + zCur * t;
+                xSum += (xPrev + xIn) * (interval - width) * 0.5f;
+                ySum += (yPrev + yIn) * (interval - width) * 0.5f;
+                zSum += (zPrev + zIn) * (interval - width) * 0.5f;
+                xbar[sBin] = xSum;
+                ybar[sBin] = ySum;
+                zbar[sBin] = zSum;
+                
+                xSum = ySum = zSum = 0;
+                xPrev = xIn;
+                yPrev = yIn;
+                zPrev = zIn;
+                
+                ++sBin;
+                nextP = float(sBin + 1) / numStrata;
+            }
+            xSum += (xPrev + xCur) * width * 0.5f;
+            ySum += (yPrev + yCur) * width * 0.5f;
+            zSum += (zPrev + zCur) * width * 0.5f;
+            xPrev = xCur;
+            yPrev = yCur;
+            zPrev = zCur;
+        }
+        
+        integralCMF = 0.0f;
+        for (int i = 0; i < numStrata; ++i)
+            integralCMF += ybar[i];
+    };
 };
 template <typename RealType, uint32_t numStrata> const uint32_t DiscretizedSpectrumTemplate<RealType, numStrata>::NumStrata = numStrata;
+template <typename RealType, uint32_t numStrata> std::unique_ptr<float[]> DiscretizedSpectrumTemplate<RealType, numStrata>::xbar;
+template <typename RealType, uint32_t numStrata> std::unique_ptr<float[]> DiscretizedSpectrumTemplate<RealType, numStrata>::ybar;
+template <typename RealType, uint32_t numStrata> std::unique_ptr<float[]> DiscretizedSpectrumTemplate<RealType, numStrata>::zbar;
+template <typename RealType, uint32_t numStrata> float DiscretizedSpectrumTemplate<RealType, numStrata>::integralCMF;
 
 template <typename RealType, uint32_t numStrata>
 const DiscretizedSpectrumTemplate<RealType, numStrata> DiscretizedSpectrumTemplate<RealType, numStrata>::Zero = DiscretizedSpectrumTemplate<RealType, numStrata>(0.0);
@@ -530,13 +634,20 @@ const DiscretizedSpectrumTemplate<RealType, numStrata> DiscretizedSpectrumTempla
 
 template <typename RealType, uint32_t numStrata>
 struct SpectrumStorageTemplate {
-    CompensatedSum<DiscretizedSpectrumTemplate<RealType, numStrata>> value;
+    typedef DiscretizedSpectrumTemplate<RealType, numStrata> ValueType;
+    CompensatedSum<ValueType> value;
     
-    SpectrumStorageTemplate(const DiscretizedSpectrumTemplate<RealType, numStrata> &v = DiscretizedSpectrumTemplate<RealType, numStrata>::Zero) :
+    SpectrumStorageTemplate(const ValueType &v = ValueType::Zero) :
     value(v) {};
     
     template <uint32_t N>
-    SpectrumStorageTemplate &add(const WavelengthSamplesTemplate<RealType, N> &wls, const SampledSpectrumTemplate<RealType, N> &value) {
+    SpectrumStorageTemplate &add(const WavelengthSamplesTemplate<RealType, N> &wls, const SampledSpectrumTemplate<RealType, N> &val) {
+        ValueType addend(0.0);
+        for (int i = 0; i < WavelengthSamplesTemplate<RealType, N>::NumComponents; ++i) {
+            uint32_t sBin = std::min(uint32_t((wls[i] - WavelengthLowBound) / (WavelengthHighBound - WavelengthLowBound) * numStrata), numStrata - 1);
+            addend[sBin] += val[i];
+        }
+        value += addend;
         return *this;
     };
 };

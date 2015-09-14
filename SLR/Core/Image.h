@@ -12,6 +12,7 @@
 #include "../references.h"
 #include "../Memory/Allocator.h"
 #include "../Helper/image_loader.h"
+#include "../BasicTypes/Spectrum.h"
 
 class Image2D {
 protected:
@@ -19,7 +20,7 @@ protected:
     ColorFormat m_colorFormat;
     
     virtual const void* getInternal(uint32_t x, uint32_t y) const = 0;
-    virtual void setInternal(uint32_t x, uint32_t y, void* data, size_t size) = 0;
+    virtual void setInternal(uint32_t x, uint32_t y, const void* data, size_t size) = 0;
 public:
     Image2D() { };
     Image2D(uint32_t w, uint32_t h, ColorFormat fmt) : m_width(w), m_height(h), m_colorFormat(fmt) { };
@@ -75,6 +76,83 @@ class TiledImage2DTemplate : public Image2D {
         imgSuccess = loadImage(filepath, (uint8_t*)linearData, gammaCorrection);
         SLRAssert(imgSuccess, "failed to load the image\n%s", filepath.c_str());
         
+#ifdef Use_Spectral_Representation
+        ColorFormat intermFormat;
+        switch (m_colorFormat) {
+            case ColorFormat::RGB8x3:
+            case ColorFormat::RGB_8x4:
+                intermFormat = ColorFormat::uvs16Fx3;
+                break;
+            case ColorFormat::RGBA8x4:
+            case ColorFormat::RGBA16Fx4:
+                intermFormat = ColorFormat::uvsA16Fx4;
+                break;
+            case ColorFormat::Gray8:
+                intermFormat = ColorFormat::Gray8;
+                break;
+            default:
+                SLRAssert(false, "Color format is invalid.");
+                break;
+        }
+        m_stride = sizesOfColorFormats[(uint32_t)intermFormat];
+        m_numTileX = (m_width + (tileWidth - 1)) >> log2_tileWidth;
+        size_t numTileY = (m_height + (tileWidth - 1)) >> log2_tileWidth;
+        size_t tileSize = m_stride * tileWidth * tileWidth;
+        m_allocSize = m_numTileX * numTileY * tileSize;
+        m_data = (uint8_t*)mem->alloc(m_allocSize, SLR_L1_Cacheline_Size);
+        
+        for (int i = 0; i < m_height; ++i) {
+            for (int j = 0; j < m_width; ++j) {
+                switch (m_colorFormat) {
+                    case ColorFormat::RGB8x3: {
+                        const RGB8x3 &val = *((RGB8x3*)linearData + m_width * i + j);
+                        float RGB[3] = {val.r / 255.0f, val.g / 255.0f, val.b / 255.0f};
+                        float uvs[3];
+                        Upsampling::sRGB_to_uvs(RGB, uvs);
+                        uvs16Fx3 storedVal{(half)uvs[0], (half)uvs[1], (half)uvs[2]};
+                        setInternal(j, i, &storedVal, m_stride);
+                        break;
+                    }
+                    case ColorFormat::RGB_8x4: {
+                        const RGB_8x4 &val = *((RGB_8x4*)linearData + m_width * i + j);
+                        float RGB[3] = {val.r / 255.0f, val.g / 255.0f, val.b / 255.0f};
+                        float uvs[3];
+                        Upsampling::sRGB_to_uvs(RGB, uvs);
+                        uvs16Fx3 storedVal{(half)uvs[0], (half)uvs[1], (half)uvs[2]};
+                        setInternal(j, i, &storedVal, m_stride);
+                        break;
+                    }
+                    case ColorFormat::RGBA8x4: {
+                        const RGBA8x4 &val = *((RGBA8x4*)linearData + m_width * i + j);
+                        float RGB[3] = {val.r / 255.0f, val.g / 255.0f, val.b / 255.0f};
+                        float uvs[3];
+                        Upsampling::sRGB_to_uvs(RGB, uvs);
+                        uvsA16Fx4 storedVal{(half)uvs[0], (half)uvs[1], (half)uvs[2], (half)(val.a / 255.0f)};
+                        setInternal(j, i, &storedVal, m_stride);
+                        break;
+                    }
+                    case ColorFormat::RGBA16Fx4: {
+                        const RGBA16Fx4 &val = *((RGBA16Fx4*)linearData + m_width * i + j);
+                        float RGB[3] = {val.r, val.g, val.b};
+                        float uvs[3];
+                        Upsampling::sRGB_to_uvs(RGB, uvs);
+                        uvsA16Fx4 storedVal{(half)uvs[0], (half)uvs[1], (half)uvs[2], (half)val.a};
+                        setInternal(j, i, &storedVal, m_stride);
+                        break;
+                    }
+                    case ColorFormat::Gray8: {
+                        const Gray8 &val = *((Gray8*)linearData + m_width * i + j);
+                        setInternal(j, i, &val, m_stride);
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+        }
+        
+        m_colorFormat = intermFormat;
+#else
         m_stride = sizesOfColorFormats[(uint32_t)m_colorFormat];
         m_numTileX = (m_width + (tileWidth - 1)) >> log2_tileWidth;
         size_t numTileY = (m_height + (tileWidth - 1)) >> log2_tileWidth;
@@ -87,6 +165,7 @@ class TiledImage2DTemplate : public Image2D {
                 setInternal(j, i, (uint8_t*)linearData + m_stride * (m_width * i + j), m_stride);
             }
         }
+#endif
         free(linearData);
     };
     
@@ -98,7 +177,7 @@ class TiledImage2DTemplate : public Image2D {
         return m_data + m_stride * ((ty * m_numTileX + tx) * tileWidth * tileWidth + ly * tileWidth + lx);
     };
     
-    void setInternal(uint32_t x, uint32_t y, void* data, size_t size) override {
+    void setInternal(uint32_t x, uint32_t y, const void* data, size_t size) override {
         uint32_t tx = x >> log2_tileWidth;
         uint32_t ty = y >> log2_tileWidth;
         uint32_t lx = x & localMask;

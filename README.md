@@ -18,9 +18,9 @@ SLR is a renderer based on Monte Carlo ray tracing.
 * Adaptive MCMC Progressive Photon Mapping \[3\]  
   (current implementation is buggy and does not support IBL.)
 
-[1] "Physically Meaningful Rendering using Tristimulus Colours"  
-[2] "THE RENDERING EQUATION"  
-[3] "Robust Adaptive Photon Tracing Using Photon Path Visibility"
+[1] "Physically Meaningful Rendering using Tristimulus Colours", 2015  
+[2] "THE RENDERING EQUATION", 1986  
+[3] "Robust Adaptive Photon Tracing Using Photon Path Visibility", 2011
 
 ##動作環境 / Confirmed Environment
 現状以下の環境で動作を確認しています。  
