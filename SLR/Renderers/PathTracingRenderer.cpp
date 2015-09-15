@@ -115,7 +115,7 @@ void PathTracingRenderer::Job::kernel(uint32_t threadID) {
             LensPosQuery lensQuery(time, wls);
             LensPosSample lensSample(rng.getFloat0cTo1o(), rng.getFloat0cTo1o());
             LensPosQueryResult lensResult;
-            Spectrum We0 = camera->sample(lensQuery, lensSample, &lensResult) * 29.375f;
+            Spectrum We0 = camera->sample(lensQuery, lensSample, &lensResult);
             
             IDFSample WeSample(px / imageWidth, py / imageHeight);
             IDFQueryResult WeResult;

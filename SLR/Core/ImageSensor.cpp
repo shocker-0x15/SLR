@@ -72,7 +72,7 @@ void ImageSensor::clearSeparatedBuffers() {
     for (int b = 0; b < m_numSeparated; ++b) {
         for (int i = 0; i < m_allocSize / sizeof(SpectrumStorage); ++i) {
             SpectrumStorage &dst = *((SpectrumStorage*)m_separatedData[b] + i);
-            dst = SpectrumStorage();
+            dst = SpectrumStorage(0.0);
         }
     }
 }
@@ -160,14 +160,25 @@ void ImageSensor::saveImage(const std::string &filepath, float scale, float* sca
                 printf("(%u, %u): has an infinite value!\n", j, i);
             if (pix.hasNaN())
                 printf("(%u, %u): has NaN!\n", j, i);
-            float Y = pix.luminance();
-            if (Y != 0)
-                pix *= (1.0f - std::exp(-Y)) / Y;
-            else
-                pix = DiscretizedSpectrum::Zero;
+            if (pix.hasMinus())
+                printf("(%u, %u): has a minus value!\n", j, i);
             
             float RGB[3];
             pix.getRGB(RGB);
+            RGB[0] = RGB[0] < 0.0f ? 0.0f : RGB[0];
+            RGB[1] = RGB[1] < 0.0f ? 0.0f : RGB[1];
+            RGB[2] = RGB[2] < 0.0f ? 0.0f : RGB[2];
+
+//            if (j >= 940 && j < 948 && i >= 500 && i < 516) {
+//                printf("%g, %g, %g\n", RGB[0], RGB[1], RGB[2]);
+//            }
+            
+            float Y = 0.222485 * RGB[0] + 0.716905 * RGB[1] + 0.060610 * RGB[2];
+            float scale = 1;
+            if (Y != 0)
+                scale = (1.0f - std::exp(-Y)) / Y;
+            else
+                RGB[0] = RGB[1] = RGB[2] = 0;
             
             auto gammaCorrection = [](float value) {
                 return value <= 0.0031308f ? 12.92f * value : (1.055f * std::pow(value, 1.0f / 2.4f) - 0.055f);
@@ -175,9 +186,9 @@ void ImageSensor::saveImage(const std::string &filepath, float scale, float* sca
             
             uint32_t idx = (m_height - i - 1) * byteWidth + 3 * j;
             BMP_RGB &dst = *(BMP_RGB*)(bmp + idx);
-            dst.R = uint8_t(256 * std::min(gammaCorrection(RGB[0]), 0.999f));
-            dst.G = uint8_t(256 * std::min(gammaCorrection(RGB[1]), 0.999f));
-            dst.B = uint8_t(256 * std::min(gammaCorrection(RGB[2]), 0.999f));
+            dst.R = uint8_t(256 * std::min(gammaCorrection(RGB[0] * scale), 0.999f));
+            dst.G = uint8_t(256 * std::min(gammaCorrection(RGB[1] * scale), 0.999f));
+            dst.B = uint8_t(256 * std::min(gammaCorrection(RGB[2] * scale), 0.999f));
         }
     }
     

@@ -294,7 +294,7 @@ struct SampledSpectrumTemplate {
         return *this;
     };
     SampledSpectrumTemplate &operator/=(RealType s) {
-        float r = 1 / s;
+        RealType r = 1 / s;
         for (int i = 0; i < N; ++i)
             values[i] *= r;
         return *this;
@@ -356,7 +356,7 @@ struct SampledSpectrumTemplate {
     RealType luminance(RGBColorSpace space = RGBColorSpace::sRGB) const {
         RealType sum = 0;
         for (int i = 0; i < N; ++i)
-            sum += i;
+            sum += values[i];
         return sum;
     };
     
@@ -510,6 +510,12 @@ struct DiscretizedSpectrumTemplate {
     bool hasInf() const {
         for (int i = 0; i < numStrata; ++i)
             if (std::isinf(values[i]))
+                return true;
+        return false;
+    };
+    bool hasMinus() const {
+        for (int i = 0; i < numStrata; ++i)
+            if (values[i] < 0)
                 return true;
         return false;
     };

@@ -137,7 +137,7 @@ Spectrum InfiniteSphereSurfaceObject::sample(const Light &light, const LightPosQ
     surfPt.u = phi;
     surfPt.v = theta;
     surfPt.texCoord = TexCoord2D(phi / (2 * M_PI), theta / M_PI);
-    surfPt.texCoord0Dir = Vector3D(-std::cos(phi), 0.0f, -std::sin(theta));
+    surfPt.texCoord0Dir = normalize(Vector3D(-std::cos(phi), 0.0f, -std::sin(theta)));
     surfPt.shadingFrame.x = surfPt.texCoord0Dir;
     surfPt.shadingFrame.z = surfPt.gNormal;
     surfPt.shadingFrame.y = cross(surfPt.shadingFrame.z, surfPt.shadingFrame.x);
