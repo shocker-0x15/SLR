@@ -24,6 +24,10 @@ SampledSpectrum MultiBSDF::sample(const BSDFQuery &query, const BSDFSample &smp,
     float sumWeights, base;
     uint32_t idx = sampleDiscrete(weights, &sumWeights, &base, m_numComponents, smp.uComponent);
     BSDF* selectedBSDF = m_BSDFs[idx];
+    if (sumWeights == 0.0f) {
+        result->dirPDF = 0.0f;
+        return SampledSpectrum::Zero;
+    }
     
     SampledSpectrum value = selectedBSDF->sample(query, smp, result);
     result->dirPDF *= weights[idx];
@@ -54,9 +58,11 @@ float MultiBSDF::evaluatePDF(const BSDFQuery &query, const Vector3D &dirOut) con
     float sumWeights = 0.0f;
     float weights[maxNumElems];
     for (int i = 0; i < m_numComponents; ++i) {
-        weights[i] += m_BSDFs[i]->weight(query, dirOut);
+        weights[i] = m_BSDFs[i]->weight(query, dirOut);
         sumWeights += weights[i];
     }
+    if (sumWeights == 0.0f)
+        return 0.0f;
     
     float retPDF = 0.0f;
     for (int i = 0; i < m_numComponents; ++i) {

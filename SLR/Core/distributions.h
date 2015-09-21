@@ -233,6 +233,7 @@ public:
         m_integral = sum;
         auto pickFuncTop = [this](uint32_t idx) { return m_1DDists[idx].integral(); };
         m_top1DDist = new RegularConstantContinuous1DTemplate<RealType>(numD2, pickFuncTop);
+        SLRAssert(!std::isnan(m_integral) && !std::isinf(m_integral), "invalid integral value.");
     };
     ~RegularConstantContinuous2DTemplate() {
         free(m_1DDists);

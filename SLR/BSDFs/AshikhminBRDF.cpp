@@ -55,8 +55,8 @@ float AshikhminSpecularBRDF::weight(const BSDFQuery &query, const BSDFSample &sm
         return 0;
 #ifdef Use_BSDF_Actual_Weights
     BSDFQueryResult result;
-    float fs = sample(query, smp, &result)[query.wlHint];
-    return fs * std::fabs(result.dir_sn.z) / result.dirPDF;
+    float fs = sample(query, smp, &result).maxValue();
+    return result.dirPDF > 0.0f ? fs * std::fabs(result.dir_sn.z) / result.dirPDF : 0.0f;
 #else
     SampledSpectrum F = m_Rs + (SampledSpectrum::One - m_Rs) * std::pow(1.0f - std::fabs(query.dir_sn.z), 5);
     return F.maxValue();
@@ -69,9 +69,9 @@ float AshikhminSpecularBRDF::weight(const BSDFQuery &query, const Vector3D &dir)
         return 0;
 #ifdef Use_BSDF_Actual_Weights
     BSDFQueryResult result;
-    float fs = evaluate(query, dir)[query.wlHint];
+    float fs = evaluate(query, dir).maxValue();
     float dirPDF = evaluatePDF(query, dir);
-    return fs * std::fabs(dir.z) / dirPDF;
+    return dirPDF > 0 ? fs * std::fabs(dir.z) / dirPDF : 0.0f;
 #else
     return weight(query, BSDFSample(0, 0, 0));
 #endif
@@ -117,8 +117,8 @@ float AshikhminDiffuseBRDF::weight(const BSDFQuery &query, const BSDFSample &smp
         return 0;
 #ifdef Use_BSDF_Actual_Weights
     BSDFQueryResult result;
-    float fs = sample(query, smp, &result)[query.wlHint];
-    return fs * std::fabs(result.dir_sn.z) / result.dirPDF;
+    float fs = sample(query, smp, &result).maxValue();
+    return result.dirPDF > 0.0f ? fs * std::fabs(result.dir_sn.z) / result.dirPDF : 0.0f;
 #else
     float F = std::pow((1.0f - std::pow(1.0f - std::fabs(query.dir_sn.z) / 2, 5)), 2);
     return (28 * m_Rd / (23 * M_PI) * (SampledSpectrum::One - m_Rs) * F).maxValue();
@@ -131,9 +131,9 @@ float AshikhminDiffuseBRDF::weight(const BSDFQuery &query, const Vector3D &dir) 
         return 0;
 #ifdef Use_BSDF_Actual_Weights
     BSDFQueryResult result;
-    float fs = evaluate(query, dir)[query.wlHint];
+    float fs = evaluate(query, dir).maxValue();
     float dirPDF = evaluatePDF(query, dir);
-    return fs * std::fabs(dir.z) / dirPDF;
+    return dirPDF > 0.0f ? fs * std::fabs(dir.z) / dirPDF : 0.0f;
 #else
     return weight(query, BSDFSample(0, 0, 0));
 #endif

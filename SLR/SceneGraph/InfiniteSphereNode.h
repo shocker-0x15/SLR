@@ -23,7 +23,7 @@ class InfiniteSphereNode : public Node {
     RegularConstantContinuous2D* m_dist;
     bool m_ready;
 public:
-    InfiniteSphereNode(const Scene* scene, const SpectrumTextureRef &IBLTex, const SampledSpectrum &scale);
+    InfiniteSphereNode(const Scene* scene, const SpectrumTextureRef &IBLTex, float scale);
     ~InfiniteSphereNode();
     
     void getRenderingData(ArenaAllocator &mem, const Transform* subTF, RenderingData *data) {

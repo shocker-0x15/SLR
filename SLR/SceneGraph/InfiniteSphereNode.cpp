@@ -12,7 +12,7 @@
 #include "../Core/SurfaceObject.h"
 #include "../SurfaceMaterials/IBLEmission.h"
 
-InfiniteSphereNode::InfiniteSphereNode(const Scene* scene, const SpectrumTextureRef &IBLTex, const SampledSpectrum &scale) : m_scene(scene) {
+InfiniteSphereNode::InfiniteSphereNode(const Scene* scene, const SpectrumTextureRef &IBLTex, float scale) : m_scene(scene) {
     m_dist = IBLTex->createIBLImportanceMap();
 //    m_dist->exportBMP("distribution.bmp", 4);
     m_emitter = createShared<IBLEmission>(m_scene, IBLTex, scale);

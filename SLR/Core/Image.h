@@ -113,6 +113,9 @@ class TiledImage2DTemplate : public Image2D {
                         float RGB[3] = {val.r / 255.0f, val.g / 255.0f, val.b / 255.0f};
                         float uvs[3];
                         Upsampling::sRGB_to_uvs(spType, RGB, uvs);
+                        SLRAssert(!std::isnan(uvs[0]) && !std::isinf(uvs[0]) &&
+                                  !std::isnan(uvs[1]) && !std::isinf(uvs[1]) &&
+                                  !std::isnan(uvs[2]) && !std::isinf(uvs[2]), "Invalid value.");
                         uvs16Fx3 storedVal{(half)uvs[0], (half)uvs[1], (half)uvs[2]};
                         setInternal(j, i, &storedVal, m_stride);
                         break;
@@ -122,6 +125,9 @@ class TiledImage2DTemplate : public Image2D {
                         float RGB[3] = {val.r / 255.0f, val.g / 255.0f, val.b / 255.0f};
                         float uvs[3];
                         Upsampling::sRGB_to_uvs(spType, RGB, uvs);
+                        SLRAssert(!std::isnan(uvs[0]) && !std::isinf(uvs[0]) &&
+                                  !std::isnan(uvs[1]) && !std::isinf(uvs[1]) &&
+                                  !std::isnan(uvs[2]) && !std::isinf(uvs[2]), "Invalid value.");
                         uvs16Fx3 storedVal{(half)uvs[0], (half)uvs[1], (half)uvs[2]};
                         setInternal(j, i, &storedVal, m_stride);
                         break;
@@ -131,6 +137,9 @@ class TiledImage2DTemplate : public Image2D {
                         float RGB[3] = {val.r / 255.0f, val.g / 255.0f, val.b / 255.0f};
                         float uvs[3];
                         Upsampling::sRGB_to_uvs(spType, RGB, uvs);
+                        SLRAssert(!std::isnan(uvs[0]) && !std::isinf(uvs[0]) &&
+                                  !std::isnan(uvs[1]) && !std::isinf(uvs[1]) &&
+                                  !std::isnan(uvs[2]) && !std::isinf(uvs[2]), "Invalid value.");
                         uvsA16Fx4 storedVal{(half)uvs[0], (half)uvs[1], (half)uvs[2], (half)(val.a / 255.0f)};
                         setInternal(j, i, &storedVal, m_stride);
                         break;
@@ -140,6 +149,9 @@ class TiledImage2DTemplate : public Image2D {
                         float RGB[3] = {val.r, val.g, val.b};
                         float uvs[3];
                         Upsampling::sRGB_to_uvs(spType, RGB, uvs);
+                        SLRAssert(!std::isnan(uvs[0]) && !std::isinf(uvs[0]) &&
+                                  !std::isnan(uvs[1]) && !std::isinf(uvs[1]) &&
+                                  !std::isnan(uvs[2]) && !std::isinf(uvs[2]), "Invalid value.");
                         uvsA16Fx4 storedVal{(half)uvs[0], (half)uvs[1], (half)uvs[2], (half)val.a};
                         setInternal(j, i, &storedVal, m_stride);
                         break;

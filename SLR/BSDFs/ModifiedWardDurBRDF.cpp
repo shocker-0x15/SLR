@@ -76,8 +76,8 @@ float ModifiedWardDurBRDF::weight(const BSDFQuery &query, const BSDFSample &smp)
         return 0;
 #ifdef Use_BSDF_Actual_Weights
     BSDFQueryResult result;
-    float fs = sample(query, smp, &result)[query.wlHint];
-    return fs * std::fabs(result.dir_sn.z) / result.dirPDF;
+    float fs = sample(query, smp, &result).maxValue();
+    return result.dirPDF > 0.0f ? fs * std::fabs(result.dir_sn.z) / result.dirPDF : 0.0f;
 #else
     return m_R.maxValue();
 #endif
@@ -88,9 +88,9 @@ float ModifiedWardDurBRDF::weight(const BSDFQuery &query, const Vector3D &dir) c
         return 0;
 #ifdef Use_BSDF_Actual_Weights
     BSDFQueryResult result;
-    float fs = evaluate(query, dir)[query.wlHint];
+    float fs = evaluate(query, dir).maxValue();
     float dirPDF = evaluatePDF(query, dir);
-    return fs * std::fabs(dir.z) / dirPDF;
+    return dirPDF > 0.0f ? fs * std::fabs(dir.z) / dirPDF : 0.0f;
 #else
     return weight(query, BSDFSample(0, 0, 0));
 #endif

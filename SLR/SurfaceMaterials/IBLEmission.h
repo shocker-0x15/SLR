@@ -15,9 +15,9 @@
 class IBLEmission : public EmitterSurfaceProperty {
     const Scene* m_scene;
     SpectrumTextureRef m_coeffM;
-    SampledSpectrum m_scale;
+    float m_scale;
 public:
-    IBLEmission(const Scene* scene, const SpectrumTextureRef &coeffM, const SampledSpectrum &scale) :
+    IBLEmission(const Scene* scene, const SpectrumTextureRef &coeffM, float scale) :
     m_scene(scene), m_coeffM(coeffM), m_scale(scale) {};
     
     SampledSpectrum emittance(const SurfacePoint &surfPt, const WavelengthSamples &wls) const override;

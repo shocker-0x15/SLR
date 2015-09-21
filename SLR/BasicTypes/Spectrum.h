@@ -356,6 +356,8 @@ namespace Upsampling {
         RealType b = xyz[0] + xyz[1] + xyz[2];
         xy[0] = xyz[0] / b;
         xy[1] = xyz[1] / b;
+        if (b == 0)
+            xy[0] = xy[1] = 1.0f / 3.0;
         xy_to_uv(xy, uvs);
         uvs[2] = b / Upsampling::EqualEnergyReflectance;
     }

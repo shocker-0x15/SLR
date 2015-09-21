@@ -33,7 +33,7 @@ float LambertianBRDF::weight(const BSDFQuery &query, const BSDFSample &smp) cons
     if (!query.flags.matches(m_type))
         return 0;
 #ifdef Use_BSDF_Actual_Weights
-    return m_R[query.wlHint];
+    return m_R.maxValue();
 #else
     return m_R.maxValue();
 #endif
@@ -43,7 +43,7 @@ float LambertianBRDF::weight(const BSDFQuery &query, const Vector3D &dir) const 
     if (!query.flags.matches(m_type))
         return 0;
 #ifdef Use_BSDF_Actual_Weights
-    return m_R[query.wlHint];
+    return m_R.maxValue();
 #else
     return m_R.maxValue();
 #endif
@@ -83,7 +83,7 @@ float SpecularBRDF::weight(const BSDFQuery &query, const BSDFSample &smp) const 
         return 0.0f;
 #ifdef Use_BSDF_Actual_Weights
     BSDFQueryResult result;
-    float fs = sample(query, smp, &result)[query.wlHint];
+    float fs = sample(query, smp, &result).maxValue();
     return fs * std::fabs(result.dir_sn.z) / result.dirPDF;
 #else
     return m_coeffR.maxValue();
@@ -148,9 +148,7 @@ float SpecularBTDF::weight(const BSDFQuery &query, const BSDFSample &smp) const 
 #ifdef Use_BSDF_Actual_Weights
     BSDFQueryResult result;
     float fs = sample(query, smp, &result)[query.wlHint];
-    if (result.dirPDF == 0.0f)
-        return 0.0f;
-    return fs * std::fabs(result.dir_sn.z) / result.dirPDF;
+    return result.dirPDF > 0.0f ? fs * std::fabs(result.dir_sn.z) / result.dirPDF : 0.0f;
 #else
     return m_coeffT.maxValue();
 #endif
