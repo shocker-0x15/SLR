@@ -8,9 +8,38 @@
 #ifndef __SLR__RGBTypes__
 #define __SLR__RGBTypes__
 
+// just for compatibility with spectral representation build.
+template <typename RealType>
+struct RGBSamplesTemplate {
+    enum Flag : uint16_t {
+        LambdaSelected = 0x01,
+    };
+    uint16_t selectedLambda;
+    uint16_t flags;
+    static const uint32_t NumComponents;
+    
+    RGBSamplesTemplate() { };
+    
+    bool lambdaSelected() const {
+        return (flags & LambdaSelected) != 0;
+    };
+    
+    static RGBSamplesTemplate createWithEqualOffsets(RealType offset, RealType uLambda, RealType* PDF) {
+        SLRAssert(offset >= 0 && offset < 1, "\"offset\" must be in range [0, 1).");
+        SLRAssert(uLambda >= 0 && uLambda < 1, "\"uLambda\" must be in range [0, 1).");
+        RGBSamplesTemplate ret;
+        ret.selectedLambda = std::min(uint16_t(3 * uLambda), uint16_t(2));
+        ret.flags = 0;
+        *PDF = 1;
+        return ret;
+    };
+};
+template <typename RealType> const uint32_t RGBSamplesTemplate<RealType>::NumComponents = 3;
+
 template <typename RealType>
 struct RGBTemplate {
     RealType r, g, b;
+    static const uint32_t NumComponents;
     
     RGBTemplate(RealType v = 0.0f) : r(v), g(v), b(v) { };
     constexpr RGBTemplate(RealType rr, RealType gg, RealType bb) : r(rr), g(gg), b(bb) { };
@@ -72,11 +101,25 @@ struct RGBTemplate {
         return str;
     };
     
+    //------------------------------------------------
+    // Methods for compatibility with ContinuousSpectrumTemplate
+    const RGBTemplate &evaluate(const RGBSamplesTemplate<RealType> &wls) const {
+        return *this;
+    };
+    //------------------------------------------------
+    // Methods for compatibility with DiscretizedSpectrumTemplate
+    bool hasMinus() const {
+        return r < 0 || g < 0 || b < 0;
+    };
+    static void init() { };
+    //------------------------------------------------
+    
     static const RGBTemplate Zero;
     static const RGBTemplate One;
     static const RGBTemplate Inf;
     static const RGBTemplate NaN;
 };
+template <typename RealType> const uint32_t RGBTemplate<RealType>::NumComponents = 3;
 
 template <typename RealType>
 const RGBTemplate<RealType> RGBTemplate<RealType>::Zero = RGBTemplate<RealType>(0);
@@ -111,7 +154,8 @@ struct RGBStorageTemplate {
     RGBStorageTemplate(const RGBTemplate<RealType> &v = RGBTemplate<RealType>::Zero) :
     value(v) {};
     
-    RGBStorageTemplate &add(const RGBTemplate<RealType> &value) {
+    RGBStorageTemplate &add(const RGBSamplesTemplate<RealType> &wls, const RGBTemplate<RealType> &val) {
+        value += val;
         return *this;
     };
 };

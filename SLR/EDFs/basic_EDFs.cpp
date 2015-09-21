@@ -8,16 +8,16 @@
 #include "basic_EDFs.h"
 #include "../Core/distributions.h"
 
-Spectrum DiffuseEDF::sample(const EDFQuery &query, const EDFSample &smp, EDFQueryResult* result) const {
+SampledSpectrum DiffuseEDF::sample(const EDFQuery &query, const EDFSample &smp, EDFQueryResult* result) const {
     result->dir_sn = cosineSampleHemisphere(smp.uDir[0], smp.uDir[1]);
     result->dirPDF = result->dir_sn.z / M_PI;
     result->dirType = m_type;
     return 1.0f / M_PI;
 }
 
-Spectrum DiffuseEDF::evaluate(const EDFQuery &query, const Vector3D &dir) const {
+SampledSpectrum DiffuseEDF::evaluate(const EDFQuery &query, const Vector3D &dir) const {
     if (!query.flags.matches(m_type))
-        return Spectrum::Zero;
+        return SampledSpectrum::Zero;
     return dir.z > 0.0f ? 1.0f / M_PI : 0.0f;
 }
 

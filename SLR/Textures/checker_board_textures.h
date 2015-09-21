@@ -13,11 +13,11 @@
 #include "../Core/textures.h"
 
 class CheckerBoardSpectrumTexture : public SpectrumTexture {
-    Spectrum m_values[2];
+    InputSpectrumRef m_values[2];
 public:
-    CheckerBoardSpectrumTexture(const Spectrum &v0, const Spectrum &v1) : m_values{v0, v1} { };
+    CheckerBoardSpectrumTexture(const InputSpectrumRef &v0, const InputSpectrumRef &v1) : m_values{v0, v1} { };
     
-    Spectrum evaluate(const TexCoord2D &tc, const WavelengthSamples &wls) const override { return m_values[((int)(tc.u * 2) + (int)(tc.v * 2)) % 2]; };
+    SampledSpectrum evaluate(const TexCoord2D &tc, const WavelengthSamples &wls) const override { return m_values[((int)(tc.u * 2) + (int)(tc.v * 2)) % 2]->evaluate(wls); };
     RegularConstantContinuous2D* createIBLImportanceMap() const override;
 };
 

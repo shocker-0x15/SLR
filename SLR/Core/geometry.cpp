@@ -34,7 +34,7 @@ bool SurfacePoint::isEmitting() const {
     return obj->isEmitting();
 }
 
-Spectrum SurfacePoint::emittance(const WavelengthSamples &wls) const {
+SampledSpectrum SurfacePoint::emittance(const WavelengthSamples &wls) const {
     return obj->emittance(*this, wls);
 }
 

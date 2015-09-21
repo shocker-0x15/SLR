@@ -8,9 +8,9 @@
 #include "AshikhminBRDF.h"
 #include "../Core/distributions.h"
 
-Spectrum AshikhminSpecularBRDF::sample(const BSDFQuery &query, const BSDFSample &smp, BSDFQueryResult *result) const {
+SampledSpectrum AshikhminSpecularBRDF::sample(const BSDFQuery &query, const BSDFSample &smp, BSDFQueryResult *result) const {
     if (!matches(query.flags, result))
-        return Spectrum::Zero;
+        return SampledSpectrum::Zero;
     
     float quad = 2 * M_PI * smp.uDir[1];
     float phi_h = std::atan2(std::sqrt(m_nu + 1) * std::sin(quad), std::sqrt(m_nv + 1) * std::cos(quad));
@@ -26,15 +26,15 @@ Spectrum AshikhminSpecularBRDF::sample(const BSDFQuery &query, const BSDFSample 
     return evaluateInternal(query, result->dir_sn);
 }
 
-Spectrum AshikhminSpecularBRDF::evaluateInternal(const BSDFQuery &query, const Vector3D &dir) const {
+SampledSpectrum AshikhminSpecularBRDF::evaluateInternal(const BSDFQuery &query, const Vector3D &dir) const {
     if (!query.flags.matches(m_type))
-        return Spectrum::Zero;
+        return SampledSpectrum::Zero;
     
     Vector3D halfv = halfVector(query.dir_sn, dir);
     float dotHV = dot(halfv, query.dir_sn);
     float exp = (m_nu * halfv.x * halfv.x + m_nv * halfv.y * halfv.y) / (1 - halfv.z * halfv.z);
-    Spectrum fr = m_Rs + (Spectrum::One - m_Rs) * std::pow(1.0f - dotHV, 5);
-    Spectrum ret = std::sqrt((m_nu + 1) * (m_nv + 1)) / (8 * M_PI) *
+    SampledSpectrum fr = m_Rs + (SampledSpectrum::One - m_Rs) * std::pow(1.0f - dotHV, 5);
+    SampledSpectrum ret = std::sqrt((m_nu + 1) * (m_nv + 1)) / (8 * M_PI) *
     std::pow(std::fabs(halfv.z), exp) / (dotHV * std::fmax(std::fabs(query.dir_sn.z), std::fabs(dir.z))) * fr;
     BSDF_EVALUATE_ASSERT;
     return ret;
@@ -50,24 +50,43 @@ float AshikhminSpecularBRDF::evaluatePDF(const BSDFQuery &query, const Vector3D 
     return ret;
 }
 
-float AshikhminSpecularBRDF::weight(const BSDFQuery &query) const {
+float AshikhminSpecularBRDF::weight(const BSDFQuery &query, const BSDFSample &smp) const {
     if (!query.flags.matches(m_type))
         return 0;
-    Spectrum F = m_Rs + (Spectrum::One - m_Rs) * std::pow(1.0f - std::fabs(query.dir_sn.z), 5);
+#ifdef Use_BSDF_Actual_Weights
+    BSDFQueryResult result;
+    float fs = sample(query, smp, &result)[query.wlHint];
+    return fs * std::fabs(result.dir_sn.z) / result.dirPDF;
+#else
+    SampledSpectrum F = m_Rs + (SampledSpectrum::One - m_Rs) * std::pow(1.0f - std::fabs(query.dir_sn.z), 5);
     return F.maxValue();
     //    return m_Rs.maxValue();
+#endif
 }
 
-Spectrum AshikhminSpecularBRDF::getBaseColor(DirectionType flags) const {
+float AshikhminSpecularBRDF::weight(const BSDFQuery &query, const Vector3D &dir) const {
+    if (!query.flags.matches(m_type))
+        return 0;
+#ifdef Use_BSDF_Actual_Weights
+    BSDFQueryResult result;
+    float fs = evaluate(query, dir)[query.wlHint];
+    float dirPDF = evaluatePDF(query, dir);
+    return fs * std::fabs(dir.z) / dirPDF;
+#else
+    return weight(query, BSDFSample(0, 0, 0));
+#endif
+}
+
+SampledSpectrum AshikhminSpecularBRDF::getBaseColor(DirectionType flags) const {
     if (!flags.matches(m_type))
-        return Spectrum::Zero;
+        return SampledSpectrum::Zero;
     return m_Rs;
 }
 
 
-Spectrum AshikhminDiffuseBRDF::sample(const BSDFQuery &query, const BSDFSample &smp, BSDFQueryResult *result) const {
+SampledSpectrum AshikhminDiffuseBRDF::sample(const BSDFQuery &query, const BSDFSample &smp, BSDFQueryResult *result) const {
     if (!matches(query.flags, result))
-        return Spectrum::Zero;
+        return SampledSpectrum::Zero;
     
     result->dir_sn = cosineSampleHemisphere(smp.uDir[0], smp.uDir[1]);
     result->dirPDF = result->dir_sn.z / M_PI;
@@ -75,11 +94,11 @@ Spectrum AshikhminDiffuseBRDF::sample(const BSDFQuery &query, const BSDFSample &
     return evaluateInternal(query, result->dir_sn);
 }
 
-Spectrum AshikhminDiffuseBRDF::evaluateInternal(const BSDFQuery &query, const Vector3D &dir) const {
+SampledSpectrum AshikhminDiffuseBRDF::evaluateInternal(const BSDFQuery &query, const Vector3D &dir) const {
     if (!query.flags.matches(m_type))
-        return Spectrum::Zero;
+        return SampledSpectrum::Zero;
     
-    Spectrum ret = (28 * m_Rd / (23 * M_PI) * (Spectrum::One - m_Rs) *
+    SampledSpectrum ret = (28 * m_Rd / (23 * M_PI) * (SampledSpectrum::One - m_Rs) *
                     (1.0f - std::pow(1.0f - std::fabs(query.dir_sn.z) / 2, 5)) *
                     (1.0f - std::pow(1.0f - std::fabs(dir.z) / 2, 5))
                     );
@@ -93,16 +112,35 @@ float AshikhminDiffuseBRDF::evaluatePDF(const BSDFQuery &query, const Vector3D &
     return query.dir_sn.z * dir.z >= 0.0f ? dir.z / M_PI : 0.0f;
 }
 
-float AshikhminDiffuseBRDF::weight(const BSDFQuery &query) const {
+float AshikhminDiffuseBRDF::weight(const BSDFQuery &query, const BSDFSample &smp) const {
     if (!query.flags.matches(m_type))
         return 0;
+#ifdef Use_BSDF_Actual_Weights
+    BSDFQueryResult result;
+    float fs = sample(query, smp, &result)[query.wlHint];
+    return fs * std::fabs(result.dir_sn.z) / result.dirPDF;
+#else
     float F = std::pow((1.0f - std::pow(1.0f - std::fabs(query.dir_sn.z) / 2, 5)), 2);
-    return (28 * m_Rd / (23 * M_PI) * (Spectrum::One - m_Rs) * F).maxValue();
+    return (28 * m_Rd / (23 * M_PI) * (SampledSpectrum::One - m_Rs) * F).maxValue();
     //    return m_Rd.maxValue();
+#endif
 }
 
-Spectrum AshikhminDiffuseBRDF::getBaseColor(DirectionType flags) const {
+float AshikhminDiffuseBRDF::weight(const BSDFQuery &query, const Vector3D &dir) const {
+    if (!query.flags.matches(m_type))
+        return 0;
+#ifdef Use_BSDF_Actual_Weights
+    BSDFQueryResult result;
+    float fs = evaluate(query, dir)[query.wlHint];
+    float dirPDF = evaluatePDF(query, dir);
+    return fs * std::fabs(dir.z) / dirPDF;
+#else
+    return weight(query, BSDFSample(0, 0, 0));
+#endif
+}
+
+SampledSpectrum AshikhminDiffuseBRDF::getBaseColor(DirectionType flags) const {
     if (!flags.matches(m_type))
-        return Spectrum::Zero;
+        return SampledSpectrum::Zero;
     return m_Rd;
 }

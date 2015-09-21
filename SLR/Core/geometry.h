@@ -172,7 +172,7 @@ struct SurfacePoint {
     
     Vector3D getShadowDirection(const SurfacePoint &shadingPoint, float* dist2);
     bool isEmitting() const;
-    Spectrum emittance(const WavelengthSamples &wls) const;
+    SampledSpectrum emittance(const WavelengthSamples &wls) const;
     float evaluateAreaPDF() const;
     BSDF* createBSDF(const WavelengthSamples &wls, ArenaAllocator &mem) const;
     EDF* createEDF(const WavelengthSamples &wls, ArenaAllocator &mem) const;

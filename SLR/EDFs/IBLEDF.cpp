@@ -7,16 +7,16 @@
 
 #include "IBLEDF.h"
 
-Spectrum IBLEDF::sample(const EDFQuery &query, const EDFSample &smp, EDFQueryResult* result) const {
+SampledSpectrum IBLEDF::sample(const EDFQuery &query, const EDFSample &smp, EDFQueryResult* result) const {
     result->dir_sn = Vector3D(0, 0, 1);
     result->dirPDF = 1.0f / m_worldDiscArea;
     result->dirType = m_type;
     return 1.0f / m_worldDiscArea;
 }
 
-Spectrum IBLEDF::evaluate(const EDFQuery &query, const Vector3D &dir) const {
+SampledSpectrum IBLEDF::evaluate(const EDFQuery &query, const Vector3D &dir) const {
     if (!query.flags.matches(m_type))
-        return Spectrum::Zero;
+        return SampledSpectrum::Zero;
     return 1.0f / m_worldDiscArea;
 }
 

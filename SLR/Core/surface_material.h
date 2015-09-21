@@ -18,7 +18,7 @@ public:
     virtual ~SurfaceMaterial() { };
     
     virtual BSDF* getBSDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem, float scale = 1.0f) const = 0;
-    virtual Spectrum emittance(const SurfacePoint &surfPt, const WavelengthSamples &wls) const { return Spectrum::Zero; };
+    virtual SampledSpectrum emittance(const SurfacePoint &surfPt, const WavelengthSamples &wls) const { return SampledSpectrum::Zero; };
     virtual bool isEmitting() const { return false; };
     virtual EDF* getEDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem, float scale = 1.0f) const { SLRAssert(false, "Not implemented."); return nullptr; };
     
@@ -34,7 +34,7 @@ public:
 
 class EmitterSurfaceProperty {
 public:
-    virtual Spectrum emittance(const SurfacePoint &surfPt, const WavelengthSamples &wls) const = 0;
+    virtual SampledSpectrum emittance(const SurfacePoint &surfPt, const WavelengthSamples &wls) const = 0;
     virtual EDF* getEDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem, float scale = 1.0f) const = 0;
     
     static EmitterSurfacePropertyRef createDiffuseEmitter(const SpectrumTextureRef &emittance);
@@ -48,7 +48,7 @@ public:
     m_mat(mat), m_emit(emit) {};
     
     BSDF* getBSDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem, float scale = 1.0f) const override;
-    Spectrum emittance(const SurfacePoint &surfPt, const WavelengthSamples &wls) const override;
+    SampledSpectrum emittance(const SurfacePoint &surfPt, const WavelengthSamples &wls) const override;
     bool isEmitting() const { return true; };
     EDF* getEDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem, float scale) const override;
 };
@@ -79,12 +79,12 @@ public:
 };
 
 class SpatialFresnelDielectric : public SpatialFresnel {
-    FloatTextureRef m_etaExt, m_etaInt;
+    SpectrumTextureRef m_etaExt, m_etaInt;
 public:
-    SpatialFresnelDielectric(const FloatTextureRef &etaExt, const FloatTextureRef &etaInt) : m_etaExt(etaExt), m_etaInt(etaInt) { };
+    SpatialFresnelDielectric(const SpectrumTextureRef &etaExt, const SpectrumTextureRef &etaInt) : m_etaExt(etaExt), m_etaInt(etaInt) { };
     
-    const FloatTextureRef &etaExt() const { return m_etaExt; };
-    const FloatTextureRef &etaInt() const { return m_etaInt; };
+    const SpectrumTextureRef &etaExt() const { return m_etaExt; };
+    const SpectrumTextureRef &etaInt() const { return m_etaInt; };
     
     Fresnel* getFresnel(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem) const override;
 };

@@ -98,15 +98,15 @@ namespace Assimp {
         
         SpectrumTextureRef diffuseTex;
         if (aiMat->Get(AI_MATKEY_TEXTURE_DIFFUSE(0), strValue) == aiReturn_SUCCESS) {
-            TiledImage2DRef image = TiledImage2D::create((pathPrefix + strValue.C_Str()).c_str(), mem);
+            TiledImage2DRef image = TiledImage2D::create((pathPrefix + strValue.C_Str()).c_str(), mem, SpectrumType::Reflectance);
             diffuseTex = createShared<ImageSpectrumTexture>(image);
         }
         else if (aiMat->Get(AI_MATKEY_COLOR_DIFFUSE, color, nullptr) == aiReturn_SUCCESS) {
-            InputSpectrumRef sp = createShared<UpsampledContinuousSpectrum>(ColorSpace::sRGB_NonLinear, color[0], color[1], color[2]);
+            InputSpectrumRef sp = createInputSpectrum(SpectrumType::Reflectance, ColorSpace::sRGB_NonLinear, color[0], color[1], color[2]);
             diffuseTex = createShared<ConstantSpectrumTexture>(sp);
         }
         else {
-            InputSpectrumRef sp = createShared<UpsampledContinuousSpectrum>(ColorSpace::sRGB_NonLinear, 1.0f, 0.0f, 1.0f);
+            InputSpectrumRef sp = createInputSpectrum(SpectrumType::Reflectance, ColorSpace::sRGB_NonLinear, 1.0f, 0.0f, 1.0f);
             diffuseTex = createShared<ConstantSpectrumTexture>(sp);
         }
         
@@ -127,7 +127,7 @@ namespace Assimp {
             aiString strValue;
             Normal3DTextureRef normalTex;
             if (aiMat->Get(AI_MATKEY_TEXTURE_DISPLACEMENT(0), strValue) == aiReturn_SUCCESS) {
-                TiledImage2DRef image = TiledImage2D::create((pathPrefix + strValue.C_Str()).c_str(), &defMem);
+                TiledImage2DRef image = TiledImage2D::create((pathPrefix + strValue.C_Str()).c_str(), &defMem, SpectrumType::Illuminant);
                 normalTex = createShared<ImageNormal3DTexture>(image);
             }
             normalMaps.push_back(normalTex);

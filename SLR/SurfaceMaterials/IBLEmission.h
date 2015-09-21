@@ -15,12 +15,12 @@
 class IBLEmission : public EmitterSurfaceProperty {
     const Scene* m_scene;
     SpectrumTextureRef m_coeffM;
-    Spectrum m_scale;
+    SampledSpectrum m_scale;
 public:
-    IBLEmission(const Scene* scene, const SpectrumTextureRef &coeffM, const Spectrum &scale) :
+    IBLEmission(const Scene* scene, const SpectrumTextureRef &coeffM, const SampledSpectrum &scale) :
     m_scene(scene), m_coeffM(coeffM), m_scale(scale) {};
     
-    Spectrum emittance(const SurfacePoint &surfPt, const WavelengthSamples &wls) const override;
+    SampledSpectrum emittance(const SurfacePoint &surfPt, const WavelengthSamples &wls) const override;
     EDF* getEDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem, float scale = 1.0f) const override;
 };
 

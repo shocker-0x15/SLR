@@ -17,16 +17,17 @@ class MultiBSDF : public BSDF {
     uint32_t m_numComponents;
     BSDF* m_BSDFs[maxNumElems];
     
-    Spectrum evaluateInternal(const BSDFQuery &query, const Vector3D &dirOut) const override;
+    SampledSpectrum evaluateInternal(const BSDFQuery &query, const Vector3D &dirOut) const override;
 public:
     MultiBSDF() : BSDF(DirectionType()), m_numComponents(0) { }
     
     void add(BSDF* bsdf);
-    Spectrum sample(const BSDFQuery &query, const BSDFSample &smp, BSDFQueryResult* result) const override;
+    SampledSpectrum sample(const BSDFQuery &query, const BSDFSample &smp, BSDFQueryResult* result) const override;
     float evaluatePDF(const BSDFQuery &query, const Vector3D &dirOut) const override;
-    float weight(const BSDFQuery &query) const override;
+    float weight(const BSDFQuery &query, const BSDFSample &smp) const override;
+    float weight(const BSDFQuery &query, const Vector3D &dir) const override;
     
-    Spectrum getBaseColor(DirectionType flags) const override;
+    SampledSpectrum getBaseColor(DirectionType flags) const override;
     
     bool matches(DirectionType flags) const {
         for (int i = 0; i < m_numComponents; ++i)

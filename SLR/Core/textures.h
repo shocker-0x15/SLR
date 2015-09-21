@@ -19,7 +19,7 @@ class SpectrumTexture {
 public:
     virtual ~SpectrumTexture() { };
     
-    virtual Spectrum evaluate(const TexCoord2D &tc, const WavelengthSamples &wls) const = 0;
+    virtual SampledSpectrum evaluate(const TexCoord2D &tc, const WavelengthSamples &wls) const = 0;
     virtual RegularConstantContinuous2D* createIBLImportanceMap() const = 0;
 };
 

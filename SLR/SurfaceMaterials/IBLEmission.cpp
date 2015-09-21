@@ -11,7 +11,7 @@
 #include "../Core/textures.h"
 #include "../SceneGraph/Scene.h"
 
-Spectrum IBLEmission::emittance(const SurfacePoint &surfPt, const WavelengthSamples &wls) const {
+SampledSpectrum IBLEmission::emittance(const SurfacePoint &surfPt, const WavelengthSamples &wls) const {
     return m_scene->getWorldDiscArea() * m_coeffM->evaluate(surfPt.texCoord, wls) * m_scale;
 }
 

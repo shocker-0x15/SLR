@@ -113,31 +113,17 @@ SpectrumStorage &ImageSensor::pixel(uint32_t idx, uint32_t x, uint32_t y) {
     return storage;
 }
 
-#ifdef Use_Spectral_Representation
-void ImageSensor::add(float px, float py, const WavelengthSamples &wls, const Spectrum &contribution) {
+void ImageSensor::add(float px, float py, const WavelengthSamples &wls, const SampledSpectrum &contribution) {
     uint32_t ipx = std::min((uint32_t)px, m_width - 1);
     uint32_t ipy = std::min((uint32_t)py, m_height - 1);
     pixel(ipx, ipy).add(wls, contribution);
 }
 
-void ImageSensor::add(uint32_t idx, float px, float py, const WavelengthSamples &wls, const Spectrum &contribution) {
+void ImageSensor::add(uint32_t idx, float px, float py, const WavelengthSamples &wls, const SampledSpectrum &contribution) {
     uint32_t ipx = std::min((uint32_t)px, m_width - 1);
     uint32_t ipy = std::min((uint32_t)py, m_height - 1);
     pixel(idx, ipx, ipy).add(wls, contribution);
 }
-#else
-void ImageSensor::add(float px, float py, const WavelengthSamples &wls, const Spectrum &contribution) {
-    uint32_t ipx = std::min((uint32_t)px, m_width - 1);
-    uint32_t ipy = std::min((uint32_t)py, m_height - 1);
-    pixel(ipx, ipy).add(contribution);
-}
-
-void ImageSensor::add(uint32_t idx, float px, float py, const WavelengthSamples &wls, const Spectrum &contribution) {
-    uint32_t ipx = std::min((uint32_t)px, m_width - 1);
-    uint32_t ipy = std::min((uint32_t)py, m_height - 1);
-    pixel(idx, ipx, ipy).add(contribution);
-}
-#endif
 
 void ImageSensor::saveImage(const std::string &filepath, float scale, float* scaleSeparated) const {
     struct BMP_RGB {
@@ -169,26 +155,21 @@ void ImageSensor::saveImage(const std::string &filepath, float scale, float* sca
             RGB[1] = RGB[1] < 0.0f ? 0.0f : RGB[1];
             RGB[2] = RGB[2] < 0.0f ? 0.0f : RGB[2];
 
-//            if (j >= 940 && j < 948 && i >= 500 && i < 516) {
+//            if (j >= 508 && j < 516 && i >= 296 && i < 304) {
 //                printf("%g, %g, %g\n", RGB[0], RGB[1], RGB[2]);
 //            }
             
             float Y = 0.222485 * RGB[0] + 0.716905 * RGB[1] + 0.060610 * RGB[2];
-            float scale = 1;
-            if (Y != 0)
-                scale = (1.0f - std::exp(-Y)) / Y;
-            else
-                RGB[0] = RGB[1] = RGB[2] = 0;
-            
-            auto gammaCorrection = [](float value) {
-                return value <= 0.0031308f ? 12.92f * value : (1.055f * std::pow(value, 1.0f / 2.4f) - 0.055f);
-            };
+            float scaleY = Y != 0 ? (1.0f - std::exp(-Y)) / Y : 0.0f;
+            RGB[0] = std::min(scaleY * RGB[0], 1.0f);
+            RGB[1] = std::min(scaleY * RGB[1], 1.0f);
+            RGB[2] = std::min(scaleY * RGB[2], 1.0f);
             
             uint32_t idx = (m_height - i - 1) * byteWidth + 3 * j;
             BMP_RGB &dst = *(BMP_RGB*)(bmp + idx);
-            dst.R = uint8_t(256 * std::min(gammaCorrection(RGB[0] * scale), 0.999f));
-            dst.G = uint8_t(256 * std::min(gammaCorrection(RGB[1] * scale), 0.999f));
-            dst.B = uint8_t(256 * std::min(gammaCorrection(RGB[2] * scale), 0.999f));
+            dst.R = uint8_t(256 * std::min(sRGB_gamma(RGB[0]), 0.999f));
+            dst.G = uint8_t(256 * std::min(sRGB_gamma(RGB[1]), 0.999f));
+            dst.B = uint8_t(256 * std::min(sRGB_gamma(RGB[2]), 0.999f));
         }
     }
     

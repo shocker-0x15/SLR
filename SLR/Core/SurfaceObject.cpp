@@ -12,7 +12,7 @@
 #include "../Accelerator/BBVH.h"
 #include "textures.h"
 
-Spectrum Light::sample(const LightPosQuery &query, const LightPosSample &smp, LightPosQueryResult* result) const {
+SampledSpectrum Light::sample(const LightPosQuery &query, const LightPosSample &smp, LightPosQueryResult* result) const {
     return m_hierarchy.top()->sample(*this, query, smp, result);
 }
 
@@ -68,10 +68,10 @@ float SingleSurfaceObject::evaluateProb(const Light &light) const {
     return light.top() == this ? 1.0f : 0.0f;
 }
 
-Spectrum SingleSurfaceObject::sample(const Light &light, const LightPosQuery &query, const LightPosSample &smp, LightPosQueryResult* result) const {
+SampledSpectrum SingleSurfaceObject::sample(const Light &light, const LightPosQuery &query, const LightPosSample &smp, LightPosQueryResult* result) const {
     if (light.top()!= this) {
         result->areaPDF = 0.0f;
-        return Spectrum::Zero;
+        return SampledSpectrum::Zero;
     }
     m_surface->sample(smp.uPos[0], smp.uPos[1], &result->surfPt, &result->areaPDF);
     result->isDeltaPos = false;// TODO: consider sampling delta function.
@@ -87,7 +87,7 @@ float SingleSurfaceObject::evaluateAreaPDF(const SurfacePoint& surfPt) const {
     return m_surface->evaluateAreaPDF(surfPt);
 }
 
-Spectrum SingleSurfaceObject::emittance(const SurfacePoint& surfPt, const WavelengthSamples &wls) const {
+SampledSpectrum SingleSurfaceObject::emittance(const SurfacePoint& surfPt, const WavelengthSamples &wls) const {
     return m_material->emittance(surfPt, wls);
 }
 
@@ -122,10 +122,10 @@ float InfiniteSphereSurfaceObject::importance() const {
     return 1.0f;// TODO: consider a total power emitted from this object.
 }
 
-Spectrum InfiniteSphereSurfaceObject::sample(const Light &light, const LightPosQuery &query, const LightPosSample &smp, LightPosQueryResult* result) const {
+SampledSpectrum InfiniteSphereSurfaceObject::sample(const Light &light, const LightPosQuery &query, const LightPosSample &smp, LightPosQueryResult* result) const {
     if (light.top()!= this) {
         result->areaPDF = 0.0f;
-        return Spectrum::Zero;
+        return SampledSpectrum::Zero;
     }
     float uvPDF;
     float theta, phi;
@@ -232,13 +232,13 @@ float SurfaceObjectAggregate::evaluateProb(const Light &light) const {
     return prob * light.top()->evaluateProb(light);
 }
 
-Spectrum SurfaceObjectAggregate::sample(const Light &light, const LightPosQuery &query, const LightPosSample &smp, LightPosQueryResult* result) const {
+SampledSpectrum SurfaceObjectAggregate::sample(const Light &light, const LightPosQuery &query, const LightPosSample &smp, LightPosQueryResult* result) const {
 //    if (light.top() != this) {
 //        result->areaPDF = 0.0f;
-//        return Spectrum::Zero;
+//        return SampledSpectrum::Zero;
 //    }
 //    light.pop();
-//    Spectrum M = light.top()->sample(light, query, result);
+//    SampledSpectrum M = light.top()->sample(light, query, result);
 //    light.push(this);
 //    return M;
     return light.top()->sample(light, query, smp, result);
@@ -292,13 +292,13 @@ float TransformedSurfaceObject::evaluateProb(const Light &light) const {
     return prob;
 }
 
-Spectrum TransformedSurfaceObject::sample(const Light &light, const LightPosQuery &query, const LightPosSample &smp, LightPosQueryResult* result) const {
+SampledSpectrum TransformedSurfaceObject::sample(const Light &light, const LightPosQuery &query, const LightPosSample &smp, LightPosQueryResult* result) const {
     if (light.top() != this) {
         result->areaPDF = 0.0f;
-        return Spectrum::Zero;
+        return SampledSpectrum::Zero;
     }
     light.pop();
-    Spectrum M = light.top()->sample(light, query, smp, result);
+    SampledSpectrum M = light.top()->sample(light, query, smp, result);
     StaticTransform sampledTF;
     m_transform->sample(query.time, &sampledTF);
     result->surfPt = sampledTF * result->surfPt;

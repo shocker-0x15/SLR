@@ -13,35 +13,37 @@
 #include "../Core/directional_distribution_functions.h"
 
 class AshikhminSpecularBRDF : public BSDF {
-    Spectrum m_Rs;
+    SampledSpectrum m_Rs;
     float m_nu, m_nv;
     
-    Spectrum evaluateInternal(const BSDFQuery &query, const Vector3D &dir) const override;
+    SampledSpectrum evaluateInternal(const BSDFQuery &query, const Vector3D &dir) const override;
 public:
-    AshikhminSpecularBRDF(const Spectrum &Rs, float nu, float nv) :
+    AshikhminSpecularBRDF(const SampledSpectrum &Rs, float nu, float nv) :
     BSDF(DirectionType::Reflection | DirectionType::HighFreq), m_Rs(Rs), m_nu(nu), m_nv(nv) { };
     
-    Spectrum sample(const BSDFQuery &query, const BSDFSample &smp, BSDFQueryResult* result) const override;
+    SampledSpectrum sample(const BSDFQuery &query, const BSDFSample &smp, BSDFQueryResult* result) const override;
     float evaluatePDF(const BSDFQuery &query, const Vector3D &dir) const override;
-    float weight(const BSDFQuery &query) const override;
+    float weight(const BSDFQuery &query, const BSDFSample &smp) const override;
+    float weight(const BSDFQuery &query, const Vector3D &dir) const override;
     
-    Spectrum getBaseColor(DirectionType flags) const override;
+    SampledSpectrum getBaseColor(DirectionType flags) const override;
 };
 
 class AshikhminDiffuseBRDF : public BSDF {
-    Spectrum m_Rs;
-    Spectrum m_Rd;
+    SampledSpectrum m_Rs;
+    SampledSpectrum m_Rd;
     
-    Spectrum evaluateInternal(const BSDFQuery &query, const Vector3D &dir) const override;
+    SampledSpectrum evaluateInternal(const BSDFQuery &query, const Vector3D &dir) const override;
 public:
-    AshikhminDiffuseBRDF(const Spectrum &Rs, const Spectrum &Rd) :
+    AshikhminDiffuseBRDF(const SampledSpectrum &Rs, const SampledSpectrum &Rd) :
     BSDF(DirectionType::Reflection | DirectionType::LowFreq), m_Rs(Rs), m_Rd(Rd) { };
     
-    Spectrum sample(const BSDFQuery &query, const BSDFSample &smp, BSDFQueryResult* result) const override;
+    SampledSpectrum sample(const BSDFQuery &query, const BSDFSample &smp, BSDFQueryResult* result) const override;
     float evaluatePDF(const BSDFQuery &query, const Vector3D &dir) const override;
-    float weight(const BSDFQuery &query) const override;
+    float weight(const BSDFQuery &query, const BSDFSample &smp) const override;
+    float weight(const BSDFQuery &query, const Vector3D &dir) const override;
     
-    Spectrum getBaseColor(DirectionType flags) const override;
+    SampledSpectrum getBaseColor(DirectionType flags) const override;
 };
 
 #endif /* defined(__SLR__AshikhminBRDF__) */

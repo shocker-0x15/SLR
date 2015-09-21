@@ -21,8 +21,8 @@ public:
     MultiEDF() : EDF(DirectionType()) { }
     
     void add(EDF* edf);
-    Spectrum sample(const EDFQuery &query, const EDFSample &smp, EDFQueryResult* result) const override;
-    Spectrum evaluate(const EDFQuery &query, const Vector3D &dirOut) const override;
+    SampledSpectrum sample(const EDFQuery &query, const EDFSample &smp, EDFQueryResult* result) const override;
+    SampledSpectrum evaluate(const EDFQuery &query, const Vector3D &dirOut) const override;
     float evaluatePDF(const EDFQuery &query, const Vector3D &dirOut) const override;
     float weight(const EDFQuery &query) const override;
 };

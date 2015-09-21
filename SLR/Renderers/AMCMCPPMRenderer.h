@@ -50,11 +50,11 @@ class AMCMCPPMRenderer : public Renderer {
         float imgX, imgY;
         Normal3D gNormal;
         Vector3D dirOut_sn;
-        Spectrum weight;
+        SampledSpectrum weight;
         const BSDF* bsdf;
         ReferenceFrame shadingFrame;
         
-        Hitpoint(float px, float py, const Point3D &pos, const Normal3D &gn, const Vector3D &dirO_sn, const Spectrum &w, const BSDF* f, const ReferenceFrame &frame) :
+        Hitpoint(float px, float py, const Point3D &pos, const Normal3D &gn, const Vector3D &dirO_sn, const SampledSpectrum &w, const BSDF* f, const ReferenceFrame &frame) :
         imgX(px), imgY(py), Particle(pos), gNormal(gn), dirOut_sn(dirO_sn), weight(w), bsdf(f), shadingFrame(frame) { };
     };
     
@@ -67,7 +67,7 @@ class AMCMCPPMRenderer : public Renderer {
         
         void initialize(uint32_t numThreads, uint32_t numPixels);
         void store(uint32_t thread, float imgX, float imgY,
-                   const Spectrum &weight, const Point3D &pos, const Normal3D &gn, const Vector3D &dir_sn,
+                   const SampledSpectrum &weight, const Point3D &pos, const Normal3D &gn, const Vector3D &dir_sn,
                    const BSDF* f, const ReferenceFrame &frame);
         void build();
         void queryHitpoints(const Point3D &pos, const Normal3D &gn_sn, float radius, std::vector<Particle*> &pointsFound) const;
@@ -189,15 +189,15 @@ class AMCMCPPMRenderer : public Renderer {
         uint32_t basePixelY;
         
         void kernel(uint32_t threadID);
-        Spectrum record(uint32_t threadID, const Scene &scene, const WavelengthSamples &wls, float px, float py, const Ray &initRay, const Spectrum &initAlpha,
+        SampledSpectrum record(uint32_t threadID, const Scene &scene, const WavelengthSamples &initWLs, float px, float py, const Ray &initRay, const SampledSpectrum &initAlpha,
                         RandomNumberGenerator &rng, ArenaAllocator &mem) const;
     };
     struct PhotonSplattingJob {
         struct ResultRecord {
             float imgX, imgY;
-            Spectrum contribution;
+            SampledSpectrum contribution;
             ResultRecord() { };
-            ResultRecord(float px, float py, const Spectrum &c) : imgX(px), imgY(py), contribution(c) { };
+            ResultRecord(float px, float py, const SampledSpectrum &c) : imgX(px), imgY(py), contribution(c) { };
         };
         const Scene* scene;
         ImageSensor* sensor;

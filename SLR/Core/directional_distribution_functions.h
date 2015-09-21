@@ -51,12 +51,13 @@ struct DirectionType {
         HighFreq = 1 << 1,
         Delta0D = 1 << 2,
         Delta1D = 1 << 3,
-        NonDelta = LowFreq | HighFreq,
-        Delta = Delta0D | Delta1D,
+        Dispersive = 1 << 4,
+        NonDelta = LowFreq | HighFreq | Dispersive,
+        Delta = Delta0D | Delta1D | Dispersive,
         AllFreq = NonDelta | Delta,
         
-        Reflection = 1 << 4,
-        Transmission = 1 << 5,
+        Reflection = 1 << 5,
+        Transmission = 1 << 6,
         WholeSphere = Reflection | Transmission,
         
         All = AllFreq | WholeSphere,
@@ -84,6 +85,7 @@ struct DirectionType {
     bool isDelta() const { return (value & (Delta | WholeSphere)) == value; };
     bool hasNonDelta() const { return value & NonDelta; };
     bool hasDelta() const { return value & Delta; };
+    bool isDispersive() const { return value & Dispersive; };
 };
 
 
@@ -107,11 +109,12 @@ struct EDFQueryResult {
 struct BSDFQuery {
     Vector3D dir_sn;
     Normal3D gNormal_sn;
+    int16_t wlHint;
     DirectionType flags;
     bool adjoint;
     
-    BSDFQuery(const Vector3D &dirSN, const Normal3D &gNormalSN, DirectionType f = DirectionType::All, bool adj = false) :
-    dir_sn(dirSN), gNormal_sn(gNormalSN), flags(f), adjoint(adj) { };
+    BSDFQuery(const Vector3D &dirSN, const Normal3D &gNormalSN, int16_t wl, DirectionType f = DirectionType::All, bool adj = false) :
+    dir_sn(dirSN), gNormal_sn(gNormalSN), wlHint(wl), flags(f), adjoint(adj) { };
 };
 
 struct BSDFSample {
@@ -153,8 +156,8 @@ public:
     EDF(DirectionType t) : m_type(t) { };
     virtual ~EDF() { };
     
-    virtual Spectrum sample(const EDFQuery &query, const EDFSample &smp, EDFQueryResult* result) const = 0;
-    virtual Spectrum evaluate(const EDFQuery &query, const Vector3D &dir) const = 0;
+    virtual SampledSpectrum sample(const EDFQuery &query, const EDFSample &smp, EDFQueryResult* result) const = 0;
+    virtual SampledSpectrum evaluate(const EDFQuery &query, const Vector3D &dir) const = 0;
     virtual float evaluatePDF(const EDFQuery &query, const Vector3D &dir) const = 0;
     virtual float weight(const EDFQuery &query) const = 0;
 };
@@ -174,22 +177,23 @@ protected:
         result->dirType = DirectionType();
         return false;
     };
-    virtual Spectrum evaluateInternal(const BSDFQuery &query, const Vector3D &dir) const = 0;
+    virtual SampledSpectrum evaluateInternal(const BSDFQuery &query, const Vector3D &dir) const = 0;
     friend class MultiBSDF;
 public:
     BSDF(DirectionType t) : m_type(t) { };
     virtual ~BSDF() { };
     
-    virtual Spectrum sample(const BSDFQuery &query, const BSDFSample &smp, BSDFQueryResult* result) const = 0;
-    Spectrum evaluate(const BSDFQuery &query, const Vector3D &dir) const {
+    virtual SampledSpectrum sample(const BSDFQuery &query, const BSDFSample &smp, BSDFQueryResult* result) const = 0;
+    SampledSpectrum evaluate(const BSDFQuery &query, const Vector3D &dir) const {
         BSDFQuery mQuery = query;
         mQuery.flags &= sideTest(query.gNormal_sn, query.dir_sn, dir);
         return evaluateInternal(mQuery, dir);
     };
     virtual float evaluatePDF(const BSDFQuery &query, const Vector3D &dir) const = 0;
-    virtual float weight(const BSDFQuery &query) const = 0;
+    virtual float weight(const BSDFQuery &query, const BSDFSample &smp) const = 0;
+    virtual float weight(const BSDFQuery &query, const Vector3D &dir) const = 0;
     
-    virtual Spectrum getBaseColor(DirectionType flags) const = 0;
+    virtual SampledSpectrum getBaseColor(DirectionType flags) const = 0;
 
     virtual bool matches(DirectionType flags) const { return flags.matches(m_type); };
     bool hasNonDelta() const { return m_type.hasNonDelta(); };
@@ -210,41 +214,43 @@ public:
     IDF(DirectionType t) : m_type(t) { };
     virtual ~IDF() { };
     
-    virtual Spectrum sample(const IDFSample &smp, IDFQueryResult* result) const = 0;
-    virtual Spectrum evaluate(const Vector3D &dirIn) const = 0;
+    virtual SampledSpectrum sample(const IDFSample &smp, IDFQueryResult* result) const = 0;
+    virtual SampledSpectrum evaluate(const Vector3D &dirIn) const = 0;
     virtual float evaluatePDF(const Vector3D &dirIn) const = 0;
 };
 
 
 class Fresnel {
 public:
-    virtual Spectrum evaluate(float cosEnter) const = 0;
+    virtual SampledSpectrum evaluate(float cosEnter) const = 0;
 };
 
 class FresnelNoOp : public Fresnel {
 public:
-    Spectrum evaluate(float cosEnter) const override;
+    SampledSpectrum evaluate(float cosEnter) const override;
 };
 
 class FresnelConductor : public Fresnel {
-    Spectrum m_eta;
-    Spectrum m_k;
+    SampledSpectrum m_eta;
+    SampledSpectrum m_k;
 public:
-    FresnelConductor(const Spectrum &eta, const Spectrum &k) : m_eta(eta), m_k(k) { };
+    FresnelConductor(const SampledSpectrum &eta, const SampledSpectrum &k) : m_eta(eta), m_k(k) { };
     
-    Spectrum evaluate(float cosEnter) const override;
+    SampledSpectrum evaluate(float cosEnter) const override;
 };
 
 class FresnelDielectric : public Fresnel {
-    float m_etaExt;
-    float m_etaInt;
+    SampledSpectrum m_etaExt;
+    SampledSpectrum m_etaInt;
 public:
-    FresnelDielectric(float etaExt, float etaInt) : m_etaExt(etaExt), m_etaInt(etaInt) { };
+    FresnelDielectric(const SampledSpectrum &etaExt, const SampledSpectrum &etaInt) : m_etaExt(etaExt), m_etaInt(etaInt) { };
     
-    float etaExt() const { return m_etaExt; };
-    float etaInt() const { return m_etaInt; };
+    SampledSpectrum etaExt() const { return m_etaExt; };
+    SampledSpectrum etaInt() const { return m_etaInt; };
     
-    Spectrum evaluate(float cosEnter) const override;
+    SampledSpectrum evaluate(float cosEnter) const override;
+    
+    static float evalF(float etaEnter, float etaExit, float cosEnter, float cosExit);
 };
 
 #endif

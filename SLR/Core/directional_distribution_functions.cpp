@@ -7,40 +7,45 @@
 
 #include "directional_distribution_functions.h"
 
-Spectrum FresnelNoOp::evaluate(float cosEnter) const {
-    return Spectrum::One;
+SampledSpectrum FresnelNoOp::evaluate(float cosEnter) const {
+    return SampledSpectrum::One;
 }
 
-Spectrum FresnelConductor::evaluate(float cosEnter) const {
+SampledSpectrum FresnelConductor::evaluate(float cosEnter) const {
     cosEnter = std::fabs(cosEnter);
     float cosEnter2 = cosEnter * cosEnter;
-    Spectrum _2EtaCosEnter = 2.0f * m_eta * cosEnter;
-    Spectrum tmp_f = m_eta * m_eta + m_k * m_k;
-    Spectrum tmp = tmp_f * cosEnter2;
-    Spectrum Rparl2 = (tmp - _2EtaCosEnter + 1) / (tmp + _2EtaCosEnter + 1);
-    Spectrum Rperp2 = (tmp_f - _2EtaCosEnter + cosEnter2) / (tmp_f + _2EtaCosEnter + cosEnter2);
+    SampledSpectrum _2EtaCosEnter = 2.0f * m_eta * cosEnter;
+    SampledSpectrum tmp_f = m_eta * m_eta + m_k * m_k;
+    SampledSpectrum tmp = tmp_f * cosEnter2;
+    SampledSpectrum Rparl2 = (tmp - _2EtaCosEnter + 1) / (tmp + _2EtaCosEnter + 1);
+    SampledSpectrum Rperp2 = (tmp_f - _2EtaCosEnter + cosEnter2) / (tmp_f + _2EtaCosEnter + cosEnter2);
     return (Rparl2 + Rperp2) / 2.0f;
 }
 
-Spectrum FresnelDielectric::evaluate(float cosEnter) const {
+SampledSpectrum FresnelDielectric::evaluate(float cosEnter) const {
     cosEnter = std::clamp(cosEnter, -1.0f, 1.0f);
     
     bool entering = cosEnter > 0.0f;
-    float eEnter = m_etaExt;
-    float eExit = m_etaInt;
-    if (!entering)
-        std::swap(eEnter, eExit);
+    const SampledSpectrum &eEnter = entering ? m_etaExt : m_etaInt;
+    const SampledSpectrum &eExit = entering ? m_etaInt : m_etaExt;
     
-    float sinExit = eEnter / eExit * std::sqrt(std::fmax(0.0f, 1.0f - cosEnter * cosEnter));
-    if (sinExit >= 1.0f) {
-        return Spectrum::One;
+    SampledSpectrum sinExit = eEnter / eExit * std::sqrt(std::fmax(0.0f, 1.0f - cosEnter * cosEnter));
+    SampledSpectrum ret = SampledSpectrum::Zero;
+    cosEnter = std::fabs(cosEnter);
+    for (int i = 0; i < SampledSpectrum::NumComponents; ++i) {
+        if (sinExit[i] >= 1.0f) {
+            ret[i] = 1.0f;
+        }
+        else {
+            float cosExit = std::sqrt(std::fmax(0.0f, 1.0f - sinExit[i] * sinExit[i]));
+            ret[i] = evalF(eEnter[i], eExit[i], cosEnter, cosExit);
+        }
     }
-    else {
-        float cosExit = std::sqrt(std::fmax(0.0f, 1.0f - sinExit * sinExit));
-        cosEnter = std::fabs(cosEnter);
-        
-        Spectrum Rparl = ((eExit * cosEnter) - (eEnter * cosExit)) / ((eExit * cosEnter) + (eEnter * cosExit));
-        Spectrum Rperp = ((eEnter * cosEnter) - (eExit * cosExit)) / ((eEnter * cosEnter) + (eExit * cosExit));
-        return (Rparl * Rparl + Rperp * Rperp) / 2.0f;
-    }
+    return ret;
+}
+
+float FresnelDielectric::evalF(float etaEnter, float etaExit, float cosEnter, float cosExit) {
+    float Rparl = ((etaExit * cosEnter) - (etaEnter * cosExit)) / ((etaExit * cosEnter) + (etaEnter * cosExit));
+    float Rperp = ((etaEnter * cosEnter) - (etaExit * cosExit)) / ((etaEnter * cosEnter) + (etaExit * cosExit));
+    return (Rparl * Rparl + Rperp * Rperp) / 2.0f;
 }

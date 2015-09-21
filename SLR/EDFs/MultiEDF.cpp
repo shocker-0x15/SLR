@@ -14,7 +14,7 @@ void MultiEDF::add(EDF *edf) {
     m_type |= edf->m_type;
 }
 
-Spectrum MultiEDF::sample(const EDFQuery &query, const EDFSample &smp, EDFQueryResult *result) const {
+SampledSpectrum MultiEDF::sample(const EDFQuery &query, const EDFSample &smp, EDFQueryResult *result) const {
     float weights[maxNumEDFElems];
     for (int i = 0; i < m_numComponents; ++i)
         weights[i] = m_EDFs[i]->weight(query);
@@ -23,7 +23,7 @@ Spectrum MultiEDF::sample(const EDFQuery &query, const EDFSample &smp, EDFQueryR
     uint32_t idx = sampleDiscrete(weights, &sumWeights, &base, m_numComponents, smp.uComponent);
     EDF* selectedEDF = m_EDFs[idx];
     
-    Spectrum value = selectedEDF->sample(query, smp, result);
+    SampledSpectrum value = selectedEDF->sample(query, smp, result);
     result->dirPDF *= weights[idx];
     
     if (!result->dirType.hasDelta()) {
@@ -39,8 +39,8 @@ Spectrum MultiEDF::sample(const EDFQuery &query, const EDFSample &smp, EDFQueryR
     return value;
 }
 
-Spectrum MultiEDF::evaluate(const EDFQuery &query, const Vector3D &dir) const {
-    Spectrum retValue;
+SampledSpectrum MultiEDF::evaluate(const EDFQuery &query, const Vector3D &dir) const {
+    SampledSpectrum retValue;
     for (int i = 0; i < m_numComponents; ++i)
         retValue += m_EDFs[i]->evaluate(query, dir);
     return retValue;

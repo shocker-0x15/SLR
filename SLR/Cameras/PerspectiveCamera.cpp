@@ -10,7 +10,7 @@
 #include "../Memory/ArenaAllocator.h"
 #include "../Core/distributions.h"
 
-Spectrum PerspectiveCamera::sample(const LensPosQuery &query, const LensPosSample &smp, LensPosQueryResult* result) const {
+SampledSpectrum PerspectiveCamera::sample(const LensPosQuery &query, const LensPosSample &smp, LensPosQueryResult* result) const {
     StaticTransform staticTF;
     if (m_transform)
         m_transform->sample(query.time, &staticTF);
@@ -32,14 +32,14 @@ Spectrum PerspectiveCamera::sample(const LensPosQuery &query, const LensPosSampl
     result->isDeltaPos = m_lensRadius == 0.0f;
     result->areaPDF = m_lensRadius > 0.0f ? 1.0f / (M_PI * m_lensRadius * m_lensRadius) : 1.0f;
     
-    return Spectrum::One;
+    return SampledSpectrum::One;
 }
 
 IDF* PerspectiveCamera::createIDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem) const {
     return mem.create<PerspectiveIDF>(*this, Point3D(m_lensRadius * surfPt.u, m_lensRadius * surfPt.v, 0.0f));
 }
 
-Spectrum PerspectiveIDF::sample(const IDFSample &smp, IDFQueryResult *result) const {
+SampledSpectrum PerspectiveIDF::sample(const IDFSample &smp, IDFQueryResult *result) const {
     Point3D pFocus = Point3D(m_cam.m_opWidth * (0.5f - smp.uDir[0]),
                              m_cam.m_opHeight * (0.5f - smp.uDir[1]),
                              m_cam.m_objPlaneDistance);
@@ -48,14 +48,14 @@ Spectrum PerspectiveIDF::sample(const IDFSample &smp, IDFQueryResult *result) co
     result->dirLocal = dirLocal;
     result->dirPDF = m_cam.m_imgPlaneDistance * m_cam.m_imgPlaneDistance / ((dirLocal.z * dirLocal.z * dirLocal.z) * m_cam.m_imgPlaneArea);
     
-    return Spectrum::One;
+    return SampledSpectrum::One;
 }
 
-Spectrum PerspectiveIDF::evaluate(const Vector3D &dirIn) const {
+SampledSpectrum PerspectiveIDF::evaluate(const Vector3D &dirIn) const {
     Point3D pFocas = dirIn * (m_cam.m_objPlaneDistance / dirIn.z) + m_orgLocal;
     bool valid = (pFocas.x >= -m_cam.m_opWidth * 0.5f && pFocas.x <= m_cam.m_opWidth * 0.5f &&
                   pFocas.y >= -m_cam.m_opHeight * 0.5f && pFocas.y <= m_cam.m_opHeight * 0.5f);
-    return valid ? Spectrum::One : Spectrum::Zero;
+    return valid ? SampledSpectrum::One : SampledSpectrum::Zero;
 }
 
 float PerspectiveIDF::evaluatePDF(const Vector3D &dirIn) const {

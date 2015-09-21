@@ -17,8 +17,8 @@ class IBLEDF : public EDF {
 public:
     IBLEDF(float worldDiscArea) : EDF(DirectionType::Reflection | DirectionType::LowFreq), m_worldDiscArea(worldDiscArea) { };
     
-    Spectrum sample(const EDFQuery &query, const EDFSample &smp, EDFQueryResult* result) const override;
-    Spectrum evaluate(const EDFQuery &query, const Vector3D &dir) const override;
+    SampledSpectrum sample(const EDFQuery &query, const EDFSample &smp, EDFQueryResult* result) const override;
+    SampledSpectrum evaluate(const EDFQuery &query, const Vector3D &dir) const override;
     float evaluatePDF(const EDFQuery &query, const Vector3D &dir) const override;
     float weight(const EDFQuery &query) const { return 1.0f; };
 };

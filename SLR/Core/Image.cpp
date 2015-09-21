@@ -112,7 +112,7 @@ void Image2D::areaAverage(float xLeft, float xRight, float yTop, float yBottom, 
                 uvs[0] = pix.u;
                 uvs[1] = pix.v;
                 uvs[2] = pix.s;
-                Upsampling::uvs_to_sRGB(uvs, rgb);
+                Upsampling::uvs_to_sRGB(m_spType, uvs, rgb);
                 sumR += coeffsCorners[i] * rgb[0];
                 sumG += coeffsCorners[i] * rgb[1];
                 sumB += coeffsCorners[i] * rgb[2];
@@ -123,7 +123,7 @@ void Image2D::areaAverage(float xLeft, float xRight, float yTop, float yBottom, 
                 uvs[0] = pix.u;
                 uvs[1] = pix.v;
                 uvs[2] = pix.s;
-                Upsampling::uvs_to_sRGB(uvs, rgb);
+                Upsampling::uvs_to_sRGB(m_spType, uvs, rgb);
                 sumR += coeffsEdges[0] * rgb[0];
                 sumG += coeffsEdges[0] * rgb[1];
                 sumB += coeffsEdges[0] * rgb[2];
@@ -132,7 +132,7 @@ void Image2D::areaAverage(float xLeft, float xRight, float yTop, float yBottom, 
                 uvs[0] = pix.u;
                 uvs[1] = pix.v;
                 uvs[2] = pix.s;
-                Upsampling::uvs_to_sRGB(uvs, rgb);
+                Upsampling::uvs_to_sRGB(m_spType, uvs, rgb);
                 sumR += coeffsEdges[3] * rgb[0];
                 sumG += coeffsEdges[3] * rgb[1];
                 sumB += coeffsEdges[3] * rgb[2];
@@ -142,7 +142,7 @@ void Image2D::areaAverage(float xLeft, float xRight, float yTop, float yBottom, 
                 uvs[0] = pix.u;
                 uvs[1] = pix.v;
                 uvs[2] = pix.s;
-                Upsampling::uvs_to_sRGB(uvs, rgb);
+                Upsampling::uvs_to_sRGB(m_spType, uvs, rgb);
                 sumR += coeffsEdges[1] * rgb[0];
                 sumG += coeffsEdges[1] * rgb[1];
                 sumB += coeffsEdges[1] * rgb[2];
@@ -151,7 +151,7 @@ void Image2D::areaAverage(float xLeft, float xRight, float yTop, float yBottom, 
                 uvs[0] = pix.u;
                 uvs[1] = pix.v;
                 uvs[2] = pix.s;
-                Upsampling::uvs_to_sRGB(uvs, rgb);
+                Upsampling::uvs_to_sRGB(m_spType, uvs, rgb);
                 sumR += coeffsEdges[2] * rgb[0];
                 sumG += coeffsEdges[2] * rgb[1];
                 sumB += coeffsEdges[2] * rgb[2];
@@ -163,7 +163,7 @@ void Image2D::areaAverage(float xLeft, float xRight, float yTop, float yBottom, 
                     uvs[0] = pix.u;
                     uvs[1] = pix.v;
                     uvs[2] = pix.s;
-                    Upsampling::uvs_to_sRGB(uvs, rgb);
+                    Upsampling::uvs_to_sRGB(m_spType, uvs, rgb);
                     sumR += rgb[0];
                     sumG += rgb[1];
                     sumB += rgb[2];
@@ -172,7 +172,7 @@ void Image2D::areaAverage(float xLeft, float xRight, float yTop, float yBottom, 
             rgb[0] = sumR / area;
             rgb[1] = sumG / area;
             rgb[2] = sumB / area;
-            Upsampling::sRGB_to_uvs(rgb, uvs);
+            Upsampling::sRGB_to_uvs(m_spType, rgb, uvs);
             
             uvs16Fx3 ret{half(uvs[0]), half(uvs[1]), half(uvs[2])};
             memcpy(avg, &ret, sizeof(ret));
@@ -191,7 +191,7 @@ void Image2D::areaAverage(float xLeft, float xRight, float yTop, float yBottom, 
                 uvs[0] = pix.u;
                 uvs[1] = pix.v;
                 uvs[2] = pix.s;
-                Upsampling::uvs_to_sRGB(uvs, rgb);
+                Upsampling::uvs_to_sRGB(m_spType, uvs, rgb);
                 sumR += coeffsCorners[i] * rgb[0];
                 sumG += coeffsCorners[i] * rgb[1];
                 sumB += coeffsCorners[i] * rgb[2];
@@ -203,7 +203,7 @@ void Image2D::areaAverage(float xLeft, float xRight, float yTop, float yBottom, 
                 uvs[0] = pix.u;
                 uvs[1] = pix.v;
                 uvs[2] = pix.s;
-                Upsampling::uvs_to_sRGB(uvs, rgb);
+                Upsampling::uvs_to_sRGB(m_spType, uvs, rgb);
                 sumR += coeffsEdges[0] * rgb[0];
                 sumG += coeffsEdges[0] * rgb[1];
                 sumB += coeffsEdges[0] * rgb[2];
@@ -213,7 +213,7 @@ void Image2D::areaAverage(float xLeft, float xRight, float yTop, float yBottom, 
                 uvs[0] = pix.u;
                 uvs[1] = pix.v;
                 uvs[2] = pix.s;
-                Upsampling::uvs_to_sRGB(uvs, rgb);
+                Upsampling::uvs_to_sRGB(m_spType, uvs, rgb);
                 sumR += coeffsEdges[3] * rgb[0];
                 sumG += coeffsEdges[3] * rgb[1];
                 sumB += coeffsEdges[3] * rgb[2];
@@ -224,7 +224,7 @@ void Image2D::areaAverage(float xLeft, float xRight, float yTop, float yBottom, 
                 uvs[0] = pix.u;
                 uvs[1] = pix.v;
                 uvs[2] = pix.s;
-                Upsampling::uvs_to_sRGB(uvs, rgb);
+                Upsampling::uvs_to_sRGB(m_spType, uvs, rgb);
                 sumR += coeffsEdges[1] * rgb[0];
                 sumG += coeffsEdges[1] * rgb[1];
                 sumB += coeffsEdges[1] * rgb[2];
@@ -234,7 +234,7 @@ void Image2D::areaAverage(float xLeft, float xRight, float yTop, float yBottom, 
                 uvs[0] = pix.u;
                 uvs[1] = pix.v;
                 uvs[2] = pix.s;
-                Upsampling::uvs_to_sRGB(uvs, rgb);
+                Upsampling::uvs_to_sRGB(m_spType, uvs, rgb);
                 sumR += coeffsEdges[2] * rgb[0];
                 sumG += coeffsEdges[2] * rgb[1];
                 sumB += coeffsEdges[2] * rgb[2];
@@ -247,7 +247,7 @@ void Image2D::areaAverage(float xLeft, float xRight, float yTop, float yBottom, 
                     uvs[0] = pix.u;
                     uvs[1] = pix.v;
                     uvs[2] = pix.s;
-                    Upsampling::uvs_to_sRGB(uvs, rgb);
+                    Upsampling::uvs_to_sRGB(m_spType, uvs, rgb);
                     sumR += rgb[0];
                     sumG += rgb[1];
                     sumB += rgb[2];
@@ -257,7 +257,7 @@ void Image2D::areaAverage(float xLeft, float xRight, float yTop, float yBottom, 
             rgb[0] = sumR / area;
             rgb[1] = sumG / area;
             rgb[2] = sumB / area;
-            Upsampling::sRGB_to_uvs(rgb, uvs);
+            Upsampling::sRGB_to_uvs(m_spType, rgb, uvs);
             
             uvsA16Fx4 ret{half(uvs[0]), half(uvs[1]), half(uvs[2]), half(sumA / area)};
             memcpy(avg, &ret, sizeof(ret));

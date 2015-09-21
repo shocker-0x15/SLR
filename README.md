@@ -5,8 +5,9 @@ SLRはモンテカルロレイトレーシングに基づいたレンダラー�
 SLR is a renderer based on Monte Carlo ray tracing.
 
 ##特徴 / Features
-* ~~Full Spectral Rendering~~ (under Dev.)  
+* Full Spectral Rendering (Continuous Function Sampling)  
   (For RGB resources, RGB->Spectrum conversion is performed using Meng-Simon's method [1].)
+* RGB Rendering
 * Various BSDF Types (including Mixed and ~~Layered~~ (under Dev.) BSDF)
 * Image Based Environmental Light
 * Bump Mapping (Normal Map)
@@ -15,7 +16,7 @@ SLR is a renderer based on Monte Carlo ray tracing.
 * Geometry Instancing
 * Binned SAH BVH
 * Unidirectional Path Tracing \[2\] with MIS
-* Adaptive MCMC Progressive Photon Mapping \[3\]  
+* ~~Adaptive MCMC Progressive Photon Mapping~~ \[3\]  
   (current implementation is buggy and does not support IBL.)
 
 [1] "Physically Meaningful Rendering using Tristimulus Colours", 2015  

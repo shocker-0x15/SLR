@@ -34,7 +34,7 @@ public:
         m_imgPlaneArea = m_opWidth * m_opHeight * std::pow(m_imgPlaneDistance / m_objPlaneDistance, 2);
     };
     
-    Spectrum sample(const LensPosQuery &query, const LensPosSample &smp, LensPosQueryResult* result) const override;
+    SampledSpectrum sample(const LensPosQuery &query, const LensPosSample &smp, LensPosQueryResult* result) const override;
     IDF* createIDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem) const override;
 };
 
@@ -44,8 +44,8 @@ class PerspectiveIDF : public IDF {
 public:
     PerspectiveIDF(const PerspectiveCamera &cam, const Point3D &orgLocal) : IDF(DirectionType::WholeSphere | DirectionType::LowFreq), m_cam(cam), m_orgLocal(orgLocal) { };
     
-    Spectrum sample(const IDFSample &smp, IDFQueryResult* result) const override;
-    Spectrum evaluate(const Vector3D &dirIn) const override;
+    SampledSpectrum sample(const IDFSample &smp, IDFQueryResult* result) const override;
+    SampledSpectrum evaluate(const Vector3D &dirIn) const override;
     float evaluatePDF(const Vector3D &dirIn) const override;
 };
 

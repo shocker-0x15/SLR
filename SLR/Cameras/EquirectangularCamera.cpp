@@ -9,7 +9,7 @@
 #include "../Core/Transform.h"
 #include "../Memory/ArenaAllocator.h"
 
-Spectrum EquirectangularCamera::sample(const LensPosQuery &query, const LensPosSample &smp, LensPosQueryResult* result) const {
+SampledSpectrum EquirectangularCamera::sample(const LensPosQuery &query, const LensPosSample &smp, LensPosQueryResult* result) const {
     StaticTransform staticTF;
     if (m_transform)
         m_transform->sample(query.time, &staticTF);
@@ -28,7 +28,7 @@ Spectrum EquirectangularCamera::sample(const LensPosQuery &query, const LensPosS
     result->isDeltaPos = true;
     result->areaPDF = 1.0f;
     
-    return Spectrum::One;
+    return SampledSpectrum::One;
 }
 
 IDF* EquirectangularCamera::createIDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem) const {
@@ -44,22 +44,22 @@ inline Vector3D polarToDirYTop(float phi, float theta) {
     return Vector3D(std::sin(phi) * std::sin(theta), std::cos(theta), std::cos(phi) * std::sin(theta));
 }
 
-Spectrum EquirectangularIDF::sample(const IDFSample &smp, IDFQueryResult *result) const {
+SampledSpectrum EquirectangularIDF::sample(const IDFSample &smp, IDFQueryResult *result) const {
     float phi = m_cam.m_phiAngle * (0.5f - smp.uDir[0]);
     float theta = M_PI_2 + m_cam.m_thetaAngle * (-0.5f + smp.uDir[1]);
     result->dirLocal = polarToDirYTop(phi, theta);
     float sinTheta = (1.0f - result->dirLocal.y * result->dirLocal.y);
     result->dirPDF = 1.0f / (m_cam.m_phiAngle * m_cam.m_thetaAngle * sinTheta);
     
-    return Spectrum::One;
+    return SampledSpectrum::One;
 }
 
-Spectrum EquirectangularIDF::evaluate(const Vector3D &dirIn) const {
+SampledSpectrum EquirectangularIDF::evaluate(const Vector3D &dirIn) const {
     float phi, theta;
     dirToPolarYTop(dirIn, &theta, &phi);
     bool valid = (phi >= -m_cam.m_phiAngle * 0.5f && phi < m_cam.m_phiAngle * 0.5f &&
                   theta >= -m_cam.m_thetaAngle * 0.5f && theta < m_cam.m_thetaAngle * 0.5f);
-    return valid ? Spectrum::One : Spectrum::Zero;
+    return valid ? SampledSpectrum::One : SampledSpectrum::Zero;
 }
 
 float EquirectangularIDF::evaluatePDF(const Vector3D &dirIn) const {

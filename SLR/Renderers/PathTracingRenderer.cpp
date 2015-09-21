@@ -60,7 +60,7 @@ void PathTracingRenderer::render(const Scene &scene, const RenderSettings &setti
     job.rngs = rngRefs.get();
     
     uint32_t imgIdx = 0;
-    uint32_t endIdx = 30;
+    uint32_t endIdx = 16;
     uint32_t exportTime = 30000;
     
     for (int s = 0; s < numSamples; ++s) {
@@ -85,9 +85,10 @@ void PathTracingRenderer::render(const Scene &scene, const RenderSettings &setti
         
         uint64_t elapsed;
         if ((elapsed = sw.elapsed()) > exportTime) {
-            exportTime += 30000;
-            if (exportTime == endIdx * 30000)
-                exportTime -= 3000;
+//            exportTime += 30000;
+//            if (exportTime == endIdx * 30000)
+//                exportTime -= 3000;
+            exportTime += exportTime;
             char filename[256];
             sprintf(filename, "%03u.bmp", imgIdx);
             sensor.saveImage(filename, settings.getFloat(RenderSettingItem::SensorResponse) / (s + 1));
@@ -110,26 +111,27 @@ void PathTracingRenderer::Job::kernel(uint32_t threadID) {
             float px = basePixelX + lx + rng.getFloat0cTo1o();
             float py = basePixelY + ly + rng.getFloat0cTo1o();
             
-            WavelengthSamples wls(rng.getFloat0cTo1o());
+            float selectWLPDF;
+            WavelengthSamples wls = WavelengthSamples::createWithEqualOffsets(rng.getFloat0cTo1o(), rng.getFloat0cTo1o(), &selectWLPDF);
             
             LensPosQuery lensQuery(time, wls);
             LensPosSample lensSample(rng.getFloat0cTo1o(), rng.getFloat0cTo1o());
             LensPosQueryResult lensResult;
-            Spectrum We0 = camera->sample(lensQuery, lensSample, &lensResult);
+            SampledSpectrum We0 = camera->sample(lensQuery, lensSample, &lensResult);
             
             IDFSample WeSample(px / imageWidth, py / imageHeight);
             IDFQueryResult WeResult;
             IDF* idf = camera->createIDF(lensResult.surfPt, wls, mem);
-            Spectrum We1 = idf->sample(WeSample, &WeResult);
+            SampledSpectrum We1 = idf->sample(WeSample, &WeResult);
             
             Ray ray(lensResult.surfPt.p, lensResult.surfPt.shadingFrame.fromLocal(WeResult.dirLocal), time);
-            Spectrum C = contribution(*scene, wls, ray, rng, mem);
-            SLRAssert(C.hasNaN() == false && C.hasInf() == false,
+            SampledSpectrum C = contribution(*scene, wls, ray, rng, mem);
+            SLRAssert(C.hasNaN() == false && C.hasInf() == false && C.hasMinus() == false,
                      "Unexpected value detected: %s\n"
                      "pix: (%f, %f)", C.toString().c_str(), px, py);
             
-            Spectrum weight = (We0 * We1) / (lensResult.areaPDF * WeResult.dirPDF);
-            SLRAssert(weight.hasNaN() == false && weight.hasInf() == false,
+            SampledSpectrum weight = (We0 * We1) / (lensResult.areaPDF * WeResult.dirPDF * selectWLPDF);
+            SLRAssert(weight.hasNaN() == false && weight.hasInf() == false && weight.hasMinus() == false,
                      "Unexpected value detected: %s\n"
                      "pix: (%f, %f)", weight.toString().c_str(), px, py);
             sensor->add(px, py, wls, weight * C);
@@ -139,23 +141,24 @@ void PathTracingRenderer::Job::kernel(uint32_t threadID) {
     }
 }
 
-Spectrum PathTracingRenderer::Job::contribution(const Scene &scene, const WavelengthSamples &wls, const Ray &initRay, RandomNumberGenerator &rng, ArenaAllocator &mem) const {
+SampledSpectrum PathTracingRenderer::Job::contribution(const Scene &scene, const WavelengthSamples &initWLs, const Ray &initRay, RandomNumberGenerator &rng, ArenaAllocator &mem) const {
+    WavelengthSamples wls = initWLs;
     Ray ray = initRay;
     SurfacePoint surfPt;
-    Spectrum alpha = Spectrum::One;
+    SampledSpectrum alpha = SampledSpectrum::One;
     float initY = alpha.luminance();
-    SpectrumSum sp(Spectrum::Zero);
+    SampledSpectrumSum sp(SampledSpectrum::Zero);
     uint32_t pathLength = 0;
     
     Intersection isect;
     if (!scene.intersect(ray, &isect))
-        return Spectrum::Zero;
+        return SampledSpectrum::Zero;
     isect.getSurfacePoint(&surfPt);
     
     Vector3D dirOut_sn = surfPt.shadingFrame.toLocal(-ray.dir);
     if (surfPt.isEmitting()) {
         EDF* edf = surfPt.createEDF(wls, mem);
-        Spectrum Le = surfPt.emittance(wls) * edf->evaluate(EDFQuery(), dirOut_sn);
+        SampledSpectrum Le = surfPt.emittance(wls) * edf->evaluate(EDFQuery(), dirOut_sn);
         sp += alpha * Le;
     }
     if (surfPt.atInfinity)
@@ -176,7 +179,7 @@ Spectrum PathTracingRenderer::Job::contribution(const Scene &scene, const Wavele
             LightPosQuery xpQuery(ray.time, wls);
             LightPosSample xpSample(rng.getFloat0cTo1o(), rng.getFloat0cTo1o());
             LightPosQueryResult xpResult;
-            Spectrum M = light.sample(xpQuery, xpSample, &xpResult);
+            SampledSpectrum M = light.sample(xpQuery, xpSample, &xpResult);
             SLRAssert(!std::isnan(xpResult.areaPDF)/* && !std::isinf(xpResult.areaPDF)*/, "areaPDF: unexpected value detected: %f", xpResult.areaPDF);
             
             float dist2;
@@ -185,13 +188,13 @@ Spectrum PathTracingRenderer::Job::contribution(const Scene &scene, const Wavele
             if (scene.testVisiblility(surfPt, xpResult.surfPt, ray.time)) {
                 EDF* edf = xpResult.surfPt.createEDF(wls, mem);
                 Vector3D shadowDir_l = xpResult.surfPt.shadingFrame.toLocal(-shadowDir);
-                Spectrum Le = M * edf->evaluate(EDFQuery(), shadowDir_l);
+                SampledSpectrum Le = M * edf->evaluate(EDFQuery(), shadowDir_l);
                 float lightPDF = lightProb * xpResult.areaPDF;
                 SLRAssert(!Le.hasNaN() && !Le.hasInf(), "Le: unexpected value detected: %s", Le.toString().c_str());
                 
                 Vector3D shadowDir_sn = surfPt.shadingFrame.toLocal(shadowDir);
-                BSDFQuery queryBSDF(dirOut_sn, gNorm_sn);
-                Spectrum fs = bsdf->evaluate(queryBSDF, shadowDir_sn);
+                BSDFQuery queryBSDF(dirOut_sn, gNorm_sn, wls.selectedLambda);
+                SampledSpectrum fs = bsdf->evaluate(queryBSDF, shadowDir_sn);
                 float bsdfPDF = bsdf->evaluatePDF(queryBSDF, shadowDir_sn) * std::fabs(shadowDir_l.z) / dist2;
                 SLRAssert(!std::isnan(bsdfPDF) && !std::isinf(bsdfPDF), "bsdfPDF: unexpected value detected: %f", bsdfPDF);
                 SLRAssert(!fs.hasNaN() && !fs.hasInf(), "fs: unexpected value detected: %s", fs.toString().c_str());
@@ -206,12 +209,16 @@ Spectrum PathTracingRenderer::Job::contribution(const Scene &scene, const Wavele
             }
         }
         
-        BSDFQuery fsQuery(dirOut_sn, gNorm_sn);
+        BSDFQuery fsQuery(dirOut_sn, gNorm_sn, wls.selectedLambda);
         BSDFSample fsSample(rng.getFloat0cTo1o(), rng.getFloat0cTo1o(), rng.getFloat0cTo1o());
         BSDFQueryResult fsResult;
-        Spectrum fs = bsdf->sample(fsQuery, fsSample, &fsResult);
-        if (fs == Spectrum::Zero || fsResult.dirPDF == 0.0f)
+        SampledSpectrum fs = bsdf->sample(fsQuery, fsSample, &fsResult);
+        if (fs == SampledSpectrum::Zero || fsResult.dirPDF == 0.0f)
             break;
+        if (fsResult.dirType.isDispersive()) {
+            fsResult.dirPDF /= WavelengthSamples::NumComponents;
+            wls.flags |= WavelengthSamples::LambdaSelected;
+        }
         alpha *= fs * (std::fabs(fsResult.dir_sn.z) / fsResult.dirPDF);
         SLRAssert(!alpha.hasInf() && !alpha.hasNaN(), "alpha: unexpected value detected: %s", alpha.toString().c_str());
         
@@ -231,7 +238,7 @@ Spectrum PathTracingRenderer::Job::contribution(const Scene &scene, const Wavele
             SLRAssert(!std::isnan(bsdfPDF) && !std::isinf(bsdfPDF), "bsdfPDF: unexpected value detected: %f", bsdfPDF);
             
             EDF* edf = surfPt.createEDF(wls, mem);
-            Spectrum Le = surfPt.emittance(wls) * edf->evaluate(EDFQuery(), dirOut_sn);
+            SampledSpectrum Le = surfPt.emittance(wls) * edf->evaluate(EDFQuery(), dirOut_sn);
             float lightProb = scene.evaluateProb(Light(isect.obj));
             float dist2 = surfPt.atInfinity ? 1.0f : sqDistance(ray.org, surfPt.p);
             float lightPDF = lightProb * surfPt.evaluateAreaPDF() * dist2 / std::fabs(dirOut_sn.z);

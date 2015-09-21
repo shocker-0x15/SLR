@@ -13,19 +13,20 @@
 #include "../Core/directional_distribution_functions.h"
 
 class ModifiedWardDurBRDF : public BSDF {
-    Spectrum m_R;
+    SampledSpectrum m_R;
     float m_anisoX, m_anisoY;
     
-    Spectrum evaluateInternal(const BSDFQuery &query, const Vector3D &dir) const override;
+    SampledSpectrum evaluateInternal(const BSDFQuery &query, const Vector3D &dir) const override;
 public:
-    ModifiedWardDurBRDF(const Spectrum &R, float ax, float ay) :
+    ModifiedWardDurBRDF(const SampledSpectrum &R, float ax, float ay) :
     BSDF(DirectionType::Reflection | DirectionType::HighFreq), m_R(R), m_anisoX(ax), m_anisoY(ay) { };
     
-    Spectrum sample(const BSDFQuery &query, const BSDFSample &smp, BSDFQueryResult* result) const override;
+    SampledSpectrum sample(const BSDFQuery &query, const BSDFSample &smp, BSDFQueryResult* result) const override;
     float evaluatePDF(const BSDFQuery &query, const Vector3D &dir) const override;
-    float weight(const BSDFQuery &query) const override;
+    float weight(const BSDFQuery &query, const BSDFSample &smp) const override;
+    float weight(const BSDFQuery &query, const Vector3D &dir) const override;
     
-    Spectrum getBaseColor(DirectionType flags) const override;
+    SampledSpectrum getBaseColor(DirectionType flags) const override;
 };
 
 #endif /* defined(__SLR__ModifiedWardDurBRDF__) */

@@ -21,33 +21,42 @@ class MSpaceAllocator;
 
 // RGB & Spectrum
 template<typename RealType> struct CompensatedSum;
+template <typename RealType> struct RGBSamplesTemplate;
 template <typename RealType> struct RGBTemplate;
 template <typename RealType> struct RGBStorageTemplate;
 template <typename RealType, uint32_t N> struct ContinuousSpectrumTemplate;
 template <typename RealType, uint32_t N> struct RegularContinuousSpectrumTemplate;
+template <typename RealType, uint32_t N> struct IrregularContinuousSpectrumTemplate;
 template <typename RealType, uint32_t N> struct UpsampledContinuousSpectrumTemplate;
 template <typename RealType, uint32_t N> struct WavelengthSamplesTemplate;
 template <typename RealType, uint32_t N> struct SampledSpectrumTemplate;
 template <typename RealType, uint32_t N> struct DiscretizedSpectrumTemplate;
 template <typename RealType, uint32_t numStrata> struct SpectrumStorageTemplate;
+// FIXME: Current code is inconsistent with respect to float precision.
+typedef float SpectrumFloat;
+typedef RGBTemplate<SpectrumFloat> RGBInputSpectrum;
+const static uint32_t NumSpectralSamples = 16;
+typedef ContinuousSpectrumTemplate<SpectrumFloat, NumSpectralSamples> ContinuousSpectrum;
+typedef RegularContinuousSpectrumTemplate<SpectrumFloat, NumSpectralSamples> RegularContinuousSpectrum;
+typedef IrregularContinuousSpectrumTemplate<SpectrumFloat, NumSpectralSamples> IrregularContinuousSpectrum;
+typedef UpsampledContinuousSpectrumTemplate<SpectrumFloat, NumSpectralSamples> UpsampledContinuousSpectrum;
 #ifdef Use_Spectral_Representation
-typedef ContinuousSpectrumTemplate<float, 16> ContinuousSpectrum;
-typedef RegularContinuousSpectrumTemplate<float, 16> RegularContinuousSpectrum;
-typedef UpsampledContinuousSpectrumTemplate<float, 16> UpsampledContinuousSpectrum;
-typedef WavelengthSamplesTemplate<float, 16> WavelengthSamples;
-typedef SampledSpectrumTemplate<float, 16> Spectrum;
-typedef DiscretizedSpectrumTemplate<float, 16> DiscretizedSpectrum;
-typedef SpectrumStorageTemplate<float, 16> SpectrumStorage;
+const static uint32_t NumStrataForStorage = 16;
+typedef WavelengthSamplesTemplate<SpectrumFloat, NumSpectralSamples> WavelengthSamples;
+typedef SampledSpectrumTemplate<SpectrumFloat, NumSpectralSamples> SampledSpectrum;
+typedef DiscretizedSpectrumTemplate<SpectrumFloat, NumStrataForStorage> DiscretizedSpectrum;
+typedef SpectrumStorageTemplate<SpectrumFloat, NumStrataForStorage> SpectrumStorage;
 
 typedef std::shared_ptr<ContinuousSpectrum> InputSpectrumRef;
 #else
-typedef RGBTemplate<float> Spectrum;
-typedef RGBTemplate<float> DiscretizedSpectrum;
-typedef RGBStorageTemplate<float> SpectrumStorage;
+typedef RGBSamplesTemplate<SpectrumFloat> WavelengthSamples;
+typedef RGBTemplate<SpectrumFloat> SampledSpectrum;
+typedef RGBTemplate<SpectrumFloat> DiscretizedSpectrum;
+typedef RGBStorageTemplate<SpectrumFloat> SpectrumStorage;
 
-typedef std::shared_ptr<RGBTemplate<float>> InputSpectrumRef;
+typedef std::shared_ptr<RGBInputSpectrum> InputSpectrumRef;
 #endif
-typedef CompensatedSum<Spectrum> SpectrumSum;
+typedef CompensatedSum<SampledSpectrum> SampledSpectrumSum;
 
 // Basic Types
 template <typename RealType> struct Vector3Template;

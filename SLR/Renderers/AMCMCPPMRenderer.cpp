@@ -150,7 +150,7 @@ void AMCMCPPMRenderer::HitpointMap::initialize(uint32_t numThreads, uint32_t num
 }
 
 void AMCMCPPMRenderer::HitpointMap::store(uint32_t thread, float imgX, float imgY,
-                                          const Spectrum &weight, const Point3D &pos, const Normal3D &gn, const Vector3D &dir_sn,
+                                          const SampledSpectrum &weight, const Point3D &pos, const Normal3D &gn, const Vector3D &dir_sn,
                                           const BSDF* f, const ReferenceFrame &frame) {
     m_points[thread].emplace_back(imgX, imgY, pos, gn, dir_sn, weight, f, frame);
 }
@@ -357,11 +357,13 @@ void AMCMCPPMRenderer::render(const Scene &scene, const RenderSettings &settings
         float time = timeStart + (timeEnd - timeStart) * topRand.getFloat0cTo1o();
         jobDRT.time = time;
         
-        WavelengthSamples wls(topRand.getFloat0cTo1o());
-        // sample wavelengths
-        // ...
-        // ...
+        // FIXME: wavelength selection should be done in each path.
+        float selectWLPDF;
+        WavelengthSamples wls = WavelengthSamples::createWithEqualOffsets(topRand.getFloat0cTo1o(), topRand.getFloat0cTo1o(), &selectWLPDF);
+
         jobDRT.wls = wls;
+        
+        wls.flags |= WavelengthSamples::LambdaSelected;
         for (int i = 0; i < numMCMCs; ++i)
             jobPSs[i].wls = wls;
         
@@ -444,16 +446,16 @@ void AMCMCPPMRenderer::DistributedRTJob::kernel(uint32_t threadID) {
             LensPosQuery lensQuery(time, wls);
             LensPosSample lensSample(rng.getFloat0cTo1o(), rng.getFloat0cTo1o());
             LensPosQueryResult lensResult;
-            Spectrum We0 = camera->sample(lensQuery, lensSample, &lensResult);
+            SampledSpectrum We0 = camera->sample(lensQuery, lensSample, &lensResult);
             
             IDFSample WeSample(px / imageWidth, py / imageHeight);
             IDFQueryResult WeResult;
             IDF* idf = camera->createIDF(lensResult.surfPt, wls, mem);
-            Spectrum We1 = idf->sample(WeSample, &WeResult);
+            SampledSpectrum We1 = idf->sample(WeSample, &WeResult);
             
             Ray ray(lensResult.surfPt.p, lensResult.surfPt.shadingFrame.fromLocal(WeResult.dirLocal), time);
-            Spectrum weight = (We0 * We1) / (lensResult.areaPDF * WeResult.dirPDF);
-            Spectrum C = record(threadID, *scene, wls, px, py, ray, weight, rng, mem);
+            SampledSpectrum weight = (We0 * We1) / (lensResult.areaPDF * WeResult.dirPDF);
+            SampledSpectrum C = record(threadID, *scene, wls, px, py, ray, weight, rng, mem);
             SLRAssert(weight.hasNaN() == false && weight.hasInf() == false,
                      "Unexpected value detected: %s\n"
                      "pix: (%f, %f)", weight.toString().c_str(), px, py);
@@ -466,24 +468,25 @@ void AMCMCPPMRenderer::DistributedRTJob::kernel(uint32_t threadID) {
     }
 }
 
-Spectrum AMCMCPPMRenderer::DistributedRTJob::record(uint32_t threadID, const Scene &scene, const WavelengthSamples &wls, float px, float py, const Ray &initRay, const Spectrum &initAlpha,
+SampledSpectrum AMCMCPPMRenderer::DistributedRTJob::record(uint32_t threadID, const Scene &scene, const WavelengthSamples &initWLs, float px, float py, const Ray &initRay, const SampledSpectrum &initAlpha,
                                                     RandomNumberGenerator &rng, ArenaAllocator &mem) const {
+    WavelengthSamples wls = initWLs;
     Ray ray = initRay;
     SurfacePoint surfPt;
-    Spectrum alpha = initAlpha;
+    SampledSpectrum alpha = initAlpha;
     float initY = alpha.luminance();
-    SpectrumSum sp(Spectrum::Zero);
+    SampledSpectrumSum sp(SampledSpectrum::Zero);
     uint32_t pathLength = 0;
     
     Intersection isect;
     if (!scene.intersect(ray, &isect))
-        return Spectrum::Zero;
+        return SampledSpectrum::Zero;
     isect.getSurfacePoint(&surfPt);
     
     Vector3D dirOut_sn = surfPt.shadingFrame.toLocal(-ray.dir);
     if (surfPt.isEmitting()) {
         EDF* edf = surfPt.createEDF(wls, mem);
-        Spectrum Le = surfPt.emittance(wls) * edf->evaluate(EDFQuery(), dirOut_sn);
+        SampledSpectrum Le = surfPt.emittance(wls) * edf->evaluate(EDFQuery(), dirOut_sn);
         sp += alpha * Le;
     }
     if (surfPt.atInfinity)
@@ -502,13 +505,17 @@ Spectrum AMCMCPPMRenderer::DistributedRTJob::record(uint32_t threadID, const Sce
         if (!bsdf->matches(scatterType))
             break;
         
-        BSDFQuery fsQuery(dirOut_sn, gNorm_sn);
+        BSDFQuery fsQuery(dirOut_sn, gNorm_sn, wls.selectedLambda);
         BSDFSample fsSample(rng.getFloat0cTo1o(), rng.getFloat0cTo1o(), rng.getFloat0cTo1o());
         fsQuery.flags = scatterType;
         BSDFQueryResult fsResult;
-        Spectrum fs = bsdf->sample(fsQuery, fsSample, &fsResult);
-        if (fs == Spectrum::Zero || fsResult.dirPDF == 0.0f)
+        SampledSpectrum fs = bsdf->sample(fsQuery, fsSample, &fsResult);
+        if (fs == SampledSpectrum::Zero || fsResult.dirPDF == 0.0f)
             break;
+        if (fsResult.dirType.isDispersive()) {
+            fsResult.dirPDF /= WavelengthSamples::NumComponents;
+            wls.flags |= WavelengthSamples::LambdaSelected;
+        }
         alpha *= fs * (std::fabs(fsResult.dir_sn.z) / fsResult.dirPDF);
         SLRAssert(!alpha.hasInf() && !alpha.hasNaN(), "alpha: unexpected value detected: %s", alpha.toString().c_str());
         
@@ -524,7 +531,7 @@ Spectrum AMCMCPPMRenderer::DistributedRTJob::record(uint32_t threadID, const Sce
         
         if (surfPt.isEmitting()) {
             EDF* edf = surfPt.createEDF(wls, mem);
-            Spectrum Le = surfPt.emittance(wls) * edf->evaluate(EDFQuery(), dirOut_sn);
+            SampledSpectrum Le = surfPt.emittance(wls) * edf->evaluate(EDFQuery(), dirOut_sn);
             SLRAssert(!Le.hasNaN() && !Le.hasInf(), "Le: unexpected value detected: %s", Le.toString().c_str());
             
             sp += alpha * Le;
@@ -632,11 +639,11 @@ float AMCMCPPMRenderer::PhotonSplattingJob::photonTracing(const WavelengthSample
     EDFQuery LeQuery;
     EDFSample LeSample(psLight.uComponent, psLight.uDirection[0], psLight.uDirection[1]);
     EDFQueryResult LeResult;
-    Spectrum M = light.sample(xpQuery, xpSample, &xpResult);
+    SampledSpectrum M = light.sample(xpQuery, xpSample, &xpResult);
     EDF* edf = xpResult.surfPt.createEDF(wls, mem);
-    Spectrum Le = M * edf->sample(LeQuery, LeSample, &LeResult);
+    SampledSpectrum Le = M * edf->sample(LeQuery, LeSample, &LeResult);
     
-    Spectrum alpha = Le / (lightProb * xpResult.areaPDF * LeResult.dirPDF) * std::fabs(LeResult.dir_sn.z) / numPhotons;
+    SampledSpectrum alpha = Le / (lightProb * xpResult.areaPDF * LeResult.dirPDF) * std::fabs(LeResult.dir_sn.z) / numPhotons;
     Vector3D dirOut = xpResult.surfPt.shadingFrame.fromLocal(LeResult.dir_sn);
     Ray ray(xpResult.surfPt.p + Ray::Epsilon * dirOut, dirOut, time);
     float initY = alpha.luminance();
@@ -662,9 +669,9 @@ float AMCMCPPMRenderer::PhotonSplattingJob::photonTracing(const WavelengthSample
                 Hitpoint &hp = *(Hitpoint*)hitpoints[i];
                 Vector3D dirIn_sn = hp.shadingFrame.toLocal(-ray.dir);
                 Normal3D gNorm_sn = hp.shadingFrame.toLocal(hp.gNormal);
-                BSDFQuery queryBSDF(dirIn_sn, gNorm_sn);
-                Spectrum fs = hp.bsdf->evaluate(queryBSDF, hp.dirOut_sn);
-                Spectrum contribution = hp.weight * fs * alpha * kernelWeight * std::fabs(dirIn_sn.z / dot(Vector3D(surfPt.gNormal), ray.dir));
+                BSDFQuery queryBSDF(dirIn_sn, gNorm_sn, wls.selectedLambda);
+                SampledSpectrum fs = hp.bsdf->evaluate(queryBSDF, hp.dirOut_sn);
+                SampledSpectrum contribution = hp.weight * fs * alpha * kernelWeight * std::fabs(dirIn_sn.z / dot(Vector3D(surfPt.gNormal), ray.dir));
                 SLRAssert(!contribution.hasInf() && !contribution.hasNaN(), "contribution: unexpected value detected: %s",
                          contribution.toString().c_str());
                 results.emplace_back(hp.imgX, hp.imgY, contribution);
@@ -677,11 +684,11 @@ float AMCMCPPMRenderer::PhotonSplattingJob::photonTracing(const WavelengthSample
 
         // TODO: consider adjoint correction.
         PathPrimarySample psPath = sampler.getPathPrimarySample();
-        BSDFQuery fsQuery(dirIn_sn, gNorm_sn);
+        BSDFQuery fsQuery(dirIn_sn, gNorm_sn, wls.selectedLambda);
         BSDFSample fsSample(psPath.uComponent, psPath.uDirection[0], psPath.uDirection[1]);
         BSDFQueryResult fsResult;
-        Spectrum fs = bsdf->sample(fsQuery, fsSample, &fsResult);
-        if (fs == Spectrum::Zero || fsResult.dirPDF == 0.0f)
+        SampledSpectrum fs = bsdf->sample(fsQuery, fsSample, &fsResult);
+        if (fs == SampledSpectrum::Zero || fsResult.dirPDF == 0.0f)
             break;
         alpha *= fs * (std::fabs(fsResult.dir_sn.z) / fsResult.dirPDF);
         SLRAssert(!alpha.hasInf() && !alpha.hasNaN(), "alpha: unexpected value detected: %s", alpha.toString().c_str());

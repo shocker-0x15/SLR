@@ -10,7 +10,7 @@
 #include "../Memory/ArenaAllocator.h"
 #include "../Core/textures.h"
 
-Spectrum DiffuseEmission::emittance(const SurfacePoint &surfPt, const WavelengthSamples &wls) const {
+SampledSpectrum DiffuseEmission::emittance(const SurfacePoint &surfPt, const WavelengthSamples &wls) const {
     return m_emittance->evaluate(surfPt.texCoord, wls);
 }
 

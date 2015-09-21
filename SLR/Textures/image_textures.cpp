@@ -9,10 +9,10 @@
 #include "../Core/Image.h"
 #include "../Core/distributions.h"
 
-Spectrum ImageSpectrumTexture::evaluate(const TexCoord2D &tc, const WavelengthSamples &wls) const {
+SampledSpectrum ImageSpectrumTexture::evaluate(const TexCoord2D &tc, const WavelengthSamples &wls) const {
     uint32_t px = std::clamp((uint32_t)std::fmod(m_data->width() * tc.u, m_data->width()), 0u, m_data->width() - 1);
     uint32_t py = std::clamp((uint32_t)std::fmod(m_data->height() * tc.v, m_data->height()), 0u, m_data->height() - 1);
-    Spectrum ret;
+    SampledSpectrum ret;
     switch (m_data->format()) {
 #ifdef Use_Spectral_Representation
         case ColorFormat::uvs16Fx3: {
@@ -27,7 +27,7 @@ Spectrum ImageSpectrumTexture::evaluate(const TexCoord2D &tc, const WavelengthSa
         }
         case ColorFormat::Gray8: {
             const Gray8 &data = m_data->get<Gray8>(px, py);
-            ret = Spectrum(data.v / 255.0f);
+            ret = SampledSpectrum(data.v / 255.0f);
             break;
         }
 #else
@@ -106,7 +106,7 @@ RegularConstantContinuous2D* ImageSpectrumTexture::createIBLImportanceMap() cons
                 uvs16Fx3 avg = *(uvs16Fx3*)data;
                 float uvs[3] = {avg.u, avg.v, avg.s};
                 float rgb[3];
-                Upsampling::uvs_to_sRGB(uvs, rgb);
+                Upsampling::uvs_to_sRGB(m_data->spectrumType(), uvs, rgb);
                 luminance = 0.222485f * rgb[0] + 0.716905f * rgb[1] + 0.060610f * rgb[2];
                 break;
             }
@@ -114,7 +114,7 @@ RegularConstantContinuous2D* ImageSpectrumTexture::createIBLImportanceMap() cons
                 uvsA16Fx4 avg = *(uvsA16Fx4*)data;
                 float uvs[3] = {avg.u, avg.v, avg.s};
                 float rgb[3];
-                Upsampling::uvs_to_sRGB(uvs, rgb);
+                Upsampling::uvs_to_sRGB(m_data->spectrumType(), uvs, rgb);
                 luminance = 0.222485f * rgb[0] + 0.716905f * rgb[1] + 0.060610f * rgb[2];
                 break;
             }

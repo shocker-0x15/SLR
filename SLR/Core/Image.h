@@ -17,13 +17,14 @@
 class Image2D {
 protected:
     uint32_t m_width, m_height;
+    SpectrumType m_spType;
     ColorFormat m_colorFormat;
     
     virtual const void* getInternal(uint32_t x, uint32_t y) const = 0;
     virtual void setInternal(uint32_t x, uint32_t y, const void* data, size_t size) = 0;
 public:
     Image2D() { };
-    Image2D(uint32_t w, uint32_t h, ColorFormat fmt) : m_width(w), m_height(h), m_colorFormat(fmt) { };
+    Image2D(uint32_t w, uint32_t h, ColorFormat fmt, SpectrumType spType) : m_width(w), m_height(h), m_colorFormat(fmt), m_spType(spType) { };
     ~Image2D() { };
     
     template <typename ColFmt>
@@ -35,6 +36,7 @@ public:
     
     uint32_t width() const { return m_width; };
     uint32_t height() const { return m_height; };
+    SpectrumType spectrumType() const { return m_spType; };
     ColorFormat format() const { return m_colorFormat; };
     
     static std::map<std::string, Image2DRef> s_database;
@@ -66,7 +68,9 @@ class TiledImage2DTemplate : public Image2D {
 //        }
 //    };
     
-    TiledImage2DTemplate(const std::string &filepath, Allocator* mem, bool gammaCorrection) {
+    TiledImage2DTemplate(const std::string &filepath, Allocator* mem, SpectrumType spType, bool gammaCorrection) {
+        m_spType = spType;
+        
         uint64_t requiredSize;
         bool imgSuccess;
         imgSuccess = getImageInfo(filepath, &m_width, &m_height, &requiredSize, &m_colorFormat);
@@ -108,7 +112,7 @@ class TiledImage2DTemplate : public Image2D {
                         const RGB8x3 &val = *((RGB8x3*)linearData + m_width * i + j);
                         float RGB[3] = {val.r / 255.0f, val.g / 255.0f, val.b / 255.0f};
                         float uvs[3];
-                        Upsampling::sRGB_to_uvs(RGB, uvs);
+                        Upsampling::sRGB_to_uvs(spType, RGB, uvs);
                         uvs16Fx3 storedVal{(half)uvs[0], (half)uvs[1], (half)uvs[2]};
                         setInternal(j, i, &storedVal, m_stride);
                         break;
@@ -117,7 +121,7 @@ class TiledImage2DTemplate : public Image2D {
                         const RGB_8x4 &val = *((RGB_8x4*)linearData + m_width * i + j);
                         float RGB[3] = {val.r / 255.0f, val.g / 255.0f, val.b / 255.0f};
                         float uvs[3];
-                        Upsampling::sRGB_to_uvs(RGB, uvs);
+                        Upsampling::sRGB_to_uvs(spType, RGB, uvs);
                         uvs16Fx3 storedVal{(half)uvs[0], (half)uvs[1], (half)uvs[2]};
                         setInternal(j, i, &storedVal, m_stride);
                         break;
@@ -126,7 +130,7 @@ class TiledImage2DTemplate : public Image2D {
                         const RGBA8x4 &val = *((RGBA8x4*)linearData + m_width * i + j);
                         float RGB[3] = {val.r / 255.0f, val.g / 255.0f, val.b / 255.0f};
                         float uvs[3];
-                        Upsampling::sRGB_to_uvs(RGB, uvs);
+                        Upsampling::sRGB_to_uvs(spType, RGB, uvs);
                         uvsA16Fx4 storedVal{(half)uvs[0], (half)uvs[1], (half)uvs[2], (half)(val.a / 255.0f)};
                         setInternal(j, i, &storedVal, m_stride);
                         break;
@@ -135,7 +139,7 @@ class TiledImage2DTemplate : public Image2D {
                         const RGBA16Fx4 &val = *((RGBA16Fx4*)linearData + m_width * i + j);
                         float RGB[3] = {val.r, val.g, val.b};
                         float uvs[3];
-                        Upsampling::sRGB_to_uvs(RGB, uvs);
+                        Upsampling::sRGB_to_uvs(spType, RGB, uvs);
                         uvsA16Fx4 storedVal{(half)uvs[0], (half)uvs[1], (half)uvs[2], (half)val.a};
                         setInternal(j, i, &storedVal, m_stride);
                         break;
@@ -189,12 +193,12 @@ public:
         
     };
     
-    static std::shared_ptr<TiledImage2DTemplate> create(const std::string &filepath, Allocator *mem, bool gammaCorrection = false) {
+    static std::shared_ptr<TiledImage2DTemplate> create(const std::string &filepath, Allocator *mem, SpectrumType spType, bool gammaCorrection = false) {
         if (s_database.count(filepath) > 0) {
             return std::static_pointer_cast<TiledImage2DTemplate>(s_database[filepath]);
         }
         else {
-            TiledImage2DTemplate* texData = new TiledImage2DTemplate(filepath, mem, gammaCorrection);
+            TiledImage2DTemplate* texData = new TiledImage2DTemplate(filepath, mem, spType, gammaCorrection);
             std::shared_ptr<TiledImage2DTemplate> ret = std::shared_ptr<TiledImage2DTemplate>(texData);
             s_database[filepath] = ret;
             return ret;

@@ -12,6 +12,10 @@
 #include "../references.h"
 #include "CompensatedSum.h"
 
+//         |              Input|     Calculation|             Storage|
+//      RGB|                RGB|             RGB|                 RGB|
+// Spectral| ContinuousSpectrum| SampledSpectrum| DiscretizedSpectrum| + SampledWavelengths
+
 enum class ColorSpace {
     sRGB,
     sRGB_NonLinear,
@@ -24,9 +28,36 @@ enum class RGBColorSpace {
     sRGB = 0,
 };
 
-//         |              Input|     Calculation|             Storage|
-//      RGB|                RGB|             RGB|                 RGB|
-// Spectral| ContinuousSpectrum| SampledSpectrum| DiscretizedSpectrum| + SampledWavelengths
+enum class SpectrumType : uint32_t {
+    Reflectance = 0,
+    Illuminant,
+    IndexOfRefraction,
+};
+
+template <typename RealType>
+RealType sRGB_gamma(RealType value) {
+    SLRAssert(value >= 0 && value <= 1.0, "Input valus must be in range [0, 1].");
+    if (value <= 0.0031308)
+        return 12.92 * value;
+    return 1.055 * std::pow(value, 1.0 / 2.4) - 0.055;
+};
+
+template <typename RealType>
+RealType sRGB_degamma(RealType value) {
+    SLRAssert(value >= 0 && value <= 1.0, "Input valus must be in range [0, 1].");
+    if (value <= 0.04045)
+        return value  / 12.92;
+    return std::pow((value + 0.055) / 1.055, 2.4);
+};
+
+// TODO: implement a method to generate arbitrary XYZ<->RGB matrices.
+// http://www.brucelindbloom.com/index.html?Eqn_RGB_XYZ_Matrix.html
+//template <typename RealType>
+//static void RGB_to_XYZ(RealType xR, RealType yR, RealType xG, RealType yG, RealType xB, RealType yB, RealType xW, RealType yW) {
+//    RealType XR = xR / yR, YR = 1, ZR = (1 - xR - yR) / yR;
+//    RealType XG = xG / yG, YG = 1, ZG = (1 - xG - yG) / yG;
+//    RealType XB = xB / yB, YB = 1, ZB = (1 - xB - yB) / yB;
+//}
 
 template <typename RealType>
 static inline void sRGB_to_XYZ(const RealType rgb[3], RealType xyz[3]) {
@@ -43,11 +74,52 @@ static inline void XYZ_to_sRGB(const RealType xyz[3], RealType rgb[3]) {
 }
 
 template <typename RealType>
+static inline void sRGB_E_to_XYZ(const RealType rgb[3], RealType xyz[3]) {
+    xyz[0] = 0.4969 * rgb[0] + 0.3391 * rgb[1] + 0.1640 * rgb[2];
+    xyz[1] = 0.2562 * rgb[0] + 0.6782 * rgb[1] + 0.0656 * rgb[2];
+    xyz[2] = 0.0233 * rgb[0] + 0.1130 * rgb[1] + 0.8637 * rgb[2];
+}
+
+template <typename RealType>
+static inline void XYZ_to_sRGB_E(const RealType xyz[3], RealType rgb[3]) {
+    rgb[0] = 2.6897 * xyz[0] - 1.2759 * xyz[1] - 0.4138 * xyz[2];
+    rgb[1] = -1.0221 * xyz[0] + 1.9783 * xyz[1] + 0.0438 * xyz[2];
+    rgb[2] = 0.0612 * xyz[0] - 0.2245 * xyz[1] + 1.1633 * xyz[2];
+}
+
+template <typename RealType>
+static inline void sRGB_D50_to_XYZ(const RealType rgb[3], RealType xyz[3]) {
+    xyz[0] = 0.4850 * rgb[0] + 0.3489 * rgb[1] + 0.1303 * rgb[2];
+    xyz[1] = 0.2501 * rgb[0] + 0.6978 * rgb[1] + 0.0521 * rgb[2];
+    xyz[2] = 0.0227 * rgb[0] + 0.1163 * rgb[1] + 0.6862 * rgb[2];
+}
+
+template <typename RealType>
+static inline void XYZ_to_sRGB_D50(const RealType xyz[3], RealType rgb[3]) {
+    rgb[0] = 2.7556 * xyz[0] - 1.3071 * xyz[1] - 0.4239 * xyz[2];
+    rgb[1] = -0.9934 * xyz[0] + 1.9227 * xyz[1] + 0.0426 * xyz[2];
+    rgb[2] = 0.0771 * xyz[0] - 0.2826 * xyz[1] + 1.4642 * xyz[2];
+}
+
+template <typename RealType>
 static inline void XYZ_to_xyY(const RealType xyz[3], RealType xyY[3]) {
     RealType b = xyz[0] + xyz[1] + xyz[2];
+    if (b == 0) {
+        xyY[0] = xyY[1] = 1.0f / 3.0f;
+        xyY[2] = 0.0f;
+        return;
+    }
     xyY[0] = xyz[0] / b;
     xyY[1] = xyz[1] / b;
     xyY[2] = xyz[1];
+}
+
+template <typename RealType>
+static inline void xyY_to_XYZ(const RealType xyY[3], RealType xyz[3]) {
+    RealType b = xyY[2] / xyY[1];
+    xyz[0] = xyY[0] * b;
+    xyz[1] = xyY[2];
+    xyz[2] = (1.0f - xyY[0] - xyY[1]) * b;
 }
 
 static const float WavelengthLowBound = 360.0f;
@@ -265,9 +337,21 @@ namespace Upsampling {
     }
     
     template <typename RealType>
-    static inline void sRGB_to_uvs(const RealType rgb[3], RealType uvs[3]) {
+    static inline void sRGB_to_uvs(SpectrumType spType, const RealType rgb[3], RealType uvs[3]) {
         float xyz[3];
-        sRGB_to_XYZ(rgb, xyz);
+        switch (spType) {
+            case SpectrumType::Reflectance:
+                sRGB_E_to_XYZ(rgb, xyz);
+                break;
+            case SpectrumType::Illuminant:
+                sRGB_to_XYZ(rgb, xyz);
+                break;
+            case SpectrumType::IndexOfRefraction:
+                sRGB_E_to_XYZ(rgb, xyz);
+                break;
+            default:
+                break;
+        }
         float xy[2];
         RealType b = xyz[0] + xyz[1] + xyz[2];
         xy[0] = xyz[0] / b;
@@ -277,7 +361,7 @@ namespace Upsampling {
     }
     
     template <typename RealType>
-    static inline void uvs_to_sRGB(const RealType uvs[3], RealType rgb[3]) {
+    static inline void uvs_to_sRGB(SpectrumType spType, const RealType uvs[3], RealType rgb[3]) {
         float xy[2];
         uv_to_xy(uvs, xy);
         float b = uvs[2] * Upsampling::EqualEnergyReflectance;
@@ -285,7 +369,19 @@ namespace Upsampling {
         XYZ[0] = xy[0] * b;
         XYZ[1] = xy[1] * b;
         XYZ[2] = b - XYZ[0] - XYZ[1];
-        XYZ_to_sRGB(XYZ, rgb);
+        switch (spType) {
+            case SpectrumType::Reflectance:
+                XYZ_to_sRGB_E(XYZ, rgb);
+                break;
+            case SpectrumType::Illuminant:
+                XYZ_to_sRGB(XYZ, rgb);
+                break;
+            case SpectrumType::IndexOfRefraction:
+                XYZ_to_sRGB_E(XYZ, rgb);
+                break;
+            default:
+                break;
+        }
     }
     
     // Grid cells. Laid out in row-major format.
@@ -666,5 +762,13 @@ namespace Upsampling {
 
 #include "RGBTypes.h"
 #include "SpectrumTypes.h"
+#include "common_spectra.h"
+#include "spectum_library.h"
+
+void initSpectrum();
+
+InputSpectrumRef createInputSpectrum(SpectrumType spType, ColorSpace space, SpectrumFloat e0, SpectrumFloat e1, SpectrumFloat e2);
+InputSpectrumRef createInputSpectrum(SpectrumType spType, SpectrumFloat minLambda, SpectrumFloat maxLambda, const SpectrumFloat* values, uint32_t numSamples);
+InputSpectrumRef createInputSpectrum(SpectrumType spType, const SpectrumFloat* lambdas, const SpectrumFloat* values, uint32_t numSamples);
 
 #endif

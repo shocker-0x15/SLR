@@ -34,10 +34,10 @@ public:
 
 class SpecularTransmission : public SurfaceMaterial {
     SpectrumTextureRef m_coeffT;
-    FloatTextureRef m_etaExt;
-    FloatTextureRef m_etaInt;
+    SpectrumTextureRef m_etaExt;
+    SpectrumTextureRef m_etaInt;
 public:
-    SpecularTransmission(const SpectrumTextureRef &coeffT, const FloatTextureRef &etaExt, const FloatTextureRef &etaInt) :
+    SpecularTransmission(const SpectrumTextureRef &coeffT, const SpectrumTextureRef &etaExt, const SpectrumTextureRef &etaInt) :
     m_coeffT(coeffT), m_etaExt(etaExt), m_etaInt(etaInt) { };
     
     BSDF* getBSDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem, float scale = 1.0f) const override;

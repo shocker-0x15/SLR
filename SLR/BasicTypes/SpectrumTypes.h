@@ -10,16 +10,15 @@
 
 template <typename RealType, uint32_t N>
 struct WavelengthSamplesTemplate {
-    RealType lambdas[N];
-    uint32_t flags;
-    static const uint32_t NumComponents;
-    WavelengthSamplesTemplate() : flags(0) {};
-    WavelengthSamplesTemplate(RealType offset) {
-        SLRAssert(offset >= 0 && offset < 1, "\"offset\" must be in range [0, 1).");
-        for (int i = 0; i < N; ++i)
-            lambdas[i] = WavelengthLowBound + (WavelengthHighBound - WavelengthLowBound) * (i + offset) / N;
-        flags = 0;
+    enum Flag : uint16_t {
+        LambdaSelected = 0x01,
     };
+    RealType lambdas[N];
+    uint16_t selectedLambda;
+    uint16_t flags;
+    static const uint32_t NumComponents;
+    
+    WavelengthSamplesTemplate() : selectedLambda(0), flags(0) {};
     WavelengthSamplesTemplate(const RealType* values) {
         for (int i = 0; i < N; ++i)
             lambdas[i] = values[i];
@@ -34,18 +33,104 @@ struct WavelengthSamplesTemplate {
         SLRAssert(index < N, "\"index\" is out of range [0, %u].", N - 1);
         return lambdas[index];
     };
+    
+    bool lambdaSelected() const {
+        return (flags & LambdaSelected) != 0;
+    };
+    
+    static WavelengthSamplesTemplate createWithEqualOffsets(RealType offset, RealType uLambda, RealType* PDF) {
+        SLRAssert(offset >= 0 && offset < 1, "\"offset\" must be in range [0, 1).");
+        SLRAssert(uLambda >= 0 && uLambda < 1, "\"uLambda\" must be in range [0, 1).");
+        WavelengthSamplesTemplate wls;
+        for (int i = 0; i < N; ++i)
+            wls.lambdas[i] = WavelengthLowBound + (WavelengthHighBound - WavelengthLowBound) * (i + offset) / N;
+        wls.selectedLambda = std::min(uint16_t(N * uLambda), uint16_t(N - 1));
+        wls.flags = 0;
+        *PDF = N / (WavelengthHighBound - WavelengthLowBound);
+        return wls;
+    };
 };
 template <typename RealType, uint32_t N> const uint32_t WavelengthSamplesTemplate<RealType, N>::NumComponents = N;
 
 template <typename RealType, uint32_t N>
 struct ContinuousSpectrumTemplate {
-    virtual SampledSpectrumTemplate<RealType, N> evaluate(const WavelengthSamples &wls) const = 0;
+    virtual SampledSpectrumTemplate<RealType, N> evaluate(const WavelengthSamplesTemplate<RealType, N> &wls) const = 0;
 };
 
 template <typename RealType, uint32_t N>
 struct RegularContinuousSpectrumTemplate : public ContinuousSpectrumTemplate<RealType, N> {
-    SampledSpectrumTemplate<RealType, N> evaluate(const WavelengthSamples &wls) const override {
+    RealType minLambda, maxLambda;
+    uint32_t numSamples;
+    RealType* values;
     
+    RegularContinuousSpectrumTemplate(RealType minWL, RealType maxWL, const RealType* vals, uint32_t numVals) : minLambda(minWL), maxLambda(maxWL), numSamples(numVals) {
+        values = new RealType[numSamples];
+        for (int i = 0; i < numSamples; ++i)
+            values[i] = vals[i];
+    };
+    ~RegularContinuousSpectrumTemplate() {
+        delete[] values;
+    };
+    
+    SampledSpectrumTemplate<RealType, N> evaluate(const WavelengthSamplesTemplate<RealType, N> &wls) const override {
+        SampledSpectrumTemplate<RealType, N> ret(0.0f);
+        for (int i = 0; i < WavelengthSamplesTemplate<RealType, N>::NumComponents; ++i) {
+            RealType binF = (wls[i] - minLambda) / (maxLambda - minLambda) * (numSamples - 1);
+            if (binF <= 0.0f) {
+                ret[i] = values[0];
+                continue;
+            }
+            else if (binF >= numSamples - 1) {
+                ret[i] = values[numSamples - 1];
+                continue;
+            }
+            int32_t bin = int32_t(binF);
+            SLRAssert(bin >= 0 && bin < numSamples - 1, "invalid bin index.");
+            RealType t = binF - bin;
+            ret[i] = (1 - t) * values[bin] + t * values[bin + 1];
+        }
+        return ret;
+    };
+};
+
+template <typename RealType, uint32_t N>
+struct IrregularContinuousSpectrumTemplate : public ContinuousSpectrumTemplate<RealType, N> {
+    uint32_t numSamples;
+    RealType* lambdas;
+    RealType* values;
+    
+    IrregularContinuousSpectrumTemplate(const RealType* wls, const RealType* vals, uint32_t numVals) : numSamples(numVals) {
+        lambdas = new RealType[numSamples];
+        values = new RealType[numSamples];
+        for (int i = 0; i < numSamples; ++i) {
+            lambdas[i] = wls[i];
+            values[i] = vals[i];
+        }
+    };
+    ~IrregularContinuousSpectrumTemplate() {
+        delete[] lambdas;
+        delete[] values;
+    };
+    
+    SampledSpectrumTemplate<RealType, N> evaluate(const WavelengthSamplesTemplate<RealType, N> &wls) const override {
+        SampledSpectrumTemplate<RealType, N> ret(0.0f);
+        uint32_t searchBase = 0;
+        for (int i = 0; i < WavelengthSamplesTemplate<RealType, N>::NumComponents; ++i) {
+            int32_t lowIdx = std::max((int32_t)std::distance(lambdas, std::lower_bound(lambdas + searchBase, lambdas + numSamples, wls[i])) - 1, 0);
+            searchBase = lowIdx;
+            if (lowIdx >= numSamples - 1) {
+                ret[i] = values[numSamples - 1];
+                continue;
+            }
+            RealType t = (wls[i] - lambdas[lowIdx]) / (lambdas[lowIdx + 1] - lambdas[lowIdx]);
+            if (t <= 0.0f) {
+                ret[i] = values[0];
+                continue;
+            }
+            SLRAssert(t >= 0 && t <= 1, "invalid interpolation coefficient.");
+            ret[i] = (1 - t) * values[lowIdx] + t * values[lowIdx + 1];
+        }
+        return ret;
     };
 };
 
@@ -53,27 +138,31 @@ template <typename RealType, uint32_t N>
 struct UpsampledContinuousSpectrumTemplate : public ContinuousSpectrumTemplate<RealType, N> {
     RealType u, v, scale;
     
-    std::function<RealType(RealType)> inverseGammaCorrection = [](RealType value) {
-        if (value <= 0.04045)
-            return value  / 12.92;
-        return std::pow((value + 0.055) / 1.055, 2.4);
-    };
-    
     UpsampledContinuousSpectrumTemplate(RealType uu, RealType vv, RealType ss) : u(uu), v(vv), scale(ss) {};
     
-    UpsampledContinuousSpectrumTemplate(ColorSpace space, RealType e0, RealType e1, RealType e2) {
+    UpsampledContinuousSpectrumTemplate(SpectrumType spType, ColorSpace space, RealType e0, RealType e1, RealType e2) {
         RealType x, y, norm;
         switch (space) {
             case ColorSpace::sRGB_NonLinear: {
-                e0 = inverseGammaCorrection(e0);
-                e1 = inverseGammaCorrection(e1);
-                e2 = inverseGammaCorrection(e2);
+                e0 = sRGB_degamma(e0);
+                e1 = sRGB_degamma(e1);
+                e2 = sRGB_degamma(e2);
                 // pass to the sRGB process.
             }
             case ColorSpace::sRGB: {
                 RealType RGB[3] = {e0, e1, e2};
                 RealType XYZ[3];
-                sRGB_to_XYZ(RGB, XYZ);
+                switch (spType) {
+                    case SpectrumType::Reflectance:
+                        sRGB_E_to_XYZ(RGB, XYZ);
+                        break;
+                    case SpectrumType::Illuminant:
+                        sRGB_E_to_XYZ(RGB, XYZ);
+                        break;
+                    default:
+                        SLRAssert(false, "Invalid Spectrum Type");
+                        break;
+                }
                 e0 = XYZ[0];
                 e1 = XYZ[1];
                 e2 = XYZ[2];
@@ -107,7 +196,7 @@ struct UpsampledContinuousSpectrumTemplate : public ContinuousSpectrumTemplate<R
         SLRAssert(!std::isinf(u) && !std::isnan(u) && !std::isinf(v) && !std::isnan(v) && !std::isinf(scale) && !std::isnan(scale), "Invalid value.");
     };
     
-    SampledSpectrumTemplate<RealType, N> evaluate(const WavelengthSamples &wls) const override {
+    SampledSpectrumTemplate<RealType, N> evaluate(const WavelengthSamplesTemplate<RealType, N> &wls) const override {
         using namespace Upsampling;
         if (u < 0.0f || u >= GridWidth || v < 0.0f || v >= GridHeight)
             return SampledSpectrumTemplate<RealType, N>::Zero;
@@ -181,7 +270,7 @@ struct UpsampledContinuousSpectrumTemplate : public ContinuousSpectrumTemplate<R
         }
     
         SampledSpectrumTemplate<RealType, N> ret(0.0);
-        for (int i = 0; i < WavelengthSamples::NumComponents; ++i) {
+        for (int i = 0; i < WavelengthSamplesTemplate<RealType, N>::NumComponents; ++i) {
             RealType lambda = wls[i];
             RealType p = (lambda - MinWavelength) / (MaxWavelength - MinWavelength);
             SLRAssert(p >= 0 && p <= 1, "Wavelength is out of valid range.");
@@ -207,6 +296,7 @@ struct UpsampledContinuousSpectrumTemplate : public ContinuousSpectrumTemplate<R
         return ret * scale;
     };
 };
+
 
 template <typename RealType, uint32_t N>
 struct SampledSpectrumTemplate {
@@ -322,6 +412,12 @@ struct SampledSpectrumTemplate {
         return values[index];
     };
     
+    RealType avgValue() const {
+        RealType sumVal = values[0];
+        for (int i = 1; i < N; ++i)
+            sumVal += values[i];
+        return sumVal / N;
+    };
     RealType maxValue() const {
         RealType maxVal = values[0];
         for (int i = 1; i < N; ++i)
@@ -349,6 +445,12 @@ struct SampledSpectrumTemplate {
     bool hasInf() const {
         for (int i = 0; i < N; ++i)
             if (std::isinf(values[i]))
+                return true;
+        return false;
+    };
+    bool hasMinus() const {
+        for (int i = 0; i < N; ++i)
+            if (values[i] < 0)
                 return true;
         return false;
     };
@@ -648,10 +750,11 @@ struct SpectrumStorageTemplate {
     
     template <uint32_t N>
     SpectrumStorageTemplate &add(const WavelengthSamplesTemplate<RealType, N> &wls, const SampledSpectrumTemplate<RealType, N> &val) {
+        const float recBinWidth = numStrata / (WavelengthHighBound - WavelengthLowBound);
         ValueType addend(0.0);
         for (int i = 0; i < WavelengthSamplesTemplate<RealType, N>::NumComponents; ++i) {
             uint32_t sBin = std::min(uint32_t((wls[i] - WavelengthLowBound) / (WavelengthHighBound - WavelengthLowBound) * numStrata), numStrata - 1);
-            addend[sBin] += val[i];
+            addend[sBin] += val[i] * recBinWidth;
         }
         value += addend;
         return *this;

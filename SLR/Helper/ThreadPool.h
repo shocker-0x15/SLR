@@ -65,14 +65,17 @@ public:
     
     void enqueue(const JobFunctionObject &task) {
         {
-            std::unique_lock<std::mutex> lock(m_mutex);
+            std::lock_guard<std::mutex> lock(m_mutex);
             m_taskQueue.push_back(task);
         }
         m_condVar.notify_all();
     };
     
     void wait() {
-        m_finishable = true;
+        {
+            std::lock_guard<std::mutex> lock(m_mutex);
+            m_finishable = true;
+        }
         m_condVar.notify_all();
         for (int i = 0; i < m_workers.size(); ++i)
             m_workers[i].join();

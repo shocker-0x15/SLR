@@ -7,9 +7,9 @@
 
 #include "ModifiedWardDurBRDF.h"
 
-Spectrum ModifiedWardDurBRDF::sample(const BSDFQuery &query, const BSDFSample &smp, BSDFQueryResult *result) const {
+SampledSpectrum ModifiedWardDurBRDF::sample(const BSDFQuery &query, const BSDFSample &smp, BSDFQueryResult *result) const {
     if (!matches(query.flags, result))
-        return Spectrum::Zero;
+        return SampledSpectrum::Zero;
     
     float quad = 2 * M_PI * smp.uDir[1];
     float phi_h = std::atan2(m_anisoY * std::sin(quad), m_anisoX * std::cos(quad));
@@ -22,7 +22,7 @@ Spectrum ModifiedWardDurBRDF::sample(const BSDFQuery &query, const BSDFSample &s
     result->dir_sn = 2 * dot(query.dir_sn, halfv) * halfv - query.dir_sn;
     if (result->dir_sn.z /** query.dirLocal.z*/ <= 0) {
         result->dirPDF = 0.0f;
-        return Spectrum::Zero;
+        return SampledSpectrum::Zero;
     }
     
     float hx_ax = halfv.x / m_anisoX;
@@ -34,14 +34,14 @@ Spectrum ModifiedWardDurBRDF::sample(const BSDFQuery &query, const BSDFSample &s
     
     result->dirPDF = numerator / commonDenom;
     result->dirType = m_type;
-    Spectrum ret = m_R * (numerator / (commonDenom * dotHI * dotHN));
+    SampledSpectrum ret = m_R * (numerator / (commonDenom * dotHI * dotHN));
     BSDF_SAMPLE_ASSERT;
     return ret;
 }
 
-Spectrum ModifiedWardDurBRDF::evaluateInternal(const BSDFQuery &query, const Vector3D &dir) const {
+SampledSpectrum ModifiedWardDurBRDF::evaluateInternal(const BSDFQuery &query, const Vector3D &dir) const {
     if (!query.flags.matches(m_type))
-        return Spectrum::Zero;
+        return SampledSpectrum::Zero;
     
     Vector3D halfv = normalize(query.dir_sn + dir);
     float hx_ax = halfv.x / m_anisoX;
@@ -50,7 +50,7 @@ Spectrum ModifiedWardDurBRDF::evaluateInternal(const BSDFQuery &query, const Vec
     float dotHI = dot(halfv, dir);
     float numerator = std::exp(-(hx_ax * hx_ax + hy_ay * hy_ay) / (dotHN * dotHN));
     float denominator = 4 * M_PI * m_anisoX * m_anisoY * dotHI * dotHI * dotHN * dotHN * dotHN * dotHN;
-    Spectrum ret = m_R * numerator / denominator;
+    SampledSpectrum ret = m_R * numerator / denominator;
     BSDF_EVALUATE_ASSERT;
     return ret;
 }
@@ -71,14 +71,33 @@ float ModifiedWardDurBRDF::evaluatePDF(const BSDFQuery &query, const Vector3D &d
     return ret;
 }
 
-float ModifiedWardDurBRDF::weight(const BSDFQuery &query) const {
+float ModifiedWardDurBRDF::weight(const BSDFQuery &query, const BSDFSample &smp) const {
     if (!query.flags.matches(m_type))
         return 0;
+#ifdef Use_BSDF_Actual_Weights
+    BSDFQueryResult result;
+    float fs = sample(query, smp, &result)[query.wlHint];
+    return fs * std::fabs(result.dir_sn.z) / result.dirPDF;
+#else
     return m_R.maxValue();
+#endif
 }
 
-Spectrum ModifiedWardDurBRDF::getBaseColor(DirectionType flags) const {
+float ModifiedWardDurBRDF::weight(const BSDFQuery &query, const Vector3D &dir) const {
+    if (!query.flags.matches(m_type))
+        return 0;
+#ifdef Use_BSDF_Actual_Weights
+    BSDFQueryResult result;
+    float fs = evaluate(query, dir)[query.wlHint];
+    float dirPDF = evaluatePDF(query, dir);
+    return fs * std::fabs(dir.z) / dirPDF;
+#else
+    return weight(query, BSDFSample(0, 0, 0));
+#endif
+}
+
+SampledSpectrum ModifiedWardDurBRDF::getBaseColor(DirectionType flags) const {
     if (!flags.matches(m_type))
-        return Spectrum::Zero;
+        return SampledSpectrum::Zero;
     return m_R;
 }

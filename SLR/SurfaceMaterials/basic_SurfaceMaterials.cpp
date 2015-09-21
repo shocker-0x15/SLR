@@ -15,6 +15,7 @@ BSDF* DiffuseReflection::getBSDF(const SurfacePoint &surfPt, const WavelengthSam
     if (m_sigma) {
         float sigma = m_sigma->evaluate(surfPt.texCoord);
         bsdf = nullptr;
+        SLRAssert(false, "Oren-Nayer BSDF is not implemented.");
     }
     else {
         bsdf = mem.create<LambertianBRDF>(scale * m_reflectance->evaluate(surfPt.texCoord, wls));
@@ -23,14 +24,14 @@ BSDF* DiffuseReflection::getBSDF(const SurfacePoint &surfPt, const WavelengthSam
 }
 
 BSDF* SpecularReflection::getBSDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem, float scale) const {
-    Spectrum coeffR = m_coeffR->evaluate(surfPt.texCoord, wls);
+    SampledSpectrum coeffR = m_coeffR->evaluate(surfPt.texCoord, wls);
     const Fresnel* fresnel = m_fresnel->getFresnel(surfPt, wls, mem);
     return mem.create<SpecularBRDF>(scale * coeffR, fresnel);
 }
 
 BSDF* SpecularTransmission::getBSDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem, float scale) const {
-    Spectrum coeffT = m_coeffT->evaluate(surfPt.texCoord, wls);
-    float etaExt = m_etaExt->evaluate(surfPt.texCoord);
-    float etaInt = m_etaInt->evaluate(surfPt.texCoord);
-    return mem.create<SpecularBTDF>(scale * coeffT, etaExt, etaInt);
+    SampledSpectrum coeffT = m_coeffT->evaluate(surfPt.texCoord, wls);
+    SampledSpectrum etaExt = m_etaExt->evaluate(surfPt.texCoord, wls);
+    SampledSpectrum etaInt = m_etaInt->evaluate(surfPt.texCoord, wls);
+    return mem.create<SpecularBTDF>(scale * coeffT, etaExt, etaInt, !wls.lambdaSelected());
 }
