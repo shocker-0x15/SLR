@@ -1,11 +1,14 @@
 #SLR: 
 
+![SLR](README_TOP.png)  
+IBL image: [sIBL Archive](http://www.hdrlabs.com/sibl/archive.html)  
+
 SLRはモンテカルロレイトレーシングに基づいたレンダラーです。
 
 SLR is a renderer based on Monte Carlo ray tracing.
 
 ##特徴 / Features
-* Full Spectral Rendering (Continuous Function Sampling)  
+* Full Spectral Rendering (Monte Carlo Spectral Sampling)  
   (For RGB resources, RGB->Spectrum conversion is performed using Meng-Simon's method [1].)
 * RGB Rendering
 * Various BSDF Types (including Mixed and ~~Layered~~ (under Dev.) BSDF)

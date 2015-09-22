@@ -190,6 +190,7 @@ struct UpsampledContinuousSpectrumTemplate : public ContinuousSpectrumTemplate<R
                 SLRAssert(false, "Invalid color space is specified.");
                 break;
         }
+        // TODO: Contain a factor for solid of natural reflectance.
         scale = norm / Upsampling::EqualEnergyReflectance;
         RealType xy[2] = {x, y};
         Upsampling::xy_to_uv(xy, &u);
