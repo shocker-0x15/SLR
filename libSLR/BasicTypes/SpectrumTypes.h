@@ -142,7 +142,7 @@ namespace SLR {
         UpsampledContinuousSpectrumTemplate(RealType uu, RealType vv, RealType ss) : u(uu), v(vv), scale(ss) {};
         
         UpsampledContinuousSpectrumTemplate(SpectrumType spType, ColorSpace space, RealType e0, RealType e1, RealType e2) {
-            RealType x, y, norm;
+            RealType x, y, brightness;
             switch (space) {
                 case ColorSpace::sRGB_NonLinear: {
                     e0 = sRGB_degamma(e0);
@@ -170,21 +170,21 @@ namespace SLR {
                     // pass to the XYZ process.
                 }
                 case ColorSpace::XYZ: {
-                    norm = e0 + e1 + e2;
-                    if (norm == 0) {
+                    brightness = e0 + e1 + e2;
+                    if (brightness == 0) {
                         u = 6;
                         v = 4;
                         scale = 0;
                         return;
                     }
-                    x = e0 / norm;
-                    y = e1 / norm;
+                    x = e0 / brightness;
+                    y = e1 / brightness;
                     break;
                 }
                 case ColorSpace::xyY: {
                     x = e0;
                     y = e1;
-                    norm = e2 / e1;
+                    brightness = e2 / e1;
                     break;
                 }
                 default:
@@ -192,7 +192,9 @@ namespace SLR {
                     break;
             }
             // TODO: Contain a factor for solid of natural reflectance.
-            scale = norm / Upsampling::EqualEnergyReflectance;
+            //if (spType == SpectrumType::Reflectance)
+            //    brightness = std::min(brightness, evaluateMaximumBrightness(x, y));
+            scale = brightness / Upsampling::EqualEnergyReflectance;
             RealType xy[2] = {x, y};
             Upsampling::xy_to_uv(xy, &u);
             SLRAssert(!std::isinf(u) && !std::isnan(u) && !std::isinf(v) && !std::isnan(v) && !std::isinf(scale) && !std::isnan(scale), "Invalid value.");
