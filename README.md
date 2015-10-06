@@ -3,9 +3,14 @@
 ![SLR](README_TOP.png)  
 IBL image: [sIBL Archive](http://www.hdrlabs.com/sibl/archive.html)  
 
-SLRはモンテカルロレイトレーシングに基づいたレンダラーです。
+SLRはモンテカルロレイトレーシングに基づいたレンダラーです。  
+SLR is a renderer based on Monte Carlo ray tracing.  
 
-SLR is a renderer based on Monte Carlo ray tracing.
+SLRは次の要素から構成されています。  
+SLR consists of the following components.  
+* libSLR - レンダリングコア / rendering core
+* libSLRSceneGraph - シーン管理・読み込み機能 / scene managing & loading
+* Host Program
 
 ##特徴 / Features
 * Full Spectral Rendering (Monte Carlo Spectral Sampling)  
@@ -41,9 +46,7 @@ It requires the following libraries.
 * assimp (currently obtained from GitHub for supporting the .assbin format)
 
 ##注意 / Note
-モデルデータやテクスチャーを読み込むコードが書かれていますが、それらアセットはリポジトリには含まれていません。
-
-There are code for loading a model data and textures, but those assets are NOT included in this repository.
+...
 
 ----
 2015 [@Shocker_0x15](https://twitter.com/Shocker_0x15)

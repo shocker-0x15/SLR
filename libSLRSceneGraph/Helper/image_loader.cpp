@@ -14,8 +14,6 @@
 #include <string>
 #include <cassert>
 
-#include <libSLR/Core/Image.h>
-
 enum EXRType {
     Plane = 0,
     LatitudeLongitude,
@@ -313,34 +311,4 @@ bool loadImage(const std::string &filePath, uint8_t* storage, bool gammaCorrecti
     }
     
     return false;
-}
-
-namespace SLRSceneGraph {
-    std::map<std::string, SLR::Image2DRef> s_imageDB;
-    
-    std::shared_ptr<SLR::TiledImage2D> createTiledImage(const std::string &filepath, SLR::Allocator *mem, SLR::SpectrumType spType, bool gammaCorrection) {
-        if (s_imageDB.count(filepath) > 0) {
-            return std::static_pointer_cast<SLR::TiledImage2D>(s_imageDB[filepath]);
-        }
-        else {
-            uint64_t requiredSize;
-            bool imgSuccess;
-            uint32_t width, height;
-            ::ColorFormat colorFormat;
-            imgSuccess = getImageInfo(filepath, &width, &height, &requiredSize, &colorFormat);
-            SLRAssert(imgSuccess, "Error occured during getting image information.\n%s", filepath.c_str());
-            
-            void* linearData = malloc(requiredSize);
-            imgSuccess = loadImage(filepath, (uint8_t*)linearData, gammaCorrection);
-            SLRAssert(imgSuccess, "failed to load the image\n%s", filepath.c_str());
-            
-            SLR::ColorFormat internalFormat = (SLR::ColorFormat)colorFormat;
-            SLR::TiledImage2D* texData = new SLR::TiledImage2D(linearData, width, height, internalFormat, mem, spType);
-            free(linearData);
-            
-            std::shared_ptr<SLR::TiledImage2D> ret = std::shared_ptr<SLR::TiledImage2D>(texData);
-            s_imageDB[filepath] = ret;
-            return ret;
-        }
-    };
 }

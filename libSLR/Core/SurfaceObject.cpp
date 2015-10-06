@@ -11,6 +11,7 @@
 #include "distributions.h"
 #include "../Accelerator/BBVH.h"
 #include "textures.h"
+#include "../SurfaceMaterials/IBLEmission.h"
 
 namespace SLR {
     SampledSpectrum Light::sample(const LightPosQuery &query, const LightPosSample &smp, LightPosQueryResult* result) const {
@@ -113,6 +114,17 @@ namespace SLR {
         surfPt->shadingFrame.z = n;
     }
     
+    
+    InfiniteSphereSurfaceObject::InfiniteSphereSurfaceObject(const Surface* surf, const IBLEmission* emitter) {
+        m_surface = surf;
+        m_surfMat = new EmitterSurfaceMaterial(nullptr, emitter);
+        m_dist = emitter->createIBLImportanceMap();
+    }
+    
+    InfiniteSphereSurfaceObject::~InfiniteSphereSurfaceObject() {
+        delete m_dist;
+        delete m_surfMat;
+    }
     
     bool InfiniteSphereSurfaceObject::isEmitting() const {
         //    return m_material->isEmitting();

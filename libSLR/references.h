@@ -48,14 +48,14 @@ namespace SLR {
     typedef DiscretizedSpectrumTemplate<SpectrumFloat, NumStrataForStorage> DiscretizedSpectrum;
     typedef SpectrumStorageTemplate<SpectrumFloat, NumStrataForStorage> SpectrumStorage;
     
-    typedef std::shared_ptr<ContinuousSpectrum> InputSpectrumRef;
+    typedef ContinuousSpectrum InputSpectrum;
 #else
     typedef RGBSamplesTemplate<SpectrumFloat> WavelengthSamples;
     typedef RGBTemplate<SpectrumFloat> SampledSpectrum;
     typedef RGBTemplate<SpectrumFloat> DiscretizedSpectrum;
     typedef RGBStorageTemplate<SpectrumFloat> SpectrumStorage;
     
-    typedef std::shared_ptr<RGBInputSpectrum> InputSpectrumRef;
+    typedef RGBInputSpectrum InputSpectrum;
 #endif
     typedef CompensatedSum<SampledSpectrum> SampledSpectrumSum;
     
@@ -106,9 +106,6 @@ namespace SLR {
     template <uint32_t log2_tileWidth = 3> class TiledImage2DTemplate;
     
     typedef TiledImage2DTemplate<> TiledImage2D;
-    
-    typedef std::shared_ptr<Image2D> Image2DRef;
-    typedef std::shared_ptr<TiledImage2D> TiledImage2DRef;
     
     //
     class ImageSensor;
@@ -161,9 +158,6 @@ namespace SLR {
     class CheckerBoardSpectrumTexture;
     class CheckerBoardNormal3DTexture;
     class CheckerBoardFloatTexture;
-    typedef std::shared_ptr<SpectrumTexture> SpectrumTextureRef;
-    typedef std::shared_ptr<Normal3DTexture> Normal3DTextureRef;
-    typedef std::shared_ptr<FloatTexture> FloatTextureRef;
     
     // Materials
     class SpatialFresnel;
@@ -178,15 +172,11 @@ namespace SLR {
     class ModifiedWardDurReflection;
     class AshikhminSpecularReflection;
     class AshikhminDiffuseReflection;
-    class AddedSurfaceMaterial;
+    class SummedSurfaceMaterial;
     class MixedSurfaceMaterial;
     class EmitterSurfaceMaterial;
     class DiffuseEmission;
     class IBLEmission;
-    typedef std::shared_ptr<SpatialFresnel> SpatialFresnelRef;
-    typedef std::shared_ptr<SpatialFresnelDielectric> SpatialFresnelDielectricRef;
-    typedef std::shared_ptr<SurfaceMaterial> SurfaceMaterialRef;
-    typedef std::shared_ptr<EmitterSurfaceProperty> EmitterSurfacePropertyRef;
     
     // Directional Distribution Functions
     struct DirectionType;

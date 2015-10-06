@@ -590,10 +590,6 @@ namespace SLR {
 
 namespace SLR {
     void initSpectrum();
-    
-    InputSpectrumRef createInputSpectrum(SpectrumType spType, ColorSpace space, SpectrumFloat e0, SpectrumFloat e1, SpectrumFloat e2);
-    InputSpectrumRef createInputSpectrum(SpectrumType spType, SpectrumFloat minLambda, SpectrumFloat maxLambda, const SpectrumFloat* values, uint32_t numSamples);
-    InputSpectrumRef createInputSpectrum(SpectrumType spType, const SpectrumFloat* lambdas, const SpectrumFloat* values, uint32_t numSamples);
 }
 
 #endif

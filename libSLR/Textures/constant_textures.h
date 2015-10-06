@@ -14,9 +14,9 @@
 
 namespace SLR {
     class ConstantSpectrumTexture : public SpectrumTexture {
-        InputSpectrumRef m_value;
+        const InputSpectrum* m_value;
     public:
-        ConstantSpectrumTexture(const InputSpectrumRef &value) : m_value(value) { };
+        ConstantSpectrumTexture(const InputSpectrum* value) : m_value(value) { };
         
         SampledSpectrum evaluate(const TexCoord2D &tc, const WavelengthSamples &wls) const override;
         RegularConstantContinuous2D* createIBLImportanceMap() const override;
@@ -25,7 +25,7 @@ namespace SLR {
     class ConstantFloatTexture : public FloatTexture {
         float m_value;
     public:
-        ConstantFloatTexture(const float &value) : m_value(value) { };
+        ConstantFloatTexture(float value) : m_value(value) { };
         
         float evaluate(const TexCoord2D &tc) const override { return m_value; };
     };    

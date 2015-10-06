@@ -14,15 +14,15 @@
 
 namespace SLR {
     class MixedSurfaceMaterial : public SurfaceMaterial {
-        SurfaceMaterialRef m_mat0;
-        SurfaceMaterialRef m_mat1;
-        FloatTextureRef m_factor;
+        const SurfaceMaterial* m_mat0;
+        const SurfaceMaterial* m_mat1;
+        const FloatTexture* m_factor;
     public:
-        MixedSurfaceMaterial(const SurfaceMaterialRef &m0, const SurfaceMaterialRef &m1, const FloatTextureRef &factor) :
+        MixedSurfaceMaterial(const SurfaceMaterial* m0, const SurfaceMaterial* m1, const FloatTexture* factor) :
         m_mat0(m0), m_mat1(m1), m_factor(factor) {};
         
         BSDF* getBSDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem, float scale = 1.0f) const override;
-    };    
+    };
 }
 
 #endif /* defined(__SLR__MixedSurfaceMaterial__) */

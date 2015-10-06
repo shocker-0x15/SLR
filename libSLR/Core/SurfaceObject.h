@@ -100,11 +100,11 @@ namespace SLR {
     };
     
     class InfiniteSphereSurfaceObject : public SingleSurfaceObject {
+        const SurfaceMaterial* m_surfMat;
         const RegularConstantContinuous2D* m_dist;
     public:
-        InfiniteSphereSurfaceObject(const Surface* surf, const SurfaceMaterial* mat, const RegularConstantContinuous2D* dist) :
-        SingleSurfaceObject(surf, mat), m_dist(dist) { };
-        ~InfiniteSphereSurfaceObject() { };
+        InfiniteSphereSurfaceObject(const Surface* surf, const IBLEmission* emitter);
+        ~InfiniteSphereSurfaceObject();
         
         bool isEmitting() const override;
         float importance() const override;

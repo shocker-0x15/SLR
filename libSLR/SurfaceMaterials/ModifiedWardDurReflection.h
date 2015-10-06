@@ -14,10 +14,11 @@
 
 namespace SLR {
     class ModifiedWardDurReflection : public SurfaceMaterial {
-        SpectrumTextureRef m_reflectance;
-        FloatTextureRef m_anisoX, m_anisoY;
+        const SpectrumTexture* m_reflectance;
+        const FloatTexture* m_anisoX;
+        const FloatTexture* m_anisoY;
     public:
-        ModifiedWardDurReflection(const SpectrumTextureRef &reflectance, const FloatTextureRef &anisoX, const FloatTextureRef &anisoY) :
+        ModifiedWardDurReflection(const SpectrumTexture* reflectance, const FloatTexture* anisoX, const FloatTexture* anisoY) :
         m_reflectance(reflectance), m_anisoX(anisoX), m_anisoY(anisoY) { };
         
         BSDF* getBSDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem, float scale = 1.0f) const override;

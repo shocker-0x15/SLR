@@ -14,14 +14,14 @@
 
 namespace SLR {
     class DiffuseEmission : public EmitterSurfaceProperty {
-        SpectrumTextureRef m_emittance;
+        const SpectrumTexture* m_emittance;
     public:
-        DiffuseEmission(const SpectrumTextureRef &emittance) :
+        DiffuseEmission(const SpectrumTexture* emittance) :
         m_emittance(emittance) {};
         
         SampledSpectrum emittance(const SurfacePoint &surfPt, const WavelengthSamples &wls) const override;
         EDF* getEDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem, float scale = 1.0f) const override;
-    };    
+    };
 }
 
 #endif /* defined(__SLR__DiffuseEmission__) */

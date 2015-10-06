@@ -7,6 +7,16 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		4602E8961BC2D8EF00EC16FA /* API.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4602E8941BC2D8EF00EC16FA /* API.cpp */; settings = {ASSET_TAGS = (); }; };
+		4602E8971BC2D8EF00EC16FA /* API.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 4602E8951BC2D8EF00EC16FA /* API.hpp */; settings = {ASSET_TAGS = (); }; };
+		4602E8B01BC40E8700EC16FA /* surface_materials.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4602E8AC1BC40E8700EC16FA /* surface_materials.cpp */; settings = {ASSET_TAGS = (); }; };
+		4602E8B11BC40E8700EC16FA /* surface_materials.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 4602E8AD1BC40E8700EC16FA /* surface_materials.hpp */; settings = {ASSET_TAGS = (); }; };
+		4602E8B21BC40E8700EC16FA /* textures.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4602E8AE1BC40E8700EC16FA /* textures.cpp */; settings = {ASSET_TAGS = (); }; };
+		4602E8B31BC40E8700EC16FA /* textures.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 4602E8AF1BC40E8700EC16FA /* textures.hpp */; settings = {ASSET_TAGS = (); }; };
+		4602E8B51BC414C000EC16FA /* texture_headers.h in Headers */ = {isa = PBXBuildFile; fileRef = 4602E8B41BC414C000EC16FA /* texture_headers.h */; settings = {ASSET_TAGS = (); }; };
+		4602E8B71BC4152D00EC16FA /* surface_material_headers.h in Headers */ = {isa = PBXBuildFile; fileRef = 4602E8B61BC4152D00EC16FA /* surface_material_headers.h */; settings = {ASSET_TAGS = (); }; };
+		4602E8BE1BC418FA00EC16FA /* SummedSurfaceMaterial.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4602E8BC1BC418FA00EC16FA /* SummedSurfaceMaterial.cpp */; settings = {ASSET_TAGS = (); }; };
+		4602E8BF1BC418FA00EC16FA /* SummedSurfaceMaterial.h in Headers */ = {isa = PBXBuildFile; fileRef = 4602E8BD1BC418FA00EC16FA /* SummedSurfaceMaterial.h */; settings = {ASSET_TAGS = (); }; };
 		466F6CCC1BB6C9D60056F2FA /* BBVH.h in Headers */ = {isa = PBXBuildFile; fileRef = 466F6C081BB6B2660056F2FA /* BBVH.h */; };
 		466F6CCD1BB6CA070056F2FA /* common_spectra.h in Headers */ = {isa = PBXBuildFile; fileRef = 466F6C091BB6B2830056F2FA /* common_spectra.h */; };
 		466F6CCE1BB6CA070056F2FA /* CompensatedSum.h in Headers */ = {isa = PBXBuildFile; fileRef = 466F6C0A1BB6B2830056F2FA /* CompensatedSum.h */; };
@@ -85,8 +95,6 @@
 		466F6D381BB6DC170056F2FA /* ArenaAllocator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 466F6C631BB6B2D70056F2FA /* ArenaAllocator.cpp */; };
 		466F6D391BB6DC200056F2FA /* Allocator.h in Headers */ = {isa = PBXBuildFile; fileRef = 466F6C621BB6B2D70056F2FA /* Allocator.h */; };
 		466F6D3A1BB6DC200056F2FA /* ArenaAllocator.h in Headers */ = {isa = PBXBuildFile; fileRef = 466F6C641BB6B2D70056F2FA /* ArenaAllocator.h */; };
-		466F6D3B1BB6DC840056F2FA /* AddedSurfaceMaterial.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 466F6C8D1BB6B3090056F2FA /* AddedSurfaceMaterial.cpp */; };
-		466F6D3C1BB6DC840056F2FA /* AddedSurfaceMaterial.h in Headers */ = {isa = PBXBuildFile; fileRef = 466F6C8E1BB6B3090056F2FA /* AddedSurfaceMaterial.h */; };
 		466F6D3D1BB6DC840056F2FA /* AshikhminReflection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 466F6C8F1BB6B3090056F2FA /* AshikhminReflection.cpp */; };
 		466F6D3E1BB6DC840056F2FA /* AshikhminReflection.h in Headers */ = {isa = PBXBuildFile; fileRef = 466F6C901BB6B3090056F2FA /* AshikhminReflection.h */; };
 		466F6D3F1BB6DC840056F2FA /* basic_SurfaceMaterials.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 466F6C911BB6B3090056F2FA /* basic_SurfaceMaterials.cpp */; };
@@ -159,6 +167,16 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		4602E8941BC2D8EF00EC16FA /* API.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = API.cpp; path = libSLRSceneGraph/API.cpp; sourceTree = "<group>"; };
+		4602E8951BC2D8EF00EC16FA /* API.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = API.hpp; path = libSLRSceneGraph/API.hpp; sourceTree = "<group>"; };
+		4602E8AC1BC40E8700EC16FA /* surface_materials.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = surface_materials.cpp; path = libSLRSceneGraph/surface_materials.cpp; sourceTree = "<group>"; };
+		4602E8AD1BC40E8700EC16FA /* surface_materials.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = surface_materials.hpp; path = libSLRSceneGraph/surface_materials.hpp; sourceTree = "<group>"; };
+		4602E8AE1BC40E8700EC16FA /* textures.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = textures.cpp; path = libSLRSceneGraph/textures.cpp; sourceTree = "<group>"; };
+		4602E8AF1BC40E8700EC16FA /* textures.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = textures.hpp; path = libSLRSceneGraph/textures.hpp; sourceTree = "<group>"; };
+		4602E8B41BC414C000EC16FA /* texture_headers.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = texture_headers.h; path = libSLR/Textures/texture_headers.h; sourceTree = SOURCE_ROOT; };
+		4602E8B61BC4152D00EC16FA /* surface_material_headers.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = surface_material_headers.h; path = libSLR/SurfaceMaterials/surface_material_headers.h; sourceTree = SOURCE_ROOT; };
+		4602E8BC1BC418FA00EC16FA /* SummedSurfaceMaterial.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SummedSurfaceMaterial.cpp; path = libSLR/SurfaceMaterials/SummedSurfaceMaterial.cpp; sourceTree = SOURCE_ROOT; };
+		4602E8BD1BC418FA00EC16FA /* SummedSurfaceMaterial.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SummedSurfaceMaterial.h; path = libSLR/SurfaceMaterials/SummedSurfaceMaterial.h; sourceTree = SOURCE_ROOT; };
 		4634EC3E1B9B60400047AE54 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		466F6C081BB6B2660056F2FA /* BBVH.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = BBVH.h; path = libSLR/Accelerator/BBVH.h; sourceTree = SOURCE_ROOT; };
 		466F6C091BB6B2830056F2FA /* common_spectra.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = common_spectra.h; path = libSLR/BasicTypes/common_spectra.h; sourceTree = SOURCE_ROOT; };
@@ -232,8 +250,6 @@
 		466F6C881BB6B2FB0056F2FA /* InfiniteSphere.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = InfiniteSphere.h; path = libSLR/Surface/InfiniteSphere.h; sourceTree = SOURCE_ROOT; };
 		466F6C891BB6B2FB0056F2FA /* TriangleMesh.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TriangleMesh.cpp; path = libSLR/Surface/TriangleMesh.cpp; sourceTree = SOURCE_ROOT; };
 		466F6C8A1BB6B2FB0056F2FA /* TriangleMesh.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TriangleMesh.h; path = libSLR/Surface/TriangleMesh.h; sourceTree = SOURCE_ROOT; };
-		466F6C8D1BB6B3090056F2FA /* AddedSurfaceMaterial.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AddedSurfaceMaterial.cpp; path = libSLR/SurfaceMaterials/AddedSurfaceMaterial.cpp; sourceTree = SOURCE_ROOT; };
-		466F6C8E1BB6B3090056F2FA /* AddedSurfaceMaterial.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AddedSurfaceMaterial.h; path = libSLR/SurfaceMaterials/AddedSurfaceMaterial.h; sourceTree = SOURCE_ROOT; };
 		466F6C8F1BB6B3090056F2FA /* AshikhminReflection.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AshikhminReflection.cpp; path = libSLR/SurfaceMaterials/AshikhminReflection.cpp; sourceTree = SOURCE_ROOT; };
 		466F6C901BB6B3090056F2FA /* AshikhminReflection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AshikhminReflection.h; path = libSLR/SurfaceMaterials/AshikhminReflection.h; sourceTree = SOURCE_ROOT; };
 		466F6C911BB6B3090056F2FA /* basic_SurfaceMaterials.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = basic_SurfaceMaterials.cpp; path = libSLR/SurfaceMaterials/basic_SurfaceMaterials.cpp; sourceTree = SOURCE_ROOT; };
@@ -452,8 +468,8 @@
 		4634EBF61B9B529B0047AE54 /* SurfaceMaterials */ = {
 			isa = PBXGroup;
 			children = (
-				466F6C8D1BB6B3090056F2FA /* AddedSurfaceMaterial.cpp */,
-				466F6C8E1BB6B3090056F2FA /* AddedSurfaceMaterial.h */,
+				4602E8BC1BC418FA00EC16FA /* SummedSurfaceMaterial.cpp */,
+				4602E8BD1BC418FA00EC16FA /* SummedSurfaceMaterial.h */,
 				466F6C8F1BB6B3090056F2FA /* AshikhminReflection.cpp */,
 				466F6C901BB6B3090056F2FA /* AshikhminReflection.h */,
 				466F6C911BB6B3090056F2FA /* basic_SurfaceMaterials.cpp */,
@@ -466,6 +482,7 @@
 				466F6C981BB6B3090056F2FA /* MixedSurfaceMaterial.h */,
 				466F6C991BB6B3090056F2FA /* ModifiedWardDurReflection.cpp */,
 				466F6C9A1BB6B3090056F2FA /* ModifiedWardDurReflection.h */,
+				4602E8B61BC4152D00EC16FA /* surface_material_headers.h */,
 			);
 			path = SurfaceMaterials;
 			sourceTree = "<group>";
@@ -479,6 +496,7 @@
 				466F6CA51BB6B31D0056F2FA /* constant_textures.h */,
 				466F6CA61BB6B31D0056F2FA /* image_textures.cpp */,
 				466F6CA71BB6B31D0056F2FA /* image_textures.h */,
+				4602E8B41BC414C000EC16FA /* texture_headers.h */,
 			);
 			path = Textures;
 			sourceTree = "<group>";
@@ -487,6 +505,12 @@
 			isa = PBXGroup;
 			children = (
 				466F6D491BB7134E0056F2FA /* references.h */,
+				4602E8941BC2D8EF00EC16FA /* API.cpp */,
+				4602E8951BC2D8EF00EC16FA /* API.hpp */,
+				4602E8AE1BC40E8700EC16FA /* textures.cpp */,
+				4602E8AF1BC40E8700EC16FA /* textures.hpp */,
+				4602E8AC1BC40E8700EC16FA /* surface_materials.cpp */,
+				4602E8AD1BC40E8700EC16FA /* surface_materials.hpp */,
 				466F6D181BB6CB4E0056F2FA /* nodes.cpp */,
 				466F6D191BB6CB4E0056F2FA /* nodes.h */,
 				466F6D1C1BB6CB4E0056F2FA /* TriangleMeshNode.cpp */,
@@ -582,14 +606,15 @@
 				466F6CD01BB6CA070056F2FA /* Matrix4x4.h in Headers */,
 				466F6CD11BB6CA070056F2FA /* Normal3.h in Headers */,
 				466F6D011BB6CA420056F2FA /* XORShift.h in Headers */,
-				466F6D3C1BB6DC840056F2FA /* AddedSurfaceMaterial.h in Headers */,
 				466F6D031BB6CA510056F2FA /* basic_EDFs.h in Headers */,
 				466F6CD61BB6CA070056F2FA /* Spectrum.h in Headers */,
 				466F6CE71BB6CA2D0056F2FA /* PerspectiveCamera.h in Headers */,
 				466F6D371BB6DC080056F2FA /* bmp_exporter.h in Headers */,
 				466F6D4B1BB7153E0056F2FA /* InfiniteSphere.h in Headers */,
+				4602E8BF1BC418FA00EC16FA /* SummedSurfaceMaterial.h in Headers */,
 				466F6D051BB6CA510056F2FA /* IBLEDF.h in Headers */,
 				466F6CF71BB6CA420056F2FA /* RenderSettings.h in Headers */,
+				4602E8B51BC414C000EC16FA /* texture_headers.h in Headers */,
 				466F6D461BB6DC840056F2FA /* MixedSurfaceMaterial.h in Headers */,
 				466F6D581BB715660056F2FA /* defines.h in Headers */,
 				466F6CE11BB6CA260056F2FA /* ModifiedWardDurBRDF.h in Headers */,
@@ -606,6 +631,7 @@
 				466F6D421BB6DC840056F2FA /* DiffuseEmission.h in Headers */,
 				466F6CCC1BB6C9D60056F2FA /* BBVH.h in Headers */,
 				466F6CCE1BB6CA070056F2FA /* CompensatedSum.h in Headers */,
+				4602E8B71BC4152D00EC16FA /* surface_material_headers.h in Headers */,
 				466F6CEC1BB6CA420056F2FA /* distributions.h in Headers */,
 				466F6D571BB715600056F2FA /* image_textures.h in Headers */,
 				466F6CDB1BB6CA070056F2FA /* Vector4.h in Headers */,
@@ -636,11 +662,14 @@
 			buildActionMask = 2147483647;
 			files = (
 				466F6D1F1BB6CB4E0056F2FA /* camera_nodes.h in Headers */,
+				4602E8B11BC40E8700EC16FA /* surface_materials.hpp in Headers */,
 				466F6D211BB6CB4E0056F2FA /* InfiniteSphereNode.h in Headers */,
 				466F6D251BB6CB4E0056F2FA /* nodes.h in Headers */,
 				466F6D231BB6CB4E0056F2FA /* node_constructor.h in Headers */,
+				4602E8B31BC40E8700EC16FA /* textures.hpp in Headers */,
 				46AE85291BB718C400C70BF3 /* references.h in Headers */,
 				466F6D271BB6CB4E0056F2FA /* Scene.h in Headers */,
+				4602E8971BC2D8EF00EC16FA /* API.hpp in Headers */,
 				466F6D351BB6D7A00056F2FA /* image_loader.h in Headers */,
 				466F6D291BB6CB4E0056F2FA /* TriangleMeshNode.h in Headers */,
 			);
@@ -709,7 +738,7 @@
 		46FFDDF51B9B258400E47537 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0620;
+				LastUpgradeCheck = 0700;
 				ORGANIZATIONNAME = "渡部 心";
 				TargetAttributes = {
 					466F6CC61BB6C9C10056F2FA = {
@@ -752,12 +781,12 @@
 				466F6D4C1BB7153E0056F2FA /* TriangleMesh.cpp in Sources */,
 				466F6CE81BB6CA420056F2FA /* cameras.cpp in Sources */,
 				466F6D451BB6DC840056F2FA /* MixedSurfaceMaterial.cpp in Sources */,
+				4602E8BE1BC418FA00EC16FA /* SummedSurfaceMaterial.cpp in Sources */,
 				466F6CF11BB6CA420056F2FA /* ImageSensor.cpp in Sources */,
 				466F6D521BB715600056F2FA /* checker_board_textures.cpp in Sources */,
 				466F6D4E1BB715490056F2FA /* AMCMCPPMRenderer.cpp in Sources */,
 				466F6D381BB6DC170056F2FA /* ArenaAllocator.cpp in Sources */,
 				466F6D001BB6CA420056F2FA /* XORShift.cpp in Sources */,
-				466F6D3B1BB6DC840056F2FA /* AddedSurfaceMaterial.cpp in Sources */,
 				466F6CFA1BB6CA420056F2FA /* SurfaceObject.cpp in Sources */,
 				466F6CE01BB6CA260056F2FA /* ModifiedWardDurBRDF.cpp in Sources */,
 				466F6CEA1BB6CA420056F2FA /* directional_distribution_functions.cpp in Sources */,
@@ -796,6 +825,9 @@
 			files = (
 				466F6D201BB6CB4E0056F2FA /* InfiniteSphereNode.cpp in Sources */,
 				466F6D221BB6CB4E0056F2FA /* node_constructor.cpp in Sources */,
+				4602E8B01BC40E8700EC16FA /* surface_materials.cpp in Sources */,
+				4602E8B21BC40E8700EC16FA /* textures.cpp in Sources */,
+				4602E8961BC2D8EF00EC16FA /* API.cpp in Sources */,
 				466F6D341BB6D7A00056F2FA /* image_loader.cpp in Sources */,
 				466F6D1E1BB6CB4E0056F2FA /* camera_nodes.cpp in Sources */,
 				466F6D261BB6CB4E0056F2FA /* Scene.cpp in Sources */,
@@ -837,6 +869,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CLANG_ENABLE_MODULES = YES;
+				COMBINE_HIDPI_IMAGES = YES;
 				CONFIGURATION_BUILD_DIR = "$(inherited)";
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
@@ -856,6 +889,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CLANG_ENABLE_MODULES = YES;
+				COMBINE_HIDPI_IMAGES = YES;
 				CONFIGURATION_BUILD_DIR = "$(inherited)";
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
@@ -874,6 +908,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CLANG_ENABLE_MODULES = YES;
+				COMBINE_HIDPI_IMAGES = YES;
 				CONFIGURATION_BUILD_DIR = "$(inherited)";
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
@@ -892,6 +927,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CLANG_ENABLE_MODULES = YES;
+				COMBINE_HIDPI_IMAGES = YES;
 				CONFIGURATION_BUILD_DIR = "$(inherited)";
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
@@ -902,7 +938,6 @@
 					"$(SRCROOT)/",
 					/usr/local/include,
 					/usr/local/include/OpenEXR,
-					/opt/local/include,
 				);
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
@@ -911,9 +946,9 @@
 				OTHER_LDFLAGS = (
 					"-lSLR",
 					"-lpng",
-					"-lHalf",
-					"-lIlmImf-2_2",
 					"-lassimp",
+					"-lHalf",
+					"-lIlmImf",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
@@ -923,6 +958,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CLANG_ENABLE_MODULES = YES;
+				COMBINE_HIDPI_IMAGES = YES;
 				CONFIGURATION_BUILD_DIR = "$(inherited)";
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
@@ -932,7 +968,6 @@
 					"$(SRCROOT)/",
 					/usr/local/include,
 					/usr/local/include/OpenEXR,
-					/opt/local/include,
 				);
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
@@ -941,9 +976,9 @@
 				OTHER_LDFLAGS = (
 					"-lSLR",
 					"-lpng",
-					"-lHalf",
-					"-lIlmImf-2_2",
 					"-lassimp",
+					"-lHalf",
+					"-lIlmImf",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
@@ -953,6 +988,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CLANG_ENABLE_MODULES = YES;
+				COMBINE_HIDPI_IMAGES = YES;
 				CONFIGURATION_BUILD_DIR = "$(inherited)";
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
@@ -962,7 +998,6 @@
 					"$(SRCROOT)/",
 					/usr/local/include,
 					/usr/local/include/OpenEXR,
-					/opt/local/include,
 				);
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
@@ -971,9 +1006,9 @@
 				OTHER_LDFLAGS = (
 					"-lSLR",
 					"-lpng",
-					"-lHalf",
-					"-lIlmImf-2_2",
 					"-lassimp",
+					"-lHalf",
+					"-lIlmImf",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
@@ -1011,10 +1046,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = "$(inherited)";
-				LIBRARY_SEARCH_PATHS = (
-					/opt/local/lib,
-					/usr/local/lib,
-				);
+				LIBRARY_SEARCH_PATHS = /usr/local/lib;
 				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				OTHER_LDFLAGS = "";
@@ -1062,6 +1094,7 @@
 				CONFIGURATION_BUILD_DIR = "$(SRCROOT)/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)";
 				COPY_PHASE_STRIP = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_OPTIMIZATION_LEVEL = 0;
@@ -1077,10 +1110,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = "$(inherited)";
-				LIBRARY_SEARCH_PATHS = (
-					/opt/local/lib,
-					/usr/local/lib,
-				);
+				LIBRARY_SEARCH_PATHS = /usr/local/lib;
 				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -1120,10 +1150,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = "$(inherited)";
-				LIBRARY_SEARCH_PATHS = (
-					/opt/local/lib,
-					/usr/local/lib,
-				);
+				LIBRARY_SEARCH_PATHS = /usr/local/lib;
 				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				OTHER_LDFLAGS = "";

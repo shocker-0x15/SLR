@@ -81,7 +81,7 @@ namespace SLR {
         BoundingBox3D::Axis axis = m_BBox.widestAxis();
         
         // axis軸においてメディアンとなる値より小さい値を前に、大きい値を後ろに並べる。
-        auto compareFunc = [&axis](Particle* &p0, Particle* p1) { return p0->position[axis] < p1->position[axis]; };
+        auto compareFunc = [&axis](Particle* p0, Particle* p1) { return p0->position[axis] < p1->position[axis]; };
         std::nth_element(m_ptrParticles.begin() + start, m_ptrParticles.begin() + median, m_ptrParticles.begin() + end + 1, compareFunc);
         
         balanced[index] = m_ptrParticles[median];

@@ -28,18 +28,18 @@ namespace SLRSceneGraph {
         
         std::vector<Vertex> m_vertices;
         std::vector<Triangle> m_triangles;
-        std::vector<SLR::SurfaceMaterialRef> m_materials;
-        std::vector<SLR::Normal3DTextureRef> m_normalMaps;
+        std::vector<SurfaceMaterialRef> m_materials;
+        std::vector<Normal3DTextureRef> m_normalMaps;
     public:
         TriangleMeshNode() : SurfaceObjectNode() { };
         ~TriangleMeshNode();
         
         uint64_t addVertex(const SLR::Vertex &v);
-        void addTriangle(uint64_t v0, uint64_t v1, uint64_t v2, const SLR::SurfaceMaterialRef &mat, const SLR::Normal3DTextureRef &normalMap = nullptr);
+        void addTriangle(uint64_t v0, uint64_t v1, uint64_t v2, const SurfaceMaterialRef &mat, const Normal3DTextureRef &normalMap = nullptr);
         
         void applyTransform(const SLR::StaticTransform &t) final;
         void createSurfaceObjects() final;
-    };    
+    };
 }
 
 #endif /* defined(__SLRSceneGraph__TriangleMeshNode__) */

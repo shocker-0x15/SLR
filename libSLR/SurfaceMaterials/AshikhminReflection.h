@@ -14,24 +14,25 @@
 
 namespace SLR {
     class AshikhminSpecularReflection : public SurfaceMaterial {
-        SpectrumTextureRef m_Rs;
-        FloatTextureRef m_nu, m_nv;
+        const SpectrumTexture* m_Rs;
+        const FloatTexture* m_nu;
+        const FloatTexture* m_nv;
     public:
-        AshikhminSpecularReflection(const SpectrumTextureRef &Rs, const FloatTextureRef &nu, const FloatTextureRef &nv) :
+        AshikhminSpecularReflection(const SpectrumTexture* Rs, const FloatTexture* nu, const FloatTexture* nv) :
         m_Rs(Rs), m_nu(nu), m_nv(nv) { };
         
         BSDF* getBSDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem, float scale = 1.0f) const override;
     };
     
     class AshikhminDiffuseReflection : public SurfaceMaterial {
-        SpectrumTextureRef m_Rs;
-        SpectrumTextureRef m_Rd;
+        const SpectrumTexture* m_Rs;
+        const SpectrumTexture* m_Rd;
     public:
-        AshikhminDiffuseReflection(const SpectrumTextureRef &Rs, const SpectrumTextureRef &Rd) :
+        AshikhminDiffuseReflection(const SpectrumTexture* Rs, const SpectrumTexture* Rd) :
         m_Rs(Rs), m_Rd(Rd) { };
         
         BSDF* getBSDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem, float scale = 1.0f) const override;
-    };    
+    };
 }
 
 #endif /* defined(__SLR__AshikhminReflection__) */

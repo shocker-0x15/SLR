@@ -114,6 +114,8 @@ int main(int argc, const char * argv[]) {
     printf("%s\n", std::ctime(&ctimeLaunch));
     
     stopwatch.start();
+//    SLRSceneGraph::Scene scene;
+//    SLRSceneGraph::readScene(argv[1], &scene);
     buildScene(stopwatch);
     printf("build: %g [s]\n", stopwatch.stop() * 1e-3f);
     

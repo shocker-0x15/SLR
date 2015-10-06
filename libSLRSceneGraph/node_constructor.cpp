@@ -6,13 +6,10 @@
 //
 
 #include "node_constructor.h"
-#include <libSLR/Memory/Allocator.h>
-#include <libSLR/Core/textures.h>
-#include <libSLR/Core/surface_material.h>
-#include <libSLR/Textures/constant_textures.h>
-#include <libSLR/Textures/image_textures.h>
 #include "TriangleMeshNode.h"
-#include "Helper/image_loader.h"
+#include "API.hpp"
+#include "textures.hpp"
+#include <libSLR/Memory/Allocator.h>
 #include <libSLR/Core/Transform.h>
 
 inline void makeTangent(float nx, float ny, float nz, float* s) {
@@ -31,7 +28,7 @@ inline void makeTangent(float nx, float ny, float nz, float* s) {
 }
 
 namespace SLRSceneGraph {
-    void recursiveConstruct(const aiScene &objSrc, const aiNode* nodeSrc, const std::vector<SLR::SurfaceMaterialRef> &materials, InternalNodeRef &nodeOut) {
+    void recursiveConstruct(const aiScene &objSrc, const aiNode* nodeSrc, const std::vector<SurfaceMaterialRef> &materials, InternalNodeRef &nodeOut) {
         if (nodeSrc->mNumMeshes == 0 && nodeSrc->mNumChildren == 0) {
             nodeOut = nullptr;
             return;
@@ -56,7 +53,7 @@ namespace SLRSceneGraph {
             }
             
             TriangleMeshNodeRef surfMesh = createShared<TriangleMeshNode>();
-            const SLR::SurfaceMaterialRef &surfMat = materials[mesh->mMaterialIndex];
+            const SurfaceMaterialRef &surfMat = materials[mesh->mMaterialIndex];
             
             for (int v = 0; v < mesh->mNumVertices; ++v) {
                 const aiVector3D &p = mesh->mVertices[v];
@@ -90,7 +87,7 @@ namespace SLRSceneGraph {
         }
     }
     
-    SLR::SurfaceMaterialRef createMaterialDefaultFunction(const aiMaterial* aiMat, const std::string &pathPrefix, SLR::Allocator* mem) {
+    SurfaceMaterialRef createMaterialDefaultFunction(const aiMaterial* aiMat, const std::string &pathPrefix, SLR::Allocator* mem) {
         using namespace SLR;
         aiReturn ret;
         aiString strValue;
@@ -100,19 +97,19 @@ namespace SLRSceneGraph {
         
         SpectrumTextureRef diffuseTex;
         if (aiMat->Get(AI_MATKEY_TEXTURE_DIFFUSE(0), strValue) == aiReturn_SUCCESS) {
-            TiledImage2DRef image = createTiledImage((pathPrefix + strValue.C_Str()).c_str(), mem, SpectrumType::Reflectance);
+            TiledImage2DRef image = API::Image::createTiledImage((pathPrefix + strValue.C_Str()).c_str(), mem, SpectrumType::Reflectance);
             diffuseTex = createShared<ImageSpectrumTexture>(image);
         }
         else if (aiMat->Get(AI_MATKEY_COLOR_DIFFUSE, color, nullptr) == aiReturn_SUCCESS) {
-            InputSpectrumRef sp = createInputSpectrum(SpectrumType::Reflectance, ColorSpace::sRGB_NonLinear, color[0], color[1], color[2]);
+            InputSpectrumRef sp = API::Spectrum::create(SpectrumType::Reflectance, ColorSpace::sRGB_NonLinear, color[0], color[1], color[2]);
             diffuseTex = createShared<ConstantSpectrumTexture>(sp);
         }
         else {
-            InputSpectrumRef sp = createInputSpectrum(SpectrumType::Reflectance, ColorSpace::sRGB_NonLinear, 1.0f, 0.0f, 1.0f);
+            InputSpectrumRef sp = API::Spectrum::create(SpectrumType::Reflectance, ColorSpace::sRGB_NonLinear, 1.0f, 0.0f, 1.0f);
             diffuseTex = createShared<ConstantSpectrumTexture>(sp);
         }
         
-        return SurfaceMaterial::createMatte(diffuseTex, nullptr);
+        return API::SurfaceMaterial::createMatte(diffuseTex, nullptr);
     };
     
     void construct(const aiScene &objSrc, const std::string &pathPrefix, InternalNodeRef &nodeOut, const createMaterialFunction materialFunc) {
@@ -130,7 +127,7 @@ namespace SLRSceneGraph {
             aiString strValue;
             Normal3DTextureRef normalTex;
             if (aiMat->Get(AI_MATKEY_TEXTURE_DISPLACEMENT(0), strValue) == aiReturn_SUCCESS) {
-                TiledImage2DRef image = createTiledImage((pathPrefix + strValue.C_Str()).c_str(), &defMem, SpectrumType::Illuminant);
+                TiledImage2DRef image = API::Image::createTiledImage((pathPrefix + strValue.C_Str()).c_str(), &defMem, SpectrumType::Illuminant);
                 normalTex = createShared<ImageNormal3DTexture>(image);
             }
             normalMaps.push_back(normalTex);

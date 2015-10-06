@@ -15,15 +15,17 @@
 namespace SLR {
     class IBLEmission : public EmitterSurfaceProperty {
         const Scene* m_scene;
-        SpectrumTextureRef m_coeffM;
+        const SpectrumTexture* m_coeffM;
         float m_scale;
     public:
-        IBLEmission(const Scene* scene, const SpectrumTextureRef &coeffM, float scale) :
+        IBLEmission(const Scene* scene, const SpectrumTexture* coeffM, float scale) :
         m_scene(scene), m_coeffM(coeffM), m_scale(scale) {};
         
         SampledSpectrum emittance(const SurfacePoint &surfPt, const WavelengthSamples &wls) const override;
         EDF* getEDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem, float scale = 1.0f) const override;
-    };    
+        
+        RegularConstantContinuous2D* createIBLImportanceMap() const;
+    };
 }
 
 #endif /* defined(__SLR__IBLEmission__) */

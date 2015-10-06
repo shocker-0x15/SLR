@@ -6,6 +6,8 @@
 //
 
 #include "TriangleMeshNode.h"
+#include "textures.hpp"
+#include "surface_materials.hpp"
 #include <libSLR/Core/Transform.h>
 #include <libSLR/Core/SurfaceObject.h>
 #include <libSLR/Surface/TriangleMesh.h>
@@ -20,7 +22,7 @@ namespace SLRSceneGraph {
         return m_vertices.size() - 1;
     }
     
-    void TriangleMeshNode::addTriangle(uint64_t v0, uint64_t v1, uint64_t v2, const SLR::SurfaceMaterialRef &mat, const SLR::Normal3DTextureRef &normalMap) {
+    void TriangleMeshNode::addTriangle(uint64_t v0, uint64_t v1, uint64_t v2, const SurfaceMaterialRef &mat, const Normal3DTextureRef &normalMap) {
         Triangle tri{v0, v1, v2};
         m_triangles.push_back(tri);
         m_materials.push_back(mat);
@@ -45,9 +47,9 @@ namespace SLRSceneGraph {
             SLR::Triangle &triR = m_trianglesForRendering[i];
             new (&triR) SLR::Triangle(&m_vertices[tri.vIdx[0]], &m_vertices[tri.vIdx[1]], &m_vertices[tri.vIdx[2]], nullptr);
             if (m_normalMaps[i])
-                m_refinedObjs[i] = new SLR::BumpSingleSurfaceObject(&triR, m_materials[i].get(), m_normalMaps[i].get());
+                m_refinedObjs[i] = new SLR::BumpSingleSurfaceObject(&triR, m_materials[i]->getRaw(), m_normalMaps[i]->getRaw());
             else
-                m_refinedObjs[i] = new SLR::SingleSurfaceObject(&triR, m_materials[i].get());
+                m_refinedObjs[i] = new SLR::SingleSurfaceObject(&triR, m_materials[i]->getRaw());
         }
-    }    
+    }
 }

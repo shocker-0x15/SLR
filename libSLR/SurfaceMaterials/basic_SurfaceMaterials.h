@@ -14,35 +14,35 @@
 
 namespace SLR {
     class DiffuseReflection : public SurfaceMaterial {
-        SpectrumTextureRef m_reflectance;
-        FloatTextureRef m_sigma;
+        const SpectrumTexture* m_reflectance;
+        const FloatTexture* m_sigma;
     public:
-        DiffuseReflection(const SpectrumTextureRef &reflectance, const FloatTextureRef &sigma) :
+        DiffuseReflection(const SpectrumTexture* reflectance, const FloatTexture* sigma) :
         m_reflectance(reflectance), m_sigma(sigma) {};
         
         BSDF* getBSDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem, float scale = 1.0f) const override;
     };
     
     class SpecularReflection : public SurfaceMaterial {
-        SpectrumTextureRef m_coeffR;
-        SpatialFresnelRef m_fresnel;
+        const SpectrumTexture* m_coeffR;
+        const SpatialFresnel* m_fresnel;
     public:
-        SpecularReflection(const SpectrumTextureRef &coeffR, const SpatialFresnelRef &fresnel) :
+        SpecularReflection(const SpectrumTexture* coeffR, const SpatialFresnel* fresnel) :
         m_coeffR(coeffR), m_fresnel(fresnel) { };
         
         BSDF* getBSDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem, float scale = 1.0f) const override;
     };
     
     class SpecularTransmission : public SurfaceMaterial {
-        SpectrumTextureRef m_coeffT;
-        SpectrumTextureRef m_etaExt;
-        SpectrumTextureRef m_etaInt;
+        const SpectrumTexture* m_coeffT;
+        const SpectrumTexture* m_etaExt;
+        const SpectrumTexture* m_etaInt;
     public:
-        SpecularTransmission(const SpectrumTextureRef &coeffT, const SpectrumTextureRef &etaExt, const SpectrumTextureRef &etaInt) :
+        SpecularTransmission(const SpectrumTexture* coeffT, const SpectrumTexture* etaExt, const SpectrumTexture* etaInt) :
         m_coeffT(coeffT), m_etaExt(etaExt), m_etaInt(etaInt) { };
         
         BSDF* getBSDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem, float scale = 1.0f) const override;
-    };    
+    };
 }
 
 #endif /* defined(__SLR__basic_SurfaceMaterials__) */

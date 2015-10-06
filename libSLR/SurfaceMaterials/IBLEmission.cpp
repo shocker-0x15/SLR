@@ -18,5 +18,9 @@ namespace SLR {
     
     EDF* IBLEmission::getEDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem, float scale) const {
         return mem.create<IBLEDF>(m_scene->getWorldDiscArea());
-    }    
+    }
+    
+    RegularConstantContinuous2D* IBLEmission::createIBLImportanceMap() const {
+        return m_coeffM->createIBLImportanceMap();
+    }
 }

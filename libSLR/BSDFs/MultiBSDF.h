@@ -30,7 +30,7 @@ namespace SLR {
         
         SampledSpectrum getBaseColor(DirectionType flags) const override;
         
-        bool matches(DirectionType flags) const {
+        bool matches(DirectionType flags) const override {
             for (int i = 0; i < m_numComponents; ++i)
                 if (m_BSDFs[i]->matches(flags))
                     return true;

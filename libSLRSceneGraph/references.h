@@ -8,16 +8,34 @@
 #ifndef SLRSceneGraph_references_h
 #define SLRSceneGraph_references_h
 
-#include <vector>
-#include <memory>
-#include <stdint.h>
-
-namespace SLR {
-    class Transform;
-}
+#include <libSLR/references.h>
 
 namespace SLRSceneGraph {
     typedef std::shared_ptr<SLR::Transform> TransformRef;
+    
+    typedef std::shared_ptr<SLR::InputSpectrum> InputSpectrumRef;
+    
+    typedef std::shared_ptr<SLR::Image2D> Image2DRef;
+    typedef std::shared_ptr<SLR::TiledImage2D> TiledImage2DRef;
+    
+    class SpectrumTexture;
+    class Normal3DTexture;
+    class FloatTexture;
+    
+    typedef std::shared_ptr<SpectrumTexture> SpectrumTextureRef;
+    typedef std::shared_ptr<Normal3DTexture> Normal3DTextureRef;
+    typedef std::shared_ptr<FloatTexture> FloatTextureRef;
+    
+    class SurfaceMaterial;
+    class EmitterSurfaceProperty;
+    class SpatialFresnel;
+    
+    typedef std::shared_ptr<SpatialFresnel> SpatialFresnelRef;
+    typedef std::shared_ptr<SurfaceMaterial> SurfaceMaterialRef;
+    typedef std::shared_ptr<EmitterSurfaceProperty> EmitterSurfacePropertyRef;
+    
+    class IBLEmission;
+    typedef std::shared_ptr<IBLEmission> IBLEmissionRef;
     
     // Nodes
     class Node;
@@ -38,6 +56,7 @@ namespace SLRSceneGraph {
     struct RenderingData;
     
     class Scene;
+    typedef std::weak_ptr<Scene> SceneWRef;
 }
 
 #endif

@@ -21,8 +21,8 @@ namespace SLR {
         SampledSpectrum sample(const EDFQuery &query, const EDFSample &smp, EDFQueryResult* result) const override;
         SampledSpectrum evaluate(const EDFQuery &query, const Vector3D &dir) const override;
         float evaluatePDF(const EDFQuery &query, const Vector3D &dir) const override;
-        float weight(const EDFQuery &query) const { return 1.0f; };
-    };    
+        float weight(const EDFQuery &query) const override { return 1.0f; };
+    };
 }
 
 #endif /* defined(__SLR__IBLEDF__) */

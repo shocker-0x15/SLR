@@ -14,9 +14,9 @@
 
 namespace SLR {
     class CheckerBoardSpectrumTexture : public SpectrumTexture {
-        InputSpectrumRef m_values[2];
+        const InputSpectrum* m_values[2];
     public:
-        CheckerBoardSpectrumTexture(const InputSpectrumRef &v0, const InputSpectrumRef &v1) : m_values{v0, v1} { };
+        CheckerBoardSpectrumTexture(const InputSpectrum* v0, const InputSpectrum* v1) : m_values{v0, v1} { };
         
         SampledSpectrum evaluate(const TexCoord2D &tc, const WavelengthSamples &wls) const override { return m_values[((int)(tc.u * 2) + (int)(tc.v * 2)) % 2]->evaluate(wls); };
         RegularConstantContinuous2D* createIBLImportanceMap() const override;
@@ -37,10 +37,10 @@ namespace SLR {
     class CheckerBoardFloatTexture : public FloatTexture {
         float m_values[2];
     public:
-        CheckerBoardFloatTexture(const float &v0, const float &v1) : m_values{v0, v1} { };
+        CheckerBoardFloatTexture(float v0, float v1) : m_values{v0, v1} { };
         
         float evaluate(const TexCoord2D &tc) const override { return m_values[((int)(tc.u * 2) + (int)(tc.v * 2)) % 2]; };
-    };    
+    };
 }
 
 #endif /* defined(__SLR__checker_board_textures__) */

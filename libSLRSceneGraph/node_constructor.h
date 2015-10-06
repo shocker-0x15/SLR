@@ -14,8 +14,8 @@
 #include <assimp/scene.h>
 
 namespace SLRSceneGraph {
-    typedef SLR::SurfaceMaterialRef (*createMaterialFunction)(const aiMaterial* aiMat, const std::string &pathPrefix, SLR::Allocator* mem);
-    SLR::SurfaceMaterialRef createMaterialDefaultFunction(const aiMaterial* aiMat, const std::string &pathPrefix, SLR::Allocator* mem);
+    typedef SurfaceMaterialRef (*createMaterialFunction)(const aiMaterial* aiMat, const std::string &pathPrefix, SLR::Allocator* mem);
+    SurfaceMaterialRef createMaterialDefaultFunction(const aiMaterial* aiMat, const std::string &pathPrefix, SLR::Allocator* mem);
     void construct(const aiScene &objSrc, const std::string &pathPrefix, InternalNodeRef &nodeOut, const createMaterialFunction materialFunc = createMaterialDefaultFunction);
 }
 
