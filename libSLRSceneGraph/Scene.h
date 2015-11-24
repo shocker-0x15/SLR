@@ -9,7 +9,6 @@
 #define __SLRSceneGraph__Scene__
 
 #include <libSLR/defines.h>
-#include <libSLR/references.h>
 #include "references.h"
 
 namespace SLRSceneGraph {
@@ -24,7 +23,13 @@ namespace SLRSceneGraph {
         void setEnvNode(const InfiniteSphereNodeRef &node) { m_envNode = node; };
         
         void build(SLR::Scene** scene, SLR::ArenaAllocator &mem);
-    };    
+    };
+    
+    struct RenderingContext {
+        std::unique_ptr<SLR::Renderer> renderer;
+        RenderingContext();
+        ~RenderingContext();
+    };
 }
 
 #endif

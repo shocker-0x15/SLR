@@ -223,6 +223,7 @@ query.dir_sn.x, query.dir_sn.y, query.dir_sn.z);
     
     class Fresnel {
     public:
+        virtual ~Fresnel() { };
         virtual SampledSpectrum evaluate(float cosEnter) const = 0;
     };
     

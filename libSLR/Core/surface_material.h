@@ -26,6 +26,8 @@ namespace SLR {
     
     class EmitterSurfaceProperty {
     public:
+        virtual ~EmitterSurfaceProperty() { };
+        
         virtual SampledSpectrum emittance(const SurfacePoint &surfPt, const WavelengthSamples &wls) const = 0;
         virtual EDF* getEDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem, float scale = 1.0f) const = 0;
     };

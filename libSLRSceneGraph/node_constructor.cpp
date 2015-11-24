@@ -8,7 +8,10 @@
 #include "node_constructor.h"
 #include "TriangleMeshNode.h"
 #include "API.hpp"
+#include "surface_materials.hpp"
 #include "textures.hpp"
+#include <assimp/Importer.hpp>
+#include <assimp/postprocess.h>
 #include <libSLR/Memory/Allocator.h>
 #include <libSLR/Core/Transform.h>
 
@@ -28,7 +31,7 @@ inline void makeTangent(float nx, float ny, float nz, float* s) {
 }
 
 namespace SLRSceneGraph {
-    void recursiveConstruct(const aiScene &objSrc, const aiNode* nodeSrc, const std::vector<SurfaceMaterialRef> &materials, InternalNodeRef &nodeOut) {
+    static void recursiveConstruct(const aiScene* objSrc, const aiNode* nodeSrc, const std::vector<SurfaceMaterialRef> &materials, InternalNodeRef &nodeOut) {
         if (nodeSrc->mNumMeshes == 0 && nodeSrc->mNumChildren == 0) {
             nodeOut = nullptr;
             return;
@@ -46,7 +49,7 @@ namespace SLRSceneGraph {
         nodeOut->setTransform(createShared<SLR::StaticTransform>(SLR::Matrix4x4(tfElems)));
         
         for (int m = 0; m < nodeSrc->mNumMeshes; ++m) {
-            const aiMesh* mesh = objSrc.mMeshes[nodeSrc->mMeshes[m]];
+            const aiMesh* mesh = objSrc->mMeshes[nodeSrc->mMeshes[m]];
             if (mesh->mPrimitiveTypes != aiPrimitiveType_TRIANGLE) {
                 printf("ignored non triangle mesh.\n");
                 continue;
@@ -97,42 +100,50 @@ namespace SLRSceneGraph {
         
         SpectrumTextureRef diffuseTex;
         if (aiMat->Get(AI_MATKEY_TEXTURE_DIFFUSE(0), strValue) == aiReturn_SUCCESS) {
-            TiledImage2DRef image = API::Image::createTiledImage((pathPrefix + strValue.C_Str()).c_str(), mem, SpectrumType::Reflectance);
+            TiledImage2DRef image = Image::createTiledImage((pathPrefix + strValue.C_Str()).c_str(), mem, SpectrumType::Reflectance);
             diffuseTex = createShared<ImageSpectrumTexture>(image);
         }
         else if (aiMat->Get(AI_MATKEY_COLOR_DIFFUSE, color, nullptr) == aiReturn_SUCCESS) {
-            InputSpectrumRef sp = API::Spectrum::create(SpectrumType::Reflectance, ColorSpace::sRGB_NonLinear, color[0], color[1], color[2]);
+            InputSpectrumRef sp = Spectrum::create(SpectrumType::Reflectance, ColorSpace::sRGB_NonLinear, color[0], color[1], color[2]);
             diffuseTex = createShared<ConstantSpectrumTexture>(sp);
         }
         else {
-            InputSpectrumRef sp = API::Spectrum::create(SpectrumType::Reflectance, ColorSpace::sRGB_NonLinear, 1.0f, 0.0f, 1.0f);
+            InputSpectrumRef sp = Spectrum::create(SpectrumType::Reflectance, ColorSpace::sRGB_NonLinear, 1.0f, 0.0f, 1.0f);
             diffuseTex = createShared<ConstantSpectrumTexture>(sp);
         }
         
-        return API::SurfaceMaterial::createMatte(diffuseTex, nullptr);
+        return SurfaceMaterial::createMatte(diffuseTex, nullptr);
     };
     
-    void construct(const aiScene &objSrc, const std::string &pathPrefix, InternalNodeRef &nodeOut, const createMaterialFunction materialFunc) {
+    void construct(const std::string &filePath, InternalNodeRef &nodeOut, const createMaterialFunction materialFunc) {
         using namespace SLR;
         DefaultAllocator &defMem = DefaultAllocator::instance();
+        
+        Assimp::Importer importer;
+        const aiScene* scene = importer.ReadFile(filePath, 0);
+        printf("Reading: %s done.\n", filePath.c_str());
+        
+        std::string pathPrefix = filePath.substr(0, filePath.find_last_of("/") + 1);
         
         // マテリアルの生成。
         std::vector<SurfaceMaterialRef> materials;
         std::vector<Normal3DTextureRef> normalMaps;
-        for (int m = 0; m < objSrc.mNumMaterials; ++m) {
-            const aiMaterial* aiMat = objSrc.mMaterials[m];
+        for (int m = 0; m < scene->mNumMaterials; ++m) {
+            const aiMaterial* aiMat = scene->mMaterials[m];
             SurfaceMaterialRef surfMat = materialFunc(aiMat, pathPrefix, &defMem);
             materials.push_back(surfMat);
             
             aiString strValue;
             Normal3DTextureRef normalTex;
             if (aiMat->Get(AI_MATKEY_TEXTURE_DISPLACEMENT(0), strValue) == aiReturn_SUCCESS) {
-                TiledImage2DRef image = API::Image::createTiledImage((pathPrefix + strValue.C_Str()).c_str(), &defMem, SpectrumType::Illuminant);
+                TiledImage2DRef image = Image::createTiledImage((pathPrefix + strValue.C_Str()).c_str(), &defMem, SpectrumType::Illuminant);
                 normalTex = createShared<ImageNormal3DTexture>(image);
             }
             normalMaps.push_back(normalTex);
         }
         
-        recursiveConstruct(objSrc, objSrc.mRootNode, materials, nodeOut);
+        recursiveConstruct(scene, scene->mRootNode, materials, nodeOut);
+        
+        nodeOut->setName(filePath);
     }
 }

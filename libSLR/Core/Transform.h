@@ -15,6 +15,8 @@
 namespace SLR {
     class Transform {
     public:
+        virtual ~Transform() { };
+        
         virtual bool isStatic() const = 0;
         virtual void sample(float time, StaticTransform* tf) const { SLRAssert(false, "Not implemented."); };
         virtual bool isChained() const = 0;

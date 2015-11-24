@@ -33,8 +33,10 @@ namespace SLR {
             void kernel(uint32_t threadID);
             SampledSpectrum contribution(const Scene &scene, const WavelengthSamples &initWLs, const Ray &initRay, RandomNumberGenerator &rng, ArenaAllocator &mem) const;
         };
+        
+        uint32_t m_samplesPerPixel;
     public:
-        PathTracingRenderer();
+        PathTracingRenderer(uint32_t spp);
         void render(const Scene &scene, const RenderSettings &settings) const override;
     };    
 }

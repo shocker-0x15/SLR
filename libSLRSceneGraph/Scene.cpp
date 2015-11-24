@@ -13,6 +13,8 @@
 #include <libSLR/Core/Transform.h>
 #include "InfiniteSphereNode.h"
 
+#include <libSLR/Core/Renderer.h>
+
 namespace SLRSceneGraph {
     Scene::Scene() : m_envNode(nullptr) {
         m_rootNode = createShared<InternalNode>();
@@ -33,5 +35,13 @@ namespace SLRSceneGraph {
         SLR::Camera* camera = renderingData.camera;
         camera->setTransform(renderingData.camTransform);
         *scene = mem.create<SLR::Scene>(aggregate, envSphere, camera);
+    }
+    
+    RenderingContext::RenderingContext() {
+        
+    }
+    
+    RenderingContext::~RenderingContext() {
+        
     }
 }

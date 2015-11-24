@@ -18,7 +18,9 @@
 #include <string>
 #include <sstream>
 
+#include <array>
 #include <vector>
+#include <deque>
 #include <map>
 #include <set>
 #include <stack>
@@ -83,6 +85,11 @@ namespace std {
     template <typename T>
     inline T clamp(const T &v, const T &min, const T &max) {
         return std::min(max, std::max(min, v));
+    }
+    
+    template <typename T, typename ...Args>
+    inline std::array<T, sizeof...(Args)> make_array(Args &&...args) {
+        return std::array<T, sizeof...(Args)>{ std::forward<Args>(args)... };
     }
 }
 

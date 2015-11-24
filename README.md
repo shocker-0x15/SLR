@@ -35,7 +35,7 @@ SLR consists of the following components.
 現状以下の環境で動作を確認しています。  
 I've confirmed that the program runs correctly on the following environment.
 
-* OS X 10.9.5
+* OS X 10.11
 * MacBook Pro Retina Late 2013
 
 動作させるにあたっては以下のライブラリが必要です。  
@@ -46,7 +46,9 @@ It requires the following libraries.
 * assimp (currently obtained from GitHub for supporting the .assbin format)
 
 ##注意 / Note
-...
+モデルデータやテクスチャーを読み込むコードが書かれていますが、それらアセットはリポジトリには含まれていません。
+
+There are code for loading a model data and textures, but those assets are NOT included in this repository.
 
 ----
 2015 [@Shocker_0x15](https://twitter.com/Shocker_0x15)

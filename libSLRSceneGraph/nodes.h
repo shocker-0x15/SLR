@@ -9,7 +9,6 @@
 #define __SLRSceneGraph__entities__
 
 #include <libSLR/defines.h>
-#include <libSLR/references.h>
 #include "references.h"
 
 namespace SLRSceneGraph {

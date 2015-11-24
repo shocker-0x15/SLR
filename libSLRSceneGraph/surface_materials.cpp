@@ -41,7 +41,7 @@ namespace SLRSceneGraph {
     
     DiffuseReflection::DiffuseReflection(const SpectrumTextureRef &reflectance, const FloatTextureRef &sigma) :
     m_reflectance(reflectance), m_sigma(sigma) {
-        m_rawData = new SLR::DiffuseReflection(reflectance->getRaw(), sigma->getRaw());
+        m_rawData = new SLR::DiffuseReflection(reflectance->getRaw(), m_sigma ? sigma->getRaw() : nullptr);
     }
     
     SpecularReflection::SpecularReflection(const SpectrumTextureRef &coeffR, const SpatialFresnelRef &fresnel) :
@@ -67,5 +67,48 @@ namespace SLRSceneGraph {
     ModifiedWardDurReflection::ModifiedWardDurReflection(const SpectrumTextureRef &reflectance, const FloatTextureRef &anisoX, const FloatTextureRef &anisoY) :
     m_reflectance(reflectance), m_anisoX(anisoX), m_anisoY(anisoY) {
         m_rawData = new SLR::ModifiedWardDurReflection(reflectance->getRaw(), anisoX->getRaw(), anisoY->getRaw());
+    }
+    
+    
+    SurfaceMaterialRef SurfaceMaterial::createMatte(const SpectrumTextureRef &reflectance, const FloatTextureRef &sigma) {
+        return createShared<DiffuseReflection>(reflectance, sigma);
+    }
+    
+    SurfaceMaterialRef SurfaceMaterial::createMetal(const SpectrumTextureRef &coeffR, const SpectrumTextureRef &eta, const SpectrumTextureRef &k) {
+        SpatialFresnelRef fresnel = createShared<SpatialFresnelConductor>(eta, k);
+        return createShared<SpecularReflection>(coeffR, fresnel);
+    }
+    
+    SurfaceMaterialRef SurfaceMaterial::createGlass(const SpectrumTextureRef &coeffR, const SpectrumTextureRef &coeffT, const SpectrumTextureRef &etaExt, const SpectrumTextureRef &etaInt) {
+        SpatialFresnelRef frDiel = createShared<SpatialFresnelDielectric>(etaExt, etaInt);
+        SurfaceMaterialRef r = createShared<SpecularReflection>(coeffR, frDiel);
+        SurfaceMaterialRef t = createShared<SpecularTransmission>(coeffT, etaExt, etaInt);
+        return createSummedMaterial(r, t);
+    }
+    
+    SurfaceMaterialRef SurfaceMaterial::createModifiedWardDur(const SpectrumTextureRef &reflectance, const FloatTextureRef &anisoX, const FloatTextureRef &anisoY) {
+        return createShared<ModifiedWardDurReflection>(reflectance, anisoX, anisoY);
+    }
+    
+    SurfaceMaterialRef SurfaceMaterial::createAshikhminShirley(const SpectrumTextureRef &Rd, const SpectrumTextureRef &Rs, const FloatTextureRef &nu, const FloatTextureRef &nv) {
+        SurfaceMaterialRef specular = createShared<AshikhminSpecularReflection>(Rs, nu, nv);
+        SurfaceMaterialRef diffuse = createShared<AshikhminDiffuseReflection>(Rs, Rd);
+        return createSummedMaterial(specular, diffuse);
+    }
+    
+    SurfaceMaterialRef SurfaceMaterial::createSummedMaterial(const SurfaceMaterialRef &mat0, const SurfaceMaterialRef &mat1) {
+        return createShared<SummedSurfaceMaterial>(mat0, mat1);
+    }
+    
+    SurfaceMaterialRef SurfaceMaterial::createMixedMaterial(const SurfaceMaterialRef &mat0, const SurfaceMaterialRef &mat1, const FloatTextureRef &factor) {
+        return createShared<MixedSurfaceMaterial>(mat0, mat1, factor);
+    }
+    
+    SurfaceMaterialRef SurfaceMaterial::createEmitterSurfaceMaterial(const SurfaceMaterialRef &mat, const EmitterSurfacePropertyRef &emit) {
+        return createShared<EmitterSurfaceMaterial>(mat, emit);
+    }
+    
+    EmitterSurfacePropertyRef SurfaceMaterial::createDiffuseEmitter(const SpectrumTextureRef &emittance) {
+        return createShared<DiffuseEmission>(emittance);
     }
 }

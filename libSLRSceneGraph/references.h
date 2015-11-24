@@ -57,6 +57,9 @@ namespace SLRSceneGraph {
     
     class Scene;
     typedef std::weak_ptr<Scene> SceneWRef;
+    
+    struct RenderingContext;
+    struct SceneParsingDriver;
 }
 
 #endif

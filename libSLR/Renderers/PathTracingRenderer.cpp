@@ -19,12 +19,11 @@
 #include "../Core/directional_distribution_functions.h"
 
 namespace SLR {
-    PathTracingRenderer::PathTracingRenderer() {
+    PathTracingRenderer::PathTracingRenderer(uint32_t spp) : m_samplesPerPixel(spp) {
         
     }
     
     void PathTracingRenderer::render(const Scene &scene, const RenderSettings &settings) const {
-        uint32_t numSamples = settings.getInt(RenderSettingItem::NumSamples);
         uint32_t imageWidth = settings.getInt(RenderSettingItem::ImageWidth);
         uint32_t imageHeight = settings.getInt(RenderSettingItem::ImageHeight);
         ImageSensor sensor(imageWidth, imageHeight);
@@ -58,7 +57,7 @@ namespace SLR {
         uint32_t imgIdx = 0;
         uint32_t endIdx = 16;
         
-        for (int s = 0; s < numSamples; ++s) {
+        for (int s = 0; s < m_samplesPerPixel; ++s) {
 #ifdef DEBUG
             ThreadPool threadPool(1);
 #else

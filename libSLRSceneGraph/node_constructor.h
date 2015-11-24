@@ -9,14 +9,13 @@
 #define __SLRSceneGraph__node_constructor__
 
 #include <libSLR/defines.h>
-#include <libSLR/references.h>
 #include "references.h"
 #include <assimp/scene.h>
 
 namespace SLRSceneGraph {
     typedef SurfaceMaterialRef (*createMaterialFunction)(const aiMaterial* aiMat, const std::string &pathPrefix, SLR::Allocator* mem);
     SurfaceMaterialRef createMaterialDefaultFunction(const aiMaterial* aiMat, const std::string &pathPrefix, SLR::Allocator* mem);
-    void construct(const aiScene &objSrc, const std::string &pathPrefix, InternalNodeRef &nodeOut, const createMaterialFunction materialFunc = createMaterialDefaultFunction);
+    void construct(const std::string &filePath, InternalNodeRef &nodeOut, const createMaterialFunction materialFunc = createMaterialDefaultFunction);
 }
 
 #endif

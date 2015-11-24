@@ -9,7 +9,6 @@
 #define __SLRSceneGraph__TriangleMeshNode__
 
 #include <libSLR/defines.h>
-#include <libSLR/references.h>
 #include "references.h"
 #include "nodes.h"
 #include <libSLR/Core/geometry.h>

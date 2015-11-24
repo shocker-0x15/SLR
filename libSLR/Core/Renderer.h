@@ -14,6 +14,7 @@
 namespace SLR {
     class Renderer {
     public:
+        virtual ~Renderer() { };
         virtual void render(const Scene &scene, const RenderSettings &settings) const = 0;
     };
 }

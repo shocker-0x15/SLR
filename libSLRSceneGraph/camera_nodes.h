@@ -9,7 +9,6 @@
 #define __SLRSceneGraph__camera_nodes__
 
 #include <libSLR/defines.h>
-#include <libSLR/references.h>
 #include "references.h"
 #include "nodes.h"
 
