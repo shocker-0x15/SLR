@@ -96,9 +96,9 @@ SetRenderer {
     DPRINTF("%s\n", yytext);
     return SceneParser::make_API(API::SetRenderer, loc);
 }
-CreateSensor {
+SetRenderSettings {
     DPRINTF("%s\n", yytext);
-    return SceneParser::make_API(API::CreateSensor, loc);
+    return SceneParser::make_API(API::SetRenderSettings, loc);   
 }
 CreatePerspectiveCamera {
     DPRINTF("%s\n", yytext);

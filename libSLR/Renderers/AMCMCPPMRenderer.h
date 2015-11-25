@@ -174,16 +174,17 @@ namespace SLR {
         
         struct DistributedRTJob {
             const Scene* scene;
-            ImageSensor* sensor;
-            const Camera* camera;
-            uint32_t imageWidth;
-            uint32_t imageHeight;
-            float time;
             WavelengthSamples wls;
             ArenaAllocator* mems;
             RandomNumberGenerator** rngs;
             HitpointMap* hpMap;
             
+            const Camera* camera;
+            float time;
+            
+            ImageSensor* sensor;
+            uint32_t imageWidth;
+            uint32_t imageHeight;
             uint32_t numPixelX;
             uint32_t numPixelY;
             uint32_t basePixelX;
@@ -201,13 +202,14 @@ namespace SLR {
                 ResultRecord(float px, float py, const SampledSpectrum &c) : imgX(px), imgY(py), contribution(c) { };
             };
             const Scene* scene;
-            ImageSensor* sensor;
-            float time;
             WavelengthSamples wls;
             float radius;
             ArenaAllocator* mems;
             HitpointMap* hpMap;
             uint32_t numPhotons;
+            
+            ImageSensor* sensor;
+            float time;
             
             ReplicaExchangeSampler sampler;
             uint64_t uniformCount;
@@ -219,8 +221,11 @@ namespace SLR {
             void kernel(uint32_t threadID);
             float photonTracing(const WavelengthSamples &wls, ArenaAllocator &mem, std::vector<ResultRecord> &results);
         };
+        
+        uint32_t m_numPhotonsPerPass;
+        uint32_t m_numPasses;
     public:
-        AMCMCPPMRenderer();
+        AMCMCPPMRenderer(uint32_t numPhotonsPerPass, uint32_t numPasses);
         void render(const Scene &scene, const RenderSettings &settings) const override;
     };    
 }

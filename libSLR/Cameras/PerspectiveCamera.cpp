@@ -9,8 +9,27 @@
 #include "../Core/Transform.h"
 #include "../Memory/ArenaAllocator.h"
 #include "../Core/distributions.h"
+#include "../Core/ImageSensor.h"
 
 namespace SLR {
+    PerspectiveCamera::PerspectiveCamera(float sensitivity,
+                                         float aspect, float fovY, float lensRadius, float imgPDist, float objPDist) :
+    Camera(nullptr),
+    m_aspect(aspect), m_fovY(fovY), m_lensRadius(lensRadius), m_imgPlaneDistance(imgPDist), m_objPlaneDistance(objPDist) {
+        m_opHeight = 2.0f * m_objPlaneDistance * std::tan(m_fovY * 0.5f);
+        m_opWidth = m_opHeight * m_aspect;
+        m_imgPlaneArea = m_opWidth * m_opHeight * std::pow(m_imgPlaneDistance / m_objPlaneDistance, 2);
+        
+        m_sensor = createUnique<ImageSensor>(sensitivity > 0 ? sensitivity : (1.0f / (M_PI * lensRadius * lensRadius)));
+    }
+    
+    PerspectiveCamera::~PerspectiveCamera() {
+    }
+    
+    ImageSensor* PerspectiveCamera::getSensor() const {
+        return m_sensor.get();
+    }
+    
     SampledSpectrum PerspectiveCamera::sample(const LensPosQuery &query, const LensPosSample &smp, LensPosQueryResult* result) const {
         StaticTransform staticTF;
         if (m_transform)

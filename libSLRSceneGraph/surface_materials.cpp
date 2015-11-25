@@ -69,6 +69,28 @@ namespace SLRSceneGraph {
         m_rawData = new SLR::ModifiedWardDurReflection(reflectance->getRaw(), anisoX->getRaw(), anisoY->getRaw());
     }
     
+    SummedSurfaceMaterial::SummedSurfaceMaterial(const SurfaceMaterialRef &m0, const SurfaceMaterialRef &m1) :
+    m_mat0(m0), m_mat1(m1) {
+        m_rawData = new SLR::SummedSurfaceMaterial(m0->getRaw(), m1->getRaw());
+    }
+    
+    MixedSurfaceMaterial::MixedSurfaceMaterial(const SurfaceMaterialRef &m0, const SurfaceMaterialRef &m1, const FloatTextureRef &factor) :
+    m_mat0(m0), m_mat1(m1), m_factor(factor) {
+        m_rawData = new SLR::MixedSurfaceMaterial(m0->getRaw(), m1->getRaw(), factor->getRaw());
+    }
+    
+    
+    DiffuseEmission::DiffuseEmission(const SpectrumTextureRef &emittance) :
+    m_emittance(emittance) {
+        m_rawData = new SLR::DiffuseEmission(emittance->getRaw());
+    };
+    
+    IBLEmission::IBLEmission(const SceneWRef &scene, const SpectrumTextureRef &coeffM, float scale) :
+    m_scene(scene), m_coeffM(coeffM), m_scale(scale) {
+        SLRAssert(false, "Not implemented.");
+//        m_rawData = new SLR::IBLEmission(scene., coeffM->getRaw(), scale);
+    };
+    
     
     SurfaceMaterialRef SurfaceMaterial::createMatte(const SpectrumTextureRef &reflectance, const FloatTextureRef &sigma) {
         return createShared<DiffuseReflection>(reflectance, sigma);

@@ -44,4 +44,15 @@ namespace SLRSceneGraph {
     RenderingContext::~RenderingContext() {
         
     }
+    
+    RenderingContext& RenderingContext::operator=(RenderingContext &&ctx) {
+        renderer = std::move(ctx.renderer);
+        width = ctx.width;
+        height = ctx.height;
+        timeStart = ctx.timeStart;
+        timeEnd = ctx.timeEnd;
+        rngSeed = ctx.rngSeed;
+        
+        return *this;
+    }
 }

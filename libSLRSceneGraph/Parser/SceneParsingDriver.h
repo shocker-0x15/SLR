@@ -30,14 +30,20 @@ namespace SLRSceneGraph {
 		void beginScan();
 		void endScan();
 
-		int32_t parse(const std::string &f, Scene* scene) {
-			  file = f;
-			  beginScan();
-			  SceneParser parser(*this);
-			  parser.set_debug_level(traceParsing);
-			  int res = parser.parse();
-			  endScan();
-			  return res;
+		int32_t parse(const std::string &f, Scene* outScene, RenderingContext* outContext) {
+            variables["root"] = Element(Type::Node, scene.rootNode());
+            
+            file = f;
+            beginScan();
+            SceneParser parser(*this);
+            parser.set_debug_level(traceParsing);
+            int res = parser.parse();
+            endScan();
+            
+            *outScene = scene;
+            *outContext = std::move(context);
+            
+            return res;
 		};
 
 		void error(const location &loc, const std::string &msg) {

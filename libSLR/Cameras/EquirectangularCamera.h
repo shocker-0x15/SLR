@@ -15,13 +15,17 @@
 
 namespace SLR {
     class EquirectangularCamera : public Camera {
+        std::unique_ptr<ImageSensor> m_sensor;
+        
         float m_phiAngle;
         float m_thetaAngle;
         friend class EquirectangularIDF;
     public:
-        EquirectangularCamera(float phiAngle, float thetaAngle) :
-        Camera(nullptr),
-        m_phiAngle(phiAngle), m_thetaAngle(thetaAngle) { };
+        EquirectangularCamera(float sensitivity,
+                              float phiAngle, float thetaAngle);
+        ~EquirectangularCamera();
+        
+        ImageSensor* getSensor() const override;
         
         SampledSpectrum sample(const LensPosQuery &query, const LensPosSample &smp, LensPosQueryResult* result) const override;
         IDF* createIDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem) const override;

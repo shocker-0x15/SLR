@@ -15,6 +15,8 @@
 
 namespace SLR {
     class PerspectiveCamera : public Camera {
+        std::unique_ptr<ImageSensor> m_sensor;
+        
         float m_aspect;
         float m_fovY;
         float m_objPlaneDistance;
@@ -27,13 +29,11 @@ namespace SLR {
         
         friend class PerspectiveIDF;
     public:
-        PerspectiveCamera(float aspect, float fovY, float lensRadius, float imgPDist, float objPDist) :
-        Camera(nullptr),
-        m_aspect(aspect), m_fovY(fovY), m_lensRadius(lensRadius), m_imgPlaneDistance(imgPDist), m_objPlaneDistance(objPDist) {
-            m_opHeight = 2.0f * m_objPlaneDistance * std::tan(m_fovY * 0.5f);
-            m_opWidth = m_opHeight * m_aspect;
-            m_imgPlaneArea = m_opWidth * m_opHeight * std::pow(m_imgPlaneDistance / m_objPlaneDistance, 2);
-        };
+        PerspectiveCamera(float sensitivity,
+                          float aspect, float fovY, float lensRadius, float imgPDist, float objPDist);
+        ~PerspectiveCamera();
+        
+        ImageSensor* getSensor() const override;
         
         SampledSpectrum sample(const LensPosQuery &query, const LensPosSample &smp, LensPosQueryResult* result) const override;
         IDF* createIDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem) const override;

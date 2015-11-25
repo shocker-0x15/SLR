@@ -893,13 +893,13 @@ namespace SLRSceneGraph {
         printf("Call SetRenderer\n");
         yylhs.value.as< Element > () = SLRSceneGraph::SetRenderer(*yystack_[1].value.as< ParameterListRef > ().get(), &driver.context, &errMsg);
         break;
-    case API::CreateSensor:
-        printf("Call CreateSensor\n");
-        yylhs.value.as< Element > () = Element(Type::Sensor, nullptr);
+    case API::SetRenderSettings:
+        printf("Call SetRenderSettings\n");
+        yylhs.value.as< Element > () = SLRSceneGraph::SetRenderSettings(*yystack_[1].value.as< ParameterListRef > ().get(), &driver.context, &errMsg);
         break;
     case API::CreatePerspectiveCamera:
         printf("Call CreatePerspectiveCamera\n");
-        yylhs.value.as< Element > () = Element(Type::Camera, nullptr);
+        yylhs.value.as< Element > () = SLRSceneGraph::CreatePerspectiveCamera(params, &errMsg);
         break;
     case API::Load3DModel:
         printf("Call Load3DModel\n");

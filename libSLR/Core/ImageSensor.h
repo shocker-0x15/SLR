@@ -20,13 +20,14 @@ namespace SLR {
         uint32_t m_numSeparated;
         uint32_t m_width;
         uint32_t m_height;
+        float m_sensitivity;
         
         size_t m_numTileX;
         size_t m_numTileY;
         size_t m_allocSize;
     public:
-        ImageSensor() : m_data(nullptr), m_separatedData(nullptr), m_numSeparated(0) { };
-        ImageSensor(uint32_t width, uint32_t height);
+        ImageSensor(float sensitivity);
+        ImageSensor(uint32_t width, uint32_t height, float sensitivity);
         ~ImageSensor();
         
         void init(uint32_t width, uint32_t height);
@@ -50,7 +51,7 @@ namespace SLR {
         void add(float px, float py, const WavelengthSamples &wls, const SampledSpectrum &contribution);
         void add(uint32_t idx, float px, float py, const WavelengthSamples &wls, const SampledSpectrum &contribution);
         
-        void saveImage(const std::string &filepath, float scale, float* scaleSeparated = nullptr) const;
+        void saveImage(const std::string &filepath, float scale = 1.0f, float* scaleSeparated = nullptr) const;
     };    
 }
 

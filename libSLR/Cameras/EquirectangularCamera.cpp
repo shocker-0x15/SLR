@@ -8,8 +8,23 @@
 #include "EquirectangularCamera.h"
 #include "../Core/Transform.h"
 #include "../Memory/ArenaAllocator.h"
+#include "../Core/ImageSensor.h"
 
 namespace SLR {
+    EquirectangularCamera::EquirectangularCamera(float sensitivity,
+                                                 float phiAngle, float thetaAngle) :
+    Camera(nullptr),
+    m_phiAngle(phiAngle), m_thetaAngle(thetaAngle) {
+        m_sensor = createUnique<ImageSensor>(sensitivity > 0 ? sensitivity : 1.0f);
+    }
+    
+    EquirectangularCamera::~EquirectangularCamera() {
+    }
+    
+    ImageSensor* EquirectangularCamera::getSensor() const {
+        return m_sensor.get();
+    }
+    
     SampledSpectrum EquirectangularCamera::sample(const LensPosQuery &query, const LensPosSample &smp, LensPosQueryResult* result) const {
         StaticTransform staticTF;
         if (m_transform)

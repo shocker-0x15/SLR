@@ -14,25 +14,27 @@
 
 namespace SLRSceneGraph {
     class PerspectiveCameraNode : public CameraNode {
+        float m_sensitivity;
         float m_aspect;
         float m_fovY;
         float m_objPlaneDistance;
         float m_imgPlaneDistance;
         float m_lensRadius;
     public:
-        PerspectiveCameraNode(float aspect, float fovY, float lensRadius, float imgPDist, float objPDist) :
-        m_aspect(aspect), m_fovY(fovY), m_lensRadius(lensRadius), m_imgPlaneDistance(imgPDist), m_objPlaneDistance(objPDist) { };
+        PerspectiveCameraNode(float sensitivity, float aspect, float fovY, float lensRadius, float imgPDist, float objPDist) :
+        m_sensitivity(sensitivity), m_aspect(aspect), m_fovY(fovY), m_lensRadius(lensRadius), m_imgPlaneDistance(imgPDist), m_objPlaneDistance(objPDist) { };
         
         void applyTransform(const SLR::StaticTransform &t) final { };
         void createCamera() final;
     };
     
     class EquirectangularCameraNode : public CameraNode {
+        float m_sensitivity;
         float m_phiAngle;
         float m_thetaAngle;
     public:
-        EquirectangularCameraNode(float phiAngle, float thetaAngle) :
-        m_phiAngle(phiAngle), m_thetaAngle(thetaAngle) { };
+        EquirectangularCameraNode(float sensitivity, float phiAngle, float thetaAngle) :
+        m_sensitivity(sensitivity), m_phiAngle(phiAngle), m_thetaAngle(thetaAngle) { };
         
         void applyTransform(const SLR::StaticTransform &t) final { };
         void createCamera() final;

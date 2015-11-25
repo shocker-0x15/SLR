@@ -279,15 +279,10 @@ namespace SLR {
     };
     
     
-    AMCMCPPMRenderer::AMCMCPPMRenderer() {
+    AMCMCPPMRenderer::AMCMCPPMRenderer(uint32_t numPhotonsPerPass, uint32_t numPasses) : m_numPhotonsPerPass(numPhotonsPerPass), m_numPasses(numPasses) {
     };
     
-    void AMCMCPPMRenderer::render(const Scene &scene, const RenderSettings &settings) const {        
-        uint32_t numSamples = settings.getInt(RenderSettingItem::NumSamples);
-        uint32_t imageWidth = settings.getInt(RenderSettingItem::ImageWidth);
-        uint32_t imageHeight = settings.getInt(RenderSettingItem::ImageHeight);
-        ImageSensor sensor(imageWidth, imageHeight);
-        
+    void AMCMCPPMRenderer::render(const Scene &scene, const RenderSettings &settings) const {                
 #ifdef DEBUG
         uint32_t numThreads = 1;
 #else
@@ -304,21 +299,26 @@ namespace SLR {
             new (memPTs.get() + i) ArenaAllocator();
             rngRefs[i] = new (rngs.get() + i) XORShift(topRand.getUInt());
         }
-        sensor.addSeparatedBuffers(numThreads);
+        
+        const Camera* camera = scene.getCamera();
+        ImageSensor* sensor = camera->getSensor();
         
         HitpointMap hitpointMap;
         
         DistributedRTJob jobDRT;
         jobDRT.scene = &scene;
-        jobDRT.sensor = &sensor;
-        jobDRT.camera = scene.getCamera();
-        jobDRT.imageWidth = imageWidth;
-        jobDRT.imageHeight = imageHeight;
-        jobDRT.numPixelX = sensor.tileWidth();
-        jobDRT.numPixelY = sensor.tileHeight();
+        
         jobDRT.mems = mems.get();
         jobDRT.rngs = rngRefs.get();
         jobDRT.hpMap = &hitpointMap;
+        
+        jobDRT.camera = scene.getCamera();
+        
+        jobDRT.sensor = sensor;
+        jobDRT.imageWidth = settings.getInt(RenderSettingItem::ImageWidth);
+        jobDRT.imageHeight = settings.getInt(RenderSettingItem::ImageHeight);
+        jobDRT.numPixelX = sensor->tileWidth();
+        jobDRT.numPixelY = sensor->tileHeight();
         
         float radius = 0.0025f;
         const uint32_t numMCMCs = 16;
@@ -328,10 +328,11 @@ namespace SLR {
         for (int i = 0; i < numMCMCs; ++i) {
             PhotonSplattingJob &jobPS = jobPSs[i];
             jobPS.scene = &scene;
-            jobPS.sensor = &sensor;
             jobPS.mems = memPTs.get();
             jobPS.hpMap = &hitpointMap;
-            jobPS.numPhotons = numPhotonsPerPass;
+            jobPS.numPhotons = m_numPhotonsPerPass;
+            
+            jobPS.sensor = sensor;
             
             jobPS.sampler = ReplicaExchangeSampler(rngPSs.get());
             jobPS.uniformCount = 0;
@@ -344,11 +345,13 @@ namespace SLR {
         uint32_t exportIdx = 1;
         uint32_t endIdx = 16;
         
+        sensor->init(jobDRT.imageWidth, jobDRT.imageHeight);
+        sensor->addSeparatedBuffers(numThreads);
+        
         float timeStart = settings.getFloat(RenderSettingItem::TimeStart);
         float timeEnd = settings.getFloat(RenderSettingItem::TimeEnd);
-        float sensorReponce = settings.getFloat(RenderSettingItem::SensorResponse);
         
-        for (int s = 0; s < numSamples; ++s) {
+        for (int s = 0; s < m_numPasses; ++s) {
             float time = timeStart + (timeEnd - timeStart) * topRand.getFloat0cTo1o();
             jobDRT.time = time;
             
@@ -362,14 +365,14 @@ namespace SLR {
             for (int i = 0; i < numMCMCs; ++i)
                 jobPSs[i].wls = wls;
             
-            hitpointMap.initialize(numThreads, imageWidth * imageHeight);
+            hitpointMap.initialize(numThreads, jobDRT.imageWidth * jobDRT.imageHeight);
             
             // Distributed Ray Tracing Pass: record hitpoints in a k-d tree.
             ThreadPool DRTPool(numThreads);
-            for (int ty = 0; ty < sensor.numTileY(); ++ty) {
-                for (int tx = 0; tx < sensor.numTileX(); ++tx) {
-                    jobDRT.basePixelX = tx * sensor.tileWidth();
-                    jobDRT.basePixelY = ty * sensor.tileHeight();
+            for (int ty = 0; ty < sensor->numTileY(); ++ty) {
+                for (int tx = 0; tx < sensor->numTileX(); ++tx) {
+                    jobDRT.basePixelX = tx * sensor->tileWidth();
+                    jobDRT.basePixelY = ty * sensor->tileHeight();
                     DRTPool.enqueue(std::bind(&DistributedRTJob::kernel, jobDRT, std::placeholders::_1));
                 }
             }
@@ -401,7 +404,7 @@ namespace SLR {
                        i, jobPSs[i].uniformCount, jobPSs[i].mutationCount, jobPSs[i].acceptedCount, jobPSs[i].mutationSize);
                 uniformCount += jobPSs[i].uniformCount;
             }
-            float scale = float(uniformCount) / numPhotons * (sensorReponce / (numPasses * numMCMCs));
+            float scale = float(uniformCount) / numPhotons * (1.0f / (numPasses * numMCMCs));
             for (int i = 0; i < numThreads; ++i)
                 scales[i] = scale;
             printf("\n");
@@ -411,7 +414,7 @@ namespace SLR {
                 exportIdx += exportIdx;
                 char filename[256];
                 sprintf(filename, "%03u.bmp", imgIdx);
-                sensor.saveImage(filename, settings.getFloat(RenderSettingItem::SensorResponse) / (s + 1));
+                sensor->saveImage(filename, 1.0f / (s + 1));
                 printf("%u samples: %s\n", s, filename);
                 ++imgIdx;
                 if (imgIdx == endIdx)

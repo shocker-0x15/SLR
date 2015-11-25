@@ -15,16 +15,18 @@
 namespace SLR {
     class PathTracingRenderer : public Renderer {
         struct Job {
-            ImageSensor* sensor;
-            const Camera* camera;
             const Scene* scene;
-            uint32_t imageWidth;
-            uint32_t imageHeight;
-            float timeStart;
-            float timeEnd;
+            
             ArenaAllocator* mems;
             RandomNumberGenerator** rngs;
             
+            const Camera* camera;
+            float timeStart;
+            float timeEnd;
+            
+            ImageSensor* sensor;
+            uint32_t imageWidth;
+            uint32_t imageHeight;
             uint32_t numPixelX;
             uint32_t numPixelY;
             uint32_t basePixelX;

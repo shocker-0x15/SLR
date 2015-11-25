@@ -9,6 +9,9 @@
 #include <libSLR/defines.h>
 #include <libSLRSceneGraph/references.h>
 #include <libSLR/BasicTypes/Spectrum.h>
+#include <libSLR/Memory/ArenaAllocator.h>
+#include <libSLR/Core/Renderer.h>
+#include <libSLR/Core/RenderSettings.h>
 #include <libSLRSceneGraph/Scene.h>
 #include <libSLRSceneGraph/API.hpp>
 
@@ -31,9 +34,23 @@ int main(int argc, const char * argv[]) {
     
     stopwatch.start();
     SLRSceneGraph::Scene scene;
-    bool readSceneSuccess = SLRSceneGraph::readScene(argv[1], &scene);
+    SLRSceneGraph::RenderingContext context;
+    bool readSceneSuccess = SLRSceneGraph::readScene(argv[1], &scene, &context);
     SLRAssert(readSceneSuccess, "Failed to read a scene file.");
     printf("build: %g [s]\n", stopwatch.stop() * 1e-3f);
+    
+    SLR::Scene* rawScene;
+    SLR::ArenaAllocator mem;
+    scene.build(&rawScene, mem);
+    
+    SLR::RenderSettings settings;
+    settings.addItem(SLR::RenderSettingItem::ImageWidth, context.width);
+    settings.addItem(SLR::RenderSettingItem::ImageHeight, context.height);
+    settings.addItem(SLR::RenderSettingItem::TimeStart, context.timeStart);
+    settings.addItem(SLR::RenderSettingItem::TimeEnd, context.timeEnd);
+    settings.addItem(SLR::RenderSettingItem::RNGSeed, context.rngSeed);
+    
+    context.renderer->render(*rawScene, settings);
     
     return 0;
 }

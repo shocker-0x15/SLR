@@ -13,6 +13,7 @@
 #include "Scene.h"
 
 #include "TriangleMeshNode.h"
+#include "camera_nodes.h"
 
 #include "nodes.h"
 #include "node_constructor.h"
@@ -63,9 +64,6 @@ std::ostream &operator<<(std::ostream &out, const Element &elem) {
             break;
         case Type::Mesh:
             out << "Mesh";
-            break;
-        case Type::Sensor:
-            out << "Sensor";
             break;
         case Type::Camera:
             out << "Camera";
@@ -129,13 +127,12 @@ void TypeInfo::init() {
 }
 
 namespace SLRSceneGraph {
-    bool readScene(const std::string &filePath, Scene* scene) {
+    bool readScene(const std::string &filePath, Scene* scene, RenderingContext* context) {
         TypeInfo::init();
         SceneParsingDriver parser;
 //        parser.traceParsing = true;
-        parser.variables["root"] = Element(Type::Node, scene->rootNode());
-        int ret = parser.parse(filePath, scene);
-        SLRAssert(ret != 0, "Failed to parse scene file: %s", filePath.c_str());
+        int ret = parser.parse(filePath, scene, context);
+        SLRAssert(ret == 0, "Failed to parse scene file: %s", filePath.c_str());
         return true;
     }
     
@@ -568,15 +565,6 @@ namespace SLRSceneGraph {
     
     Element AddChild(const ParameterList &params, ErrorMessage* err) {
         static const Function proc0{
-            {{"parent", Type::Node}, {"child", Type::Mesh}},
-            [](const std::map<std::string, Element> &args, ErrorMessage* err) {
-                InternalNodeRef parent = args.at("parent").asRef<InternalNode>();
-                TriangleMeshNodeRef child = args.at("child").asRef<TriangleMeshNode>();
-                parent->addChildNode(child);
-                return Element();
-            }
-        };
-        static const Function proc1{
             {{"parent", Type::Node}, {"child", Type::Node}},
             [](const std::map<std::string, Element> &args, ErrorMessage* err) {
                 InternalNodeRef parent = args.at("parent").asRef<InternalNode>();
@@ -585,7 +573,25 @@ namespace SLRSceneGraph {
                 return Element();
             }
         };
-        static const auto procs = std::make_array<Function>(proc0, proc1);
+        static const Function proc1{
+            {{"parent", Type::Node}, {"child", Type::Mesh}},
+            [](const std::map<std::string, Element> &args, ErrorMessage* err) {
+                InternalNodeRef parent = args.at("parent").asRef<InternalNode>();
+                TriangleMeshNodeRef child = args.at("child").asRef<TriangleMeshNode>();
+                parent->addChildNode(child);
+                return Element();
+            }
+        };
+        static const Function proc2{
+            {{"parent", Type::Node}, {"child", Type::Camera}},
+            [](const std::map<std::string, Element> &args, ErrorMessage* err) {
+                InternalNodeRef parent = args.at("parent").asRef<InternalNode>();
+                CameraNodeRef child = args.at("child").asRef<CameraNode>();
+                parent->addChildNode(child);
+                return Element();
+            }
+        };
+        static const auto procs = std::make_array<Function>(proc0, proc1, proc2);
         for (int i = 0; i < procs.size(); ++i) {
             Element elem = procs[i](params, err);
             if (!err->error)
@@ -605,6 +611,29 @@ namespace SLRSceneGraph {
                 modelNode->setName(path);
                 
                 return Element(Type::Node, modelNode);
+            }
+        };
+        return proc(params, err);
+    }
+    
+    // width = 1024, height = 1024, aspect = 1.0, fovY = 0.5235987756, sensitivity = 0,
+    // radius = 0.0, imgDist = 0.02, objDist = 5
+    Element CreatePerspectiveCamera(const ParameterList &params, ErrorMessage* err) {
+        static const Function proc{
+            {
+                {"sensitivity", Type::RealNumber, Element(0.0)},
+                {"aspect", Type::RealNumber, Element(1.0)}, {"fovY", Type::RealNumber, Element(0.5235987756)},
+                {"radius", Type::RealNumber, Element(0.0)}, {"imgDist", Type::RealNumber, Element(0.02)}, {"objDist", Type::RealNumber, Element(5.0)}
+            },
+            [](const std::map<std::string, Element> &args, ErrorMessage* err) {
+                float sensitivity = args.at("sensitivity").as<double>();
+                float aspect = args.at("aspect").as<double>();
+                float fovY = args.at("fovY").as<double>();
+                float radius = args.at("radius").as<double>();
+                float imgDist = args.at("imgDist").as<double>();
+                float objDist = args.at("objDist").as<double>();
+                
+                return Element(Type::Camera, createShared<PerspectiveCameraNode>(sensitivity, aspect, fovY, radius, imgDist, objDist));
             }
         };
         return proc(params, err);
@@ -632,6 +661,26 @@ namespace SLRSceneGraph {
             *err = ErrorMessage("Unknown method is specified.");
         }
         return Element();
+    }
+    
+    Element SetRenderSettings(const ParameterList &params, RenderingContext* context, ErrorMessage* err) {
+        static const Function proc{
+            {
+                {"width", Type::Integer, Element(1024)}, {"height", Type::Integer, Element(1024)},
+                {"timeStart", Type::RealNumber, Element(0.0)}, {"timeEnd", Type::RealNumber, Element(0.0)},
+                {"rngSeed", Type::Integer, Element(1509761209)},
+            },
+            [](const std::map<std::string, Element> &args, RenderingContext* context, ErrorMessage* err) {
+                context->width = args.at("width").as<int32_t>();
+                context->height = args.at("height").as<int32_t>();
+                context->timeStart = args.at("timeStart").as<double>();
+                context->timeEnd = args.at("timeEnd").as<double>();
+                context->rngSeed = args.at("rngSeed").as<int32_t>();
+                
+                return Element();
+            }
+        };
+        return proc(params, context, err);
     }
     
     namespace Spectrum {

@@ -11,10 +11,10 @@
 
 namespace SLRSceneGraph {
     void PerspectiveCameraNode::createCamera() {
-        m_camera = new SLR::PerspectiveCamera(m_aspect, m_fovY, m_lensRadius, m_imgPlaneDistance, m_objPlaneDistance);
+        m_camera = new SLR::PerspectiveCamera(m_sensitivity, m_aspect, m_fovY, m_lensRadius, m_imgPlaneDistance, m_objPlaneDistance);
     }
     
     void EquirectangularCameraNode::createCamera() {
-        m_camera = new SLR::EquirectangularCamera(m_phiAngle, m_thetaAngle);
+        m_camera = new SLR::EquirectangularCamera(m_sensitivity, m_phiAngle, m_thetaAngle);
     }    
 }

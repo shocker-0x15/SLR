@@ -17,9 +17,7 @@ namespace SLR {
         ImageHeight,
         TimeStart,
         TimeEnd,
-        NumSamples,
         RNGSeed,
-        SensorResponse,
     };
     
     class RenderSettings {

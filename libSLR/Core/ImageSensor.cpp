@@ -13,7 +13,12 @@ namespace SLR {
     static const uint32_t s_tileWidth = 1 << s_log2_tileWidth;
     static const uint32_t s_localMask = (1 << s_log2_tileWidth) - 1;
     
-    ImageSensor::ImageSensor(uint32_t width, uint32_t height) : ImageSensor() {
+    ImageSensor::ImageSensor(float sensitivity) :
+    m_data(nullptr), m_separatedData(nullptr), m_numSeparated(0), m_sensitivity(sensitivity)
+    { };
+    
+    ImageSensor::ImageSensor(uint32_t width, uint32_t height, float sensitivity) :
+    m_data(nullptr), m_separatedData(nullptr), m_numSeparated(0), m_sensitivity(sensitivity) {
         init(width, height);
     }
     
@@ -133,7 +138,8 @@ namespace SLR {
         
         float* scales = (float*)alloca(sizeof(float) * m_numSeparated);
         for (int i = 0; i < m_numSeparated; ++i)
-            scales[i] = scaleSeparated ? scaleSeparated[i] : scale;
+            scales[i] = (scaleSeparated ? scaleSeparated[i] : scale) * m_sensitivity;
+        scale *= m_sensitivity;
         
         uint32_t byteWidth = 3 * m_width + m_width % 4;
         uint8_t* bmp = (uint8_t*)malloc(m_height * byteWidth);

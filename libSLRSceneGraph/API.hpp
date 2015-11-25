@@ -25,8 +25,7 @@ enum class Type : uint32_t {
     FloatTexture,
     SurfaceMaterial,
     EmitterSurfaceProperty,
-    Mesh, 
-    Sensor,
+    Mesh,
     Camera,
     Node,
     Tuple, 
@@ -37,6 +36,8 @@ enum class Type : uint32_t {
 struct Element {
     Type type;
     std::shared_ptr<void> valueRef;
+    Element(int32_t val) : type(Type::Integer), valueRef(createShared<int32_t>(val)) { };
+    Element(double val) : type(Type::RealNumber), valueRef(createShared<double>(val)) { };
     Element(Type t = Type::Void, const std::shared_ptr<void> &vr = nullptr) : type(t), valueRef(vr) { };
     
     operator bool() const { return type != Type::Void; };
@@ -113,7 +114,7 @@ struct ErrorMessage {
 };
 
 namespace SLRSceneGraph {
-    bool readScene(const std::string &filePath, Scene* scene);
+    bool readScene(const std::string &filePath, Scene* scene, RenderingContext* context);
     
     Element mulMatrix4x4(const Element &lm, const Element &rm);
     
@@ -135,7 +136,10 @@ namespace SLRSceneGraph {
     Element AddChild(const ParameterList &params, ErrorMessage* err);
     Element Load3DModel(const ParameterList &params, ErrorMessage* err);
     
+    Element CreatePerspectiveCamera(const ParameterList &params, ErrorMessage* err);
+    
     Element SetRenderer(const ParameterList &params, RenderingContext* context, ErrorMessage* err);
+    Element SetRenderSettings(const ParameterList &params, RenderingContext* context, ErrorMessage* err);
     
     namespace Spectrum {
         using namespace SLR;

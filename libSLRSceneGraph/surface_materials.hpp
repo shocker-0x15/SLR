@@ -132,8 +132,7 @@ namespace SLRSceneGraph {
         SurfaceMaterialRef m_mat0;
         SurfaceMaterialRef m_mat1;
     public:
-        SummedSurfaceMaterial(const SurfaceMaterialRef &m0, const SurfaceMaterialRef &m1) :
-        m_mat0(m0), m_mat1(m1) {};
+        SummedSurfaceMaterial(const SurfaceMaterialRef &m0, const SurfaceMaterialRef &m1);
     };
     
     
@@ -142,16 +141,14 @@ namespace SLRSceneGraph {
         SurfaceMaterialRef m_mat1;
         FloatTextureRef m_factor;
     public:
-        MixedSurfaceMaterial(const SurfaceMaterialRef &m0, const SurfaceMaterialRef &m1, const FloatTextureRef &factor) :
-        m_mat0(m0), m_mat1(m1), m_factor(factor) {};
+        MixedSurfaceMaterial(const SurfaceMaterialRef &m0, const SurfaceMaterialRef &m1, const FloatTextureRef &factor);
     };
     
     
     class DiffuseEmission : public EmitterSurfaceProperty {
         SpectrumTextureRef m_emittance;
     public:
-        DiffuseEmission(const SpectrumTextureRef &emittance) :
-        m_emittance(emittance) {};
+        DiffuseEmission(const SpectrumTextureRef &emittance);
     };
     
     
@@ -160,8 +157,7 @@ namespace SLRSceneGraph {
         SpectrumTextureRef m_coeffM;
         float m_scale;
     public:
-        IBLEmission(const SceneWRef &scene, const SpectrumTextureRef &coeffM, float scale) :
-        m_scene(scene), m_coeffM(coeffM), m_scale(scale) {};
+        IBLEmission(const SceneWRef &scene, const SpectrumTextureRef &coeffM, float scale);
     };
 }
 

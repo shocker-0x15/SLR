@@ -27,8 +27,16 @@ namespace SLRSceneGraph {
     
     struct RenderingContext {
         std::unique_ptr<SLR::Renderer> renderer;
+        int32_t width;
+        int32_t height;
+        float timeStart;
+        float timeEnd;
+        int32_t rngSeed;
+        
         RenderingContext();
         ~RenderingContext();
+        
+        RenderingContext &operator=(RenderingContext &&ctx);
     };
 }
 

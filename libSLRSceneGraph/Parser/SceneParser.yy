@@ -41,9 +41,9 @@
             CreateNode,
             SetTransform,
             AddChild, 
-            CreateSensor,
             CreatePerspectiveCamera,
             SetRenderer,
+            SetRenderSettings, 
             SetEnvironment, 
             LoadImage, 
             Load3DModel, 
@@ -240,13 +240,13 @@ API "(" arguments ")" {
         printf("Call SetRenderer\n");
         $$ = SLRSceneGraph::SetRenderer(*$3.get(), &driver.context, &errMsg);
         break;
-    case API::CreateSensor:
-        printf("Call CreateSensor\n");
-        $$ = Element(Type::Sensor, nullptr);
+    case API::SetRenderSettings:
+        printf("Call SetRenderSettings\n");
+        $$ = SLRSceneGraph::SetRenderSettings(*$3.get(), &driver.context, &errMsg);
         break;
     case API::CreatePerspectiveCamera:
         printf("Call CreatePerspectiveCamera\n");
-        $$ = Element(Type::Camera, nullptr);
+        $$ = SLRSceneGraph::CreatePerspectiveCamera(params, &errMsg);
         break;
     case API::Load3DModel:
         printf("Call Load3DModel\n");

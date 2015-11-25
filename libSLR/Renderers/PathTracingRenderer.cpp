@@ -24,10 +24,6 @@ namespace SLR {
     }
     
     void PathTracingRenderer::render(const Scene &scene, const RenderSettings &settings) const {
-        uint32_t imageWidth = settings.getInt(RenderSettingItem::ImageWidth);
-        uint32_t imageHeight = settings.getInt(RenderSettingItem::ImageHeight);
-        ImageSensor sensor(imageWidth, imageHeight);
-        
         uint32_t numThreads = std::thread::hardware_concurrency();
         XORShift topRand(settings.getInt(RenderSettingItem::RNGSeed));
         std::unique_ptr<ArenaAllocator[]> mems = std::unique_ptr<ArenaAllocator[]>(new ArenaAllocator[numThreads]);
@@ -40,22 +36,30 @@ namespace SLR {
         for (int i = 0; i < numThreads; ++i)
             rngRefs[i] = &rngs[i];
         
+        const Camera* camera = scene.getCamera();
+        ImageSensor* sensor = camera->getSensor();
+        
         Job job;
-        job.sensor = &sensor;
-        job.camera = scene.getCamera();
         job.scene = &scene;
-        job.imageWidth = sensor.width();
-        job.imageHeight = sensor.height();
-        job.timeStart = settings.getFloat(RenderSettingItem::TimeStart);
-        job.timeEnd = settings.getFloat(RenderSettingItem::TimeEnd);
-        job.numPixelX = sensor.tileWidth();
-        job.numPixelY = sensor.tileHeight();
+        
         job.mems = mems.get();
         job.rngs = rngRefs.get();
+        
+        job.camera = camera;
+        job.timeStart = settings.getFloat(RenderSettingItem::TimeStart);
+        job.timeEnd = settings.getFloat(RenderSettingItem::TimeEnd);
+        
+        job.sensor = sensor;
+        job.imageWidth = settings.getInt(RenderSettingItem::ImageWidth);
+        job.imageHeight = settings.getInt(RenderSettingItem::ImageHeight);
+        job.numPixelX = sensor->tileWidth();
+        job.numPixelY = sensor->tileHeight();
         
         uint32_t exportPass = 1;
         uint32_t imgIdx = 0;
         uint32_t endIdx = 16;
+        
+        sensor->init(job.imageWidth, job.imageHeight);
         
         for (int s = 0; s < m_samplesPerPixel; ++s) {
 #ifdef DEBUG
@@ -63,10 +67,10 @@ namespace SLR {
 #else
             ThreadPool threadPool;
 #endif
-            for (int ty = 0; ty < sensor.numTileY(); ++ty) {
-                for (int tx = 0; tx < sensor.numTileX(); ++tx) {
-                    job.basePixelX = tx * sensor.tileWidth();
-                    job.basePixelY = ty * sensor.tileHeight();
+            for (int ty = 0; ty < sensor->numTileY(); ++ty) {
+                for (int tx = 0; tx < sensor->numTileX(); ++tx) {
+                    job.basePixelX = tx * sensor->tileWidth();
+                    job.basePixelY = ty * sensor->tileHeight();
                     threadPool.enqueue(std::bind(&Job::kernel, job, std::placeholders::_1));
                 }
             }
@@ -75,7 +79,7 @@ namespace SLR {
             if ((s + 1) == exportPass) {
                 char filename[256];
                 sprintf(filename, "%03u.bmp", imgIdx);
-                sensor.saveImage(filename, settings.getFloat(RenderSettingItem::SensorResponse) / (s + 1));
+                sensor->saveImage(filename, 1.0f / (s + 1));
                 printf("%u samples: %s\n", exportPass, filename);
                 ++imgIdx;
                 if (imgIdx == endIdx)
