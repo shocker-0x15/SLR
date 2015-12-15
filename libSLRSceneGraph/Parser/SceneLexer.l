@@ -23,11 +23,13 @@ DIGIT           [[:digit:]]
 FLOAT           ({NONZERO}{DIGIT}*\.?|0\.|\.{DIGIT}){DIGIT}*|0
 EXPONENT        [eE](-|\+?){DIGIT}+
 
-INTEGER         [\+-]?{NONZERO}{DIGIT}*|0
-REALNUMBER      [\+-]?{FLOAT}{EXPONENT}?
+BOOL            True|False|true|false
+INTEGER         {NONZERO}{DIGIT}*|0
+REALNUMBER      {FLOAT}{EXPONENT}?
 ID              [_[:alpha:]][_[:alnum:]]*
-OPERATORS		=|\*|,|:
-PARENTHESES		\(|\)
+OPERATORS		=|\*|\+|-
+DELIMITERS      ,|:|;
+PARENTHESES		\(|\)|\{|\}
 WSPACE          [[:blank:]]+
 
 %{
@@ -49,7 +51,14 @@ WSPACE          [[:blank:]]+
 
 <<EOF>> {
     DPRINTF("End of File\n");
-    return SceneParser::make_END(loc);
+    return SceneParser::make_EOF(loc);
+}
+
+{BOOL} {
+    std::string str = yytext;
+    bool value = str == "True" || str == "true";
+    DPRINTF("Bool: %s\n", value ? "true" : "false");
+    return SceneParser::make_BOOL(value, loc);
 }
 
 {INTEGER} {
@@ -62,6 +71,11 @@ WSPACE          [[:blank:]]+
     double value = std::atof(yytext);
     DPRINTF("Real Number: %g\n", value);
     return SceneParser::make_REALNUMBER(value, loc);
+}
+
+for {
+    DPRINTF("%s\n", yytext);
+    return SceneParser::make_FOR(loc);
 }
 
 Translate {
@@ -158,19 +172,34 @@ CreateMesh {
         return SceneParser::make_LPAR(loc);
     else if (c == ')')
         return SceneParser::make_RPAR(loc);
+    else if (c == '{')
+        return SceneParser::make_LBRC(loc);
+    else if (c == '}')
+        return SceneParser::make_RBRC(loc);
 }
 
 {OPERATORS}	{
     char c = yytext[0];
     DPRINTF("Operator: %c\n", c);
-    if (c == ',')
-        return SceneParser::make_COMMA(loc);
-    else if (c == '=')
-        return SceneParser::make_SUBSTITUTION(loc);
+    if (c == '=')
+        return SceneParser::make_SUBSTITUTION(c, loc);
     else if (c == '*')
-        return SceneParser::make_MUL(loc);
+        return SceneParser::make_MUL(c, loc);
+    else if (c == '+')
+        return SceneParser::make_ADD(c, loc);
+    else if (c == '-')
+        return SceneParser::make_SUB(c, loc);
+}
+
+{DELIMITERS} {
+        char c = yytext[0];
+    DPRINTF("Operator: %c\n", c);
+    if (c == ',')
+        return SceneParser::make_COMMA(c, loc);
     else if (c == ':')
-        return SceneParser::make_COLON(loc);
+        return SceneParser::make_COLON(c, loc);
+    else if (c == ';')
+        return SceneParser::make_SEMICOLON(c, loc);
 }
 
 {WSPACE} {

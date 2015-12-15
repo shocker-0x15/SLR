@@ -414,7 +414,7 @@ namespace SLR {
                 exportIdx += exportIdx;
                 char filename[256];
                 sprintf(filename, "%03u.bmp", imgIdx);
-                sensor->saveImage(filename, 1.0f / (s + 1));
+                sensor->saveImage(filename, settings.getFloat(RenderSettingItem::Brightness) / (s + 1));
                 printf("%u samples: %s\n", s, filename);
                 ++imgIdx;
                 if (imgIdx == endIdx)

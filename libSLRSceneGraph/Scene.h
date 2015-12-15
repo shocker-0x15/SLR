@@ -31,6 +31,7 @@ namespace SLRSceneGraph {
         int32_t height;
         float timeStart;
         float timeEnd;
+        float brightness;
         int32_t rngSeed;
         
         RenderingContext();

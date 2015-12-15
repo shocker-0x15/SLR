@@ -79,7 +79,7 @@ namespace SLR {
             if ((s + 1) == exportPass) {
                 char filename[256];
                 sprintf(filename, "%03u.bmp", imgIdx);
-                sensor->saveImage(filename, 1.0f / (s + 1));
+                sensor->saveImage(filename, settings.getFloat(RenderSettingItem::Brightness) / (s + 1));
                 printf("%u samples: %s\n", exportPass, filename);
                 ++imgIdx;
                 if (imgIdx == endIdx)

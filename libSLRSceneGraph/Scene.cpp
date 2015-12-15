@@ -51,6 +51,7 @@ namespace SLRSceneGraph {
         height = ctx.height;
         timeStart = ctx.timeStart;
         timeEnd = ctx.timeEnd;
+        brightness = ctx.brightness;
         rngSeed = ctx.rngSeed;
         
         return *this;

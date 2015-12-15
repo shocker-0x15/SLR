@@ -22,33 +22,6 @@
     #define DSTMT(stmt)
     #define DPRINTF(fmt, ...)
     #endif
-
-    namespace SLRSceneGraph {
-        class SceneParsingDriver;
-
-        enum class API : uint32_t {
-            Translate,
-            RotateX,
-            RotateY,
-            RotateZ,
-            Scale,
-            Spectrum, 
-            SpectrumTexture, 
-            CreateMatte,
-            CreateDiffuseEmitter,
-            CreateEmitterSurfaceMaterial,
-            CreateMesh,
-            CreateNode,
-            SetTransform,
-            AddChild, 
-            CreatePerspectiveCamera,
-            SetRenderer,
-            SetRenderSettings, 
-            SetEnvironment, 
-            LoadImage, 
-            Load3DModel, 
-        };
-    }
 }
 
 %locations
@@ -62,56 +35,78 @@
 }
 
 %define api.token.prefix {TOKEN_}
+// %leftなどでもトークンの宣言にはなるが、リテラル文字列との関連付けは%tokenで行う必要がある。
 %token
-    END 0 "end of file"
+    EOF 0 "end of file"
     LPAR "("
     RPAR ")"
+    LBRC "{"
+    RBRC "}"
     COMMA ","
-    SUBSTITUTION "="
-    MUL "*"
     COLON ":"
+    SEMICOLON ";"
+    SUBSTITUTION "="
+    ADD "+"
+    SUB "-"
+    MUL "*"
 ;
 %token<char> CHAR
 %token<API> API
+%token<bool> BOOL
 %token<int32_t> INTEGER
 %token<double> REALNUMBER
 %token<std::string> STRING
 %token<std::string> ID
+%token FOR
 
-%type<Element> expression
-%type<Element> value
-%type<Element> function_call
-%type<ParameterListRef> arguments
-%type<Parameter> argument
+%type<StatementsRef> Statements
+%type<StatementRef> Statement
+%type<ExpressionRef> Expression
+%type<TermRef> Term
+%type<ValueRef> Value
+%type<ValueRef> ImmValue
+%type<ValueRef> TupleValue
+%type<ArgumentsRef> Elements
+%type<TermRef> Function
+%type<ArgumentsRef> Arguments
+%type<ArgumentRef> Argument
 
-%printer { yyoutput << $$; } <*>;
-%printer { printf(""); } <API>;
-%printer { printf(""); } <Parameter>;
-%printer { printf(""); } <ParameterListRef>;
+%printer { /*yyoutput << $$;*/ } <*>;
 
-%left ","
-%left ":"
-%left "="
-%left "*"
+%left<char> COMMA
+%nonassoc<char> COLON
+%nonassoc<char> SEMICOLON
+%right<char> SUBSTITUTION
+%left<char> ADD SUB
+%left<char> MUL
+%nonassoc NEG
 
 %%
 
-input:
-/* empty */ |
-input statement
+Statements:
+Statement {
+    $$ = createShared<std::vector<StatementRef>>();
+    if ($1)
+        $$->push_back($1);
+    driver.statements = $$;
+} | 
+Statements Statement {
+    $$ = $1;
+    if ($2)
+        $$->push_back($2); 
+    driver.statements = $$;
+}
 ;
 
-statement:
-expression {
-    printf("statement done.\n");
+Statement:
+/* empty */ "\n" {
+    $$ = nullptr;
 } |
-ID "=" expression {
-    if (!$3) {
-        error(@3, "The expression does not return a value.");
-        YYERROR;
-    }
-    driver.variables[$1] = $3;
-    DPRINTF("substitution statement done.\n");
+Expression ";" {
+    $$ = $1;
+} |
+FOR "(" Expression ";" Expression ";" Expression ")" "{" Statements "}" {
+    $$ = createShared<ForStatement>($3, $5, $7, $10);
 } |
 error {
     printf("Parsing aborted.\n");
@@ -119,178 +114,121 @@ error {
 }
 ;
 
-expression:
-value {
+Expression:
+Term {
     $$ = $1;
 } |
-function_call {
-    $$ = $1;
+Term "+" Term {
+    $$ = createShared<BinaryExpression>("+", $1, $3);
 } |
-expression "*" expression {
-    if ($1.type != Type::Matrix || $3.type != Type::Matrix) {
-        error(@3, "'*' operator is only valid for matrix multiplication.");
-        YYERROR;
-    }
-    $$ = SLRSceneGraph::mulMatrix4x4($1, $3);
+Term "-" Term {
+    $$ = createShared<BinaryExpression>("-", $1, $3);
+} |
+ID "=" Expression {
+    $$ = createShared<SubstitutionExpression>($1, $3);
 }
 ;
 
-value:
-INTEGER {
-    // DSTMT(std::cout << "value Integer: " << @1 << std::endl;)
-    $$ = Element(Type::Integer, createShared<int32_t>($1));
+Term:
+Value {
+    $$ = $1;
 } |
-REALNUMBER {
-    // DSTMT(std::cout << "value RealNumber: " << @1 << std::endl;)
-    $$ = Element(Type::RealNumber, createShared<double>($1));
+Function {
+    $$ = $1;
 } |
-STRING {
-    // DSTMT(std::cout << "value String: " << @1 << std::endl;)
-    $$ = Element(Type::String, createShared<std::string>($1));
+"+" Term %prec NEG {
+    $$ = createShared<UnaryTerm>("+", $2);
 } |
-"(" arguments ")" {
-    // DSTMT(std::cout << "value Array: " << @1 << std::endl;)
-    $$ = Element(Type::Tuple, $2);
+"-" Term %prec NEG {
+    $$ = createShared<UnaryTerm>("-", $2);
+} |
+Term "*" Term {
+    $$ = createShared<BinaryTerm>("*", $1, $3);
+} |
+"(" Expression ")" {
+    $$ = createShared<EnclosedTerm>($2);
+}
+;
+
+Value:
+ImmValue {
+    $$ = $1;
+} |
+TupleValue {
+    $$ = $1;
 } |
 ID {
-    // DSTMT(std::cout << "value ID: " << @1 << std::endl;)
-    if (driver.variables.count($1) == 0) {
-        error(@$, "undefined variable: " + $1);
-        YYERROR;
-    }
-    else {
-        $$ = driver.variables.at($1);
-    }
+    $$ = createShared<VariableValue>($1);
 }
 ;
 
-function_call:
-API "(" arguments ")" {
-    // DSTMT(std::cout << "function_call ID: " << @1 << " Args: " << @3 << std::endl;)
-    // DPRINTF("%u params (named: %u, unnamed: %u)\n", 
-    //         $3->numParams(), $3->named.size(), $3->unnamed.size());
-    DSTMT(
-        for (auto it = $3->named.begin(); it != $3->named.end(); ++it)
-            std::cout << it->first << ": " << it->second << std::endl;
-        for (auto it = $3->unnamed.begin(); it != $3->unnamed.end(); ++it)
-            std::cout << *it << std::endl;
-        )
-
-    ParameterList &params = *$3.get();
-    ErrorMessage errMsg;
-    $$ = Element();
-    switch($1) {
-    case API::Translate:
-        printf("Call Translate\n");
-        $$ = SLRSceneGraph::Translate(params, &errMsg);
-        break;
-    case API::RotateX:
-        printf("Call RotateX\n");
-        $$ = SLRSceneGraph::RotateX(params, &errMsg);
-        break;
-    case API::RotateY:
-        printf("Call RotateY\n");
-        $$ = SLRSceneGraph::RotateY(params, &errMsg);
-        break;
-    case API::RotateZ:
-        printf("Call RotateZ\n");
-        $$ = SLRSceneGraph::RotateZ(params, &errMsg);
-        break;
-    case API::Scale:
-        printf("Call Scale\n");
-        $$ = SLRSceneGraph::Scale(params, &errMsg);
-        break;
-    case API::Spectrum:
-        printf("Call Spectrum\n");
-        $$ = SLRSceneGraph::CreateSpectrum(params, &errMsg);
-        break;
-    case API::SpectrumTexture:
-        printf("Call SpectrumTexture\n");
-        $$ = SLRSceneGraph::CreateSpectrumTexture(params, &errMsg);
-        break;
-    case API::CreateMatte:
-        printf("Call CreateMatte\n");
-        $$ = SLRSceneGraph::CreateMatte(params, &errMsg);
-        break;
-    case API::CreateDiffuseEmitter:
-        printf("Call CreateDiffuseEmitter\n");
-        $$ = SLRSceneGraph::CreateDiffuseEmitter(params, &errMsg);
-        break;
-    case API::CreateEmitterSurfaceMaterial:
-        printf("Call CreateEmitterSurfaceMaterial\n");
-        $$ = SLRSceneGraph::CreateEmitterSurfaceMaterial(params, &errMsg);
-        break;
-    case API::CreateMesh:
-        printf("Call CreateMesh\n");
-        $$ = SLRSceneGraph::CreateMesh(params, &errMsg);
-        break;
-    case API::CreateNode:
-        printf("Call CreateNode\n");
-        $$ = SLRSceneGraph::CreateNode(params, &errMsg);
-        break;
-    case API::SetTransform:
-        printf("Call SetTransform\n");
-        $$ = SLRSceneGraph::SetTransform(params, &errMsg);
-        break;
-    case API::AddChild:
-        printf("Call AddChild\n");
-        $$ = SLRSceneGraph::AddChild(params, &errMsg);
-        break;
-    case API::SetRenderer:
-        printf("Call SetRenderer\n");
-        $$ = SLRSceneGraph::SetRenderer(*$3.get(), &driver.context, &errMsg);
-        break;
-    case API::SetRenderSettings:
-        printf("Call SetRenderSettings\n");
-        $$ = SLRSceneGraph::SetRenderSettings(*$3.get(), &driver.context, &errMsg);
-        break;
-    case API::CreatePerspectiveCamera:
-        printf("Call CreatePerspectiveCamera\n");
-        $$ = SLRSceneGraph::CreatePerspectiveCamera(params, &errMsg);
-        break;
-    case API::Load3DModel:
-        printf("Call Load3DModel\n");
-        $$ = SLRSceneGraph::Load3DModel(params, &errMsg);
-        break;
-    case API::LoadImage:
-        printf("Call LoadImage\n");
-        break;
-    case API::SetEnvironment:
-        printf("Call SetEnvironment\n");
-        break;
-    default:
-        break;
-    }
-
-    if (errMsg.error) {
-        error(@$, errMsg.message);
-        YYERROR;
-    }
+ImmValue:
+BOOL {
+    $$ = createShared<ImmediateValue>(Element($1));
+} |
+INTEGER {
+    $$ = createShared<ImmediateValue>(Element($1));
+} |
+REALNUMBER {
+    $$ = createShared<ImmediateValue>(Element($1));
+} |
+STRING {
+    $$ = createShared<ImmediateValue>(Element($1));
 }
 ;
 
-arguments:
-/* empty */ {
-    DSTMT(std::cout << "empty: " << @$ << std::endl;)
-    $$ = createShared<ParameterList>();
+TupleValue:
+"(" "," ")" {
+    $$ = createShared<TupleValue>(createShared<std::vector<ArgumentRef>>());
+} | 
+"(" Argument "," ")" {
+    ArgumentsRef elem = createShared<std::vector<ArgumentRef>>();
+    elem->push_back($2);
+    $$ = createShared<TupleValue>(elem);
 } |
-argument {
-    $$ = createShared<ParameterList>();
-    $$->add($1);
+"(" Elements ")" {
+    $$ = createShared<TupleValue>($2);
+}
+;
+
+Elements:
+Argument "," Argument {
+    $$ = createShared<std::vector<ArgumentRef>>();
+    $$->push_back($1);
+    $$->push_back($3);
 } |
-arguments "," argument {
-    // DSTMT(std::cout << @$ << " (" << @1 << ", " << @3 << ")" << std::endl;)
+Elements "," Argument {
     $$ = $1;
-    $$->add($3);
+    $$->push_back($3);
 }
 ;
 
-argument: 
-expression {
-    $$ = Parameter("", $1);
+Function:
+API "(" Arguments ")" {
+    $$ = createShared<FunctionTerm>($1, $3);
+}
+;
+
+Arguments:
+/* empty */ {
+    $$ = createShared<std::vector<ArgumentRef>>();
 } |
-STRING ":" expression {
-    $$ = Parameter($1, $3);
+Argument {
+    $$ = createShared<std::vector<ArgumentRef>>();
+    $$->push_back($1);
+} |
+Arguments "," Argument {
+    $$ = $1;
+    $$->push_back($3);
+}
+;
+
+Argument: 
+Expression {
+    $$ = createShared<Argument>(nullptr, $1);
+} |
+Expression ":" Expression {
+    $$ = createShared<Argument>($1, $3);
 }
 ;
 

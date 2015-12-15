@@ -48,6 +48,7 @@ int main(int argc, const char * argv[]) {
     settings.addItem(SLR::RenderSettingItem::ImageHeight, context.height);
     settings.addItem(SLR::RenderSettingItem::TimeStart, context.timeStart);
     settings.addItem(SLR::RenderSettingItem::TimeEnd, context.timeEnd);
+    settings.addItem(SLR::RenderSettingItem::Brightness, context.brightness);
     settings.addItem(SLR::RenderSettingItem::RNGSeed, context.rngSeed);
     
     context.renderer->render(*rawScene, settings);

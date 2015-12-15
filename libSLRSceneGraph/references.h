@@ -60,6 +60,19 @@ namespace SLRSceneGraph {
     
     struct RenderingContext;
     struct SceneParsingDriver;
+    
+    class Statement;
+    typedef std::shared_ptr<Statement> StatementRef;
+    typedef std::shared_ptr<std::vector<StatementRef>> StatementsRef;
+    class Expression;
+    typedef std::shared_ptr<Expression> ExpressionRef;
+    class Term;
+    typedef std::shared_ptr<Term> TermRef;
+    class Value;
+    typedef std::shared_ptr<Value> ValueRef;
+    class Argument;
+    typedef std::shared_ptr<Argument> ArgumentRef;
+    typedef std::shared_ptr<std::vector<ArgumentRef>> ArgumentsRef;
 }
 
 #endif

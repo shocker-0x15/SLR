@@ -17,6 +17,7 @@ namespace SLR {
         ImageHeight,
         TimeStart,
         TimeEnd,
+        Brightness, 
         RNGSeed,
     };
     
