@@ -45,10 +45,6 @@
     COMMA ","
     COLON ":"
     SEMICOLON ";"
-    SUBSTITUTION "="
-    ADD "+"
-    SUB "-"
-    MUL "*"
 ;
 %token<char> CHAR
 %token<API> API
@@ -76,10 +72,11 @@
 %left<char> COMMA
 %nonassoc<char> COLON
 %nonassoc<char> SEMICOLON
-%right<char> SUBSTITUTION
-%left<char> ADD SUB
-%left<char> MUL
+%right<std::string> SUBSTITUTION
+%left<std::string> OPERATOR0
+%left<std::string> OPERATOR1
 %nonassoc NEG
+%nonassoc<std::string> INC_DEC
 
 %%
 
@@ -99,9 +96,6 @@ Statements Statement {
 ;
 
 Statement:
-/* empty */ "\n" {
-    $$ = nullptr;
-} |
 Expression ";" {
     $$ = $1;
 } |
@@ -118,14 +112,11 @@ Expression:
 Term {
     $$ = $1;
 } |
-Term "+" Term {
-    $$ = createShared<BinaryExpression>("+", $1, $3);
+Term OPERATOR0 Term {
+    $$ = createShared<BinaryExpression>($1, $2, $3);
 } |
-Term "-" Term {
-    $$ = createShared<BinaryExpression>("-", $1, $3);
-} |
-ID "=" Expression {
-    $$ = createShared<SubstitutionExpression>($1, $3);
+ID SUBSTITUTION Expression {
+    $$ = createShared<SubstitutionExpression>($1, $2, $3);
 }
 ;
 
@@ -136,14 +127,17 @@ Value {
 Function {
     $$ = $1;
 } |
-"+" Term %prec NEG {
-    $$ = createShared<UnaryTerm>("+", $2);
+OPERATOR0 Term %prec NEG {
+    $$ = createShared<UnaryTerm>($1, $2);
 } |
-"-" Term %prec NEG {
-    $$ = createShared<UnaryTerm>("-", $2);
+INC_DEC ID {
+    
 } |
-Term "*" Term {
-    $$ = createShared<BinaryTerm>("*", $1, $3);
+ID INC_DEC {
+
+} |
+Term OPERATOR1 Term {
+    $$ = createShared<BinaryTerm>($1, $2, $3);
 } |
 "(" Expression ")" {
     $$ = createShared<EnclosedTerm>($2);

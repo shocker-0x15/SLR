@@ -73,6 +73,17 @@ namespace SLRSceneGraph {
     class Argument;
     typedef std::shared_ptr<Argument> ArgumentRef;
     typedef std::shared_ptr<std::vector<ArgumentRef>> ArgumentsRef;
+    
+    struct ErrorMessage;
+    
+    struct Element;
+    struct Parameter;
+    struct ParameterList;
+    typedef std::shared_ptr<ParameterList> ParameterListRef;
+    struct TypeInfo;
+    
+    struct LocalVariables;
+    struct ExecuteContext;
 }
 
 #endif

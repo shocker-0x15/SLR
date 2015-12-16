@@ -27,9 +27,12 @@ BOOL            True|False|true|false
 INTEGER         {NONZERO}{DIGIT}*|0
 REALNUMBER      {FLOAT}{EXPONENT}?
 ID              [_[:alpha:]][_[:alnum:]]*
-OPERATORS		=|\*|\+|-
+SUBSTITUTION    =|\+=|-=|\*=
+INC_DEC         \+\+|--
+OPERATORS0      \+|-
+OPERATORS1      \*
 DELIMITERS      ,|:|;
-PARENTHESES		\(|\)|\{|\}
+PARENTHESES     \(|\)|\{|\}
 WSPACE          [[:blank:]]+
 
 %{
@@ -178,21 +181,28 @@ CreateMesh {
         return SceneParser::make_RBRC(loc);
 }
 
-{OPERATORS}	{
-    char c = yytext[0];
-    DPRINTF("Operator: %c\n", c);
-    if (c == '=')
-        return SceneParser::make_SUBSTITUTION(c, loc);
-    else if (c == '*')
-        return SceneParser::make_MUL(c, loc);
-    else if (c == '+')
-        return SceneParser::make_ADD(c, loc);
-    else if (c == '-')
-        return SceneParser::make_SUB(c, loc);
+{SUBSTITUTION} {
+    DPRINTF("%s\n", yytext);
+    return SceneParser::make_SUBSTITUTION(yytext, loc);
+}
+
+{INC_DEC} {
+    DPRINTF("%s\n", yytext);
+    return SceneParser::make_INC_DEC(yytext, loc);
+}
+
+{OPERATORS0} {
+    DPRINTF("%s\n", yytext);
+    return SceneParser::make_OPERATOR0(yytext, loc);
+}
+
+{OPERATORS1} {
+    DPRINTF("%s\n", yytext);
+    return SceneParser::make_OPERATOR1(yytext, loc);
 }
 
 {DELIMITERS} {
-        char c = yytext[0];
+    char c = yytext[0];
     DPRINTF("Operator: %c\n", c);
     if (c == ',')
         return SceneParser::make_COMMA(c, loc);

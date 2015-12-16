@@ -26,418 +26,6 @@
 #include "surface_materials.hpp"
 
 namespace SLRSceneGraph {
-    std::ostream &operator<<(std::ostream &out, Type t) {
-        switch (t) {
-            case Type::Integer:
-                out << "Integer";
-                break;
-            case Type::RealNumber:
-                out << "RealNumber";
-                break;
-            case Type::String:
-                out << "String";
-                break;
-            case Type::Matrix:
-                out << "Matrix";
-                break;
-            case Type::Transform:
-                out << "Transform";
-                break;
-            case Type::Spectrum:
-                out << "Spectrum";
-                break;
-            case Type::SpectrumTexture:
-                out << "SpectrumTexture";
-                break;
-            case Type::NormalTexture:
-                out << "NormalTexture";
-                break;
-            case Type::FloatTexture:
-                out << "FloatTexture";
-                break;
-            case Type::SurfaceMaterial:
-                out << "SurfaceMaterial";
-                break;
-            case Type::EmitterSurfaceProperty:
-                out << "EmitterSurfaceProperty";
-                break;
-            case Type::Mesh:
-                out << "Mesh";
-                break;
-            case Type::Camera:
-                out << "Camera";
-                break;
-            case Type::Node:
-                out << "Node";
-                break;
-            case Type::Tuple:
-                out << "Tuple";
-                break;
-            case Type::Void:
-                out << "Void";
-                break;
-            case Type::NumTypes:
-                out << "NumTypes";
-                break;
-            default:
-                break;
-        }
-        return out;
-    }
-    
-    std::ostream &operator<<(std::ostream &out, const Element &elem) {
-        switch (elem.type) {
-            case Type::Integer:
-                out << elem.as<int32_t>();
-                break;
-            case Type::RealNumber:
-                out << elem.as<double>();
-                break;
-            case Type::String:
-                out << "\"" << elem.as<std::string>() << "\"";
-                break;
-            case Type::Matrix:
-                out << "Matrix";
-                break;
-            case Type::Transform:
-                out << "Transform";
-                break;
-            case Type::Spectrum:
-                out << "Spectrum";
-                break;
-            case Type::SpectrumTexture:
-                out << "SpectrumTexture";
-                break;
-            case Type::NormalTexture:
-                out << "NormalTexture";
-                break;
-            case Type::FloatTexture:
-                out << "FloatTexture";
-                break;
-            case Type::SurfaceMaterial:
-                out << "SurfaceMaterial";
-                break;
-            case Type::EmitterSurfaceProperty:
-                out << "EmitterSurfaceProperty";
-                break;
-            case Type::Mesh:
-                out << "Mesh";
-                break;
-            case Type::Camera:
-                out << "Camera";
-                break;
-            case Type::Node:
-                out << "Node";
-                break;
-            case Type::Tuple:
-                out << elem.as<ParameterList>();
-                break;
-            case Type::Void:
-                out << "Void";
-                break;
-            case Type::NumTypes:
-                out << "NumTypes";
-                break;
-            default:
-                out << "Unknown";
-                break;
-        }
-        return out;
-    }
-    
-    std::ostream &operator<<(std::ostream &out, const ParameterList &params) {
-        out << "{";
-        for (auto it = params.named.begin(); it != params.named.end(); ++it) {
-            out << "\"" << it->first << "\"" << ": " << it->second;
-            if (std::distance(params.named.begin(), it) + 1 < params.named.size())
-                out << ", ";
-        }
-        out << "}, ";
-        out << "(";
-        for (auto it = params.unnamed.begin(); it != params.unnamed.end(); ++it) {
-            out << *it;
-            if (std::distance(params.unnamed.begin(), it) + 1 < params.unnamed.size())
-                out << ", ";
-        }
-        out << ")";
-        return out;
-    }
-    
-    bool Element::isConvertibleTo(Type toType) const {
-        return TypeInfo::infos[(uint32_t)type].isConvertibleTo(toType);
-    }
-    
-    Element Element::convertTo(Type toType) const {
-        SLRAssert(isConvertibleTo(toType), "Specified type is invalid.");
-        TypeInfo::convertFunction func = TypeInfo::infos[(uint32_t)type].convertFunctions.at(toType);
-        return func(*this);
-    }
-    
-    bool TypeInfo::isConvertibleTo(Type toType) const {
-        return convertFunctions.count(toType) > 0;
-    }
-    
-    bool TypeInfo::initialized = false;
-    TypeInfo TypeInfo::infos[(uint32_t)Type::NumTypes];
-    
-    void TypeInfo::init() {
-        if (!initialized) {
-            for (int i = 0; i < (int)Type::NumTypes; ++i) {
-                TypeInfo &info = infos[i];
-                info.negOperator = nullptr;
-                info.addOperator = nullptr;
-                info.subOperator = nullptr;
-                info.mulOperator = nullptr;
-                info.convertFunctions[(Type)i] = [](const Element &v) { return v; };
-            }
-            
-            {
-                TypeInfo &info = infos[(uint32_t)Type::Integer];
-                
-                info.negOperator = [](const Element &v) { return Element(-v.as<int32_t>()); };
-                
-                info.addOperator = [](const Element &v0, const Element &v1) { return Element(v0.as<int32_t>() + v1.as<int32_t>()); };
-                info.subOperator = [](const Element &v0, const Element &v1) { return Element(v0.as<int32_t>() - v1.as<int32_t>()); };
-                info.mulOperator = [](const Element &v0, const Element &v1) { return Element(v0.as<int32_t>() * v1.as<int32_t>()); };
-                
-                info.convertFunctions[Type::Bool] = [](const Element &elemFrom) { return Element((bool)elemFrom.as<int32_t>()); };
-                info.convertFunctions[Type::RealNumber] = [](const Element &elemFrom) { return Element((double)elemFrom.as<int32_t>()); };
-            }
-            {
-                TypeInfo &info = infos[(uint32_t)Type::RealNumber];
-                
-                info.negOperator = [](const Element &v) { return Element(-v.as<double>()); };
-                
-                info.addOperator = [](const Element &v0, const Element &v1) { return Element(v0.as<double>() + v1.as<double>()); };
-                info.subOperator = [](const Element &v0, const Element &v1) { return Element(v0.as<double>() - v1.as<double>()); };
-                info.mulOperator = [](const Element &v0, const Element &v1) { return Element(v0.as<double>() * v1.as<double>()); };
-            }
-            {
-                TypeInfo &info = infos[(uint32_t)Type::Matrix];
-                
-                info.mulOperator = [](const Element &v0, const Element &v1) {
-                    SLR::Matrix4x4 lMat = v0.as<SLR::Matrix4x4>();
-                    SLR::Matrix4x4 rMat = v1.as<SLR::Matrix4x4>();
-                    return Element(Type::Matrix, createShared<SLR::Matrix4x4>(lMat * rMat));
-                };
-                
-                info.convertFunctions[Type::Transform] = [](const Element &elemFrom) {
-                    return Element(Type::Transform, createShared<SLR::StaticTransform>(elemFrom.as<SLR::Matrix4x4>()));
-                };
-            }
-            initialized = true;
-        }
-    }
-    
-    bool Argument::perform(ExecuteContext &context, ErrorMessage *errMsg) const {
-        if (m_keyExpr && !m_keyExpr->perform(context, errMsg))
-            return false;
-        if (!m_valueExpr->perform(context, errMsg))
-            return false;
-        m_result = Parameter(m_keyExpr ? m_keyExpr->result().as<std::string>() : "", m_valueExpr->result());
-        return true;
-    }
-    
-    ForStatement::ForStatement(const ExpressionRef &preExpr, const ExpressionRef &condExpr, const ExpressionRef &postExpr, const StatementsRef &statementList) :
-    m_preExpr(preExpr), m_condExpr(condExpr), m_postExpr(postExpr) {
-        for (int i = 0; i < statementList->size(); ++i)
-            m_block.push_back(statementList->at(i));
-    }
-    
-    bool ForStatement::perform(ExecuteContext &context, ErrorMessage* errMsg) const {
-        if (!m_preExpr->perform(context, errMsg))
-            return false;
-        
-        if (!m_condExpr->perform(context, errMsg))
-            return false;
-        if (!m_condExpr->result().isConvertibleTo(Type::Bool)) {
-            *errMsg = ErrorMessage("Must provide a boolean value.");
-            return false;
-        }
-        bool condition = m_condExpr->result().as<bool>();
-        while (condition) {
-            context.stackVariables.pushDepth();
-            for (int i = 0; i < m_block.size(); ++i) {
-                if (!m_block[i]->perform(context, errMsg))
-                    return false;
-            }
-            context.stackVariables.popDepth();
-            if (!m_postExpr->perform(context, errMsg))
-                return false;
-            
-            if (!m_condExpr->perform(context, errMsg))
-                return false;
-            condition = m_condExpr->result().as<bool>();
-        }
-        
-        return true;
-    }
-    
-    const std::map<std::string, std::function<Element(const Element &, const Element &)>> BinaryExpression::s_functions = {
-        {"+", [](const Element &, const Element &) {
-            return Element();
-        }},
-        {"-", [](const Element &, const Element &) {
-            return Element();
-        }}
-    };
-    
-    bool BinaryExpression::perform(ExecuteContext &context, ErrorMessage *errMsg) const {
-        if (!m_left->perform(context, errMsg))
-            return false;
-        if (!m_right->perform(context, errMsg))
-            return false;
-        auto func = s_functions.at(m_op);
-//        if (TypeInfo::infos[m_left->result().type].)
-        SLRAssert(false, "Not Implemented.");
-        m_result = func(m_left->result(), m_right->result());
-        return true;
-    }
-    
-    bool SubstitutionExpression::perform(ExecuteContext &context, ErrorMessage *errMsg) const {
-        if (!m_right->perform(context, errMsg))
-            return false;
-        context.stackVariables[m_varName] = m_right->result();
-        return true;
-    }
-    
-    bool FunctionTerm::perform(ExecuteContext &context, ErrorMessage* errMsg) const {
-        ParameterList params;
-        for (int i = 0; i < m_args->size(); ++i) {
-            ArgumentRef arg = m_args->at(i);
-            if (!arg->perform(context, errMsg))
-                return false;
-            params.add(arg->result());
-        }
-        
-        switch (m_funcID) {
-            case API::Translate:
-                m_result = Translate(params, errMsg);
-                break;
-            case API::RotateX:
-                m_result = RotateX(params, errMsg);
-                break;
-            case API::RotateY:
-                m_result = RotateY(params, errMsg);
-                break;
-            case API::RotateZ:
-                m_result = RotateZ(params, errMsg);
-                break;
-            case API::Scale:
-                m_result = Scale(params, errMsg);
-                break;
-            case API::Spectrum:
-                m_result = CreateSpectrum(params, errMsg);
-                break;
-            case API::SpectrumTexture:
-                m_result = CreateSpectrumTexture(params, errMsg);
-                break;
-            case API::CreateMatte:
-                m_result = CreateMatte(params, errMsg);
-                break;
-            case API::CreateDiffuseEmitter:
-                m_result = CreateDiffuseEmitter(params, errMsg);
-                break;
-            case API::CreateEmitterSurfaceMaterial:
-                m_result = CreateEmitterSurfaceMaterial(params, errMsg);
-                break;
-            case API::CreateMesh:
-                m_result = CreateMesh(params, errMsg);
-                break;
-            case API::CreateNode:
-                m_result = CreateNode(params, errMsg);
-                break;
-            case API::SetTransform:
-                m_result = SetTransform(params, errMsg);
-                break;
-            case API::AddChild:
-                m_result = AddChild(params, errMsg);
-                break;
-            case API::SetRenderer:
-                m_result = SetRenderer(params, context.renderingContext, errMsg);
-                break;
-            case API::SetRenderSettings:
-                m_result = SetRenderSettings(params, context.renderingContext, errMsg);
-                break;
-            case API::CreatePerspectiveCamera:
-                m_result = CreatePerspectiveCamera(params, errMsg);
-                break;
-            case API::Load3DModel:
-                m_result = Load3DModel(params, errMsg);
-                break;
-            case API::LoadImage:
-                break;
-            case API::SetEnvironment:
-                break;
-            default:
-                break;
-        }
-        return !errMsg->error;
-    }
-    
-    const std::map<std::string, std::function<Element(const Element &)>> UnaryTerm::s_functions = {
-        {"+", [](const Element &) {
-            return Element();
-        }},
-        {"-", [](const Element &) {
-            return Element();
-        }}
-    };
-    
-    bool UnaryTerm::perform(ExecuteContext &context, ErrorMessage *errMsg) const {
-        if (!m_term->perform(context, errMsg))
-            return false;
-        auto func = s_functions.at(m_op);
-        SLRAssert(false, "Not Implemented.");
-        m_result = func(m_term->result());
-        return true;
-    }
-    
-    const std::map<std::string, std::function<Element(const Element &, const Element &)>> BinaryTerm::s_functions = {
-        {"*", [](const Element &, const Element &) {
-            return Element();
-        }}
-    };
-    
-    bool BinaryTerm::perform(ExecuteContext &context, ErrorMessage *errMsg) const {
-        if (!m_left->perform(context, errMsg))
-            return false;
-        if (!m_right->perform(context, errMsg))
-            return false;
-        auto func = s_functions.at(m_op);
-        SLRAssert(false, "Not Implemented.");
-        m_result = func(m_left->result(), m_right->result());
-        return true;
-    }
-    
-    bool EnclosedTerm::perform(ExecuteContext &context, ErrorMessage *errMsg) const {
-        if (!m_expr->perform(context, errMsg))
-            return false;
-        m_result = m_expr->result();
-        return true;
-    }
-    
-    bool TupleValue::perform(ExecuteContext &context, ErrorMessage *errMsg) const {
-        ParameterListRef params = createShared<ParameterList>();
-        for (int i = 0; i < m_elements->size(); ++i) {
-            ArgumentRef arg = m_elements->at(i);
-            if (!arg->perform(context, errMsg))
-                return false;
-            params->add(arg->result());
-        }
-        m_result = Element(Type::Tuple, params);
-        return true;
-    }
-    
-    bool VariableValue::perform(ExecuteContext &context, ErrorMessage *errMsg) const {
-        if (!context.stackVariables.exists(m_varName))
-            return false;
-        m_result = context.stackVariables[m_varName];
-        return true;
-    }
-    
-    
-    
     bool readScene(const std::string &filePath, Scene* scene, RenderingContext* context) {
         TypeInfo::init();
         SceneParsingDriver parser;
@@ -449,7 +37,7 @@ namespace SLRSceneGraph {
         ErrorMessage errMsg;
         executeContext.scene = scene;
         executeContext.renderingContext = context;
-        executeContext.stackVariables["root"] = Element(Type::Node, scene->rootNode());
+        executeContext.stackVariables["root"] = Element(TypeMap::Node(), scene->rootNode());
         for (int i = 0; i < statements->size(); ++i) {
             StatementRef statement = statements->at(i);
             if (!statement->perform(executeContext, &errMsg))
@@ -570,7 +158,7 @@ namespace SLRSceneGraph {
                 float ty = args.at("y").as<double>();
                 float tz = args.at("z").as<double>();
                 
-                return Element(Type::Matrix, createShared<SLR::Matrix4x4>(SLR::translate(tx, ty, tz)));
+                return Element(TypeMap::Matrix(), SLR::translate(tx, ty, tz));
             }
         };
         return proc(params, err);
@@ -581,7 +169,7 @@ namespace SLRSceneGraph {
             {{"angle", Type::RealNumber}},
             [](const std::map<std::string, Element> &args, ErrorMessage* err) {
                 float angle = args.at("angle").as<double>();
-                return Element(Type::Matrix, createShared<SLR::Matrix4x4>(SLR::rotateX(angle)));
+                return Element(TypeMap::Matrix(), SLR::rotateX(angle));
             }
         };
         return proc(params, err);
@@ -592,7 +180,7 @@ namespace SLRSceneGraph {
             {{"angle", Type::RealNumber}},
             [](const std::map<std::string, Element> &args, ErrorMessage* err) {
                 float angle = args.at("angle").as<double>();
-                return Element(Type::Matrix, createShared<SLR::Matrix4x4>(SLR::rotateY(angle)));
+                return Element(TypeMap::Matrix(), SLR::rotateY(angle));
             }
         };
         return proc(params, err);
@@ -603,7 +191,7 @@ namespace SLRSceneGraph {
             {{"angle", Type::RealNumber}},
             [](const std::map<std::string, Element> &args, ErrorMessage* err) {
                 float angle = args.at("angle").as<double>();
-                return Element(Type::Matrix, createShared<SLR::Matrix4x4>(SLR::rotateZ(angle)));
+                return Element(TypeMap::Matrix(), SLR::rotateZ(angle));
             }
         };
         return proc(params, err);
@@ -615,7 +203,7 @@ namespace SLRSceneGraph {
             {{"s", Type::RealNumber}},
             [](const std::map<std::string, Element> &args, ErrorMessage* err) {
                 float s = args.at("s").as<double>();
-                return Element(Type::Matrix, createShared<SLR::Matrix4x4>(SLR::scale(s)));
+                return Element(TypeMap::Matrix(), SLR::scale(s));
             }
         };
         static const Function proc1{
@@ -624,7 +212,7 @@ namespace SLRSceneGraph {
                 float sx = args.at("x").as<double>();
                 float sy = args.at("y").as<double>();
                 float sz = args.at("z").as<double>();
-                return Element(Type::Matrix, createShared<SLR::Matrix4x4>(SLR::scale(sx, sy, sz)));
+                return Element(TypeMap::Matrix(), SLR::scale(sx, sy, sz));
             }
         };
         static const auto procs = std::make_array<Function>(proc0, proc1);
@@ -682,13 +270,13 @@ namespace SLRSceneGraph {
                 }
                 float value = args.at("value").as<double>();
                 
-                return Element(Type::Spectrum, Spectrum::create(type, SLR::ColorSpace::sRGB, value, value, value));
+                return Element(TypeMap::Spectrum(), Spectrum::create(type, SLR::ColorSpace::sRGB, value, value, value));
             }
         };
         static const Function proc1{
             {
-                {"type", Type::String, Element(Type::String, createShared<std::string>("Reflectance"))},
-                {"space", Type::String, Element(Type::String, createShared<std::string>("sRGB"))},
+                {"type", Type::String, Element(TypeMap::String(), "Reflectance")},
+                {"space", Type::String, Element(TypeMap::String(), "sRGB")},
                 {"e0", Type::RealNumber},
                 {"e1", Type::RealNumber},
                 {"e2", Type::RealNumber}
@@ -710,7 +298,7 @@ namespace SLRSceneGraph {
                 float e1 = args.at("e1").as<double>();
                 float e2 = args.at("e2").as<double>();
                 
-                return Element(Type::Spectrum, Spectrum::create(type, space, e0, e1, e2));
+                return Element(TypeMap::Spectrum(), Spectrum::create(type, space, e0, e1, e2));
             }
         };
         static const Function proc2{
@@ -744,7 +332,7 @@ namespace SLRSceneGraph {
                                                 StandardIlluminant::D65, StandardIlluminant::NumSamples);
                 else
                     *err = ErrorMessage("unrecognized spectrum ID.");
-                return Element(Type::Spectrum, spectrum);
+                return Element(TypeMap::Spectrum(), spectrum);
             }
         };
         static const auto procs = std::make_array<Function>(proc0, proc1, proc2, proc3, proc4);
@@ -761,7 +349,7 @@ namespace SLRSceneGraph {
             {{"spectrum", Type::Spectrum}},
             [](const std::map<std::string, Element> &args, ErrorMessage* err) {
                 InputSpectrumRef spectrum = args.at("spectrum").asRef<SLR::InputSpectrum>();
-                return Element(Type::SpectrumTexture, createShared<ConstantSpectrumTexture>(spectrum));
+                return Element(TypeMap::SpectrumTexture(), createShared<ConstantSpectrumTexture>(spectrum));
             }
         };
         static const auto procs = std::make_array<Function>(proc0);
@@ -775,11 +363,11 @@ namespace SLRSceneGraph {
     
     Element CreateMatte(const ParameterList &params, ErrorMessage* err) {
         static const Function proc{
-            {{"reflectance", Type::SpectrumTexture}, {"sigma", Type::FloatTexture, Element(Type::FloatTexture, nullptr)}},
+            {{"reflectance", Type::SpectrumTexture}, {"sigma", Type::FloatTexture, Element(TypeMap::FloatTexture(), nullptr)}},
             [](const std::map<std::string, Element> &args, ErrorMessage* err) {
                 SpectrumTextureRef reflectance = args.at("reflectance").asRef<SpectrumTexture>();
                 FloatTextureRef sigma = args.at("sigma").asRef<FloatTexture>();
-                return Element(Type::SurfaceMaterial, SurfaceMaterial::createMatte(reflectance, sigma));
+                return Element(TypeMap::SurfaceMaterial(), SurfaceMaterial::createMatte(reflectance, sigma));
             }
         };
         return proc(params, err);
@@ -790,7 +378,7 @@ namespace SLRSceneGraph {
             {{"emittance", Type::SpectrumTexture}},
             [](const std::map<std::string, Element> &args, ErrorMessage* err) {
                 SpectrumTextureRef emittance = args.at("emittance").asRef<SpectrumTexture>();
-                return Element(Type::EmitterSurfaceProperty, SurfaceMaterial::createDiffuseEmitter(emittance));
+                return Element(TypeMap::EmitterSurfaceProperty(), SurfaceMaterial::createDiffuseEmitter(emittance));
             }
         };
         return proc(params, err);
@@ -802,7 +390,7 @@ namespace SLRSceneGraph {
             [](const std::map<std::string, Element> &args, ErrorMessage* err) {
                 SurfaceMaterialRef mat = args.at("mat").asRef<SurfaceMaterial>();
                 EmitterSurfacePropertyRef emit = args.at("emit").asRef<EmitterSurfaceProperty>();
-                return Element(Type::SurfaceMaterial, SurfaceMaterial::createEmitterSurfaceMaterial(mat, emit));
+                return Element(TypeMap::SurfaceMaterial(), SurfaceMaterial::createEmitterSurfaceMaterial(mat, emit));
             }
         };
         return proc(params, err);
@@ -866,7 +454,7 @@ namespace SLRSceneGraph {
                     lightMesh->addTriangle(f.v0, f.v1, f.v2, f.mat);
                 }
                 
-                return Element(Type::Mesh, lightMesh);
+                return Element(TypeMap::Mesh(), lightMesh);
             }
         };
         return proc(params, err);
@@ -876,7 +464,7 @@ namespace SLRSceneGraph {
         static const Function proc{
             {},
             [](const std::map<std::string, Element> &args, ErrorMessage* err) {
-                return Element(Type::Node, createShared<InternalNode>());
+                return Element(TypeMap::Node(), InternalNode());
             }
         };
         return proc(params, err);
@@ -942,7 +530,7 @@ namespace SLRSceneGraph {
                 construct(path, modelNode);
                 modelNode->setName(path);
                 
-                return Element(Type::Node, modelNode);
+                return Element(TypeMap::Node(), modelNode);
             }
         };
         return proc(params, err);
@@ -965,7 +553,7 @@ namespace SLRSceneGraph {
                 float imgDist = args.at("imgDist").as<double>();
                 float objDist = args.at("objDist").as<double>();
                 
-                return Element(Type::Camera, createShared<PerspectiveCameraNode>(sensitivity, aspect, fovY, radius, imgDist, objDist));
+                return Element(TypeMap::Camera(), createShared<PerspectiveCameraNode>(sensitivity, aspect, fovY, radius, imgDist, objDist));
             }
         };
         return proc(params, err);

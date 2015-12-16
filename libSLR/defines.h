@@ -11,6 +11,7 @@
 #include <cstdio>
 #include <cstdint>
 #include <cstdlib>
+#include <cstdarg>
 #include <cmath>
 
 #include <iostream>
