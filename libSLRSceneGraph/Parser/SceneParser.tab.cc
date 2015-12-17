@@ -251,67 +251,63 @@ namespace SLRSceneGraph {
   {
       switch (that.type_get ())
     {
-      case 11: // API
+      case 33: // API
         value.move< API > (that.value);
         break;
 
-      case 34: // Argument
+      case 60: // Argument
         value.move< ArgumentRef > (that.value);
         break;
 
-      case 31: // Elements
-      case 33: // Arguments
+      case 57: // Elements
+      case 59: // Arguments
         value.move< ArgumentsRef > (that.value);
         break;
 
-      case 26: // Expression
+      case 52: // Expression
         value.move< ExpressionRef > (that.value);
         break;
 
-      case 25: // Statement
+      case 51: // Statement
         value.move< StatementRef > (that.value);
         break;
 
-      case 24: // Statements
+      case 50: // Statements
         value.move< StatementsRef > (that.value);
         break;
 
-      case 27: // Term
-      case 32: // Function
+      case 53: // Term
+      case 58: // Function
         value.move< TermRef > (that.value);
         break;
 
-      case 28: // Value
-      case 29: // ImmValue
-      case 30: // TupleValue
+      case 54: // Value
+      case 55: // ImmValue
+      case 56: // TupleValue
         value.move< ValueRef > (that.value);
         break;
 
-      case 12: // BOOL
+      case 34: // BOOL
         value.move< bool > (that.value);
         break;
 
-      case 7: // ","
-      case 8: // ":"
-      case 9: // ";"
-      case 10: // CHAR
+      case 29: // ":"
+      case 30: // ","
+      case 31: // ";"
+      case 32: // CHAR
         value.move< char > (that.value);
         break;
 
-      case 14: // REALNUMBER
+      case 36: // REALNUMBER
         value.move< double > (that.value);
         break;
 
-      case 13: // INTEGER
+      case 35: // INTEGER
         value.move< int32_t > (that.value);
         break;
 
-      case 15: // STRING
-      case 16: // ID
-      case 18: // SUBSTITUTION
-      case 19: // OPERATOR0
-      case 20: // OPERATOR1
-      case 22: // INC_DEC
+      case 37: // STRING
+      case 38: // ID
         value.move< std::string > (that.value);
         break;
 
@@ -330,67 +326,63 @@ namespace SLRSceneGraph {
     state = that.state;
       switch (that.type_get ())
     {
-      case 11: // API
+      case 33: // API
         value.copy< API > (that.value);
         break;
 
-      case 34: // Argument
+      case 60: // Argument
         value.copy< ArgumentRef > (that.value);
         break;
 
-      case 31: // Elements
-      case 33: // Arguments
+      case 57: // Elements
+      case 59: // Arguments
         value.copy< ArgumentsRef > (that.value);
         break;
 
-      case 26: // Expression
+      case 52: // Expression
         value.copy< ExpressionRef > (that.value);
         break;
 
-      case 25: // Statement
+      case 51: // Statement
         value.copy< StatementRef > (that.value);
         break;
 
-      case 24: // Statements
+      case 50: // Statements
         value.copy< StatementsRef > (that.value);
         break;
 
-      case 27: // Term
-      case 32: // Function
+      case 53: // Term
+      case 58: // Function
         value.copy< TermRef > (that.value);
         break;
 
-      case 28: // Value
-      case 29: // ImmValue
-      case 30: // TupleValue
+      case 54: // Value
+      case 55: // ImmValue
+      case 56: // TupleValue
         value.copy< ValueRef > (that.value);
         break;
 
-      case 12: // BOOL
+      case 34: // BOOL
         value.copy< bool > (that.value);
         break;
 
-      case 7: // ","
-      case 8: // ":"
-      case 9: // ";"
-      case 10: // CHAR
+      case 29: // ":"
+      case 30: // ","
+      case 31: // ";"
+      case 32: // CHAR
         value.copy< char > (that.value);
         break;
 
-      case 14: // REALNUMBER
+      case 36: // REALNUMBER
         value.copy< double > (that.value);
         break;
 
-      case 13: // INTEGER
+      case 35: // INTEGER
         value.copy< int32_t > (that.value);
         break;
 
-      case 15: // STRING
-      case 16: // ID
-      case 18: // SUBSTITUTION
-      case 19: // OPERATOR0
-      case 20: // OPERATOR1
-      case 22: // INC_DEC
+      case 37: // STRING
+      case 38: // ID
         value.copy< std::string > (that.value);
         break;
 
@@ -430,179 +422,151 @@ namespace SLRSceneGraph {
         << yysym.location << ": ";
     switch (yytype)
     {
-            case 7: // ","
+            case 29: // ":"
 
-#line 70 "SceneParser.yy" // lalr1.cc:636
+#line 94 "SceneParser.yy" // lalr1.cc:636
         { /*yyoutput << $$;*/ }
-#line 438 "SceneParser.tab.cc" // lalr1.cc:636
+#line 430 "SceneParser.tab.cc" // lalr1.cc:636
         break;
 
-      case 8: // ":"
+      case 30: // ","
 
-#line 70 "SceneParser.yy" // lalr1.cc:636
+#line 94 "SceneParser.yy" // lalr1.cc:636
         { /*yyoutput << $$;*/ }
-#line 445 "SceneParser.tab.cc" // lalr1.cc:636
+#line 437 "SceneParser.tab.cc" // lalr1.cc:636
         break;
 
-      case 9: // ";"
+      case 31: // ";"
 
-#line 70 "SceneParser.yy" // lalr1.cc:636
+#line 94 "SceneParser.yy" // lalr1.cc:636
         { /*yyoutput << $$;*/ }
-#line 452 "SceneParser.tab.cc" // lalr1.cc:636
+#line 444 "SceneParser.tab.cc" // lalr1.cc:636
         break;
 
-      case 10: // CHAR
+      case 32: // CHAR
 
-#line 70 "SceneParser.yy" // lalr1.cc:636
+#line 94 "SceneParser.yy" // lalr1.cc:636
         { /*yyoutput << $$;*/ }
-#line 459 "SceneParser.tab.cc" // lalr1.cc:636
+#line 451 "SceneParser.tab.cc" // lalr1.cc:636
         break;
 
-      case 11: // API
+      case 33: // API
 
-#line 70 "SceneParser.yy" // lalr1.cc:636
+#line 94 "SceneParser.yy" // lalr1.cc:636
         { /*yyoutput << $$;*/ }
-#line 466 "SceneParser.tab.cc" // lalr1.cc:636
+#line 458 "SceneParser.tab.cc" // lalr1.cc:636
         break;
 
-      case 12: // BOOL
+      case 34: // BOOL
 
-#line 70 "SceneParser.yy" // lalr1.cc:636
+#line 94 "SceneParser.yy" // lalr1.cc:636
         { /*yyoutput << $$;*/ }
-#line 473 "SceneParser.tab.cc" // lalr1.cc:636
+#line 465 "SceneParser.tab.cc" // lalr1.cc:636
         break;
 
-      case 13: // INTEGER
+      case 35: // INTEGER
 
-#line 70 "SceneParser.yy" // lalr1.cc:636
+#line 94 "SceneParser.yy" // lalr1.cc:636
         { /*yyoutput << $$;*/ }
-#line 480 "SceneParser.tab.cc" // lalr1.cc:636
+#line 472 "SceneParser.tab.cc" // lalr1.cc:636
         break;
 
-      case 14: // REALNUMBER
+      case 36: // REALNUMBER
 
-#line 70 "SceneParser.yy" // lalr1.cc:636
+#line 94 "SceneParser.yy" // lalr1.cc:636
         { /*yyoutput << $$;*/ }
-#line 487 "SceneParser.tab.cc" // lalr1.cc:636
+#line 479 "SceneParser.tab.cc" // lalr1.cc:636
         break;
 
-      case 15: // STRING
+      case 37: // STRING
 
-#line 70 "SceneParser.yy" // lalr1.cc:636
+#line 94 "SceneParser.yy" // lalr1.cc:636
         { /*yyoutput << $$;*/ }
-#line 494 "SceneParser.tab.cc" // lalr1.cc:636
+#line 486 "SceneParser.tab.cc" // lalr1.cc:636
         break;
 
-      case 16: // ID
+      case 38: // ID
 
-#line 70 "SceneParser.yy" // lalr1.cc:636
+#line 94 "SceneParser.yy" // lalr1.cc:636
         { /*yyoutput << $$;*/ }
-#line 501 "SceneParser.tab.cc" // lalr1.cc:636
+#line 493 "SceneParser.tab.cc" // lalr1.cc:636
         break;
 
-      case 18: // SUBSTITUTION
+      case 50: // Statements
 
-#line 70 "SceneParser.yy" // lalr1.cc:636
+#line 94 "SceneParser.yy" // lalr1.cc:636
         { /*yyoutput << $$;*/ }
-#line 508 "SceneParser.tab.cc" // lalr1.cc:636
+#line 500 "SceneParser.tab.cc" // lalr1.cc:636
         break;
 
-      case 19: // OPERATOR0
+      case 51: // Statement
 
-#line 70 "SceneParser.yy" // lalr1.cc:636
+#line 94 "SceneParser.yy" // lalr1.cc:636
         { /*yyoutput << $$;*/ }
-#line 515 "SceneParser.tab.cc" // lalr1.cc:636
+#line 507 "SceneParser.tab.cc" // lalr1.cc:636
         break;
 
-      case 20: // OPERATOR1
+      case 52: // Expression
 
-#line 70 "SceneParser.yy" // lalr1.cc:636
+#line 94 "SceneParser.yy" // lalr1.cc:636
         { /*yyoutput << $$;*/ }
-#line 522 "SceneParser.tab.cc" // lalr1.cc:636
+#line 514 "SceneParser.tab.cc" // lalr1.cc:636
         break;
 
-      case 22: // INC_DEC
+      case 53: // Term
 
-#line 70 "SceneParser.yy" // lalr1.cc:636
+#line 94 "SceneParser.yy" // lalr1.cc:636
         { /*yyoutput << $$;*/ }
-#line 529 "SceneParser.tab.cc" // lalr1.cc:636
+#line 521 "SceneParser.tab.cc" // lalr1.cc:636
         break;
 
-      case 24: // Statements
+      case 54: // Value
 
-#line 70 "SceneParser.yy" // lalr1.cc:636
+#line 94 "SceneParser.yy" // lalr1.cc:636
         { /*yyoutput << $$;*/ }
-#line 536 "SceneParser.tab.cc" // lalr1.cc:636
+#line 528 "SceneParser.tab.cc" // lalr1.cc:636
         break;
 
-      case 25: // Statement
+      case 55: // ImmValue
 
-#line 70 "SceneParser.yy" // lalr1.cc:636
+#line 94 "SceneParser.yy" // lalr1.cc:636
         { /*yyoutput << $$;*/ }
-#line 543 "SceneParser.tab.cc" // lalr1.cc:636
+#line 535 "SceneParser.tab.cc" // lalr1.cc:636
         break;
 
-      case 26: // Expression
+      case 56: // TupleValue
 
-#line 70 "SceneParser.yy" // lalr1.cc:636
+#line 94 "SceneParser.yy" // lalr1.cc:636
         { /*yyoutput << $$;*/ }
-#line 550 "SceneParser.tab.cc" // lalr1.cc:636
+#line 542 "SceneParser.tab.cc" // lalr1.cc:636
         break;
 
-      case 27: // Term
+      case 57: // Elements
 
-#line 70 "SceneParser.yy" // lalr1.cc:636
+#line 94 "SceneParser.yy" // lalr1.cc:636
         { /*yyoutput << $$;*/ }
-#line 557 "SceneParser.tab.cc" // lalr1.cc:636
+#line 549 "SceneParser.tab.cc" // lalr1.cc:636
         break;
 
-      case 28: // Value
+      case 58: // Function
 
-#line 70 "SceneParser.yy" // lalr1.cc:636
+#line 94 "SceneParser.yy" // lalr1.cc:636
         { /*yyoutput << $$;*/ }
-#line 564 "SceneParser.tab.cc" // lalr1.cc:636
+#line 556 "SceneParser.tab.cc" // lalr1.cc:636
         break;
 
-      case 29: // ImmValue
+      case 59: // Arguments
 
-#line 70 "SceneParser.yy" // lalr1.cc:636
+#line 94 "SceneParser.yy" // lalr1.cc:636
         { /*yyoutput << $$;*/ }
-#line 571 "SceneParser.tab.cc" // lalr1.cc:636
+#line 563 "SceneParser.tab.cc" // lalr1.cc:636
         break;
 
-      case 30: // TupleValue
+      case 60: // Argument
 
-#line 70 "SceneParser.yy" // lalr1.cc:636
+#line 94 "SceneParser.yy" // lalr1.cc:636
         { /*yyoutput << $$;*/ }
-#line 578 "SceneParser.tab.cc" // lalr1.cc:636
-        break;
-
-      case 31: // Elements
-
-#line 70 "SceneParser.yy" // lalr1.cc:636
-        { /*yyoutput << $$;*/ }
-#line 585 "SceneParser.tab.cc" // lalr1.cc:636
-        break;
-
-      case 32: // Function
-
-#line 70 "SceneParser.yy" // lalr1.cc:636
-        { /*yyoutput << $$;*/ }
-#line 592 "SceneParser.tab.cc" // lalr1.cc:636
-        break;
-
-      case 33: // Arguments
-
-#line 70 "SceneParser.yy" // lalr1.cc:636
-        { /*yyoutput << $$;*/ }
-#line 599 "SceneParser.tab.cc" // lalr1.cc:636
-        break;
-
-      case 34: // Argument
-
-#line 70 "SceneParser.yy" // lalr1.cc:636
-        { /*yyoutput << $$;*/ }
-#line 606 "SceneParser.tab.cc" // lalr1.cc:636
+#line 570 "SceneParser.tab.cc" // lalr1.cc:636
         break;
 
 
@@ -721,7 +685,7 @@ namespace SLRSceneGraph {
     yyla.location.begin.filename = yyla.location.end.filename = &driver.file;
 }
 
-#line 725 "SceneParser.tab.cc" // lalr1.cc:745
+#line 689 "SceneParser.tab.cc" // lalr1.cc:745
 
     /* Initialize the stack.  The initial state will be set in
        yynewstate, since the latter expects the semantical and the
@@ -811,67 +775,63 @@ namespace SLRSceneGraph {
          when using variants.  */
         switch (yyr1_[yyn])
     {
-      case 11: // API
+      case 33: // API
         yylhs.value.build< API > ();
         break;
 
-      case 34: // Argument
+      case 60: // Argument
         yylhs.value.build< ArgumentRef > ();
         break;
 
-      case 31: // Elements
-      case 33: // Arguments
+      case 57: // Elements
+      case 59: // Arguments
         yylhs.value.build< ArgumentsRef > ();
         break;
 
-      case 26: // Expression
+      case 52: // Expression
         yylhs.value.build< ExpressionRef > ();
         break;
 
-      case 25: // Statement
+      case 51: // Statement
         yylhs.value.build< StatementRef > ();
         break;
 
-      case 24: // Statements
+      case 50: // Statements
         yylhs.value.build< StatementsRef > ();
         break;
 
-      case 27: // Term
-      case 32: // Function
+      case 53: // Term
+      case 58: // Function
         yylhs.value.build< TermRef > ();
         break;
 
-      case 28: // Value
-      case 29: // ImmValue
-      case 30: // TupleValue
+      case 54: // Value
+      case 55: // ImmValue
+      case 56: // TupleValue
         yylhs.value.build< ValueRef > ();
         break;
 
-      case 12: // BOOL
+      case 34: // BOOL
         yylhs.value.build< bool > ();
         break;
 
-      case 7: // ","
-      case 8: // ":"
-      case 9: // ";"
-      case 10: // CHAR
+      case 29: // ":"
+      case 30: // ","
+      case 31: // ";"
+      case 32: // CHAR
         yylhs.value.build< char > ();
         break;
 
-      case 14: // REALNUMBER
+      case 36: // REALNUMBER
         yylhs.value.build< double > ();
         break;
 
-      case 13: // INTEGER
+      case 35: // INTEGER
         yylhs.value.build< int32_t > ();
         break;
 
-      case 15: // STRING
-      case 16: // ID
-      case 18: // SUBSTITUTION
-      case 19: // OPERATOR0
-      case 20: // OPERATOR1
-      case 22: // INC_DEC
+      case 37: // STRING
+      case 38: // ID
         yylhs.value.build< std::string > ();
         break;
 
@@ -893,285 +853,363 @@ namespace SLRSceneGraph {
           switch (yyn)
             {
   case 2:
-#line 84 "SceneParser.yy" // lalr1.cc:859
+#line 112 "SceneParser.yy" // lalr1.cc:859
     {
     yylhs.value.as< StatementsRef > () = createShared<std::vector<StatementRef>>();
     if (yystack_[0].value.as< StatementRef > ())
         yylhs.value.as< StatementsRef > ()->push_back(yystack_[0].value.as< StatementRef > ());
     driver.statements = yylhs.value.as< StatementsRef > ();
 }
-#line 904 "SceneParser.tab.cc" // lalr1.cc:859
+#line 864 "SceneParser.tab.cc" // lalr1.cc:859
     break;
 
   case 3:
-#line 90 "SceneParser.yy" // lalr1.cc:859
+#line 118 "SceneParser.yy" // lalr1.cc:859
     {
     yylhs.value.as< StatementsRef > () = yystack_[1].value.as< StatementsRef > ();
     if (yystack_[0].value.as< StatementRef > ())
         yylhs.value.as< StatementsRef > ()->push_back(yystack_[0].value.as< StatementRef > ()); 
     driver.statements = yylhs.value.as< StatementsRef > ();
 }
-#line 915 "SceneParser.tab.cc" // lalr1.cc:859
+#line 875 "SceneParser.tab.cc" // lalr1.cc:859
     break;
 
   case 4:
-#line 99 "SceneParser.yy" // lalr1.cc:859
-    {
-    yylhs.value.as< StatementRef > () = yystack_[1].value.as< ExpressionRef > ();
-}
-#line 923 "SceneParser.tab.cc" // lalr1.cc:859
+#line 127 "SceneParser.yy" // lalr1.cc:859
+    { yylhs.value.as< StatementRef > () = yystack_[1].value.as< ExpressionRef > (); }
+#line 881 "SceneParser.tab.cc" // lalr1.cc:859
     break;
 
   case 5:
-#line 102 "SceneParser.yy" // lalr1.cc:859
+#line 128 "SceneParser.yy" // lalr1.cc:859
     {
     yylhs.value.as< StatementRef > () = createShared<ForStatement>(yystack_[8].value.as< ExpressionRef > (), yystack_[6].value.as< ExpressionRef > (), yystack_[4].value.as< ExpressionRef > (), yystack_[1].value.as< StatementsRef > ());
 }
-#line 931 "SceneParser.tab.cc" // lalr1.cc:859
+#line 889 "SceneParser.tab.cc" // lalr1.cc:859
     break;
 
   case 6:
-#line 105 "SceneParser.yy" // lalr1.cc:859
+#line 131 "SceneParser.yy" // lalr1.cc:859
     {
     printf("Parsing aborted.\n");
     YYABORT;
 }
-#line 940 "SceneParser.tab.cc" // lalr1.cc:859
+#line 898 "SceneParser.tab.cc" // lalr1.cc:859
     break;
 
   case 7:
-#line 112 "SceneParser.yy" // lalr1.cc:859
-    {
-    yylhs.value.as< ExpressionRef > () = yystack_[0].value.as< TermRef > ();
-}
-#line 948 "SceneParser.tab.cc" // lalr1.cc:859
+#line 138 "SceneParser.yy" // lalr1.cc:859
+    { yylhs.value.as< ExpressionRef > () = yystack_[0].value.as< TermRef > (); }
+#line 904 "SceneParser.tab.cc" // lalr1.cc:859
     break;
 
   case 8:
-#line 115 "SceneParser.yy" // lalr1.cc:859
-    {
-    yylhs.value.as< ExpressionRef > () = createShared<BinaryExpression>(yystack_[2].value.as< TermRef > (), yystack_[1].value.as< std::string > (), yystack_[0].value.as< TermRef > ());
-}
-#line 956 "SceneParser.tab.cc" // lalr1.cc:859
+#line 139 "SceneParser.yy" // lalr1.cc:859
+    { yylhs.value.as< ExpressionRef > () = createShared<BinaryExpression>(yystack_[2].value.as< TermRef > (), "+", yystack_[0].value.as< TermRef > ()); }
+#line 910 "SceneParser.tab.cc" // lalr1.cc:859
     break;
 
   case 9:
-#line 118 "SceneParser.yy" // lalr1.cc:859
-    {
-    yylhs.value.as< ExpressionRef > () = createShared<SubstitutionExpression>(yystack_[2].value.as< std::string > (), yystack_[1].value.as< std::string > (), yystack_[0].value.as< ExpressionRef > ());
-}
-#line 964 "SceneParser.tab.cc" // lalr1.cc:859
+#line 140 "SceneParser.yy" // lalr1.cc:859
+    { yylhs.value.as< ExpressionRef > () = createShared<BinaryExpression>(yystack_[2].value.as< TermRef > (), "-", yystack_[0].value.as< TermRef > ()); }
+#line 916 "SceneParser.tab.cc" // lalr1.cc:859
     break;
 
   case 10:
-#line 124 "SceneParser.yy" // lalr1.cc:859
-    {
-    yylhs.value.as< TermRef > () = yystack_[0].value.as< ValueRef > ();
-}
-#line 972 "SceneParser.tab.cc" // lalr1.cc:859
+#line 141 "SceneParser.yy" // lalr1.cc:859
+    { yylhs.value.as< ExpressionRef > () = createShared<BinaryExpression>(yystack_[2].value.as< TermRef > (), "<", yystack_[0].value.as< TermRef > ()); }
+#line 922 "SceneParser.tab.cc" // lalr1.cc:859
     break;
 
   case 11:
-#line 127 "SceneParser.yy" // lalr1.cc:859
-    {
-    yylhs.value.as< TermRef > () = yystack_[0].value.as< TermRef > ();
-}
-#line 980 "SceneParser.tab.cc" // lalr1.cc:859
+#line 142 "SceneParser.yy" // lalr1.cc:859
+    { yylhs.value.as< ExpressionRef > () = createShared<BinaryExpression>(yystack_[2].value.as< TermRef > (), ">", yystack_[0].value.as< TermRef > ()); }
+#line 928 "SceneParser.tab.cc" // lalr1.cc:859
     break;
 
   case 12:
-#line 130 "SceneParser.yy" // lalr1.cc:859
-    {
-    yylhs.value.as< TermRef > () = createShared<UnaryTerm>(yystack_[1].value.as< std::string > (), yystack_[0].value.as< TermRef > ());
-}
-#line 988 "SceneParser.tab.cc" // lalr1.cc:859
+#line 143 "SceneParser.yy" // lalr1.cc:859
+    { yylhs.value.as< ExpressionRef > () = createShared<BinaryExpression>(yystack_[2].value.as< TermRef > (), "<=", yystack_[0].value.as< TermRef > ()); }
+#line 934 "SceneParser.tab.cc" // lalr1.cc:859
     break;
 
   case 13:
-#line 133 "SceneParser.yy" // lalr1.cc:859
-    {
-    
-}
-#line 996 "SceneParser.tab.cc" // lalr1.cc:859
+#line 144 "SceneParser.yy" // lalr1.cc:859
+    { yylhs.value.as< ExpressionRef > () = createShared<BinaryExpression>(yystack_[2].value.as< TermRef > (), ">=", yystack_[0].value.as< TermRef > ()); }
+#line 940 "SceneParser.tab.cc" // lalr1.cc:859
     break;
 
   case 14:
-#line 136 "SceneParser.yy" // lalr1.cc:859
-    {
-
-}
-#line 1004 "SceneParser.tab.cc" // lalr1.cc:859
+#line 145 "SceneParser.yy" // lalr1.cc:859
+    { yylhs.value.as< ExpressionRef > () = createShared<BinaryExpression>(yystack_[2].value.as< TermRef > (), "==", yystack_[0].value.as< TermRef > ()); }
+#line 946 "SceneParser.tab.cc" // lalr1.cc:859
     break;
 
   case 15:
-#line 139 "SceneParser.yy" // lalr1.cc:859
-    {
-    yylhs.value.as< TermRef > () = createShared<BinaryTerm>(yystack_[2].value.as< TermRef > (), yystack_[1].value.as< std::string > (), yystack_[0].value.as< TermRef > ());
-}
-#line 1012 "SceneParser.tab.cc" // lalr1.cc:859
+#line 146 "SceneParser.yy" // lalr1.cc:859
+    { yylhs.value.as< ExpressionRef > () = createShared<BinaryExpression>(yystack_[2].value.as< TermRef > (), "!=", yystack_[0].value.as< TermRef > ()); }
+#line 952 "SceneParser.tab.cc" // lalr1.cc:859
     break;
 
   case 16:
-#line 142 "SceneParser.yy" // lalr1.cc:859
-    {
-    yylhs.value.as< TermRef > () = createShared<EnclosedTerm>(yystack_[1].value.as< ExpressionRef > ());
-}
-#line 1020 "SceneParser.tab.cc" // lalr1.cc:859
+#line 147 "SceneParser.yy" // lalr1.cc:859
+    { yylhs.value.as< ExpressionRef > () = createShared<BinaryExpression>(yystack_[2].value.as< TermRef > (), "&&", yystack_[0].value.as< TermRef > ()); }
+#line 958 "SceneParser.tab.cc" // lalr1.cc:859
     break;
 
   case 17:
 #line 148 "SceneParser.yy" // lalr1.cc:859
-    {
-    yylhs.value.as< ValueRef > () = yystack_[0].value.as< ValueRef > ();
-}
-#line 1028 "SceneParser.tab.cc" // lalr1.cc:859
+    { yylhs.value.as< ExpressionRef > () = createShared<BinaryExpression>(yystack_[2].value.as< TermRef > (), "||", yystack_[0].value.as< TermRef > ()); }
+#line 964 "SceneParser.tab.cc" // lalr1.cc:859
     break;
 
   case 18:
-#line 151 "SceneParser.yy" // lalr1.cc:859
-    {
-    yylhs.value.as< ValueRef > () = yystack_[0].value.as< ValueRef > ();
-}
-#line 1036 "SceneParser.tab.cc" // lalr1.cc:859
+#line 149 "SceneParser.yy" // lalr1.cc:859
+    { yylhs.value.as< ExpressionRef > () = createShared<SubstitutionExpression>(yystack_[2].value.as< std::string > (), "=", yystack_[0].value.as< ExpressionRef > ()); }
+#line 970 "SceneParser.tab.cc" // lalr1.cc:859
     break;
 
   case 19:
-#line 154 "SceneParser.yy" // lalr1.cc:859
-    {
-    yylhs.value.as< ValueRef > () = createShared<VariableValue>(yystack_[0].value.as< std::string > ());
-}
-#line 1044 "SceneParser.tab.cc" // lalr1.cc:859
+#line 150 "SceneParser.yy" // lalr1.cc:859
+    { yylhs.value.as< ExpressionRef > () = createShared<SubstitutionExpression>(yystack_[2].value.as< std::string > (), "+=", yystack_[0].value.as< ExpressionRef > ()); }
+#line 976 "SceneParser.tab.cc" // lalr1.cc:859
     break;
 
   case 20:
-#line 160 "SceneParser.yy" // lalr1.cc:859
-    {
-    yylhs.value.as< ValueRef > () = createShared<ImmediateValue>(Element(yystack_[0].value.as< bool > ()));
-}
-#line 1052 "SceneParser.tab.cc" // lalr1.cc:859
+#line 151 "SceneParser.yy" // lalr1.cc:859
+    { yylhs.value.as< ExpressionRef > () = createShared<SubstitutionExpression>(yystack_[2].value.as< std::string > (), "-=", yystack_[0].value.as< ExpressionRef > ()); }
+#line 982 "SceneParser.tab.cc" // lalr1.cc:859
     break;
 
   case 21:
-#line 163 "SceneParser.yy" // lalr1.cc:859
-    {
-    yylhs.value.as< ValueRef > () = createShared<ImmediateValue>(Element(yystack_[0].value.as< int32_t > ()));
-}
-#line 1060 "SceneParser.tab.cc" // lalr1.cc:859
+#line 152 "SceneParser.yy" // lalr1.cc:859
+    { yylhs.value.as< ExpressionRef > () = createShared<SubstitutionExpression>(yystack_[2].value.as< std::string > (), "*=", yystack_[0].value.as< ExpressionRef > ()); }
+#line 988 "SceneParser.tab.cc" // lalr1.cc:859
     break;
 
   case 22:
-#line 166 "SceneParser.yy" // lalr1.cc:859
-    {
-    yylhs.value.as< ValueRef > () = createShared<ImmediateValue>(Element(yystack_[0].value.as< double > ()));
-}
-#line 1068 "SceneParser.tab.cc" // lalr1.cc:859
+#line 153 "SceneParser.yy" // lalr1.cc:859
+    { yylhs.value.as< ExpressionRef > () = createShared<SubstitutionExpression>(yystack_[2].value.as< std::string > (), "/=", yystack_[0].value.as< ExpressionRef > ()); }
+#line 994 "SceneParser.tab.cc" // lalr1.cc:859
     break;
 
   case 23:
-#line 169 "SceneParser.yy" // lalr1.cc:859
-    {
-    yylhs.value.as< ValueRef > () = createShared<ImmediateValue>(Element(yystack_[0].value.as< std::string > ()));
-}
-#line 1076 "SceneParser.tab.cc" // lalr1.cc:859
+#line 154 "SceneParser.yy" // lalr1.cc:859
+    { yylhs.value.as< ExpressionRef > () = createShared<SubstitutionExpression>(yystack_[2].value.as< std::string > (), "%=", yystack_[0].value.as< ExpressionRef > ()); }
+#line 1000 "SceneParser.tab.cc" // lalr1.cc:859
     break;
 
   case 24:
-#line 175 "SceneParser.yy" // lalr1.cc:859
-    {
-    yylhs.value.as< ValueRef > () = createShared<TupleValue>(createShared<std::vector<ArgumentRef>>());
-}
-#line 1084 "SceneParser.tab.cc" // lalr1.cc:859
+#line 158 "SceneParser.yy" // lalr1.cc:859
+    { yylhs.value.as< TermRef > () = yystack_[0].value.as< ValueRef > (); }
+#line 1006 "SceneParser.tab.cc" // lalr1.cc:859
     break;
 
   case 25:
-#line 178 "SceneParser.yy" // lalr1.cc:859
+#line 159 "SceneParser.yy" // lalr1.cc:859
+    { yylhs.value.as< TermRef > () = yystack_[0].value.as< TermRef > (); }
+#line 1012 "SceneParser.tab.cc" // lalr1.cc:859
+    break;
+
+  case 26:
+#line 160 "SceneParser.yy" // lalr1.cc:859
+    { yylhs.value.as< TermRef > () = createShared<UnaryTerm>("+", yystack_[0].value.as< TermRef > ()); }
+#line 1018 "SceneParser.tab.cc" // lalr1.cc:859
+    break;
+
+  case 27:
+#line 161 "SceneParser.yy" // lalr1.cc:859
+    { yylhs.value.as< TermRef > () = createShared<UnaryTerm>("-", yystack_[0].value.as< TermRef > ()); }
+#line 1024 "SceneParser.tab.cc" // lalr1.cc:859
+    break;
+
+  case 28:
+#line 162 "SceneParser.yy" // lalr1.cc:859
+    { yylhs.value.as< TermRef > () = createShared<UnaryTerm>("!", yystack_[0].value.as< TermRef > ()); }
+#line 1030 "SceneParser.tab.cc" // lalr1.cc:859
+    break;
+
+  case 29:
+#line 163 "SceneParser.yy" // lalr1.cc:859
+    { }
+#line 1036 "SceneParser.tab.cc" // lalr1.cc:859
+    break;
+
+  case 30:
+#line 164 "SceneParser.yy" // lalr1.cc:859
+    { }
+#line 1042 "SceneParser.tab.cc" // lalr1.cc:859
+    break;
+
+  case 31:
+#line 165 "SceneParser.yy" // lalr1.cc:859
+    { }
+#line 1048 "SceneParser.tab.cc" // lalr1.cc:859
+    break;
+
+  case 32:
+#line 166 "SceneParser.yy" // lalr1.cc:859
+    { }
+#line 1054 "SceneParser.tab.cc" // lalr1.cc:859
+    break;
+
+  case 33:
+#line 167 "SceneParser.yy" // lalr1.cc:859
+    { yylhs.value.as< TermRef > () = createShared<BinaryTerm>(yystack_[2].value.as< TermRef > (), "*", yystack_[0].value.as< TermRef > ()); }
+#line 1060 "SceneParser.tab.cc" // lalr1.cc:859
+    break;
+
+  case 34:
+#line 168 "SceneParser.yy" // lalr1.cc:859
+    { yylhs.value.as< TermRef > () = createShared<BinaryTerm>(yystack_[2].value.as< TermRef > (), "/", yystack_[0].value.as< TermRef > ()); }
+#line 1066 "SceneParser.tab.cc" // lalr1.cc:859
+    break;
+
+  case 35:
+#line 169 "SceneParser.yy" // lalr1.cc:859
+    { yylhs.value.as< TermRef > () = createShared<BinaryTerm>(yystack_[2].value.as< TermRef > (), "%", yystack_[0].value.as< TermRef > ()); }
+#line 1072 "SceneParser.tab.cc" // lalr1.cc:859
+    break;
+
+  case 36:
+#line 170 "SceneParser.yy" // lalr1.cc:859
+    { yylhs.value.as< TermRef > () = createShared<EnclosedTerm>(yystack_[1].value.as< ExpressionRef > ()); }
+#line 1078 "SceneParser.tab.cc" // lalr1.cc:859
+    break;
+
+  case 37:
+#line 174 "SceneParser.yy" // lalr1.cc:859
+    { yylhs.value.as< ValueRef > () = yystack_[0].value.as< ValueRef > (); }
+#line 1084 "SceneParser.tab.cc" // lalr1.cc:859
+    break;
+
+  case 38:
+#line 175 "SceneParser.yy" // lalr1.cc:859
+    { yylhs.value.as< ValueRef > () = yystack_[0].value.as< ValueRef > (); }
+#line 1090 "SceneParser.tab.cc" // lalr1.cc:859
+    break;
+
+  case 39:
+#line 176 "SceneParser.yy" // lalr1.cc:859
+    { yylhs.value.as< ValueRef > () = createShared<VariableValue>(yystack_[0].value.as< std::string > ()); }
+#line 1096 "SceneParser.tab.cc" // lalr1.cc:859
+    break;
+
+  case 40:
+#line 180 "SceneParser.yy" // lalr1.cc:859
+    { yylhs.value.as< ValueRef > () = createShared<ImmediateValue>(Element(yystack_[0].value.as< bool > ())); }
+#line 1102 "SceneParser.tab.cc" // lalr1.cc:859
+    break;
+
+  case 41:
+#line 181 "SceneParser.yy" // lalr1.cc:859
+    { yylhs.value.as< ValueRef > () = createShared<ImmediateValue>(Element(yystack_[0].value.as< int32_t > ())); }
+#line 1108 "SceneParser.tab.cc" // lalr1.cc:859
+    break;
+
+  case 42:
+#line 182 "SceneParser.yy" // lalr1.cc:859
+    { yylhs.value.as< ValueRef > () = createShared<ImmediateValue>(Element(yystack_[0].value.as< double > ())); }
+#line 1114 "SceneParser.tab.cc" // lalr1.cc:859
+    break;
+
+  case 43:
+#line 183 "SceneParser.yy" // lalr1.cc:859
+    { yylhs.value.as< ValueRef > () = createShared<ImmediateValue>(Element(yystack_[0].value.as< std::string > ())); }
+#line 1120 "SceneParser.tab.cc" // lalr1.cc:859
+    break;
+
+  case 44:
+#line 187 "SceneParser.yy" // lalr1.cc:859
+    {
+    yylhs.value.as< ValueRef > () = createShared<TupleValue>(createShared<std::vector<ArgumentRef>>());
+}
+#line 1128 "SceneParser.tab.cc" // lalr1.cc:859
+    break;
+
+  case 45:
+#line 190 "SceneParser.yy" // lalr1.cc:859
     {
     ArgumentsRef elem = createShared<std::vector<ArgumentRef>>();
     elem->push_back(yystack_[2].value.as< ArgumentRef > ());
     yylhs.value.as< ValueRef > () = createShared<TupleValue>(elem);
 }
-#line 1094 "SceneParser.tab.cc" // lalr1.cc:859
+#line 1138 "SceneParser.tab.cc" // lalr1.cc:859
     break;
 
-  case 26:
-#line 183 "SceneParser.yy" // lalr1.cc:859
+  case 46:
+#line 195 "SceneParser.yy" // lalr1.cc:859
     {
     yylhs.value.as< ValueRef > () = createShared<TupleValue>(yystack_[1].value.as< ArgumentsRef > ());
 }
-#line 1102 "SceneParser.tab.cc" // lalr1.cc:859
+#line 1146 "SceneParser.tab.cc" // lalr1.cc:859
     break;
 
-  case 27:
-#line 189 "SceneParser.yy" // lalr1.cc:859
+  case 47:
+#line 201 "SceneParser.yy" // lalr1.cc:859
     {
     yylhs.value.as< ArgumentsRef > () = createShared<std::vector<ArgumentRef>>();
     yylhs.value.as< ArgumentsRef > ()->push_back(yystack_[2].value.as< ArgumentRef > ());
     yylhs.value.as< ArgumentsRef > ()->push_back(yystack_[0].value.as< ArgumentRef > ());
 }
-#line 1112 "SceneParser.tab.cc" // lalr1.cc:859
+#line 1156 "SceneParser.tab.cc" // lalr1.cc:859
     break;
 
-  case 28:
-#line 194 "SceneParser.yy" // lalr1.cc:859
+  case 48:
+#line 206 "SceneParser.yy" // lalr1.cc:859
     {
     yylhs.value.as< ArgumentsRef > () = yystack_[2].value.as< ArgumentsRef > ();
     yylhs.value.as< ArgumentsRef > ()->push_back(yystack_[0].value.as< ArgumentRef > ());
 }
-#line 1121 "SceneParser.tab.cc" // lalr1.cc:859
+#line 1165 "SceneParser.tab.cc" // lalr1.cc:859
     break;
 
-  case 29:
-#line 201 "SceneParser.yy" // lalr1.cc:859
-    {
-    yylhs.value.as< TermRef > () = createShared<FunctionTerm>(yystack_[3].value.as< API > (), yystack_[1].value.as< ArgumentsRef > ());
-}
-#line 1129 "SceneParser.tab.cc" // lalr1.cc:859
-    break;
-
-  case 30:
-#line 207 "SceneParser.yy" // lalr1.cc:859
-    {
-    yylhs.value.as< ArgumentsRef > () = createShared<std::vector<ArgumentRef>>();
-}
-#line 1137 "SceneParser.tab.cc" // lalr1.cc:859
-    break;
-
-  case 31:
-#line 210 "SceneParser.yy" // lalr1.cc:859
-    {
-    yylhs.value.as< ArgumentsRef > () = createShared<std::vector<ArgumentRef>>();
-    yylhs.value.as< ArgumentsRef > ()->push_back(yystack_[0].value.as< ArgumentRef > ());
-}
-#line 1146 "SceneParser.tab.cc" // lalr1.cc:859
-    break;
-
-  case 32:
-#line 214 "SceneParser.yy" // lalr1.cc:859
-    {
-    yylhs.value.as< ArgumentsRef > () = yystack_[2].value.as< ArgumentsRef > ();
-    yylhs.value.as< ArgumentsRef > ()->push_back(yystack_[0].value.as< ArgumentRef > ());
-}
-#line 1155 "SceneParser.tab.cc" // lalr1.cc:859
-    break;
-
-  case 33:
-#line 221 "SceneParser.yy" // lalr1.cc:859
-    {
-    yylhs.value.as< ArgumentRef > () = createShared<Argument>(nullptr, yystack_[0].value.as< ExpressionRef > ());
-}
-#line 1163 "SceneParser.tab.cc" // lalr1.cc:859
-    break;
-
-  case 34:
-#line 224 "SceneParser.yy" // lalr1.cc:859
-    {
-    yylhs.value.as< ArgumentRef > () = createShared<Argument>(yystack_[2].value.as< ExpressionRef > (), yystack_[0].value.as< ExpressionRef > ());
-}
+  case 49:
+#line 213 "SceneParser.yy" // lalr1.cc:859
+    { yylhs.value.as< TermRef > () = createShared<FunctionTerm>(yystack_[3].value.as< API > (), yystack_[1].value.as< ArgumentsRef > ()); }
 #line 1171 "SceneParser.tab.cc" // lalr1.cc:859
     break;
 
+  case 50:
+#line 217 "SceneParser.yy" // lalr1.cc:859
+    {
+    yylhs.value.as< ArgumentsRef > () = createShared<std::vector<ArgumentRef>>();
+}
+#line 1179 "SceneParser.tab.cc" // lalr1.cc:859
+    break;
 
-#line 1175 "SceneParser.tab.cc" // lalr1.cc:859
+  case 51:
+#line 220 "SceneParser.yy" // lalr1.cc:859
+    {
+    yylhs.value.as< ArgumentsRef > () = createShared<std::vector<ArgumentRef>>();
+    yylhs.value.as< ArgumentsRef > ()->push_back(yystack_[0].value.as< ArgumentRef > ());
+}
+#line 1188 "SceneParser.tab.cc" // lalr1.cc:859
+    break;
+
+  case 52:
+#line 224 "SceneParser.yy" // lalr1.cc:859
+    {
+    yylhs.value.as< ArgumentsRef > () = yystack_[2].value.as< ArgumentsRef > ();
+    yylhs.value.as< ArgumentsRef > ()->push_back(yystack_[0].value.as< ArgumentRef > ());
+}
+#line 1197 "SceneParser.tab.cc" // lalr1.cc:859
+    break;
+
+  case 53:
+#line 231 "SceneParser.yy" // lalr1.cc:859
+    { yylhs.value.as< ArgumentRef > () = createShared<Argument>(nullptr, yystack_[0].value.as< ExpressionRef > ()); }
+#line 1203 "SceneParser.tab.cc" // lalr1.cc:859
+    break;
+
+  case 54:
+#line 232 "SceneParser.yy" // lalr1.cc:859
+    { yylhs.value.as< ArgumentRef > () = createShared<Argument>(yystack_[2].value.as< ExpressionRef > (), yystack_[0].value.as< ExpressionRef > ()); }
+#line 1209 "SceneParser.tab.cc" // lalr1.cc:859
+    break;
+
+
+#line 1213 "SceneParser.tab.cc" // lalr1.cc:859
             default:
               break;
             }
@@ -1426,118 +1464,154 @@ namespace SLRSceneGraph {
   }
 
 
-  const signed char SceneParser::yypact_ninf_ = -28;
+  const signed char SceneParser::yypact_ninf_ = -38;
 
   const signed char SceneParser::yytable_ninf_ = -1;
 
   const short int
   SceneParser::yypact_[] =
   {
-      80,   -28,    97,     9,   -28,   -28,   -28,   -28,   -14,    10,
-     125,   -10,    46,   -28,     8,    -4,   -28,   -28,   -28,   -28,
-      16,     1,     3,    14,   139,   139,   -28,   139,     2,   -28,
-     -28,   -28,   -28,   -28,   125,   125,   -28,   -28,   139,   -28,
-     139,   111,    18,     7,   -28,   -28,    20,    11,   -28,   -28,
-     -28,   -28,   -28,   -28,   139,   139,   -28,    21,   139,    29,
-      30,    80,    63,   -28
+     120,   -38,   157,   205,   205,   205,   -29,   -28,    22,   -38,
+     -38,   -38,   -38,    -4,    23,    66,   -38,   -17,   249,   -38,
+     -38,   -38,   -38,    24,     1,    11,    -3,   -21,   -38,   -38,
+     -38,   -38,   -38,   217,   217,   217,   217,   217,   217,   217,
+     -38,   -38,   217,   -38,   -38,   -38,   205,   205,   205,   205,
+     205,   205,   205,   205,   205,   205,   205,   205,   205,   -38,
+     -38,   217,   -38,   217,   169,    14,    12,   -38,   -38,   -38,
+     -38,   -38,   -38,   -38,    13,     0,     0,     0,     0,   -38,
+     -38,   -38,     0,     0,     0,     0,     0,     0,   -38,   -38,
+     -38,   -38,   -38,   217,   217,   -38,    27,   217,    25,    55,
+     120,   105,   -38
   };
 
   const unsigned char
   SceneParser::yydefact_[] =
   {
-       0,     6,     0,     0,    20,    21,    22,    23,    19,     0,
-       0,     0,     0,     2,     0,     7,    10,    17,    18,    11,
-       0,    33,     0,     0,    30,     0,    14,     0,    19,    12,
-      13,     1,     3,     4,     0,     0,    24,    16,     0,    26,
-       0,     0,    33,     0,    31,     9,     0,     8,    15,    34,
-      28,    25,    27,    29,     0,     0,    32,     0,     0,     0,
-       0,     0,     0,     5
+       0,     6,     0,     0,     0,     0,     0,     0,     0,    40,
+      41,    42,    43,    39,     0,     0,     2,     0,     7,    24,
+      37,    38,    25,     0,    53,     0,     0,    39,    26,    27,
+      28,    29,    30,    50,     0,     0,     0,     0,     0,     0,
+      31,    32,     0,     1,     3,     4,     0,     0,     0,     0,
+       0,     0,     0,     0,     0,     0,     0,     0,     0,    44,
+      36,     0,    46,     0,     0,    53,     0,    51,    18,    19,
+      20,    21,    22,    23,     0,    10,    11,     8,     9,    33,
+      34,    35,    12,    13,    14,    15,    16,    17,    54,    48,
+      45,    47,    49,     0,     0,    52,     0,     0,     0,     0,
+       0,     0,     5
   };
 
   const signed char
   SceneParser::yypgoto_[] =
   {
-     -28,   -27,   -11,    -2,    -7,   -28,   -28,   -28,   -28,   -28,
-     -28,   -22
+     -38,   -37,   -14,    -2,    -1,   -38,   -38,   -38,   -38,   -38,
+     -38,   -25
   };
 
   const signed char
   SceneParser::yydefgoto_[] =
   {
-      -1,    12,    13,    14,    15,    16,    17,    18,    22,    19,
-      43,    23
+      -1,    15,    16,    17,    18,    19,    20,    21,    25,    22,
+      66,    26
   };
 
   const unsigned char
   SceneParser::yytable_[] =
   {
-      21,    32,    44,    29,    25,    37,    30,    39,    26,    38,
-      40,    53,    24,    27,    54,    34,    35,    33,    50,    52,
-      36,    41,    42,    45,    26,    46,    38,    47,    48,    55,
-      58,    35,    56,    60,    62,    61,    49,     0,    42,    42,
-       0,     0,     0,     0,     0,     0,    31,     1,     0,     2,
-       0,    32,    42,    57,     0,     0,    59,     3,     4,     5,
-       6,     7,     8,     9,     1,    10,     2,     0,    11,    63,
-       0,     0,     0,     0,     3,     4,     5,     6,     7,     8,
-       9,     1,    10,     2,     0,    11,     0,     0,     0,     0,
-       0,     3,     4,     5,     6,     7,     8,     9,     0,    10,
-       2,     0,    11,     0,    20,     0,     0,     0,     3,     4,
-       5,     6,     7,     8,     2,    51,    10,     0,     0,    11,
-       0,     0,     3,     4,     5,     6,     7,     8,     2,     0,
-      10,     0,     0,    11,     0,     0,     3,     4,     5,     6,
-       7,    28,     2,     0,    10,     0,     0,    11,     0,     0,
-       3,     4,     5,     6,     7,     8,     0,     0,    10,     0,
-       0,    11
+      24,    44,    28,    29,    30,    60,    40,    41,    67,    31,
+      32,    50,    51,    52,    45,    62,    92,    34,    35,    36,
+      37,    38,    39,    40,    41,    33,    42,    64,    59,    99,
+      61,    65,    68,    69,    70,    71,    72,    73,    89,    91,
+      74,    63,    93,    61,    94,    75,    76,    77,    78,    79,
+      80,    81,    82,    83,    84,    85,    86,    87,    97,    88,
+     100,    65,    65,   101,     0,     0,    43,     1,    95,     2,
+       0,     0,     0,     0,     0,     3,     4,     0,     0,     0,
+       5,     0,     0,     0,     0,     0,     0,    44,     0,     0,
+       0,    65,    96,     6,     7,    98,     0,     0,     0,     8,
+       9,    10,    11,    12,    13,    14,     1,     0,     2,     0,
+       0,   102,     0,     0,     3,     4,     0,     0,     0,     5,
+       0,     1,     0,     2,     0,     0,     0,     0,     0,     3,
+       4,     0,     6,     7,     5,     0,     0,     0,     8,     9,
+      10,    11,    12,    13,    14,     0,     0,     6,     7,     0,
+       0,     0,     0,     8,     9,    10,    11,    12,    13,    14,
+       2,     0,     0,     0,     0,     0,     3,     4,     0,     0,
+       0,     5,     2,    90,     0,     0,     0,     0,     3,     4,
+       0,     0,     0,     5,     6,     7,     0,    23,     0,     0,
+       8,     9,    10,    11,    12,    13,     6,     7,     0,     0,
+       0,     0,     8,     9,    10,    11,    12,    13,     2,     0,
+       0,     0,     0,     0,     3,     4,     0,     0,     0,     5,
+       2,     0,     0,     0,     0,     0,     3,     4,     0,     0,
+       0,     5,     6,     7,     0,     0,     0,     0,     8,     9,
+      10,    11,    12,    27,     6,     7,     0,     0,     0,     0,
+       8,     9,    10,    11,    12,    13,    46,    47,    48,    49,
+      50,    51,    52,     0,    53,    54,    55,    56,    57,    58
   };
 
   const signed char
   SceneParser::yycheck_[] =
   {
-       2,    12,    24,    10,    18,     4,    16,     4,    22,     8,
-       7,     4,     3,     3,     7,    19,    20,     9,    40,    41,
-       4,     7,    24,    25,    22,    27,     8,    34,    35,     9,
-       9,    20,    54,     4,    61,     5,    38,    -1,    40,    41,
-      -1,    -1,    -1,    -1,    -1,    -1,     0,     1,    -1,     3,
-      -1,    62,    54,    55,    -1,    -1,    58,    11,    12,    13,
-      14,    15,    16,    17,     1,    19,     3,    -1,    22,     6,
-      -1,    -1,    -1,    -1,    11,    12,    13,    14,    15,    16,
-      17,     1,    19,     3,    -1,    22,    -1,    -1,    -1,    -1,
-      -1,    11,    12,    13,    14,    15,    16,    17,    -1,    19,
-       3,    -1,    22,    -1,     7,    -1,    -1,    -1,    11,    12,
-      13,    14,    15,    16,     3,     4,    19,    -1,    -1,    22,
-      -1,    -1,    11,    12,    13,    14,    15,    16,     3,    -1,
-      19,    -1,    -1,    22,    -1,    -1,    11,    12,    13,    14,
-      15,    16,     3,    -1,    19,    -1,    -1,    22,    -1,    -1,
-      11,    12,    13,    14,    15,    16,    -1,    -1,    19,    -1,
-      -1,    22
+       2,    15,     3,     4,     5,     4,    27,    28,    33,    38,
+      38,    11,    12,    13,    31,     4,     4,    21,    22,    23,
+      24,    25,    26,    27,    28,     3,     3,    30,     4,     4,
+      29,    33,    34,    35,    36,    37,    38,    39,    63,    64,
+      42,    30,    30,    29,    31,    46,    47,    48,    49,    50,
+      51,    52,    53,    54,    55,    56,    57,    58,    31,    61,
+       5,    63,    64,   100,    -1,    -1,     0,     1,    93,     3,
+      -1,    -1,    -1,    -1,    -1,     9,    10,    -1,    -1,    -1,
+      14,    -1,    -1,    -1,    -1,    -1,    -1,   101,    -1,    -1,
+      -1,    93,    94,    27,    28,    97,    -1,    -1,    -1,    33,
+      34,    35,    36,    37,    38,    39,     1,    -1,     3,    -1,
+      -1,     6,    -1,    -1,     9,    10,    -1,    -1,    -1,    14,
+      -1,     1,    -1,     3,    -1,    -1,    -1,    -1,    -1,     9,
+      10,    -1,    27,    28,    14,    -1,    -1,    -1,    33,    34,
+      35,    36,    37,    38,    39,    -1,    -1,    27,    28,    -1,
+      -1,    -1,    -1,    33,    34,    35,    36,    37,    38,    39,
+       3,    -1,    -1,    -1,    -1,    -1,     9,    10,    -1,    -1,
+      -1,    14,     3,     4,    -1,    -1,    -1,    -1,     9,    10,
+      -1,    -1,    -1,    14,    27,    28,    -1,    30,    -1,    -1,
+      33,    34,    35,    36,    37,    38,    27,    28,    -1,    -1,
+      -1,    -1,    33,    34,    35,    36,    37,    38,     3,    -1,
+      -1,    -1,    -1,    -1,     9,    10,    -1,    -1,    -1,    14,
+       3,    -1,    -1,    -1,    -1,    -1,     9,    10,    -1,    -1,
+      -1,    14,    27,    28,    -1,    -1,    -1,    -1,    33,    34,
+      35,    36,    37,    38,    27,    28,    -1,    -1,    -1,    -1,
+      33,    34,    35,    36,    37,    38,     7,     8,     9,    10,
+      11,    12,    13,    -1,    15,    16,    17,    18,    19,    20
   };
 
   const unsigned char
   SceneParser::yystos_[] =
   {
-       0,     1,     3,    11,    12,    13,    14,    15,    16,    17,
-      19,    22,    24,    25,    26,    27,    28,    29,    30,    32,
-       7,    26,    31,    34,     3,    18,    22,     3,    16,    27,
-      16,     0,    25,     9,    19,    20,     4,     4,     8,     4,
-       7,     7,    26,    33,    34,    26,    26,    27,    27,    26,
-      34,     4,    34,     4,     7,     9,    34,    26,     9,    26,
-       4,     5,    24,     6
+       0,     1,     3,     9,    10,    14,    27,    28,    33,    34,
+      35,    36,    37,    38,    39,    50,    51,    52,    53,    54,
+      55,    56,    58,    30,    52,    57,    60,    38,    53,    53,
+      53,    38,    38,     3,    21,    22,    23,    24,    25,    26,
+      27,    28,     3,     0,    51,    31,     7,     8,     9,    10,
+      11,    12,    13,    15,    16,    17,    18,    19,    20,     4,
+       4,    29,     4,    30,    30,    52,    59,    60,    52,    52,
+      52,    52,    52,    52,    52,    53,    53,    53,    53,    53,
+      53,    53,    53,    53,    53,    53,    53,    53,    52,    60,
+       4,    60,     4,    30,    31,    60,    52,    31,    52,     4,
+       5,    50,     6
   };
 
   const unsigned char
   SceneParser::yyr1_[] =
   {
-       0,    23,    24,    24,    25,    25,    25,    26,    26,    26,
-      27,    27,    27,    27,    27,    27,    27,    28,    28,    28,
-      29,    29,    29,    29,    30,    30,    30,    31,    31,    32,
-      33,    33,    33,    34,    34
+       0,    49,    50,    50,    51,    51,    51,    52,    52,    52,
+      52,    52,    52,    52,    52,    52,    52,    52,    52,    52,
+      52,    52,    52,    52,    53,    53,    53,    53,    53,    53,
+      53,    53,    53,    53,    53,    53,    53,    54,    54,    54,
+      55,    55,    55,    55,    56,    56,    56,    57,    57,    58,
+      59,    59,    59,    60,    60
   };
 
   const unsigned char
   SceneParser::yyr2_[] =
   {
        0,     2,     1,     2,     2,    11,     1,     1,     3,     3,
-       1,     1,     2,     2,     2,     3,     3,     1,     1,     1,
+       3,     3,     3,     3,     3,     3,     3,     3,     3,     3,
+       3,     3,     3,     3,     1,     1,     2,     2,     2,     2,
+       2,     2,     2,     3,     3,     3,     3,     1,     1,     1,
        1,     1,     1,     1,     3,     4,     3,     3,     3,     4,
        0,     1,     3,     1,     3
   };
@@ -1550,9 +1624,13 @@ namespace SLRSceneGraph {
   const SceneParser::yytname_[] =
   {
   "\"end of file\"", "error", "$undefined", "\"(\"", "\")\"", "\"{\"",
-  "\"}\"", "\",\"", "\":\"", "\";\"", "CHAR", "API", "BOOL", "INTEGER",
-  "REALNUMBER", "STRING", "ID", "FOR", "SUBSTITUTION", "OPERATOR0",
-  "OPERATOR1", "NEG", "INC_DEC", "$accept", "Statements", "Statement",
+  "\"}\"", "\"<\"", "\">\"", "\"+\"", "\"-\"", "\"*\"", "\"/\"", "\"%\"",
+  "\"!\"", "\"<=\"", "\">=\"", "\"==\"", "\"!=\"", "\"&&\"", "\"||\"",
+  "\"=\"", "\"+=\"", "\"-=\"", "\"*=\"", "\"/=\"", "\"%=\"", "\"++\"",
+  "\"--\"", "\":\"", "\",\"", "\";\"", "CHAR", "API", "BOOL", "INTEGER",
+  "REALNUMBER", "STRING", "ID", "FOR", "PREC_SUBST", "PREC_LOGIC_OR",
+  "PREC_LOGIC_AND", "PREC_EQ_REL", "PREC_INEQ_REL", "PREC_ADD", "PREC_MUL",
+  "PREC_PRE_INC", "PREC_POST_INC", "$accept", "Statements", "Statement",
   "Expression", "Term", "Value", "ImmValue", "TupleValue", "Elements",
   "Function", "Arguments", "Argument", YY_NULLPTR
   };
@@ -1561,10 +1639,12 @@ namespace SLRSceneGraph {
   const unsigned char
   SceneParser::yyrline_[] =
   {
-       0,    84,    84,    90,    99,   102,   105,   112,   115,   118,
-     124,   127,   130,   133,   136,   139,   142,   148,   151,   154,
-     160,   163,   166,   169,   175,   178,   183,   189,   194,   201,
-     207,   210,   214,   221,   224
+       0,   112,   112,   118,   127,   128,   131,   138,   139,   140,
+     141,   142,   143,   144,   145,   146,   147,   148,   149,   150,
+     151,   152,   153,   154,   158,   159,   160,   161,   162,   163,
+     164,   165,   166,   167,   168,   169,   170,   174,   175,   176,
+     180,   181,   182,   183,   187,   190,   195,   201,   206,   213,
+     217,   220,   224,   231,   232
   };
 
   // Print the state stack on the debug stream.
@@ -1599,8 +1679,8 @@ namespace SLRSceneGraph {
 
 #line 4 "SceneParser.yy" // lalr1.cc:1167
 } // SLRSceneGraph
-#line 1603 "SceneParser.tab.cc" // lalr1.cc:1167
-#line 229 "SceneParser.yy" // lalr1.cc:1168
+#line 1683 "SceneParser.tab.cc" // lalr1.cc:1167
+#line 235 "SceneParser.yy" // lalr1.cc:1168
 
 
 namespace SLRSceneGraph {

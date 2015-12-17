@@ -113,7 +113,6 @@ namespace SLRSceneGraph {
         Element(Map dummy, const std::shared_ptr<typename Map::InternalType> &valRef = nullptr) : type((Type)Map::Value), valueRef(valRef) { }
 //        Element(Type t = Type::Void, const std::shared_ptr<void> &vr = nullptr) : type(t), valueRef(vr) { };
         
-        operator bool() const { return type != Type::Void; }
         template <typename T>
         const T& as() const { return *(T*)valueRef.get(); }
         template <typename T>
@@ -123,11 +122,36 @@ namespace SLRSceneGraph {
         template <typename Map>
         typename Map::InternalType convertTo() const;
         
-        Element operator+(const Element &rElem) const;
-        Element operator-(const Element &rElem) const;
-        Element operator*(const Element &rElem) const;
+        Element operator++(int);
+        Element operator--(int);
+        Element &operator++();
+        Element &operator--();
         Element operator+() const;
         Element operator-() const;
+        Element operator!() const;
+        
+        Element operator*(const Element &rElem) const;
+        Element operator/(const Element &rElem) const;
+        Element operator%(const Element &rElem) const;
+        Element operator+(const Element &rElem) const;
+        Element operator-(const Element &rElem) const;
+        
+        Element operator<(const Element &rElem) const;
+        Element operator>(const Element &rElem) const;
+        Element operator<=(const Element &rElem) const;
+        Element operator>=(const Element &rElem) const;
+        Element operator==(const Element &rElem) const;
+        Element operator!=(const Element &rElem) const;
+        
+        Element operator&&(const Element &rElem) const;
+        Element operator||(const Element &rElem) const;
+        
+        Element &substitute(const Element &rElem);
+        Element &operator+=(const Element &rElem);
+        Element &operator-=(const Element &rElem);
+        Element &operator*=(const Element &rElem);
+        Element &operator/=(const Element &rElem);
+        Element &operator%=(const Element &rElem);
     };
     std::ostream &operator<<(std::ostream &out, const Element &elem);
     
@@ -176,14 +200,40 @@ namespace SLRSceneGraph {
     std::ostream &operator<<(std::ostream &out, const ParameterList &params);
     
     struct TypeInfo {
+        Element &operator%=(const Element &rElem) const;
+        
         typedef Element (*convertFunction)(const Element &);
         typedef Element (*unOpFunction)(const Element &);
+        typedef Element (*postSubstUnOpFunction)(Element &);
+        typedef void (*preSubstUnOpFunction)(Element &);
         typedef Element (*binOpFunction)(const Element &, const Element &);
+        typedef void (*substBinOpFunction)(Element &, const Element &);
+        postSubstUnOpFunction postIncOperator;
+        postSubstUnOpFunction postDecOperator;
+        preSubstUnOpFunction preIncOperator;
+        preSubstUnOpFunction preDecOperator;
         unOpFunction affOperator;
         unOpFunction negOperator;
+        unOpFunction logicNotOperator;
+        binOpFunction mulOperator;
+        binOpFunction divOperator;
+        binOpFunction remOperator;
         binOpFunction addOperator;
         binOpFunction subOperator;
-        binOpFunction mulOperator;
+        binOpFunction lessOperator;
+        binOpFunction greaterOperator;
+        binOpFunction lessEqOperator;
+        binOpFunction greaterEqOperator;
+        binOpFunction eqOperator;
+        binOpFunction neqOperator;
+        binOpFunction logicAndOperator;
+        binOpFunction logicOrOperator;
+        substBinOpFunction substOperator;
+        substBinOpFunction mulSubstOperator;
+        substBinOpFunction divSubstOperator;
+        substBinOpFunction remSubstOperator;
+        substBinOpFunction addSubstOperator;
+        substBinOpFunction subSubstOperator;
         std::map<Type, convertFunction> convertFunctions;
         
         bool isConvertibleTo(Type toType) const;

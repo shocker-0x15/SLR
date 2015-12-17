@@ -162,25 +162,36 @@ namespace SLRSceneGraph {
         return func(*this);
     }
     
-    Element Element::operator+(const Element &rElem) const {
-        const TypeInfo &leftType = TypeInfo::infos[(uint32_t)type];
-        if (!leftType.addOperator)
-            return Element(ErrorMessage("Left type does not have the + operator definition."));
-        return leftType.addOperator(*this, rElem);
+    Element Element::operator++(int) {
+        const TypeInfo &thisType = TypeInfo::infos[(uint32_t)type];
+        if (!thisType.postIncOperator)
+            return Element(ErrorMessage("This type does not have the postfix ++ operator definition."));
+        return thisType.postIncOperator(*this);
     }
     
-    Element Element::operator-(const Element &rElem) const {
-        const TypeInfo &leftType = TypeInfo::infos[(uint32_t)type];
-        if (!leftType.subOperator)
-            return Element(ErrorMessage("Left type does not have the - operator definition."));
-        return leftType.subOperator(*this, rElem);
+    Element Element::operator--(int) {
+        const TypeInfo &thisType = TypeInfo::infos[(uint32_t)type];
+        if (!thisType.postDecOperator)
+            return Element(ErrorMessage("This type does not have the postfix -- operator definition."));
+        return thisType.postDecOperator(*this);
     }
     
-    Element Element::operator*(const Element &rElem) const {
+    Element &Element::operator++() {
         const TypeInfo &leftType = TypeInfo::infos[(uint32_t)type];
-        if (!leftType.mulOperator)
-            return Element(ErrorMessage("Left type does not have the * operator definition."));
-        return leftType.mulOperator(*this, rElem);
+        if (leftType.preIncOperator)
+            leftType.preIncOperator(*this);
+        else
+            *this = Element(ErrorMessage("Left type does not have the prefix ++ operator definition."));
+        return *this;
+    }
+    
+    Element &Element::operator--() {
+        const TypeInfo &leftType = TypeInfo::infos[(uint32_t)type];
+        if (!leftType.preDecOperator)
+            leftType.preDecOperator(*this);
+        else
+            *this = Element(ErrorMessage("Left type does not have the prefix -- operator definition."));
+        return *this;
     }
     
     Element Element::operator+() const {
@@ -197,6 +208,158 @@ namespace SLRSceneGraph {
         return thisType.negOperator(*this);
     }
     
+    Element Element::operator!() const {
+        const TypeInfo &thisType = TypeInfo::infos[(uint32_t)type];
+        if (!thisType.logicNotOperator)
+            return Element(ErrorMessage("This type does not have the unary ! operator definition."));
+        return thisType.logicNotOperator(*this);
+    }
+    
+    Element Element::operator*(const Element &rElem) const {
+        const TypeInfo &leftType = TypeInfo::infos[(uint32_t)type];
+        if (!leftType.mulOperator)
+            return Element(ErrorMessage("Left type does not have the * operator definition."));
+        return leftType.mulOperator(*this, rElem);
+    }
+    
+    Element Element::operator/(const Element &rElem) const {
+        const TypeInfo &leftType = TypeInfo::infos[(uint32_t)type];
+        if (!leftType.divOperator)
+            return Element(ErrorMessage("Left type does not have the / operator definition."));
+        return leftType.divOperator(*this, rElem);
+    }
+    
+    Element Element::operator%(const Element &rElem) const {
+        const TypeInfo &leftType = TypeInfo::infos[(uint32_t)type];
+        if (!leftType.remOperator)
+            return Element(ErrorMessage("Left type does not have the \% operator definition."));
+        return leftType.remOperator(*this, rElem);
+    }
+    
+    Element Element::operator+(const Element &rElem) const {
+        const TypeInfo &leftType = TypeInfo::infos[(uint32_t)type];
+        if (!leftType.addOperator)
+            return Element(ErrorMessage("Left type does not have the + operator definition."));
+        return leftType.addOperator(*this, rElem);
+    }
+    
+    Element Element::operator-(const Element &rElem) const {
+        const TypeInfo &leftType = TypeInfo::infos[(uint32_t)type];
+        if (!leftType.subOperator)
+            return Element(ErrorMessage("Left type does not have the - operator definition."));
+        return leftType.subOperator(*this, rElem);
+    }
+    
+    Element Element::operator<(const Element &rElem) const {
+        const TypeInfo &leftType = TypeInfo::infos[(uint32_t)type];
+        if (!leftType.lessOperator)
+            return Element(ErrorMessage("Left type does not have the < operator definition."));
+        return leftType.lessOperator(*this, rElem);
+    }
+    
+    Element Element::operator>(const Element &rElem) const {
+        const TypeInfo &leftType = TypeInfo::infos[(uint32_t)type];
+        if (!leftType.greaterOperator)
+            return Element(ErrorMessage("Left type does not have the > operator definition."));
+        return leftType.greaterOperator(*this, rElem);
+    }
+    
+    Element Element::operator<=(const Element &rElem) const {
+        const TypeInfo &leftType = TypeInfo::infos[(uint32_t)type];
+        if (!leftType.lessEqOperator)
+            return Element(ErrorMessage("Left type does not have the <= operator definition."));
+        return leftType.lessEqOperator(*this, rElem);
+    }
+    
+    Element Element::operator>=(const Element &rElem) const {
+        const TypeInfo &leftType = TypeInfo::infos[(uint32_t)type];
+        if (!leftType.greaterEqOperator)
+            return Element(ErrorMessage("Left type does not have the >= operator definition."));
+        return leftType.greaterEqOperator(*this, rElem);
+    }
+    
+    Element Element::operator==(const Element &rElem) const {
+        const TypeInfo &leftType = TypeInfo::infos[(uint32_t)type];
+        if (!leftType.eqOperator)
+            return Element(ErrorMessage("Left type does not have the == operator definition."));
+        return leftType.eqOperator(*this, rElem);
+    }
+    
+    Element Element::operator!=(const Element &rElem) const {
+        const TypeInfo &leftType = TypeInfo::infos[(uint32_t)type];
+        if (!leftType.neqOperator)
+            return Element(ErrorMessage("Left type does not have the != operator definition."));
+        return leftType.neqOperator(*this, rElem);
+    }
+    
+    Element Element::operator&&(const Element &rElem) const {
+        const TypeInfo &leftType = TypeInfo::infos[(uint32_t)type];
+        if (!leftType.logicAndOperator)
+            return Element(ErrorMessage("Left type does not have the && operator definition."));
+        return leftType.logicAndOperator(*this, rElem);
+    }
+    
+    Element Element::operator||(const Element &rElem) const {
+        const TypeInfo &leftType = TypeInfo::infos[(uint32_t)type];
+        if (!leftType.logicOrOperator)
+            return Element(ErrorMessage("Left type does not have the || operator definition."));
+        return leftType.logicOrOperator(*this, rElem);
+    }
+    
+    Element &Element::substitute(const Element &rElem) {
+        const TypeInfo &leftType = TypeInfo::infos[(uint32_t)type];
+        if (leftType.substOperator)
+            leftType.substOperator(*this, rElem);
+        else
+            *this = Element(ErrorMessage("Left type does not have the = operator definition."));
+        return *this;
+    }
+    
+    Element &Element::operator+=(const Element &rElem) {
+        const TypeInfo &leftType = TypeInfo::infos[(uint32_t)type];
+        if (leftType.addSubstOperator)
+            leftType.addSubstOperator(*this, rElem);
+        else
+            *this = Element(ErrorMessage("Left type does not have the += operator definition."));
+        return *this;
+    }
+    
+    Element &Element::operator-=(const Element &rElem) {
+        const TypeInfo &leftType = TypeInfo::infos[(uint32_t)type];
+        if (leftType.subSubstOperator)
+            leftType.subSubstOperator(*this, rElem);
+        else
+            *this = Element(ErrorMessage("Left type does not have the -= operator definition."));
+        return *this;
+    }
+    
+    Element &Element::operator*=(const Element &rElem) {
+        const TypeInfo &leftType = TypeInfo::infos[(uint32_t)type];
+        if (leftType.mulSubstOperator)
+            leftType.mulSubstOperator(*this, rElem);
+        else
+            *this = Element(ErrorMessage("Left type does not have the *= operator definition."));
+        return *this;
+    }
+    
+    Element &Element::operator/=(const Element &rElem) {
+        const TypeInfo &leftType = TypeInfo::infos[(uint32_t)type];
+        if (leftType.divSubstOperator)
+            leftType.divSubstOperator(*this, rElem);
+        else
+            *this = Element(ErrorMessage("Left type does not have the /= operator definition."));
+        return *this;
+    }
+    
+    Element &Element::operator%=(const Element &rElem) {
+        const TypeInfo &leftType = TypeInfo::infos[(uint32_t)type];
+        if (leftType.remSubstOperator)
+            leftType.remSubstOperator(*this, rElem);
+        else
+            *this = Element(ErrorMessage("Left type does not have the %= operator definition."));
+        return *this;
+    }
+    
     bool TypeInfo::isConvertibleTo(Type toType) const {
         return convertFunctions.count(toType) > 0;
     }
@@ -208,11 +371,32 @@ namespace SLRSceneGraph {
         if (!initialized) {
             for (int i = 0; i < (int)Type::NumTypes; ++i) {
                 TypeInfo &info = infos[i];
+                info.postIncOperator = nullptr;
+                info.postDecOperator = nullptr;
+                info.preIncOperator = nullptr;
+                info.preDecOperator = nullptr;
                 info.affOperator = nullptr;
                 info.negOperator = nullptr;
+                info.logicNotOperator = nullptr;
+                info.mulOperator = nullptr;
+                info.divOperator = nullptr;
+                info.remOperator = nullptr;
                 info.addOperator = nullptr;
                 info.subOperator = nullptr;
-                info.mulOperator = nullptr;
+                info.lessOperator = nullptr;
+                info.greaterOperator = nullptr;
+                info.lessEqOperator = nullptr;
+                info.greaterEqOperator = nullptr;
+                info.eqOperator = nullptr;
+                info.neqOperator = nullptr;
+                info.logicAndOperator = nullptr;
+                info.logicOrOperator = nullptr;
+                info.substOperator = [](Element &l, const Element &r) { l = r; };
+                info.mulSubstOperator = nullptr;
+                info.divSubstOperator = nullptr;
+                info.remSubstOperator = nullptr;
+                info.addSubstOperator = nullptr;
+                info.subSubstOperator = nullptr;
                 info.convertFunctions[(Type)i] = [](const Element &v) { return v; };
             }
             
@@ -221,7 +405,16 @@ namespace SLRSceneGraph {
                 
                 info.affOperator = [](const Element &v) { return Element(v.as<bool>()); };
                 info.negOperator = [](const Element &v) { return Element(-(int32_t)v.as<bool>()); };
+                info.logicNotOperator = [](const Element &v) { return Element(!v.as<bool>()); };
                 
+                info.mulOperator = [](const Element &v0, const Element &v1) {
+                    int32_t lVal = v0.as<bool>();
+                    if (v1.isConvertibleTo(Type::Integer))
+                        return Element(lVal * v1.convertTo(Type::Integer).as<int32_t>());
+                    else if (v1.isConvertibleTo(Type::RealNumber))
+                        return Element(lVal * v1.convertTo(Type::RealNumber).as<double>());
+                    return Element(ErrorMessage("* operator does not support the right operand type."));
+                };
                 info.addOperator = [](const Element &v0, const Element &v1) {
                     int32_t lVal = v0.as<bool>();
                     if (v1.isConvertibleTo(Type::Integer))
@@ -237,14 +430,6 @@ namespace SLRSceneGraph {
                     else if (v1.isConvertibleTo(Type::RealNumber))
                         return Element(lVal - v1.convertTo(Type::RealNumber).as<int32_t>());
                     return Element(ErrorMessage("- operator does not support the right operand type."));
-                };
-                info.mulOperator = [](const Element &v0, const Element &v1) {
-                    int32_t lVal = v0.as<bool>();
-                    if (v1.isConvertibleTo(Type::Integer))
-                        return Element(lVal * v1.convertTo(Type::Integer).as<int32_t>());
-                    else if (v1.isConvertibleTo(Type::RealNumber))
-                        return Element(lVal * v1.convertTo(Type::RealNumber).as<double>());
-                    return Element(ErrorMessage("* operator does not support the right operand type."));
                 };
                 
                 info.convertFunctions[Type::Integer] = [](const Element &elemFrom) { return Element((int32_t)elemFrom.as<bool>()); };
@@ -385,6 +570,22 @@ namespace SLRSceneGraph {
             m_result = m_left->result() + m_right->result();
         else if (m_op == "-")
             m_result = m_left->result() - m_right->result();
+        else if (m_op == "<")
+            m_result = m_left->result() < m_right->result();
+        else if (m_op == ">")
+            m_result = m_left->result() > m_right->result();
+        else if (m_op == "<=")
+            m_result = m_left->result() <= m_right->result();
+        else if (m_op == ">=")
+            m_result = m_left->result() >= m_right->result();
+        else if (m_op == "==")
+            m_result = m_left->result() == m_right->result();
+        else if (m_op == "!=")
+            m_result = m_left->result() != m_right->result();
+        else if (m_op == "&&")
+            m_result = m_left->result() && m_right->result();
+        else if (m_op == "||")
+            m_result = m_left->result() || m_right->result();
         if (m_result.type == Type::Error) {
             *errMsg = m_result.as<ErrorMessage>();
             return false;
@@ -400,21 +601,26 @@ namespace SLRSceneGraph {
             *errMsg = ErrorMessage("Undefined variable: %s", m_varName.c_str());
             return false;
         }
+        Element &var = context.stackVariables[m_varName];
         
         if (m_op == "=")
-            m_result = m_right->result();
+            var.substitute(m_right->result());
         else if (m_op == "+=")
-            m_result = context.stackVariables.at(m_varName) + m_right->result();
+            var += m_right->result();
         else if (m_op == "-=")
-            m_result = context.stackVariables.at(m_varName) - m_right->result();
+            var -= m_right->result();
         else if (m_op == "*=")
-            m_result = context.stackVariables.at(m_varName) * m_right->result();
-        if (m_result.type == Type::Error) {
-            *errMsg = m_result.as<ErrorMessage>();
+            var *= m_right->result();
+        else if (m_op == "/=")
+            var /= m_right->result();
+        else if (m_op == "\%=")
+            var %= m_right->result();
+        if (var.type == Type::Error) {
+            *errMsg = var.as<ErrorMessage>();
             return false;
         }
         
-        context.stackVariables[m_varName] = m_result;
+        m_result = var;
         return true;
     }
     
@@ -499,6 +705,8 @@ namespace SLRSceneGraph {
             m_result = +m_term->result();
         else if (m_op == "-")
             m_result = -m_term->result();
+        else if (m_op == "!")
+            m_result = !m_term->result();
         return true;
     }
     
@@ -510,6 +718,10 @@ namespace SLRSceneGraph {
         
         if (m_op == "*")
             m_result = m_left->result() * m_right->result();
+        else if (m_op == "/")
+            m_result = m_left->result() / m_right->result();
+        else if (m_op == "\%")
+            m_result = m_left->result() % m_right->result();
         if (m_result.type == Type::Error) {
             *errMsg = m_result.as<ErrorMessage>();
             return false;

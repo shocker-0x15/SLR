@@ -38,12 +38,36 @@
 // %leftなどでもトークンの宣言にはなるが、リテラル文字列との関連付けは%tokenで行う必要がある。
 %token
     EOF 0 "end of file"
-    LPAR "("
-    RPAR ")"
-    LBRC "{"
-    RBRC "}"
-    COMMA ","
+    L_PAREN "("
+    R_PAREN ")"
+    L_BRACE "{"
+    R_BRACE "}"
+    L_ANGLE "<"
+    R_ANGLE ">"
+
+    PLUS "+"
+    MINUS "-"
+    AST "*"
+    SLASH "/"
+    PERC "%"
+    EXC "!"
+    L_ANGLE_EQ "<="
+    R_ANGLE_EQ ">="
+    EQ_EQ "=="
+    EXC_EQ "!="
+    AND_AND "&&"
+    VBAR_VBAR "||"
+    EQ "="
+    PLUS_EQ "+="
+    MINUS_EQ "-="
+    AST_EQ "*="
+    SLASH_EQ "/="
+    PERC_EQ "%="
+    PLUS_PLUS "++"
+    MINUS_MINUS "--"
+
     COLON ":"
+    COMMA ","
     SEMICOLON ";"
 ;
 %token<char> CHAR
@@ -69,14 +93,18 @@
 
 %printer { /*yyoutput << $$;*/ } <*>;
 
+%nonassoc<char> SEMICOLON
 %left<char> COMMA
 %nonassoc<char> COLON
-%nonassoc<char> SEMICOLON
-%right<std::string> SUBSTITUTION
-%left<std::string> OPERATOR0
-%left<std::string> OPERATOR1
-%nonassoc NEG
-%nonassoc<std::string> INC_DEC
+%right PREC_SUBST "=" "+=" "-=" "*=" "/=" "%="
+%left PREC_LOGIC_OR "||"
+%left PREC_LOGIC_AND "&&"
+%left PREC_EQ_REL "==" "!="
+%left PREC_INEQ_REL "<" ">" "<=" ">="
+%left PREC_ADD "+" "-"
+%left PREC_MUL "*" "/" "%"
+%right PREC_PRE_INC "++" "--" "!"
+%left PREC_POST_INC
 
 %%
 
@@ -96,9 +124,7 @@ Statements Statement {
 ;
 
 Statement:
-Expression ";" {
-    $$ = $1;
-} |
+Expression ";" { $$ = $1; } |
 FOR "(" Expression ";" Expression ";" Expression ")" "{" Statements "}" {
     $$ = createShared<ForStatement>($3, $5, $7, $10);
 } |
@@ -109,66 +135,52 @@ error {
 ;
 
 Expression:
-Term {
-    $$ = $1;
-} |
-Term OPERATOR0 Term {
-    $$ = createShared<BinaryExpression>($1, $2, $3);
-} |
-ID SUBSTITUTION Expression {
-    $$ = createShared<SubstitutionExpression>($1, $2, $3);
-}
+Term { $$ = $1; } |
+Term "+" Term { $$ = createShared<BinaryExpression>($1, "+", $3); } |
+Term "-" Term { $$ = createShared<BinaryExpression>($1, "-", $3); } |
+Term "<" Term { $$ = createShared<BinaryExpression>($1, "<", $3); } |
+Term ">" Term { $$ = createShared<BinaryExpression>($1, ">", $3); } |
+Term "<=" Term { $$ = createShared<BinaryExpression>($1, "<=", $3); } |
+Term ">=" Term { $$ = createShared<BinaryExpression>($1, ">=", $3); } |
+Term "==" Term { $$ = createShared<BinaryExpression>($1, "==", $3); } |
+Term "!=" Term { $$ = createShared<BinaryExpression>($1, "!=", $3); } |
+Term "&&" Term { $$ = createShared<BinaryExpression>($1, "&&", $3); } |
+Term "||" Term { $$ = createShared<BinaryExpression>($1, "||", $3); } |
+ID "=" Expression { $$ = createShared<SubstitutionExpression>($1, "=", $3); } |
+ID "+=" Expression { $$ = createShared<SubstitutionExpression>($1, "+=", $3); } |
+ID "-=" Expression { $$ = createShared<SubstitutionExpression>($1, "-=", $3); } |
+ID "*=" Expression { $$ = createShared<SubstitutionExpression>($1, "*=", $3); } |
+ID "/=" Expression { $$ = createShared<SubstitutionExpression>($1, "/=", $3); } |
+ID "%=" Expression { $$ = createShared<SubstitutionExpression>($1, "%=", $3); }
 ;
 
 Term:
-Value {
-    $$ = $1;
-} |
-Function {
-    $$ = $1;
-} |
-OPERATOR0 Term %prec NEG {
-    $$ = createShared<UnaryTerm>($1, $2);
-} |
-INC_DEC ID {
-    
-} |
-ID INC_DEC {
-
-} |
-Term OPERATOR1 Term {
-    $$ = createShared<BinaryTerm>($1, $2, $3);
-} |
-"(" Expression ")" {
-    $$ = createShared<EnclosedTerm>($2);
-}
+Value { $$ = $1; } |
+Function { $$ = $1; } |
+"+" Term %prec PREC_PRE_INC { $$ = createShared<UnaryTerm>("+", $2); } |
+"-" Term %prec PREC_PRE_INC { $$ = createShared<UnaryTerm>("-", $2); } |
+"!" Term { $$ = createShared<UnaryTerm>("!", $2); } |
+"++" ID { } |
+"--" ID { } |
+ID "++" %prec PREC_POST_INC { } |
+ID "--" %prec PREC_POST_INC { } |
+Term "*" Term { $$ = createShared<BinaryTerm>($1, "*", $3); } |
+Term "/" Term { $$ = createShared<BinaryTerm>($1, "/", $3); } |
+Term "%" Term { $$ = createShared<BinaryTerm>($1, "%", $3); } |
+"(" Expression ")" { $$ = createShared<EnclosedTerm>($2); }
 ;
 
 Value:
-ImmValue {
-    $$ = $1;
-} |
-TupleValue {
-    $$ = $1;
-} |
-ID {
-    $$ = createShared<VariableValue>($1);
-}
+ImmValue { $$ = $1; } |
+TupleValue { $$ = $1; } |
+ID { $$ = createShared<VariableValue>($1); }
 ;
 
 ImmValue:
-BOOL {
-    $$ = createShared<ImmediateValue>(Element($1));
-} |
-INTEGER {
-    $$ = createShared<ImmediateValue>(Element($1));
-} |
-REALNUMBER {
-    $$ = createShared<ImmediateValue>(Element($1));
-} |
-STRING {
-    $$ = createShared<ImmediateValue>(Element($1));
-}
+BOOL { $$ = createShared<ImmediateValue>(Element($1)); } |
+INTEGER { $$ = createShared<ImmediateValue>(Element($1)); } |
+REALNUMBER { $$ = createShared<ImmediateValue>(Element($1)); } |
+STRING { $$ = createShared<ImmediateValue>(Element($1)); }
 ;
 
 TupleValue:
@@ -198,9 +210,7 @@ Elements "," Argument {
 ;
 
 Function:
-API "(" Arguments ")" {
-    $$ = createShared<FunctionTerm>($1, $3);
-}
+API "(" Arguments ")" { $$ = createShared<FunctionTerm>($1, $3); }
 ;
 
 Arguments:
@@ -218,12 +228,8 @@ Arguments "," Argument {
 ;
 
 Argument: 
-Expression {
-    $$ = createShared<Argument>(nullptr, $1);
-} |
-Expression ":" Expression {
-    $$ = createShared<Argument>($1, $3);
-}
+Expression { $$ = createShared<Argument>(nullptr, $1); } |
+Expression ":" Expression { $$ = createShared<Argument>($1, $3); }
 ;
 
 %%

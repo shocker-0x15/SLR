@@ -27,10 +27,7 @@ BOOL            True|False|true|false
 INTEGER         {NONZERO}{DIGIT}*|0
 REALNUMBER      {FLOAT}{EXPONENT}?
 ID              [_[:alpha:]][_[:alnum:]]*
-SUBSTITUTION    =|\+=|-=|\*=
-INC_DEC         \+\+|--
-OPERATORS0      \+|-
-OPERATORS1      \*
+OPERATORS       <=|>=|<|>|==|!=|=|&&|\|\||\+=|-=|\*=|\/=|%=|\+\+|--|\+|-|\*|\/|%|!
 DELIMITERS      ,|:|;
 PARENTHESES     \(|\)|\{|\}
 WSPACE          [[:blank:]]+
@@ -171,45 +168,51 @@ CreateMesh {
 {PARENTHESES} {
     char c = yytext[0];
     DPRINTF("Parenthesis: %c\n", c);
-    if (c == '(')
-        return SceneParser::make_LPAR(loc);
-    else if (c == ')')
-        return SceneParser::make_RPAR(loc);
-    else if (c == '{')
-        return SceneParser::make_LBRC(loc);
-    else if (c == '}')
-        return SceneParser::make_RBRC(loc);
+    if (c == '(') return SceneParser::make_L_PAREN(loc);
+    if (c == ')') return SceneParser::make_R_PAREN(loc);
+    if (c == '{') return SceneParser::make_L_BRACE(loc);
+    if (c == '}') return SceneParser::make_R_BRACE(loc);
+    SLRAssert(false, "Undefined parenthesis.");
 }
 
-{SUBSTITUTION} {
-    DPRINTF("%s\n", yytext);
-    return SceneParser::make_SUBSTITUTION(yytext, loc);
-}
-
-{INC_DEC} {
-    DPRINTF("%s\n", yytext);
-    return SceneParser::make_INC_DEC(yytext, loc);
-}
-
-{OPERATORS0} {
-    DPRINTF("%s\n", yytext);
-    return SceneParser::make_OPERATOR0(yytext, loc);
-}
-
-{OPERATORS1} {
-    DPRINTF("%s\n", yytext);
-    return SceneParser::make_OPERATOR1(yytext, loc);
+{OPERATORS} {
+    std::string str = yytext;
+    DPRINTF("Operator: %s\n", str.c_str());
+    if (str == "<=") return SceneParser::make_L_ANGLE_EQ(loc);
+    if (str == ">=") return SceneParser::make_R_ANGLE_EQ(loc);
+    if (str == "<") return SceneParser::make_L_ANGLE(loc);
+    if (str == ">") return SceneParser::make_R_ANGLE(loc);
+    if (str == "==") return SceneParser::make_EQ_EQ(loc);
+    if (str == "!=") return SceneParser::make_EXC_EQ(loc);
+    if (str == "&&") return SceneParser::make_AND_AND(loc);
+    if (str == "||") return SceneParser::make_VBAR_VBAR(loc);
+    if (str == "=") return SceneParser::make_EQ(loc);
+    if (str == "+=") return SceneParser::make_PLUS_EQ(loc);
+    if (str == "-=") return SceneParser::make_MINUS_EQ(loc);
+    if (str == "*=") return SceneParser::make_AST_EQ(loc);
+    if (str == "/=") return SceneParser::make_SLASH_EQ(loc);
+    if (str == "\%=") return SceneParser::make_PERC_EQ(loc);
+    if (str == "++") return SceneParser::make_PLUS_PLUS(loc);
+    if (str == "--") return SceneParser::make_MINUS_MINUS(loc);
+    if (str == "+") return SceneParser::make_PLUS(loc);
+    if (str == "-") return SceneParser::make_MINUS(loc);
+    if (str == "*") return SceneParser::make_AST(loc);
+    if (str == "/") return SceneParser::make_SLASH(loc);
+    if (str == "\%") return SceneParser::make_PERC(loc);
+    if (str == "!") return SceneParser::make_EXC(loc);
+    SLRAssert(false, "Undefined operator.");
 }
 
 {DELIMITERS} {
     char c = yytext[0];
-    DPRINTF("Operator: %c\n", c);
+    DPRINTF("Delimiter: %c\n", c);
     if (c == ',')
         return SceneParser::make_COMMA(c, loc);
     else if (c == ':')
         return SceneParser::make_COLON(c, loc);
     else if (c == ';')
         return SceneParser::make_SEMICOLON(c, loc);
+    SLRAssert(false, "Undefined delimiter.");
 }
 
 {WSPACE} {

@@ -40,8 +40,10 @@ namespace SLRSceneGraph {
         executeContext.stackVariables["root"] = Element(TypeMap::Node(), scene->rootNode());
         for (int i = 0; i < statements->size(); ++i) {
             StatementRef statement = statements->at(i);
-            if (!statement->perform(executeContext, &errMsg))
+            if (!statement->perform(executeContext, &errMsg)) {
+                printf("%s\n", errMsg.message.c_str());
                 return false;
+            }
         }
         return true;
     }
@@ -105,7 +107,7 @@ namespace SLRSceneGraph {
                 if (assigned[i])
                     continue;
                 const ArgInfo &argInfo = signature[i];
-                if (!argInfo.defaultValue) {
+                if (argInfo.defaultValue.type == Type::Void) {
                     args->clear();
                     return false;
                 }
@@ -561,7 +563,7 @@ namespace SLRSceneGraph {
     
     Element SetRenderer(const ParameterList &params, RenderingContext* context, ErrorMessage* err) {
         Element paramMethod = params("method", Type::String);
-        if (!paramMethod) {
+        if (paramMethod.type == Type::Void) {
             *err = ErrorMessage("Rendering method is not specified.");
             return Element();
         }
