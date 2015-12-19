@@ -68,16 +68,17 @@ namespace SLRSceneGraph {
     typedef std::shared_ptr<Expression> ExpressionRef;
     class Term;
     typedef std::shared_ptr<Term> TermRef;
+    class SingleTerm;
+    typedef std::shared_ptr<SingleTerm> SingleTermRef;
     class Value;
     typedef std::shared_ptr<Value> ValueRef;
-    class Argument;
-    typedef std::shared_ptr<Argument> ArgumentRef;
-    typedef std::shared_ptr<std::vector<ArgumentRef>> ArgumentsRef;
+    class Parameter;
+    typedef std::shared_ptr<Parameter> ParameterRef;
+    typedef std::shared_ptr<std::vector<ParameterRef>> ParameterVecRef;
     
     struct ErrorMessage;
     
     struct Element;
-    struct Parameter;
     struct ParameterList;
     typedef std::shared_ptr<ParameterList> ParameterListRef;
     struct TypeInfo;

@@ -15,7 +15,7 @@
 %code requires {
     #include "../API.hpp"
 
-    #if 1
+    #if DEBUG
     #define DSTMT(stmt) stmt;
     #define DPRINTF(fmt, ...) printf(fmt, ##__VA_ARGS__)
     #else
@@ -44,6 +44,8 @@
     R_BRACE "}"
     L_ANGLE "<"
     R_ANGLE ">"
+    L_BRACK "["
+    R_BRACK "]"
 
     PLUS "+"
     MINUS "-"
@@ -83,19 +85,19 @@
 %type<StatementRef> Statement
 %type<ExpressionRef> Expression
 %type<TermRef> Term
+%type<SingleTermRef> SingleTerm
 %type<ValueRef> Value
 %type<ValueRef> ImmValue
 %type<ValueRef> TupleValue
-%type<ArgumentsRef> Elements
-%type<TermRef> Function
-%type<ArgumentsRef> Arguments
-%type<ArgumentRef> Argument
+%type<ParameterRef> Parameter
+%type<ParameterVecRef> Elements
+%type<ParameterVecRef> Arguments
 
 %printer { /*yyoutput << $$;*/ } <*>;
 
-%nonassoc<char> SEMICOLON
-%left<char> COMMA
-%nonassoc<char> COLON
+%nonassoc SEMICOLON
+%left COMMA
+%right ":"
 %right PREC_SUBST "=" "+=" "-=" "*=" "/=" "%="
 %left PREC_LOGIC_OR "||"
 %left PREC_LOGIC_AND "&&"
@@ -155,19 +157,24 @@ ID "%=" Expression { $$ = createShared<SubstitutionExpression>($1, "%=", $3); }
 ;
 
 Term:
-Value { $$ = $1; } |
-Function { $$ = $1; } |
-"+" Term %prec PREC_PRE_INC { $$ = createShared<UnaryTerm>("+", $2); } |
-"-" Term %prec PREC_PRE_INC { $$ = createShared<UnaryTerm>("-", $2); } |
-"!" Term { $$ = createShared<UnaryTerm>("!", $2); } |
-"++" ID { } |
-"--" ID { } |
-ID "++" %prec PREC_POST_INC { } |
-ID "--" %prec PREC_POST_INC { } |
+SingleTerm { $$ = $1; } | 
+"+" SingleTerm %prec PREC_PRE_INC { $$ = createShared<UnaryTerm>("+", $2); } |
+"-" SingleTerm %prec PREC_PRE_INC { $$ = createShared<UnaryTerm>("-", $2); } |
+"!" SingleTerm { $$ = createShared<UnaryTerm>("!", $2); } |
+"++" ID { $$ = createShared<UnarySubstitutionTerm>("++*", $2); } |
+"--" ID { $$ = createShared<UnarySubstitutionTerm>("--*", $2); } |
+ID "++" %prec PREC_POST_INC { $$ = createShared<UnarySubstitutionTerm>("*++", $1); } |
+ID "--" %prec PREC_POST_INC { $$ = createShared<UnarySubstitutionTerm>("*--", $1); } |
 Term "*" Term { $$ = createShared<BinaryTerm>($1, "*", $3); } |
 Term "/" Term { $$ = createShared<BinaryTerm>($1, "/", $3); } |
-Term "%" Term { $$ = createShared<BinaryTerm>($1, "%", $3); } |
-"(" Expression ")" { $$ = createShared<EnclosedTerm>($2); }
+Term "%" Term { $$ = createShared<BinaryTerm>($1, "%", $3); }
+;
+
+SingleTerm:
+Value { $$ = $1; } |
+API "(" Arguments ")" { $$ = createShared<FunctionSingleTerm>($1, $3); } |
+"(" Expression ")" { $$ = createShared<EnclosedSingleTerm>($2); } |
+SingleTerm "[" Expression "]" { $$ = createShared<TupleElementSingleTerm>($1, $3); }
 ;
 
 Value:
@@ -185,10 +192,10 @@ STRING { $$ = createShared<ImmediateValue>(Element($1)); }
 
 TupleValue:
 "(" "," ")" {
-    $$ = createShared<TupleValue>(createShared<std::vector<ArgumentRef>>());
+    $$ = createShared<TupleValue>(createShared<std::vector<ParameterRef>>());
 } | 
-"(" Argument "," ")" {
-    ArgumentsRef elem = createShared<std::vector<ArgumentRef>>();
+"(" Parameter "," ")" {
+    ParameterVecRef elem = createShared<std::vector<ParameterRef>>();
     elem->push_back($2);
     $$ = createShared<TupleValue>(elem);
 } |
@@ -197,39 +204,35 @@ TupleValue:
 }
 ;
 
+Parameter:
+Expression { $$ = createShared<Parameter>(nullptr, $1); } |
+Expression ":" Expression { $$ = createShared<Parameter>($1, $3); }
+;
+
 Elements:
-Argument "," Argument {
-    $$ = createShared<std::vector<ArgumentRef>>();
+Parameter "," Parameter {
+    $$ = createShared<std::vector<ParameterRef>>();
     $$->push_back($1);
     $$->push_back($3);
 } |
-Elements "," Argument {
+Elements "," Parameter {
     $$ = $1;
     $$->push_back($3);
 }
-;
-
-Function:
-API "(" Arguments ")" { $$ = createShared<FunctionTerm>($1, $3); }
 ;
 
 Arguments:
 /* empty */ {
-    $$ = createShared<std::vector<ArgumentRef>>();
+    $$ = createShared<std::vector<ParameterRef>>();
 } |
-Argument {
-    $$ = createShared<std::vector<ArgumentRef>>();
+Parameter {
+    $$ = createShared<std::vector<ParameterRef>>();
     $$->push_back($1);
 } |
-Arguments "," Argument {
+Arguments "," Parameter {
     $$ = $1;
     $$->push_back($3);
 }
-;
-
-Argument: 
-Expression { $$ = createShared<Argument>(nullptr, $1); } |
-Expression ":" Expression { $$ = createShared<Argument>($1, $3); }
 ;
 
 %%

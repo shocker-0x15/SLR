@@ -29,41 +29,33 @@ CBNode = Load3DModel("models/Cornell_box_RB.assbin");
 AddChild(root, CBNode);
 SetTransform(CBNode, RotateY(-1.5707963268));
 
+// Color Checker Materials
 mats = (,);
 for (i = 0; i < 24; ++i) {
     sp = Spectrum("ID": "ColorChecker", i);
     difTex = SpectrumTexture(sp);
     scatterMat = CreateMatte(difTex);
-    //AddItem(mats, scatterMat);
+    AddItem(mats, scatterMat);
 }
 
-/*
-Construct ColorChecker
-TriangleMeshNodeRef mesh = createShared<TriangleMeshNode>();
+// Create Color Checker
+vertices = (,);
+indices = (,);
+for (i = 0; i < 24; ++i) {
+    transform = RotateY(1.5707963268) * Translate(0, 0, -0.999) * Scale(0.9 / 3.0) * Translate(-3.0 + (i % 6), 1.0 - (i / 6), 0.0);
 
-std::vector<SurfaceMaterialRef> mats;
-for (int i = 0; i < 24; ++i) {
-    InputSpectrumRef sp = createInputSpectrum(SpectrumType::Reflectance, ColorChecker::MinWavelength, ColorChecker::MaxWavelength,
-                                              ColorChecker::Spectra[i], ColorChecker::NumSamples);
-    SpectrumTextureRef diffuseTex = createShared<ConstantSpectrumTexture>(sp);
-    SurfaceMaterialRef scatterMat = SurfaceMaterial::createMatte(diffuseTex, nullptr);
-    mats.push_back(scatterMat);
-}
 
-for (int i = 0; i < 24; ++i) {
-    Matrix4x4 transform = rotateY(float(M_PI / 2)) * translate(0.0f, 0.0f, -0.999f) * scale(0.9f / 3.0f) * translate(-3.0f + float(i % 6), 1.0f - float(i / 6), 0.0f);
-    mesh->addVertex(Vertex(transform * Point3D(0.0f, 0.0f, 0.0f), transform * Normal3D(0, -1, 0), transform * Tangent3D(1, 0, 0), TexCoord2D(0, 0)));
-    mesh->addVertex(Vertex(transform * Point3D(1.0f, 0.0f, 0.0f), transform * Normal3D(0, -1, 0), transform * Tangent3D(1, 0, 0), TexCoord2D(1, 0)));
-    mesh->addVertex(Vertex(transform * Point3D(1.0f, 1.0f, 0.0f), transform * Normal3D(0, -1, 0), transform * Tangent3D(1, 0, 0), TexCoord2D(1, 1)));
-    mesh->addVertex(Vertex(transform * Point3D(0.0f, 1.0f, 0.0f), transform * Normal3D(0, -1, 0), transform * Tangent3D(1, 0, 0), TexCoord2D(0, 1)));
+    AddItem(vertices, transform * CreateVertex((0.0, 0.0, 0.0), (0, -1, 0), (1, 0, 0), (0, 0)));
+    AddItem(vertices, transform * CreateVertex((1.0, 0.0, 0.0), (0, -1, 0), (1, 0, 0), (1, 0)));
+    AddItem(vertices, transform * CreateVertex((1.0, 1.0, 0.0), (0, -1, 0), (1, 0, 0), (1, 1)));
+    AddItem(vertices, transform * CreateVertex((0.0, 1.0, 0.0), (0, -1, 0), (1, 0, 0), (0, 1)));
     
-    uint32_t idxBase = 4 * i;
-    mesh->addTriangle(idxBase + 0, idxBase + 1, idxBase + 2, mats[i]);
-    mesh->addTriangle(idxBase + 0, idxBase + 2, idxBase + 3, mats[i]);
+    idxBase = 4 * i;
+    AddItem(indices, ((idxBase + 0, idxBase + 1, idxBase + 2), mats[i]));
+    AddItem(indices, ((idxBase + 0, idxBase + 2, idxBase + 3), mats[i]));
 }
-
-CBNode->addChildNode(mesh);
-*/
+colorCheckerMesh = CreateMesh(vertices, indices);
+AddChild(CBNode, colorCheckerMesh);
 
 pikachuNode = Load3DModel("models/Pikachu_corrected.assbin");
 SetTransform(pikachuNode, Translate(0, -1, 0) * RotateY(2.3561944902) * Scale(0.2));

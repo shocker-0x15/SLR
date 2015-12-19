@@ -71,38 +71,44 @@ namespace SLRSceneGraph {
         bool mapParamsToArgs(const ParameterList &params, std::map<std::string, Element>* args) const {
             size_t numArgs = signature.size();
             std::vector<bool> assigned(numArgs, false);
+            
+            // find key-matched arguments defined in the function signature.
             for (auto namedParam : params.named) {
                 const std::string key = namedParam.first;
                 const Element value = namedParam.second;
                 size_t idx = std::distance(std::begin(signature),
                                            std::find_if(std::begin(signature), std::end(signature),
                                                         [&key, &value](const ArgInfo &arg) {
-                                                            return arg.name == key && value.isConvertibleTo(arg.expectedType);
+                                                            return arg.name == key && (value.isConvertibleTo(arg.expectedType) || arg.expectedType == Type::Any);
                                                         }));
+                // If params has a key which does not defined in the signatures, the mapping fails.
                 if (idx == numArgs) {
                     args->clear();
                     return false;
                 }
                 const ArgInfo &argInfo = signature[idx];
-                (*args)[argInfo.name] = value.convertTo(argInfo.expectedType);
+                (*args)[argInfo.name] = argInfo.expectedType == Type::Any ? value : value.as(argInfo.expectedType);
                 assigned[idx] = true;
             }
+            // find arguments which have not assigned a value.
             for (auto it = std::begin(params.unnamed); it != std::end(params.unnamed); ++it) {
                 const Element &value = *it;
                 size_t idx = std::distance(std::begin(signature),
                                            std::find_if(std::begin(signature), std::end(signature),
                                                         [this, &value, &assigned](const ArgInfo &arg) {
                                                             size_t curIdx = std::distance(&signature[0], &arg);
-                                                            return assigned[curIdx] == false && value.isConvertibleTo(arg.expectedType);
+                                                            return assigned[curIdx] == false && (value.isConvertibleTo(arg.expectedType) || arg.expectedType == Type::Any);
                                                         }));
+                // If params has an extra parameters, the mapping fails.
                 if (idx == numArgs) {
                     args->clear();
                     return false;
                 }
                 const ArgInfo &argInfo = signature[idx];
-                (*args)[argInfo.name] = value.convertTo(argInfo.expectedType);
+                (*args)[argInfo.name] = argInfo.expectedType == Type::Any ? value : value.as(argInfo.expectedType);
                 assigned[idx] = true;
             }
+            // If there are arguments they have not assigned yet and does not have default values, the mapping fails.
             for (int i = 0; i < numArgs; ++i) {
                 if (assigned[i])
                     continue;
@@ -151,14 +157,30 @@ namespace SLRSceneGraph {
         };
     };
     
+    
+    
+    Element AddItem(const ParameterList &params, ErrorMessage* err) {
+        static const Function proc{
+            {{"tuple", Type::Tuple}, {"key", Type::String, Element(TypeMap::String(), "")}, {"item", Type::Any}},
+            [](const std::map<std::string, Element> &args, ErrorMessage* err) {
+                auto tuple = args.at("tuple").rawRef<TypeMap::Tuple>();
+                auto key = args.at("key").raw<TypeMap::String>();
+                tuple->add(key, args.at("item"));
+                
+                return Element(TypeMap::Tuple(), tuple);
+            }
+        };
+        return proc(params, err);
+    }
+    
     // tx, ty, tz
     Element Translate(const ParameterList &params, ErrorMessage* err) {
         static const Function proc{
             {{"x", Type::RealNumber}, {"y", Type::RealNumber}, {"z", Type::RealNumber}},
             [](const std::map<std::string, Element> &args, ErrorMessage* err) {
-                float tx = args.at("x").as<double>();
-                float ty = args.at("y").as<double>();
-                float tz = args.at("z").as<double>();
+                float tx = args.at("x").raw<TypeMap::RealNumber>();
+                float ty = args.at("y").raw<TypeMap::RealNumber>();
+                float tz = args.at("z").raw<TypeMap::RealNumber>();
                 
                 return Element(TypeMap::Matrix(), SLR::translate(tx, ty, tz));
             }
@@ -170,7 +192,7 @@ namespace SLRSceneGraph {
         static const Function proc{
             {{"angle", Type::RealNumber}},
             [](const std::map<std::string, Element> &args, ErrorMessage* err) {
-                float angle = args.at("angle").as<double>();
+                float angle = args.at("angle").raw<TypeMap::RealNumber>();
                 return Element(TypeMap::Matrix(), SLR::rotateX(angle));
             }
         };
@@ -181,7 +203,7 @@ namespace SLRSceneGraph {
         static const Function proc{
             {{"angle", Type::RealNumber}},
             [](const std::map<std::string, Element> &args, ErrorMessage* err) {
-                float angle = args.at("angle").as<double>();
+                float angle = args.at("angle").raw<TypeMap::RealNumber>();
                 return Element(TypeMap::Matrix(), SLR::rotateY(angle));
             }
         };
@@ -192,7 +214,7 @@ namespace SLRSceneGraph {
         static const Function proc{
             {{"angle", Type::RealNumber}},
             [](const std::map<std::string, Element> &args, ErrorMessage* err) {
-                float angle = args.at("angle").as<double>();
+                float angle = args.at("angle").raw<TypeMap::RealNumber>();
                 return Element(TypeMap::Matrix(), SLR::rotateZ(angle));
             }
         };
@@ -204,16 +226,16 @@ namespace SLRSceneGraph {
         static const Function proc0{
             {{"s", Type::RealNumber}},
             [](const std::map<std::string, Element> &args, ErrorMessage* err) {
-                float s = args.at("s").as<double>();
+                float s = args.at("s").raw<TypeMap::RealNumber>();
                 return Element(TypeMap::Matrix(), SLR::scale(s));
             }
         };
         static const Function proc1{
             {{"x", Type::RealNumber}, {"y", Type::RealNumber}, {"z", Type::RealNumber}},
             [](const std::map<std::string, Element> &args, ErrorMessage* err) {
-                float sx = args.at("x").as<double>();
-                float sy = args.at("y").as<double>();
-                float sz = args.at("z").as<double>();
+                float sx = args.at("x").raw<TypeMap::RealNumber>();
+                float sy = args.at("y").raw<TypeMap::RealNumber>();
+                float sz = args.at("z").raw<TypeMap::RealNumber>();
                 return Element(TypeMap::Matrix(), SLR::scale(sx, sy, sz));
             }
         };
@@ -224,6 +246,36 @@ namespace SLRSceneGraph {
                 return elem;
         }
         return Element();
+    }
+    
+    Element CreateVertex(const ParameterList &params, ErrorMessage* err) {
+        static const Function proc{
+            {{"position", Type::Tuple}, {"normal", Type::Tuple}, {"tangent", Type::Tuple}, {"texCoord", Type::Tuple}},
+            [](const std::map<std::string, Element> &args, ErrorMessage* err) {
+                static const Function sigPosition = Function({{"x", Type::RealNumber}, {"y", Type::RealNumber}, {"z", Type::RealNumber}});
+                static const Function sigNormal = Function({{"x", Type::RealNumber}, {"y", Type::RealNumber}, {"z", Type::RealNumber}});
+                static const Function sigTangent = Function({{"x", Type::RealNumber}, {"y", Type::RealNumber}, {"z", Type::RealNumber}});
+                static const Function sigTexCoord = Function({{"u", Type::RealNumber}, {"v", Type::RealNumber}});
+                static const auto procPosition = [](const std::map<std::string, Element> &arg) {
+                    return SLR::Point3D(arg.at("x").raw<TypeMap::RealNumber>(), arg.at("y").raw<TypeMap::RealNumber>(), arg.at("z").raw<TypeMap::RealNumber>());
+                };
+                static const auto procNormal = [](const std::map<std::string, Element> &arg) {
+                    return SLR::Normal3D(arg.at("x").raw<TypeMap::RealNumber>(), arg.at("y").raw<TypeMap::RealNumber>(), arg.at("z").raw<TypeMap::RealNumber>());
+                };
+                static const auto procTangent = [](const std::map<std::string, Element> &arg) {
+                    return SLR::Tangent3D(arg.at("x").raw<TypeMap::RealNumber>(), arg.at("y").raw<TypeMap::RealNumber>(), arg.at("z").raw<TypeMap::RealNumber>());
+                };
+                static const auto procTexCoord = [](const std::map<std::string, Element> &arg) {
+                    return SLR::TexCoord2D(arg.at("u").raw<TypeMap::RealNumber>(), arg.at("v").raw<TypeMap::RealNumber>());
+                };
+                SLR::Vertex vtx = SLR::Vertex(sigPosition.perform<SLR::Point3D>(procPosition, args.at("position").raw<TypeMap::Tuple>()),
+                                              sigNormal.perform<SLR::Normal3D>(procNormal, args.at("normal").raw<TypeMap::Tuple>()),
+                                              sigTangent.perform<SLR::Tangent3D>(procTangent, args.at("tangent").raw<TypeMap::Tuple>()),
+                                              sigTexCoord.perform<SLR::TexCoord2D>(procTexCoord, args.at("texCoord").raw<TypeMap::Tuple>()));
+                return Element(TypeMap::Vertex(), vtx);
+            }
+        };
+        return proc(params, err);
     }
     
     static bool strToSpectrumType(const std::string &str, SLR::SpectrumType* type) {
@@ -256,7 +308,7 @@ namespace SLRSceneGraph {
     // type = Reflectance, space = sRGB, e0, e1, e2
     // minWL, maxWL, values
     // wls, values
-    // ID
+    // ID, idx
     Element CreateSpectrum(const ParameterList &params, ErrorMessage* err) {
         static const Function proc0{
             {
@@ -264,13 +316,13 @@ namespace SLRSceneGraph {
                 {"value", Type::RealNumber}
             },
             [](const std::map<std::string, Element> &args, ErrorMessage* err) {
-                std::string typeStr = args.at("type").as<std::string>();
+                std::string typeStr = args.at("type").raw<TypeMap::String>();
                 SLR::SpectrumType type;
                 if (!strToSpectrumType(typeStr, &type)) {
                     *err = ErrorMessage("Specified spectrum type is invalid.");
                     return Element();
                 }
-                float value = args.at("value").as<double>();
+                float value = args.at("value").raw<TypeMap::RealNumber>();
                 
                 return Element(TypeMap::Spectrum(), Spectrum::create(type, SLR::ColorSpace::sRGB, value, value, value));
             }
@@ -284,21 +336,21 @@ namespace SLRSceneGraph {
                 {"e2", Type::RealNumber}
             },
             [](const std::map<std::string, Element> &args, ErrorMessage* err) {
-                std::string typeStr = args.at("type").as<std::string>();
+                std::string typeStr = args.at("type").raw<TypeMap::String>();
                 SLR::SpectrumType type;
                 if (!strToSpectrumType(typeStr, &type)) {
                     *err = ErrorMessage("Specified spectrum type is invalid.");
                     return Element();
                 }
-                std::string spaceStr = args.at("space").as<std::string>();
+                std::string spaceStr = args.at("space").raw<TypeMap::String>();
                 SLR::ColorSpace space;
                 if (!strToColorSpace(spaceStr, &space)) {
                     *err = ErrorMessage("Specified color space is invalid.");
                     return Element();
                 }
-                float e0 = args.at("e0").as<double>();
-                float e1 = args.at("e1").as<double>();
-                float e2 = args.at("e2").as<double>();
+                float e0 = args.at("e0").raw<TypeMap::RealNumber>();
+                float e1 = args.at("e1").raw<TypeMap::RealNumber>();
+                float e2 = args.at("e2").raw<TypeMap::RealNumber>();
                 
                 return Element(TypeMap::Spectrum(), Spectrum::create(type, space, e0, e1, e2));
             }
@@ -324,14 +376,18 @@ namespace SLRSceneGraph {
         };
         static const Function proc4{
             {
-                {"ID", Type::String}
+                {"ID", Type::String}, {"idx", Type::Integer, Element(0)}
             },
             [](const std::map<std::string, Element> &args, ErrorMessage* err)  {
                 using namespace SLR;
                 InputSpectrumRef spectrum;
-                if (args.at("ID").as<std::string>() == "D65")
+                auto idx = args.at("idx").raw<TypeMap::Integer>();
+                if (args.at("ID").raw<TypeMap::String>() == "D65")
                     spectrum = Spectrum::create(SpectrumType::Illuminant, StandardIlluminant::MinWavelength, StandardIlluminant::MaxWavelength,
                                                 StandardIlluminant::D65, StandardIlluminant::NumSamples);
+                else if (args.at("ID").raw<TypeMap::String>() == "ColorChecker")
+                    spectrum = Spectrum::create(SpectrumType::Reflectance, ColorChecker::MinWavelength, ColorChecker::MaxWavelength,
+                                                ColorChecker::Spectra[idx], ColorChecker::NumSamples);
                 else
                     *err = ErrorMessage("unrecognized spectrum ID.");
                 return Element(TypeMap::Spectrum(), spectrum);
@@ -350,7 +406,7 @@ namespace SLRSceneGraph {
         static const Function proc0{
             {{"spectrum", Type::Spectrum}},
             [](const std::map<std::string, Element> &args, ErrorMessage* err) {
-                InputSpectrumRef spectrum = args.at("spectrum").asRef<SLR::InputSpectrum>();
+                InputSpectrumRef spectrum = args.at("spectrum").rawRef<TypeMap::Spectrum>();
                 return Element(TypeMap::SpectrumTexture(), createShared<ConstantSpectrumTexture>(spectrum));
             }
         };
@@ -367,8 +423,8 @@ namespace SLRSceneGraph {
         static const Function proc{
             {{"reflectance", Type::SpectrumTexture}, {"sigma", Type::FloatTexture, Element(TypeMap::FloatTexture(), nullptr)}},
             [](const std::map<std::string, Element> &args, ErrorMessage* err) {
-                SpectrumTextureRef reflectance = args.at("reflectance").asRef<SpectrumTexture>();
-                FloatTextureRef sigma = args.at("sigma").asRef<FloatTexture>();
+                SpectrumTextureRef reflectance = args.at("reflectance").rawRef<TypeMap::SpectrumTexture>();
+                FloatTextureRef sigma = args.at("sigma").rawRef<TypeMap::FloatTexture>();
                 return Element(TypeMap::SurfaceMaterial(), SurfaceMaterial::createMatte(reflectance, sigma));
             }
         };
@@ -379,7 +435,7 @@ namespace SLRSceneGraph {
         static const Function proc{
             {{"emittance", Type::SpectrumTexture}},
             [](const std::map<std::string, Element> &args, ErrorMessage* err) {
-                SpectrumTextureRef emittance = args.at("emittance").asRef<SpectrumTexture>();
+                SpectrumTextureRef emittance = args.at("emittance").rawRef<TypeMap::SpectrumTexture>();
                 return Element(TypeMap::EmitterSurfaceProperty(), SurfaceMaterial::createDiffuseEmitter(emittance));
             }
         };
@@ -390,8 +446,8 @@ namespace SLRSceneGraph {
         static const Function proc{
             {{"mat", Type::SurfaceMaterial}, {"emit", Type::EmitterSurfaceProperty}},
             [](const std::map<std::string, Element> &args, ErrorMessage* err) {
-                SurfaceMaterialRef mat = args.at("mat").asRef<SurfaceMaterial>();
-                EmitterSurfacePropertyRef emit = args.at("emit").asRef<EmitterSurfaceProperty>();
+                SurfaceMaterialRef mat = args.at("mat").rawRef<TypeMap::SurfaceMaterial>();
+                EmitterSurfacePropertyRef emit = args.at("emit").rawRef<TypeMap::EmitterSurfaceProperty>();
                 return Element(TypeMap::SurfaceMaterial(), SurfaceMaterial::createEmitterSurfaceMaterial(mat, emit));
             }
         };
@@ -403,56 +459,42 @@ namespace SLRSceneGraph {
         static const Function proc{
             {{"vertices", Type::Tuple}, {"faces", Type::Tuple}},
             [](const std::map<std::string, Element> &args, ErrorMessage* err) {
-                const std::vector<Element> &vertices = args.at("vertices").as<ParameterList>().unnamed;
-                const std::vector<Element> &faces = args.at("faces").as<ParameterList>().unnamed;
+                const std::vector<Element> &vertices = args.at("vertices").raw<TypeMap::Tuple>().unnamed;
+                const std::vector<Element> &faces = args.at("faces").raw<TypeMap::Tuple>().unnamed;
+                
+                struct Face {
+                    uint32_t v0, v1, v2;
+                    SurfaceMaterialRef mat;
+                };
+                static const Function sigFace{
+                    {{"indices", Type::Tuple}, {"material", Type::SurfaceMaterial}}
+                };
+                static const auto procFace = [](const std::map<std::string, Element> &arg) {
+                    static const Function sigIndices = Function({{"v0", Type::Integer}, {"v1", Type::Integer}, {"v2", Type::Integer}});
+                    std::map<std::string, Element> indices;
+                    sigIndices.mapParamsToArgs(arg.at("indices").raw<TypeMap::Tuple>(), &indices);
+                    uint32_t v0 = indices.at("v0").raw<TypeMap::Integer>();
+                    uint32_t v1 = indices.at("v1").raw<TypeMap::Integer>();
+                    uint32_t v2 = indices.at("v2").raw<TypeMap::Integer>();
+                    return Face{v0, v1, v2, arg.at("material").rawRef<TypeMap::SurfaceMaterial>()};
+                };
                 
                 TriangleMeshNodeRef lightMesh = createShared<TriangleMeshNode>();
                 for (int i = 0; i < vertices.size(); ++i) {
-                    static const Function sigVertex{
-                        {{"position", Type::Tuple}, {"normal", Type::Tuple}, {"tangent", Type::Tuple}, {"texCoord", Type::Tuple}}
-                    };
-                    static const auto procVertex = [](const std::map<std::string, Element> &arg) {
-                        static const Function sigPosition = Function({{"x", Type::RealNumber}, {"y", Type::RealNumber}, {"z", Type::RealNumber}});
-                        static const Function sigNormal = Function({{"x", Type::RealNumber}, {"y", Type::RealNumber}, {"z", Type::RealNumber}});
-                        static const Function sigTangent = Function({{"x", Type::RealNumber}, {"y", Type::RealNumber}, {"z", Type::RealNumber}});
-                        static const Function sigTexCoord = Function({{"u", Type::RealNumber}, {"v", Type::RealNumber}});
-                        static const auto procPosition = [](const std::map<std::string, Element> &arg) {
-                            return SLR::Point3D(arg.at("x").as<double>(), arg.at("y").as<double>(), arg.at("z").as<double>());
-                        };
-                        static const auto procNormal = [](const std::map<std::string, Element> &arg) {
-                            return SLR::Normal3D(arg.at("x").as<double>(), arg.at("y").as<double>(), arg.at("z").as<double>());
-                        };
-                        static const auto procTangent = [](const std::map<std::string, Element> &arg) {
-                            return SLR::Tangent3D(arg.at("x").as<double>(), arg.at("y").as<double>(), arg.at("z").as<double>());
-                        };
-                        static const auto procTexCoord = [](const std::map<std::string, Element> &arg) {
-                            return SLR::TexCoord2D(arg.at("u").as<double>(), arg.at("v").as<double>());
-                        };
-                        return SLR::Vertex(sigPosition.perform<SLR::Point3D>(procPosition, arg.at("position").as<ParameterList>()),
-                                           sigNormal.perform<SLR::Normal3D>(procNormal, arg.at("normal").as<ParameterList>()),
-                                           sigTangent.perform<SLR::Tangent3D>(procTangent, arg.at("tangent").as<ParameterList>()),
-                                           sigTexCoord.perform<SLR::TexCoord2D>(procTexCoord, arg.at("texCoord").as<ParameterList>()));
-                    };
-                    lightMesh->addVertex(sigVertex.perform<SLR::Vertex>(procVertex, vertices[i].as<ParameterList>()));
+                    if (vertices[i].type == Type::Vertex) {
+                        lightMesh->addVertex(vertices[i].raw<TypeMap::Vertex>());
+                    }
+                    else {
+                        Element vtx = CreateVertex(vertices[i].raw<TypeMap::Tuple>(), err);
+                        if (err->error)
+                            return Element();
+                        lightMesh->addVertex(vtx.raw<TypeMap::Vertex>());
+                    }
                 }
                 for (int i = 0; i < faces.size(); ++i) {
-                    struct Face {
-                        uint32_t v0, v1, v2;
-                        SurfaceMaterialRef mat;
-                    };
-                    static const Function sigFace{
-                        {{"indices", Type::Tuple}, {"material", Type::SurfaceMaterial}}
-                    };
-                    static const auto procFace = [](const std::map<std::string, Element> &arg) {
-                        static const Function sigIndices = Function({{"v0", Type::Integer}, {"v1", Type::Integer}, {"v2", Type::Integer}});
-                        std::map<std::string, Element> indices;
-                        sigIndices.mapParamsToArgs(arg.at("indices").as<ParameterList>(), &indices);
-                        uint32_t v0 = (uint32_t)indices.at("v0").as<int32_t>();
-                        uint32_t v1 = (uint32_t)indices.at("v1").as<int32_t>();
-                        uint32_t v2 = (uint32_t)indices.at("v2").as<int32_t>();
-                        return Face{v0, v1, v2, arg.at("material").asRef<SurfaceMaterial>()};
-                    };
-                    Face f = sigFace.perform<Face>(procFace, faces[i].as<ParameterList>());
+                    Face f = sigFace.perform<Face>(procFace, faces[i].raw<TypeMap::Tuple>(), Face(), err);
+                    if (err->error)
+                        return Element();
                     lightMesh->addTriangle(f.v0, f.v1, f.v2, f.mat);
                 }
                 
@@ -476,8 +518,8 @@ namespace SLRSceneGraph {
         static const Function proc{
             {{"node", Type::Node}, {"transform", Type::Transform}},
             [](const std::map<std::string, Element> &args, ErrorMessage* err) {
-                InternalNodeRef node = args.at("node").asRef<InternalNode>();
-                TransformRef tf = args.at("transform").asRef<SLR::Transform>();
+                InternalNodeRef node = args.at("node").rawRef<TypeMap::Node>();
+                TransformRef tf = args.at("transform").rawRef<TypeMap::Transform>();
                 node->setTransform(tf);
                 return Element();
             }
@@ -489,8 +531,8 @@ namespace SLRSceneGraph {
         static const Function proc0{
             {{"parent", Type::Node}, {"child", Type::Node}},
             [](const std::map<std::string, Element> &args, ErrorMessage* err) {
-                InternalNodeRef parent = args.at("parent").asRef<InternalNode>();
-                InternalNodeRef child = args.at("child").asRef<InternalNode>();
+                InternalNodeRef parent = args.at("parent").rawRef<TypeMap::Node>();
+                InternalNodeRef child = args.at("child").rawRef<TypeMap::Node>();
                 parent->addChildNode(child);
                 return Element();
             }
@@ -498,8 +540,8 @@ namespace SLRSceneGraph {
         static const Function proc1{
             {{"parent", Type::Node}, {"child", Type::Mesh}},
             [](const std::map<std::string, Element> &args, ErrorMessage* err) {
-                InternalNodeRef parent = args.at("parent").asRef<InternalNode>();
-                TriangleMeshNodeRef child = args.at("child").asRef<TriangleMeshNode>();
+                InternalNodeRef parent = args.at("parent").rawRef<TypeMap::Node>();
+                TriangleMeshNodeRef child = args.at("child").rawRef<TypeMap::Mesh>();
                 parent->addChildNode(child);
                 return Element();
             }
@@ -507,8 +549,8 @@ namespace SLRSceneGraph {
         static const Function proc2{
             {{"parent", Type::Node}, {"child", Type::Camera}},
             [](const std::map<std::string, Element> &args, ErrorMessage* err) {
-                InternalNodeRef parent = args.at("parent").asRef<InternalNode>();
-                CameraNodeRef child = args.at("child").asRef<CameraNode>();
+                InternalNodeRef parent = args.at("parent").rawRef<TypeMap::Node>();
+                CameraNodeRef child = args.at("child").rawRef<TypeMap::Camera>();
                 parent->addChildNode(child);
                 return Element();
             }
@@ -526,7 +568,7 @@ namespace SLRSceneGraph {
         static const Function proc{
             {{"path", Type::String}},
             [](const std::map<std::string, Element> &args, ErrorMessage* err) {
-                std::string path = args.at("path").as<std::string>();
+                std::string path = args.at("path").raw<TypeMap::String>();
                 
                 InternalNodeRef modelNode;
                 construct(path, modelNode);
@@ -548,12 +590,12 @@ namespace SLRSceneGraph {
                 {"radius", Type::RealNumber, Element(0.0)}, {"imgDist", Type::RealNumber, Element(0.02)}, {"objDist", Type::RealNumber, Element(5.0)}
             },
             [](const std::map<std::string, Element> &args, ErrorMessage* err) {
-                float sensitivity = args.at("sensitivity").as<double>();
-                float aspect = args.at("aspect").as<double>();
-                float fovY = args.at("fovY").as<double>();
-                float radius = args.at("radius").as<double>();
-                float imgDist = args.at("imgDist").as<double>();
-                float objDist = args.at("objDist").as<double>();
+                float sensitivity = args.at("sensitivity").raw<TypeMap::RealNumber>();
+                float aspect = args.at("aspect").raw<TypeMap::RealNumber>();
+                float fovY = args.at("fovY").raw<TypeMap::RealNumber>();
+                float radius = args.at("radius").raw<TypeMap::RealNumber>();
+                float imgDist = args.at("imgDist").raw<TypeMap::RealNumber>();
+                float objDist = args.at("objDist").raw<TypeMap::RealNumber>();
                 
                 return Element(TypeMap::Camera(), createShared<PerspectiveCameraNode>(sensitivity, aspect, fovY, radius, imgDist, objDist));
             }
@@ -567,12 +609,12 @@ namespace SLRSceneGraph {
             *err = ErrorMessage("Rendering method is not specified.");
             return Element();
         }
-        std::string method = paramMethod.as<std::string>();
+        std::string method = paramMethod.raw<TypeMap::String>();
         if (method == "PT") {
             static const Function proc{
                 {{"method", Type::String}, {"samples", Type::Integer}},
                 [](const std::map<std::string, Element> &args, RenderingContext* context, ErrorMessage* err) {
-                    uint32_t spp = args.at("samples").as<uint32_t>();
+                    uint32_t spp = args.at("samples").raw<TypeMap::Integer>();
                     context->renderer = createUnique<SLR::PathTracingRenderer>(spp);
                     return Element();
                 }
@@ -594,12 +636,12 @@ namespace SLRSceneGraph {
                 {"rngSeed", Type::Integer, Element(1509761209)},
             },
             [](const std::map<std::string, Element> &args, RenderingContext* context, ErrorMessage* err) {
-                context->width = args.at("width").as<int32_t>();
-                context->height = args.at("height").as<int32_t>();
-                context->timeStart = args.at("timeStart").as<double>();
-                context->timeEnd = args.at("timeEnd").as<double>();
-                context->brightness = args.at("brightness").as<double>();
-                context->rngSeed = args.at("rngSeed").as<int32_t>();
+                context->width = args.at("width").raw<TypeMap::Integer>();
+                context->height = args.at("height").raw<TypeMap::Integer>();
+                context->timeStart = args.at("timeStart").raw<TypeMap::RealNumber>();
+                context->timeEnd = args.at("timeEnd").raw<TypeMap::RealNumber>();
+                context->brightness = args.at("brightness").raw<TypeMap::RealNumber>();
+                context->rngSeed = args.at("rngSeed").raw<TypeMap::Integer>();
                 
                 return Element();
             }

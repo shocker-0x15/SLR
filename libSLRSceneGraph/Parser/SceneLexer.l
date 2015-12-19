@@ -29,7 +29,7 @@ REALNUMBER      {FLOAT}{EXPONENT}?
 ID              [_[:alpha:]][_[:alnum:]]*
 OPERATORS       <=|>=|<|>|==|!=|=|&&|\|\||\+=|-=|\*=|\/=|%=|\+\+|--|\+|-|\*|\/|%|!
 DELIMITERS      ,|:|;
-PARENTHESES     \(|\)|\{|\}
+PARENTHESES     \(|\)|\{|\}|\[|\]
 WSPACE          [[:blank:]]+
 
 %{
@@ -78,6 +78,10 @@ for {
     return SceneParser::make_FOR(loc);
 }
 
+AddItem {
+    DPRINTF("%s\n", yytext);
+    return SceneParser::make_API(API::AddItem, loc);    
+}
 Translate {
     DPRINTF("%s\n", yytext);
     return SceneParser::make_API(API::Translate, loc);
@@ -97,6 +101,10 @@ RotateZ {
 Scale {
     DPRINTF("%s\n", yytext);
     return SceneParser::make_API(API::Scale, loc);
+}
+CreateVertex {
+    DPRINTF("%s\n", yytext);
+    return SceneParser::make_API(API::CreateVertex, loc);   
 }
 Spectrum {
     DPRINTF("%s\n", yytext);
@@ -172,6 +180,8 @@ CreateMesh {
     if (c == ')') return SceneParser::make_R_PAREN(loc);
     if (c == '{') return SceneParser::make_L_BRACE(loc);
     if (c == '}') return SceneParser::make_R_BRACE(loc);
+    if (c == '[') return SceneParser::make_L_BRACK(loc);
+    if (c == ']') return SceneParser::make_R_BRACK(loc);
     SLRAssert(false, "Undefined parenthesis.");
 }
 
@@ -207,11 +217,11 @@ CreateMesh {
     char c = yytext[0];
     DPRINTF("Delimiter: %c\n", c);
     if (c == ',')
-        return SceneParser::make_COMMA(c, loc);
+        return SceneParser::make_COMMA(loc);
     else if (c == ':')
-        return SceneParser::make_COLON(c, loc);
+        return SceneParser::make_COLON(loc);
     else if (c == ';')
-        return SceneParser::make_SEMICOLON(c, loc);
+        return SceneParser::make_SEMICOLON(loc);
     SLRAssert(false, "Undefined delimiter.");
 }
 
@@ -225,7 +235,7 @@ CreateMesh {
 }
 
 "//".*$ {
-    printf("single line comment(s): (%s)\n", yytext);
+    DPRINTF("single line comment(s): (%s)\n", yytext);
 }
 
 "/*" {

@@ -20,6 +20,7 @@ namespace SLRSceneGraph {
         RealNumber,
         String,
         Matrix,
+        Vertex,
         Transform,
         Spectrum,
         SpectrumTexture,
@@ -31,6 +32,7 @@ namespace SLRSceneGraph {
         Camera,
         Node,
         Tuple,
+        Any,
         Void,
         Error,
         NumTypes
@@ -44,11 +46,12 @@ namespace SLRSceneGraph {
         TypeMapDef(RealNumber, double);
         TypeMapDef(String, std::string);
         TypeMapDef(Matrix, SLR::Matrix4x4);
+        TypeMapDef(Vertex, SLR::Vertex);
         TypeMapDef(Transform, SLR::Transform);
         TypeMapDef(Spectrum, SLR::InputSpectrum);
         TypeMapDef(SpectrumTexture, SLRSceneGraph::SpectrumTexture);
-        TypeMapDef(NormalTexture, Normal3DTexture);
-        TypeMapDef(FloatTexture, FloatTexture);
+        TypeMapDef(NormalTexture, SLRSceneGraph::Normal3DTexture);
+        TypeMapDef(FloatTexture, SLRSceneGraph::FloatTexture);
         TypeMapDef(SurfaceMaterial, SLRSceneGraph::SurfaceMaterial);
         TypeMapDef(EmitterSurfaceProperty, SLRSceneGraph::EmitterSurfaceProperty);
         TypeMapDef(Mesh, SLRSceneGraph::TriangleMeshNode);
@@ -60,11 +63,13 @@ namespace SLRSceneGraph {
     }
     
     enum class API : uint32_t {
+        AddItem,
         Translate,
         RotateX,
         RotateY,
         RotateZ,
         Scale,
+        CreateVertex,
         Spectrum,
         SpectrumTexture,
         CreateMatte,
@@ -113,14 +118,18 @@ namespace SLRSceneGraph {
         Element(Map dummy, const std::shared_ptr<typename Map::InternalType> &valRef = nullptr) : type((Type)Map::Value), valueRef(valRef) { }
 //        Element(Type t = Type::Void, const std::shared_ptr<void> &vr = nullptr) : type(t), valueRef(vr) { };
         
-        template <typename T>
-        const T& as() const { return *(T*)valueRef.get(); }
-        template <typename T>
-        std::shared_ptr<T> asRef() const { return std::static_pointer_cast<T>(valueRef); }
-        bool isConvertibleTo(Type toType) const;
-        Element convertTo(Type toType) const;
         template <typename Map>
-        typename Map::InternalType convertTo() const;
+        const typename Map::InternalType& raw() const { return *(typename Map::InternalType*)valueRef.get(); }
+        template <typename Map>
+        std::shared_ptr<typename Map::InternalType> rawRef() const { return std::static_pointer_cast<typename Map::InternalType>(valueRef); }
+        bool isConvertibleTo(Type toType) const;
+        template <typename Map>
+        bool isConvertibleTo() const;
+        Element as(Type toType) const;
+        template <typename Map>
+        Element as() const;
+        template <typename Map>
+        typename Map::InternalType asRaw() const;
         
         Element operator++(int);
         Element operator--(int);
@@ -155,25 +164,18 @@ namespace SLRSceneGraph {
     };
     std::ostream &operator<<(std::ostream &out, const Element &elem);
     
-    struct Parameter {
-        std::string name;
-        Element elem;
-        Parameter() : name("") { };
-        Parameter(const std::string &n, const Element &e) : name(n), elem(e) { };
-    };
-    
     struct ParameterList {
         std::map<std::string, Element> named;
         std::vector<Element> unnamed;
         
-        bool add(const Parameter &param) {
-            if (param.name.empty())
-                unnamed.push_back(param.elem);
+        bool add(const std::string &key, const Element &value) {
+            if (key.empty())
+                unnamed.push_back(value);
             else {
-                if (named.count(param.name))
+                if (named.count(key))
                     return false;
                 
-                named[param.name] = param.elem;
+                named[key] = value;
             }
             return true;
         };
@@ -182,21 +184,32 @@ namespace SLRSceneGraph {
             return uint32_t(named.size() + unnamed.size());
         };
         
-        Element operator()(const std::string &key, Type expectedType) const {
-            if (named.count(key) && named.at(key).isConvertibleTo(expectedType))
-                return named.at(key).convertTo(expectedType);
+        Element operator()(const std::string &key, Type expectedType = Type::Any) const {
+            if (named.count(key) == 0)
+                return Element();
+            
+            const Element &value = named.at(key);
+            if (expectedType == Type::Any)
+                return value;
+            else if (value.isConvertibleTo(expectedType))
+                return value.as(expectedType);
             else
                 return Element();
         };
         
-        Element operator()(uint32_t idx, Type expectedType) const {
-            if (idx < unnamed.size() && unnamed[idx].isConvertibleTo(expectedType))
-                return unnamed[idx].convertTo(expectedType);
+        Element operator()(uint32_t idx, Type expectedType = Type::Any) const {
+            if (idx >= unnamed.size())
+                return Element();
+            
+            const Element &value = unnamed.at(idx);
+            if (expectedType == Type::Any)
+                return value;
+            else if (value.isConvertibleTo(expectedType))
+                return value.as(expectedType);
             else
                 return Element();
         };
     };
-    typedef std::shared_ptr<ParameterList> ParameterListRef;
     std::ostream &operator<<(std::ostream &out, const ParameterList &params);
     
     struct TypeInfo {
@@ -244,10 +257,22 @@ namespace SLRSceneGraph {
     };
     
     template <typename Map>
-    typename Map::InternalType Element::convertTo() const {
-        SLRAssert(isConvertibleTo((Type)Map::Value), "Specified type is invalid.");
-        TypeInfo::convertFunction func = TypeInfo::infos[Map::Value].convertFunctions.at((Type)Map::Value);
-        return func(*this).as<typename Map::InternalType>();
+    bool Element::isConvertibleTo() const {
+        return TypeInfo::infos[(uint32_t)type].isConvertibleTo((Type)Map::Value);
+    };
+    
+    template <typename Map>
+    Element Element::as() const {
+        SLRAssert(isConvertibleTo<Map>(), "Specified type is invalid.");
+        TypeInfo::convertFunction func = TypeInfo::infos[(uint32_t)type].convertFunctions.at((Type)Map::Value);
+        return func(*this);
+    }
+    
+    template <typename Map>
+    typename Map::InternalType Element::asRaw() const {
+        SLRAssert(isConvertibleTo<Map>(), "Specified type is invalid.");
+        TypeInfo::convertFunction func = TypeInfo::infos[(uint32_t)type].convertFunctions.at((Type)Map::Value);
+        return func(*this).raw<Map>();
     };
     
     class LocalVariables {
@@ -273,6 +298,33 @@ namespace SLRSceneGraph {
             return m_primaryMap.at(key);
         }
         const Element &operator[](const std::string &key) const { return m_primaryMap.at(key); }
+        
+        void printVarList() const {
+            auto depthwiseVars = m_depthwiseVars;
+            while (!depthwiseVars.empty()) {
+                std::set<std::string> vars = depthwiseVars.top();
+                size_t depth = depthwiseVars.size();
+                printf("%2lu:", depth);
+                for (auto it = std::begin(vars); it != std::end(vars); ++it)
+                    printf(" %s", it->c_str());
+                printf("\n");
+                depthwiseVars.pop();
+            }
+            printf("\n");
+            depthwiseVars = m_depthwiseVars;
+            while (!depthwiseVars.empty()) {
+                std::set<std::string> vars = depthwiseVars.top();
+                size_t depth = depthwiseVars.size();
+                printf("%2lu:\n", depth);
+                for (auto it = std::begin(vars); it != std::end(vars); ++it) {
+                    const std::string &varName = *it;
+                    printf(" %s: \n", varName.c_str());
+                    std::cout << "  " << m_primaryMap.at(varName) << std::endl;
+                }
+                printf("\n");
+                depthwiseVars.pop();
+            }
+        }
     };
     
     struct ExecuteContext {
@@ -297,18 +349,10 @@ namespace SLRSceneGraph {
     class Term : public Expression {
     };
     
-    class Value : public Term {
+    class SingleTerm : public Term {
     };
     
-    class Argument {
-        ExpressionRef m_keyExpr;
-        ExpressionRef m_valueExpr;
-        mutable Parameter m_result;
-    public:
-        Argument(const ExpressionRef &keyExpr, const ExpressionRef &valueExpr) : m_keyExpr(keyExpr), m_valueExpr(valueExpr) { }
-        
-        bool perform(ExecuteContext &context, ErrorMessage* errMsg) const;
-        const Parameter &result() const { return m_result; };
+    class Value : public SingleTerm {
     };
     
     class ForStatement : public Statement {
@@ -342,20 +386,20 @@ namespace SLRSceneGraph {
         bool perform(ExecuteContext &context, ErrorMessage* errMsg) const override;
     };
     
-    class FunctionTerm : public Term {
-        API m_funcID;
-        ArgumentsRef m_args;
-    public:
-        FunctionTerm(API funcID, const ArgumentsRef &args) : m_funcID(funcID), m_args(args) { }
-        
-        bool perform(ExecuteContext &context, ErrorMessage* errMsg) const override;
-    };
-    
     class UnaryTerm : public Term {
         std::string m_op;
         TermRef m_term;
     public:
         UnaryTerm(const std::string &op, const TermRef &term) : m_op(op), m_term(term) { }
+        
+        bool perform(ExecuteContext &context, ErrorMessage* errMsg) const override;
+    };
+    
+    class UnarySubstitutionTerm : public Term {
+        std::string m_op;
+        std::string m_varName;
+    public:
+        UnarySubstitutionTerm(const std::string &op, const std::string &varName) : m_op(op), m_varName(varName) { }
         
         bool perform(ExecuteContext &context, ErrorMessage* errMsg) const override;
     };
@@ -370,10 +414,28 @@ namespace SLRSceneGraph {
         bool perform(ExecuteContext &context, ErrorMessage* errMsg) const override;
     };
     
-    class EnclosedTerm : public Term {
+    class FunctionSingleTerm : public SingleTerm {
+        API m_funcID;
+        ParameterVecRef m_args;
+    public:
+        FunctionSingleTerm(API funcID, const ParameterVecRef &args) : m_funcID(funcID), m_args(args) { }
+        
+        bool perform(ExecuteContext &context, ErrorMessage* errMsg) const override;
+    };
+    
+    class EnclosedSingleTerm : public SingleTerm {
         ExpressionRef m_expr;
     public:
-        EnclosedTerm(const ExpressionRef &expr) : m_expr(expr) { }
+        EnclosedSingleTerm(const ExpressionRef &expr) : m_expr(expr) { }
+        
+        bool perform(ExecuteContext &context, ErrorMessage* errMsg) const override;
+    };
+    
+    class TupleElementSingleTerm : public SingleTerm {
+        SingleTermRef m_tuple;
+        ExpressionRef m_idxExpr;
+    public:
+        TupleElementSingleTerm(const SingleTermRef &tuple, const ExpressionRef &idxExpr) : m_tuple(tuple), m_idxExpr(idxExpr) { }
         
         bool perform(ExecuteContext &context, ErrorMessage* errMsg) const override;
     };
@@ -386,9 +448,9 @@ namespace SLRSceneGraph {
     };
     
     class TupleValue : public Value {
-        ArgumentsRef m_elements;
+        ParameterVecRef m_elements;
     public:
-        TupleValue(const ArgumentsRef &elements) : m_elements(elements) { }
+        TupleValue(const ParameterVecRef &elements) : m_elements(elements) { }
         
         bool perform(ExecuteContext &context, ErrorMessage* errMsg) const override;
     };
@@ -399,6 +461,16 @@ namespace SLRSceneGraph {
         VariableValue(const std::string &varName) : m_varName(varName) { }
         
         bool perform(ExecuteContext &context, ErrorMessage* errMsg) const override;
+    };
+    
+    class Parameter {
+        ExpressionRef m_keyExpr;
+        ExpressionRef m_valueExpr;
+    public:
+        Parameter(const ExpressionRef &keyExpr, const ExpressionRef &valueExpr) : m_keyExpr(keyExpr), m_valueExpr(valueExpr) { }
+        
+        bool perform(ExecuteContext &context, ErrorMessage* errMsg) const;
+        void getKeyAndValue(Element* key, Element* value) const;
     };
 }
 

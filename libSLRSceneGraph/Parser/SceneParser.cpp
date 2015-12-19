@@ -14,6 +14,9 @@
 namespace SLRSceneGraph {
     std::ostream &operator<<(std::ostream &out, Type t) {
         switch (t) {
+            case Type::Bool:
+                out << "Bool";
+                break;
             case Type::Integer:
                 out << "Integer";
                 break;
@@ -25,6 +28,9 @@ namespace SLRSceneGraph {
                 break;
             case Type::Matrix:
                 out << "Matrix";
+                break;
+            case Type::Vertex:
+                out << "Vertex";
                 break;
             case Type::Transform:
                 out << "Transform";
@@ -59,8 +65,14 @@ namespace SLRSceneGraph {
             case Type::Tuple:
                 out << "Tuple";
                 break;
+            case Type::Any:
+                out << "Any";
+                break;
             case Type::Void:
                 out << "Void";
+                break;
+            case Type::Error:
+                out << "Error";
                 break;
             case Type::NumTypes:
                 out << "NumTypes";
@@ -73,17 +85,23 @@ namespace SLRSceneGraph {
     
     std::ostream &operator<<(std::ostream &out, const Element &elem) {
         switch (elem.type) {
+            case Type::Bool:
+                out << elem.raw<TypeMap::Bool>();
+                break;
             case Type::Integer:
-                out << elem.as<int32_t>();
+                out << elem.raw<TypeMap::Integer>();
                 break;
             case Type::RealNumber:
-                out << elem.as<double>();
+                out << elem.raw<TypeMap::RealNumber>();
                 break;
             case Type::String:
-                out << "\"" << elem.as<std::string>() << "\"";
+                out << "\"" << elem.raw<TypeMap::String>() << "\"";
                 break;
             case Type::Matrix:
                 out << "Matrix";
+                break;
+            case Type::Vertex:
+                out << "Vertex";
                 break;
             case Type::Transform:
                 out << "Transform";
@@ -116,7 +134,10 @@ namespace SLRSceneGraph {
                 out << "Node";
                 break;
             case Type::Tuple:
-                out << elem.as<ParameterList>();
+                out << elem.raw<TypeMap::Tuple>();
+                break;
+            case Type::Any:
+                out << "Any";
                 break;
             case Type::Void:
                 out << "Void";
@@ -154,9 +175,9 @@ namespace SLRSceneGraph {
     
     bool Element::isConvertibleTo(Type toType) const {
         return TypeInfo::infos[(uint32_t)type].isConvertibleTo(toType);
-    }
+    };
     
-    Element Element::convertTo(Type toType) const {
+    Element Element::as(Type toType) const {
         SLRAssert(isConvertibleTo(toType), "Specified type is invalid.");
         TypeInfo::convertFunction func = TypeInfo::infos[(uint32_t)type].convertFunctions.at(toType);
         return func(*this);
@@ -385,144 +406,299 @@ namespace SLRSceneGraph {
                 info.subOperator = nullptr;
                 info.lessOperator = nullptr;
                 info.greaterOperator = nullptr;
-                info.lessEqOperator = nullptr;
-                info.greaterEqOperator = nullptr;
+                info.lessEqOperator = [](const Element &v0, const Element &v1) {
+                    const TypeInfo &info = TypeInfo::infos[(uint32_t)v0.type];
+                    return Element(info.eqOperator(v0, v1).raw<TypeMap::Bool>() && info.lessOperator(v0, v1).raw<TypeMap::Bool>());
+                };
+                info.greaterEqOperator = [](const Element &v0, const Element &v1) {
+                    const TypeInfo &info = TypeInfo::infos[(uint32_t)v0.type];
+                    return Element(info.eqOperator(v0, v1).raw<TypeMap::Bool>() && info.greaterOperator(v0, v1).raw<TypeMap::Bool>());
+                };
                 info.eqOperator = nullptr;
-                info.neqOperator = nullptr;
-                info.logicAndOperator = nullptr;
-                info.logicOrOperator = nullptr;
+                info.neqOperator = [](const Element &v0, const Element &v1) {
+                    const TypeInfo &info = TypeInfo::infos[(uint32_t)v0.type];
+                    return Element(!info.eqOperator(v0, v1).raw<TypeMap::Bool>());
+                };
+                info.logicAndOperator = [](const Element &v0, const Element &v1) {
+                    if (!v0.isConvertibleTo<TypeMap::Bool>())
+                        return Element(ErrorMessage("Left operand cannot be converted to a bool value."));
+                    if (!v1.isConvertibleTo<TypeMap::Bool>())
+                        return Element(ErrorMessage("Right operand cannot be converted to a bool value."));
+                    return Element(v0.asRaw<TypeMap::Bool>() && v1.asRaw<TypeMap::Bool>());
+                };
+                info.logicOrOperator = [](const Element &v0, const Element &v1) {
+                    if (!v0.isConvertibleTo<TypeMap::Bool>())
+                        return Element(ErrorMessage("Left operand cannot be converted to a bool value."));
+                    if (!v1.isConvertibleTo<TypeMap::Bool>())
+                        return Element(ErrorMessage("Right operand cannot be converted to a bool value."));
+                    return Element(v0.asRaw<TypeMap::Bool>() || v1.asRaw<TypeMap::Bool>());
+                };
                 info.substOperator = [](Element &l, const Element &r) { l = r; };
-                info.mulSubstOperator = nullptr;
-                info.divSubstOperator = nullptr;
-                info.remSubstOperator = nullptr;
-                info.addSubstOperator = nullptr;
-                info.subSubstOperator = nullptr;
+                info.mulSubstOperator = [](Element &l, const Element &r) { l = l * r; };
+                info.divSubstOperator = [](Element &l, const Element &r) { l = l / r; };
+                info.remSubstOperator = [](Element &l, const Element &r) { l = l % r; };
+                info.addSubstOperator = [](Element &l, const Element &r) { l = l + r; };
+                info.subSubstOperator = [](Element &l, const Element &r) { l = l - r; };
                 info.convertFunctions[(Type)i] = [](const Element &v) { return v; };
             }
             
             {
                 TypeInfo &info = infos[(uint32_t)Type::Bool];
                 
-                info.affOperator = [](const Element &v) { return Element(v.as<bool>()); };
-                info.negOperator = [](const Element &v) { return Element(-(int32_t)v.as<bool>()); };
-                info.logicNotOperator = [](const Element &v) { return Element(!v.as<bool>()); };
+                info.affOperator = [](const Element &v) { return Element(v.raw<TypeMap::Bool>()); };
+                info.negOperator = [](const Element &v) { return Element(-v.raw<TypeMap::Bool>()); };
+                info.logicNotOperator = [](const Element &v) { return Element(!v.raw<TypeMap::Bool>()); };
                 
                 info.mulOperator = [](const Element &v0, const Element &v1) {
-                    int32_t lVal = v0.as<bool>();
-                    if (v1.isConvertibleTo(Type::Integer))
-                        return Element(lVal * v1.convertTo(Type::Integer).as<int32_t>());
-                    else if (v1.isConvertibleTo(Type::RealNumber))
-                        return Element(lVal * v1.convertTo(Type::RealNumber).as<double>());
+                    auto lVal = v0.raw<TypeMap::Bool>();
+                    if (v1.isConvertibleTo<TypeMap::Integer>())
+                        return Element(lVal * v1.asRaw<TypeMap::Integer>());
+                    else if (v1.isConvertibleTo<TypeMap::RealNumber>())
+                        return Element(lVal * v1.asRaw<TypeMap::RealNumber>());
                     return Element(ErrorMessage("* operator does not support the right operand type."));
                 };
+                info.divOperator = [](const Element &v0, const Element &v1) {
+                    auto lVal = v0.raw<TypeMap::Bool>();
+                    if (v1.isConvertibleTo<TypeMap::Integer>())
+                        return Element(lVal / v1.asRaw<TypeMap::Integer>());
+                    else if (v1.isConvertibleTo<TypeMap::RealNumber>())
+                        return Element(lVal / v1.asRaw<TypeMap::RealNumber>());
+                    return Element(ErrorMessage("/ operator does not support the right operand type."));
+                };
+                info.remOperator = [](const Element &v0, const Element &v1) {
+                    auto lVal = v0.raw<TypeMap::Bool>();
+                    if (v1.isConvertibleTo<TypeMap::Integer>())
+                        return Element(lVal % v1.asRaw<TypeMap::Integer>());
+                    return Element(ErrorMessage("% operator does not support the right operand type."));
+                };
                 info.addOperator = [](const Element &v0, const Element &v1) {
-                    int32_t lVal = v0.as<bool>();
-                    if (v1.isConvertibleTo(Type::Integer))
-                        return Element(lVal + v1.convertTo<TypeMap::Integer>());
-                    else if (v1.isConvertibleTo(Type::RealNumber))
-                        return Element(lVal + v1.convertTo<TypeMap::RealNumber>());
+                    auto lVal = v0.raw<TypeMap::Bool>();
+                    if (v1.isConvertibleTo<TypeMap::Integer>())
+                        return Element(lVal + v1.asRaw<TypeMap::Integer>());
+                    else if (v1.isConvertibleTo<TypeMap::RealNumber>())
+                        return Element(lVal + v1.asRaw<TypeMap::RealNumber>());
                     return Element(ErrorMessage("+ operator does not support the right operand type."));
                 };
                 info.subOperator = [](const Element &v0, const Element &v1) {
-                    int32_t lVal = v0.as<bool>();
-                    if (v1.isConvertibleTo(Type::Integer))
-                        return Element(lVal - v1.convertTo(Type::Integer).as<int32_t>());
-                    else if (v1.isConvertibleTo(Type::RealNumber))
-                        return Element(lVal - v1.convertTo(Type::RealNumber).as<int32_t>());
+                    auto lVal = v0.raw<TypeMap::Bool>();
+                    if (v1.isConvertibleTo<TypeMap::Integer>())
+                        return Element(lVal - v1.asRaw<TypeMap::Integer>());
+                    else if (v1.isConvertibleTo<TypeMap::RealNumber>())
+                        return Element(lVal - v1.asRaw<TypeMap::RealNumber>());
                     return Element(ErrorMessage("- operator does not support the right operand type."));
                 };
+                info.lessOperator = [](const Element &v0, const Element &v1) {
+                    auto lVal = v0.raw<TypeMap::Bool>();
+                    if (v1.isConvertibleTo<TypeMap::Integer>())
+                        return Element(lVal < v1.asRaw<TypeMap::Integer>());
+                    else if (v1.isConvertibleTo<TypeMap::RealNumber>())
+                        return Element(lVal < v1.asRaw<TypeMap::RealNumber>());
+                    return Element(ErrorMessage("< operator does not support the right operand type."));
+                };
+                info.greaterOperator = [](const Element &v0, const Element &v1) {
+                    auto lVal = v0.raw<TypeMap::Bool>();
+                    if (v1.isConvertibleTo<TypeMap::Integer>())
+                        return Element(lVal > v1.asRaw<TypeMap::Integer>());
+                    else if (v1.isConvertibleTo<TypeMap::RealNumber>())
+                        return Element(lVal > v1.asRaw<TypeMap::RealNumber>());
+                    return Element(ErrorMessage("> operator does not support the right operand type."));
+                };
+                info.eqOperator = [](const Element &v0, const Element &v1) {
+                    auto lVal = v0.raw<TypeMap::Bool>();
+                    if (v1.isConvertibleTo<TypeMap::Bool>())
+                        return Element(lVal == v1.asRaw<TypeMap::Bool>());
+                    return Element(ErrorMessage("== operator does not support the right operand type."));
+                };
                 
-                info.convertFunctions[Type::Integer] = [](const Element &elemFrom) { return Element((int32_t)elemFrom.as<bool>()); };
-                info.convertFunctions[Type::RealNumber] = [](const Element &elemFrom) { return Element((double)elemFrom.as<bool>()); };
+                info.convertFunctions[Type::Integer] = [](const Element &elemFrom) { return Element(TypeMap::Integer(), elemFrom.raw<TypeMap::Bool>()); };
+                info.convertFunctions[Type::RealNumber] = [](const Element &elemFrom) { return Element(TypeMap::RealNumber(), elemFrom.raw<TypeMap::Bool>()); };
             }
             
             {
                 TypeInfo &info = infos[(uint32_t)Type::Integer];
                 
-                info.affOperator = [](const Element &v) { return v; };
-                info.negOperator = [](const Element &v) { return Element(-v.as<int32_t>()); };
+                info.postIncOperator = [](Element &v) {
+                    Element old = v;
+                    v = Element(v.raw<TypeMap::Integer>() + 1);
+                    return old;
+                };
+                info.postDecOperator = [](Element &v) {
+                    Element old = v;
+                    v = Element(v.raw<TypeMap::Integer>() - 1);
+                    return old;
+                };
+                info.preIncOperator = [](Element &v) { v = Element(v.raw<TypeMap::Integer>() + 1); };
+                info.preDecOperator = [](Element &v) { v = Element(v.raw<TypeMap::Integer>() - 1); };
                 
+                info.affOperator = [](const Element &v) { return v; };
+                info.negOperator = [](const Element &v) { return Element(-v.raw<TypeMap::Integer>()); };
+                info.logicNotOperator = [](const Element &v) { return Element(!v.raw<TypeMap::Integer>()); };
+                
+                info.mulOperator = [](const Element &v0, const Element &v1) {
+                    auto lVal = v0.raw<TypeMap::Integer>();
+                    if (v1.isConvertibleTo<TypeMap::Integer>())
+                        return Element(lVal * v1.asRaw<TypeMap::Integer>());
+                    else if (v1.isConvertibleTo<TypeMap::RealNumber>())
+                        return Element(lVal * v1.asRaw<TypeMap::RealNumber>());
+                    return Element(ErrorMessage("* operator does not support the right operand type."));
+                };
+                info.divOperator = [](const Element &v0, const Element &v1) {
+                    auto lVal = v0.raw<TypeMap::Integer>();
+                    if (v1.isConvertibleTo<TypeMap::Integer>())
+                        return Element(lVal / v1.asRaw<TypeMap::Integer>());
+                    else if (v1.isConvertibleTo<TypeMap::RealNumber>())
+                        return Element(lVal / v1.asRaw<TypeMap::RealNumber>());
+                    return Element(ErrorMessage("/ operator does not support the right operand type."));
+                };
+                info.remOperator = [](const Element &v0, const Element &v1) {
+                    auto lVal = v0.raw<TypeMap::Integer>();
+                    if (v1.isConvertibleTo<TypeMap::Integer>())
+                        return Element(lVal % v1.asRaw<TypeMap::Integer>());
+                    return Element(ErrorMessage("% operator does not support the right operand type."));
+                };
                 info.addOperator = [](const Element &v0, const Element &v1) {
-                    int32_t lVal = v0.as<int32_t>();
-                    if (v1.isConvertibleTo(Type::Integer))
-                        return Element(lVal + v1.convertTo(Type::Integer).as<int32_t>());
-                    else if (v1.isConvertibleTo(Type::RealNumber))
-                        return Element(lVal + v1.convertTo(Type::RealNumber).as<double>());
+                    auto lVal = v0.raw<TypeMap::Integer>();
+                    if (v1.isConvertibleTo<TypeMap::Integer>())
+                        return Element(lVal + v1.asRaw<TypeMap::Integer>());
+                    else if (v1.isConvertibleTo<TypeMap::RealNumber>())
+                        return Element(lVal + v1.asRaw<TypeMap::RealNumber>());
                     return Element(ErrorMessage("+ operator does not support the right operand type."));
                 };
                 info.subOperator = [](const Element &v0, const Element &v1) {
-                    int32_t lVal = v0.as<int32_t>();
-                    if (v1.isConvertibleTo(Type::Integer))
-                        return Element(lVal - v1.convertTo(Type::Integer).as<int32_t>());
-                    else if (v1.isConvertibleTo(Type::RealNumber))
-                        return Element(lVal - v1.convertTo(Type::RealNumber).as<double>());
+                    auto lVal = v0.raw<TypeMap::Integer>();
+                    if (v1.isConvertibleTo<TypeMap::Integer>())
+                        return Element(lVal - v1.asRaw<TypeMap::Integer>());
+                    else if (v1.isConvertibleTo<TypeMap::RealNumber>())
+                        return Element(lVal - v1.asRaw<TypeMap::RealNumber>());
                     return Element(ErrorMessage("- operator does not support the right operand type."));
                 };
-                info.mulOperator = [](const Element &v0, const Element &v1) {
-                    int32_t lVal = v0.as<int32_t>();
-                    if (v1.isConvertibleTo(Type::Integer))
-                        return Element(lVal * v1.convertTo(Type::Integer).as<int32_t>());
-                    else if (v1.isConvertibleTo(Type::RealNumber))
-                        return Element(lVal * v1.convertTo(Type::RealNumber).as<double>());
-                    return Element(ErrorMessage("* operator does not support the right operand type."));
+                info.lessOperator = [](const Element &v0, const Element &v1) {
+                    auto lVal = v0.raw<TypeMap::Integer>();
+                    if (v1.isConvertibleTo<TypeMap::Integer>())
+                        return Element(lVal < v1.asRaw<TypeMap::Integer>());
+                    else if (v1.isConvertibleTo<TypeMap::RealNumber>())
+                        return Element(lVal < v1.asRaw<TypeMap::RealNumber>());
+                    return Element(ErrorMessage("< operator does not support the right operand type."));
+                };
+                info.greaterOperator = [](const Element &v0, const Element &v1) {
+                    auto lVal = v0.raw<TypeMap::Integer>();
+                    if (v1.isConvertibleTo<TypeMap::Integer>())
+                        return Element(lVal > v1.asRaw<TypeMap::Integer>());
+                    else if (v1.isConvertibleTo<TypeMap::RealNumber>())
+                        return Element(lVal > v1.asRaw<TypeMap::RealNumber>());
+                    return Element(ErrorMessage("> operator does not support the right operand type."));
+                };
+                info.eqOperator = [](const Element &v0, const Element &v1) {
+                    auto lVal = v0.raw<TypeMap::Integer>();
+                    if (v1.isConvertibleTo<TypeMap::Integer>())
+                        return Element(lVal == v1.asRaw<TypeMap::Bool>());
+                    else if (v1.isConvertibleTo<TypeMap::RealNumber>())
+                        return Element(lVal == v1.asRaw<TypeMap::RealNumber>());
+                    return Element(ErrorMessage("== operator does not support the right operand type."));
                 };
                 
-                info.convertFunctions[Type::Bool] = [](const Element &elemFrom) { return Element((bool)elemFrom.as<int32_t>()); };
-                info.convertFunctions[Type::RealNumber] = [](const Element &elemFrom) { return Element((double)elemFrom.as<int32_t>()); };
+                info.convertFunctions[Type::Bool] = [](const Element &elemFrom) { return Element(TypeMap::Bool(), elemFrom.raw<TypeMap::Integer>()); };
+                info.convertFunctions[Type::RealNumber] = [](const Element &elemFrom) { return Element(TypeMap::RealNumber(), elemFrom.raw<TypeMap::Integer>()); };
             }
             {
                 TypeInfo &info = infos[(uint32_t)Type::RealNumber];
                 
-                info.affOperator = [](const Element &v) { return v; };
-                info.negOperator = [](const Element &v) { return Element(-v.as<double>()); };
+                info.postIncOperator = [](Element &v) {
+                    Element old = v;
+                    v = Element(v.raw<TypeMap::RealNumber>() + 1);
+                    return old;
+                };
+                info.postDecOperator = [](Element &v) {
+                    Element old = v;
+                    v = Element(v.raw<TypeMap::RealNumber>() - 1);
+                    return old;
+                };
+                info.preIncOperator = [](Element &v) { v = Element(v.raw<TypeMap::RealNumber>() + 1); };
+                info.preDecOperator = [](Element &v) { v = Element(v.raw<TypeMap::RealNumber>() - 1); };
                 
+                info.affOperator = [](const Element &v) { return v; };
+                info.negOperator = [](const Element &v) { return Element(-v.raw<TypeMap::RealNumber>()); };
+                info.logicNotOperator = [](const Element &v) { return Element(!v.raw<TypeMap::RealNumber>()); };
+                
+                info.mulOperator = [](const Element &v0, const Element &v1) {
+                    auto lVal = v0.raw<TypeMap::RealNumber>();
+                    if (v1.isConvertibleTo<TypeMap::RealNumber>())
+                        return Element(lVal * v1.asRaw<TypeMap::RealNumber>());
+                    return Element(ErrorMessage("* operator does not support the right operand type."));
+                };
+                info.divOperator = [](const Element &v0, const Element &v1) {
+                    auto lVal = v0.raw<TypeMap::RealNumber>();
+                    if (v1.isConvertibleTo<TypeMap::RealNumber>())
+                        return Element(lVal / v1.asRaw<TypeMap::RealNumber>());
+                    return Element(ErrorMessage("/ operator does not support the right operand type."));
+                };
                 info.addOperator = [](const Element &v0, const Element &v1) {
-                    double lVal = v0.as<double>();
-                    if (v1.isConvertibleTo(Type::RealNumber))
-                        return Element(lVal + v1.convertTo(Type::RealNumber).as<double>());
+                    auto lVal = v0.raw<TypeMap::RealNumber>();
+                    if (v1.isConvertibleTo<TypeMap::RealNumber>())
+                        return Element(lVal + v1.asRaw<TypeMap::RealNumber>());
                     return Element(ErrorMessage("+ operator does not support the right operand type."));
                 };
                 info.subOperator = [](const Element &v0, const Element &v1) {
-                    double lVal = v0.as<double>();
-                    if (v1.isConvertibleTo(Type::RealNumber))
-                        return Element(lVal - v1.convertTo(Type::RealNumber).as<double>());
+                    auto lVal = v0.raw<TypeMap::RealNumber>();
+                    if (v1.isConvertibleTo<TypeMap::RealNumber>())
+                        return Element(lVal - v1.asRaw<TypeMap::RealNumber>());
                     return Element(ErrorMessage("- operator does not support the right operand type."));
                 };
-                info.mulOperator = [](const Element &v0, const Element &v1) {
-                    double lVal = v0.as<double>();
-                    if (v1.isConvertibleTo(Type::RealNumber))
-                        return Element(lVal * v1.convertTo(Type::RealNumber).as<double>());
-                    return Element(ErrorMessage("* operator does not support the right operand type."));
+                info.lessOperator = [](const Element &v0, const Element &v1) {
+                    auto lVal = v0.raw<TypeMap::RealNumber>();
+                    if (v1.isConvertibleTo<TypeMap::RealNumber>())
+                        return Element(lVal < v1.asRaw<TypeMap::RealNumber>());
+                    return Element(ErrorMessage("< operator does not support the right operand type."));
+                };
+                info.greaterOperator = [](const Element &v0, const Element &v1) {
+                    auto lVal = v0.raw<TypeMap::RealNumber>();
+                    if (v1.isConvertibleTo<TypeMap::RealNumber>())
+                        return Element(lVal > v1.asRaw<TypeMap::RealNumber>());
+                    return Element(ErrorMessage("> operator does not support the right operand type."));
+                };
+                info.eqOperator = [](const Element &v0, const Element &v1) {
+                    auto lVal = v0.raw<TypeMap::RealNumber>();
+                    if (v1.isConvertibleTo<TypeMap::RealNumber>())
+                        return Element(lVal == v1.asRaw<TypeMap::RealNumber>());
+                    return Element(ErrorMessage("== operator does not support the right operand type."));
                 };
             }
             {
                 TypeInfo &info = infos[(uint32_t)Type::Matrix];
                 
                 info.affOperator = [](const Element &v) { return v; };
-                info.negOperator = [](const Element &v) { return Element(TypeMap::Matrix(), -v.as<SLR::Matrix4x4>()); };
+                info.negOperator = [](const Element &v) { return Element(TypeMap::Matrix(), -v.raw<TypeMap::Matrix>()); };
                 
                 info.mulOperator = [](const Element &v0, const Element &v1) {
-                    SLR::Matrix4x4 lVal = v0.as<SLR::Matrix4x4>();
-                    if (v1.isConvertibleTo(Type::Matrix))
-                        return Element(TypeMap::Matrix(), lVal * v1.convertTo<TypeMap::Matrix>());
+                    auto lVal = v0.raw<TypeMap::Matrix>();
+                    if (v1.isConvertibleTo<TypeMap::RealNumber>())
+                        return Element(TypeMap::Matrix(), lVal * v1.asRaw<TypeMap::RealNumber>());
+                    else if (v1.isConvertibleTo<TypeMap::Vertex>()) {
+                        auto rVal = v1.asRaw<TypeMap::Vertex>();
+                        SLR::Vertex vtx;
+                        vtx.position = lVal * rVal.position;
+                        vtx.normal = lVal * rVal.normal;
+                        vtx.tangent = lVal * rVal.tangent;
+                        vtx.texCoord = rVal.texCoord;
+                        return Element(TypeMap::Vertex(), vtx);
+                    }
+                    else if (v1.isConvertibleTo<TypeMap::Matrix>())
+                        return Element(TypeMap::Matrix(), lVal * v1.asRaw<TypeMap::Matrix>());
                     return Element(ErrorMessage("* operator does not support the right operand type."));
+                };
+                info.eqOperator = [](const Element &v0, const Element &v1) {
+                    auto lVal = v0.raw<TypeMap::Matrix>();
+                    if (v1.isConvertibleTo<TypeMap::Matrix>())
+                        return Element(lVal == v1.asRaw<TypeMap::Matrix>());
+                    return Element(ErrorMessage("== operator does not support the right operand type."));
                 };
                 
                 info.convertFunctions[Type::Transform] = [](const Element &elemFrom) {
-                    return Element(TypeMap::Transform(), createShared<SLR::StaticTransform>(elemFrom.as<SLR::Matrix4x4>()));
+                    return Element(TypeMap::Transform(), createShared<SLR::StaticTransform>(elemFrom.raw<TypeMap::Matrix>()));
                 };
             }
             initialized = true;
         }
-    }
-    
-    bool Argument::perform(ExecuteContext &context, ErrorMessage *errMsg) const {
-        if (m_keyExpr && !m_keyExpr->perform(context, errMsg))
-            return false;
-        if (!m_valueExpr->perform(context, errMsg))
-            return false;
-        m_result = Parameter(m_keyExpr ? m_keyExpr->result().as<std::string>() : "", m_valueExpr->result());
-        return true;
     }
     
     ForStatement::ForStatement(const ExpressionRef &preExpr, const ExpressionRef &condExpr, const ExpressionRef &postExpr, const StatementsRef &statementList) :
@@ -537,11 +713,11 @@ namespace SLRSceneGraph {
         
         if (!m_condExpr->perform(context, errMsg))
             return false;
-        if (!m_condExpr->result().isConvertibleTo(Type::Bool)) {
+        if (!m_condExpr->result().isConvertibleTo<TypeMap::Bool>()) {
             *errMsg = ErrorMessage("Must provide a boolean value.");
             return false;
         }
-        bool condition = m_condExpr->result().as<bool>();
+        bool condition = m_condExpr->result().asRaw<TypeMap::Bool>();
         while (condition) {
             context.stackVariables.pushDepth();
             for (int i = 0; i < m_block.size(); ++i) {
@@ -554,7 +730,7 @@ namespace SLRSceneGraph {
             
             if (!m_condExpr->perform(context, errMsg))
                 return false;
-            condition = m_condExpr->result().as<bool>();
+            condition = m_condExpr->result().asRaw<TypeMap::Bool>();
         }
         
         return true;
@@ -587,7 +763,7 @@ namespace SLRSceneGraph {
         else if (m_op == "||")
             m_result = m_left->result() || m_right->result();
         if (m_result.type == Type::Error) {
-            *errMsg = m_result.as<ErrorMessage>();
+            *errMsg = m_result.raw<TypeMap::Error>();
             return false;
         }
         
@@ -616,7 +792,7 @@ namespace SLRSceneGraph {
         else if (m_op == "\%=")
             var %= m_right->result();
         if (var.type == Type::Error) {
-            *errMsg = var.as<ErrorMessage>();
+            *errMsg = var.raw<TypeMap::Error>();
             return false;
         }
         
@@ -624,16 +800,73 @@ namespace SLRSceneGraph {
         return true;
     }
     
-    bool FunctionTerm::perform(ExecuteContext &context, ErrorMessage* errMsg) const {
+    bool UnaryTerm::perform(ExecuteContext &context, ErrorMessage *errMsg) const {
+        if (!m_term->perform(context, errMsg))
+            return false;
+        if (m_op == "+")
+            m_result = +m_term->result();
+        else if (m_op == "-")
+            m_result = -m_term->result();
+        else if (m_op == "!")
+            m_result = !m_term->result();
+        return true;
+    }
+    
+    bool UnarySubstitutionTerm::perform(SLRSceneGraph::ExecuteContext &context, SLRSceneGraph::ErrorMessage *errMsg) const {
+        if (context.stackVariables.exists(m_varName) == false) {
+            *errMsg = ErrorMessage("Undefined variable: %s", m_varName.c_str());
+            return false;
+        }
+        Element &var = context.stackVariables[m_varName];
+        if (m_op == "++*")
+            m_result = ++var;
+        else if (m_op == "--*")
+            m_result = --var;
+        else if (m_op == "*++")
+            m_result = var++;
+        else if (m_op == "*--")
+            m_result = var--;
+        return true;
+    }
+    
+    bool BinaryTerm::perform(ExecuteContext &context, ErrorMessage *errMsg) const {
+        if (!m_left->perform(context, errMsg))
+            return false;
+        if (!m_right->perform(context, errMsg))
+            return false;
+
+        if (m_op == "*")
+            m_result = m_left->result() * m_right->result();
+        else if (m_op == "/")
+            m_result = m_left->result() / m_right->result();
+        else if (m_op == "\%")
+            m_result = m_left->result() % m_right->result();
+        if (m_result.type == Type::Error) {
+            *errMsg = m_result.raw<TypeMap::Error>();
+            return false;
+        }
+        return true;
+    }
+    
+    bool FunctionSingleTerm::perform(ExecuteContext &context, ErrorMessage* errMsg) const {
         ParameterList params;
         for (int i = 0; i < m_args->size(); ++i) {
-            ArgumentRef arg = m_args->at(i);
+            ParameterRef arg = m_args->at(i);
             if (!arg->perform(context, errMsg))
                 return false;
-            params.add(arg->result());
+            Element key, value;
+            arg->getKeyAndValue(&key, &value);
+            if (key.type != Type::String) {
+                *errMsg = ErrorMessage("Key expression must results in string type.");
+                return false;
+            }
+            params.add(key.raw<TypeMap::String>(), value);
         }
         
         switch (m_funcID) {
+            case API::AddItem:
+                m_result = AddItem(params, errMsg);
+                break;
             case API::Translate:
                 m_result = Translate(params, errMsg);
                 break;
@@ -648,6 +881,9 @@ namespace SLRSceneGraph {
                 break;
             case API::Scale:
                 m_result = Scale(params, errMsg);
+                break;
+            case API::CreateVertex:
+                m_result = CreateVertex(params, errMsg);
                 break;
             case API::Spectrum:
                 m_result = CreateSpectrum(params, errMsg);
@@ -698,60 +934,83 @@ namespace SLRSceneGraph {
         return !errMsg->error;
     }
     
-    bool UnaryTerm::perform(ExecuteContext &context, ErrorMessage *errMsg) const {
-        if (!m_term->perform(context, errMsg))
-            return false;
-        if (m_op == "+")
-            m_result = +m_term->result();
-        else if (m_op == "-")
-            m_result = -m_term->result();
-        else if (m_op == "!")
-            m_result = !m_term->result();
-        return true;
-    }
-    
-    bool BinaryTerm::perform(ExecuteContext &context, ErrorMessage *errMsg) const {
-        if (!m_left->perform(context, errMsg))
-            return false;
-        if (!m_right->perform(context, errMsg))
-            return false;
-        
-        if (m_op == "*")
-            m_result = m_left->result() * m_right->result();
-        else if (m_op == "/")
-            m_result = m_left->result() / m_right->result();
-        else if (m_op == "\%")
-            m_result = m_left->result() % m_right->result();
-        if (m_result.type == Type::Error) {
-            *errMsg = m_result.as<ErrorMessage>();
-            return false;
-        }
-        return true;
-    }
-    
-    bool EnclosedTerm::perform(ExecuteContext &context, ErrorMessage *errMsg) const {
+    bool EnclosedSingleTerm::perform(ExecuteContext &context, ErrorMessage *errMsg) const {
         if (!m_expr->perform(context, errMsg))
             return false;
         m_result = m_expr->result();
         return true;
     }
     
+    bool TupleElementSingleTerm::perform(SLRSceneGraph::ExecuteContext &context, SLRSceneGraph::ErrorMessage *errMsg) const {
+        if (!m_tuple->perform(context, errMsg))
+            return false;
+        if (!m_idxExpr->perform(context, errMsg))
+            return false;
+        const Element &tuple = m_tuple->result();
+        const Element &idx = m_idxExpr->result();
+        if (!tuple.isConvertibleTo<TypeMap::Tuple>()) {
+            *errMsg = ErrorMessage("Element access operator [] cannot be used to non tuple value.");
+            return false;
+        }
+        
+        const ParameterList &paramList = tuple.raw<TypeMap::Tuple>();
+        if (idx.isConvertibleTo<TypeMap::Integer>()) {
+            m_result = paramList(idx.raw<TypeMap::Integer>());
+            if (m_result.type == Type::Void) {
+                *errMsg = ErrorMessage("index value is out or range.");
+                return false;
+            }
+            return true;
+        }
+        else if (idx.isConvertibleTo<TypeMap::String>()) {
+            m_result = paramList(idx.raw<TypeMap::String>());
+            if (m_result.type == Type::Void) {
+                *errMsg = ErrorMessage("index value is invalid.");
+                return false;
+            }
+            return true;
+        }
+        *errMsg = ErrorMessage("index value must be integer or string compatible type.");
+        return false;
+    }
+    
     bool TupleValue::perform(ExecuteContext &context, ErrorMessage *errMsg) const {
         ParameterListRef params = createShared<ParameterList>();
         for (int i = 0; i < m_elements->size(); ++i) {
-            ArgumentRef arg = m_elements->at(i);
+            ParameterRef arg = m_elements->at(i);
             if (!arg->perform(context, errMsg))
                 return false;
-            params->add(arg->result());
+            Element key, value;
+            arg->getKeyAndValue(&key, &value);
+            if (key.type != Type::String) {
+                *errMsg = ErrorMessage("Key expression must results in string type.");
+                return false;
+            }
+            params->add(key.raw<TypeMap::String>(), value);
         }
         m_result = Element(TypeMap::Tuple(), params);
         return true;
     }
     
     bool VariableValue::perform(ExecuteContext &context, ErrorMessage *errMsg) const {
-        if (!context.stackVariables.exists(m_varName))
+        if (!context.stackVariables.exists(m_varName)) {
+            *errMsg = ErrorMessage("Undefined variable is used.");
             return false;
+        }
         m_result = context.stackVariables[m_varName];
         return true;
-    }    
+    }
+    
+    bool Parameter::perform(ExecuteContext &context, ErrorMessage *errMsg) const {
+        if (m_keyExpr && !m_keyExpr->perform(context, errMsg))
+            return false;
+        if (!m_valueExpr->perform(context, errMsg))
+            return false;
+        return true;
+    }
+    
+    void Parameter::getKeyAndValue(Element* key, Element* value) const {
+        *key = m_keyExpr ? m_keyExpr->result() : Element(TypeMap::String(), "");
+        *value = m_valueExpr->result();
+    }
 }

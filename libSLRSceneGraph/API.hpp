@@ -18,11 +18,15 @@
 namespace SLRSceneGraph {
     bool readScene(const std::string &filePath, Scene* scene, RenderingContext* context);
     
+    Element AddItem(const ParameterList &params, ErrorMessage* err);
+    
     Element Translate(const ParameterList &params, ErrorMessage* err);
     Element RotateX(const ParameterList &params, ErrorMessage* err);
     Element RotateY(const ParameterList &params, ErrorMessage* err);
     Element RotateZ(const ParameterList &params, ErrorMessage* err);
     Element Scale(const ParameterList &params, ErrorMessage* err);
+    
+    Element CreateVertex(const ParameterList &params, ErrorMessage* err);
     
     Element CreateSpectrum(const ParameterList &params, ErrorMessage* err);
     Element CreateSpectrumTexture(const ParameterList &params, ErrorMessage* err);
