@@ -21,6 +21,22 @@ function CornellBoxMaterial(name, attrs) {
     return createSurfaceMaterial("matte", (difTex,));
 }
 
+function PikachuMaterial(name, attrs) {
+    difTex = 0;
+    if (numElements(attrs["diffuse textures"])) {
+        difTexPaths = attrs["diffuse textures"];
+        image = Image2D(difTexPaths[0]);
+        difTex = SpectrumTexture(image);
+    }
+    else {
+        difCol = attrs["diffuse color"];
+        difTex = SpectrumTexture(Spectrum(difCol[0], difCol[1], difCol[2]));
+    }
+    speTex = SpectrumTexture(Spectrum(0.1, 0.1, 0.1));
+    nxTex = nyTex = FloatTexture(100);
+    return createSurfaceMaterial("Ashikhmin", (difTex, speTex, nxTex, nyTex));
+}
+
 CBNode = load3DModel("models/Cornell_box_RB.assbin", CornellBoxMaterial);
     lightNode = createNode();
     setTransform(lightNode, translate(0.0, 0.999, 0.0));
@@ -76,7 +92,7 @@ for (i = 0; i < 24; ++i) {
 colorCheckerMesh = createMesh(vertices, indices);
 addChild(CBNode, colorCheckerMesh);
 
-pikachuNode = load3DModel("models/Pikachu_corrected_subdivided.assbin");
+pikachuNode = load3DModel("models/Pikachu_corrected_subdivided.assbin", PikachuMaterial);
 setTransform(pikachuNode, translate(0, -1, 0) * scale(0.75) * translate(0, 1, 0));
 addChild(CBNode, pikachuNode);
 

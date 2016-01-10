@@ -313,6 +313,23 @@ namespace SLRSceneGraph {
                                                             }
                                                         })
                                                );
+            stack["FloatTexture"] = Element(TypeMap::Function(),
+                                            Function(1,
+                                                     {
+                                                         {{"value", Type::RealNumber}},
+                                                         {{"image", Type::Image2D}}
+                                                     },
+                                                     {
+                                                         [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
+                                                             auto value = args.at("value").raw<TypeMap::RealNumber>();
+                                                             return Element(TypeMap::FloatTexture(), createShared<ConstantFloatTexture>(value));
+                                                         },
+                                                         [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
+                                                             const auto &image = args.at("image").rawRef<TypeMap::Image2D>();
+                                                             return Element(TypeMap::FloatTexture(), createShared<ImageFloatTexture>(image));
+                                                         }
+                                                     })
+                                            );
             stack["createSurfaceMaterial"] = Element(TypeMap::Function(),
                                                      Function(1, {{"type", Type::String}, {"params", Type::Tuple}},
                                                               [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
@@ -512,12 +529,13 @@ namespace SLRSceneGraph {
                                            Function(1, {{"path", Type::String}, {"matProc", Type::Function, Element(TypeMap::Function(), nullptr)}},
                                                     [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
                                                         std::string path = args.at("path").raw<TypeMap::String>();
+                                                        std::string pathPrefix = path.substr(0, path.find_last_of("/") + 1);
                                                         auto matProcRef = args.at("matProc").rawRef<TypeMap::Function>();
                                                         
                                                         CreateMaterialFunction nativeMatProc = createMaterialDefaultFunction;
                                                         if (matProcRef) {
                                                             const Function &matProc = *matProcRef.get();
-                                                            nativeMatProc = [&matProc, &context, &err](const aiMaterial* aiMat, const std::string &pathPrefix, SLR::Allocator* mem) {
+                                                            nativeMatProc = [&pathPrefix, &matProc, &context, &err](const aiMaterial* aiMat, const std::string &pathPrefix, SLR::Allocator* mem) {
                                                                 using namespace SLR;
                                                                 aiString aiStr;
                                                                 float color[3];
@@ -527,8 +545,8 @@ namespace SLRSceneGraph {
                                                                 Element matAttrs = Element(TypeMap::Tuple(), ParameterList());
                                                                 
                                                                 auto &attrs = matAttrs.raw<TypeMap::Tuple>();
-                                                                auto getStringElement = [](const aiString str) {
-                                                                    return Element(std::string(str.C_Str()));
+                                                                auto getPathElement = [&pathPrefix](const aiString str) {
+                                                                    return Element(pathPrefix + std::string(str.C_Str()));
                                                                 };
                                                                 auto getRGBElement = [](const float* RGB) {
                                                                     ParameterListRef values = createShared<ParameterList>();
@@ -542,7 +560,7 @@ namespace SLRSceneGraph {
                                                                 auto &diffuseTextures = diffuseTexturesElement.raw<TypeMap::Tuple>();
                                                                 for (int i = 0; i < aiMat->GetTextureCount(aiTextureType_DIFFUSE); ++i) {
                                                                     if (aiMat->Get(AI_MATKEY_TEXTURE_DIFFUSE(i), aiStr) == aiReturn_SUCCESS)
-                                                                        diffuseTextures.add("", getStringElement(aiStr));
+                                                                        diffuseTextures.add("", getPathElement(aiStr));
                                                                 }
                                                                 attrs.add("diffuse textures", diffuseTexturesElement);
                                                                 
@@ -550,7 +568,7 @@ namespace SLRSceneGraph {
                                                                 auto &specularTextures = specularTexturesElement.raw<TypeMap::Tuple>();
                                                                 for (int i = 0; i < aiMat->GetTextureCount(aiTextureType_SPECULAR); ++i) {
                                                                     if (aiMat->Get(AI_MATKEY_TEXTURE_SPECULAR(i), aiStr) == aiReturn_SUCCESS)
-                                                                        specularTextures.add("", getStringElement(aiStr));
+                                                                        specularTextures.add("", getPathElement(aiStr));
                                                                 }
                                                                 attrs.add("specular textures", specularTexturesElement);
                                                                 
@@ -558,7 +576,7 @@ namespace SLRSceneGraph {
                                                                 auto &emissiveTextures = emissiveTexturesElement.raw<TypeMap::Tuple>();
                                                                 for (int i = 0; i < aiMat->GetTextureCount(aiTextureType_EMISSIVE); ++i) {
                                                                     if (aiMat->Get(AI_MATKEY_TEXTURE_EMISSIVE(i), aiStr) == aiReturn_SUCCESS)
-                                                                        emissiveTextures.add("", getStringElement(aiStr));
+                                                                        emissiveTextures.add("", getPathElement(aiStr));
                                                                 }
                                                                 attrs.add("emissive textures", emissiveTexturesElement);
                                                                 
@@ -566,7 +584,7 @@ namespace SLRSceneGraph {
                                                                 auto &heightTextures = heightTexturesElement.raw<TypeMap::Tuple>();
                                                                 for (int i = 0; i < aiMat->GetTextureCount(aiTextureType_HEIGHT); ++i) {
                                                                     if (aiMat->Get(AI_MATKEY_TEXTURE_HEIGHT(i), aiStr) == aiReturn_SUCCESS)
-                                                                        heightTextures.add("", getStringElement(aiStr));
+                                                                        heightTextures.add("", getPathElement(aiStr));
                                                                 }
                                                                 attrs.add("height textures", heightTexturesElement);
                                                                 
@@ -574,7 +592,7 @@ namespace SLRSceneGraph {
                                                                 auto &normalTextures = normalTexturesElement.raw<TypeMap::Tuple>();
                                                                 for (int i = 0; i < aiMat->GetTextureCount(aiTextureType_NORMALS); ++i) {
                                                                     if (aiMat->Get(AI_MATKEY_TEXTURE_NORMALS(i), aiStr) == aiReturn_SUCCESS)
-                                                                        normalTextures.add("", getStringElement(aiStr));
+                                                                        normalTextures.add("", getPathElement(aiStr));
                                                                 }
                                                                 attrs.add("normal textures", normalTexturesElement);
                                                                 
