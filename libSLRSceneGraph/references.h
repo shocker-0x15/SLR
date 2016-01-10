@@ -56,6 +56,7 @@ namespace SLRSceneGraph {
     struct RenderingData;
     
     class Scene;
+    typedef std::shared_ptr<Scene> SceneRef;
     typedef std::weak_ptr<Scene> SceneWRef;
     
     struct RenderingContext;
@@ -72,6 +73,9 @@ namespace SLRSceneGraph {
     typedef std::shared_ptr<SingleTerm> SingleTermRef;
     class Value;
     typedef std::shared_ptr<Value> ValueRef;
+    class ArgumentDefinition;
+    typedef std::shared_ptr<ArgumentDefinition> ArgumentDefinitionRef;
+    typedef std::shared_ptr<std::vector<ArgumentDefinitionRef>> ArgumentDefinitionVecRef;
     class Parameter;
     typedef std::shared_ptr<Parameter> ParameterRef;
     typedef std::shared_ptr<std::vector<ParameterRef>> ParameterVecRef;
@@ -81,6 +85,7 @@ namespace SLRSceneGraph {
     struct Element;
     struct ParameterList;
     typedef std::shared_ptr<ParameterList> ParameterListRef;
+    struct Function;
     struct TypeInfo;
     
     struct LocalVariables;

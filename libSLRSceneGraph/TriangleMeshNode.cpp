@@ -14,7 +14,8 @@
 
 namespace SLRSceneGraph {
     TriangleMeshNode::~TriangleMeshNode() {
-        delete[] m_trianglesForRendering;
+        if (m_trianglesForRendering)
+            delete[] m_trianglesForRendering;
     }
 
     uint64_t TriangleMeshNode::addVertex(const SLR::Vertex &v) {

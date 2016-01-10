@@ -30,7 +30,7 @@ namespace SLRSceneGraph {
         std::vector<SurfaceMaterialRef> m_materials;
         std::vector<Normal3DTextureRef> m_normalMaps;
     public:
-        TriangleMeshNode() : SurfaceObjectNode() { };
+        TriangleMeshNode() : SurfaceObjectNode(), m_trianglesForRendering(nullptr) { };
         ~TriangleMeshNode();
         
         uint64_t addVertex(const SLR::Vertex &v);

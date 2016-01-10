@@ -33,15 +33,18 @@ int main(int argc, const char * argv[]) {
     printf("%s\n", std::ctime(&ctimeLaunch));
     
     stopwatch.start();
-    SLRSceneGraph::Scene scene;
+    SLRSceneGraph::SceneRef scene = createShared<SLRSceneGraph::Scene>();
     SLRSceneGraph::RenderingContext context;
-    bool readSceneSuccess = SLRSceneGraph::readScene(argv[1], &scene, &context);
-    SLRAssert(readSceneSuccess, "Failed to read a scene file.");
+    bool readSceneSuccess = SLRSceneGraph::readScene(argv[1], scene, &context);
+    if (!readSceneSuccess) {
+        printf("Failed to read a scene file.\n");
+        exit(-1);
+    }
     printf("build: %g [s]\n", stopwatch.stop() * 1e-3f);
     
-    SLR::Scene* rawScene;
+    const SLR::Scene* rawScene;
     SLR::ArenaAllocator mem;
-    scene.build(&rawScene, mem);
+    scene->build(&rawScene, mem);
     
     SLR::RenderSettings settings;
     settings.addItem(SLR::RenderSettingItem::ImageWidth, context.width);

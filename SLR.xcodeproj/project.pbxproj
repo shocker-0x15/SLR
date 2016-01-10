@@ -994,7 +994,6 @@
 					"$(SRCROOT)/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)",
 				);
 				OTHER_LDFLAGS = (
-					"-ll",
 					"-lSLR",
 					"-lpng",
 					"-lassimp",
@@ -1025,7 +1024,6 @@
 					"$(SRCROOT)/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)",
 				);
 				OTHER_LDFLAGS = (
-					"-ll",
 					"-lSLR",
 					"-lpng",
 					"-lassimp",
@@ -1056,7 +1054,6 @@
 					"$(SRCROOT)/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)",
 				);
 				OTHER_LDFLAGS = (
-					"-ll",
 					"-lSLR",
 					"-lpng",
 					"-lassimp",

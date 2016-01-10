@@ -16,34 +16,9 @@
 #include <libSLR/BasicTypes/Spectrum.h>
 
 namespace SLRSceneGraph {
-    bool readScene(const std::string &filePath, Scene* scene, RenderingContext* context);
-    
-    Element AddItem(const ParameterList &params, ErrorMessage* err);
-    
-    Element Translate(const ParameterList &params, ErrorMessage* err);
-    Element RotateX(const ParameterList &params, ErrorMessage* err);
-    Element RotateY(const ParameterList &params, ErrorMessage* err);
-    Element RotateZ(const ParameterList &params, ErrorMessage* err);
-    Element Scale(const ParameterList &params, ErrorMessage* err);
-    
-    Element CreateVertex(const ParameterList &params, ErrorMessage* err);
-    
-    Element CreateSpectrum(const ParameterList &params, ErrorMessage* err);
-    Element CreateSpectrumTexture(const ParameterList &params, ErrorMessage* err);
-    Element CreateMatte(const ParameterList &params, ErrorMessage* err);
-    Element CreateDiffuseEmitter(const ParameterList &params, ErrorMessage* err);
-    Element CreateEmitterSurfaceMaterial(const ParameterList &params, ErrorMessage* err);
-    
-    Element CreateMesh(const ParameterList &params, ErrorMessage* err);
-    Element CreateNode(const ParameterList &params, ErrorMessage* err);
-    Element SetTransform(const ParameterList &params, ErrorMessage* err);
-    Element AddChild(const ParameterList &params, ErrorMessage* err);
-    Element Load3DModel(const ParameterList &params, ErrorMessage* err);
-    
-    Element CreatePerspectiveCamera(const ParameterList &params, ErrorMessage* err);
+    bool readScene(const std::string &filePath, const SceneRef &scene, RenderingContext* context);
     
     Element SetRenderer(const ParameterList &params, RenderingContext* context, ErrorMessage* err);
-    Element SetRenderSettings(const ParameterList &params, RenderingContext* context, ErrorMessage* err);
     
     namespace Spectrum {
         using namespace SLR;

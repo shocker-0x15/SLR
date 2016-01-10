@@ -13,6 +13,7 @@
 
 #include "TriangleMeshNode.h"
 #include "camera_nodes.h"
+#include "InfiniteSphereNode.h"
 
 #include "nodes.h"
 #include "node_constructor.h"
@@ -26,258 +27,6 @@
 #include "surface_materials.hpp"
 
 namespace SLRSceneGraph {
-    bool readScene(const std::string &filePath, Scene* scene, RenderingContext* context) {
-        TypeInfo::init();
-        SceneParsingDriver parser;
-//        parser.traceParsing = true;
-        StatementsRef statements = parser.parse(filePath);
-        SLRAssert(statements, "Failed to parse scene file: %s", filePath.c_str());
-        
-        ExecuteContext executeContext;
-        ErrorMessage errMsg;
-        executeContext.scene = scene;
-        executeContext.renderingContext = context;
-        executeContext.stackVariables["root"] = Element(TypeMap::Node(), scene->rootNode());
-        for (int i = 0; i < statements->size(); ++i) {
-            StatementRef statement = statements->at(i);
-            if (!statement->perform(executeContext, &errMsg)) {
-                printf("%s\n", errMsg.message.c_str());
-                return false;
-            }
-        }
-        return true;
-    }
-    
-    class Function {
-        struct ArgInfo {
-            std::string name;
-            Type expectedType;
-            Element defaultValue;
-        };
-        typedef std::function<Element(const std::map<std::string, Element> &, ErrorMessage*)> A;
-        typedef std::function<Element(const std::map<std::string, Element> &, RenderingContext*, ErrorMessage*)> B;
-        
-        const std::vector<ArgInfo> signature;
-        const A procA;
-        const B procB;
-        
-        static Element NoOpA(const std::map<std::string, Element> &args, ErrorMessage* err) { SLRAssert(false, "Not implemented."); return Element(); };
-        static Element NoOpB(const std::map<std::string, Element> &args, RenderingContext* context, ErrorMessage* err) { SLRAssert(false, "Not implemented."); return Element(); };
-    public:
-        Function(const std::vector<ArgInfo> &sig) : signature(sig), procA(NoOpA), procB(NoOpB) { };
-        Function(const std::vector<ArgInfo> &sig, const A &proc) : signature(sig), procA(proc), procB(NoOpB) { };
-        Function(const std::vector<ArgInfo> &sig, const B &proc) : signature(sig), procA(NoOpA), procB(proc) { };
-        
-        bool mapParamsToArgs(const ParameterList &params, std::map<std::string, Element>* args) const {
-            size_t numArgs = signature.size();
-            std::vector<bool> assigned(numArgs, false);
-            
-            // find key-matched arguments defined in the function signature.
-            for (auto namedParam : params.named) {
-                const std::string key = namedParam.first;
-                const Element value = namedParam.second;
-                size_t idx = std::distance(std::begin(signature),
-                                           std::find_if(std::begin(signature), std::end(signature),
-                                                        [&key, &value](const ArgInfo &arg) {
-                                                            return arg.name == key && (value.isConvertibleTo(arg.expectedType) || arg.expectedType == Type::Any);
-                                                        }));
-                // If params has a key which does not defined in the signatures, the mapping fails.
-                if (idx == numArgs) {
-                    args->clear();
-                    return false;
-                }
-                const ArgInfo &argInfo = signature[idx];
-                (*args)[argInfo.name] = argInfo.expectedType == Type::Any ? value : value.as(argInfo.expectedType);
-                assigned[idx] = true;
-            }
-            // find arguments which have not assigned a value.
-            for (auto it = std::begin(params.unnamed); it != std::end(params.unnamed); ++it) {
-                const Element &value = *it;
-                size_t idx = std::distance(std::begin(signature),
-                                           std::find_if(std::begin(signature), std::end(signature),
-                                                        [this, &value, &assigned](const ArgInfo &arg) {
-                                                            size_t curIdx = std::distance(&signature[0], &arg);
-                                                            return assigned[curIdx] == false && (value.isConvertibleTo(arg.expectedType) || arg.expectedType == Type::Any);
-                                                        }));
-                // If params has an extra parameters, the mapping fails.
-                if (idx == numArgs) {
-                    args->clear();
-                    return false;
-                }
-                const ArgInfo &argInfo = signature[idx];
-                (*args)[argInfo.name] = argInfo.expectedType == Type::Any ? value : value.as(argInfo.expectedType);
-                assigned[idx] = true;
-            }
-            // If there are arguments they have not assigned yet and does not have default values, the mapping fails.
-            for (int i = 0; i < numArgs; ++i) {
-                if (assigned[i])
-                    continue;
-                const ArgInfo &argInfo = signature[i];
-                if (argInfo.defaultValue.type == Type::Void) {
-                    args->clear();
-                    return false;
-                }
-                (*args)[argInfo.name] = argInfo.defaultValue;
-            }
-            
-            return true;
-        };
-        
-        Element operator()(const ParameterList &params, ErrorMessage* err) const {
-            std::map<std::string, Element> args;
-            if (mapParamsToArgs(params, &args)) {
-                *err = ErrorMessage();
-                return procA(args, err);
-            }
-            *err = ErrorMessage("Parameters are invalid.");
-            return Element();
-        };
-        
-        Element operator()(const ParameterList &params, RenderingContext* context, ErrorMessage* err) const {
-            std::map<std::string, Element> args;
-            if (mapParamsToArgs(params, &args)) {
-                *err = ErrorMessage();
-                return procB(args, context, err);
-            }
-            *err = ErrorMessage("Parameters are invalid.");
-            return Element();
-        };
-        
-        template <typename T>
-        T perform(const std::function<T(const std::map<std::string, Element> &)> &proc, const ParameterList &params, const T &failValue = T(), ErrorMessage* err = nullptr) const {
-            std::map<std::string, Element> args;
-            if (mapParamsToArgs(params, &args)) {
-                if (err)
-                    *err = ErrorMessage();
-                return proc(args);
-            }
-            if (err)
-                *err = ErrorMessage("Parameters are invalid.");
-            return failValue;
-        };
-    };
-    
-    
-    
-    Element AddItem(const ParameterList &params, ErrorMessage* err) {
-        static const Function proc{
-            {{"tuple", Type::Tuple}, {"key", Type::String, Element(TypeMap::String(), "")}, {"item", Type::Any}},
-            [](const std::map<std::string, Element> &args, ErrorMessage* err) {
-                auto tuple = args.at("tuple").rawRef<TypeMap::Tuple>();
-                auto key = args.at("key").raw<TypeMap::String>();
-                tuple->add(key, args.at("item"));
-                
-                return Element(TypeMap::Tuple(), tuple);
-            }
-        };
-        return proc(params, err);
-    }
-    
-    // tx, ty, tz
-    Element Translate(const ParameterList &params, ErrorMessage* err) {
-        static const Function proc{
-            {{"x", Type::RealNumber}, {"y", Type::RealNumber}, {"z", Type::RealNumber}},
-            [](const std::map<std::string, Element> &args, ErrorMessage* err) {
-                float tx = args.at("x").raw<TypeMap::RealNumber>();
-                float ty = args.at("y").raw<TypeMap::RealNumber>();
-                float tz = args.at("z").raw<TypeMap::RealNumber>();
-                
-                return Element(TypeMap::Matrix(), SLR::translate(tx, ty, tz));
-            }
-        };
-        return proc(params, err);
-    }
-    // angle
-    Element RotateX(const ParameterList &params, ErrorMessage* err) {
-        static const Function proc{
-            {{"angle", Type::RealNumber}},
-            [](const std::map<std::string, Element> &args, ErrorMessage* err) {
-                float angle = args.at("angle").raw<TypeMap::RealNumber>();
-                return Element(TypeMap::Matrix(), SLR::rotateX(angle));
-            }
-        };
-        return proc(params, err);
-    }
-    // angle
-    Element RotateY(const ParameterList &params, ErrorMessage* err) {
-        static const Function proc{
-            {{"angle", Type::RealNumber}},
-            [](const std::map<std::string, Element> &args, ErrorMessage* err) {
-                float angle = args.at("angle").raw<TypeMap::RealNumber>();
-                return Element(TypeMap::Matrix(), SLR::rotateY(angle));
-            }
-        };
-        return proc(params, err);
-    }
-    // angle
-    Element RotateZ(const ParameterList &params, ErrorMessage* err) {
-        static const Function proc{
-            {{"angle", Type::RealNumber}},
-            [](const std::map<std::string, Element> &args, ErrorMessage* err) {
-                float angle = args.at("angle").raw<TypeMap::RealNumber>();
-                return Element(TypeMap::Matrix(), SLR::rotateZ(angle));
-            }
-        };
-        return proc(params, err);
-    }
-    // sx, sy, sz
-    // s
-    Element Scale(const ParameterList &params, ErrorMessage* err) {
-        static const Function proc0{
-            {{"s", Type::RealNumber}},
-            [](const std::map<std::string, Element> &args, ErrorMessage* err) {
-                float s = args.at("s").raw<TypeMap::RealNumber>();
-                return Element(TypeMap::Matrix(), SLR::scale(s));
-            }
-        };
-        static const Function proc1{
-            {{"x", Type::RealNumber}, {"y", Type::RealNumber}, {"z", Type::RealNumber}},
-            [](const std::map<std::string, Element> &args, ErrorMessage* err) {
-                float sx = args.at("x").raw<TypeMap::RealNumber>();
-                float sy = args.at("y").raw<TypeMap::RealNumber>();
-                float sz = args.at("z").raw<TypeMap::RealNumber>();
-                return Element(TypeMap::Matrix(), SLR::scale(sx, sy, sz));
-            }
-        };
-        static const auto procs = std::make_array<Function>(proc0, proc1);
-        for (int i = 0; i < procs.size(); ++i) {
-            Element elem = procs[i](params, err);
-            if (!err->error)
-                return elem;
-        }
-        return Element();
-    }
-    
-    Element CreateVertex(const ParameterList &params, ErrorMessage* err) {
-        static const Function proc{
-            {{"position", Type::Tuple}, {"normal", Type::Tuple}, {"tangent", Type::Tuple}, {"texCoord", Type::Tuple}},
-            [](const std::map<std::string, Element> &args, ErrorMessage* err) {
-                static const Function sigPosition = Function({{"x", Type::RealNumber}, {"y", Type::RealNumber}, {"z", Type::RealNumber}});
-                static const Function sigNormal = Function({{"x", Type::RealNumber}, {"y", Type::RealNumber}, {"z", Type::RealNumber}});
-                static const Function sigTangent = Function({{"x", Type::RealNumber}, {"y", Type::RealNumber}, {"z", Type::RealNumber}});
-                static const Function sigTexCoord = Function({{"u", Type::RealNumber}, {"v", Type::RealNumber}});
-                static const auto procPosition = [](const std::map<std::string, Element> &arg) {
-                    return SLR::Point3D(arg.at("x").raw<TypeMap::RealNumber>(), arg.at("y").raw<TypeMap::RealNumber>(), arg.at("z").raw<TypeMap::RealNumber>());
-                };
-                static const auto procNormal = [](const std::map<std::string, Element> &arg) {
-                    return SLR::Normal3D(arg.at("x").raw<TypeMap::RealNumber>(), arg.at("y").raw<TypeMap::RealNumber>(), arg.at("z").raw<TypeMap::RealNumber>());
-                };
-                static const auto procTangent = [](const std::map<std::string, Element> &arg) {
-                    return SLR::Tangent3D(arg.at("x").raw<TypeMap::RealNumber>(), arg.at("y").raw<TypeMap::RealNumber>(), arg.at("z").raw<TypeMap::RealNumber>());
-                };
-                static const auto procTexCoord = [](const std::map<std::string, Element> &arg) {
-                    return SLR::TexCoord2D(arg.at("u").raw<TypeMap::RealNumber>(), arg.at("v").raw<TypeMap::RealNumber>());
-                };
-                SLR::Vertex vtx = SLR::Vertex(sigPosition.perform<SLR::Point3D>(procPosition, args.at("position").raw<TypeMap::Tuple>()),
-                                              sigNormal.perform<SLR::Normal3D>(procNormal, args.at("normal").raw<TypeMap::Tuple>()),
-                                              sigTangent.perform<SLR::Tangent3D>(procTangent, args.at("tangent").raw<TypeMap::Tuple>()),
-                                              sigTexCoord.perform<SLR::TexCoord2D>(procTexCoord, args.at("texCoord").raw<TypeMap::Tuple>()));
-                return Element(TypeMap::Vertex(), vtx);
-            }
-        };
-        return proc(params, err);
-    }
-    
     static bool strToSpectrumType(const std::string &str, SLR::SpectrumType* type) {
         if (str == "Reflectance")
             *type = SLR::SpectrumType::Reflectance;
@@ -304,351 +53,663 @@ namespace SLRSceneGraph {
         return true;
     }
     
-    // type = Reflectance, e
-    // type = Reflectance, space = sRGB, e0, e1, e2
-    // minWL, maxWL, values
-    // wls, values
-    // ID, idx
-    Element CreateSpectrum(const ParameterList &params, ErrorMessage* err) {
-        static const Function proc0{
-            {
-                {"type", Type::String},
-                {"value", Type::RealNumber}
-            },
-            [](const std::map<std::string, Element> &args, ErrorMessage* err) {
-                std::string typeStr = args.at("type").raw<TypeMap::String>();
-                SLR::SpectrumType type;
-                if (!strToSpectrumType(typeStr, &type)) {
-                    *err = ErrorMessage("Specified spectrum type is invalid.");
-                    return Element();
-                }
-                float value = args.at("value").raw<TypeMap::RealNumber>();
-                
-                return Element(TypeMap::Spectrum(), Spectrum::create(type, SLR::ColorSpace::sRGB, value, value, value));
-            }
-        };
-        static const Function proc1{
-            {
-                {"type", Type::String, Element(TypeMap::String(), "Reflectance")},
-                {"space", Type::String, Element(TypeMap::String(), "sRGB")},
-                {"e0", Type::RealNumber},
-                {"e1", Type::RealNumber},
-                {"e2", Type::RealNumber}
-            },
-            [](const std::map<std::string, Element> &args, ErrorMessage* err) {
-                std::string typeStr = args.at("type").raw<TypeMap::String>();
-                SLR::SpectrumType type;
-                if (!strToSpectrumType(typeStr, &type)) {
-                    *err = ErrorMessage("Specified spectrum type is invalid.");
-                    return Element();
-                }
-                std::string spaceStr = args.at("space").raw<TypeMap::String>();
-                SLR::ColorSpace space;
-                if (!strToColorSpace(spaceStr, &space)) {
-                    *err = ErrorMessage("Specified color space is invalid.");
-                    return Element();
-                }
-                float e0 = args.at("e0").raw<TypeMap::RealNumber>();
-                float e1 = args.at("e1").raw<TypeMap::RealNumber>();
-                float e2 = args.at("e2").raw<TypeMap::RealNumber>();
-                
-                return Element(TypeMap::Spectrum(), Spectrum::create(type, space, e0, e1, e2));
-            }
-        };
-        static const Function proc2{
-            {
-                {"minWL", Type::RealNumber},
-                {"maxWL", Type::RealNumber},
-                {"values", Type::RealNumber}
-            },
-            [](const std::map<std::string, Element> &args, ErrorMessage* err) {
-                return Element();
-            }
-        };
-        static const Function proc3{
-            {
-                {"wls", Type::RealNumber},
-                {"values", Type::RealNumber}
-            },
-            [](const std::map<std::string, Element> &args, ErrorMessage* err)  {
-                return Element();
-            }
-        };
-        static const Function proc4{
-            {
-                {"ID", Type::String}, {"idx", Type::Integer, Element(0)}
-            },
-            [](const std::map<std::string, Element> &args, ErrorMessage* err)  {
-                using namespace SLR;
-                InputSpectrumRef spectrum;
-                auto idx = args.at("idx").raw<TypeMap::Integer>();
-                if (args.at("ID").raw<TypeMap::String>() == "D65")
-                    spectrum = Spectrum::create(SpectrumType::Illuminant, StandardIlluminant::MinWavelength, StandardIlluminant::MaxWavelength,
-                                                StandardIlluminant::D65, StandardIlluminant::NumSamples);
-                else if (args.at("ID").raw<TypeMap::String>() == "ColorChecker")
-                    spectrum = Spectrum::create(SpectrumType::Reflectance, ColorChecker::MinWavelength, ColorChecker::MaxWavelength,
-                                                ColorChecker::Spectra[idx], ColorChecker::NumSamples);
-                else
-                    *err = ErrorMessage("unrecognized spectrum ID.");
-                return Element(TypeMap::Spectrum(), spectrum);
-            }
-        };
-        static const auto procs = std::make_array<Function>(proc0, proc1, proc2, proc3, proc4);
-        for (int i = 0; i < procs.size(); ++i) {
-            Element elem = procs[i](params, err);
-            if (!err->error)
-                return elem;
+    bool readScene(const std::string &filePath, const SceneRef &scene, RenderingContext* context) {
+        TypeInfo::init();
+        ExecuteContext executeContext;
+        ErrorMessage errMsg;
+        executeContext.scene = scene;
+        executeContext.renderingContext = context;
+        {
+            LocalVariables &stack = executeContext.stackVariables.current();
+            stack["root"] = Element(TypeMap::Node(), scene->rootNode());
+            
+            stack["print"] = Element(TypeMap::Function(),
+                                       Function(1,
+                                                {{"value", Type::Any}},
+                                                [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
+                                                    std::cout << args.at("value") << std::endl;
+                                                    return Element();
+                                                })
+                                       );
+            stack["addItem"] = Element(TypeMap::Function(),
+                                       Function(1,
+                                                {{"tuple", Type::Tuple}, {"key", Type::String, Element(TypeMap::String(), "")}, {"item", Type::Any}},
+                                                [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
+                                                    auto tuple = args.at("tuple").rawRef<TypeMap::Tuple>();
+                                                    auto key = args.at("key").raw<TypeMap::String>();
+                                                    tuple->add(key, args.at("item"));
+                                                    
+                                                    return Element(TypeMap::Tuple(), tuple);
+                                                })
+                                       );
+            stack["numElements"] = Element(TypeMap::Function(),
+                                           Function(1,
+                                                    {{"tuple", Type::Tuple}},
+                                                    [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
+                                                        auto tuple = args.at("tuple").rawRef<TypeMap::Tuple>();
+                                                        return Element(TypeMap::Integer(), tuple->numParams());
+                                                    })
+                                           );
+            stack["translate"] = Element(TypeMap::Function(),
+                                       Function(1, 
+                                                {{"x", Type::RealNumber}, {"y", Type::RealNumber}, {"z", Type::RealNumber}},
+                                                [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
+                                                    float tx = args.at("x").raw<TypeMap::RealNumber>();
+                                                    float ty = args.at("y").raw<TypeMap::RealNumber>();
+                                                    float tz = args.at("z").raw<TypeMap::RealNumber>();
+                                                    
+                                                    return Element(TypeMap::Matrix(), SLR::translate(tx, ty, tz));
+                                                })
+                                       );
+            stack["rotateX"] = Element(TypeMap::Function(),
+                                       Function(1, {{"angle", Type::RealNumber}},
+                                                [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
+                                                    float angle = args.at("angle").raw<TypeMap::RealNumber>();
+                                                    return Element(TypeMap::Matrix(), SLR::rotateX(angle));
+                                                })
+                                       );
+            stack["rotateY"] = Element(TypeMap::Function(),
+                                       Function(1, {{"angle", Type::RealNumber}},
+                                                [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
+                                                    float angle = args.at("angle").raw<TypeMap::RealNumber>();
+                                                    return Element(TypeMap::Matrix(), SLR::rotateY(angle));
+                                                })
+                                       );
+            stack["rotateZ"] = Element(TypeMap::Function(),
+                                       Function(1, {{"angle", Type::RealNumber}},
+                                                [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
+                                                    float angle = args.at("angle").raw<TypeMap::RealNumber>();
+                                                    return Element(TypeMap::Matrix(), SLR::rotateZ(angle));
+                                                })
+                                       );
+            stack["scale"] = Element(TypeMap::Function(),
+                                     Function(1, 
+                                              {
+                                                  {{"s", Type::RealNumber}},
+                                                  {{"x", Type::RealNumber}, {"y", Type::RealNumber}, {"z", Type::RealNumber}}
+                                              },
+                                              {
+                                                  [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
+                                                      float s = args.at("s").raw<TypeMap::RealNumber>();
+                                                      return Element(TypeMap::Matrix(), SLR::scale(s));
+                                                  },
+                                                  [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
+                                                      float sx = args.at("x").raw<TypeMap::RealNumber>();
+                                                      float sy = args.at("y").raw<TypeMap::RealNumber>();
+                                                      float sz = args.at("z").raw<TypeMap::RealNumber>();
+                                                      return Element(TypeMap::Matrix(), SLR::scale(sx, sy, sz));
+                                                  }
+                                              })
+                                     );
+            stack["createVertex"] = Element(TypeMap::Function(),
+                                            Function(1, {{"position", Type::Tuple}, {"normal", Type::Tuple}, {"tangent", Type::Tuple}, {"texCoord", Type::Tuple}},
+                                                     [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
+                                                         static const Function sigPosition = Function(1, {{"x", Type::RealNumber}, {"y", Type::RealNumber}, {"z", Type::RealNumber}});
+                                                         static const Function sigNormal = Function(1, {{"x", Type::RealNumber}, {"y", Type::RealNumber}, {"z", Type::RealNumber}});
+                                                         static const Function sigTangent = Function(1, {{"x", Type::RealNumber}, {"y", Type::RealNumber}, {"z", Type::RealNumber}});
+                                                         static const Function sigTexCoord = Function(1, {{"u", Type::RealNumber}, {"v", Type::RealNumber}});
+                                                         static const auto procPosition = [](const std::map<std::string, Element> &arg) {
+                                                             return SLR::Point3D(arg.at("x").raw<TypeMap::RealNumber>(), arg.at("y").raw<TypeMap::RealNumber>(), arg.at("z").raw<TypeMap::RealNumber>());
+                                                         };
+                                                         static const auto procNormal = [](const std::map<std::string, Element> &arg) {
+                                                             return SLR::Normal3D(arg.at("x").raw<TypeMap::RealNumber>(), arg.at("y").raw<TypeMap::RealNumber>(), arg.at("z").raw<TypeMap::RealNumber>());
+                                                         };
+                                                         static const auto procTangent = [](const std::map<std::string, Element> &arg) {
+                                                             return SLR::Tangent3D(arg.at("x").raw<TypeMap::RealNumber>(), arg.at("y").raw<TypeMap::RealNumber>(), arg.at("z").raw<TypeMap::RealNumber>());
+                                                         };
+                                                         static const auto procTexCoord = [](const std::map<std::string, Element> &arg) {
+                                                             return SLR::TexCoord2D(arg.at("u").raw<TypeMap::RealNumber>(), arg.at("v").raw<TypeMap::RealNumber>());
+                                                         };
+                                                         SLR::Vertex vtx = SLR::Vertex(sigPosition.perform<SLR::Point3D>(procPosition, args.at("position").raw<TypeMap::Tuple>()),
+                                                                                       sigNormal.perform<SLR::Normal3D>(procNormal, args.at("normal").raw<TypeMap::Tuple>()),
+                                                                                       sigTangent.perform<SLR::Tangent3D>(procTangent, args.at("tangent").raw<TypeMap::Tuple>()),
+                                                                                       sigTexCoord.perform<SLR::TexCoord2D>(procTexCoord, args.at("texCoord").raw<TypeMap::Tuple>()));
+                                                         return Element(TypeMap::Vertex(), vtx);
+                                                     })
+                                            );
+            stack["Spectrum"] = Element(TypeMap::Function(),
+                                              Function(1, 
+                                                       {
+                                                           {
+                                                               {"type", Type::String},
+                                                               {"value", Type::RealNumber}
+                                                           },
+                                                           {
+                                                               {"type", Type::String, Element(TypeMap::String(), "Reflectance")},
+                                                               {"space", Type::String, Element(TypeMap::String(), "sRGB")},
+                                                               {"e0", Type::RealNumber},
+                                                               {"e1", Type::RealNumber},
+                                                               {"e2", Type::RealNumber}
+                                                           },
+                                                           {
+                                                               {"minWL", Type::RealNumber},
+                                                               {"maxWL", Type::RealNumber},
+                                                               {"values", Type::RealNumber}
+                                                           },
+                                                           {
+                                                               {"wls", Type::RealNumber},
+                                                               {"values", Type::RealNumber}
+                                                           },
+                                                           {
+                                                               {"ID", Type::String},
+                                                               {"idx", Type::Integer, Element(0)}
+                                                           }
+                                                       },
+                                                       {
+                                                           [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
+                                                               std::string typeStr = args.at("type").raw<TypeMap::String>();
+                                                               SLR::SpectrumType type;
+                                                               if (!strToSpectrumType(typeStr, &type)) {
+                                                                   *err = ErrorMessage("Specified spectrum type is invalid.");
+                                                                   return Element();
+                                                               }
+                                                               float value = args.at("value").raw<TypeMap::RealNumber>();
+                                                               
+                                                               return Element(TypeMap::Spectrum(), Spectrum::create(type, SLR::ColorSpace::sRGB, value, value, value));
+                                                           },
+                                                           [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
+                                                               std::string typeStr = args.at("type").raw<TypeMap::String>();
+                                                               SLR::SpectrumType type;
+                                                               if (!strToSpectrumType(typeStr, &type)) {
+                                                                   *err = ErrorMessage("Specified spectrum type is invalid.");
+                                                                   return Element();
+                                                               }
+                                                               std::string spaceStr = args.at("space").raw<TypeMap::String>();
+                                                               SLR::ColorSpace space;
+                                                               if (!strToColorSpace(spaceStr, &space)) {
+                                                                   *err = ErrorMessage("Specified color space is invalid.");
+                                                                   return Element();
+                                                               }
+                                                               float e0 = args.at("e0").raw<TypeMap::RealNumber>();
+                                                               float e1 = args.at("e1").raw<TypeMap::RealNumber>();
+                                                               float e2 = args.at("e2").raw<TypeMap::RealNumber>();
+                                                               
+                                                               return Element(TypeMap::Spectrum(), Spectrum::create(type, space, e0, e1, e2));
+                                                           },
+                                                           [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
+                                                               return Element();
+                                                           },
+                                                           [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
+                                                               return Element();
+                                                           },
+                                                           [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err)  {
+                                                               using namespace SLR;
+                                                               InputSpectrumRef spectrum;
+                                                               std::string ID = args.at("ID").raw<TypeMap::String>();
+                                                               auto idx = args.at("idx").raw<TypeMap::Integer>();
+                                                               if (ID == "D65") {
+                                                                   if (idx != 0) {
+                                                                       *err = ErrorMessage("Specified index is out of range for this spectrum.");
+                                                                       return Element();
+                                                                   }
+                                                                   spectrum = Spectrum::create(SpectrumType::Illuminant, StandardIlluminant::MinWavelength, StandardIlluminant::MaxWavelength,
+                                                                                               StandardIlluminant::D65, StandardIlluminant::NumSamples);
+                                                               }
+                                                               else if (ID == "ColorChecker") {
+                                                                   if (idx < 0 || idx >= 24) {
+                                                                       *err = ErrorMessage("Specified index is out of range for this spectrum.");
+                                                                       return Element();
+                                                                   }
+                                                                   spectrum = Spectrum::create(SpectrumType::Reflectance, ColorChecker::MinWavelength, ColorChecker::MaxWavelength,
+                                                                                               ColorChecker::Spectra[idx], ColorChecker::NumSamples);
+                                                               }
+                                                               else {
+                                                                   if (SpectrumLibrary::IORs.count(ID) > 0) {
+                                                                       if (idx < 0 || idx >= 2) {
+                                                                           *err = ErrorMessage("Specified index is out of range.");
+                                                                           return Element();
+                                                                       }
+                                                                       const SpectrumLibrary::IndexOfRefraction &IOR = SpectrumLibrary::IORs.at(ID);
+                                                                       const float* values = idx == 0 ? IOR.etas : IOR.ks;
+                                                                       if (!values) {
+                                                                           *err = ErrorMessage("This IOR doesn't have the spectrum corresponding to the index specified.");
+                                                                           return Element();
+                                                                       }
+                                                                       if (IOR.dType == SpectrumLibrary::DistributionType::Regular)
+                                                                           spectrum = Spectrum::create(SpectrumType::IndexOfRefraction, IOR.minLambdas, IOR.maxLambdas, values, IOR.numSamples);
+                                                                       else
+                                                                           spectrum = Spectrum::create(SpectrumType::IndexOfRefraction, IOR.lambdas, values, IOR.numSamples);
+                                                                   }
+                                                                   else {
+                                                                       *err = ErrorMessage("unrecognized spectrum ID.");
+                                                                       return Element();
+                                                                   }
+                                                               }
+                                                               return Element(TypeMap::Spectrum(), spectrum);
+                                                           }
+                                                       })
+                                              );
+            stack["Image2D"] = Element(TypeMap::Function(),
+                                       Function(1, {{"path", Type::String}, {"type", Type::String, Element(TypeMap::String(), "Reflectance")}},
+                                                [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
+                                                    std::string path = args.at("path").raw<TypeMap::String>();
+                                                    std::string typeStr = args.at("type").raw<TypeMap::String>();
+                                                    SLR::SpectrumType type;
+                                                    if (!strToSpectrumType(typeStr, &type)) {
+                                                        *err = ErrorMessage("Specified spectrum type is invalid.");
+                                                        return Element();
+                                                    }
+                                                    
+                                                    // TODO: ?? make a memory allocator selectable.
+                                                    SLR::DefaultAllocator &defMem = SLR::DefaultAllocator::instance();
+                                                    TiledImage2DRef image = Image::createTiledImage(path.c_str(), &defMem, type);
+                                                    return Element(TypeMap::Image2D(), image);
+                                                })
+                                       );
+            stack["SpectrumTexture"] = Element(TypeMap::Function(),
+                                               Function(1,
+                                                        {
+                                                            {{"spectrum", Type::Spectrum}},
+                                                            {{"image", Type::Image2D}}
+                                                        },
+                                                        {
+                                                            [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
+                                                                InputSpectrumRef spectrum = args.at("spectrum").rawRef<TypeMap::Spectrum>();
+                                                                return Element(TypeMap::SpectrumTexture(), createShared<ConstantSpectrumTexture>(spectrum));
+                                                            },
+                                                            [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
+                                                                const auto &image = args.at("image").rawRef<TypeMap::Image2D>();
+                                                                return Element(TypeMap::SpectrumTexture(), createShared<ImageSpectrumTexture>(image));
+                                                            }
+                                                        })
+                                               );
+            stack["createSurfaceMaterial"] = Element(TypeMap::Function(),
+                                                     Function(1, {{"type", Type::String}, {"params", Type::Tuple}},
+                                                              [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
+                                                                  std::string type = args.at("type").raw<TypeMap::String>();
+                                                                  const ParameterList &params = args.at("params").raw<TypeMap::Tuple>();
+                                                                  if (type == "matte") {
+                                                                      const static Function configFunc{
+                                                                          0, {
+                                                                              {"reflectance", Type::SpectrumTexture},
+                                                                              {"sigma", Type::FloatTexture, Element(TypeMap::FloatTexture(), nullptr)}
+                                                                          },
+                                                                          [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
+                                                                              SpectrumTextureRef reflectance = args.at("reflectance").rawRef<TypeMap::SpectrumTexture>();
+                                                                              FloatTextureRef sigma = args.at("sigma").rawRef<TypeMap::FloatTexture>();
+                                                                              return Element(TypeMap::SurfaceMaterial(), SurfaceMaterial::createMatte(reflectance, sigma));
+                                                                          }
+                                                                      };
+                                                                      return configFunc(params, context, err);
+                                                                  }
+                                                                  else if (type == "metal") {
+                                                                      const static Function configFunc{
+                                                                          0, {
+                                                                              {"coeffR", Type::SpectrumTexture},
+                                                                              {"eta", Type::SpectrumTexture}, {"k", Type::SpectrumTexture}
+                                                                          },
+                                                                          [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
+                                                                              SpectrumTextureRef coeffR = args.at("coeffR").rawRef<TypeMap::SpectrumTexture>();
+                                                                              SpectrumTextureRef eta = args.at("eta").rawRef<TypeMap::SpectrumTexture>();
+                                                                              SpectrumTextureRef k = args.at("k").rawRef<TypeMap::SpectrumTexture>();
+                                                                              return Element(TypeMap::SurfaceMaterial(), SurfaceMaterial::createMetal(coeffR, eta, k));
+                                                                          }
+                                                                      };
+                                                                      return configFunc(params, context, err);
+                                                                  }
+                                                                  else if (type == "glass") {
+                                                                      const static Function configFunc{
+                                                                          0, {
+                                                                              {"coeffR", Type::SpectrumTexture}, {"coeffT", Type::SpectrumTexture},
+                                                                              {"etaExt", Type::SpectrumTexture}, {"etaInt", Type::SpectrumTexture}
+                                                                          },
+                                                                          [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
+                                                                              SpectrumTextureRef coeffR = args.at("coeffR").rawRef<TypeMap::SpectrumTexture>();
+                                                                              SpectrumTextureRef coeffT = args.at("coeffT").rawRef<TypeMap::SpectrumTexture>();
+                                                                              SpectrumTextureRef etaExt = args.at("etaExt").rawRef<TypeMap::SpectrumTexture>();
+                                                                              SpectrumTextureRef etaInt = args.at("etaInt").rawRef<TypeMap::SpectrumTexture>();
+                                                                              return Element(TypeMap::SurfaceMaterial(), SurfaceMaterial::createGlass(coeffR, coeffT, etaExt, etaInt));
+                                                                          }
+                                                                      };
+                                                                      return configFunc(params, context, err);
+                                                                  }
+                                                                  else if (type == "Ashikhmin") {
+                                                                      const static Function configFunc{
+                                                                          0, {
+                                                                              {"Rd", Type::SpectrumTexture}, {"Rs", Type::SpectrumTexture},
+                                                                              {"nx", Type::FloatTexture}, {"ny", Type::FloatTexture}
+                                                                          },
+                                                                          [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
+                                                                              SpectrumTextureRef Rd = args.at("Rd").rawRef<TypeMap::SpectrumTexture>();
+                                                                              SpectrumTextureRef Rs = args.at("Rs").rawRef<TypeMap::SpectrumTexture>();
+                                                                              FloatTextureRef nx = args.at("nx").rawRef<TypeMap::FloatTexture>();
+                                                                              FloatTextureRef ny = args.at("ny").rawRef<TypeMap::FloatTexture>();
+                                                                              return Element(TypeMap::SurfaceMaterial(), SurfaceMaterial::createAshikhminShirley(Rd, Rs, nx, ny));
+                                                                          }
+                                                                      };
+                                                                      return configFunc(params, context, err);
+                                                                  }
+                                                                  else if (type == "emitter") {
+                                                                      const static Function configFunc{
+                                                                          0, {
+                                                                              {"scatter", Type::SurfaceMaterial},
+                                                                              {"emitter", Type::EmitterSurfaceProperty}
+                                                                          },
+                                                                          [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
+                                                                              SurfaceMaterialRef scatter = args.at("scatter").rawRef<TypeMap::SurfaceMaterial>();
+                                                                              EmitterSurfacePropertyRef emitter = args.at("emitter").rawRef<TypeMap::EmitterSurfaceProperty>();
+                                                                              return Element(TypeMap::SurfaceMaterial(), SurfaceMaterial::createEmitterSurfaceMaterial(scatter, emitter));
+                                                                          }
+                                                                      };
+                                                                      return configFunc(params, context, err);
+                                                                  }
+                                                                  *err = ErrorMessage("Specified material type is invalid.");
+                                                                  return Element();
+                                                              })
+                                                     );
+            stack["createEmitterSurfaceProperty"] = Element(TypeMap::Function(),
+                                                            Function(1, {{"type", Type::String}, {"params", Type::Tuple}},
+                                                                     [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
+                                                                         std::string type = args.at("type").raw<TypeMap::String>();
+                                                                         const ParameterList &params = args.at("params").raw<TypeMap::Tuple>();
+                                                                         if (type == "diffuse") {
+                                                                             const static Function configFunc{
+                                                                                 0, {
+                                                                                     {"emittance", Type::SpectrumTexture}
+                                                                                 },
+                                                                                 [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
+                                                                                     SpectrumTextureRef emittance = args.at("emittance").rawRef<TypeMap::SpectrumTexture>();
+                                                                                     return Element(TypeMap::EmitterSurfaceProperty(), SurfaceMaterial::createDiffuseEmitter(emittance));
+                                                                                 }
+                                                                             };
+                                                                             return configFunc(params, context, err);
+                                                                         }
+                                                                         *err = ErrorMessage("Specified material type is invalid.");
+                                                                         return Element();
+                                                                     })
+                                                            );
+            stack["createMesh"] = Element(TypeMap::Function(),
+                                          Function(1, {{"vertices", Type::Tuple}, {"faces", Type::Tuple}},
+                                                   [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
+                                                       const std::vector<Element> &vertices = args.at("vertices").raw<TypeMap::Tuple>().unnamed;
+                                                       const std::vector<Element> &faces = args.at("faces").raw<TypeMap::Tuple>().unnamed;
+                                                       
+                                                       struct Face {
+                                                           uint32_t v0, v1, v2;
+                                                           SurfaceMaterialRef mat;
+                                                       };
+                                                       static const Function sigFace{
+                                                           1, {{"indices", Type::Tuple}, {"material", Type::SurfaceMaterial}}
+                                                       };
+                                                       static const auto procFace = [](const std::map<std::string, Element> &arg) {
+                                                           std::map<std::string, Element> indices;
+                                                           mapParamsToArgs(arg.at("indices").raw<TypeMap::Tuple>(),
+                                                                           {{"v0", Type::Integer}, {"v1", Type::Integer}, {"v2", Type::Integer}},
+                                                                           &indices);
+                                                           uint32_t v0 = indices.at("v0").raw<TypeMap::Integer>();
+                                                           uint32_t v1 = indices.at("v1").raw<TypeMap::Integer>();
+                                                           uint32_t v2 = indices.at("v2").raw<TypeMap::Integer>();
+                                                           return Face{v0, v1, v2, arg.at("material").rawRef<TypeMap::SurfaceMaterial>()};
+                                                       };
+                                                       
+                                                       TriangleMeshNodeRef lightMesh = createShared<TriangleMeshNode>();
+                                                       for (int i = 0; i < vertices.size(); ++i) {
+                                                           if (vertices[i].type == Type::Vertex) {
+                                                               lightMesh->addVertex(vertices[i].raw<TypeMap::Vertex>());
+                                                           }
+                                                           else {
+                                                               const Function &CreateVertex = context.stackVariables["createVertex"].raw<TypeMap::Function>();
+                                                               Element vtx = CreateVertex(vertices[i].raw<TypeMap::Tuple>(), context, err);
+                                                               if (err->error)
+                                                                   return Element();
+                                                               lightMesh->addVertex(vtx.raw<TypeMap::Vertex>());
+                                                           }
+                                                       }
+                                                       for (int i = 0; i < faces.size(); ++i) {
+                                                           Face f = sigFace.perform<Face>(procFace, faces[i].raw<TypeMap::Tuple>(), Face(), err);
+                                                           if (err->error)
+                                                               return Element();
+                                                           lightMesh->addTriangle(f.v0, f.v1, f.v2, f.mat);
+                                                       }
+                                                       
+                                                       return Element(TypeMap::Mesh(), lightMesh);
+                                                   })
+                                          );
+            stack["createNode"] = Element(TypeMap::Function(),
+                                          Function(1, {},
+                                                   [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
+                                                       return Element(TypeMap::Node(), InternalNode());
+                                                   })
+                                          );
+            stack["setTransform"] = Element(TypeMap::Function(),
+                                            Function(1, {{"node", Type::Node}, {"transform", Type::Transform}},
+                                                     [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
+                                                         InternalNodeRef node = args.at("node").rawRef<TypeMap::Node>();
+                                                         TransformRef tf = args.at("transform").rawRef<TypeMap::Transform>();
+                                                         node->setTransform(tf);
+                                                         return Element();
+                                                     })
+                                            );
+            stack["addChild"] = Element(TypeMap::Function(),
+                                              Function(1, 
+                                                       {
+                                                           {{"parent", Type::Node}, {"child", Type::Node}},
+                                                           {{"parent", Type::Node}, {"child", Type::Mesh}},
+                                                           {{"parent", Type::Node}, {"child", Type::Camera}}
+                                                       },
+                                                       {
+                                                           [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
+                                                               InternalNodeRef parent = args.at("parent").rawRef<TypeMap::Node>();
+                                                               InternalNodeRef child = args.at("child").rawRef<TypeMap::Node>();
+                                                               parent->addChildNode(child);
+                                                               return Element();
+                                                           },
+                                                           [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
+                                                               InternalNodeRef parent = args.at("parent").rawRef<TypeMap::Node>();
+                                                               TriangleMeshNodeRef child = args.at("child").rawRef<TypeMap::Mesh>();
+                                                               parent->addChildNode(child);
+                                                               return Element();
+                                                           },
+                                                           [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
+                                                               InternalNodeRef parent = args.at("parent").rawRef<TypeMap::Node>();
+                                                               CameraNodeRef child = args.at("child").rawRef<TypeMap::Camera>();
+                                                               parent->addChildNode(child);
+                                                               return Element();
+                                                           }
+                                                       })
+                                              );
+            stack["load3DModel"] = Element(TypeMap::Function(),
+                                           Function(1, {{"path", Type::String}, {"matProc", Type::Function, Element(TypeMap::Function(), nullptr)}},
+                                                    [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
+                                                        std::string path = args.at("path").raw<TypeMap::String>();
+                                                        auto matProcRef = args.at("matProc").rawRef<TypeMap::Function>();
+                                                        
+                                                        CreateMaterialFunction nativeMatProc = createMaterialDefaultFunction;
+                                                        if (matProcRef) {
+                                                            const Function &matProc = *matProcRef.get();
+                                                            nativeMatProc = [&matProc, &context, &err](const aiMaterial* aiMat, const std::string &pathPrefix, SLR::Allocator* mem) {
+                                                                using namespace SLR;
+                                                                aiString aiStr;
+                                                                float color[3];
+                                                                
+                                                                aiMat->Get(AI_MATKEY_NAME, aiStr);
+                                                                Element matName = Element(std::string(aiStr.C_Str()));
+                                                                Element matAttrs = Element(TypeMap::Tuple(), ParameterList());
+                                                                
+                                                                auto &attrs = matAttrs.raw<TypeMap::Tuple>();
+                                                                auto getStringElement = [](const aiString str) {
+                                                                    return Element(std::string(str.C_Str()));
+                                                                };
+                                                                auto getRGBElement = [](const float* RGB) {
+                                                                    ParameterListRef values = createShared<ParameterList>();
+                                                                    values->add("", Element(RGB[0]));
+                                                                    values->add("", Element(RGB[1]));
+                                                                    values->add("", Element(RGB[2]));
+                                                                    return Element(TypeMap::Tuple(), values);
+                                                                };
+                                                                
+                                                                Element diffuseTexturesElement = Element(TypeMap::Tuple(), ParameterList());
+                                                                auto &diffuseTextures = diffuseTexturesElement.raw<TypeMap::Tuple>();
+                                                                for (int i = 0; i < aiMat->GetTextureCount(aiTextureType_DIFFUSE); ++i) {
+                                                                    if (aiMat->Get(AI_MATKEY_TEXTURE_DIFFUSE(i), aiStr) == aiReturn_SUCCESS)
+                                                                        diffuseTextures.add("", getStringElement(aiStr));
+                                                                }
+                                                                attrs.add("diffuse textures", diffuseTexturesElement);
+                                                                
+                                                                Element specularTexturesElement = Element(TypeMap::Tuple(), ParameterList());
+                                                                auto &specularTextures = specularTexturesElement.raw<TypeMap::Tuple>();
+                                                                for (int i = 0; i < aiMat->GetTextureCount(aiTextureType_SPECULAR); ++i) {
+                                                                    if (aiMat->Get(AI_MATKEY_TEXTURE_SPECULAR(i), aiStr) == aiReturn_SUCCESS)
+                                                                        specularTextures.add("", getStringElement(aiStr));
+                                                                }
+                                                                attrs.add("specular textures", specularTexturesElement);
+                                                                
+                                                                Element emissiveTexturesElement = Element(TypeMap::Tuple(), ParameterList());
+                                                                auto &emissiveTextures = emissiveTexturesElement.raw<TypeMap::Tuple>();
+                                                                for (int i = 0; i < aiMat->GetTextureCount(aiTextureType_EMISSIVE); ++i) {
+                                                                    if (aiMat->Get(AI_MATKEY_TEXTURE_EMISSIVE(i), aiStr) == aiReturn_SUCCESS)
+                                                                        emissiveTextures.add("", getStringElement(aiStr));
+                                                                }
+                                                                attrs.add("emissive textures", emissiveTexturesElement);
+                                                                
+                                                                Element heightTexturesElement = Element(TypeMap::Tuple(), ParameterList());
+                                                                auto &heightTextures = heightTexturesElement.raw<TypeMap::Tuple>();
+                                                                for (int i = 0; i < aiMat->GetTextureCount(aiTextureType_HEIGHT); ++i) {
+                                                                    if (aiMat->Get(AI_MATKEY_TEXTURE_HEIGHT(i), aiStr) == aiReturn_SUCCESS)
+                                                                        heightTextures.add("", getStringElement(aiStr));
+                                                                }
+                                                                attrs.add("height textures", heightTexturesElement);
+                                                                
+                                                                Element normalTexturesElement = Element(TypeMap::Tuple(), ParameterList());
+                                                                auto &normalTextures = normalTexturesElement.raw<TypeMap::Tuple>();
+                                                                for (int i = 0; i < aiMat->GetTextureCount(aiTextureType_NORMALS); ++i) {
+                                                                    if (aiMat->Get(AI_MATKEY_TEXTURE_NORMALS(i), aiStr) == aiReturn_SUCCESS)
+                                                                        normalTextures.add("", getStringElement(aiStr));
+                                                                }
+                                                                attrs.add("normal textures", normalTexturesElement);
+                                                                
+                                                                if (aiMat->Get(AI_MATKEY_COLOR_DIFFUSE, color, nullptr) == aiReturn_SUCCESS)
+                                                                    attrs.add("diffuse color", getRGBElement(color));
+                                                                
+                                                                if (aiMat->Get(AI_MATKEY_COLOR_SPECULAR, color, nullptr) == aiReturn_SUCCESS)
+                                                                    attrs.add("specular color", getRGBElement(color));
+                                                                
+                                                                if (aiMat->Get(AI_MATKEY_COLOR_EMISSIVE, color, nullptr) == aiReturn_SUCCESS)
+                                                                    attrs.add("emissive color", getRGBElement(color));
+                                                                
+                                                                ParameterList params;
+                                                                params.add("", matName);
+                                                                params.add("", matAttrs);
+                                                                Element result = matProc(params, context, err);
+                                                                return result.rawRef<TypeMap::SurfaceMaterial>();
+                                                            };
+                                                        }
+                                                        
+                                                        InternalNodeRef modelNode;
+                                                        construct(path, modelNode, nativeMatProc);
+                                                        modelNode->setName(path);
+                                                        
+                                                        return Element(TypeMap::Node(), modelNode);
+                                                    })
+                                           );
+            stack["createPerspectiveCamera"] = Element(TypeMap::Function(),
+                                                       Function(1, 
+                                                                {
+                                                                    {"sensitivity", Type::RealNumber, Element(0.0)},
+                                                                    {"aspect", Type::RealNumber, Element(1.0)},
+                                                                    {"fovY", Type::RealNumber, Element(0.5235987756)},
+                                                                    {"radius", Type::RealNumber, Element(0.0)},
+                                                                    {"imgDist", Type::RealNumber, Element(0.02)},
+                                                                    {"objDist", Type::RealNumber, Element(5.0)}
+                                                                },
+                                                                [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
+                                                                    float sensitivity = args.at("sensitivity").raw<TypeMap::RealNumber>();
+                                                                    float aspect = args.at("aspect").raw<TypeMap::RealNumber>();
+                                                                    float fovY = args.at("fovY").raw<TypeMap::RealNumber>();
+                                                                    float radius = args.at("radius").raw<TypeMap::RealNumber>();
+                                                                    float imgDist = args.at("imgDist").raw<TypeMap::RealNumber>();
+                                                                    float objDist = args.at("objDist").raw<TypeMap::RealNumber>();
+                                                                    
+                                                                    return Element(TypeMap::Camera(), createShared<PerspectiveCameraNode>(sensitivity, aspect, fovY, radius, imgDist, objDist));
+                                                                })
+                                                       );
+            stack["setRenderer"] = Element(TypeMap::Function(),
+                                           Function(1, 
+                                                    {
+                                                        {"method", Type::String}, {"config", Type::Tuple, Element(TypeMap::Tuple(), ParameterList())}
+                                                    },
+                                                    [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
+                                                        std::string method = args.at("method").raw<TypeMap::String>();
+                                                        const ParameterList &config = args.at("config").raw<TypeMap::Tuple>();
+                                                        if (method == "PT") {
+                                                            const static Function configPT{
+                                                                0, {{"samples", Type::Integer, Element(8)}},
+                                                                [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
+                                                                    uint32_t spp = args.at("samples").raw<TypeMap::Integer>();
+                                                                    context.renderingContext->renderer = createUnique<SLR::PathTracingRenderer>(spp);
+                                                                    return Element();
+                                                                }
+                                                            };
+                                                            return configPT(config, context, err);
+                                                        }
+                                                        else {
+                                                            *err = ErrorMessage("Unknown method is specified.");
+                                                        }
+                                                        return Element();
+                                                    })
+                                           );
+            stack["setRenderSettings"] = Element(TypeMap::Function(),
+                                                 Function(1, 
+                                                          {
+                                                              {"width", Type::Integer, Element(1024)},
+                                                              {"height", Type::Integer, Element(1024)},
+                                                              {"timeStart", Type::RealNumber, Element(0.0)},
+                                                              {"timeEnd", Type::RealNumber, Element(0.0)},
+                                                              {"brightness", Type::RealNumber, Element(1.0f)},
+                                                              {"rngSeed", Type::Integer, Element(1509761209)}
+                                                          },
+                                                          [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
+                                                              RenderingContext* renderCtx = context.renderingContext;
+                                                              renderCtx->width = args.at("width").raw<TypeMap::Integer>();
+                                                              renderCtx->height = args.at("height").raw<TypeMap::Integer>();
+                                                              renderCtx->timeStart = args.at("timeStart").raw<TypeMap::RealNumber>();
+                                                              renderCtx->timeEnd = args.at("timeEnd").raw<TypeMap::RealNumber>();
+                                                              renderCtx->brightness = args.at("brightness").raw<TypeMap::RealNumber>();
+                                                              renderCtx->rngSeed = args.at("rngSeed").raw<TypeMap::Integer>();
+                                                              
+                                                              return Element();
+                                                          })
+                                                 );
+            stack["setEnvironment"] = Element(TypeMap::Function(),
+                                              Function(1,
+                                                       {{"path", Type::String}, {"scale", Type::RealNumber, Element(1.0)}},
+                                                       [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
+                                                           std::string path = args.at("path").raw<TypeMap::String>();
+                                                           float scale = args.at("scale").raw<TypeMap::RealNumber>();
+                                                           SLR::DefaultAllocator &defMem = SLR::DefaultAllocator::instance();
+                                                           
+                                                           // TODO: make memory allocator selectable.
+                                                           TiledImage2DRef img = Image::createTiledImage(path, &defMem, SLR::SpectrumType::Illuminant);
+                                                           SpectrumTextureRef IBLTex = createShared<ImageSpectrumTexture>(img);
+                                                           std::weak_ptr<Scene> sceneWRef = context.scene;
+                                                           InfiniteSphereNodeRef infSphere = createShared<InfiniteSphereNode>(sceneWRef, IBLTex, scale);
+                                                           
+                                                           context.scene->setEnvNode(infSphere);
+                                                           
+                                                           return Element();
+                                                       })
+                                              );
+            
         }
-        return Element();
-    }
-    
-    Element CreateSpectrumTexture(const ParameterList &params, ErrorMessage* err) {
-        static const Function proc0{
-            {{"spectrum", Type::Spectrum}},
-            [](const std::map<std::string, Element> &args, ErrorMessage* err) {
-                InputSpectrumRef spectrum = args.at("spectrum").rawRef<TypeMap::Spectrum>();
-                return Element(TypeMap::SpectrumTexture(), createShared<ConstantSpectrumTexture>(spectrum));
-            }
-        };
-        static const auto procs = std::make_array<Function>(proc0);
-        for (int i = 0; i < procs.size(); ++i) {
-            Element elem = procs[i](params, err);
-            if (!err->error)
-                return elem;
+        
+        SceneParsingDriver parser;
+//        parser.traceParsing = true;
+        StatementsRef statements = parser.parse(filePath);
+        if (!statements) {
+            printf("Failed to parse scene file: %s", filePath.c_str());
+            return false;
         }
-        return Element();
-    }
-    
-    Element CreateMatte(const ParameterList &params, ErrorMessage* err) {
-        static const Function proc{
-            {{"reflectance", Type::SpectrumTexture}, {"sigma", Type::FloatTexture, Element(TypeMap::FloatTexture(), nullptr)}},
-            [](const std::map<std::string, Element> &args, ErrorMessage* err) {
-                SpectrumTextureRef reflectance = args.at("reflectance").rawRef<TypeMap::SpectrumTexture>();
-                FloatTextureRef sigma = args.at("sigma").rawRef<TypeMap::FloatTexture>();
-                return Element(TypeMap::SurfaceMaterial(), SurfaceMaterial::createMatte(reflectance, sigma));
+        
+        for (int i = 0; i < statements->size(); ++i) {
+            StatementRef statement = statements->at(i);
+            if (!statement->perform(executeContext, &errMsg)) {
+                printf("%s\n", errMsg.message.c_str());
+                return false;
             }
-        };
-        return proc(params, err);
-    }
-    
-    Element CreateDiffuseEmitter(const ParameterList &params, ErrorMessage* err) {
-        static const Function proc{
-            {{"emittance", Type::SpectrumTexture}},
-            [](const std::map<std::string, Element> &args, ErrorMessage* err) {
-                SpectrumTextureRef emittance = args.at("emittance").rawRef<TypeMap::SpectrumTexture>();
-                return Element(TypeMap::EmitterSurfaceProperty(), SurfaceMaterial::createDiffuseEmitter(emittance));
-            }
-        };
-        return proc(params, err);
-    }
-    
-    Element CreateEmitterSurfaceMaterial(const ParameterList &params, ErrorMessage* err) {
-        static const Function proc{
-            {{"mat", Type::SurfaceMaterial}, {"emit", Type::EmitterSurfaceProperty}},
-            [](const std::map<std::string, Element> &args, ErrorMessage* err) {
-                SurfaceMaterialRef mat = args.at("mat").rawRef<TypeMap::SurfaceMaterial>();
-                EmitterSurfacePropertyRef emit = args.at("emit").rawRef<TypeMap::EmitterSurfaceProperty>();
-                return Element(TypeMap::SurfaceMaterial(), SurfaceMaterial::createEmitterSurfaceMaterial(mat, emit));
-            }
-        };
-        return proc(params, err);
-    }
-    
-    // vertices, faces
-    Element CreateMesh(const ParameterList &params, ErrorMessage* err) {
-        static const Function proc{
-            {{"vertices", Type::Tuple}, {"faces", Type::Tuple}},
-            [](const std::map<std::string, Element> &args, ErrorMessage* err) {
-                const std::vector<Element> &vertices = args.at("vertices").raw<TypeMap::Tuple>().unnamed;
-                const std::vector<Element> &faces = args.at("faces").raw<TypeMap::Tuple>().unnamed;
-                
-                struct Face {
-                    uint32_t v0, v1, v2;
-                    SurfaceMaterialRef mat;
-                };
-                static const Function sigFace{
-                    {{"indices", Type::Tuple}, {"material", Type::SurfaceMaterial}}
-                };
-                static const auto procFace = [](const std::map<std::string, Element> &arg) {
-                    static const Function sigIndices = Function({{"v0", Type::Integer}, {"v1", Type::Integer}, {"v2", Type::Integer}});
-                    std::map<std::string, Element> indices;
-                    sigIndices.mapParamsToArgs(arg.at("indices").raw<TypeMap::Tuple>(), &indices);
-                    uint32_t v0 = indices.at("v0").raw<TypeMap::Integer>();
-                    uint32_t v1 = indices.at("v1").raw<TypeMap::Integer>();
-                    uint32_t v2 = indices.at("v2").raw<TypeMap::Integer>();
-                    return Face{v0, v1, v2, arg.at("material").rawRef<TypeMap::SurfaceMaterial>()};
-                };
-                
-                TriangleMeshNodeRef lightMesh = createShared<TriangleMeshNode>();
-                for (int i = 0; i < vertices.size(); ++i) {
-                    if (vertices[i].type == Type::Vertex) {
-                        lightMesh->addVertex(vertices[i].raw<TypeMap::Vertex>());
-                    }
-                    else {
-                        Element vtx = CreateVertex(vertices[i].raw<TypeMap::Tuple>(), err);
-                        if (err->error)
-                            return Element();
-                        lightMesh->addVertex(vtx.raw<TypeMap::Vertex>());
-                    }
-                }
-                for (int i = 0; i < faces.size(); ++i) {
-                    Face f = sigFace.perform<Face>(procFace, faces[i].raw<TypeMap::Tuple>(), Face(), err);
-                    if (err->error)
-                        return Element();
-                    lightMesh->addTriangle(f.v0, f.v1, f.v2, f.mat);
-                }
-                
-                return Element(TypeMap::Mesh(), lightMesh);
-            }
-        };
-        return proc(params, err);
-    }
-    
-    Element CreateNode(const ParameterList &params, ErrorMessage* err) {
-        static const Function proc{
-            {},
-            [](const std::map<std::string, Element> &args, ErrorMessage* err) {
-                return Element(TypeMap::Node(), InternalNode());
-            }
-        };
-        return proc(params, err);
-    }
-    
-    Element SetTransform(const ParameterList &params, ErrorMessage* err) {
-        static const Function proc{
-            {{"node", Type::Node}, {"transform", Type::Transform}},
-            [](const std::map<std::string, Element> &args, ErrorMessage* err) {
-                InternalNodeRef node = args.at("node").rawRef<TypeMap::Node>();
-                TransformRef tf = args.at("transform").rawRef<TypeMap::Transform>();
-                node->setTransform(tf);
-                return Element();
-            }
-        };
-        return proc(params, err);
-    }
-    
-    Element AddChild(const ParameterList &params, ErrorMessage* err) {
-        static const Function proc0{
-            {{"parent", Type::Node}, {"child", Type::Node}},
-            [](const std::map<std::string, Element> &args, ErrorMessage* err) {
-                InternalNodeRef parent = args.at("parent").rawRef<TypeMap::Node>();
-                InternalNodeRef child = args.at("child").rawRef<TypeMap::Node>();
-                parent->addChildNode(child);
-                return Element();
-            }
-        };
-        static const Function proc1{
-            {{"parent", Type::Node}, {"child", Type::Mesh}},
-            [](const std::map<std::string, Element> &args, ErrorMessage* err) {
-                InternalNodeRef parent = args.at("parent").rawRef<TypeMap::Node>();
-                TriangleMeshNodeRef child = args.at("child").rawRef<TypeMap::Mesh>();
-                parent->addChildNode(child);
-                return Element();
-            }
-        };
-        static const Function proc2{
-            {{"parent", Type::Node}, {"child", Type::Camera}},
-            [](const std::map<std::string, Element> &args, ErrorMessage* err) {
-                InternalNodeRef parent = args.at("parent").rawRef<TypeMap::Node>();
-                CameraNodeRef child = args.at("child").rawRef<TypeMap::Camera>();
-                parent->addChildNode(child);
-                return Element();
-            }
-        };
-        static const auto procs = std::make_array<Function>(proc0, proc1, proc2);
-        for (int i = 0; i < procs.size(); ++i) {
-            Element elem = procs[i](params, err);
-            if (!err->error)
-                return elem;
         }
-        return Element();
+        return true;
     }
-    
-    Element Load3DModel(const ParameterList &params, ErrorMessage* err) {
-        static const Function proc{
-            {{"path", Type::String}},
-            [](const std::map<std::string, Element> &args, ErrorMessage* err) {
-                std::string path = args.at("path").raw<TypeMap::String>();
-                
-                InternalNodeRef modelNode;
-                construct(path, modelNode);
-                modelNode->setName(path);
-                
-                return Element(TypeMap::Node(), modelNode);
-            }
-        };
-        return proc(params, err);
-    }
-    
-    // width = 1024, height = 1024, aspect = 1.0, fovY = 0.5235987756, sensitivity = 0,
-    // radius = 0.0, imgDist = 0.02, objDist = 5
-    Element CreatePerspectiveCamera(const ParameterList &params, ErrorMessage* err) {
-        static const Function proc{
-            {
-                {"sensitivity", Type::RealNumber, Element(0.0)},
-                {"aspect", Type::RealNumber, Element(1.0)}, {"fovY", Type::RealNumber, Element(0.5235987756)},
-                {"radius", Type::RealNumber, Element(0.0)}, {"imgDist", Type::RealNumber, Element(0.02)}, {"objDist", Type::RealNumber, Element(5.0)}
-            },
-            [](const std::map<std::string, Element> &args, ErrorMessage* err) {
-                float sensitivity = args.at("sensitivity").raw<TypeMap::RealNumber>();
-                float aspect = args.at("aspect").raw<TypeMap::RealNumber>();
-                float fovY = args.at("fovY").raw<TypeMap::RealNumber>();
-                float radius = args.at("radius").raw<TypeMap::RealNumber>();
-                float imgDist = args.at("imgDist").raw<TypeMap::RealNumber>();
-                float objDist = args.at("objDist").raw<TypeMap::RealNumber>();
-                
-                return Element(TypeMap::Camera(), createShared<PerspectiveCameraNode>(sensitivity, aspect, fovY, radius, imgDist, objDist));
-            }
-        };
-        return proc(params, err);
-    }
-    
-    Element SetRenderer(const ParameterList &params, RenderingContext* context, ErrorMessage* err) {
-        Element paramMethod = params("method", Type::String);
-        if (paramMethod.type == Type::Void) {
-            *err = ErrorMessage("Rendering method is not specified.");
-            return Element();
-        }
-        std::string method = paramMethod.raw<TypeMap::String>();
-        if (method == "PT") {
-            static const Function proc{
-                {{"method", Type::String}, {"samples", Type::Integer}},
-                [](const std::map<std::string, Element> &args, RenderingContext* context, ErrorMessage* err) {
-                    uint32_t spp = args.at("samples").raw<TypeMap::Integer>();
-                    context->renderer = createUnique<SLR::PathTracingRenderer>(spp);
-                    return Element();
-                }
-            };
-            return proc(params, context, err);
-        }
-        else {
-            *err = ErrorMessage("Unknown method is specified.");
-        }
-        return Element();
-    }
-    
-    Element SetRenderSettings(const ParameterList &params, RenderingContext* context, ErrorMessage* err) {
-        static const Function proc{
-            {
-                {"width", Type::Integer, Element(1024)}, {"height", Type::Integer, Element(1024)},
-                {"timeStart", Type::RealNumber, Element(0.0)}, {"timeEnd", Type::RealNumber, Element(0.0)},
-                {"brightness", Type::RealNumber, Element(1.0f)}, 
-                {"rngSeed", Type::Integer, Element(1509761209)},
-            },
-            [](const std::map<std::string, Element> &args, RenderingContext* context, ErrorMessage* err) {
-                context->width = args.at("width").raw<TypeMap::Integer>();
-                context->height = args.at("height").raw<TypeMap::Integer>();
-                context->timeStart = args.at("timeStart").raw<TypeMap::RealNumber>();
-                context->timeEnd = args.at("timeEnd").raw<TypeMap::RealNumber>();
-                context->brightness = args.at("brightness").raw<TypeMap::RealNumber>();
-                context->rngSeed = args.at("rngSeed").raw<TypeMap::Integer>();
-                
-                return Element();
-            }
-        };
-        return proc(params, context, err);
-    }
-    
+
     namespace Spectrum {
         using namespace SLR;
         

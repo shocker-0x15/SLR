@@ -15,6 +15,7 @@ namespace SLRSceneGraph {
     class Scene {
         InternalNodeRef m_rootNode;
         InfiniteSphereNodeRef m_envNode;
+        std::unique_ptr<SLR::Scene> m_raw;
     public:
         Scene();
         ~Scene();
@@ -22,7 +23,9 @@ namespace SLRSceneGraph {
         InternalNodeRef &rootNode() { return m_rootNode; };
         void setEnvNode(const InfiniteSphereNodeRef &node) { m_envNode = node; };
         
-        void build(SLR::Scene** scene, SLR::ArenaAllocator &mem);
+        void build(const SLR::Scene** scene, SLR::ArenaAllocator &mem);
+        
+        const SLR::Scene* raw() const { return m_raw.get(); }
     };
     
     struct RenderingContext {

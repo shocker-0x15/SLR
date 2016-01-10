@@ -28,6 +28,8 @@ namespace SLR {
             const float* ks;
         };
         
+        extern const std::map<std::string, const IndexOfRefraction&> IORs;
+        
         
         
         // Ciddor 1996

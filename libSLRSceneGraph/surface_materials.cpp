@@ -8,6 +8,7 @@
 #include "surface_materials.hpp"
 #include <libSLR/SurfaceMaterials/surface_material_headers.h>
 #include "textures.hpp"
+#include "Scene.h"
 
 namespace SLRSceneGraph {
     SurfaceMaterial::~SurfaceMaterial() {
@@ -87,8 +88,8 @@ namespace SLRSceneGraph {
     
     IBLEmission::IBLEmission(const SceneWRef &scene, const SpectrumTextureRef &coeffM, float scale) :
     m_scene(scene), m_coeffM(coeffM), m_scale(scale) {
-        SLRAssert(false, "Not implemented.");
-//        m_rawData = new SLR::IBLEmission(scene., coeffM->getRaw(), scale);
+        SceneRef sceneRef = m_scene.lock();
+        m_rawData = new SLR::IBLEmission(sceneRef->raw(), coeffM->getRaw(), scale);
     };
     
     

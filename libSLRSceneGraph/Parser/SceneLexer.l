@@ -73,98 +73,29 @@ WSPACE          [[:blank:]]+
     return SceneParser::make_REALNUMBER(value, loc);
 }
 
+if {
+    DPRINTF("%s\n", yytext);
+    return SceneParser::make_IF(loc);
+}
+
+else {
+    DPRINTF("%s\n", yytext);
+    return SceneParser::make_ELSE(loc);
+}
+
 for {
     DPRINTF("%s\n", yytext);
     return SceneParser::make_FOR(loc);
 }
 
-AddItem {
+function {
     DPRINTF("%s\n", yytext);
-    return SceneParser::make_API(API::AddItem, loc);    
+    return SceneParser::make_FUNCTION(loc);
 }
-Translate {
+
+return {
     DPRINTF("%s\n", yytext);
-    return SceneParser::make_API(API::Translate, loc);
-}
-RotateX {
-    DPRINTF("%s\n", yytext);
-    return SceneParser::make_API(API::RotateX, loc);
-}
-RotateY {
-    DPRINTF("%s\n", yytext);
-    return SceneParser::make_API(API::RotateY, loc);
-}
-RotateZ {
-    DPRINTF("%s\n", yytext);
-    return SceneParser::make_API(API::RotateZ, loc);
-}
-Scale {
-    DPRINTF("%s\n", yytext);
-    return SceneParser::make_API(API::Scale, loc);
-}
-CreateVertex {
-    DPRINTF("%s\n", yytext);
-    return SceneParser::make_API(API::CreateVertex, loc);   
-}
-Spectrum {
-    DPRINTF("%s\n", yytext);
-    return SceneParser::make_API(API::Spectrum, loc);
-}
-CreateNode {
-    DPRINTF("%s\n", yytext);
-    return SceneParser::make_API(API::CreateNode, loc);
-}
-SetRenderer {
-    DPRINTF("%s\n", yytext);
-    return SceneParser::make_API(API::SetRenderer, loc);
-}
-SetRenderSettings {
-    DPRINTF("%s\n", yytext);
-    return SceneParser::make_API(API::SetRenderSettings, loc);   
-}
-CreatePerspectiveCamera {
-    DPRINTF("%s\n", yytext);
-    return SceneParser::make_API(API::CreatePerspectiveCamera, loc);
-}
-LoadImage {
-    DPRINTF("%s\n", yytext);
-    return SceneParser::make_API(API::LoadImage, loc);
-}
-SpectrumTexture {
-    DPRINTF("%s\n", yytext);
-    return SceneParser::make_API(API::SpectrumTexture, loc);
-}
-SetEnvironment {
-    DPRINTF("%s\n", yytext);
-    return SceneParser::make_API(API::SetEnvironment, loc);
-}
-Load3DModel {
-    DPRINTF("%s\n", yytext);
-    return SceneParser::make_API(API::Load3DModel, loc);
-}
-SetTransform {
-    DPRINTF("%s\n", yytext);
-    return SceneParser::make_API(API::SetTransform, loc);
-}
-AddChild {
-    DPRINTF("%s\n", yytext);
-    return SceneParser::make_API(API::AddChild, loc);   
-}
-CreateMatte {
-    DPRINTF("%s\n", yytext);
-    return SceneParser::make_API(API::CreateMatte, loc);
-}
-CreateDiffuseEmitter {
-    DPRINTF("%s\n", yytext);
-    return SceneParser::make_API(API::CreateDiffuseEmitter, loc);
-}
-CreateEmitterSurfaceMaterial {
-    DPRINTF("%s\n", yytext);
-    return SceneParser::make_API(API::CreateEmitterSurfaceMaterial, loc);
-}
-CreateMesh {
-    DPRINTF("%s\n", yytext);
-    return SceneParser::make_API(API::CreateMesh, loc);   
+    return SceneParser::make_RETURN(loc);
 }
 
 {ID} {
@@ -243,7 +174,7 @@ CreateMesh {
     yymore();
 }
 <COMMENT>"*/" {
-    printf("Comment(s): (%s)\n", yytext);
+    DPRINTF("Comment(s): (%s)\n", yytext);
     BEGIN(INITIAL);
 }
 <COMMENT>"*" {

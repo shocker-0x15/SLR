@@ -1,7 +1,27 @@
 setRenderer("method": "PT", ("samples": 512,));
 setRenderSettings("width": 1024, "height": 1024, "brightness": 4.0);
 
-CBNode = load3DModel("models/Cornell_box_RB.assbin");
+function CornellBoxMaterial(name, attrs) {
+    if (name == "Material.001" || name == "Material.003") {
+        eta = SpectrumTexture(Spectrum("ID": "Titanium", 0));
+        k = SpectrumTexture(Spectrum("ID": "Titanium", 1));
+        return createSurfaceMaterial("metal", (SpectrumTexture(Spectrum("type": "Reflectance", 1.0)), eta, k));
+    }
+
+    difTex = 0;
+    if (numElements(attrs["diffuse textures"])) {
+        difTexPaths = attrs["diffuse textures"];
+        image = Image2D(difTexPaths[0]);
+        difTex = SpectrumTexture(image);
+    }
+    else {
+        difCol = attrs["diffuse color"];
+        difTex = SpectrumTexture(Spectrum(difCol[0], difCol[1], difCol[2]));
+    }
+    return createSurfaceMaterial("matte", (difTex,));
+}
+
+CBNode = load3DModel("models/Cornell_box_RB.assbin", CornellBoxMaterial);
     lightNode = createNode();
     setTransform(lightNode, translate(0.0, 0.999, 0.0));
         diffuseCol = Spectrum(0.9, 0.9, 0.9);

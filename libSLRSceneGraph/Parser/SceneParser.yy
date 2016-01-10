@@ -73,13 +73,12 @@
     SEMICOLON ";"
 ;
 %token<char> CHAR
-%token<API> API
 %token<bool> BOOL
 %token<int32_t> INTEGER
 %token<double> REALNUMBER
 %token<std::string> STRING
 %token<std::string> ID
-%token FOR
+%token IF ELSE FOR FUNCTION RETURN
 
 %type<StatementsRef> Statements
 %type<StatementRef> Statement
@@ -89,6 +88,8 @@
 %type<ValueRef> Value
 %type<ValueRef> ImmValue
 %type<ValueRef> TupleValue
+%type<ArgumentDefinitionRef> ArgumentDefinition
+%type<ArgumentDefinitionVecRef> ArgumentDefinitions
 %type<ParameterRef> Parameter
 %type<ParameterVecRef> Elements
 %type<ParameterVecRef> Arguments
@@ -127,9 +128,13 @@ Statements Statement {
 
 Statement:
 Expression ";" { $$ = $1; } |
-FOR "(" Expression ";" Expression ";" Expression ")" "{" Statements "}" {
-    $$ = createShared<ForStatement>($3, $5, $7, $10);
-} |
+"{" Statements "}" { $$ = createShared<BlockStatement>($2); } |
+IF "(" Expression ")" Statement { $$ = createShared<IfElseStatement>($3, $5); } |
+IF "(" Expression ")" Statement ELSE Statement { $$ = createShared<IfElseStatement>($3, $5, $7); } |
+FOR "(" Expression ";" Expression ";" Expression ")" Statement { $$ = createShared<ForStatement>($3, $5, $7, $9); } |
+FUNCTION ID "(" ArgumentDefinitions ")" Statement { $$ = createShared<FunctionDefinitionStatement>($2, $4, $6); } |
+RETURN ";" { $$ = createShared<ReturnStatement>(); } |
+RETURN Expression ";" { $$ = createShared<ReturnStatement>($2); } |
 error {
     printf("Parsing aborted.\n");
     YYABORT;
@@ -138,16 +143,16 @@ error {
 
 Expression:
 Term { $$ = $1; } |
-Term "+" Term { $$ = createShared<BinaryExpression>($1, "+", $3); } |
-Term "-" Term { $$ = createShared<BinaryExpression>($1, "-", $3); } |
-Term "<" Term { $$ = createShared<BinaryExpression>($1, "<", $3); } |
-Term ">" Term { $$ = createShared<BinaryExpression>($1, ">", $3); } |
-Term "<=" Term { $$ = createShared<BinaryExpression>($1, "<=", $3); } |
-Term ">=" Term { $$ = createShared<BinaryExpression>($1, ">=", $3); } |
-Term "==" Term { $$ = createShared<BinaryExpression>($1, "==", $3); } |
-Term "!=" Term { $$ = createShared<BinaryExpression>($1, "!=", $3); } |
-Term "&&" Term { $$ = createShared<BinaryExpression>($1, "&&", $3); } |
-Term "||" Term { $$ = createShared<BinaryExpression>($1, "||", $3); } |
+Expression "+" Term { $$ = createShared<BinaryExpression>($1, "+", $3); } |
+Expression "-" Term { $$ = createShared<BinaryExpression>($1, "-", $3); } |
+Expression "<" Expression { $$ = createShared<BinaryExpression>($1, "<", $3); } |
+Expression ">" Expression { $$ = createShared<BinaryExpression>($1, ">", $3); } |
+Expression "<=" Expression { $$ = createShared<BinaryExpression>($1, "<=", $3); } |
+Expression ">=" Expression { $$ = createShared<BinaryExpression>($1, ">=", $3); } |
+Expression "==" Expression { $$ = createShared<BinaryExpression>($1, "==", $3); } |
+Expression "!=" Expression { $$ = createShared<BinaryExpression>($1, "!=", $3); } |
+Expression "&&" Expression { $$ = createShared<BinaryExpression>($1, "&&", $3); } |
+Expression "||" Expression { $$ = createShared<BinaryExpression>($1, "||", $3); } |
 ID "=" Expression { $$ = createShared<SubstitutionExpression>($1, "=", $3); } |
 ID "+=" Expression { $$ = createShared<SubstitutionExpression>($1, "+=", $3); } |
 ID "-=" Expression { $$ = createShared<SubstitutionExpression>($1, "-=", $3); } |
@@ -172,7 +177,7 @@ Term "%" Term { $$ = createShared<BinaryTerm>($1, "%", $3); }
 
 SingleTerm:
 Value { $$ = $1; } |
-API "(" Arguments ")" { $$ = createShared<FunctionSingleTerm>($1, $3); } |
+ID "(" Arguments ")" { $$ = createShared<FunctionCallSingleTerm>($1, $3); } |
 "(" Expression ")" { $$ = createShared<EnclosedSingleTerm>($2); } |
 SingleTerm "[" Expression "]" { $$ = createShared<TupleElementSingleTerm>($1, $3); }
 ;
@@ -201,6 +206,25 @@ TupleValue:
 } |
 "(" Elements ")" {
     $$ = createShared<TupleValue>($2);
+}
+;
+
+ArgumentDefinition:
+ID { $$ = createShared<ArgumentDefinition>($1); } |
+ID "=" Expression { $$ = createShared<ArgumentDefinition>($1, $3); }
+;
+
+ArgumentDefinitions:
+/* empty */ {
+    $$ = createShared<std::vector<ArgumentDefinitionRef>>();
+} |
+ArgumentDefinition {
+    $$ = createShared<std::vector<ArgumentDefinitionRef>>();
+    $$->push_back($1);
+} |
+ArgumentDefinitions "," ArgumentDefinition {
+    $$ = $1;
+    $$->push_back($3);
 }
 ;
 

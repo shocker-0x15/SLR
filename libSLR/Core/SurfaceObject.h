@@ -100,7 +100,6 @@ namespace SLR {
     };
     
     class InfiniteSphereSurfaceObject : public SingleSurfaceObject {
-        const SurfaceMaterial* m_surfMat;
         const RegularConstantContinuous2D* m_dist;
     public:
         InfiniteSphereSurfaceObject(const Surface* surf, const IBLEmission* emitter);
@@ -166,7 +165,9 @@ namespace SLR {
         float m_worldDiscArea;
         const Camera* m_camera;
     public:
-        Scene(const SurfaceObjectAggregate* aggregate, const InfiniteSphereSurfaceObject* envSphere, const Camera* camera);;
+        Scene() { }
+        
+        void build(const SurfaceObjectAggregate* aggregate, const InfiniteSphereSurfaceObject* envSphere, const Camera* camera);
         
         const Camera* getCamera() const { return m_camera; };
         Point3D getWorldCenter() const { return m_worldCenter; };

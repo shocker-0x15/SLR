@@ -115,7 +115,7 @@ namespace SLRSceneGraph {
         return SurfaceMaterial::createMatte(diffuseTex, nullptr);
     };
     
-    void construct(const std::string &filePath, InternalNodeRef &nodeOut, const createMaterialFunction materialFunc) {
+    void construct(const std::string &filePath, InternalNodeRef &nodeOut, const CreateMaterialFunction &materialFunc) {
         using namespace SLR;
         DefaultAllocator &defMem = DefaultAllocator::instance();
         
@@ -145,5 +145,7 @@ namespace SLRSceneGraph {
         recursiveConstruct(scene, scene->mRootNode, materials, nodeOut);
         
         nodeOut->setName(filePath);
+        
+        printf("Constructing: %s done.\n", filePath.c_str());
     }
 }

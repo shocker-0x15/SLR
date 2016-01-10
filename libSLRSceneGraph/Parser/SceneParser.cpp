@@ -65,6 +65,9 @@ namespace SLRSceneGraph {
             case Type::Tuple:
                 out << "Tuple";
                 break;
+            case Type::Function:
+                out << "Function";
+                break;
             case Type::Any:
                 out << "Any";
                 break;
@@ -135,6 +138,9 @@ namespace SLRSceneGraph {
                 break;
             case Type::Tuple:
                 out << elem.raw<TypeMap::Tuple>();
+                break;
+            case Type::Function:
+                out << "Function";
                 break;
             case Type::Any:
                 out << "Any";
@@ -379,6 +385,97 @@ namespace SLRSceneGraph {
         else
             *this = Element(ErrorMessage("Left type does not have the %= operator definition."));
         return *this;
+    }
+    
+    bool mapParamsToArgs(const ParameterList &params, const std::vector<ArgInfo> signature, std::map<std::string, Element>* args) {
+        args->clear();
+        size_t numArgs = signature.size();
+        std::vector<bool> assigned(numArgs, false);
+        
+        // find key-matched arguments defined in the function signature.
+        for (auto namedParam : params.named) {
+            const std::string key = namedParam.first;
+            const Element value = namedParam.second;
+            size_t idx = std::distance(std::begin(signature),
+                                       std::find_if(std::begin(signature), std::end(signature),
+                                                    [&key, &value](const ArgInfo &arg) {
+                                                        return arg.name == key && (value.isConvertibleTo(arg.expectedType) || arg.expectedType == Type::Any);
+                                                    }));
+            // If params has a key which does not defined in the signatures, the mapping fails.
+            if (idx == numArgs) {
+                args->clear();
+                return false;
+            }
+            const ArgInfo &argInfo = signature[idx];
+            (*args)[argInfo.name] = argInfo.expectedType == Type::Any ? value : value.as(argInfo.expectedType);
+            assigned[idx] = true;
+        }
+        // find arguments which have not assigned a value.
+        for (auto it = std::begin(params.unnamed); it != std::end(params.unnamed); ++it) {
+            const Element &value = *it;
+            size_t idx = std::distance(std::begin(signature),
+                                       std::find_if(std::begin(signature), std::end(signature),
+                                                    [&signature, &value, &assigned](const ArgInfo &arg) {
+                                                        size_t curIdx = std::distance(&signature[0], &arg);
+                                                        return assigned[curIdx] == false && (value.isConvertibleTo(arg.expectedType) || arg.expectedType == Type::Any);
+                                                    }));
+            // If params has an extra parameters, the mapping fails.
+            if (idx == numArgs) {
+                args->clear();
+                return false;
+            }
+            const ArgInfo &argInfo = signature[idx];
+            (*args)[argInfo.name] = argInfo.expectedType == Type::Any ? value : value.as(argInfo.expectedType);
+            assigned[idx] = true;
+        }
+        // If there are arguments they have not assigned yet and does not have default values, the mapping fails.
+        for (int i = 0; i < numArgs; ++i) {
+            if (assigned[i])
+                continue;
+            const ArgInfo &argInfo = signature[i];
+            if (argInfo.defaultValue.type == Type::Void) {
+                args->clear();
+                return false;
+            }
+            (*args)[argInfo.name] = argInfo.defaultValue;
+        }
+        
+        return true;
+    }
+    
+    Element Function::operator()(const ParameterList &params, ExecuteContext &context, ErrorMessage* errMsg) const {
+        std::map<std::string, Element> args;
+        for (int i = 0; i < m_signatures.size(); ++i) {
+            std::vector<ArgInfo> signature = m_signatures[i];
+            const StatementRef &stmt = m_stmts[i];
+            const Procedure &nativeProc = m_nativeProcs[i];
+            
+            if (mapParamsToArgs(params, signature, &args)) {
+                context.stackVariables.current().saveFrom(m_depth);
+                context.stackVariables.push();
+                LocalVariables &current = context.stackVariables.current();
+                for (auto &keyValue : args)
+                    current[keyValue.first] = keyValue.second;
+                
+                Element retValue;
+                context.returnFlag = false;
+                if (stmt) {
+                    stmt->perform(context, errMsg);
+                    retValue = context.returnValue;
+                }
+                else {
+                    retValue = nativeProc(args, context, errMsg);
+                }
+                context.returnValue = Element();
+                context.returnFlag = false;
+                
+                context.stackVariables.pop();
+                context.stackVariables.current().restore();
+                return retValue;
+            }
+        }
+        *errMsg = ErrorMessage("Parameters are invalid.");
+        return Element();
     }
     
     bool TypeInfo::isConvertibleTo(Type toType) const {
@@ -664,6 +761,22 @@ namespace SLRSceneGraph {
                 };
             }
             {
+                TypeInfo &info = infos[(uint32_t)Type::String];
+                
+                info.addOperator = [](const Element &v0, const Element &v1) {
+                    auto lVal = v0.raw<TypeMap::String>();
+                    if (v1.isConvertibleTo<TypeMap::String>())
+                        return Element(lVal + v1.asRaw<TypeMap::String>());
+                    return Element(ErrorMessage("+ operator does not support the right operand type."));
+                };
+                info.eqOperator = [](const Element &v0, const Element &v1) {
+                    auto lVal = v0.raw<TypeMap::String>();
+                    if (v1.isConvertibleTo<TypeMap::String>())
+                        return Element(lVal == v1.asRaw<TypeMap::String>());
+                    return Element(ErrorMessage("== operator does not support the right operand type."));
+                };
+            }
+            {
                 TypeInfo &info = infos[(uint32_t)Type::Matrix];
                 
                 info.affOperator = [](const Element &v) { return v; };
@@ -701,10 +814,44 @@ namespace SLRSceneGraph {
         }
     }
     
-    ForStatement::ForStatement(const ExpressionRef &preExpr, const ExpressionRef &condExpr, const ExpressionRef &postExpr, const StatementsRef &statementList) :
-    m_preExpr(preExpr), m_condExpr(condExpr), m_postExpr(postExpr) {
-        for (int i = 0; i < statementList->size(); ++i)
-            m_block.push_back(statementList->at(i));
+    BlockStatement::BlockStatement(const StatementsRef &statements) {
+        for (int i = 0; i < statements->size(); ++i) {
+            StatementRef &statement = statements->at(i);
+            m_statements.push_back(statement);
+        }
+    }
+    
+    bool BlockStatement::perform(SLRSceneGraph::ExecuteContext &context, SLRSceneGraph::ErrorMessage *errMsg) const {
+        context.stackVariables.current().pushDepth();
+        for (int i = 0; i < m_statements.size(); ++i) {
+            if (!m_statements[i]->perform(context, errMsg))
+                return false;
+            if (context.returnFlag)
+                break;
+        }
+        context.stackVariables.current().popDepth();
+        
+        return true;
+    }
+    
+    bool IfElseStatement::perform(SLRSceneGraph::ExecuteContext &context, SLRSceneGraph::ErrorMessage *errMsg) const {
+        if (!m_condExpr->perform(context, errMsg))
+            return false;
+        if (!m_condExpr->result().isConvertibleTo<TypeMap::Bool>()) {
+            *errMsg = ErrorMessage("Must provide a boolean value.");
+            return false;
+        }
+        bool condition = m_condExpr->result().asRaw<TypeMap::Bool>();
+        if (condition) {
+            if (!m_trueBlockStmt->perform(context, errMsg))
+                return false;
+        }
+        else if (m_falseBlockStmt) {
+            if (!m_falseBlockStmt->perform(context, errMsg))
+                return false;
+        }
+        
+        return true;
     }
     
     bool ForStatement::perform(ExecuteContext &context, ErrorMessage* errMsg) const {
@@ -719,12 +866,9 @@ namespace SLRSceneGraph {
         }
         bool condition = m_condExpr->result().asRaw<TypeMap::Bool>();
         while (condition) {
-            context.stackVariables.pushDepth();
-            for (int i = 0; i < m_block.size(); ++i) {
-                if (!m_block[i]->perform(context, errMsg))
-                    return false;
-            }
-            context.stackVariables.popDepth();
+            if (!m_blockStmt->perform(context, errMsg))
+                return false;
+            
             if (!m_postExpr->perform(context, errMsg))
                 return false;
             
@@ -733,6 +877,33 @@ namespace SLRSceneGraph {
             condition = m_condExpr->result().asRaw<TypeMap::Bool>();
         }
         
+        return true;
+    }
+    
+    bool FunctionDefinitionStatement::perform(SLRSceneGraph::ExecuteContext &context, SLRSceneGraph::ErrorMessage *errMsg) const {
+        std::vector<ArgInfo> args;
+        for (int i = 0; i < m_argDefs->size(); ++i) {
+            args.emplace_back();
+            
+            ArgumentDefinitionRef argDef = m_argDefs->at(i);
+            argDef->perform(context, errMsg);
+            argDef->getArgInfo(&args.back());
+        }
+        
+        LocalVariables &current = context.stackVariables.current();
+        current[m_funcName] = Element(TypeMap::Function(), createShared<Function>(context.stackVariables.current().depth(), args, m_blockStmt));
+        return true;
+    }
+    
+    bool ReturnStatement::perform(SLRSceneGraph::ExecuteContext &context, SLRSceneGraph::ErrorMessage *errMsg) const {
+        if (!m_expr) {
+            context.returnValue = Element();
+            return true;
+        }
+        if (!m_expr->perform(context, errMsg))
+            return false;
+        context.returnValue = m_expr->result();
+        context.returnFlag = true;
         return true;
     }
     
@@ -777,7 +948,8 @@ namespace SLRSceneGraph {
             *errMsg = ErrorMessage("Undefined variable: %s", m_varName.c_str());
             return false;
         }
-        Element &var = context.stackVariables[m_varName];
+        LocalVariables &current = context.stackVariables.current();
+        Element &var = current[m_varName];
         
         if (m_op == "=")
             var.substitute(m_right->result());
@@ -817,7 +989,8 @@ namespace SLRSceneGraph {
             *errMsg = ErrorMessage("Undefined variable: %s", m_varName.c_str());
             return false;
         }
-        Element &var = context.stackVariables[m_varName];
+        LocalVariables &current = context.stackVariables.current();
+        Element &var = current.at(m_varName);
         if (m_op == "++*")
             m_result = ++var;
         else if (m_op == "--*")
@@ -848,90 +1021,34 @@ namespace SLRSceneGraph {
         return true;
     }
     
-    bool FunctionSingleTerm::perform(ExecuteContext &context, ErrorMessage* errMsg) const {
-        ParameterList params;
-        for (int i = 0; i < m_args->size(); ++i) {
-            ParameterRef arg = m_args->at(i);
-            if (!arg->perform(context, errMsg))
-                return false;
-            Element key, value;
-            arg->getKeyAndValue(&key, &value);
-            if (key.type != Type::String) {
-                *errMsg = ErrorMessage("Key expression must results in string type.");
-                return false;
+    bool FunctionCallSingleTerm::perform(ExecuteContext &context, ErrorMessage* errMsg) const {
+        if (context.stackVariables.exists(m_funcID)) {
+            const Element &funcElem = context.stackVariables.at(m_funcID);
+            if (funcElem.type == Type::Function) {
+                ParameterList params;
+                for (int i = 0; i < m_args->size(); ++i) {
+                    ParameterRef arg = m_args->at(i);
+                    if (!arg->perform(context, errMsg))
+                        return false;
+                    Element key, value;
+                    arg->getKeyAndValue(&key, &value);
+                    if (key.type != Type::String) {
+                        *errMsg = ErrorMessage("Key expression must results in string type.");
+                        return false;
+                    }
+                    params.add(key.raw<TypeMap::String>(), value);
+                }
+                
+                const Function &func = funcElem.raw<TypeMap::Function>();
+                m_result = func(params, context, errMsg);
+                if (errMsg->error)
+                    return false;
+                
+                return true;
             }
-            params.add(key.raw<TypeMap::String>(), value);
         }
-        
-        switch (m_funcID) {
-            case API::AddItem:
-                m_result = AddItem(params, errMsg);
-                break;
-            case API::Translate:
-                m_result = Translate(params, errMsg);
-                break;
-            case API::RotateX:
-                m_result = RotateX(params, errMsg);
-                break;
-            case API::RotateY:
-                m_result = RotateY(params, errMsg);
-                break;
-            case API::RotateZ:
-                m_result = RotateZ(params, errMsg);
-                break;
-            case API::Scale:
-                m_result = Scale(params, errMsg);
-                break;
-            case API::CreateVertex:
-                m_result = CreateVertex(params, errMsg);
-                break;
-            case API::Spectrum:
-                m_result = CreateSpectrum(params, errMsg);
-                break;
-            case API::SpectrumTexture:
-                m_result = CreateSpectrumTexture(params, errMsg);
-                break;
-            case API::CreateMatte:
-                m_result = CreateMatte(params, errMsg);
-                break;
-            case API::CreateDiffuseEmitter:
-                m_result = CreateDiffuseEmitter(params, errMsg);
-                break;
-            case API::CreateEmitterSurfaceMaterial:
-                m_result = CreateEmitterSurfaceMaterial(params, errMsg);
-                break;
-            case API::CreateMesh:
-                m_result = CreateMesh(params, errMsg);
-                break;
-            case API::CreateNode:
-                m_result = CreateNode(params, errMsg);
-                break;
-            case API::SetTransform:
-                m_result = SetTransform(params, errMsg);
-                break;
-            case API::AddChild:
-                m_result = AddChild(params, errMsg);
-                break;
-            case API::SetRenderer:
-                m_result = SetRenderer(params, context.renderingContext, errMsg);
-                break;
-            case API::SetRenderSettings:
-                m_result = SetRenderSettings(params, context.renderingContext, errMsg);
-                break;
-            case API::CreatePerspectiveCamera:
-                m_result = CreatePerspectiveCamera(params, errMsg);
-                break;
-            case API::Load3DModel:
-                m_result = Load3DModel(params, errMsg);
-                break;
-            case API::LoadImage:
-                break;
-            case API::SetEnvironment:
-                break;
-            default:
-                break;
-        }
-        return !errMsg->error;
+        *errMsg = ErrorMessage("Function %s is not defined.", m_funcID.c_str());
+        return false;
     }
     
     bool EnclosedSingleTerm::perform(ExecuteContext &context, ErrorMessage *errMsg) const {
@@ -957,7 +1074,7 @@ namespace SLRSceneGraph {
         if (idx.isConvertibleTo<TypeMap::Integer>()) {
             m_result = paramList(idx.raw<TypeMap::Integer>());
             if (m_result.type == Type::Void) {
-                *errMsg = ErrorMessage("index value is out or range.");
+                *errMsg = ErrorMessage("Index value is out or range.");
                 return false;
             }
             return true;
@@ -965,12 +1082,12 @@ namespace SLRSceneGraph {
         else if (idx.isConvertibleTo<TypeMap::String>()) {
             m_result = paramList(idx.raw<TypeMap::String>());
             if (m_result.type == Type::Void) {
-                *errMsg = ErrorMessage("index value is invalid.");
+                *errMsg = ErrorMessage("Index value is invalid.");
                 return false;
             }
             return true;
         }
-        *errMsg = ErrorMessage("index value must be integer or string compatible type.");
+        *errMsg = ErrorMessage("Index value must be integer or string compatible type.");
         return false;
     }
     
@@ -997,8 +1114,20 @@ namespace SLRSceneGraph {
             *errMsg = ErrorMessage("Undefined variable is used.");
             return false;
         }
-        m_result = context.stackVariables[m_varName];
+        m_result = context.stackVariables.at(m_varName);
         return true;
+    }
+    
+    bool ArgumentDefinition::perform(SLRSceneGraph::ExecuteContext &context, SLRSceneGraph::ErrorMessage *errMsg) const {
+        if (m_defaultValueExpr && !m_defaultValueExpr->perform(context, errMsg))
+            return false;
+        return true;
+    }
+    
+    void ArgumentDefinition::getArgInfo(ArgInfo* info) const {
+        info->name = m_name;
+        info->defaultValue = m_defaultValueExpr ? m_defaultValueExpr->result() : Element();
+        info->expectedType = Type::Any;
     }
     
     bool Parameter::perform(ExecuteContext &context, ErrorMessage *errMsg) const {

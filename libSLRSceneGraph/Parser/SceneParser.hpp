@@ -23,6 +23,7 @@ namespace SLRSceneGraph {
         Vertex,
         Transform,
         Spectrum,
+        Image2D,
         SpectrumTexture,
         NormalTexture,
         FloatTexture,
@@ -32,6 +33,7 @@ namespace SLRSceneGraph {
         Camera,
         Node,
         Tuple,
+        Function, 
         Any,
         Void,
         Error,
@@ -49,6 +51,7 @@ namespace SLRSceneGraph {
         TypeMapDef(Vertex, SLR::Vertex);
         TypeMapDef(Transform, SLR::Transform);
         TypeMapDef(Spectrum, SLR::InputSpectrum);
+        TypeMapDef(Image2D, SLR::TiledImage2D);
         TypeMapDef(SpectrumTexture, SLRSceneGraph::SpectrumTexture);
         TypeMapDef(NormalTexture, SLRSceneGraph::Normal3DTexture);
         TypeMapDef(FloatTexture, SLRSceneGraph::FloatTexture);
@@ -58,6 +61,7 @@ namespace SLRSceneGraph {
         TypeMapDef(Camera, SLRSceneGraph::CameraNode);
         TypeMapDef(Node, SLRSceneGraph::InternalNode);
         TypeMapDef(Tuple, SLRSceneGraph::ParameterList);
+        TypeMapDef(Function, SLRSceneGraph::Function);
         TypeMapDef(Void, void);
         TypeMapDef(Error, SLRSceneGraph::ErrorMessage);
     }
@@ -120,6 +124,8 @@ namespace SLRSceneGraph {
         
         template <typename Map>
         const typename Map::InternalType& raw() const { return *(typename Map::InternalType*)valueRef.get(); }
+        template <typename Map>
+        typename Map::InternalType& raw() { return *(typename Map::InternalType*)valueRef.get(); }
         template <typename Map>
         std::shared_ptr<typename Map::InternalType> rawRef() const { return std::static_pointer_cast<typename Map::InternalType>(valueRef); }
         bool isConvertibleTo(Type toType) const;
@@ -212,6 +218,49 @@ namespace SLRSceneGraph {
     };
     std::ostream &operator<<(std::ostream &out, const ParameterList &params);
     
+    struct ArgInfo {
+        std::string name;
+        Type expectedType;
+        Element defaultValue;
+    };
+    
+    bool mapParamsToArgs(const ParameterList &params, const std::vector<ArgInfo> signature, std::map<std::string, Element>* args);
+    
+    class Function {
+        typedef std::function<Element(const std::map<std::string, Element> &, ExecuteContext &, ErrorMessage*)> Procedure;
+        
+        const uint32_t m_depth;
+        const std::vector<std::vector<ArgInfo>> m_signatures;
+        const std::vector<Procedure> m_nativeProcs;
+        const std::vector<StatementRef> m_stmts;
+        
+        static Element NoOpProcedure(const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) { SLRAssert(false, "Not implemented."); return Element(); };
+    public:
+        Function(uint32_t depth, const std::vector<ArgInfo> &sig, const StatementRef &stmt = nullptr) :
+        m_depth(depth), m_signatures{sig}, m_nativeProcs{NoOpProcedure}, m_stmts{stmt} { }
+        Function(uint32_t depth, const std::vector<ArgInfo> &sig, const Procedure &proc) :
+        m_depth(depth), m_signatures{sig}, m_nativeProcs{proc}, m_stmts{nullptr} { }
+        Function(uint32_t depth, const std::vector<std::vector<ArgInfo>> &sigs, const std::vector<Procedure> &procs) :
+        m_depth(depth), m_signatures{sigs}, m_nativeProcs{procs}, m_stmts{m_signatures.size(), nullptr} { }
+        
+        Element operator()(const ParameterList &params, ExecuteContext &context, ErrorMessage* errMsg) const;
+        
+        template <typename T>
+        T perform(const std::function<T(const std::map<std::string, Element> &)> &proc, const ParameterList &params, const T &failValue = T(), ErrorMessage* errMsg = nullptr) const {
+            std::map<std::string, Element> args;
+
+            std::vector<ArgInfo> signature = m_signatures[0];
+            if (mapParamsToArgs(params, signature, &args)) {
+                if (errMsg)
+                    *errMsg = ErrorMessage();
+                return proc(args);
+            }
+            if (errMsg)
+                *errMsg = ErrorMessage("Parameters are invalid.");
+            return failValue;
+        };
+    };
+    
     struct TypeInfo {
         Element &operator%=(const Element &rElem) const;
         
@@ -276,60 +325,91 @@ namespace SLRSceneGraph {
     };
     
     class LocalVariables {
-        std::map<std::string, Element> m_primaryMap;
-        std::stack<std::set<std::string>> m_depthwiseVars;
+        std::vector<std::map<std::string, Element>> m_depthwiseVariables;
+        uint32_t m_maxDepth;
     public:
-        LocalVariables() { m_depthwiseVars.emplace(); }
-        void pushDepth() { m_depthwiseVars.emplace(); }
-        void popDepth() {
-            for (const std::string &name : m_depthwiseVars.top())
-                m_primaryMap.erase(name);
-            m_depthwiseVars.pop();
+        LocalVariables() : m_maxDepth(UINT32_MAX) { m_depthwiseVariables.emplace_back(); }
+        void pushDepth() { m_depthwiseVariables.emplace_back(); }
+        void popDepth() { m_depthwiseVariables.pop_back(); }
+        bool exists(const std::string &key) const {
+            uint32_t maxDepth = std::min(uint32_t(m_depthwiseVariables.size()), m_maxDepth) - 1;
+            for (int i = maxDepth; i >=0 ; --i)
+                if (m_depthwiseVariables[i].count(key) > 0)
+                    return true;
+            return false;
         }
-        bool exists(const std::string &key) {
-            return m_primaryMap.count(key) > 0;
+        uint32_t depth() const { return (uint32_t)m_depthwiseVariables.size(); }
+        
+        void saveFrom(uint32_t depth) { m_maxDepth = depth; }
+        void restore() { m_maxDepth = UINT32_MAX; }
+        
+        const Element &operator[](const std::string &key) const {
+            uint32_t maxDepth = std::min(uint32_t(m_depthwiseVariables.size()), m_maxDepth) - 1;
+            for (int i = maxDepth; i >=0 ; --i)
+                if (m_depthwiseVariables[i].count(key) > 0)
+                    return m_depthwiseVariables[i].at(key);
+            return m_depthwiseVariables.back().at(key);
         }
         Element &operator[](const std::string &key) {
-            if (m_primaryMap.count(key) == 0)
-                m_depthwiseVars.top().insert(key);
-            return m_primaryMap[key];
+            uint32_t maxDepth = std::min(uint32_t(m_depthwiseVariables.size()), m_maxDepth) - 1;
+            for (int i = maxDepth; i >=0 ; --i)
+                if (m_depthwiseVariables[i].count(key) > 0)
+                    return m_depthwiseVariables[i].at(key);
+            return m_depthwiseVariables.back()[key];
         }
-        const Element &at(const std::string &key) {
-            return m_primaryMap.at(key);
+        const Element &at(const std::string &key) const {
+            return (*this)[key];
         }
-        const Element &operator[](const std::string &key) const { return m_primaryMap.at(key); }
+        Element &at(const std::string &key) {
+            uint32_t maxDepth = std::min(uint32_t(m_depthwiseVariables.size()), m_maxDepth) - 1;
+            for (int i = maxDepth; i >=0 ; --i)
+                if (m_depthwiseVariables[i].count(key) > 0)
+                    return m_depthwiseVariables[i].at(key);
+            return m_depthwiseVariables.back().at(key);
+        }
+    };
+    
+    class StackVariables {
+        std::vector<LocalVariables> m_stack;
+    public:
+        StackVariables() { m_stack.emplace_back(); }
+        LocalVariables &current() { return m_stack.back(); }
         
-        void printVarList() const {
-            auto depthwiseVars = m_depthwiseVars;
-            while (!depthwiseVars.empty()) {
-                std::set<std::string> vars = depthwiseVars.top();
-                size_t depth = depthwiseVars.size();
-                printf("%2lu:", depth);
-                for (auto it = std::begin(vars); it != std::end(vars); ++it)
-                    printf(" %s", it->c_str());
-                printf("\n");
-                depthwiseVars.pop();
+        void push() { m_stack.emplace_back(); }
+        void pop() { m_stack.pop_back(); }
+        
+        bool exists(const std::string &key) const {
+            for (int i = int(m_stack.size() - 1); i >= 0; --i) {
+                const LocalVariables &layer = m_stack[i];
+                if (layer.exists(key))
+                    return true;
             }
-            printf("\n");
-            depthwiseVars = m_depthwiseVars;
-            while (!depthwiseVars.empty()) {
-                std::set<std::string> vars = depthwiseVars.top();
-                size_t depth = depthwiseVars.size();
-                printf("%2lu:\n", depth);
-                for (auto it = std::begin(vars); it != std::end(vars); ++it) {
-                    const std::string &varName = *it;
-                    printf(" %s: \n", varName.c_str());
-                    std::cout << "  " << m_primaryMap.at(varName) << std::endl;
-                }
-                printf("\n");
-                depthwiseVars.pop();
+            return false;
+        }
+        
+        const Element &operator[](const std::string &key) const {
+            for (int i = int(m_stack.size() - 1); i >= 0; --i) {
+                const LocalVariables &layer = m_stack[i];
+                if (layer.exists(key))
+                    return layer.at(key);
             }
+            return m_stack.back().at(key);
+        }
+        const Element &at(const std::string &key) const {
+            for (int i = int(m_stack.size() - 1); i >= 0; --i) {
+                const LocalVariables &layer = m_stack[i];
+                if (layer.exists(key))
+                    return layer.at(key);
+            }
+            return m_stack.back().at(key);
         }
     };
     
     struct ExecuteContext {
-        LocalVariables stackVariables;
-        Scene* scene;
+        StackVariables stackVariables;
+        Element returnValue;
+        bool returnFlag;
+        SceneRef scene;
         RenderingContext* renderingContext;
     };
     
@@ -355,23 +435,62 @@ namespace SLRSceneGraph {
     class Value : public SingleTerm {
     };
     
+    class BlockStatement : public Statement {
+        std::vector<StatementRef> m_statements;
+    public:
+        BlockStatement(const StatementsRef &statements);
+        
+        bool perform(ExecuteContext &context, ErrorMessage* errMsg) const override;
+    };
+    
+    class IfElseStatement : public Statement {
+        ExpressionRef m_condExpr;
+        StatementRef m_trueBlockStmt;
+        StatementRef m_falseBlockStmt;
+    public:
+        IfElseStatement(const ExpressionRef &condExpr, const StatementRef &trueBlockStmt, const StatementRef &falseBlockStmt = nullptr) :
+        m_condExpr(condExpr), m_trueBlockStmt(trueBlockStmt), m_falseBlockStmt(falseBlockStmt) { }
+        
+        bool perform(ExecuteContext &context, ErrorMessage* errMsg) const override;
+    };
+    
     class ForStatement : public Statement {
         ExpressionRef m_preExpr;
         ExpressionRef m_condExpr;
         ExpressionRef m_postExpr;
-        std::vector<StatementRef> m_block;
+        StatementRef m_blockStmt;
     public:
-        ForStatement(const ExpressionRef &preExpr, const ExpressionRef &condExpr, const ExpressionRef &postExpr, const StatementsRef &statementList);
+        ForStatement(const ExpressionRef &preExpr, const ExpressionRef &condExpr, const ExpressionRef &postExpr, const StatementRef &blockStmt) :
+        m_preExpr(preExpr), m_condExpr(condExpr), m_postExpr(postExpr), m_blockStmt(blockStmt) { }
+        
+        bool perform(ExecuteContext &context, ErrorMessage* errMsg) const override;
+    };
+    
+    class FunctionDefinitionStatement : public Statement {
+        std::string m_funcName;
+        ArgumentDefinitionVecRef m_argDefs;
+        StatementRef m_blockStmt;
+    public:
+        FunctionDefinitionStatement(const std::string &funcName, const ArgumentDefinitionVecRef &argDefs, const StatementRef &blockStmt) :
+        m_funcName(funcName), m_argDefs(argDefs), m_blockStmt(blockStmt) { }
+        
+        bool perform(ExecuteContext &context, ErrorMessage* errMsg) const override;
+    };
+    
+    class ReturnStatement : public Statement {
+        ExpressionRef m_expr;
+    public:
+        ReturnStatement(const ExpressionRef &expr = nullptr) : m_expr(expr) { }
         
         bool perform(ExecuteContext &context, ErrorMessage* errMsg) const override;
     };
     
     class BinaryExpression : public Expression {
-        TermRef m_left;
+        ExpressionRef m_left;
         std::string m_op;
-        TermRef m_right;
+        ExpressionRef m_right;
     public:
-        BinaryExpression(const TermRef &left, const std::string &op, const TermRef &right) : m_left(left), m_op(op), m_right(right) { }
+        BinaryExpression(const ExpressionRef &left, const std::string &op, const ExpressionRef &right) : m_left(left), m_op(op), m_right(right) { }
         
         bool perform(ExecuteContext &context, ErrorMessage* errMsg) const override;
     };
@@ -381,7 +500,8 @@ namespace SLRSceneGraph {
         std::string m_op;
         ExpressionRef m_right;
     public:
-        SubstitutionExpression(const std::string &varName, const std::string &op, const ExpressionRef &right) : m_varName(varName), m_op(op), m_right(right) { }
+        SubstitutionExpression(const std::string &varName, const std::string &op, const ExpressionRef &right) :
+        m_varName(varName), m_op(op), m_right(right) { }
         
         bool perform(ExecuteContext &context, ErrorMessage* errMsg) const override;
     };
@@ -414,11 +534,11 @@ namespace SLRSceneGraph {
         bool perform(ExecuteContext &context, ErrorMessage* errMsg) const override;
     };
     
-    class FunctionSingleTerm : public SingleTerm {
-        API m_funcID;
+    class FunctionCallSingleTerm : public SingleTerm {
+        std::string m_funcID;
         ParameterVecRef m_args;
     public:
-        FunctionSingleTerm(API funcID, const ParameterVecRef &args) : m_funcID(funcID), m_args(args) { }
+        FunctionCallSingleTerm(const std::string &funcID, const ParameterVecRef &args) : m_funcID(funcID), m_args(args) { }
         
         bool perform(ExecuteContext &context, ErrorMessage* errMsg) const override;
     };
@@ -461,6 +581,16 @@ namespace SLRSceneGraph {
         VariableValue(const std::string &varName) : m_varName(varName) { }
         
         bool perform(ExecuteContext &context, ErrorMessage* errMsg) const override;
+    };
+    
+    class ArgumentDefinition {
+        std::string m_name;
+        ExpressionRef m_defaultValueExpr;
+    public:
+        ArgumentDefinition(const std::string &name, const ExpressionRef &defaultValueExpr = nullptr) : m_name(name), m_defaultValueExpr(defaultValueExpr) { }
+        
+        bool perform(ExecuteContext &context, ErrorMessage* errMsg) const;
+        void getArgInfo(ArgInfo* info) const;
     };
     
     class Parameter {

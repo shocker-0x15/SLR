@@ -296,51 +296,54 @@ namespace SLRSceneGraph {
     /// An auxiliary type to compute the largest semantic type.
     union union_type
     {
-      // API
-      char dummy1[sizeof(API)];
+      // ArgumentDefinition
+      char dummy1[sizeof(ArgumentDefinitionRef)];
+
+      // ArgumentDefinitions
+      char dummy2[sizeof(ArgumentDefinitionVecRef)];
 
       // Expression
-      char dummy2[sizeof(ExpressionRef)];
+      char dummy3[sizeof(ExpressionRef)];
 
       // Parameter
-      char dummy3[sizeof(ParameterRef)];
+      char dummy4[sizeof(ParameterRef)];
 
       // Elements
       // Arguments
-      char dummy4[sizeof(ParameterVecRef)];
+      char dummy5[sizeof(ParameterVecRef)];
 
       // SingleTerm
-      char dummy5[sizeof(SingleTermRef)];
+      char dummy6[sizeof(SingleTermRef)];
 
       // Statement
-      char dummy6[sizeof(StatementRef)];
+      char dummy7[sizeof(StatementRef)];
 
       // Statements
-      char dummy7[sizeof(StatementsRef)];
+      char dummy8[sizeof(StatementsRef)];
 
       // Term
-      char dummy8[sizeof(TermRef)];
+      char dummy9[sizeof(TermRef)];
 
       // Value
       // ImmValue
       // TupleValue
-      char dummy9[sizeof(ValueRef)];
+      char dummy10[sizeof(ValueRef)];
 
       // BOOL
-      char dummy10[sizeof(bool)];
+      char dummy11[sizeof(bool)];
 
       // CHAR
-      char dummy11[sizeof(char)];
+      char dummy12[sizeof(char)];
 
       // REALNUMBER
-      char dummy12[sizeof(double)];
+      char dummy13[sizeof(double)];
 
       // INTEGER
-      char dummy13[sizeof(int32_t)];
+      char dummy14[sizeof(int32_t)];
 
       // STRING
       // ID
-      char dummy14[sizeof(std::string)];
+      char dummy15[sizeof(std::string)];
 };
 
     /// Symbol semantic values.
@@ -396,22 +399,25 @@ namespace SLRSceneGraph {
         TOKEN_COMMA = 287,
         TOKEN_SEMICOLON = 288,
         TOKEN_CHAR = 289,
-        TOKEN_API = 290,
-        TOKEN_BOOL = 291,
-        TOKEN_INTEGER = 292,
-        TOKEN_REALNUMBER = 293,
-        TOKEN_STRING = 294,
-        TOKEN_ID = 295,
-        TOKEN_FOR = 296,
-        TOKEN_PREC_SUBST = 297,
-        TOKEN_PREC_LOGIC_OR = 298,
-        TOKEN_PREC_LOGIC_AND = 299,
-        TOKEN_PREC_EQ_REL = 300,
-        TOKEN_PREC_INEQ_REL = 301,
-        TOKEN_PREC_ADD = 302,
-        TOKEN_PREC_MUL = 303,
-        TOKEN_PREC_PRE_INC = 304,
-        TOKEN_PREC_POST_INC = 305
+        TOKEN_BOOL = 290,
+        TOKEN_INTEGER = 291,
+        TOKEN_REALNUMBER = 292,
+        TOKEN_STRING = 293,
+        TOKEN_ID = 294,
+        TOKEN_IF = 295,
+        TOKEN_ELSE = 296,
+        TOKEN_FOR = 297,
+        TOKEN_FUNCTION = 298,
+        TOKEN_RETURN = 299,
+        TOKEN_PREC_SUBST = 300,
+        TOKEN_PREC_LOGIC_OR = 301,
+        TOKEN_PREC_LOGIC_AND = 302,
+        TOKEN_PREC_EQ_REL = 303,
+        TOKEN_PREC_INEQ_REL = 304,
+        TOKEN_PREC_ADD = 305,
+        TOKEN_PREC_MUL = 306,
+        TOKEN_PREC_PRE_INC = 307,
+        TOKEN_PREC_POST_INC = 308
       };
     };
 
@@ -449,7 +455,9 @@ namespace SLRSceneGraph {
 
   basic_symbol (typename Base::kind_type t, const location_type& l);
 
-  basic_symbol (typename Base::kind_type t, const API v, const location_type& l);
+  basic_symbol (typename Base::kind_type t, const ArgumentDefinitionRef v, const location_type& l);
+
+  basic_symbol (typename Base::kind_type t, const ArgumentDefinitionVecRef v, const location_type& l);
 
   basic_symbol (typename Base::kind_type t, const ExpressionRef v, const location_type& l);
 
@@ -678,10 +686,6 @@ namespace SLRSceneGraph {
 
     static inline
     symbol_type
-    make_API (const API& v, const location_type& l);
-
-    static inline
-    symbol_type
     make_BOOL (const bool& v, const location_type& l);
 
     static inline
@@ -702,7 +706,23 @@ namespace SLRSceneGraph {
 
     static inline
     symbol_type
+    make_IF (const location_type& l);
+
+    static inline
+    symbol_type
+    make_ELSE (const location_type& l);
+
+    static inline
+    symbol_type
     make_FOR (const location_type& l);
+
+    static inline
+    symbol_type
+    make_FUNCTION (const location_type& l);
+
+    static inline
+    symbol_type
+    make_RETURN (const location_type& l);
 
     static inline
     symbol_type
@@ -815,7 +835,7 @@ namespace SLRSceneGraph {
   static const unsigned char yydefact_[];
 
   // YYPGOTO[NTERM-NUM].
-  static const short int yypgoto_[];
+  static const signed char yypgoto_[];
 
   // YYDEFGOTO[NTERM-NUM].
   static const signed char yydefgoto_[];
@@ -825,7 +845,7 @@ namespace SLRSceneGraph {
   // number is the opposite.  If YYTABLE_NINF, syntax error.
   static const unsigned char yytable_[];
 
-  static const signed char yycheck_[];
+  static const short int yycheck_[];
 
   // YYSTOS[STATE-NUM] -- The (internal number of the) accessing
   // symbol of state STATE-NUM.
@@ -846,7 +866,7 @@ namespace SLRSceneGraph {
     static const char* const yytname_[];
 #if YYDEBUG
   // YYRLINE[YYN] -- Source line where rule number YYN was defined.
-  static const unsigned char yyrline_[];
+  static const unsigned short int yyrline_[];
     /// Report on the debug stream that the rule \a r is going to be reduced.
     virtual void yy_reduce_print_ (int r);
     /// Print the state stack on the debug stream.
@@ -945,12 +965,12 @@ namespace SLRSceneGraph {
     enum
     {
       yyeof_ = 0,
-      yylast_ = 256,     ///< Last index in yytable_.
-      yynnts_ = 12,  ///< Number of nonterminal symbols.
-      yyfinal_ = 43, ///< Termination state number.
+      yylast_ = 493,     ///< Last index in yytable_.
+      yynnts_ = 14,  ///< Number of nonterminal symbols.
+      yyfinal_ = 51, ///< Termination state number.
       yyterror_ = 1,
       yyerrcode_ = 256,
-      yyntokens_ = 51  ///< Number of tokens.
+      yyntokens_ = 54  ///< Number of tokens.
     };
 
 
@@ -997,9 +1017,9 @@ namespace SLRSceneGraph {
       15,    16,    17,    18,    19,    20,    21,    22,    23,    24,
       25,    26,    27,    28,    29,    30,    31,    32,    33,    34,
       35,    36,    37,    38,    39,    40,    41,    42,    43,    44,
-      45,    46,    47,    48,    49,    50
+      45,    46,    47,    48,    49,    50,    51,    52,    53
     };
-    const unsigned int user_token_number_max_ = 305;
+    const unsigned int user_token_number_max_ = 308;
     const token_number_type undef_token_ = 2;
 
     if (static_cast<int>(t) <= yyeof_)
@@ -1032,46 +1052,50 @@ namespace SLRSceneGraph {
   {
       switch (other.type_get ())
     {
-      case 35: // API
-        value.copy< API > (other.value);
+      case 63: // ArgumentDefinition
+        value.copy< ArgumentDefinitionRef > (other.value);
         break;
 
-      case 54: // Expression
+      case 64: // ArgumentDefinitions
+        value.copy< ArgumentDefinitionVecRef > (other.value);
+        break;
+
+      case 57: // Expression
         value.copy< ExpressionRef > (other.value);
         break;
 
-      case 60: // Parameter
+      case 65: // Parameter
         value.copy< ParameterRef > (other.value);
         break;
 
-      case 61: // Elements
-      case 62: // Arguments
+      case 66: // Elements
+      case 67: // Arguments
         value.copy< ParameterVecRef > (other.value);
         break;
 
-      case 56: // SingleTerm
+      case 59: // SingleTerm
         value.copy< SingleTermRef > (other.value);
         break;
 
-      case 53: // Statement
+      case 56: // Statement
         value.copy< StatementRef > (other.value);
         break;
 
-      case 52: // Statements
+      case 55: // Statements
         value.copy< StatementsRef > (other.value);
         break;
 
-      case 55: // Term
+      case 58: // Term
         value.copy< TermRef > (other.value);
         break;
 
-      case 57: // Value
-      case 58: // ImmValue
-      case 59: // TupleValue
+      case 60: // Value
+      case 61: // ImmValue
+      case 62: // TupleValue
         value.copy< ValueRef > (other.value);
         break;
 
-      case 36: // BOOL
+      case 35: // BOOL
         value.copy< bool > (other.value);
         break;
 
@@ -1079,16 +1103,16 @@ namespace SLRSceneGraph {
         value.copy< char > (other.value);
         break;
 
-      case 38: // REALNUMBER
+      case 37: // REALNUMBER
         value.copy< double > (other.value);
         break;
 
-      case 37: // INTEGER
+      case 36: // INTEGER
         value.copy< int32_t > (other.value);
         break;
 
-      case 39: // STRING
-      case 40: // ID
+      case 38: // STRING
+      case 39: // ID
         value.copy< std::string > (other.value);
         break;
 
@@ -1109,46 +1133,50 @@ namespace SLRSceneGraph {
     (void) v;
       switch (this->type_get ())
     {
-      case 35: // API
-        value.copy< API > (v);
+      case 63: // ArgumentDefinition
+        value.copy< ArgumentDefinitionRef > (v);
         break;
 
-      case 54: // Expression
+      case 64: // ArgumentDefinitions
+        value.copy< ArgumentDefinitionVecRef > (v);
+        break;
+
+      case 57: // Expression
         value.copy< ExpressionRef > (v);
         break;
 
-      case 60: // Parameter
+      case 65: // Parameter
         value.copy< ParameterRef > (v);
         break;
 
-      case 61: // Elements
-      case 62: // Arguments
+      case 66: // Elements
+      case 67: // Arguments
         value.copy< ParameterVecRef > (v);
         break;
 
-      case 56: // SingleTerm
+      case 59: // SingleTerm
         value.copy< SingleTermRef > (v);
         break;
 
-      case 53: // Statement
+      case 56: // Statement
         value.copy< StatementRef > (v);
         break;
 
-      case 52: // Statements
+      case 55: // Statements
         value.copy< StatementsRef > (v);
         break;
 
-      case 55: // Term
+      case 58: // Term
         value.copy< TermRef > (v);
         break;
 
-      case 57: // Value
-      case 58: // ImmValue
-      case 59: // TupleValue
+      case 60: // Value
+      case 61: // ImmValue
+      case 62: // TupleValue
         value.copy< ValueRef > (v);
         break;
 
-      case 36: // BOOL
+      case 35: // BOOL
         value.copy< bool > (v);
         break;
 
@@ -1156,16 +1184,16 @@ namespace SLRSceneGraph {
         value.copy< char > (v);
         break;
 
-      case 38: // REALNUMBER
+      case 37: // REALNUMBER
         value.copy< double > (v);
         break;
 
-      case 37: // INTEGER
+      case 36: // INTEGER
         value.copy< int32_t > (v);
         break;
 
-      case 39: // STRING
-      case 40: // ID
+      case 38: // STRING
+      case 39: // ID
         value.copy< std::string > (v);
         break;
 
@@ -1185,7 +1213,14 @@ namespace SLRSceneGraph {
   {}
 
   template <typename Base>
-  SceneParser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const API v, const location_type& l)
+  SceneParser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const ArgumentDefinitionRef v, const location_type& l)
+    : Base (t)
+    , value (v)
+    , location (l)
+  {}
+
+  template <typename Base>
+  SceneParser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const ArgumentDefinitionVecRef v, const location_type& l)
     : Base (t)
     , value (v)
     , location (l)
@@ -1308,46 +1343,50 @@ namespace SLRSceneGraph {
     // Type destructor.
     switch (yytype)
     {
-      case 35: // API
-        value.template destroy< API > ();
+      case 63: // ArgumentDefinition
+        value.template destroy< ArgumentDefinitionRef > ();
         break;
 
-      case 54: // Expression
+      case 64: // ArgumentDefinitions
+        value.template destroy< ArgumentDefinitionVecRef > ();
+        break;
+
+      case 57: // Expression
         value.template destroy< ExpressionRef > ();
         break;
 
-      case 60: // Parameter
+      case 65: // Parameter
         value.template destroy< ParameterRef > ();
         break;
 
-      case 61: // Elements
-      case 62: // Arguments
+      case 66: // Elements
+      case 67: // Arguments
         value.template destroy< ParameterVecRef > ();
         break;
 
-      case 56: // SingleTerm
+      case 59: // SingleTerm
         value.template destroy< SingleTermRef > ();
         break;
 
-      case 53: // Statement
+      case 56: // Statement
         value.template destroy< StatementRef > ();
         break;
 
-      case 52: // Statements
+      case 55: // Statements
         value.template destroy< StatementsRef > ();
         break;
 
-      case 55: // Term
+      case 58: // Term
         value.template destroy< TermRef > ();
         break;
 
-      case 57: // Value
-      case 58: // ImmValue
-      case 59: // TupleValue
+      case 60: // Value
+      case 61: // ImmValue
+      case 62: // TupleValue
         value.template destroy< ValueRef > ();
         break;
 
-      case 36: // BOOL
+      case 35: // BOOL
         value.template destroy< bool > ();
         break;
 
@@ -1355,16 +1394,16 @@ namespace SLRSceneGraph {
         value.template destroy< char > ();
         break;
 
-      case 38: // REALNUMBER
+      case 37: // REALNUMBER
         value.template destroy< double > ();
         break;
 
-      case 37: // INTEGER
+      case 36: // INTEGER
         value.template destroy< int32_t > ();
         break;
 
-      case 39: // STRING
-      case 40: // ID
+      case 38: // STRING
+      case 39: // ID
         value.template destroy< std::string > ();
         break;
 
@@ -1391,46 +1430,50 @@ namespace SLRSceneGraph {
     super_type::move(s);
       switch (this->type_get ())
     {
-      case 35: // API
-        value.move< API > (s.value);
+      case 63: // ArgumentDefinition
+        value.move< ArgumentDefinitionRef > (s.value);
         break;
 
-      case 54: // Expression
+      case 64: // ArgumentDefinitions
+        value.move< ArgumentDefinitionVecRef > (s.value);
+        break;
+
+      case 57: // Expression
         value.move< ExpressionRef > (s.value);
         break;
 
-      case 60: // Parameter
+      case 65: // Parameter
         value.move< ParameterRef > (s.value);
         break;
 
-      case 61: // Elements
-      case 62: // Arguments
+      case 66: // Elements
+      case 67: // Arguments
         value.move< ParameterVecRef > (s.value);
         break;
 
-      case 56: // SingleTerm
+      case 59: // SingleTerm
         value.move< SingleTermRef > (s.value);
         break;
 
-      case 53: // Statement
+      case 56: // Statement
         value.move< StatementRef > (s.value);
         break;
 
-      case 52: // Statements
+      case 55: // Statements
         value.move< StatementsRef > (s.value);
         break;
 
-      case 55: // Term
+      case 58: // Term
         value.move< TermRef > (s.value);
         break;
 
-      case 57: // Value
-      case 58: // ImmValue
-      case 59: // TupleValue
+      case 60: // Value
+      case 61: // ImmValue
+      case 62: // TupleValue
         value.move< ValueRef > (s.value);
         break;
 
-      case 36: // BOOL
+      case 35: // BOOL
         value.move< bool > (s.value);
         break;
 
@@ -1438,16 +1481,16 @@ namespace SLRSceneGraph {
         value.move< char > (s.value);
         break;
 
-      case 38: // REALNUMBER
+      case 37: // REALNUMBER
         value.move< double > (s.value);
         break;
 
-      case 37: // INTEGER
+      case 36: // INTEGER
         value.move< int32_t > (s.value);
         break;
 
-      case 39: // STRING
-      case 40: // ID
+      case 38: // STRING
+      case 39: // ID
         value.move< std::string > (s.value);
         break;
 
@@ -1511,7 +1554,7 @@ namespace SLRSceneGraph {
      275,   276,   277,   278,   279,   280,   281,   282,   283,   284,
      285,   286,   287,   288,   289,   290,   291,   292,   293,   294,
      295,   296,   297,   298,   299,   300,   301,   302,   303,   304,
-     305
+     305,   306,   307,   308
     };
     return static_cast<token_type> (yytoken_number_[type]);
   }
@@ -1715,12 +1758,6 @@ namespace SLRSceneGraph {
   }
 
   SceneParser::symbol_type
-  SceneParser::make_API (const API& v, const location_type& l)
-  {
-    return symbol_type (token::TOKEN_API, v, l);
-  }
-
-  SceneParser::symbol_type
   SceneParser::make_BOOL (const bool& v, const location_type& l)
   {
     return symbol_type (token::TOKEN_BOOL, v, l);
@@ -1751,9 +1788,33 @@ namespace SLRSceneGraph {
   }
 
   SceneParser::symbol_type
+  SceneParser::make_IF (const location_type& l)
+  {
+    return symbol_type (token::TOKEN_IF, l);
+  }
+
+  SceneParser::symbol_type
+  SceneParser::make_ELSE (const location_type& l)
+  {
+    return symbol_type (token::TOKEN_ELSE, l);
+  }
+
+  SceneParser::symbol_type
   SceneParser::make_FOR (const location_type& l)
   {
     return symbol_type (token::TOKEN_FOR, l);
+  }
+
+  SceneParser::symbol_type
+  SceneParser::make_FUNCTION (const location_type& l)
+  {
+    return symbol_type (token::TOKEN_FUNCTION, l);
+  }
+
+  SceneParser::symbol_type
+  SceneParser::make_RETURN (const location_type& l)
+  {
+    return symbol_type (token::TOKEN_RETURN, l);
   }
 
   SceneParser::symbol_type
@@ -1813,7 +1874,7 @@ namespace SLRSceneGraph {
 
 #line 4 "SceneParser.yy" // lalr1.cc:392
 } // SLRSceneGraph
-#line 1817 "SceneParser.tab.hh" // lalr1.cc:392
+#line 1878 "SceneParser.tab.hh" // lalr1.cc:392
 
 
 

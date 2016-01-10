@@ -117,13 +117,13 @@ namespace SLR {
     
     InfiniteSphereSurfaceObject::InfiniteSphereSurfaceObject(const Surface* surf, const IBLEmission* emitter) {
         m_surface = surf;
-        m_surfMat = new EmitterSurfaceMaterial(nullptr, emitter);
+        m_material = new EmitterSurfaceMaterial(nullptr, emitter);
         m_dist = emitter->createIBLImportanceMap();
     }
     
     InfiniteSphereSurfaceObject::~InfiniteSphereSurfaceObject() {
         delete m_dist;
-        delete m_surfMat;
+        delete m_material;
     }
     
     bool InfiniteSphereSurfaceObject::isEmitting() const {
@@ -143,6 +143,8 @@ namespace SLR {
         float uvPDF;
         float theta, phi;
         m_dist->sample(smp.uPos[0], smp.uPos[1], &phi, &theta, &uvPDF);
+        phi *= 2 * M_PI;
+        theta *= M_PI;
         SurfacePoint &surfPt = result->surfPt;
         surfPt.p = Point3D(-std::sin(phi) * std::sin(theta), std::cos(theta), std::cos(phi) * std::sin(theta));
         surfPt.atInfinity = true;
@@ -321,8 +323,11 @@ namespace SLR {
     
     
     
-    Scene::Scene(const SurfaceObjectAggregate* aggregate, const InfiniteSphereSurfaceObject* envSphere, const Camera* camera) :
-    m_aggregate(aggregate), m_envSphere(envSphere), m_camera(camera) {
+    void Scene::build(const SurfaceObjectAggregate* aggregate, const InfiniteSphereSurfaceObject* envSphere, const Camera* camera) {
+        m_aggregate = aggregate;
+        m_envSphere = envSphere;
+        m_camera = camera;
+        
         // calculate world bounding sphere and store its radius and disc area.
         BoundingBox3D worldBounds = m_aggregate->bounds();
         m_worldCenter = worldBounds.centroid();

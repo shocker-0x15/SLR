@@ -17,6 +17,7 @@
 
 namespace SLRSceneGraph {
     Scene::Scene() : m_envNode(nullptr) {
+        m_raw = createUnique<SLR::Scene>();
         m_rootNode = createShared<InternalNode>();
         m_rootNode->setName("root");
         m_rootNode->setTransform(createShared<SLR::StaticTransform>());
@@ -24,7 +25,7 @@ namespace SLRSceneGraph {
     
     Scene::~Scene() {}
     
-    void Scene::build(SLR::Scene** scene, SLR::ArenaAllocator &mem) {
+    void Scene::build(const SLR::Scene** scene, SLR::ArenaAllocator &mem) {
         RenderingData renderingData;
         m_rootNode->getRenderingData(mem, nullptr, &renderingData);
         SLRAssert(renderingData.camera != nullptr, "Camera is not set.");
@@ -34,7 +35,9 @@ namespace SLRSceneGraph {
         
         SLR::Camera* camera = renderingData.camera;
         camera->setTransform(renderingData.camTransform);
-        *scene = mem.create<SLR::Scene>(aggregate, envSphere, camera);
+        m_raw->build(aggregate, envSphere, camera);
+        
+        *scene = m_raw.get();
     }
     
     RenderingContext::RenderingContext() {
