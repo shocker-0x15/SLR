@@ -9,19 +9,21 @@
 #include "API.hpp"
 
 #include "Parser/SceneParsingDriver.h"
-#include <libSLR/Core/Transform.h>
 
+#include <libSLR/Core/Image.h>
+#include <libSLR/Core/Transform.h>
+#include <libSLR/Core/SurfaceObject.h>
+#include <libSLR/Core/XORShift.h>
+#include <libSLR/BasicTypes/Spectrum.h>
+#include <libSLR/Memory/ArenaAllocator.h>
+#include <libSLR/Renderers/PathTracingRenderer.h>
+
+#include "nodes.h"
+#include "node_constructor.h"
 #include "TriangleMeshNode.h"
 #include "camera_nodes.h"
 #include "InfiniteSphereNode.h"
 
-#include "nodes.h"
-#include "node_constructor.h"
-
-#include <libSLR/Renderers/PathTracingRenderer.h>
-
-#include <libSLR/BasicTypes/Spectrum.h>
-#include <libSLR/Core/Image.h>
 #include "image_loader.h"
 #include "textures.hpp"
 #include "surface_materials.hpp"
@@ -64,13 +66,13 @@ namespace SLRSceneGraph {
             stack["root"] = Element(TypeMap::Node(), scene->rootNode());
             
             stack["print"] = Element(TypeMap::Function(),
-                                       Function(1,
-                                                {{"value", Type::Any}},
-                                                [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
-                                                    std::cout << args.at("value") << std::endl;
-                                                    return Element();
-                                                })
-                                       );
+                                     Function(1,
+                                              {{"value", Type::Any}},
+                                              [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
+                                                  std::cout << args.at("value") << std::endl;
+                                                  return Element();
+                                              })
+                                     );
             stack["addItem"] = Element(TypeMap::Function(),
                                        Function(1,
                                                 {{"tuple", Type::Tuple}, {"key", Type::String, Element(TypeMap::String(), "")}, {"item", Type::Any}},
@@ -90,8 +92,182 @@ namespace SLRSceneGraph {
                                                         return Element(TypeMap::Integer(), tuple->numParams());
                                                     })
                                            );
+            stack["Vector"] = Element(TypeMap::Function(),
+                                      Function(1,
+                                               {{"x", Type::RealNumber}, {"y", Type::RealNumber}, {"z", Type::RealNumber}},
+                                               [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
+                                                   auto x = args.at("x").raw<TypeMap::RealNumber>();
+                                                   auto y = args.at("y").raw<TypeMap::RealNumber>();
+                                                   auto z = args.at("z").raw<TypeMap::RealNumber>();
+                                                   return Element(SLR::Vector3D(x, y, z));
+                                               })
+                                      );
+            stack["getX"] = Element(TypeMap::Function(),
+                                    Function(1,
+                                             {
+                                                 {{"point", Type::Point}},
+                                                 {{"vector", Type::Vector}},
+                                                 {{"normal", Type::Normal}}
+                                             },
+                                             {
+                                                 [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
+                                                     const auto &point = args.at("point").raw<TypeMap::Point>();
+                                                     return Element(point.x);
+                                                 },
+                                                 [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
+                                                     const auto &vector = args.at("vector").raw<TypeMap::Vector>();
+                                                     return Element(vector.x);
+                                                 },
+                                                 [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
+                                                     const auto &normal = args.at("normal").raw<TypeMap::Normal>();
+                                                     return Element(normal.x);
+                                                 }})
+                                    );
+            stack["getY"] = Element(TypeMap::Function(),
+                                    Function(1,
+                                             {
+                                                 {{"point", Type::Point}},
+                                                 {{"vector", Type::Vector}},
+                                                 {{"normal", Type::Normal}}
+                                             },
+                                             {
+                                                 [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
+                                                     const auto &point = args.at("point").raw<TypeMap::Point>();
+                                                     return Element(point.y);
+                                                 },
+                                                 [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
+                                                     const auto &vector = args.at("vector").raw<TypeMap::Vector>();
+                                                     return Element(vector.y);
+                                                 },
+                                                 [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
+                                                     const auto &normal = args.at("normal").raw<TypeMap::Normal>();
+                                                     return Element(normal.y);
+                                                 }})
+                                    );
+            stack["getZ"] = Element(TypeMap::Function(),
+                                    Function(1,
+                                             {
+                                                 {{"point", Type::Point}},
+                                                 {{"vector", Type::Vector}},
+                                                 {{"normal", Type::Normal}}
+                                             },
+                                             {
+                                                 [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
+                                                     const auto &point = args.at("point").raw<TypeMap::Point>();
+                                                     return Element(point.z);
+                                                 },
+                                                 [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
+                                                     const auto &vector = args.at("vector").raw<TypeMap::Vector>();
+                                                     return Element(vector.z);
+                                                 },
+                                                 [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
+                                                     const auto &normal = args.at("normal").raw<TypeMap::Normal>();
+                                                     return Element(normal.z);
+                                                 }})
+                                    );
+            stack["min"] = Element(TypeMap::Function(),
+                                   Function(1, {{"x0", Type::RealNumber}, {"x1", Type::RealNumber}},
+                                            [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
+                                                float x0 = args.at("x0").raw<TypeMap::RealNumber>();
+                                                float x1 = args.at("x1").raw<TypeMap::RealNumber>();
+                                                return Element(std::min(x0, x1));
+                                            })
+                                   );
+            stack["max"] = Element(TypeMap::Function(),
+                                   Function(1, {{"x0", Type::RealNumber}, {"x1", Type::RealNumber}},
+                                            [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
+                                                float x0 = args.at("x0").raw<TypeMap::RealNumber>();
+                                                float x1 = args.at("x1").raw<TypeMap::RealNumber>();
+                                                return Element(std::max(x0, x1));
+                                            })
+                                   );
+            stack["clamp"] = Element(TypeMap::Function(),
+                                   Function(1, {{"x", Type::RealNumber}, {"min", Type::RealNumber}, {"max", Type::RealNumber}},
+                                            [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
+                                                float x = args.at("x").raw<TypeMap::RealNumber>();
+                                                float min = args.at("min").raw<TypeMap::RealNumber>();
+                                                float max = args.at("max").raw<TypeMap::RealNumber>();
+                                                return Element(std::clamp(x, min, max));
+                                            })
+                                   );
+            stack["sin"] = Element(TypeMap::Function(),
+                                   Function(1, {{"x", Type::RealNumber}},
+                                            [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
+                                                float x = args.at("x").raw<TypeMap::RealNumber>();
+                                                return Element(std::sin(x));
+                                            })
+                                   );
+            stack["cos"] = Element(TypeMap::Function(),
+                                   Function(1, {{"x", Type::RealNumber}},
+                                            [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
+                                                float x = args.at("x").raw<TypeMap::RealNumber>();
+                                                return Element(std::cos(x));
+                                            })
+                                   );
+            stack["tan"] = Element(TypeMap::Function(),
+                                   Function(1, {{"x", Type::RealNumber}},
+                                            [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
+                                                float x = args.at("x").raw<TypeMap::RealNumber>();
+                                                return Element(std::tan(x));
+                                            })
+                                   );
+            stack["asin"] = Element(TypeMap::Function(),
+                                   Function(1, {{"x", Type::RealNumber}},
+                                            [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
+                                                float x = args.at("x").raw<TypeMap::RealNumber>();
+                                                return Element(std::asin(x));
+                                            })
+                                   );
+            stack["acos"] = Element(TypeMap::Function(),
+                                   Function(1, {{"x", Type::RealNumber}},
+                                            [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
+                                                float x = args.at("x").raw<TypeMap::RealNumber>();
+                                                return Element(std::acos(x));
+                                            })
+                                   );
+            stack["atan"] = Element(TypeMap::Function(),
+                                    Function(1,
+                                             {
+                                                 {{"x", Type::RealNumber}},
+                                                 {{"y", Type::RealNumber}, {"x", Type::RealNumber}}
+                                             },
+                                             {
+                                                 [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
+                                                     float x = args.at("x").raw<TypeMap::RealNumber>();
+                                                     return Element(std::atan(x));
+                                                 },
+                                                 [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
+                                                     float y = args.at("y").raw<TypeMap::RealNumber>();
+                                                     float x = args.at("x").raw<TypeMap::RealNumber>();
+                                                     return Element(std::atan2(y, x));
+                                                 }
+                                             })
+                                    );
+            stack["dot"] = Element(TypeMap::Function(),
+                                   Function(1, {{"v0", Type::Vector}, {"v1", Type::Vector}},
+                                            [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
+                                                const SLR::Vector3D v0 = args.at("v0").raw<TypeMap::Vector>();
+                                                const SLR::Vector3D v1 = args.at("v1").raw<TypeMap::Vector>();
+                                                return Element(SLR::dot(v0, v1));
+                                            })
+                                   );
+            stack["cross"] = Element(TypeMap::Function(),
+                                     Function(1, {{"v0", Type::Vector}, {"v1", Type::Vector}},
+                                              [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
+                                                  const SLR::Vector3D v0 = args.at("v0").raw<TypeMap::Vector>();
+                                                  const SLR::Vector3D v1 = args.at("v1").raw<TypeMap::Vector>();
+                                                  return Element(SLR::cross(v0, v1));
+                                              })
+                                     );
+            stack["random"] = Element(TypeMap::Function(),
+                                     Function(1, {},
+                                              [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
+                                                  static SLR::XORShift rng{2112984105};
+                                                  return Element(rng.getFloat0cTo1o());
+                                              })
+                                     );
             stack["translate"] = Element(TypeMap::Function(),
-                                       Function(1, 
+                                       Function(1,
                                                 {{"x", Type::RealNumber}, {"y", Type::RealNumber}, {"z", Type::RealNumber}},
                                                 [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
                                                     float tx = args.at("x").raw<TypeMap::RealNumber>();
@@ -99,6 +275,14 @@ namespace SLRSceneGraph {
                                                     float tz = args.at("z").raw<TypeMap::RealNumber>();
                                                     
                                                     return Element(TypeMap::Matrix(), SLR::translate(tx, ty, tz));
+                                                })
+                                       );
+            stack["rotate"] = Element(TypeMap::Function(),
+                                      Function(1, {{"angle", Type::RealNumber}, {"axis", Type::Vector}},
+                                                [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
+                                                    float angle = args.at("angle").raw<TypeMap::RealNumber>();
+                                                    SLR::Vector3D axis = args.at("axis").raw<TypeMap::Vector>();
+                                                    return Element(TypeMap::Matrix(), SLR::rotate(angle, axis));
                                                 })
                                        );
             stack["rotateX"] = Element(TypeMap::Function(),
@@ -488,6 +672,14 @@ namespace SLRSceneGraph {
                                                        return Element(TypeMap::Node(), InternalNode());
                                                    })
                                           );
+            stack["createReferenceNode"] = Element(TypeMap::Function(),
+                                          Function(1, {{"node", Type::Node}},
+                                                   [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
+                                                       InternalNodeRef node = args.at("node").rawRef<TypeMap::Node>();
+                                                       ReferenceNodeRef refNode = createShared<ReferenceNode>(node);
+                                                       return Element(TypeMap::ReferenceNode(), refNode);
+                                                   })
+                                          );
             stack["setTransform"] = Element(TypeMap::Function(),
                                             Function(1, {{"node", Type::Node}, {"transform", Type::Transform}},
                                                      [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
@@ -501,6 +693,7 @@ namespace SLRSceneGraph {
                                               Function(1, 
                                                        {
                                                            {{"parent", Type::Node}, {"child", Type::Node}},
+                                                           {{"parent", Type::Node}, {"child", Type::ReferenceNode}},
                                                            {{"parent", Type::Node}, {"child", Type::Mesh}},
                                                            {{"parent", Type::Node}, {"child", Type::Camera}}
                                                        },
@@ -508,6 +701,12 @@ namespace SLRSceneGraph {
                                                            [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
                                                                InternalNodeRef parent = args.at("parent").rawRef<TypeMap::Node>();
                                                                InternalNodeRef child = args.at("child").rawRef<TypeMap::Node>();
+                                                               parent->addChildNode(child);
+                                                               return Element();
+                                                           },
+                                                           [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
+                                                               InternalNodeRef parent = args.at("parent").rawRef<TypeMap::Node>();
+                                                               ReferenceNodeRef child = args.at("child").rawRef<TypeMap::ReferenceNode>();
                                                                parent->addChildNode(child);
                                                                return Element();
                                                            },
@@ -620,8 +819,58 @@ namespace SLRSceneGraph {
                                                         return Element(TypeMap::Node(), modelNode);
                                                     })
                                            );
+            stack["scanXZFromYPlus"] = Element(TypeMap::Function(),
+                                               Function(1,
+                                                        {
+                                                            {"node", Type::Node},
+                                                            {"numX", Type::Integer},
+                                                            {"numY", Type::Integer},
+                                                            {"callback", Type::Function}
+                                                        },
+                                                        [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
+                                                            using namespace SLR;
+                                                            InternalNodeRef node = args.at("node").rawRef<TypeMap::Node>();
+                                                            uint32_t numX = args.at("numX").raw<TypeMap::Integer>();
+                                                            uint32_t numY = args.at("numY").raw<TypeMap::Integer>();
+                                                            const Function &callback = args.at("callback").raw<TypeMap::Function>();
+                                                            
+                                                            RenderingData buildData;
+                                                            SLR::ArenaAllocator mem;
+                                                            node->getRenderingData(mem, nullptr, &buildData);
+                                                            auto aggregate = createUnique<SurfaceObjectAggregate>(buildData.surfObjs);
+                                                            
+                                                            SLR::BoundingBox3D bounds = aggregate->bounds();
+                                                            for (int i = 0; i < numY; ++i) {
+                                                                for (int j = 0; j < numX; ++j) {
+                                                                    Ray ray(Point3D(bounds.minP.x + (bounds.maxP.x - bounds.minP.x) * (j + 0.5f) / numX,
+                                                                                    bounds.maxP.y * 1.5f,
+                                                                                    bounds.minP.z + (bounds.maxP.z - bounds.minP.z) * (i + 0.5f) / numY),
+                                                                            Vector3D(0, -1, 0), 0.0f);
+                                                                    Intersection isect;
+                                                                    aggregate->intersect(ray, &isect);
+                                                                    SurfacePoint surfPt;
+                                                                    isect.getSurfacePoint(&surfPt);
+                                                                    
+                                                                    ParameterList params;
+                                                                    
+                                                                    Element elPosition = Element(surfPt.p);
+                                                                    Element elNormal = Element(Normal3D(surfPt.shadingFrame.z));
+                                                                    Element elTangent = Element(surfPt.shadingFrame.x);
+                                                                    Element elBitangent = Element(surfPt.shadingFrame.y);
+                                                                    params.add("", elPosition);
+                                                                    params.add("", elTangent);
+                                                                    params.add("", elBitangent);
+                                                                    params.add("", elNormal);
+                                                                    
+                                                                    callback(params, context, err);
+                                                                }
+                                                            }
+                                                            
+                                                            return Element();
+                                                        })
+                                               );
             stack["createPerspectiveCamera"] = Element(TypeMap::Function(),
-                                                       Function(1, 
+                                                       Function(1,
                                                                 {
                                                                     {"sensitivity", Type::RealNumber, Element(0.0)},
                                                                     {"aspect", Type::RealNumber, Element(1.0)},

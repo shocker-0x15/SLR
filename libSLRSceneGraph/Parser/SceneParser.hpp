@@ -19,6 +19,9 @@ namespace SLRSceneGraph {
         Integer,
         RealNumber,
         String,
+        Point,
+        Vector,
+        Normal,
         Matrix,
         Vertex,
         Transform,
@@ -32,6 +35,7 @@ namespace SLRSceneGraph {
         Mesh,
         Camera,
         Node,
+        ReferenceNode,
         Tuple,
         Function, 
         Any,
@@ -47,6 +51,9 @@ namespace SLRSceneGraph {
         TypeMapDef(Integer, int32_t);
         TypeMapDef(RealNumber, double);
         TypeMapDef(String, std::string);
+        TypeMapDef(Point, SLR::Point3D);
+        TypeMapDef(Vector, SLR::Vector3D);
+        TypeMapDef(Normal, SLR::Normal3D);
         TypeMapDef(Matrix, SLR::Matrix4x4);
         TypeMapDef(Vertex, SLR::Vertex);
         TypeMapDef(Transform, SLR::Transform);
@@ -60,6 +67,7 @@ namespace SLRSceneGraph {
         TypeMapDef(Mesh, SLRSceneGraph::TriangleMeshNode);
         TypeMapDef(Camera, SLRSceneGraph::CameraNode);
         TypeMapDef(Node, SLRSceneGraph::InternalNode);
+        TypeMapDef(ReferenceNode, SLRSceneGraph::ReferenceNode);
         TypeMapDef(Tuple, SLRSceneGraph::ParameterList);
         TypeMapDef(Function, SLRSceneGraph::Function);
         TypeMapDef(Void, void);
@@ -112,6 +120,9 @@ namespace SLRSceneGraph {
         Element(bool val) : type(Type::Bool), valueRef(createShared<bool>(val)) { }
         Element(int32_t val) : type(Type::Integer), valueRef(createShared<int32_t>(val)) { }
         Element(double val) : type(Type::RealNumber), valueRef(createShared<double>(val)) { }
+        Element(const SLR::Point3D &val);
+        Element(const SLR::Vector3D &val);
+        Element(const SLR::Normal3D &val);
         Element(const std::string &val) : type(Type::String), valueRef(createShared<std::string>(val)) { }
         Element(const ErrorMessage &val) : type(Type::Error), valueRef(createShared<ErrorMessage>(val)) { }
         

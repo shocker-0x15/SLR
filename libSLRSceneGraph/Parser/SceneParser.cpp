@@ -62,6 +62,9 @@ namespace SLRSceneGraph {
             case Type::Node:
                 out << "Node";
                 break;
+            case Type::ReferenceNode:
+                out << "ReferenceNode";
+                break;
             case Type::Tuple:
                 out << "Tuple";
                 break;
@@ -136,6 +139,9 @@ namespace SLRSceneGraph {
             case Type::Node:
                 out << "Node";
                 break;
+            case Type::ReferenceNode:
+                out << "ReferenceNode";
+                break;
             case Type::Tuple:
                 out << elem.raw<TypeMap::Tuple>();
                 break;
@@ -178,6 +184,10 @@ namespace SLRSceneGraph {
         out << ")";
         return out;
     }
+    
+    Element::Element(const SLR::Point3D &val) : type(Type::Point), valueRef(createShared<SLR::Point3D>(val)) { }
+    Element::Element(const SLR::Vector3D &val) : type(Type::Vector), valueRef(createShared<SLR::Vector3D>(val)) { }
+    Element::Element(const SLR::Normal3D &val) : type(Type::Normal), valueRef(createShared<SLR::Normal3D>(val)) { }
     
     bool Element::isConvertibleTo(Type toType) const {
         return TypeInfo::infos[(uint32_t)type].isConvertibleTo(toType);
@@ -775,6 +785,47 @@ namespace SLRSceneGraph {
                         return Element(lVal == v1.asRaw<TypeMap::String>());
                     return Element(ErrorMessage("== operator does not support the right operand type."));
                 };
+            }
+            {
+                TypeInfo &info = infos[(uint32_t)Type::Point];
+                
+                info.affOperator = [](const Element &v) { return v; };
+                info.negOperator = [](const Element &v) { return Element(-v.raw<TypeMap::Point>()); };
+                
+                info.eqOperator = [](const Element &v0, const Element &v1) {
+                    auto lVal = v0.raw<TypeMap::Point>();
+                    if (v1.isConvertibleTo<TypeMap::Point>())
+                        return Element(lVal == v1.asRaw<TypeMap::Point>());
+                    return Element(ErrorMessage("== operator does not support the right operand type."));
+                };
+            }
+            {
+                TypeInfo &info = infos[(uint32_t)Type::Vector];
+                
+                info.affOperator = [](const Element &v) { return v; };
+                info.negOperator = [](const Element &v) { return Element(-v.raw<TypeMap::Vector>()); };
+                
+                info.eqOperator = [](const Element &v0, const Element &v1) {
+                    auto lVal = v0.raw<TypeMap::Vector>();
+                    if (v1.isConvertibleTo<TypeMap::Vector>())
+                        return Element(lVal == v1.asRaw<TypeMap::Vector>());
+                    return Element(ErrorMessage("== operator does not support the right operand type."));
+                };
+            }
+            {
+                TypeInfo &info = infos[(uint32_t)Type::Normal];
+                
+                info.affOperator = [](const Element &v) { return v; };
+                info.negOperator = [](const Element &v) { return Element(-v.raw<TypeMap::Normal>()); };
+                
+                info.eqOperator = [](const Element &v0, const Element &v1) {
+                    auto lVal = v0.raw<TypeMap::Normal>();
+                    if (v1.isConvertibleTo<TypeMap::Normal>())
+                        return Element(lVal == v1.asRaw<TypeMap::Normal>());
+                    return Element(ErrorMessage("== operator does not support the right operand type."));
+                };
+                
+                info.convertFunctions[Type::Vector] = [](const Element &elemFrom) { return Element(SLR::Vector3D(elemFrom.raw<TypeMap::Normal>())); };
             }
             {
                 TypeInfo &info = infos[(uint32_t)Type::Matrix];

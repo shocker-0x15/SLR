@@ -1,0 +1,83 @@
+setRenderer("method": "PT", ("samples": 512,));
+setRenderSettings("width": 1024, "height": 1024, "brightness": 4.0);
+
+setEnvironment("images/Malibu_Overlook_3k_corrected.exr");
+
+/*
+lightNode = createNode();
+setTransform(lightNode, translate(0.0, 0.999, 0.0));
+diffuseCol = Spectrum(0.9, 0.9, 0.9);
+diffuseTex = SpectrumTexture(diffuseCol);
+scatterMat = createSurfaceMaterial("matte", (diffuseTex,));
+difLightCol = Spectrum("ID": "D65");
+difLightTex = SpectrumTexture(difLightCol);
+emitterMat = createEmitterSurfaceProperty("diffuse", (difLightTex,));
+surfMat = createSurfaceMaterial("emitter", (scatterMat, emitterMat));
+
+lightMesh = createMesh(
+    (
+    ((-0.25, 0, -0.25), (0, -1, 0), (1, 0, 0), (0, 0)), 
+    (( 0.25, 0, -0.25), (0, -1, 0), (1, 0, 0), (1, 0)),
+    (( 0.25, 0,  0.25), (0, -1, 0), (1, 0, 0), (1, 1)),
+    ((-0.25, 0,  0.25), (0, -1, 0), (1, 0, 0), (0, 1))
+    ),
+    (
+    ((0, 1, 2), surfMat), 
+    ((0, 2, 3), surfMat)
+    )
+    );
+addChild(lightNode, lightMesh);
+addChild(root, lightNode);
+*/
+
+// Color Checker Materials
+mats = (,);
+for (i = 0; i < 24; ++i) {
+    sp = Spectrum("ID": "ColorChecker", i);
+    difTex = SpectrumTexture(sp);
+    scatterMat = createSurfaceMaterial("matte", (difTex,));
+    addItem(mats, scatterMat);
+}
+
+// Create Color Checker
+vertices = (,);
+indices = (,);
+for (i = 0; i < 24; ++i) {
+    transform = translate(0, -1, 0) * scale(0.9 / 3.0) * 
+                translate(-3.0 + (i % 6), 0.0, (i / 6) - 1.0);
+
+    addItem(vertices, transform * createVertex((0.0, 0.0, 0.0), (0, 1, 0), (1, 0, 0), (0, 0)));
+    addItem(vertices, transform * createVertex((1.0, 0.0, 0.0), (0, 1, 0), (1, 0, 0), (1, 0)));
+    addItem(vertices, transform * createVertex((1.0, 0.0, -1.0), (0, 1, 0), (1, 0, 0), (1, 1)));
+    addItem(vertices, transform * createVertex((0.0, 0.0, -1.0), (0, 1, 0), (1, 0, 0), (0, 1)));
+    
+    idxBase = 4 * i;
+    addItem(indices, ((idxBase + 0, idxBase + 1, idxBase + 2), mats[i]));
+    addItem(indices, ((idxBase + 0, idxBase + 2, idxBase + 3), mats[i]));
+}
+colorCheckerMesh = createMesh(vertices, indices);
+addChild(root, colorCheckerMesh);
+
+function sphereMaterial(name, attrs) {
+    coeffR = SpectrumTexture(Spectrum("type": "Reflectance", 0.99));
+    eta = SpectrumTexture(Spectrum("ID": "Aluminium", 0));
+    k = SpectrumTexture(Spectrum("ID": "Aluminium", 1));
+    return createSurfaceMaterial("metal", (coeffR, eta, k));
+}
+
+sphereNode = load3DModel("models/sphere.assbin", sphereMaterial);
+setTransform(sphereNode, translate(0, 0.5, 0) * scale(0.4));
+addChild(root, sphereNode);
+
+kirbyNode = load3DModel("models/Kirby_Pikachu_Hat/pikachu_hat.assbin");
+setTransform(kirbyNode, translate(0, -1, 0) * scale(0.5));
+addChild(root, kirbyNode);
+
+cameraNode = createNode();
+    camera = createPerspectiveCamera("aspect": 1.0, "fovY": 0.5235987756, "radius": 0, 
+                                     "imgDist": 1.0, "objDist": 4.75);
+    addChild(cameraNode, camera);
+setTransform(cameraNode, translate(0, 0, 5) * rotateY(3.1415926536));
+
+addChild(root, cameraNode);
+setTransform(root, rotateY(1.2));

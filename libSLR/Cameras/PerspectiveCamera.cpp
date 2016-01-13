@@ -40,6 +40,7 @@ namespace SLR {
         Point3D orgLocal = Point3D(m_lensRadius * lx, m_lensRadius * ly, 0.0f);
         SurfacePoint &surfPt = result->surfPt;
         surfPt.p = staticTF * orgLocal;
+        surfPt.atInfinity = false;
         surfPt.gNormal = staticTF * Normal3D(0, 0, 1);
         surfPt.u = lx;
         surfPt.v = ly;

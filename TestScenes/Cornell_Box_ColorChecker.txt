@@ -44,10 +44,10 @@ for (i = 0; i < 24; ++i) {
     transform = translate(0, 0, -0.999) * scale(0.9 / 3.0) * 
                 translate(-3.0 + (i % 6), 1.0 - (i / 6), 0.0);
 
-    addItem(vertices, transform * createVertex((0.0, 0.0, 0.0), (0, -1, 0), (1, 0, 0), (0, 0)));
-    addItem(vertices, transform * createVertex((1.0, 0.0, 0.0), (0, -1, 0), (1, 0, 0), (1, 0)));
-    addItem(vertices, transform * createVertex((1.0, 1.0, 0.0), (0, -1, 0), (1, 0, 0), (1, 1)));
-    addItem(vertices, transform * createVertex((0.0, 1.0, 0.0), (0, -1, 0), (1, 0, 0), (0, 1)));
+    addItem(vertices, transform * createVertex((0.0, 0.0, 0.0), (0, 0, -1), (1, 0, 0), (0, 0)));
+    addItem(vertices, transform * createVertex((1.0, 0.0, 0.0), (0, 0, -1), (1, 0, 0), (1, 0)));
+    addItem(vertices, transform * createVertex((1.0, 1.0, 0.0), (0, 0, -1), (1, 0, 0), (1, 1)));
+    addItem(vertices, transform * createVertex((0.0, 1.0, 0.0), (0, 0, -1), (1, 0, 0), (0, 1)));
     
     idxBase = 4 * i;
     addItem(indices, ((idxBase + 0, idxBase + 1, idxBase + 2), mats[i]));

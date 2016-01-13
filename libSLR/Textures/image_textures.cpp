@@ -18,12 +18,12 @@ namespace SLR {
 #ifdef Use_Spectral_Representation
             case ColorFormat::uvs16Fx3: {
                 const uvs16Fx3 &data = m_data->get<uvs16Fx3>(px, py);
-                ret = UpsampledContinuousSpectrum(data.u, data.v, data.s).evaluate(wls);
+                ret = UpsampledContinuousSpectrum(data.u, data.v, data.s / Upsampling::EqualEnergyReflectance).evaluate(wls);
                 break;
             }
             case ColorFormat::uvsA16Fx4: {
                 const uvsA16Fx4 &data = m_data->get<uvsA16Fx4>(px, py);
-                ret = UpsampledContinuousSpectrum(data.u, data.v, data.s).evaluate(wls);
+                ret = UpsampledContinuousSpectrum(data.u, data.v, data.s / Upsampling::EqualEnergyReflectance).evaluate(wls);
                 break;
             }
             case ColorFormat::Gray8: {

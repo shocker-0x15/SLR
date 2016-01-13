@@ -15,6 +15,7 @@ namespace SLR {
         result->dir_sn = cosineSampleHemisphere(smp.uDir[0], smp.uDir[1]);
         result->dirPDF = result->dir_sn.z / M_PI;
         result->dirType = m_type;
+        result->dir_sn.z *= query.dir_sn.z > 0 ? 1 : -1;
         return m_R / M_PI;
     }
     

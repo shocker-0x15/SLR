@@ -129,10 +129,10 @@ namespace SLR {
                             float RGB[3] = {val.r / 255.0f, val.g / 255.0f, val.b / 255.0f};
                             float uvs[3];
                             Upsampling::sRGB_to_uvs(spType, RGB, uvs);
-                            SLRAssert(!std::isnan(uvs[0]) && !std::isinf(uvs[0]) &&
-                                      !std::isnan(uvs[1]) && !std::isinf(uvs[1]) &&
-                                      !std::isnan(uvs[2]) && !std::isinf(uvs[2]), "Invalid value.");
                             uvs16Fx3 storedVal{(half)uvs[0], (half)uvs[1], (half)uvs[2]};
+                            SLRAssert(!std::isnan((float)storedVal.u) && !std::isinf((float)storedVal.u) &&
+                                      !std::isnan((float)storedVal.v) && !std::isinf((float)storedVal.v) &&
+                                      !std::isnan((float)storedVal.s) && !std::isinf((float)storedVal.s), "Invalid value.");
                             setInternal(j, i, &storedVal, m_stride);
                             break;
                         }
@@ -141,10 +141,10 @@ namespace SLR {
                             float RGB[3] = {val.r / 255.0f, val.g / 255.0f, val.b / 255.0f};
                             float uvs[3];
                             Upsampling::sRGB_to_uvs(spType, RGB, uvs);
-                            SLRAssert(!std::isnan(uvs[0]) && !std::isinf(uvs[0]) &&
-                                      !std::isnan(uvs[1]) && !std::isinf(uvs[1]) &&
-                                      !std::isnan(uvs[2]) && !std::isinf(uvs[2]), "Invalid value.");
                             uvs16Fx3 storedVal{(half)uvs[0], (half)uvs[1], (half)uvs[2]};
+                            SLRAssert(!std::isnan((float)storedVal.u) && !std::isinf((float)storedVal.u) &&
+                                      !std::isnan((float)storedVal.v) && !std::isinf((float)storedVal.v) &&
+                                      !std::isnan((float)storedVal.s) && !std::isinf((float)storedVal.s), "Invalid value.");
                             setInternal(j, i, &storedVal, m_stride);
                             break;
                         }
@@ -153,10 +153,11 @@ namespace SLR {
                             float RGB[3] = {val.r / 255.0f, val.g / 255.0f, val.b / 255.0f};
                             float uvs[3];
                             Upsampling::sRGB_to_uvs(spType, RGB, uvs);
-                            SLRAssert(!std::isnan(uvs[0]) && !std::isinf(uvs[0]) &&
-                                      !std::isnan(uvs[1]) && !std::isinf(uvs[1]) &&
-                                      !std::isnan(uvs[2]) && !std::isinf(uvs[2]), "Invalid value.");
                             uvsA16Fx4 storedVal{(half)uvs[0], (half)uvs[1], (half)uvs[2], (half)(val.a / 255.0f)};
+                            SLRAssert(!std::isnan((float)storedVal.u) && !std::isinf((float)storedVal.u) &&
+                                      !std::isnan((float)storedVal.v) && !std::isinf((float)storedVal.v) &&
+                                      !std::isnan((float)storedVal.s) && !std::isinf((float)storedVal.s) &&
+                                      !std::isnan((float)storedVal.a) && !std::isinf((float)storedVal.a) && (float)storedVal.a > 0, "Invalid value.");
                             setInternal(j, i, &storedVal, m_stride);
                             break;
                         }
@@ -165,11 +166,11 @@ namespace SLR {
                             float RGB[3] = {val.r, val.g, val.b};
                             float uvs[3];
                             Upsampling::sRGB_to_uvs(spType, RGB, uvs);
-                            SLRAssert(!std::isnan(uvs[0]) && !std::isinf(uvs[0]) &&
-                                      !std::isnan(uvs[1]) && !std::isinf(uvs[1]) &&
-                                      !std::isnan(uvs[2]) && !std::isinf(uvs[2]) &&
-                                      !std::isnan((float)val.a) && !std::isinf((float)val.a) && (float)val.a > 0, "Invalid value.");
                             uvsA16Fx4 storedVal{(half)uvs[0], (half)uvs[1], (half)uvs[2], (half)val.a};
+                            SLRAssert(!std::isnan((float)storedVal.u) && !std::isinf((float)storedVal.u) &&
+                                      !std::isnan((float)storedVal.v) && !std::isinf((float)storedVal.v) &&
+                                      !std::isnan((float)storedVal.s) && !std::isinf((float)storedVal.s) &&
+                                      !std::isnan((float)storedVal.a) && !std::isinf((float)storedVal.a) && (float)storedVal.a > 0, "Invalid value.");
                             setInternal(j, i, &storedVal, m_stride);
                             break;
                         }

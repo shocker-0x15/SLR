@@ -178,14 +178,14 @@ namespace SLR {
             if (b == 0)
                 xy[0] = xy[1] = 1.0f / 3.0;
             xy_to_uv(xy, uvs);
-            uvs[2] = b / Upsampling::EqualEnergyReflectance;
+            uvs[2] = b;// / Upsampling::EqualEnergyReflectance;
         }
         
         template <typename RealType>
         inline void uvs_to_sRGB(SpectrumType spType, const RealType uvs[3], RealType rgb[3]) {
             float xy[2];
             uv_to_xy(uvs, xy);
-            float b = uvs[2] * Upsampling::EqualEnergyReflectance;
+            float b = uvs[2];// * Upsampling::EqualEnergyReflectance;
             float XYZ[3];
             XYZ[0] = xy[0] * b;
             XYZ[1] = xy[1] * b;

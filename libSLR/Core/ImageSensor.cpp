@@ -137,9 +137,10 @@ namespace SLR {
         };
         
         float* scales = (float*)alloca(sizeof(float) * m_numSeparated);
+        float sensitivity = std::isinf(m_sensitivity) ? 1.0f : m_sensitivity;
         for (int i = 0; i < m_numSeparated; ++i)
-            scales[i] = (scaleSeparated ? scaleSeparated[i] : scale) * m_sensitivity;
-        scale *= m_sensitivity;
+            scales[i] = (scaleSeparated ? scaleSeparated[i] : scale) * sensitivity;
+        scale *= sensitivity;
         
         uint32_t byteWidth = 3 * m_width + m_width % 4;
         uint8_t* bmp = (uint8_t*)malloc(m_height * byteWidth);
