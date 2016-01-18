@@ -155,6 +155,8 @@ namespace SLR {
         
         while (true) {
             ++pathLength;
+            if (pathLength >= 100)
+                break;
             Normal3D gNorm_sn = surfPt.shadingFrame.toLocal(surfPt.gNormal);
             BSDF* bsdf = surfPt.createBSDF(wls, mem);
             
@@ -209,7 +211,9 @@ namespace SLR {
                 wls.flags |= WavelengthSamples::LambdaSelected;
             }
             alpha *= fs * (std::fabs(fsResult.dir_sn.z) / fsResult.dirPDF);
-            SLRAssert(!alpha.hasInf() && !alpha.hasNaN(), "alpha: unexpected value detected: %s", alpha.toString().c_str());
+            SLRAssert(!alpha.hasInf() && !alpha.hasNaN(),
+                      "alpha: unexpected value detected:\nalpha: %s\nfs: %s\nlength: %u, cos: %g, dirPDF: %g",
+                      alpha.toString().c_str(), fs.toString().c_str(), pathLength, std::fabs(fsResult.dir_sn.z), fsResult.dirPDF);
             
             Vector3D dirIn = surfPt.shadingFrame.fromLocal(fsResult.dir_sn);
             ray = Ray(surfPt.p + Ray::Epsilon * dirIn, dirIn, ray.time);

@@ -9,10 +9,7 @@
 #include "../Core/distributions.h"
 
 namespace SLR {
-    SampledSpectrum AshikhminSpecularBRDF::sample(const BSDFQuery &query, const BSDFSample &smp, BSDFQueryResult *result) const {
-        if (!matches(query.flags, result))
-            return SampledSpectrum::Zero;
-        
+    SampledSpectrum AshikhminSpecularBRDF::sampleInternal(const BSDFQuery &query, const BSDFSample &smp, BSDFQueryResult *result) const {
         float quad = 2 * M_PI * smp.uDir[1];
         float phi_h = std::atan2(std::sqrt(m_nu + 1) * std::sin(quad), std::sqrt(m_nv + 1) * std::cos(quad));
         float cosphi = std::cos(phi_h);
@@ -28,9 +25,6 @@ namespace SLR {
     }
     
     SampledSpectrum AshikhminSpecularBRDF::evaluateInternal(const BSDFQuery &query, const Vector3D &dir) const {
-        if (!query.flags.matches(m_type))
-            return SampledSpectrum::Zero;
-        
         Vector3D halfv = halfVector(query.dir_sn, dir);
         float dotHV = dot(halfv, query.dir_sn);
         float exp = (m_nu * halfv.x * halfv.x + m_nv * halfv.y * halfv.y) / (1 - halfv.z * halfv.z);
@@ -41,9 +35,7 @@ namespace SLR {
         return ret;
     }
     
-    float AshikhminSpecularBRDF::evaluatePDF(const BSDFQuery &query, const Vector3D &dir) const {
-        if (!query.flags.matches(m_type))
-            return 0;
+    float AshikhminSpecularBRDF::evaluatePDFInternal(const BSDFQuery &query, const Vector3D &dir) const {
         Vector3D halfv = halfVector(query.dir_sn, dir);
         float exp = (m_nu * halfv.x * halfv.x + m_nv * halfv.y * halfv.y) / (1 - halfv.z * halfv.z);
         float ret = std::sqrt((m_nu + 1) * (m_nv + 1)) / (2 * M_PI) * std::pow(std::fabs(halfv.z), exp) / (4 * dot(query.dir_sn, halfv));
@@ -51,9 +43,7 @@ namespace SLR {
         return ret;
     }
     
-    float AshikhminSpecularBRDF::weight(const BSDFQuery &query, const BSDFSample &smp) const {
-        if (!query.flags.matches(m_type))
-            return 0;
+    float AshikhminSpecularBRDF::weightInternal(const BSDFQuery &query, const BSDFSample &smp) const {
 #ifdef Use_BSDF_Actual_Weights
         BSDFQueryResult result;
         float fs = sample(query, smp, &result).maxValue();
@@ -65,9 +55,7 @@ namespace SLR {
 #endif
     }
     
-    float AshikhminSpecularBRDF::weight(const BSDFQuery &query, const Vector3D &dir) const {
-        if (!query.flags.matches(m_type))
-            return 0;
+    float AshikhminSpecularBRDF::weightInternal(const BSDFQuery &query, const Vector3D &dir) const {
 #ifdef Use_BSDF_Actual_Weights
         BSDFQueryResult result;
         float fs = evaluate(query, dir).maxValue();
@@ -78,17 +66,12 @@ namespace SLR {
 #endif
     }
     
-    SampledSpectrum AshikhminSpecularBRDF::getBaseColor(DirectionType flags) const {
-        if (!flags.matches(m_type))
-            return SampledSpectrum::Zero;
+    SampledSpectrum AshikhminSpecularBRDF::getBaseColorInternal(DirectionType flags) const {
         return m_Rs;
     }
     
     
-    SampledSpectrum AshikhminDiffuseBRDF::sample(const BSDFQuery &query, const BSDFSample &smp, BSDFQueryResult *result) const {
-        if (!matches(query.flags, result))
-            return SampledSpectrum::Zero;
-        
+    SampledSpectrum AshikhminDiffuseBRDF::sampleInternal(const BSDFQuery &query, const BSDFSample &smp, BSDFQueryResult *result) const {
         result->dir_sn = cosineSampleHemisphere(smp.uDir[0], smp.uDir[1]);
         result->dirPDF = result->dir_sn.z / M_PI;
         result->dirType = m_type;
@@ -96,9 +79,6 @@ namespace SLR {
     }
     
     SampledSpectrum AshikhminDiffuseBRDF::evaluateInternal(const BSDFQuery &query, const Vector3D &dir) const {
-        if (!query.flags.matches(m_type))
-            return SampledSpectrum::Zero;
-        
         SampledSpectrum ret = (28 * m_Rd / (23 * M_PI) * (SampledSpectrum::One - m_Rs) *
                                (1.0f - std::pow(1.0f - std::fabs(query.dir_sn.z) / 2, 5)) *
                                (1.0f - std::pow(1.0f - std::fabs(dir.z) / 2, 5))
@@ -107,15 +87,11 @@ namespace SLR {
         return ret;
     }
     
-    float AshikhminDiffuseBRDF::evaluatePDF(const BSDFQuery &query, const Vector3D &dir) const {
-        if (!query.flags.matches(m_type))
-            return 0;
+    float AshikhminDiffuseBRDF::evaluatePDFInternal(const BSDFQuery &query, const Vector3D &dir) const {
         return query.dir_sn.z * dir.z >= 0.0f ? dir.z / M_PI : 0.0f;
     }
     
-    float AshikhminDiffuseBRDF::weight(const BSDFQuery &query, const BSDFSample &smp) const {
-        if (!query.flags.matches(m_type))
-            return 0;
+    float AshikhminDiffuseBRDF::weightInternal(const BSDFQuery &query, const BSDFSample &smp) const {
 #ifdef Use_BSDF_Actual_Weights
         BSDFQueryResult result;
         float fs = sample(query, smp, &result).maxValue();
@@ -127,9 +103,7 @@ namespace SLR {
 #endif
     }
     
-    float AshikhminDiffuseBRDF::weight(const BSDFQuery &query, const Vector3D &dir) const {
-        if (!query.flags.matches(m_type))
-            return 0;
+    float AshikhminDiffuseBRDF::weightInternal(const BSDFQuery &query, const Vector3D &dir) const {
 #ifdef Use_BSDF_Actual_Weights
         BSDFQueryResult result;
         float fs = evaluate(query, dir).maxValue();
@@ -140,9 +114,7 @@ namespace SLR {
 #endif
     }
     
-    SampledSpectrum AshikhminDiffuseBRDF::getBaseColor(DirectionType flags) const {
-        if (!flags.matches(m_type))
-            return SampledSpectrum::Zero;
+    SampledSpectrum AshikhminDiffuseBRDF::getBaseColorInternal(DirectionType flags) const {
         return m_Rd;
     }    
 }

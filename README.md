@@ -26,6 +26,7 @@ SLR consists of the following components.
 * Unidirectional Path Tracing \[2\] with MIS
 * ~~Adaptive MCMC Progressive Photon Mapping~~ \[3\]  
   (current implementation is buggy and does not support IBL.)
+* SLR Custom Language (C/Python-like syntax) for flexible scene description
 
 [1] "Physically Meaningful Rendering using Tristimulus Colours", 2015  
 [2] "THE RENDERING EQUATION", 1986  
@@ -46,9 +47,9 @@ It requires the following libraries.
 * assimp (currently obtained from GitHub for supporting the .assbin format)
 
 ##注意 / Note
-モデルデータやテクスチャーを読み込むコードが書かれていますが、それらアセットはリポジトリには含まれていません。
+モデルデータやテクスチャーを読み込むシーンファイルがありますが、それらアセットはリポジトリには含まれていません。
 
-There are code for loading a model data and textures, but those assets are NOT included in this repository.
+There are some scene files loading a model data and textures, but those assets are NOT included in this repository.
 
 ----
-2015 [@Shocker_0x15](https://twitter.com/Shocker_0x15)
+2016 [@Shocker_0x15](https://twitter.com/Shocker_0x15)

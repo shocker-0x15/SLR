@@ -91,7 +91,7 @@ namespace SLR {
         uint32_t m_numValues;
     public:
         RegularConstantDiscrete1DTemplate(const std::vector<RealType> &values) {
-            m_numValues = values.size();
+            m_numValues = (uint32_t)values.size();
             m_PMF = new RealType[m_numValues];
             m_CDF = new RealType[m_numValues + 1];
             std::memcpy(m_PMF, values.data(), sizeof(RealType) * m_numValues);

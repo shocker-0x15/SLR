@@ -15,7 +15,7 @@
 namespace SLR {
     class DiffuseEDF : public EDF {
     public:
-        DiffuseEDF() : EDF(DirectionType::Reflection | DirectionType::LowFreq) { };
+        DiffuseEDF() : EDF(DirectionType::Emission | DirectionType::LowFreq) { }
         
         SampledSpectrum sample(const EDFQuery &query, const EDFSample &smp, EDFQueryResult* result) const override;
         SampledSpectrum evaluate(const EDFQuery &query, const Vector3D &dir) const override;

@@ -34,7 +34,8 @@ namespace SLR {
     class EquirectangularIDF : public IDF {
         const EquirectangularCamera &m_cam;
     public:
-        EquirectangularIDF(const EquirectangularCamera &cam) : IDF(DirectionType::WholeSphere | DirectionType::LowFreq), m_cam(cam) { };
+        EquirectangularIDF(const EquirectangularCamera &cam) : IDF(DirectionType::Acquisition | DirectionType::LowFreq),
+        m_cam(cam) { };
         
         SampledSpectrum sample(const IDFSample &smp, IDFQueryResult* result) const override;
         SampledSpectrum evaluate(const Vector3D &dirIn) const override;

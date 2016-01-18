@@ -16,7 +16,7 @@ namespace SLR {
     class IBLEDF : public EDF {
         float m_worldDiscArea;
     public:
-        IBLEDF(float worldDiscArea) : EDF(DirectionType::Reflection | DirectionType::LowFreq), m_worldDiscArea(worldDiscArea) { };
+        IBLEDF(float worldDiscArea) : EDF(DirectionType::Emission | DirectionType::LowFreq), m_worldDiscArea(worldDiscArea) { };
         
         SampledSpectrum sample(const EDFQuery &query, const EDFSample &smp, EDFQueryResult* result) const override;
         SampledSpectrum evaluate(const EDFQuery &query, const Vector3D &dir) const override;

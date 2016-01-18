@@ -12,7 +12,6 @@ namespace SLR {
     void MultiEDF::add(EDF *edf) {
         SLRAssert(m_numComponents < maxNumEDFElems, "Number of MultiBSDF elements exceeds the limit: %u", maxNumEDFElems);
         m_EDFs[m_numComponents++] = edf;
-        m_type |= edf->m_type;
     }
     
     SampledSpectrum MultiEDF::sample(const EDFQuery &query, const EDFSample &smp, EDFQueryResult *result) const {

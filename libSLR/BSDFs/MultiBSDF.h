@@ -16,26 +16,25 @@ namespace SLR {
     class MultiBSDF : public BSDF {
 #define maxNumElems 4
         uint32_t m_numComponents;
-        BSDF* m_BSDFs[maxNumElems];
+        const BSDF* m_BSDFs[maxNumElems];
         
+        SampledSpectrum sampleInternal(const BSDFQuery &query, const BSDFSample &smp, BSDFQueryResult* result) const override;
         SampledSpectrum evaluateInternal(const BSDFQuery &query, const Vector3D &dirOut) const override;
+        float evaluatePDFInternal(const BSDFQuery &query, const Vector3D &dirOut) const override;
+        float weightInternal(const BSDFQuery &query, const BSDFSample &smp) const override;
+        float weightInternal(const BSDFQuery &query, const Vector3D &dir) const override;
+        SampledSpectrum getBaseColorInternal(DirectionType flags) const override;
     public:
         MultiBSDF() : BSDF(DirectionType()), m_numComponents(0) { }
         
-        void add(BSDF* bsdf);
-        SampledSpectrum sample(const BSDFQuery &query, const BSDFSample &smp, BSDFQueryResult* result) const override;
-        float evaluatePDF(const BSDFQuery &query, const Vector3D &dirOut) const override;
-        float weight(const BSDFQuery &query, const BSDFSample &smp) const override;
-        float weight(const BSDFQuery &query, const Vector3D &dir) const override;
-        
-        SampledSpectrum getBaseColor(DirectionType flags) const override;
+        void add(const BSDF* bsdf);
         
         bool matches(DirectionType flags) const override {
             for (int i = 0; i < m_numComponents; ++i)
                 if (m_BSDFs[i]->matches(flags))
                     return true;
             return false;
-        };
+        }
     };    
 }
 

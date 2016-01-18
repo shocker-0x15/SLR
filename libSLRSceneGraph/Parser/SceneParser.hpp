@@ -197,9 +197,9 @@ namespace SLRSceneGraph {
             return true;
         };
         
-        uint32_t numParams() const {
-            return uint32_t(named.size() + unnamed.size());
-        };
+        size_t numNamed() const { return named.size(); }
+        size_t numUnnamed() const { return unnamed.size(); }
+        size_t numParams() const { return named.size() + unnamed.size(); };
         
         Element operator()(const std::string &key, Type expectedType = Type::Any) const {
             if (named.count(key) == 0)

@@ -9,28 +9,27 @@
 #include "../Core/distributions.h"
 
 namespace SLR {
-    void MultiBSDF::add(BSDF *bsdf) {
+    void MultiBSDF::add(const BSDF *bsdf) {
         if (!bsdf)
             return;
         SLRAssert(m_numComponents < maxNumElems, "Number of MultiBSDF elements exceeds the limit: %u", maxNumElems);
         m_BSDFs[m_numComponents++] = bsdf;
-        m_type |= bsdf->m_type;
     }
     
-    SampledSpectrum MultiBSDF::sample(const BSDFQuery &query, const BSDFSample &smp, BSDFQueryResult *result) const {
+    SampledSpectrum MultiBSDF::sampleInternal(const BSDFQuery &query, const BSDFSample &smp, BSDFQueryResult *result) const {
         float weights[maxNumElems];
         for (int i = 0; i < m_numComponents; ++i)
             weights[i] = m_BSDFs[i]->weight(query, smp);
         
         float sumWeights, base;
         uint32_t idx = sampleDiscrete(weights, &sumWeights, &base, m_numComponents, smp.uComponent);
-        BSDF* selectedBSDF = m_BSDFs[idx];
+        const BSDF* selectedBSDF = m_BSDFs[idx];
         if (sumWeights == 0.0f) {
             result->dirPDF = 0.0f;
             return SampledSpectrum::Zero;
         }
         
-        SampledSpectrum value = selectedBSDF->sample(query, smp, result);
+        SampledSpectrum value = selectedBSDF->sampleInternal(query, smp, result);
         result->dirPDF *= weights[idx];
         
         if (!result->dirType.hasDelta()) {
@@ -38,9 +37,12 @@ namespace SLR {
             mQuery.flags &= sideTest(query.gNormal_sn, query.dir_sn, result->dir_sn);
             value = SampledSpectrum::Zero;
             for (int i = 0; i < m_numComponents; ++i) {
-                value += m_BSDFs[i]->evaluateInternal(mQuery, result->dir_sn);
+                const BSDF* BSDF = m_BSDFs[i];
+                if (!BSDF->matches(mQuery.flags))
+                    continue;
+                value += BSDF->evaluateInternal(mQuery, result->dir_sn);
                 if (i != idx)
-                    result->dirPDF += m_BSDFs[i]->evaluatePDF(query, result->dir_sn) * weights[i];
+                    result->dirPDF += BSDF->evaluatePDFInternal(mQuery, result->dir_sn) * weights[i];
             }
         }
         result->dirPDF /= sumWeights;
@@ -50,12 +52,15 @@ namespace SLR {
     
     SampledSpectrum MultiBSDF::evaluateInternal(const BSDFQuery &query, const Vector3D &dirOut) const {
         SampledSpectrum retValue;
-        for (int i = 0; i < m_numComponents; ++i)
+        for (int i = 0; i < m_numComponents; ++i) {
+            if (!m_BSDFs[i]->matches(query.flags))
+                continue;
             retValue += m_BSDFs[i]->evaluateInternal(query, dirOut);
+        }
         return retValue;
     }
     
-    float MultiBSDF::evaluatePDF(const BSDFQuery &query, const Vector3D &dirOut) const {
+    float MultiBSDF::evaluatePDFInternal(const BSDFQuery &query, const Vector3D &dirOut) const {
         float sumWeights = 0.0f;
         float weights[maxNumElems];
         for (int i = 0; i < m_numComponents; ++i) {
@@ -67,28 +72,29 @@ namespace SLR {
         
         float retPDF = 0.0f;
         for (int i = 0; i < m_numComponents; ++i) {
-            retPDF += m_BSDFs[i]->evaluatePDF(query, dirOut) * weights[i];
+            if (weights[i] > 0)
+                retPDF += m_BSDFs[i]->evaluatePDFInternal(query, dirOut) * weights[i];
         }
         retPDF /= sumWeights;
         
         return retPDF;
     }
     
-    float MultiBSDF::weight(const BSDFQuery &query, const BSDFSample &smp) const {
+    float MultiBSDF::weightInternal(const BSDFQuery &query, const BSDFSample &smp) const {
         float sumWeights = 0.0f;
         for (int i = 0; i < m_numComponents; ++i)
             sumWeights += m_BSDFs[i]->weight(query, smp);
         return sumWeights;
     }
     
-    float MultiBSDF::weight(const BSDFQuery &query, const Vector3D &dir) const {
+    float MultiBSDF::weightInternal(const BSDFQuery &query, const Vector3D &dir) const {
         float sumWeights = 0.0f;
         for (int i = 0; i < m_numComponents; ++i)
             sumWeights += m_BSDFs[i]->weight(query, dir);
         return sumWeights;
     }
     
-    SampledSpectrum MultiBSDF::getBaseColor(DirectionType flags) const {
+    SampledSpectrum MultiBSDF::getBaseColorInternal(DirectionType flags) const {
         SampledSpectrum baseColor = SampledSpectrum::Zero;
         for (int i = 0; i < m_numComponents; ++i) {
             baseColor = m_BSDFs[i]->getBaseColor(flags);

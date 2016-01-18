@@ -43,7 +43,8 @@ namespace SLR {
         const PerspectiveCamera &m_cam;
         Point3D m_orgLocal;
     public:
-        PerspectiveIDF(const PerspectiveCamera &cam, const Point3D &orgLocal) : IDF(DirectionType::WholeSphere | DirectionType::LowFreq), m_cam(cam), m_orgLocal(orgLocal) { };
+        PerspectiveIDF(const PerspectiveCamera &cam, const Point3D &orgLocal) : IDF(DirectionType::Acquisition | DirectionType::LowFreq),
+        m_cam(cam), m_orgLocal(orgLocal) { };
         
         SampledSpectrum sample(const IDFSample &smp, IDFQueryResult* result) const override;
         SampledSpectrum evaluate(const Vector3D &dirIn) const override;

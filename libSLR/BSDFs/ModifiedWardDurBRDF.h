@@ -17,17 +17,15 @@ namespace SLR {
         SampledSpectrum m_R;
         float m_anisoX, m_anisoY;
         
+        SampledSpectrum sampleInternal(const BSDFQuery &query, const BSDFSample &smp, BSDFQueryResult* result) const override;
         SampledSpectrum evaluateInternal(const BSDFQuery &query, const Vector3D &dir) const override;
+        float evaluatePDFInternal(const BSDFQuery &query, const Vector3D &dir) const override;
+        float weightInternal(const BSDFQuery &query, const BSDFSample &smp) const override;
+        float weightInternal(const BSDFQuery &query, const Vector3D &dir) const override;
+        SampledSpectrum getBaseColorInternal(DirectionType flags) const override;
     public:
-        ModifiedWardDurBRDF(const SampledSpectrum &R, float ax, float ay) :
-        BSDF(DirectionType::Reflection | DirectionType::HighFreq), m_R(R), m_anisoX(ax), m_anisoY(ay) { };
-        
-        SampledSpectrum sample(const BSDFQuery &query, const BSDFSample &smp, BSDFQueryResult* result) const override;
-        float evaluatePDF(const BSDFQuery &query, const Vector3D &dir) const override;
-        float weight(const BSDFQuery &query, const BSDFSample &smp) const override;
-        float weight(const BSDFQuery &query, const Vector3D &dir) const override;
-        
-        SampledSpectrum getBaseColor(DirectionType flags) const override;
+        ModifiedWardDurBRDF(const SampledSpectrum &R, float ax, float ay) : BSDF(DirectionType::Reflection | DirectionType::HighFreq),
+        m_R(R), m_anisoX(ax), m_anisoY(ay) { }
     };    
 }
 

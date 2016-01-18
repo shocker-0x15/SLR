@@ -1,4 +1,4 @@
-setRenderer("method": "PT", ("samples": 512,));
+setRenderer("method": "PT", ("samples": 16384,));
 setRenderSettings("width": 1024, "height": 1024, "brightness": 4.0);
 
 setEnvironment("images/Malibu_Overlook_3k_corrected.exr");
@@ -69,12 +69,28 @@ sphereNode = load3DModel("models/sphere.assbin", sphereMaterial);
 setTransform(sphereNode, translate(0, 0.5, 0) * scale(0.4));
 addChild(root, sphereNode);
 
-kirbyNode = load3DModel("models/Kirby_Pikachu_Hat/pikachu_hat.assbin");
+function PikachuMaterial(name, attrs) {
+    difTex = 0;
+    if (numElements(attrs["diffuse textures"])) {
+        difTexPaths = attrs["diffuse textures"];
+        image = Image2D(difTexPaths[0]);
+        difTex = SpectrumTexture(image);
+    }
+    else {
+        difCol = attrs["diffuse color"];
+        difTex = SpectrumTexture(Spectrum(difCol[0], difCol[1], difCol[2]));
+    }
+    speTex = SpectrumTexture(Spectrum(0.1, 0.1, 0.1));
+    nxTex = nyTex = FloatTexture(1000);
+    return createSurfaceMaterial("Ashikhmin", (difTex, speTex, nxTex, nyTex));
+}
+
+kirbyNode = load3DModel("models/Kirby_Pikachu_Hat/pikachu_hat_corrected.assbin", PikachuMaterial);
 setTransform(kirbyNode, translate(0, -1, 0) * scale(0.5));
 addChild(root, kirbyNode);
 
 cameraNode = createNode();
-    camera = createPerspectiveCamera("aspect": 1.0, "fovY": 0.5235987756, "radius": 0, 
+    camera = createPerspectiveCamera("aspect": 1.0, "fovY": 0.5235987756, "radius": 0.025, 
                                      "imgDist": 1.0, "objDist": 4.75);
     addChild(cameraNode, camera);
 setTransform(cameraNode, translate(0, 0, 5) * rotateY(3.1415926536));

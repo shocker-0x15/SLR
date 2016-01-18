@@ -16,52 +16,60 @@ namespace SLR {
     class LambertianBRDF : public BSDF {
         SampledSpectrum m_R;
         
+        SampledSpectrum sampleInternal(const BSDFQuery &query, const BSDFSample &smp, BSDFQueryResult* result) const override;
+        float evaluatePDFInternal(const BSDFQuery &query, const Vector3D &dir) const override;
+        float weightInternal(const BSDFQuery &query, const BSDFSample &smp) const override;
+        float weightInternal(const BSDFQuery &query, const Vector3D &dir) const override;
         SampledSpectrum evaluateInternal(const BSDFQuery &query, const Vector3D &dir) const override;
+        SampledSpectrum getBaseColorInternal(DirectionType flags) const override;
     public:
-        LambertianBRDF(const SampledSpectrum &R) : BSDF(DirectionType::Reflection | DirectionType::LowFreq), m_R(R) { };
-        
-        SampledSpectrum sample(const BSDFQuery &query, const BSDFSample &smp, BSDFQueryResult* result) const override;
-        float evaluatePDF(const BSDFQuery &query, const Vector3D &dir) const override;
-        float weight(const BSDFQuery &query, const BSDFSample &smp) const override;
-        float weight(const BSDFQuery &query, const Vector3D &dir) const override;
-        
-        SampledSpectrum getBaseColor(DirectionType flags) const override;
+        LambertianBRDF(const SampledSpectrum &R) : BSDF(DirectionType::Reflection | DirectionType::LowFreq), m_R(R) { }
     };
     
     class SpecularBRDF : public BSDF {
         SampledSpectrum m_coeffR;
         const Fresnel* m_fresnel;
         
+        SampledSpectrum sampleInternal(const BSDFQuery &query, const BSDFSample &smp, BSDFQueryResult* result) const override;
         SampledSpectrum evaluateInternal(const BSDFQuery &query, const Vector3D &dir) const override;
+        float evaluatePDFInternal(const BSDFQuery &query, const Vector3D &dir) const override;
+        float weightInternal(const BSDFQuery &query, const BSDFSample &smp) const override;
+        float weightInternal(const BSDFQuery &query, const Vector3D &dir) const override;
+        SampledSpectrum getBaseColorInternal(DirectionType flags) const override;
     public:
-        SpecularBRDF(const SampledSpectrum &coeffR, const Fresnel* fresnel) :
-        BSDF(DirectionType::Reflection | DirectionType::Delta0D), m_coeffR(coeffR), m_fresnel(fresnel) { };
-        
-        SampledSpectrum sample(const BSDFQuery &query, const BSDFSample &smp, BSDFQueryResult* result) const override;
-        float evaluatePDF(const BSDFQuery &query, const Vector3D &dir) const override;
-        float weight(const BSDFQuery &query, const BSDFSample &smp) const override;
-        float weight(const BSDFQuery &query, const Vector3D &dir) const override;
-        
-        SampledSpectrum getBaseColor(DirectionType flags) const override;
+        SpecularBRDF(const SampledSpectrum &coeffR, const Fresnel* fresnel) : BSDF(DirectionType::Reflection | DirectionType::Delta0D), m_coeffR(coeffR), m_fresnel(fresnel) { }
     };
     
     class SpecularBTDF : public BSDF {
         SampledSpectrum m_coeffT;
         FresnelDielectric m_fresnel;
-        bool m_dispersive;
         
+        SampledSpectrum sampleInternal(const BSDFQuery &query, const BSDFSample &smp, BSDFQueryResult* result) const override;
         SampledSpectrum evaluateInternal(const BSDFQuery &query, const Vector3D &dir) const override;
+        float evaluatePDFInternal(const BSDFQuery &query, const Vector3D &dir) const override;
+        float weightInternal(const BSDFQuery &query, const BSDFSample &smp) const override;
+        float weightInternal(const BSDFQuery &query, const Vector3D &dir) const override;
+        SampledSpectrum getBaseColorInternal(DirectionType flags) const override;
     public:
         SpecularBTDF(const SampledSpectrum &coeffT, const SampledSpectrum &etaExt, const SampledSpectrum &etaInt, bool dispersive) :
-        BSDF(DirectionType::Transmission | DirectionType::Delta0D), m_coeffT(coeffT), m_fresnel(etaExt, etaInt), m_dispersive(dispersive) { };
+        BSDF(DirectionType::Transmission | DirectionType::Delta0D | (dispersive ? DirectionType::Dispersive : DirectionType())),
+        m_coeffT(coeffT), m_fresnel(etaExt, etaInt) { }
+    };
+    
+    class InverseBSDF : public BSDF {
+        const BSDF* m_baseBSDF;
         
-        SampledSpectrum sample(const BSDFQuery &query, const BSDFSample &smp, BSDFQueryResult* result) const override;
-        float evaluatePDF(const BSDFQuery &query, const Vector3D &dir) const override;
-        float weight(const BSDFQuery &query, const BSDFSample &smp) const override;
-        float weight(const BSDFQuery &query, const Vector3D &dir) const override;
+        SampledSpectrum sampleInternal(const BSDFQuery &query, const BSDFSample &smp, BSDFQueryResult* result) const override;
+        SampledSpectrum evaluateInternal(const BSDFQuery &query, const Vector3D &dir) const override;
+        float evaluatePDFInternal(const BSDFQuery &query, const Vector3D &dir) const override;
+        float weightInternal(const BSDFQuery &query, const BSDFSample &smp) const override;
+        float weightInternal(const BSDFQuery &query, const Vector3D &dir) const override;
+        SampledSpectrum getBaseColorInternal(DirectionType flags) const override;
+    public:
+        InverseBSDF(const BSDF* baseBSDF) : BSDF(baseBSDF->m_type.flip()), m_baseBSDF(baseBSDF) { }
         
-        SampledSpectrum getBaseColor(DirectionType flags) const override;
-    };    
+        bool matches(DirectionType flags) const override { return m_baseBSDF->matches(flags.flip()); }
+    };
 }
 
 #endif /* defined(__SLR__basic_BSDFs__) */

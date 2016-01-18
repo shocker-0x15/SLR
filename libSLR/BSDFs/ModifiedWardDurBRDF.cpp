@@ -8,10 +8,7 @@
 #include "ModifiedWardDurBRDF.h"
 
 namespace SLR {
-    SampledSpectrum ModifiedWardDurBRDF::sample(const BSDFQuery &query, const BSDFSample &smp, BSDFQueryResult *result) const {
-        if (!matches(query.flags, result))
-            return SampledSpectrum::Zero;
-        
+    SampledSpectrum ModifiedWardDurBRDF::sampleInternal(const BSDFQuery &query, const BSDFSample &smp, BSDFQueryResult *result) const {
         float quad = 2 * M_PI * smp.uDir[1];
         float phi_h = std::atan2(m_anisoY * std::sin(quad), m_anisoX * std::cos(quad));
         float cosphi_ax = std::cos(phi_h) / m_anisoX;
@@ -41,9 +38,6 @@ namespace SLR {
     }
     
     SampledSpectrum ModifiedWardDurBRDF::evaluateInternal(const BSDFQuery &query, const Vector3D &dir) const {
-        if (!query.flags.matches(m_type))
-            return SampledSpectrum::Zero;
-        
         Vector3D halfv = normalize(query.dir_sn + dir);
         float hx_ax = halfv.x / m_anisoX;
         float hy_ay = halfv.y / m_anisoY;
@@ -56,10 +50,7 @@ namespace SLR {
         return ret;
     }
     
-    float ModifiedWardDurBRDF::evaluatePDF(const BSDFQuery &query, const Vector3D &dir) const {
-        if (!query.flags.matches(m_type))
-            return 0;
-        
+    float ModifiedWardDurBRDF::evaluatePDFInternal(const BSDFQuery &query, const Vector3D &dir) const {
         Vector3D halfv = normalize(query.dir_sn + dir);
         float hx_ax = halfv.x / m_anisoX;
         float hy_ay = halfv.y / m_anisoY;
@@ -72,9 +63,7 @@ namespace SLR {
         return ret;
     }
     
-    float ModifiedWardDurBRDF::weight(const BSDFQuery &query, const BSDFSample &smp) const {
-        if (!query.flags.matches(m_type))
-            return 0;
+    float ModifiedWardDurBRDF::weightInternal(const BSDFQuery &query, const BSDFSample &smp) const {
 #ifdef Use_BSDF_Actual_Weights
         BSDFQueryResult result;
         float fs = sample(query, smp, &result).maxValue();
@@ -84,9 +73,7 @@ namespace SLR {
 #endif
     }
     
-    float ModifiedWardDurBRDF::weight(const BSDFQuery &query, const Vector3D &dir) const {
-        if (!query.flags.matches(m_type))
-            return 0;
+    float ModifiedWardDurBRDF::weightInternal(const BSDFQuery &query, const Vector3D &dir) const {
 #ifdef Use_BSDF_Actual_Weights
         BSDFQueryResult result;
         float fs = evaluate(query, dir).maxValue();
@@ -97,9 +84,7 @@ namespace SLR {
 #endif
     }
     
-    SampledSpectrum ModifiedWardDurBRDF::getBaseColor(DirectionType flags) const {
-        if (!flags.matches(m_type))
-            return SampledSpectrum::Zero;
+    SampledSpectrum ModifiedWardDurBRDF::getBaseColorInternal(DirectionType flags) const {
         return m_R;
     }    
 }
