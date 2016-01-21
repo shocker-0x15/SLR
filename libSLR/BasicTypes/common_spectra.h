@@ -8,7 +8,7 @@
 #ifndef SLR_common_spectra_h
 #define SLR_common_spectra_h
 
-#include "defines.h"
+#include "../defines.h"
 
 namespace SLR {
     namespace ColorChecker {

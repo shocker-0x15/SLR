@@ -273,7 +273,7 @@ bool loadPNG(const std::string &filePath, uint8_t* storage, bool gammaCorrection
 }
 
 bool getImageInfo(const std::string &filePath, uint32_t* width, uint32_t* height, uint64_t* requiredSize, ColorFormat* color) {
-    size_t extPos = filePath.find_first_of(".");
+    size_t extPos = filePath.find_last_of(".");
     if (extPos == std::string::npos)
         return false;
     
@@ -295,7 +295,7 @@ bool getImageInfo(const std::string &filePath, uint32_t* width, uint32_t* height
 }
 
 bool loadImage(const std::string &filePath, uint8_t* storage, bool gammaCorrection) {
-    size_t extPos = filePath.find_first_of(".");
+    size_t extPos = filePath.find_last_of(".");
     if (extPos == std::string::npos)
         return false;
     

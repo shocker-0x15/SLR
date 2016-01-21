@@ -8,7 +8,7 @@
 #ifndef SLR_spectum_library_h
 #define SLR_spectum_library_h
 
-#include "defines.h"
+#include "../defines.h"
 
 namespace SLR {
     namespace SpectrumLibrary {

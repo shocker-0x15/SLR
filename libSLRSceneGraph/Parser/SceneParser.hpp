@@ -9,9 +9,9 @@
 #define SceneParser_hpp
 
 #include <libSLR/defines.h>
-#include "references.h"
+#include "../references.h"
 
-#include "Scene.h"
+#include "../Scene.h"
 
 namespace SLRSceneGraph {
     enum class Type : uint32_t {
@@ -420,6 +420,8 @@ namespace SLRSceneGraph {
         StackVariables stackVariables;
         Element returnValue;
         bool returnFlag;
+        
+        std::string absFileDirPath;
         SceneRef scene;
         RenderingContext* renderingContext;
     };

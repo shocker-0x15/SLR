@@ -2,7 +2,7 @@
 #define SLRSceneGraph_SceneParsingDriver_hpp
 
 #include <libSLR/defines.h>
-#include "references.h"
+#include "../references.h"
 #include "SceneParser.tab.hh"
 
 #define YY_DECL \

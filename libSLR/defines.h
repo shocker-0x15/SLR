@@ -64,10 +64,10 @@
 
 // For memalign, free, alignof
 #if defined(SLR_Defs_Windows)
-#    include <malloc.h>
-#    define SLR_memalign(size, alignment) _aligned_malloc(size, alignment)
-#    define SLR_freealign(ptr) _aligned_free(ptr)
-#    define SLR_alignof(T) __alignof(T)
+#   include <malloc.h>
+#   define SLR_memalign(size, alignment) _aligned_malloc(size, alignment)
+#   define SLR_freealign(ptr) _aligned_free(ptr)
+#   define SLR_alignof(T) __alignof(T)
 #elif defined(SLR_Defs_OS_X) || defined(SLR_Defs_OpenBSD)
 inline void* SLR_memalign(size_t size, size_t alignment) {
     void* ptr;
@@ -75,11 +75,20 @@ inline void* SLR_memalign(size_t size, size_t alignment) {
         ptr = nullptr;
     return ptr;
 }
-#     define SLR_freealign(ptr) ::free(ptr)
-#     define SLR_alignof(T) alignof(T)
+#   define SLR_freealign(ptr) ::free(ptr)
+#   define SLR_alignof(T) alignof(T)
 #elif defined(SLR_Defs_Linux)
-#    define SLR_memalign(size, alignment) SLRAssert_NotDefined
-#     define SLR_freealign(ptr) SLRAssert_NotDefined
+#   define SLR_memalign(size, alignment) SLRAssert_NotDefined
+#   define SLR_freealign(ptr) SLRAssert_NotDefined
+#endif
+
+// For getcwd
+#if defined(SLR_Defs_Windows)
+#   include <Windows.h>
+#   define SLR_getcwd(size, buf) GetCurrentDirectory(size, buf)
+#elif defined(SLR_Defs_OS_X) || defined(SLR_Defs_OpenBSD) || defined(SLR_Defs_Linux)
+#   include <unistd.h>
+#   define SLR_getcwd(size, buf) getcwd(buf, size)
 #endif
 
 namespace std {

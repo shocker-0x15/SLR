@@ -44,64 +44,18 @@ set(EXTLIBS_libpng16_lib "/usr/local/lib/" CACHE PATH "libpng library directory"
 set(EXTLIBS_OpenEXR22_include "/usr/local/include/OpenEXR" CACHE PATH "OpenEXR 2.2 include directory")
 set(EXTLIBS_OpenEXR22_lib "/usr/local/lib/" CACHE PATH "OpenEXR library directory")
 
-set(include_dirs "${EXTLIBS_Assimp_include};${EXTLIBS_libpng16_include};${EXTLIBS_OpenEXR22_include}")
-set(lib_dirs "${EXTLIBS_Assimp_lib};${EXTLIBS_libpng16_lib};${EXTLIBS_OpenEXR22_lib}")
-set(linker_flags "-lAssimp -lpng -lHalf -lIlmImf-2_2")
-
 if(msvc)
 	add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 endif()
 
-file(GLOB SLR_SOURCES
-	SLR/*.h
-	SLR/*.cpp
-	SLR/Core/*.h
-	SLR/Core/*.cpp
-	SLR/Accelerator/*.h
-	SLR/Accelerator/*.cpp
-	SLR/BasicTypes/*.h
-	SLR/BasicTypes/*.cpp
-	SLR/BSDFs/*.h
-	SLR/BSDFs/*.cpp
-	SLR/EDFs/*.h
-	SLR/EDFs/*.cpp
-	SLR/Cameras/*.h
-	SLR/Cameras/*.cpp
-	SLR/Helper/*.h
-	SLR/Helper/*.cpp
-	SLR/Memory/*.h
-	SLR/Memory/*.c
-	SLR/Memory/*.cpp
-	SLR/Renderers/*.h
-	SLR/Renderers/*.cpp
-	SLR/SceneGraph/*.h
-	SLR/SceneGraph/*.cpp
-	SLR/Surface/*.h
-	SLR/Surface/*.cpp
-	SLR/SurfaceMaterials/*.h
-	SLR/SurfaceMaterials/*.cpp
-	SLR/Textures/*.h
-	SLR/Textures/*.cpp
-	)
+# OS Xにおけるrun path処理の有効化
+set(CMAKE_MACOSX_RPATH 1)
 
-source_group("Core" REGULAR_EXPRESSION "SLR/Core/.*\.(h|c|hpp|cpp)")
-source_group("Accelerator" REGULAR_EXPRESSION "SLR/Accelerator/.*\.(h|c|hpp|cpp)")
-source_group("BasicTypes" REGULAR_EXPRESSION "SLR/BasicTypes/.*\.(h|c|hpp|cpp)")
-source_group("BSDFs" REGULAR_EXPRESSION "SLR/BSDFs/.*\.(h|c|hpp|cpp)")
-source_group("EDFs" REGULAR_EXPRESSION "SLR/EDFs/.*\.(h|c|hpp|cpp)")
-source_group("Cameras" REGULAR_EXPRESSION "SLR/Cameras/.*\.(h|c|hpp|cpp)")
-source_group("Helper" REGULAR_EXPRESSION "SLR/Helper/.*\.(h|c|hpp|cpp)")
-source_group("Memory" REGULAR_EXPRESSION "SLR/Memory/.*\.(h|c|hpp|cpp)")
-source_group("Renderers" REGULAR_EXPRESSION "SLR/Renderers/.*\.(h|c|hpp|cpp)")
-source_group("SceneGraph" REGULAR_EXPRESSION "SLR/SceneGraph/.*\.(h|c|hpp|cpp)")
-source_group("Surface" REGULAR_EXPRESSION "SLR/Surface/.*\.(h|c|hpp|cpp)")
-source_group("SurfaceMaterials" REGULAR_EXPRESSION "SLR/SurfaceMaterials/.*\.(h|c|hpp|cpp)")
-source_group("Textures" REGULAR_EXPRESSION "SLR/Textures/.*\.(h|c|hpp|cpp)")
+// 各プロジェクトのCMakeLists.txtを呼び出す。
+add_subdirectory(libSLR)
+add_subdirectory(libSLRSceneGraph)
+add_subdirectory(HostProgram)
 
-include_directories(${include_dirs})
-# link_directories(${lib_dirs})
-foreach(lib_dir ${lib_dirs})
-	link_directories(${lib_dir})
-endforeach()
-add_executable(SLR ${SLR_SOURCES})
-target_link_libraries(SLR ${linker_flags})
+// ビルド依存関係を設定
+add_dependencies(SLRSceneGraph SLR)
+add_dependencies(HostProgram SLR SLRSceneGraph)

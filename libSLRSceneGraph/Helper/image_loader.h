@@ -11,7 +11,7 @@
 #include <libSLR/defines.h>
 #include <libSLR/references.h>
 #include <libSLR/BasicTypes/Spectrum.h>
-#include "references.h"
+#include "../references.h"
 #include <string>
 #include <cstdint>
 

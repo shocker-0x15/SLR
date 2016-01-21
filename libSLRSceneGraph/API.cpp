@@ -24,7 +24,7 @@
 #include "camera_nodes.h"
 #include "InfiniteSphereNode.h"
 
-#include "image_loader.h"
+#include "Helper/image_loader.h"
 #include "textures.hpp"
 #include "surface_materials.hpp"
 
@@ -59,6 +59,10 @@ namespace SLRSceneGraph {
         TypeInfo::init();
         ExecuteContext executeContext;
         ErrorMessage errMsg;
+        char curDir[256];
+        SLR_getcwd(sizeof(curDir), curDir);
+        std::string pathPrefix = filePath.substr(0, filePath.find_last_of("/") + 1);
+        executeContext.absFileDirPath = std::string(curDir) + "/" + pathPrefix;
         executeContext.scene = scene;
         executeContext.renderingContext = context;
         {
@@ -851,7 +855,7 @@ namespace SLRSceneGraph {
             Element(TypeMap::Function(),
                     Function(1, {{"path", Type::String}, {"matProc", Type::Function, Element(TypeMap::Function(), nullptr)}},
                              [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
-                                 std::string path = args.at("path").raw<TypeMap::String>();
+                                 std::string path = context.absFileDirPath + args.at("path").raw<TypeMap::String>();
                                  std::string pathPrefix = path.substr(0, path.find_last_of("/") + 1);
                                  auto matProcRef = args.at("matProc").rawRef<TypeMap::Function>();
                                  
@@ -938,6 +942,10 @@ namespace SLRSceneGraph {
                                  
                                  InternalNodeRef modelNode;
                                  construct(path, modelNode, nativeMatProc);
+                                 if (!modelNode) {
+                                     *err = ErrorMessage("Some errors occur during loading a 3D model.");
+                                     return Element();
+                                 }
                                  modelNode->setName(path);
                                  
                                  return Element(TypeMap::Node(), modelNode);
@@ -1070,7 +1078,7 @@ namespace SLRSceneGraph {
                     Function(1,
                              {{"path", Type::String}, {"scale", Type::RealNumber, Element(1.0)}},
                              [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
-                                 std::string path = args.at("path").raw<TypeMap::String>();
+                                 std::string path = context.absFileDirPath + args.at("path").raw<TypeMap::String>();
                                  float scale = args.at("scale").raw<TypeMap::RealNumber>();
                                  SLR::DefaultAllocator &defMem = SLR::DefaultAllocator::instance();
                                  

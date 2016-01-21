@@ -121,6 +121,10 @@ namespace SLRSceneGraph {
         
         Assimp::Importer importer;
         const aiScene* scene = importer.ReadFile(filePath, 0);
+        if (!scene) {
+            printf("Failed to load %s.\n", filePath.c_str());
+            return;
+        }
         printf("Reading: %s done.\n", filePath.c_str());
         
         std::string pathPrefix = filePath.substr(0, filePath.find_last_of("/") + 1);
