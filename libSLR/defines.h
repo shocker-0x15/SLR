@@ -8,6 +8,26 @@
 #ifndef SLR_defines_h
 #define SLR_defines_h
 
+// Platform defines
+#if defined(_WIN32) || defined(_WIN64)
+#   define SLR_Defs_Windows
+#   if defined(__MINGW32__) // Defined for both 32 bit/64 bit MinGW
+#       define SLR_Defs_MinGW
+#   elif defined(_MSC_VER)
+#       define SLR_Defs_MSVC
+#   endif
+#elif defined(__linux__)
+#   define SLR_Defs_Linux
+#elif defined(__APPLE__)
+#   define SLR_Defs_OS_X
+#elif defined(__OpenBSD__)
+#   define SLR_Defs_OpenBSD
+#endif
+
+#ifdef SLR_Defs_Windows
+#   define _USE_MATH_DEFINES
+#endif
+
 #include <cstdio>
 #include <cstdint>
 #include <cstdlib>
@@ -36,28 +56,12 @@
 #endif
 
 #ifdef ENABLE_ASSERT
-#    define SLRAssert(expr, fmt, ...) if (!(expr)) { printf("%s @%s: %u:\n", #expr, __FILE__, __LINE__); printf(fmt"\n", ##__VA_ARGS__); abort(); } 0
+#   define SLRAssert(expr, fmt, ...) if (!(expr)) { printf("%s @%s: %u:\n", #expr, __FILE__, __LINE__); printf(fmt"\n", ##__VA_ARGS__); abort(); } 0
 #else
-#    define SLRAssert(expr, fmt, ...)
+#   define SLRAssert(expr, fmt, ...)
 #endif
 
 #define SLRAssert_NotDefined SLRAssert(false, "Not defined!");
-
-// Platform defines
-#if defined(_WIN32) || defined(_WIN64)
-#    define SLR_Defs_Windows
-#    if defined(__MINGW32__) // Defined for both 32 bit/64 bit MinGW
-#        define SLR_Defs_MinGW
-#    elif defined(_MSC_VER)
-#        define SLR_Defs_MSVC
-#    endif
-#elif defined(__linux__)
-#    define SLR_Defs_Linux
-#elif defined(__APPLE__)
-#    define SLR_Defs_OS_X
-#elif defined(__OpenBSD__)
-#    define SLR_Defs_OpenBSD
-#endif
 
 #define SLR_Minimum_Machine_Alignment 16
 #define SLR_L1_Cacheline_Size 64
@@ -84,6 +88,7 @@ inline void* SLR_memalign(size_t size, size_t alignment) {
 
 // For getcwd
 #if defined(SLR_Defs_Windows)
+#   define NOMINMAX
 #   include <Windows.h>
 #   define SLR_getcwd(size, buf) GetCurrentDirectory(size, buf)
 #elif defined(SLR_Defs_OS_X) || defined(SLR_Defs_OpenBSD) || defined(SLR_Defs_Linux)

@@ -51,11 +51,11 @@ endif()
 # OS Xにおけるrun path処理の有効化
 set(CMAKE_MACOSX_RPATH 1)
 
-// 各プロジェクトのCMakeLists.txtを呼び出す。
+# 各プロジェクトのCMakeLists.txtを呼び出す。
 add_subdirectory(libSLR)
 add_subdirectory(libSLRSceneGraph)
 add_subdirectory(HostProgram)
 
-// ビルド依存関係を設定
+# ビルド依存関係を設定
 add_dependencies(SLRSceneGraph SLR)
 add_dependencies(HostProgram SLR SLRSceneGraph)

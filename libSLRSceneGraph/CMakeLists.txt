@@ -15,6 +15,7 @@ file(GLOB libSLRSceneGraph_Sources
 	)
 file(GLOB libSLRSceneGraph_Sources_excluded
 	 Parser/main.cpp
+	 dummy # workaround for CMake 3.4.1 on Windows.
     )
 list(REMOVE_ITEM libSLRSceneGraph_Sources ${libSLRSceneGraph_Sources_excluded})
 
