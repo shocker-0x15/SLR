@@ -24,7 +24,7 @@ namespace SLRSceneGraph {
     }
     
     void TriangleMeshNode::addTriangle(uint64_t v0, uint64_t v1, uint64_t v2, const SurfaceMaterialRef &mat, const Normal3DTextureRef &normalMap) {
-        Triangle tri{v0, v1, v2};
+        Triangle tri{{v0, v1, v2}};
         m_triangles.push_back(tri);
         m_materials.push_back(mat);
         m_normalMaps.push_back(normalMap);

@@ -85,10 +85,10 @@ namespace SLRSceneGraph {
     struct Element;
     struct ParameterList;
     typedef std::shared_ptr<ParameterList> ParameterListRef;
-    struct Function;
+    class Function;
     struct TypeInfo;
     
-    struct LocalVariables;
+    class LocalVariables;
     struct ExecuteContext;
 }
 

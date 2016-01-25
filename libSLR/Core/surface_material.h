@@ -10,7 +10,8 @@
 
 #include "../defines.h"
 #include "../references.h"
-#include "../BasicTypes/Spectrum.h"
+#include "../BasicTypes/RGBTypes.h"
+#include "../BasicTypes/SpectrumTypes.h"
 
 namespace SLR {
     class SurfaceMaterial {

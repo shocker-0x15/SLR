@@ -17,49 +17,49 @@ namespace SLR {
     struct Point3Template {
         RealType x, y, z;
         
-        Point3Template(RealType v = 0.0f) : x(v), y(v), z(v) { };
-        constexpr Point3Template(RealType xx, RealType yy, RealType zz) : x(xx), y(yy), z(zz) { };
-        Point3Template(const Vector3Template<RealType> &v) : x(v.x), y(v.y), z(v.z) { };
+        Point3Template(RealType v = 0.0f) : x(v), y(v), z(v) { }
+        constexpr Point3Template(RealType xx, RealType yy, RealType zz) : x(xx), y(yy), z(zz) { }
+        Point3Template(const Vector3Template<RealType> &v) : x(v.x), y(v.y), z(v.z) { }
         
         operator Vector3Template<RealType>() const {
             return Vector3Template<RealType>(x, y, z);
-        };
+        }
         
-        Point3Template operator+() const { return *this; };
-        Point3Template operator-() const { return Point3Template(-x, -y, -z); };
+        Point3Template operator+() const { return *this; }
+        Point3Template operator-() const { return Point3Template(-x, -y, -z); }
         
-        Point3Template operator+(const Vector3Template<RealType> &v) const { return Point3Template(x + v.x, y + v.y, z + v.z); };
-        Point3Template operator-(const Vector3Template<RealType> &v) const { return Point3Template(x - v.x, y - v.y, z - v.z); };
-        Point3Template<RealType> operator+(const Point3Template &p) const { return Point3Template<RealType>(x + p.x, y + p.y, z + p.z); };
-        Vector3Template<RealType> operator-(const Point3Template &p) const { return Vector3Template<RealType>(x - p.x, y - p.y, z - p.z); };
-        Point3Template operator*(RealType s) const { return Point3Template(x * s, y * s, z * s); };
-        Point3Template operator/(RealType s) const { RealType r = 1.0f / s; return Point3Template(x * r, y * r, z * r); };
-        friend inline Point3Template operator+(const Vector3Template<RealType> &v, const Point3Template &p) { return Point3Template(p.x + v.x, p.y + v.y, p.z + v.z); };
-        friend inline Point3Template operator*(RealType s, const Point3Template &p) { return Point3Template(s * p.x, s * p.y, s * p.z); };
+        Point3Template operator+(const Vector3Template<RealType> &v) const { return Point3Template(x + v.x, y + v.y, z + v.z); }
+        Point3Template operator-(const Vector3Template<RealType> &v) const { return Point3Template(x - v.x, y - v.y, z - v.z); }
+        Point3Template<RealType> operator+(const Point3Template &p) const { return Point3Template<RealType>(x + p.x, y + p.y, z + p.z); }
+        Vector3Template<RealType> operator-(const Point3Template &p) const { return Vector3Template<RealType>(x - p.x, y - p.y, z - p.z); }
+        Point3Template operator*(RealType s) const { return Point3Template(x * s, y * s, z * s); }
+        Point3Template operator/(RealType s) const { RealType r = 1.0f / s; return Point3Template(x * r, y * r, z * r); }
+        friend inline Point3Template operator+(const Vector3Template<RealType> &v, const Point3Template &p) { return Point3Template(p.x + v.x, p.y + v.y, p.z + v.z); }
+        friend inline Point3Template operator*(RealType s, const Point3Template &p) { return Point3Template(s * p.x, s * p.y, s * p.z); }
         
-        Point3Template &operator+=(const Vector3Template<RealType> &v) { x += v.x; y += v.y; z += v.z; return *this; };
-        Point3Template &operator-=(const Vector3Template<RealType> &v) { x -= v.x; y -= v.y; z -= v.z; return *this; };
-        Point3Template &operator*=(RealType s) { x *= s; y *= s; z *= s; return *this; };
-        Point3Template &operator/=(RealType s) { RealType r = 1.0f / s; x *= r; y *= r; z *= r; return *this; };
+        Point3Template &operator+=(const Vector3Template<RealType> &v) { x += v.x; y += v.y; z += v.z; return *this; }
+        Point3Template &operator-=(const Vector3Template<RealType> &v) { x -= v.x; y -= v.y; z -= v.z; return *this; }
+        Point3Template &operator*=(RealType s) { x *= s; y *= s; z *= s; return *this; }
+        Point3Template &operator/=(RealType s) { RealType r = 1.0f / s; x *= r; y *= r; z *= r; return *this; }
         
-        bool operator==(const Point3Template &p) const { return x == p.x && y == p.y && z == p.z; };
-        bool operator!=(const Point3Template &p) const { return x != p.x || y != p.y || z != p.z; };
+        bool operator==(const Point3Template &p) const { return x == p.x && y == p.y && z == p.z; }
+        bool operator!=(const Point3Template &p) const { return x != p.x || y != p.y || z != p.z; }
         
         RealType &operator[](unsigned int index) {
             SLRAssert(index < 3, "\"index\" is out of range [0, 2].");
             return *(&x + index);
-        };
+        }
         RealType operator[](unsigned int index) const {
             SLRAssert(index < 3, "\"index\" is out of range [0, 2].");
             return *(&x + index);
-        };
+        }
         
-        RealType maxValue() const { return std::fmax(x, std::fmax(y, z)); };
-        RealType minValue() const { return std::fmin(x, std::fmin(y, z)); };
-        bool hasNaN() const { using std::isnan; return isnan(x) || isnan(y) || isnan(z); };
-        bool hasInf() const { using std::isinf; return isinf(x) || isinf(y) || isinf(z); };
+        RealType maxValue() const { return std::fmax(x, std::fmax(y, z)); }
+        RealType minValue() const { return std::fmin(x, std::fmin(y, z)); }
+        bool hasNaN() const { using std::isnan; return isnan(x) || isnan(y) || isnan(z); }
+        bool hasInf() const { using std::isinf; return isinf(x) || isinf(y) || isinf(z); }
         
-        void print() const { printf("(%g, %g, %g)\n", x, y, z); };
+        void print() const { printf("(%g, %g, %g)\n", x, y, z); }
         
         static const Point3Template Zero;
         static const Point3Template One;

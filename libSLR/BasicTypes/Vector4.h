@@ -18,42 +18,42 @@ namespace SLR {
     public:
         RealType x, y, z, w;
         
-        Vector4Template(float v = 0.0f) : x(v), y(v), z(v), w(v) { };
-        constexpr Vector4Template(RealType xx, RealType yy, RealType zz, RealType ww) : x(xx), y(yy), z(zz), w(ww) { };
-        Vector4Template(const Vector3Template<RealType> &vec3, RealType ww) : x(vec3.x), y(vec3.y), z(vec3.z), w(ww) { };
+        Vector4Template(RealType v = 0.0f) : x(v), y(v), z(v), w(v) { }
+        constexpr Vector4Template(RealType xx, RealType yy, RealType zz, RealType ww) : x(xx), y(yy), z(zz), w(ww) { }
+        Vector4Template(const Vector3Template<RealType> &vec3, RealType ww) : x(vec3.x), y(vec3.y), z(vec3.z), w(ww) { }
         
-        Vector4Template operator+() const { return *this; };
-        Vector4Template operator-() const { return Vector4Template(-x, -y, -z, -w); };
+        Vector4Template operator+() const { return *this; }
+        Vector4Template operator-() const { return Vector4Template(-x, -y, -z, -w); }
         
         Vector4Template operator+(const Vector4Template &v) const { return Vector4Template(x + v.x, y + v.y, z + v.z, w + v.w); }
-        Vector4Template operator-(const Vector4Template &v) const { return Vector4Template(x - v.x, y - v.y, z - v.z, w - v.w); };
-        Vector4Template operator*(RealType s) const { return Vector4Template(x * s, y * s, z * s,  w * s); };
-        Vector4Template operator/(RealType s) const { RealType r = 1.0f / s; return Vector4Template(x * r, y * r, z * r, w * r); };
-        friend inline Vector4Template operator*(RealType s, const Vector4Template &v) { return Vector4Template(s * v.x, s * v.y, s * v.z, s * v.w); };
+        Vector4Template operator-(const Vector4Template &v) const { return Vector4Template(x - v.x, y - v.y, z - v.z, w - v.w); }
+        Vector4Template operator*(RealType s) const { return Vector4Template(x * s, y * s, z * s,  w * s); }
+        Vector4Template operator/(RealType s) const { RealType r = 1.0f / s; return Vector4Template(x * r, y * r, z * r, w * r); }
+        friend inline Vector4Template operator*(RealType s, const Vector4Template &v) { return Vector4Template(s * v.x, s * v.y, s * v.z, s * v.w); }
         
-        Vector4Template &operator+=(const Vector4Template &v) { x += v.x; y += v.y; z += v.z; w += v.w; return *this; };
-        Vector4Template &operator-=(const Vector4Template &v) { x -= v.x; y -= v.y; z -= v.z; w -= v.w; return *this; };
-        Vector4Template &operator*=(RealType s) { x *= s; y *= s; z *= s; w *= s; return *this; };
-        Vector4Template &operator/=(RealType s) { RealType r = 1.0f / s; x *= r; y *= r; z *= r; w *= r; return *this; };
+        Vector4Template &operator+=(const Vector4Template &v) { x += v.x; y += v.y; z += v.z; w += v.w; return *this; }
+        Vector4Template &operator-=(const Vector4Template &v) { x -= v.x; y -= v.y; z -= v.z; w -= v.w; return *this; }
+        Vector4Template &operator*=(RealType s) { x *= s; y *= s; z *= s; w *= s; return *this; }
+        Vector4Template &operator/=(RealType s) { RealType r = 1.0f / s; x *= r; y *= r; z *= r; w *= r; return *this; }
         
-        bool operator==(const Vector4Template &v) const { return x == v.x && y == v.y && z == v.z && w == v.w; };
-        bool operator!=(const Vector4Template &v) const { return x != v.x || y != v.y || z != v.z || w != v.w; };
+        bool operator==(const Vector4Template &v) const { return x == v.x && y == v.y && z == v.z && w == v.w; }
+        bool operator!=(const Vector4Template &v) const { return x != v.x || y != v.y || z != v.z || w != v.w; }
         
         RealType &operator[](unsigned int index) {
             SLRAssert(index < 4, "\"index\" is out of range [0, 3].");
             return *(&x + index);
-        };
+        }
         RealType operator[](unsigned int index) const {
             SLRAssert(index < 4, "\"index\" is out of range [0, 3].");
             return *(&x + index);
-        };
+        }
         
-        explicit operator Vector3Template<RealType>() const { return Vector3Template<RealType>(x, y, z); };
+        explicit operator Vector3Template<RealType>() const { return Vector3Template<RealType>(x, y, z); }
         
-        RealType maxValue() const { return fmaxf(fmaxf(x, y), fmaxf(z, w)); };
-        RealType minValue() const { return fminf(fminf(x, y), fminf(z, w)); };
-        bool hasNaN() const { using std::isnan; return isnan(x) || isnan(y) || isnan(z) || isnan(w); };
-        bool hasInf() const { using std::isinf; return isinf(x) || isinf(y) || isinf(z) || isinf(w); };
+        RealType maxValue() const { using std::fmax; return fmax(fmax(x, y), fmax(z, w)); }
+        RealType minValue() const { using std::fmin; return fmin(fmin(x, y), fmin(z, w)); }
+        bool hasNaN() const { using std::isnan; return isnan(x) || isnan(y) || isnan(z) || isnan(w); }
+        bool hasInf() const { using std::isinf; return isinf(x) || isinf(y) || isinf(z) || isinf(w); }
         
         static const Vector4Template Zero;
         static const Vector4Template One;

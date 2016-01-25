@@ -17,7 +17,8 @@
 #include "../BasicTypes/Matrix4x4.h"
 #include "../BasicTypes/Quaternion.h"
 #include "../BasicTypes/TexCoord2.h"
-#include "../BasicTypes/Spectrum.h"
+#include "../BasicTypes/RGBTypes.h"
+#include "../BasicTypes/SpectrumTypes.h"
 
 namespace SLR {
     struct Ray {

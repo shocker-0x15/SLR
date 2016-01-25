@@ -19,9 +19,9 @@ namespace SLR {
         
         float m_aspect;
         float m_fovY;
-        float m_objPlaneDistance;
-        float m_imgPlaneDistance;
         float m_lensRadius;
+        float m_imgPlaneDistance;
+        float m_objPlaneDistance;
         
         float m_opWidth;
         float m_opHeight;

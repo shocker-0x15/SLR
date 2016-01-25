@@ -17,55 +17,55 @@ namespace SLR {
     struct Vector3Template {
         RealType x, y, z;
         
-        Vector3Template(RealType v = 0.0f) : x(v), y(v), z(v) { };
-        constexpr Vector3Template(RealType xx, RealType yy, RealType zz) : x(xx), y(yy), z(zz) { };
+        Vector3Template(RealType v = 0.0f) : x(v), y(v), z(v) { }
+        constexpr Vector3Template(RealType xx, RealType yy, RealType zz) : x(xx), y(yy), z(zz) { }
         
-        Vector3Template operator+() const { return *this; };
-        Vector3Template operator-() const { return Vector3Template(-x, -y, -z); };
+        Vector3Template operator+() const { return *this; }
+        Vector3Template operator-() const { return Vector3Template(-x, -y, -z); }
         
-        Vector3Template operator+(const Vector3Template &v) const { return Vector3Template(x + v.x, y + v.y, z + v.z); };
-        Vector3Template operator-(const Vector3Template &v) const { return Vector3Template(x - v.x, y - v.y, z - v.z); };
-        Vector3Template operator*(const Vector3Template &v) const { return Vector3Template(x * v.x, y * v.y, z * v.z); };
-        Vector3Template operator/(const Vector3Template &v) const { return Vector3Template(x / v.x, y / v.y, z / v.z); };
-        Vector3Template operator*(RealType s) const { return Vector3Template(x * s, y * s, z * s); };
-        Vector3Template operator/(RealType s) const { RealType r = 1.0f / s; return Vector3Template(x * r, y * r, z * r); };
-        friend inline Vector3Template operator*(RealType s, const Vector3Template &v) { return Vector3Template(s * v.x, s * v.y, s * v.z); };
+        Vector3Template operator+(const Vector3Template &v) const { return Vector3Template(x + v.x, y + v.y, z + v.z); }
+        Vector3Template operator-(const Vector3Template &v) const { return Vector3Template(x - v.x, y - v.y, z - v.z); }
+        Vector3Template operator*(const Vector3Template &v) const { return Vector3Template(x * v.x, y * v.y, z * v.z); }
+        Vector3Template operator/(const Vector3Template &v) const { return Vector3Template(x / v.x, y / v.y, z / v.z); }
+        Vector3Template operator*(RealType s) const { return Vector3Template(x * s, y * s, z * s); }
+        Vector3Template operator/(RealType s) const { RealType r = 1.0f / s; return Vector3Template(x * r, y * r, z * r); }
+        friend inline Vector3Template operator*(RealType s, const Vector3Template &v) { return Vector3Template(s * v.x, s * v.y, s * v.z); }
         
-        Vector3Template &operator+=(const Vector3Template &v) { x += v.x; y += v.y; z += v.z; return *this; };
-        Vector3Template &operator-=(const Vector3Template &v) { x -= v.x; y -= v.y; z -= v.z; return *this; };
-        Vector3Template &operator*=(RealType s) { x *= s; y *= s; z *= s; return *this; };
-        Vector3Template &operator/=(RealType s) { RealType r = 1.0f / s; x *= r; y *= r; z *= r; return *this; };
+        Vector3Template &operator+=(const Vector3Template &v) { x += v.x; y += v.y; z += v.z; return *this; }
+        Vector3Template &operator-=(const Vector3Template &v) { x -= v.x; y -= v.y; z -= v.z; return *this; }
+        Vector3Template &operator*=(RealType s) { x *= s; y *= s; z *= s; return *this; }
+        Vector3Template &operator/=(RealType s) { RealType r = 1.0f / s; x *= r; y *= r; z *= r; return *this; }
         
-        bool operator==(const Vector3Template &v) const { return x == v.x && y == v.y && z == v.z; };
-        bool operator!=(const Vector3Template &v) const { return x != v.x || y != v.y || z != v.z; };
+        bool operator==(const Vector3Template &v) const { return x == v.x && y == v.y && z == v.z; }
+        bool operator!=(const Vector3Template &v) const { return x != v.x || y != v.y || z != v.z; }
         
         RealType &operator[](unsigned int index) {
             SLRAssert(index < 3, "\"index\" is out of range [0, 2].");
             return *(&x + index);
-        };
+        }
         RealType operator[](unsigned int index) const {
             SLRAssert(index < 3, "\"index\" is out of range [0, 2].");
             return *(&x + index);
-        };
+        }
         
-        RealType length() const { return sqrtf(x * x + y * y + z * z); };
-        RealType sqLength() const { return x * x + y * y + z * z; };
+        RealType length() const { return std::sqrt(x * x + y * y + z * z); }
+        RealType sqLength() const { return x * x + y * y + z * z; }
         Vector3Template& normalize() {
-            RealType length = sqrtf(x * x + y * y + z * z);
+            RealType length = std::sqrt(x * x + y * y + z * z);
             return *this /= length;
-        };
-        Vector3Template reciprocal() const { return Vector3Template(1.0f / x, 1.0f / y, 1.0f / z); };
+        }
+        Vector3Template reciprocal() const { return Vector3Template(1.0f / x, 1.0f / y, 1.0f / z); }
         void toPolarYUp(RealType* theta, RealType* phi) const {
-            *theta = std::acos(std::clamp(y, -1.0f, 1.0f));
-            *phi = std::fmod(std::atan2(-x, z) + 2.0f * M_PI, 2 * M_PI);
-        };
+            *theta = std::acos(std::clamp(y, (RealType)-1.0, (RealType)1.0));
+            *phi = std::fmod((RealType)(std::atan2(-x, z) + 2 * M_PI), (RealType)(2 * M_PI));
+        }
         
-        RealType maxValue() const { return fmaxf(x, fmaxf(y, z)); };
-        RealType minValue() const { return fminf(x, fminf(y, z)); };
-        bool hasNaN() const { using std::isnan; return isnan(x) || isnan(y) || isnan(z); };
-        bool hasInf() const { using std::isinf; return isinf(x) || isinf(y) || isinf(z); };
+        RealType maxValue() const { return fmaxf(x, fmaxf(y, z)); }
+        RealType minValue() const { return fminf(x, fminf(y, z)); }
+        bool hasNaN() const { using std::isnan; return isnan(x) || isnan(y) || isnan(z); }
+        bool hasInf() const { using std::isinf; return isinf(x) || isinf(y) || isinf(z); }
         
-        void print() const { printf("(%f, %f, %f)\n", x, y, z); };
+        void print() const { printf("(%f, %f, %f)\n", x, y, z); }
         
         static const Vector3Template Zero;
         static const Vector3Template One;

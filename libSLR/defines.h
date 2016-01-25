@@ -26,6 +26,13 @@
 
 #ifdef SLR_Defs_Windows
 #   define _USE_MATH_DEFINES
+#   ifdef SLR_DLL
+#       define SLR_API __declspec(dllexport)
+#   else
+#       define SLR_API __declspec(dllimport)
+#   endif
+#else
+#   define SLR_API
 #endif
 
 #include <cstdio>

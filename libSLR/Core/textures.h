@@ -11,7 +11,8 @@
 #include "../defines.h"
 #include "../references.h"
 #include "../BasicTypes/TexCoord2.h"
-#include "../BasicTypes/Spectrum.h"
+#include "../BasicTypes/RGBTypes.h"
+#include "../BasicTypes/SpectrumTypes.h"
 #include "../BasicTypes/Normal3.h"
 
 namespace SLR {

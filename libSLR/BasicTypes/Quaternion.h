@@ -22,8 +22,8 @@ namespace SLR {
         RealType w;
         
         QuaternionTemplate() : w(1.0f) { };
-        constexpr QuaternionTemplate(float xx, float yy, float zz, float ww) : v(xx, yy, zz), w(ww) { };
-        constexpr QuaternionTemplate(const Vector3Template<RealType> &vv, float ww) : v(vv), w(ww) { };
+        constexpr QuaternionTemplate(RealType xx, RealType yy, RealType zz, RealType ww) : v(xx, yy, zz), w(ww) { };
+        constexpr QuaternionTemplate(const Vector3Template<RealType> &vv, RealType ww) : v(vv), w(ww) { };
         QuaternionTemplate(const Matrix4x4Template<RealType> &m) {
             RealType trace = m[0][0] + m[1][1] + m[2][2];
             if (trace > 0.0f) {
@@ -94,7 +94,7 @@ namespace SLR {
     }
     
     template <typename RealType>
-    inline QuaternionTemplate<RealType> Slerp(float t, const QuaternionTemplate<RealType> &q0, const QuaternionTemplate<RealType> &q1) {
+    inline QuaternionTemplate<RealType> Slerp(RealType t, const QuaternionTemplate<RealType> &q0, const QuaternionTemplate<RealType> &q1) {
         RealType cosTheta = dot(q0, q1);
         if (cosTheta > 0.9995f)
             return normalize((1 - t) * q0 + t * q1);
@@ -107,35 +107,7 @@ namespace SLR {
     }
     
     template <typename RealType>
-    void decompose(const Matrix4x4Template<RealType> &mat, Vector3Template<RealType>* T, QuaternionTemplate<RealType>* R, Matrix4x4Template<RealType>* S) {
-        T->x = mat[3][0];
-        T->y = mat[3][1];
-        T->z = mat[3][2];
-        
-        Matrix4x4Template<RealType> matRS = mat;
-        for (int i = 0; i < 3; ++i)
-            matRS[3][i] = matRS[i][3] = 0.0f;
-        matRS[3][3] = 1.0f;
-        
-        RealType norm;
-        int count = 0;
-        Matrix4x4Template<RealType> curR = matRS;
-        do {
-            Matrix4x4 itR = invert(transpose(curR));
-            Matrix4x4 nextR = 0.5f * (curR + itR);
-            
-            norm = 0;
-            for (int i = 0; i < 3; ++i) {
-                using std::abs;
-                RealType n = abs(curR[0][i] - nextR[0][i]) + abs(curR[1][i] - nextR[1][i]) + abs(curR[2][i] - nextR[2][i]);
-                norm = std::max(norm, n);
-            }
-            curR = nextR;
-        } while (++count < 100 && norm > 0.0001);
-        *R = QuaternionTemplate<RealType>(curR);
-        
-        *S = invert(curR) * matRS;
-    }    
+    void decompose(const Matrix4x4Template<RealType> &mat, Vector3Template<RealType>* T, QuaternionTemplate<RealType>* R, Matrix4x4Template<RealType>* S);
 }
 
 #endif

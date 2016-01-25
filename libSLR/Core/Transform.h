@@ -81,9 +81,9 @@ namespace SLR {
     };
     
     class AnimatedTransform : public Transform {
-        float m_tBegin, m_tEnd;
         StaticTransform* m_tfBegin;
         StaticTransform* m_tfEnd;
+        float m_tBegin, m_tEnd;
         Vector3D m_T[2];
         Quaternion m_R[2];
         Matrix4x4 m_S[2];

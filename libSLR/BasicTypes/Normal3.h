@@ -17,50 +17,53 @@ namespace SLR {
     struct Normal3Template {
         RealType x, y, z;
         
-        Normal3Template(RealType v = 0.0f) : x(v), y(v), z(v) { };
-        constexpr Normal3Template(RealType xx, RealType yy, RealType zz) : x(xx), y(yy), z(zz) { };
-        Normal3Template(const Vector3Template<RealType> &v) : x(v.x), y(v.y), z(v.z) { };
+        Normal3Template(RealType v = 0.0f) : x(v), y(v), z(v) { }
+        constexpr Normal3Template(RealType xx, RealType yy, RealType zz) : x(xx), y(yy), z(zz) { }
+        Normal3Template(const Vector3Template<RealType> &v) : x(v.x), y(v.y), z(v.z) { }
         
         operator Vector3Template<RealType>() const {
             return Vector3Template<RealType>(x, y, z);
-        };
+        }
         
-        Normal3Template operator+() const { return *this; };
-        Normal3Template operator-() const { return Normal3Template(-x, -y, -z); };
+        Normal3Template operator+() const { return *this; }
+        Normal3Template operator-() const { return Normal3Template(-x, -y, -z); }
         
-        Vector3Template<RealType> operator+(const Vector3Template<RealType> &v) const { return Vector3Template<RealType>(x + v.x, y + v.y, z + v.z); };
-        Vector3Template<RealType> operator-(const Vector3Template<RealType> &v) const { return Vector3Template<RealType>(x - v.x, y - v.y, z - v.z); };
-        Vector3Template<RealType> operator+(const Normal3Template &n) const { return Vector3Template<RealType>(x + n.x, y + n.y, z + n.z); };
-        Vector3Template<RealType> operator-(const Normal3Template &n) const { return Vector3Template<RealType>(x - n.x, y - n.y, z - n.z); };
-        Vector3Template<RealType> operator*(RealType s) const { return Vector3Template<RealType>(x * s, y * s, z * s); };
-        Vector3Template<RealType> operator/(RealType s) const { RealType r = 1.0f / s; return Vector3Template<RealType>(x * r, y * r, z * r); };
-        friend inline Vector3Template<RealType> operator*(RealType s, const Normal3Template &n) { return Vector3Template<RealType>(s * n.x, s * n.y, s * n.z); };
+        Vector3Template<RealType> operator+(const Vector3Template<RealType> &v) const { return Vector3Template<RealType>(x + v.x, y + v.y, z + v.z); }
+        Vector3Template<RealType> operator-(const Vector3Template<RealType> &v) const { return Vector3Template<RealType>(x - v.x, y - v.y, z - v.z); }
+        Vector3Template<RealType> operator+(const Normal3Template &n) const { return Vector3Template<RealType>(x + n.x, y + n.y, z + n.z); }
+        Vector3Template<RealType> operator-(const Normal3Template &n) const { return Vector3Template<RealType>(x - n.x, y - n.y, z - n.z); }
+        Vector3Template<RealType> operator*(RealType s) const { return Vector3Template<RealType>(x * s, y * s, z * s); }
+        Vector3Template<RealType> operator/(RealType s) const { RealType r = 1.0f / s; return Vector3Template<RealType>(x * r, y * r, z * r); }
+        friend inline Vector3Template<RealType> operator*(RealType s, const Normal3Template &n) { return Vector3Template<RealType>(s * n.x, s * n.y, s * n.z); }
         
-        bool operator==(const Normal3Template &p) const { return x == p.x && y == p.y && z == p.z; };
-        bool operator!=(const Normal3Template &p) const { return x != p.x || y != p.y || z != p.z; };
+        bool operator==(const Normal3Template &p) const { return x == p.x && y == p.y && z == p.z; }
+        bool operator!=(const Normal3Template &p) const { return x != p.x || y != p.y || z != p.z; }
         
         RealType &operator[](unsigned int index) {
             SLRAssert(index < 3, "\"index\" is out of range [0, 2].");
             return *(&x + index);
-        };
+        }
         RealType operator[](unsigned int index) const {
             SLRAssert(index < 3, "\"index\" is out of range [0, 2].");
             return *(&x + index);
-        };
+        }
         
-        RealType length() const { return std::sqrt(x * x + y * y + z * z); };
-        RealType sqLength() const { return x * x + y * y + z * z; };
+        RealType length() const { return std::sqrt(x * x + y * y + z * z); }
+        RealType sqLength() const { return x * x + y * y + z * z; }
         Normal3Template& normalize() {
-            RealType length = std::sqrt(x * x + y * y + z * z);
-            return *this /= length;
-        };
+            RealType rcpLength = 1.0 / std::sqrt(x * x + y * y + z * z);
+            x *= rcpLength;
+            y *= rcpLength;
+            z *= rcpLength;
+            return *this;
+        }
         
-        RealType maxValue() const { return fmaxf(x, fmaxf(y, z)); };
-        RealType minValue() const { return fminf(x, fminf(y, z)); };
-        bool hasNaN() const { using std::isnan; return isnan(x) || isnan(y) || isnan(z); };
-        bool hasInf() const { using std::isinf; return isinf(x) || isinf(y) || isinf(z); };
+        RealType maxValue() const { using std::fmax; return fmax(x, fmax(y, z)); }
+        RealType minValue() const { using std::fmin; return fmin(x, fmin(y, z)); }
+        bool hasNaN() const { using std::isnan; return isnan(x) || isnan(y) || isnan(z); }
+        bool hasInf() const { using std::isinf; return isinf(x) || isinf(y) || isinf(z); }
         
-        void print() const { printf("(%g, %g, %g)\n", x, y, z); };
+        void print() const { printf("(%g, %g, %g)\n", x, y, z); }
         
         static const Normal3Template Zero;
         static const Normal3Template One;

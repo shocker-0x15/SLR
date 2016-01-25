@@ -10,7 +10,6 @@
 
 #include "../defines.h"
 #include "../references.h"
-#include "CompensatedSum.h"
 
 namespace SLR {
     //         |              Input|     Calculation|             Storage|
@@ -36,20 +35,10 @@ namespace SLR {
     };
     
     template <typename RealType>
-    RealType sRGB_gamma(RealType value) {
-        SLRAssert(value >= 0 && value <= 1.0, "Input valus must be in range [0, 1].");
-        if (value <= 0.0031308)
-            return 12.92 * value;
-        return 1.055 * std::pow(value, 1.0 / 2.4) - 0.055;
-    };
+    RealType sRGB_gamma(RealType value);
     
     template <typename RealType>
-    RealType sRGB_degamma(RealType value) {
-        SLRAssert(value >= 0 && value <= 1.0, "Input valus must be in range [0, 1].");
-        if (value <= 0.04045)
-            return value  / 12.92;
-        return std::pow((value + 0.055) / 1.055, 2.4);
-    };
+    RealType sRGB_degamma(RealType value);
     
     // TODO: implement a method to generate arbitrary XYZ<->RGB matrices.
     // http://www.brucelindbloom.com/index.html?Eqn_RGB_XYZ_Matrix.html
@@ -583,8 +572,6 @@ namespace SLR {
     }
 }
 
-#include "RGBTypes.h"
-#include "SpectrumTypes.h"
 #include "common_spectra.h"
 #include "spectrum_library.h"
 

@@ -15,8 +15,9 @@ file(GLOB libSLRSceneGraph_Sources
 	)
 file(GLOB libSLRSceneGraph_Sources_excluded
 	 Parser/main.cpp
-	 dummy # workaround for CMake 3.4.1 on Windows.
     )
+# workaround for CMake 3.4.1 on Windows.
+set(libSLRSceneGraph_Sources_excluded "${libSLRSceneGraph_Sources_excluded} dummy")
 list(REMOVE_ITEM libSLRSceneGraph_Sources ${libSLRSceneGraph_Sources_excluded})
 
 source_group("SLR Scene Graph" REGULAR_EXPRESSION ".*\.(h|c|hpp|cpp)")

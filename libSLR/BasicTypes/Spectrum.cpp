@@ -6,9 +6,31 @@
 //
 
 #include "Spectrum.h"
+#include "RGBTypes.h"
+#include "SpectrumTypes.h"
 #include "../BasicTypes/CompensatedSum.h"
 
 namespace SLR {
+    template <typename RealType>
+    RealType sRGB_gamma(RealType value) {
+        SLRAssert(value >= 0 && value <= 1.0, "Input valus must be in range [0, 1].");
+        if (value <= 0.0031308)
+            return 12.92 * value;
+        return 1.055 * std::pow(value, 1.0 / 2.4) - 0.055;
+    };
+    template float sRGB_gamma(float value);
+    template double sRGB_gamma(double value);
+    
+    template <typename RealType>
+    RealType sRGB_degamma(RealType value) {
+        SLRAssert(value >= 0 && value <= 1.0, "Input valus must be in range [0, 1].");
+        if (value <= 0.04045)
+            return value  / 12.92;
+        return std::pow((value + 0.055) / 1.055, 2.4);
+    };
+    template float sRGB_degamma(float value);
+    template double sRGB_degamma(double value);
+    
     const float xbar_2deg[] = {
         0.0001299, 0.000145847, 0.000163802, 0.000184004, 0.00020669, 0.0002321, 0.000260728, 0.000293075,
         0.000329388, 0.000369914, 0.0004149, 0.000464159, 0.000518986, 0.000581854, 0.000655235, 0.0007416,

@@ -8,6 +8,11 @@
 #ifndef __SLR__RGBTypes__
 #define __SLR__RGBTypes__
 
+#include "../defines.h"
+#include "../references.h"
+#include "Spectrum.h"
+#include "CompensatedSum.h"
+
 namespace SLR {
     // just for compatibility with spectral representation build.
     template <typename RealType>
@@ -66,11 +71,11 @@ namespace SLR {
         bool operator==(const RGBTemplate &c) const { return r == c.r && g == c.g && b == c.b; };
         bool operator!=(const RGBTemplate &c) const { return r != c.r || g != c.g || b != c.b; };
         
-        float &operator[](unsigned int index) {
+        RealType &operator[](unsigned int index) {
             SLRAssert(index < 3, "\"index\" is out of range [0, 2].");
             return *(&r + index);
         };
-        float operator[](unsigned int index) const {
+        RealType operator[](unsigned int index) const {
             SLRAssert(index < 3, "\"index\" is out of range [0, 2].");
             return *(&r + index);
         };
@@ -90,7 +95,7 @@ namespace SLR {
         };
         
         // TODO: consider which RGB color space should be used for rendering calculation and converting.
-        void getRGB(float RGB[3], RGBColorSpace space = RGBColorSpace::sRGB) const {
+        void getRGB(RealType RGB[3], RGBColorSpace space = RGBColorSpace::sRGB) const {
             RGB[0] = r;
             RGB[1] = g;
             RGB[2] = b;
@@ -133,19 +138,13 @@ namespace SLR {
     
     
     template <typename RealType>
-    RGBTemplate<RealType> pow(const RGBTemplate<RealType> s, RealType p) {
-        return RGBTemplate<RealType>(std::pow(s.r, p), std::pow(s.g, p), std::pow(s.b, p));
-    }
+    RGBTemplate<RealType> pow(const RGBTemplate<RealType> &s, RealType p);
     
     template <typename RealType>
-    RGBTemplate<RealType> exp(const RGBTemplate<RealType> s) {
-        return RGBTemplate<RealType>(std::exp(s.r), std::exp(s.g), std::exp(s.b));
-    }
+    RGBTemplate<RealType> exp(const RGBTemplate<RealType> &s);
     
     template <typename RealType>
-    RGBTemplate<RealType> inverseGammaCorrection(const RGBTemplate<RealType> s, RealType gamma = 2.2) {
-        return RGBTemplate<RealType>(std::pow(s.r, gamma), std::pow(s.g, gamma), std::pow(s.b, gamma));
-    }
+    RGBTemplate<RealType> inverseGammaCorrection(const RGBTemplate<RealType> &s, RealType gamma = 2.2);
     
     
     template <typename RealType>

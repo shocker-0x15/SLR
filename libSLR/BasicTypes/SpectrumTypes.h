@@ -8,6 +8,11 @@
 #ifndef SLR_SpectrumTypes_h
 #define SLR_SpectrumTypes_h
 
+#include "../defines.h"
+#include "../references.h"
+#include "Spectrum.h"
+#include "CompensatedSum.h"
+
 namespace SLR {
     template <typename RealType, uint32_t N>
     struct WavelengthSamplesTemplate {
@@ -633,7 +638,7 @@ namespace SLR {
             return sum / integralCMF;
         };
         
-        void getRGB(float RGB[3], RGBColorSpace space = RGBColorSpace::sRGB) const {
+        void getRGB(RealType RGB[3], RGBColorSpace space = RGBColorSpace::sRGB) const {
             RealType XYZ[3] = {0, 0, 0};
             for (int i = 0; i < numStrata; ++i) {
                 XYZ[0] += xbar[i] * values[i];
@@ -754,7 +759,7 @@ namespace SLR {
         
         template <uint32_t N>
         SpectrumStorageTemplate &add(const WavelengthSamplesTemplate<RealType, N> &wls, const SampledSpectrumTemplate<RealType, N> &val) {
-            const float recBinWidth = numStrata / (WavelengthHighBound - WavelengthLowBound);
+            const RealType recBinWidth = numStrata / (WavelengthHighBound - WavelengthLowBound);
             ValueType addend(0.0);
             for (int i = 0; i < WavelengthSamplesTemplate<RealType, N>::NumComponents; ++i) {
                 uint32_t sBin = std::min(uint32_t((wls[i] - WavelengthLowBound) / (WavelengthHighBound - WavelengthLowBound) * numStrata), numStrata - 1);

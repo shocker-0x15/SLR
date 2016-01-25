@@ -44,8 +44,9 @@ set(EXTLIBS_libpng16_lib "/usr/local/lib/" CACHE PATH "libpng library directory"
 set(EXTLIBS_OpenEXR22_include "/usr/local/include/OpenEXR" CACHE PATH "OpenEXR 2.2 include directory")
 set(EXTLIBS_OpenEXR22_lib "/usr/local/lib/" CACHE PATH "OpenEXR library directory")
 
-if(msvc)
+if(MSVC)
 	add_definitions(-D_CRT_SECURE_NO_WARNINGS)
+	add_definitions(-DOPENEXR_DLL)
 endif()
 
 # OS Xにおけるrun path処理の有効化

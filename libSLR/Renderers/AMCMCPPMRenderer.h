@@ -56,7 +56,7 @@ namespace SLR {
             ReferenceFrame shadingFrame;
             
             Hitpoint(float px, float py, const Point3D &pos, const Normal3D &gn, const Vector3D &dirO_sn, const SampledSpectrum &w, const BSDF* f, const ReferenceFrame &frame) :
-            imgX(px), imgY(py), Particle(pos), gNormal(gn), dirOut_sn(dirO_sn), weight(w), bsdf(f), shadingFrame(frame) { };
+            Particle(pos), imgX(px), imgY(py), gNormal(gn), dirOut_sn(dirO_sn), weight(w), bsdf(f), shadingFrame(frame) { };
         };
         
         class HitpointMap : public KDTree {

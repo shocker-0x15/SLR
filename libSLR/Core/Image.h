@@ -39,8 +39,8 @@ namespace SLR {
     class Image2D {
     protected:
         uint32_t m_width, m_height;
-        SpectrumType m_spType;
         ColorFormat m_colorFormat;
+        SpectrumType m_spType;
         
         virtual const void* getInternal(uint32_t x, uint32_t y) const = 0;
         virtual void setInternal(uint32_t x, uint32_t y, const void* data, size_t size) = 0;

@@ -17,9 +17,9 @@ namespace SLRSceneGraph {
         float m_sensitivity;
         float m_aspect;
         float m_fovY;
-        float m_objPlaneDistance;
-        float m_imgPlaneDistance;
         float m_lensRadius;
+        float m_imgPlaneDistance;
+        float m_objPlaneDistance;
     public:
         PerspectiveCameraNode(float sensitivity, float aspect, float fovY, float lensRadius, float imgPDist, float objPDist) :
         m_sensitivity(sensitivity), m_aspect(aspect), m_fovY(fovY), m_lensRadius(lensRadius), m_imgPlaneDistance(imgPDist), m_objPlaneDistance(objPDist) { };
