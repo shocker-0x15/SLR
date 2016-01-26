@@ -19,7 +19,7 @@ namespace SLR {
         RealType x, y, z, w;
         
         Vector4Template(RealType v = 0.0f) : x(v), y(v), z(v), w(v) { }
-        constexpr Vector4Template(RealType xx, RealType yy, RealType zz, RealType ww) : x(xx), y(yy), z(zz), w(ww) { }
+        CONSTEXPR_CONSTRUCTOR Vector4Template(RealType xx, RealType yy, RealType zz, RealType ww) : x(xx), y(yy), z(zz), w(ww) { }
         Vector4Template(const Vector3Template<RealType> &vec3, RealType ww) : x(vec3.x), y(vec3.y), z(vec3.z), w(ww) { }
         
         Vector4Template operator+() const { return *this; }

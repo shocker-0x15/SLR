@@ -29,10 +29,7 @@ namespace SLR {
     public:
         virtual typename TypeSet::UInt getUInt() = 0;
         
-        virtual typename TypeSet::Float getFloat0cTo1o() {
-            unsigned int rand23bit = (getUInt() >> 9) | 0x3f800000;
-            return *(float*)&rand23bit - 1.0f;
-        };
+        virtual typename TypeSet::Float getFloat0cTo1o();
     };
     
     template <> Types32bit::Float RandomNumberGeneratorTemplate<Types32bit>::getFloat0cTo1o();

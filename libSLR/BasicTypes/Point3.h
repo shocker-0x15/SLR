@@ -18,7 +18,7 @@ namespace SLR {
         RealType x, y, z;
         
         Point3Template(RealType v = 0.0f) : x(v), y(v), z(v) { }
-        constexpr Point3Template(RealType xx, RealType yy, RealType zz) : x(xx), y(yy), z(zz) { }
+        CONSTEXPR_CONSTRUCTOR Point3Template(RealType xx, RealType yy, RealType zz) : x(xx), y(yy), z(zz) { }
         Point3Template(const Vector3Template<RealType> &v) : x(v.x), y(v.y), z(v.z) { }
         
         operator Vector3Template<RealType>() const {

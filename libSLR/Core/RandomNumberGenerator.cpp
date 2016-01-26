@@ -18,5 +18,8 @@ namespace SLR {
     Types64bit::Float RandomNumberGeneratorTemplate<Types64bit>::getFloat0cTo1o() {
         Types64bit::UInt fractionBits = (getUInt() >> 12) | 0x3ff0000000000000;
         return *(Types64bit::Float*)&fractionBits - 1.0;
-    }    
+    }
+    
+    template class RandomNumberGeneratorTemplate<Types32bit>;
+    template class RandomNumberGeneratorTemplate<Types64bit>;
 }

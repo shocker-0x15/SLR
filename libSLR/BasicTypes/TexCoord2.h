@@ -17,7 +17,7 @@ namespace SLR {
         RealType u, v;
         
         TexCoord2Template(RealType val = 0.0f) : u(val), v(val) { };
-        constexpr TexCoord2Template(RealType uu, RealType vv) : u(uu), v(vv) { };
+        CONSTEXPR_CONSTRUCTOR TexCoord2Template(RealType uu, RealType vv) : u(uu), v(vv) { };
         
         TexCoord2Template operator+() const { return *this; };
         TexCoord2Template operator-() const { return TexCoord2Template(-u, -v); };

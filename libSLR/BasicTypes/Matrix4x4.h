@@ -45,7 +45,7 @@ namespace SLR {
         m02(array[ 8]), m12(array[ 9]), m22(array[10]), m32(array[11]),
         m03(array[12]), m13(array[13]), m23(array[14]), m33(array[15]) { }
         Matrix4x4Template(const Vector3Template<RealType> &col0, const Vector3Template<RealType> &col1, const Vector3Template<RealType> &col2) : c0(col0, 0.0f), c1(col1, 0.0f), c2(col2, 0.0f), c3(Vector4Template<RealType>::Ew) { }
-        constexpr Matrix4x4Template(const Vector4Template<RealType> &col0, const Vector4Template<RealType> &col1, const Vector4Template<RealType> &col2, const Vector4Template<RealType> &col3) :
+        CONSTEXPR_CONSTRUCTOR Matrix4x4Template(const Vector4Template<RealType> &col0, const Vector4Template<RealType> &col1, const Vector4Template<RealType> &col2, const Vector4Template<RealType> &col3) :
         c0(col0), c1(col1), c2(col2), c3(col3)
 #ifdef SLR_Defs_Windows
         ,// without these extra initialization, an error occurs at least with VS2015.

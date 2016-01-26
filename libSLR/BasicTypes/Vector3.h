@@ -18,7 +18,7 @@ namespace SLR {
         RealType x, y, z;
         
         Vector3Template(RealType v = 0.0f) : x(v), y(v), z(v) { }
-        constexpr Vector3Template(RealType xx, RealType yy, RealType zz) : x(xx), y(yy), z(zz) { }
+        CONSTEXPR_CONSTRUCTOR Vector3Template(RealType xx, RealType yy, RealType zz) : x(xx), y(yy), z(zz) { }
         
         Vector3Template operator+() const { return *this; }
         Vector3Template operator-() const { return Vector3Template(-x, -y, -z); }

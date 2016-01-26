@@ -22,8 +22,8 @@ namespace SLR {
         RealType w;
         
         QuaternionTemplate() : w(1.0f) { };
-        constexpr QuaternionTemplate(RealType xx, RealType yy, RealType zz, RealType ww) : v(xx, yy, zz), w(ww) { };
-        constexpr QuaternionTemplate(const Vector3Template<RealType> &vv, RealType ww) : v(vv), w(ww) { };
+        CONSTEXPR_CONSTRUCTOR QuaternionTemplate(RealType xx, RealType yy, RealType zz, RealType ww) : v(xx, yy, zz), w(ww) { };
+        CONSTEXPR_CONSTRUCTOR QuaternionTemplate(const Vector3Template<RealType> &vv, RealType ww) : v(vv), w(ww) { };
         QuaternionTemplate(const Matrix4x4Template<RealType> &m) {
             RealType trace = m[0][0] + m[1][1] + m[2][2];
             if (trace > 0.0f) {

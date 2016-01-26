@@ -1,6 +1,6 @@
 set(include_dirs "${EXTLIBS_Assimp_include};${EXTLIBS_libpng16_include};${EXTLIBS_OpenEXR22_include};${CMAKE_SOURCE_DIR}")
 set(lib_dirs "${EXTLIBS_Assimp_lib};${EXTLIBS_libpng16_lib};${EXTLIBS_OpenEXR22_lib};")
-set(linker_flags "-lAssimp -lpng -lHalf -lIlmImf -lSLR")
+set(linker_flags "Assimp png Half IlmImf SLR")
 
 file(GLOB libSLRSceneGraph_Sources
 	*.h
@@ -25,6 +25,10 @@ source_group("SLR Scene Graph\\Helper" REGULAR_EXPRESSION "Helper/.*\.(h|c|hpp|c
 source_group("SLR Scene Graph\\Parser" REGULAR_EXPRESSION "Parser/.*\.(h|c|hh|cc|hpp|cpp)")
 
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+
+if(MSVC)
+	add_definitions(-DSLR_SCENEGRAPH_API_EXPORTS)
+endif()
 
 include_directories(${include_dirs})
 # link_directories(${lib_dirs})

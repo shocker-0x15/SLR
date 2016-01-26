@@ -30,5 +30,7 @@ namespace SLR {
         a[1] = a[2];
         a[2] = a[3];
         return a[3] = (a[3] ^ (a[3] >> 19)) ^ (t ^ (t >> 8));
-    }    
+    }
+    
+    template class XORShiftTemplate<Types32bit>;
 }

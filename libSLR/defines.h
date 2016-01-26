@@ -25,14 +25,18 @@
 #endif
 
 #ifdef SLR_Defs_Windows
+#   define NOMINMAX
 #   define _USE_MATH_DEFINES
-#   ifdef SLR_DLL
+#   ifdef SLR_API_EXPORTS
 #       define SLR_API __declspec(dllexport)
 #   else
 #       define SLR_API __declspec(dllimport)
 #   endif
+// MSVC 19.0 (Visual Studio 2015 Update 1) seems to have a problem related to a constexpr constructor.
+#   define CONSTEXPR_CONSTRUCTOR
 #else
 #   define SLR_API
+#   define CONSTEXPR_CONSTRUCTOR constexpr
 #endif
 
 #include <cstdio>
@@ -95,7 +99,6 @@ inline void* SLR_memalign(size_t size, size_t alignment) {
 
 // For getcwd
 #if defined(SLR_Defs_Windows)
-#   define NOMINMAX
 #   include <Windows.h>
 #   define SLR_getcwd(size, buf) GetCurrentDirectory(size, buf)
 #elif defined(SLR_Defs_OS_X) || defined(SLR_Defs_OpenBSD) || defined(SLR_Defs_Linux)

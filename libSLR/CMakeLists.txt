@@ -1,6 +1,6 @@
 set(include_dirs "${EXTLIBS_OpenEXR22_include}")
 set(lib_dirs "${EXTLIBS_OpenEXR22_lib}")
-set(linker_flags "-lHalf")
+set(linker_flags "Half")
 
 file(GLOB libSLR_Sources
 	*.h
@@ -55,6 +55,10 @@ source_group("SLR\\SurfaceMaterials" REGULAR_EXPRESSION "SurfaceMaterials/.*\.(h
 source_group("SLR\\Textures" REGULAR_EXPRESSION "Textures/.*\.(h|c|hpp|cpp)")
 
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+
+if(MSVC)
+	add_definitions(-DSLR_API_EXPORTS)
+endif()
 
 include_directories(${include_dirs})
 # link_directories(${lib_dirs})

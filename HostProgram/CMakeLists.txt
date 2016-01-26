@@ -1,6 +1,6 @@
 set(include_dirs "${CMAKE_SOURCE_DIR}")
 set(lib_dirs "")
-set(linker_flags "-lSLR -lSLRSceneGraph")
+set(linker_flags "SLR SLRSceneGraph")
 
 file(GLOB HostProgram_Sources
 	main.cpp

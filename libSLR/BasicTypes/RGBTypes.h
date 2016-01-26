@@ -48,7 +48,7 @@ namespace SLR {
         static const uint32_t NumComponents;
         
         RGBTemplate(RealType v = 0.0f) : r(v), g(v), b(v) { };
-        constexpr RGBTemplate(RealType rr, RealType gg, RealType bb) : r(rr), g(gg), b(bb) { };
+        CONSTEXPR_CONSTRUCTOR RGBTemplate(RealType rr, RealType gg, RealType bb) : r(rr), g(gg), b(bb) { };
         
         RGBTemplate operator+() const { return *this; };
         RGBTemplate operator-() const { return RGBTemplate(-r, -g, -b); };

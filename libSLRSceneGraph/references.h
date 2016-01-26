@@ -10,6 +10,16 @@
 
 #include <libSLR/references.h>
 
+#ifdef SLR_Defs_Windows
+#   ifdef SLR_SCENEGRAPH_API_EXPORTS
+#       define SLR_SCENEGRAPH_API __declspec(dllexport)
+#   else
+#       define SLR_SCENEGRAPH_API __declspec(dllimport)
+#   endif
+#else
+#   define SLR_SCENEGRAPH_API
+#endif
+
 namespace SLRSceneGraph {
     typedef std::shared_ptr<SLR::Transform> TransformRef;
     
