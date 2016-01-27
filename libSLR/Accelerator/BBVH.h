@@ -14,7 +14,7 @@
 #include "../Core/SurfaceObject.h"
 
 namespace SLR {
-    class BBVH {
+    class SLR_API BBVH {
     public:
         enum class Partitioning {
             Median = 0,

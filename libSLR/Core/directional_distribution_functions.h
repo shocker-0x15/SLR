@@ -35,7 +35,7 @@ SLRAssert(std::isinf(ret) == false && std::isnan(ret) == false,\
 "PDF value is an expected value. : dirIn: (%f, %f, %f)",\
 query.dir_sn.x, query.dir_sn.y, query.dir_sn.z);
     
-    struct DirectionType {
+    struct SLR_API DirectionType {
         enum InternalEnum : uint32_t {
             IE_LowFreq = 1 << 0,
             IE_HighFreq = 1 << 1,
@@ -112,24 +112,24 @@ query.dir_sn.x, query.dir_sn.y, query.dir_sn.z);
     };
     
     
-    struct EDFQuery {
+    struct SLR_API EDFQuery {
         DirectionType flags;
         EDFQuery(DirectionType f = DirectionType::All) : flags(f) { };
     };
     
-    struct EDFSample {
+    struct SLR_API EDFSample {
         float uComponent;
         float uDir[2];
         EDFSample(float uComp, float uDir0, float uDir1) : uComponent(uComp), uDir{uDir0, uDir1} {}
     };
     
-    struct EDFQueryResult {
+    struct SLR_API EDFQueryResult {
         Vector3D dir_sn;
         float dirPDF;
         DirectionType dirType;
     };
     
-    struct BSDFQuery {
+    struct SLR_API BSDFQuery {
         Vector3D dir_sn;
         Normal3D gNormal_sn;
         int16_t wlHint;
@@ -140,30 +140,30 @@ query.dir_sn.x, query.dir_sn.y, query.dir_sn.z);
         dir_sn(dirSN), gNormal_sn(gNormalSN), wlHint(wl), flags(f), adjoint(adj) { }
     };
     
-    struct BSDFSample {
+    struct SLR_API BSDFSample {
         float uComponent;
         float uDir[2];
         BSDFSample(float uComp, float uDir0, float uDir1) : uComponent(uComp), uDir{uDir0, uDir1} { }
     };
     
-    struct BSDFQueryResult {
+    struct SLR_API BSDFQueryResult {
         Vector3D dir_sn;
         float dirPDF;
         DirectionType dirType;
     };
     
-    struct IDFSample {
+    struct SLR_API IDFSample {
         float uDir[2];
         IDFSample(float uDir0, float uDir1) : uDir{uDir0, uDir1} { }
     };
     
-    struct IDFQueryResult {
+    struct SLR_API IDFQueryResult {
         Vector3D dirLocal;
         float dirPDF;
     };
     
     
-    class EDF {
+    class SLR_API EDF {
     protected:
         const DirectionType m_type;
         
@@ -188,7 +188,7 @@ query.dir_sn.x, query.dir_sn.y, query.dir_sn.z);
         bool hasNonDelta() const { return matches(DirectionType::WholeSphere | DirectionType::NonDelta); }
     };
     
-    class BSDF {
+    class SLR_API BSDF {
     protected:
         const DirectionType m_type;
         
@@ -253,7 +253,7 @@ query.dir_sn.x, query.dir_sn.y, query.dir_sn.z);
         bool hasNonDelta() const { return matches(DirectionType::WholeSphere | DirectionType::NonDelta); }
     };
     
-    class IDF {
+    class SLR_API IDF {
     protected:
         const DirectionType m_type;
         
@@ -277,18 +277,18 @@ query.dir_sn.x, query.dir_sn.y, query.dir_sn.z);
     };
     
     
-    class Fresnel {
+    class SLR_API Fresnel {
     public:
         virtual ~Fresnel() { };
         virtual SampledSpectrum evaluate(float cosEnter) const = 0;
     };
     
-    class FresnelNoOp : public Fresnel {
+    class SLR_API FresnelNoOp : public Fresnel {
     public:
         SampledSpectrum evaluate(float cosEnter) const override;
     };
     
-    class FresnelConductor : public Fresnel {
+    class SLR_API FresnelConductor : public Fresnel {
         SampledSpectrum m_eta;
         SampledSpectrum m_k;
     public:
@@ -297,7 +297,7 @@ query.dir_sn.x, query.dir_sn.y, query.dir_sn.z);
         SampledSpectrum evaluate(float cosEnter) const override;
     };
     
-    class FresnelDielectric : public Fresnel {
+    class SLR_API FresnelDielectric : public Fresnel {
         SampledSpectrum m_etaExt;
         SampledSpectrum m_etaInt;
     public:

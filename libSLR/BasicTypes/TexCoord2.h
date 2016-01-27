@@ -13,7 +13,7 @@
 
 namespace SLR {
     template <typename RealType>
-    struct TexCoord2Template {
+    struct SLR_API TexCoord2Template {
         RealType u, v;
         
         TexCoord2Template(RealType val = 0.0f) : u(val), v(val) { };
@@ -56,8 +56,7 @@ namespace SLR {
         static const TexCoord2Template One;
         static const TexCoord2Template Inf;
         static const TexCoord2Template NaN;
-    };
-    
+    };  
     template <typename RealType>
     const TexCoord2Template<RealType> TexCoord2Template<RealType>::Zero = TexCoord2Template<RealType>(0);
     template <typename RealType>
@@ -65,7 +64,7 @@ namespace SLR {
     template <typename RealType>
     const TexCoord2Template<RealType> TexCoord2Template<RealType>::Inf = TexCoord2Template<RealType>(std::numeric_limits<RealType>::infinity());
     template <typename RealType>
-    const TexCoord2Template<RealType> TexCoord2Template<RealType>::NaN = TexCoord2Template<RealType>(std::numeric_limits<RealType>::quiet_NaN());    
+    const TexCoord2Template<RealType> TexCoord2Template<RealType>::NaN = TexCoord2Template<RealType>(std::numeric_limits<RealType>::quiet_NaN());
 }
 
 #endif

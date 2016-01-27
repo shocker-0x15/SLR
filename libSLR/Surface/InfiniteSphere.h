@@ -13,7 +13,7 @@
 #include "../Core/geometry.h"
 
 namespace SLR {
-    class InfiniteSphere : public Surface {
+    class SLR_API InfiniteSphere : public Surface {
     public:
         InfiniteSphere() { };
         ~InfiniteSphere() { };

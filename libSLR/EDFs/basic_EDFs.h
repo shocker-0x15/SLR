@@ -13,7 +13,7 @@
 #include "../Core/directional_distribution_functions.h"
 
 namespace SLR {
-    class DiffuseEDF : public EDF {
+    class SLR_API DiffuseEDF : public EDF {
     public:
         DiffuseEDF() : EDF(DirectionType::Emission | DirectionType::LowFreq) { }
         

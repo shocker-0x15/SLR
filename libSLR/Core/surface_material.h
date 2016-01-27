@@ -14,7 +14,7 @@
 #include "../BasicTypes/SpectrumTypes.h"
 
 namespace SLR {
-    class SurfaceMaterial {
+    class SLR_API SurfaceMaterial {
     public:
         SurfaceMaterial() { };
         virtual ~SurfaceMaterial() { };
@@ -25,7 +25,7 @@ namespace SLR {
         virtual EDF* getEDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem, float scale = 1.0f) const { SLRAssert(false, "Not implemented."); return nullptr; };
     };
     
-    class EmitterSurfaceProperty {
+    class SLR_API EmitterSurfaceProperty {
     public:
         virtual ~EmitterSurfaceProperty() { };
         
@@ -33,7 +33,7 @@ namespace SLR {
         virtual EDF* getEDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem, float scale = 1.0f) const = 0;
     };
     
-    class EmitterSurfaceMaterial : public SurfaceMaterial {
+    class SLR_API EmitterSurfaceMaterial : public SurfaceMaterial {
         const SurfaceMaterial* m_mat;
         const EmitterSurfaceProperty* m_emit;
     public:
@@ -47,7 +47,7 @@ namespace SLR {
     };
     
     
-    class SpatialFresnel {
+    class SLR_API SpatialFresnel {
     public:
         SpatialFresnel() { };
         virtual ~SpatialFresnel() { };
@@ -55,14 +55,14 @@ namespace SLR {
         virtual Fresnel* getFresnel(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem) const = 0;
     };
     
-    class SpatialFresnelNoOp : public SpatialFresnel {
+    class SLR_API SpatialFresnelNoOp : public SpatialFresnel {
     public:
         SpatialFresnelNoOp() { };
         
         Fresnel* getFresnel(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem) const override;
     };
     
-    class SpatialFresnelConductor : public SpatialFresnel {
+    class SLR_API SpatialFresnelConductor : public SpatialFresnel {
         const SpectrumTexture* m_eta;
         const SpectrumTexture* m_k;
     public:
@@ -71,7 +71,7 @@ namespace SLR {
         Fresnel* getFresnel(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem) const override;
     };
     
-    class SpatialFresnelDielectric : public SpatialFresnel {
+    class SLR_API SpatialFresnelDielectric : public SpatialFresnel {
         const SpectrumTexture* m_etaExt;
         const SpectrumTexture* m_etaInt;
     public:

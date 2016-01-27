@@ -14,7 +14,7 @@
 #include "../Core/directional_distribution_functions.h"
 
 namespace SLR {
-    class EquirectangularCamera : public Camera {
+    class SLR_API EquirectangularCamera : public Camera {
         std::unique_ptr<ImageSensor> m_sensor;
         
         float m_phiAngle;
@@ -31,7 +31,7 @@ namespace SLR {
         IDF* createIDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem) const override;
     };
     
-    class EquirectangularIDF : public IDF {
+    class SLR_API EquirectangularIDF : public IDF {
         const EquirectangularCamera &m_cam;
     public:
         EquirectangularIDF(const EquirectangularCamera &cam) : IDF(DirectionType::Acquisition | DirectionType::LowFreq),

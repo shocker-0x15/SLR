@@ -14,7 +14,7 @@
 
 namespace SLR {
     template <typename RealType>
-    struct Normal3Template {
+    struct SLR_API Normal3Template {
         RealType x, y, z;
         
         Normal3Template(RealType v = 0.0f) : x(v), y(v), z(v) { }
@@ -70,7 +70,6 @@ namespace SLR {
         static const Normal3Template Inf;
         static const Normal3Template NaN;
     };
-    
     template <typename RealType>
     const Normal3Template<RealType> Normal3Template<RealType>::Zero = Normal3Template<RealType>(0);
     template <typename RealType>

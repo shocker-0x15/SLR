@@ -2,7 +2,7 @@
 //  surface_materials.hpp
 //
 //  Created by 渡部 心 on 2015/10/06.
-//  Copyright © 2015年 渡部 心. All rights reserved.
+//  Copyright c 2015年 渡部 心. All rights reserved.
 //
 
 #ifndef surface_materials_hpp
@@ -12,7 +12,7 @@
 #include "references.h"
 
 namespace SLRSceneGraph {
-    class SurfaceMaterial {
+    class SLR_SCENEGRAPH_API SurfaceMaterial {
     protected:
         SLR::SurfaceMaterial* m_rawData;
     public:
@@ -32,7 +32,7 @@ namespace SLRSceneGraph {
         static SurfaceMaterialRef createEmitterSurfaceMaterial(const SurfaceMaterialRef &mat, const EmitterSurfacePropertyRef &emit);
     };
     
-    class EmitterSurfaceProperty {
+    class SLR_SCENEGRAPH_API EmitterSurfaceProperty {
     protected:
         SLR::EmitterSurfaceProperty* m_rawData;
     public:
@@ -42,7 +42,7 @@ namespace SLRSceneGraph {
         };
     };
     
-    class EmitterSurfaceMaterial : public SurfaceMaterial {
+    class SLR_SCENEGRAPH_API EmitterSurfaceMaterial : public SurfaceMaterial {
         SurfaceMaterialRef m_mat;
         EmitterSurfacePropertyRef m_emit;
     public:
@@ -50,7 +50,7 @@ namespace SLRSceneGraph {
     };
     
     
-    class SpatialFresnel {
+    class SLR_SCENEGRAPH_API SpatialFresnel {
     protected:
         SLR::SpatialFresnel* m_rawData;
     public:
@@ -60,19 +60,19 @@ namespace SLRSceneGraph {
         };
     };
     
-    class SpatialFresnelNoOp : public SpatialFresnel {
+    class SLR_SCENEGRAPH_API SpatialFresnelNoOp : public SpatialFresnel {
     public:
         SpatialFresnelNoOp();
     };
     
-    class SpatialFresnelConductor : public SpatialFresnel {
+    class SLR_SCENEGRAPH_API SpatialFresnelConductor : public SpatialFresnel {
         SpectrumTextureRef m_eta;
         SpectrumTextureRef m_k;
     public:
         SpatialFresnelConductor(const SpectrumTextureRef &eta, const SpectrumTextureRef &k);
     };
     
-    class SpatialFresnelDielectric : public SpatialFresnel {
+    class SLR_SCENEGRAPH_API SpatialFresnelDielectric : public SpatialFresnel {
         SpectrumTextureRef m_etaExt;
         SpectrumTextureRef m_etaInt;
     public:
@@ -80,21 +80,21 @@ namespace SLRSceneGraph {
     };
     
     
-    class DiffuseReflection : public SurfaceMaterial {
+    class SLR_SCENEGRAPH_API DiffuseReflection : public SurfaceMaterial {
         SpectrumTextureRef m_reflectance;
         FloatTextureRef m_sigma;
     public:
         DiffuseReflection(const SpectrumTextureRef &reflectance, const FloatTextureRef &sigma);
     };
     
-    class SpecularReflection : public SurfaceMaterial {
+    class SLR_SCENEGRAPH_API SpecularReflection : public SurfaceMaterial {
         SpectrumTextureRef m_coeffR;
         SpatialFresnelRef m_fresnel;
     public:
         SpecularReflection(const SpectrumTextureRef &coeffR, const SpatialFresnelRef &fresnel);
     };
     
-    class SpecularTransmission : public SurfaceMaterial {
+    class SLR_SCENEGRAPH_API SpecularTransmission : public SurfaceMaterial {
         SpectrumTextureRef m_coeffT;
         SpectrumTextureRef m_etaExt;
         SpectrumTextureRef m_etaInt;
@@ -103,7 +103,7 @@ namespace SLRSceneGraph {
     };
     
     
-    class AshikhminSpecularReflection : public SurfaceMaterial {
+    class SLR_SCENEGRAPH_API AshikhminSpecularReflection : public SurfaceMaterial {
         SpectrumTextureRef m_Rs;
         FloatTextureRef m_nu;
         FloatTextureRef m_nv;
@@ -111,7 +111,7 @@ namespace SLRSceneGraph {
         AshikhminSpecularReflection(const SpectrumTextureRef &Rs, const FloatTextureRef &nu, const FloatTextureRef &nv);
     };
     
-    class AshikhminDiffuseReflection : public SurfaceMaterial {
+    class SLR_SCENEGRAPH_API AshikhminDiffuseReflection : public SurfaceMaterial {
         SpectrumTextureRef m_Rs;
         SpectrumTextureRef m_Rd;
     public:
@@ -119,7 +119,7 @@ namespace SLRSceneGraph {
     };
     
     
-    class ModifiedWardDurReflection : public SurfaceMaterial {
+    class SLR_SCENEGRAPH_API ModifiedWardDurReflection : public SurfaceMaterial {
         SpectrumTextureRef m_reflectance;
         FloatTextureRef m_anisoX;
         FloatTextureRef m_anisoY;
@@ -128,7 +128,7 @@ namespace SLRSceneGraph {
     };
     
     
-    class SummedSurfaceMaterial : public SurfaceMaterial {
+    class SLR_SCENEGRAPH_API SummedSurfaceMaterial : public SurfaceMaterial {
         SurfaceMaterialRef m_mat0;
         SurfaceMaterialRef m_mat1;
     public:
@@ -136,7 +136,7 @@ namespace SLRSceneGraph {
     };
     
     
-    class MixedSurfaceMaterial : public SurfaceMaterial {
+    class SLR_SCENEGRAPH_API MixedSurfaceMaterial : public SurfaceMaterial {
         SurfaceMaterialRef m_mat0;
         SurfaceMaterialRef m_mat1;
         FloatTextureRef m_factor;
@@ -145,14 +145,14 @@ namespace SLRSceneGraph {
     };
     
     
-    class DiffuseEmission : public EmitterSurfaceProperty {
+    class SLR_SCENEGRAPH_API DiffuseEmission : public EmitterSurfaceProperty {
         SpectrumTextureRef m_emittance;
     public:
         DiffuseEmission(const SpectrumTextureRef &emittance);
     };
     
     
-    class IBLEmission : public EmitterSurfaceProperty {
+    class SLR_SCENEGRAPH_API IBLEmission : public EmitterSurfaceProperty {
         SceneWRef m_scene;
         SpectrumTextureRef m_coeffM;
         float m_scale;

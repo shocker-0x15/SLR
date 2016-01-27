@@ -14,7 +14,7 @@
 
 namespace SLR {
     template <typename RealType>
-    struct Vector4Template {
+    struct SLR_API Vector4Template {
     public:
         RealType x, y, z, w;
         
@@ -64,7 +64,6 @@ namespace SLR {
         static const Vector4Template Ez;
         static const Vector4Template Ew;
     };
-    
     template <typename RealType>
     const Vector4Template<RealType> Vector4Template<RealType>::Zero = Vector4Template<RealType>(0);
     template <typename RealType>

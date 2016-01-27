@@ -28,7 +28,7 @@ namespace SLR {
             const float* ks;
         };
         
-        extern const std::map<std::string, const IndexOfRefraction&> IORs;
+        extern SLR_API const std::map<std::string, const IndexOfRefraction&> IORs;
         
         
         

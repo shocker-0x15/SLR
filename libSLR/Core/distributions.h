@@ -13,10 +13,10 @@
 
 namespace SLR {
     template <typename RealType>
-    uint32_t sampleDiscrete(const RealType* importances, RealType* sumImportances, RealType* base, uint32_t numImportances, RealType u);
+    SLR_API uint32_t sampleDiscrete(const RealType* importances, RealType* sumImportances, RealType* base, uint32_t numImportances, RealType u);
     
     template <typename RealType>
-    void concentricSampleDisk(RealType u0, RealType u1, RealType* dx, RealType* dy);
+    SLR_API void concentricSampleDisk(RealType u0, RealType u1, RealType* dx, RealType* dy);
     
     template <typename RealType>
     inline Vector3Template<RealType> cosineSampleHemisphere(RealType u0, RealType u1) {
@@ -33,7 +33,7 @@ namespace SLR {
     }
     
     template <typename RealType>
-    class RegularConstantDiscrete1DTemplate {
+    class SLR_API RegularConstantDiscrete1DTemplate {
         RealType* m_PMF;
         RealType* m_CDF;
         RealType m_integral;
@@ -56,7 +56,7 @@ namespace SLR {
     };
     
     template <typename RealType>
-    class RegularConstantContinuous1DTemplate {
+    class SLR_API RegularConstantContinuous1DTemplate {
         RealType* m_PDF;
         RealType* m_CDF;
         RealType m_integral;
@@ -77,7 +77,7 @@ namespace SLR {
     };
     
     template <typename RealType>
-    class RegularConstantContinuous2DTemplate {
+    class SLR_API RegularConstantContinuous2DTemplate {
         RegularConstantContinuous1DTemplate<RealType>* m_1DDists;
         uint32_t m_num1DDists;
         RealType m_integral;

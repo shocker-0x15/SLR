@@ -14,7 +14,7 @@
 
 namespace SLR {
     template <typename TypeSet>
-    class XORShiftTemplate : public RandomNumberGeneratorTemplate<TypeSet> {
+    class SLR_API XORShiftTemplate : public RandomNumberGeneratorTemplate<TypeSet> {
         typename TypeSet::UInt m_state[4];
     public:
         XORShiftTemplate();

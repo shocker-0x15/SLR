@@ -32,19 +32,19 @@ void saveBMP(const char* filename, const void* pixels, uint32_t width, uint32_t 
     
     memset(header, 0, HEADER_SIZE);
     header[0] = 'B';
-	header[1] = 'M';
-	memcpy(header + 2, &fileSize, sizeof(uint32_t));
-	memcpy(header + 10, &dataOffset, sizeof(uint32_t));
+    header[1] = 'M';
+    memcpy(header + 2, &fileSize, sizeof(uint32_t));
+    memcpy(header + 10, &dataOffset, sizeof(uint32_t));
     
     memcpy(header + 14, &INFO_HEADER_SIZE, sizeof(uint32_t));
-	memcpy(header + 18, &width, sizeof(uint32_t));
-	memcpy(header + 22, &height, sizeof(uint32_t));
-	memcpy(header + 26, &numPlanes, sizeof(uint16_t));
-	memcpy(header + 28, &numBits, sizeof(uint16_t));
-	memcpy(header + 30, &compress, sizeof(uint32_t));
-	memcpy(header + 34, &dataSize, sizeof(uint32_t));
-	memcpy(header + 38, &xppm, sizeof(uint32_t));
-	memcpy(header + 42, &yppm, sizeof(uint32_t));
+    memcpy(header + 18, &width, sizeof(uint32_t));
+    memcpy(header + 22, &height, sizeof(uint32_t));
+    memcpy(header + 26, &numPlanes, sizeof(uint16_t));
+    memcpy(header + 28, &numBits, sizeof(uint16_t));
+    memcpy(header + 30, &compress, sizeof(uint32_t));
+    memcpy(header + 34, &dataSize, sizeof(uint32_t));
+    memcpy(header + 38, &xppm, sizeof(uint32_t));
+    memcpy(header + 42, &yppm, sizeof(uint32_t));
     
     fwrite(header, sizeof(uint8_t), HEADER_SIZE, fp);
     fwrite(pixels, sizeof(uint8_t), dataSize, fp);

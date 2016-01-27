@@ -12,24 +12,24 @@
 #include "geometry.h"
 
 namespace SLR {
-    struct LensPosQuery {
+    struct SLR_API LensPosQuery {
         float time;
         WavelengthSamples wls;
         LensPosQuery(float t, const WavelengthSamples &lambdas) : time(t), wls(lambdas) { };
     };
     
-    struct LensPosSample {
+    struct SLR_API LensPosSample {
         float uPos[2];
         LensPosSample(float up0, float up1) : uPos{up0, up1} { };
     };
     
-    struct LensPosQueryResult {
+    struct SLR_API LensPosQueryResult {
         SurfacePoint surfPt;
         float areaPDF;
         bool isDeltaPos;
     };
     
-    class Camera {
+    class SLR_API Camera {
     protected:
         const Transform* m_transform;
     public:

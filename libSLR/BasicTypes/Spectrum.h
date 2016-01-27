@@ -35,10 +35,10 @@ namespace SLR {
     };
     
     template <typename RealType>
-    RealType sRGB_gamma(RealType value);
+    SLR_API RealType sRGB_gamma(RealType value);
     
     template <typename RealType>
-    RealType sRGB_degamma(RealType value);
+    SLR_API RealType sRGB_degamma(RealType value);
     
     // TODO: implement a method to generate arbitrary XYZ<->RGB matrices.
     // http://www.brucelindbloom.com/index.html?Eqn_RGB_XYZ_Matrix.html
@@ -576,7 +576,7 @@ namespace SLR {
 #include "spectrum_library.h"
 
 namespace SLR {
-    void initSpectrum();
+    SLR_API void initSpectrum();
 }
 
 #endif

@@ -14,7 +14,7 @@
 #include "../Core/directional_distribution_functions.h"
 
 namespace SLR {
-    class PerspectiveCamera : public Camera {
+    class SLR_API PerspectiveCamera : public Camera {
         std::unique_ptr<ImageSensor> m_sensor;
         
         float m_aspect;
@@ -39,7 +39,7 @@ namespace SLR {
         IDF* createIDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem) const override;
     };
     
-    class PerspectiveIDF : public IDF {
+    class SLR_API PerspectiveIDF : public IDF {
         const PerspectiveCamera &m_cam;
         Point3D m_orgLocal;
     public:

@@ -15,7 +15,7 @@
 
 namespace SLR {
     // Highly based on MemoryArena used in PBRT-v3
-    class ArenaAllocator : public Allocator {
+    class SLR_API ArenaAllocator : public Allocator {
         const size_t m_blockSize;
         
         uint8_t *m_currentBlock = nullptr;

@@ -13,7 +13,7 @@
 #include "../Core/directional_distribution_functions.h"
 
 namespace SLR {
-    class MultiBSDF : public BSDF {
+    class SLR_API MultiBSDF : public BSDF {
 #define maxNumElems 4
         uint32_t m_numComponents;
         const BSDF* m_BSDFs[maxNumElems];

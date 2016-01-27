@@ -16,7 +16,7 @@
 #include "../BasicTypes/Normal3.h"
 
 namespace SLR {
-    class SpectrumTexture {
+    class SLR_API SpectrumTexture {
     public:
         virtual ~SpectrumTexture() { };
         
@@ -24,14 +24,14 @@ namespace SLR {
         virtual RegularConstantContinuous2D* createIBLImportanceMap() const = 0;
     };
     
-    class Normal3DTexture {
+    class SLR_API Normal3DTexture {
     public:
         virtual ~Normal3DTexture() { };
         
         virtual Normal3D evaluate(const TexCoord2D &tc) const = 0;
     };
     
-    class FloatTexture {
+    class SLR_API FloatTexture {
     public:
         virtual ~FloatTexture() { };
         

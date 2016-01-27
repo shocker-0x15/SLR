@@ -13,7 +13,7 @@
 #include "../Core/textures.h"
 
 namespace SLR {
-    class ConstantSpectrumTexture : public SpectrumTexture {
+    class SLR_API ConstantSpectrumTexture : public SpectrumTexture {
         const InputSpectrum* m_value;
     public:
         ConstantSpectrumTexture(const InputSpectrum* value) : m_value(value) { };
@@ -22,7 +22,7 @@ namespace SLR {
         RegularConstantContinuous2D* createIBLImportanceMap() const override;
     };
     
-    class ConstantFloatTexture : public FloatTexture {
+    class SLR_API ConstantFloatTexture : public FloatTexture {
         float m_value;
     public:
         ConstantFloatTexture(float value) : m_value(value) { };

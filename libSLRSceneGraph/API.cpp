@@ -3,7 +3,7 @@
 //  API.cpp
 //
 //  Created by 渡部 心 on 2015/10/06.
-//  Copyright © 2015年 渡部 心. All rights reserved.
+//  Copyright c 2015年 渡部 心. All rights reserved.
 //
 
 #include "API.hpp"
@@ -54,15 +54,30 @@ namespace SLRSceneGraph {
             return false;
         return true;
     }
+
+#ifdef SLR_Defs_Windows
+    class FuncGetPathElement {
+        std::string pathPrefix;
+    public:
+        FuncGetPathElement(const std::string &prefix) : pathPrefix(prefix) {}
+        Element operator()(const aiString &str) const {
+            return Element(pathPrefix + std::string(str.C_Str()));
+        }
+    };
+#endif
     
-    bool readScene(const std::string &filePath, const SceneRef &scene, RenderingContext* context) {
+    SLR_SCENEGRAPH_API bool readScene(const std::string &filePath, const SceneRef &scene, RenderingContext* context) {
         TypeInfo::init();
         ExecuteContext executeContext;
         ErrorMessage errMsg;
         char curDir[256];
         SLR_getcwd(sizeof(curDir), curDir);
-        std::string pathPrefix = filePath.substr(0, filePath.find_last_of("/") + 1);
-        executeContext.absFileDirPath = std::string(curDir) + "/" + pathPrefix;
+        std::string strCurDir = curDir;
+        std::replace(strCurDir.begin(), strCurDir.end(), '\\', '/');
+        std::string mFilePath = filePath;
+        std::replace(mFilePath.begin(), mFilePath.end(), '\\', '/');
+        std::string pathPrefix = mFilePath.substr(0, mFilePath.find_last_of("/") + 1);
+        executeContext.absFileDirPath = strCurDir +"/" + pathPrefix;
         executeContext.scene = scene;
         executeContext.renderingContext = context;
         {
@@ -872,9 +887,13 @@ namespace SLRSceneGraph {
                                          Element matAttrs = Element(TypeMap::Tuple(), ParameterList());
                                          
                                          auto &attrs = matAttrs.raw<TypeMap::Tuple>();
-                                         auto getPathElement = [&pathPrefix](const aiString str) {
+#ifdef SLR_Defs_Windows
+                                         FuncGetPathElement getPathElement{ pathPrefix };
+#else
+                                         auto getPathElement = [&pathPrefix](const aiString &str) {
                                              return Element(pathPrefix + std::string(str.C_Str()));
                                          };
+#endif
                                          auto getRGBElement = [](const float* RGB) {
                                              ParameterListRef values = createShared<ParameterList>();
                                              values->add("", Element(RGB[0]));
@@ -1117,13 +1136,13 @@ namespace SLRSceneGraph {
         using namespace SLR;
         
 #ifdef Use_Spectral_Representation
-        InputSpectrumRef create(SpectrumType spType, ColorSpace space, SpectrumFloat e0, SpectrumFloat e1, SpectrumFloat e2) {
+        SLR_SCENEGRAPH_API InputSpectrumRef create(SpectrumType spType, ColorSpace space, SpectrumFloat e0, SpectrumFloat e1, SpectrumFloat e2) {
             return createShared<UpsampledContinuousSpectrum>(spType, space, e0, e1, e2);
         }
-        InputSpectrumRef create(SpectrumType spType, SpectrumFloat minLambda, SpectrumFloat maxLambda, const SpectrumFloat* values, uint32_t numSamples) {
+        SLR_SCENEGRAPH_API InputSpectrumRef create(SpectrumType spType, SpectrumFloat minLambda, SpectrumFloat maxLambda, const SpectrumFloat* values, uint32_t numSamples) {
             return createShared<RegularContinuousSpectrum>(minLambda, maxLambda, values, numSamples);
         }
-        InputSpectrumRef create(SpectrumType spType, const SpectrumFloat* lambdas, const SpectrumFloat* values, uint32_t numSamples) {
+        SLR_SCENEGRAPH_API InputSpectrumRef create(SpectrumType spType, const SpectrumFloat* lambdas, const SpectrumFloat* values, uint32_t numSamples) {
             return createShared<IrregularContinuousSpectrum>(lambdas, values, numSamples);
         }
 #else
@@ -1259,7 +1278,7 @@ namespace SLRSceneGraph {
             XYZ[2] = Z / integralCMF;
         }
         
-        InputSpectrumRef create(SpectrumType spType, ColorSpace space, SpectrumFloat e0, SpectrumFloat e1, SpectrumFloat e2) {
+        SLR_SCENEGRAPH_API InputSpectrumRef create(SpectrumType spType, ColorSpace space, SpectrumFloat e0, SpectrumFloat e1, SpectrumFloat e2) {
             SLRAssert(e0 >= 0.0 && e1 >= 0.0 && e2 >= 0.0, "Values should not be minus.");
             switch (space) {
                 case ColorSpace::sRGB:
@@ -1304,7 +1323,7 @@ namespace SLRSceneGraph {
                     return createShared<RGBInputSpectrum>();
             }
         }
-        InputSpectrumRef create(SpectrumType spType, SpectrumFloat minLambda, SpectrumFloat maxLambda, const SpectrumFloat* values, uint32_t numSamples) {
+        SLR_SCENEGRAPH_API InputSpectrumRef create(SpectrumType spType, SpectrumFloat minLambda, SpectrumFloat maxLambda, const SpectrumFloat* values, uint32_t numSamples) {
             SpectrumFloat XYZ[3];
             spectrum_to_XYZ(minLambda, maxLambda, values, numSamples, XYZ);
             SpectrumFloat RGB[3];
@@ -1326,7 +1345,7 @@ namespace SLRSceneGraph {
             RGB[2] = RGB[2] < 0.0f ? 0.0f : RGB[2];
             return createShared<RGBInputSpectrum>(RGB[0], RGB[1], RGB[2]);
         }
-        InputSpectrumRef create(SpectrumType spType, const SpectrumFloat* lambdas, const SpectrumFloat* values, uint32_t numSamples) {
+        SLR_SCENEGRAPH_API InputSpectrumRef create(SpectrumType spType, const SpectrumFloat* lambdas, const SpectrumFloat* values, uint32_t numSamples) {
             SpectrumFloat XYZ[3];
             spectrum_to_XYZ(lambdas, values, numSamples, XYZ);
             SpectrumFloat RGB[3];
@@ -1355,7 +1374,7 @@ namespace SLRSceneGraph {
         using namespace SLR;
         std::map<std::string, Image2DRef> s_imageDB;
         
-        std::shared_ptr<SLR::TiledImage2D> createTiledImage(const std::string &filepath, SLR::Allocator *mem, SLR::SpectrumType spType, bool gammaCorrection) {
+        SLR_SCENEGRAPH_API std::shared_ptr<SLR::TiledImage2D> createTiledImage(const std::string &filepath, SLR::Allocator *mem, SLR::SpectrumType spType, bool gammaCorrection) {
             if (s_imageDB.count(filepath) > 0) {
                 return std::static_pointer_cast<SLR::TiledImage2D>(s_imageDB[filepath]);
             }

@@ -140,10 +140,10 @@ bool preloadPNG(const std::string &filePath, FILE** fpRet, PNGStructures* pngStr
     png_set_sig_bytes(pngStruct, sizeof(headSignature));
     png_set_read_user_chunk_fn(pngStruct, png_get_user_chunk_ptr(pngStruct), libPNGreadChunkCallback);
     //    png_set_read_status_fn(pngStruct, libPNGreadRowCallback);
-#ifdef PNG_UNKNOWN_CHUNKS_SUPPORTED
-    png_byte chunkList[0] = {};
-    png_set_keep_unknown_chunks(pngStruct, PNG_HANDLE_CHUNK_AS_DEFAULT, chunkList, 0);
-#endif
+//#ifdef PNG_UNKNOWN_CHUNKS_SUPPORTED
+//    png_byte chunkList[0] = {};
+//    png_set_keep_unknown_chunks(pngStruct, PNG_HANDLE_CHUNK_AS_DEFAULT, chunkList, 0);
+//#endif
     png_set_user_limits(pngStruct, 5120, 5120);// 5120x5120より大きい画像は却下する。
     //    png_set_chunk_cache_max(pngStruct, 0x7FFFFFFF);// 補助チャンクsPLT, tEXt, iTXt, zTXtの限界数を設定する。
     

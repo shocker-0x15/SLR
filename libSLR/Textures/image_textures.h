@@ -13,7 +13,7 @@
 #include "../Core/textures.h"
 
 namespace SLR {
-    class ImageSpectrumTexture : public SpectrumTexture {
+    class SLR_API ImageSpectrumTexture : public SpectrumTexture {
         const TiledImage2D* m_data;
     public:
         ImageSpectrumTexture(const TiledImage2D* image) :
@@ -23,7 +23,7 @@ namespace SLR {
         RegularConstantContinuous2D* createIBLImportanceMap() const override;
     };
     
-    class ImageNormal3DTexture : public Normal3DTexture {
+    class SLR_API ImageNormal3DTexture : public Normal3DTexture {
         const TiledImage2D* m_data;
     public:
         ImageNormal3DTexture(const TiledImage2D* image) :
@@ -32,7 +32,7 @@ namespace SLR {
         Normal3D evaluate(const TexCoord2D &tc) const override;
     };
     
-    class ImageFloatTexture : public FloatTexture {
+    class SLR_API ImageFloatTexture : public FloatTexture {
         const TiledImage2D* m_data;
     public:
         ImageFloatTexture(const TiledImage2D* image) :

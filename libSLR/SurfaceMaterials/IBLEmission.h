@@ -13,7 +13,7 @@
 #include "../Core/surface_material.h"
 
 namespace SLR {
-    class IBLEmission : public EmitterSurfaceProperty {
+    class SLR_API IBLEmission : public EmitterSurfaceProperty {
         const Scene* m_scene;
         const SpectrumTexture* m_coeffM;
         float m_scale;

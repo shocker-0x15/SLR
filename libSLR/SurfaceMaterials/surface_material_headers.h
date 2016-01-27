@@ -3,7 +3,7 @@
 //  SLR
 //
 //  Created by 渡部 心 on 2015/10/06.
-//  Copyright © 2015年 渡部 心. All rights reserved.
+//  Copyright c 2015年 渡部 心. All rights reserved.
 //
 
 #ifndef surface_material_headers_h

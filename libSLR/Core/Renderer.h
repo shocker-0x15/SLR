@@ -12,7 +12,7 @@
 #include "../references.h"
 
 namespace SLR {
-    class Renderer {
+    class SLR_API Renderer {
     public:
         virtual ~Renderer() { };
         virtual void render(const Scene &scene, const RenderSettings &settings) const = 0;

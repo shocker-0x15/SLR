@@ -13,7 +13,7 @@
 #include "../Core/directional_distribution_functions.h"
 
 namespace SLR {
-    class AshikhminSpecularBRDF : public BSDF {
+    class SLR_API AshikhminSpecularBRDF : public BSDF {
         SampledSpectrum m_Rs;
         float m_nu, m_nv;
         
@@ -28,7 +28,7 @@ namespace SLR {
         m_Rs(Rs), m_nu(nu), m_nv(nv) { }
     };
     
-    class AshikhminDiffuseBRDF : public BSDF {
+    class SLR_API AshikhminDiffuseBRDF : public BSDF {
         SampledSpectrum m_Rs;
         SampledSpectrum m_Rd;
         

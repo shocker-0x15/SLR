@@ -21,7 +21,7 @@ namespace SLR {
         RNGSeed,
     };
     
-    class RenderSettings {
+    class SLR_API RenderSettings {
         std::map<RenderSettingItem, bool> m_boolValues;
         std::map<RenderSettingItem, int32_t> m_int32Values;
         std::map<RenderSettingItem, float> m_floatValues;

@@ -8,29 +8,29 @@
 #include "directional_distribution_functions.h"
 
 namespace SLR {
-    const DirectionType DirectionType::LowFreq = DirectionType::IE_LowFreq;
-    const DirectionType DirectionType::HighFreq = DirectionType::IE_HighFreq;
-    const DirectionType DirectionType::Delta0D = DirectionType::IE_Delta0D;
-    const DirectionType DirectionType::Delta1D = DirectionType::IE_Delta1D;
-    const DirectionType DirectionType::Dispersive = DirectionType::IE_Dispersive;
-    const DirectionType DirectionType::NonDelta = DirectionType::IE_NonDelta;
-    const DirectionType DirectionType::Delta = DirectionType::IE_Delta;
-    const DirectionType DirectionType::AllFreq = DirectionType::IE_AllFreq;
-    const DirectionType DirectionType::Reflection = DirectionType::IE_Reflection;
-    const DirectionType DirectionType::Transmission = DirectionType::IE_Transmission;
-    const DirectionType DirectionType::Emission = DirectionType::IE_Emission;
-    const DirectionType DirectionType::Acquisition = DirectionType::IE_Acquisition;
-    const DirectionType DirectionType::WholeSphere = DirectionType::IE_WholeSphere;
-    const DirectionType DirectionType::All = DirectionType::IE_All;
-    const DirectionType DirectionType::LowFreqReflection = DirectionType::IE_LowFreqReflection;
-    const DirectionType DirectionType::LowFreqTransmission = DirectionType::IE_LowFreqTransmission;
-    const DirectionType DirectionType::LowFreqScattering = DirectionType::IE_LowFreqScattering;
-    const DirectionType DirectionType::HighFreqReflection = DirectionType::IE_HighFreqReflection;
-    const DirectionType DirectionType::HighFreqTransmission = DirectionType::IE_HighFreqTransmission;
-    const DirectionType DirectionType::HighFreqScattering = DirectionType::IE_HighFreqScattering;
-    const DirectionType DirectionType::Delta0DReflection = DirectionType::IE_Delta0DReflection;
-    const DirectionType DirectionType::Delta0DTransmission = DirectionType::IE_Delta0DTransmission;
-    const DirectionType DirectionType::Delta0DScattering = DirectionType::IE_Delta0DScattering;
+    SLR_API const DirectionType DirectionType::LowFreq = DirectionType::IE_LowFreq;
+    SLR_API const DirectionType DirectionType::HighFreq = DirectionType::IE_HighFreq;
+    SLR_API const DirectionType DirectionType::Delta0D = DirectionType::IE_Delta0D;
+    SLR_API const DirectionType DirectionType::Delta1D = DirectionType::IE_Delta1D;
+    SLR_API const DirectionType DirectionType::Dispersive = DirectionType::IE_Dispersive;
+    SLR_API const DirectionType DirectionType::NonDelta = DirectionType::IE_NonDelta;
+    SLR_API const DirectionType DirectionType::Delta = DirectionType::IE_Delta;
+    SLR_API const DirectionType DirectionType::AllFreq = DirectionType::IE_AllFreq;
+    SLR_API const DirectionType DirectionType::Reflection = DirectionType::IE_Reflection;
+    SLR_API const DirectionType DirectionType::Transmission = DirectionType::IE_Transmission;
+    SLR_API const DirectionType DirectionType::Emission = DirectionType::IE_Emission;
+    SLR_API const DirectionType DirectionType::Acquisition = DirectionType::IE_Acquisition;
+    SLR_API const DirectionType DirectionType::WholeSphere = DirectionType::IE_WholeSphere;
+    SLR_API const DirectionType DirectionType::All = DirectionType::IE_All;
+    SLR_API const DirectionType DirectionType::LowFreqReflection = DirectionType::IE_LowFreqReflection;
+    SLR_API const DirectionType DirectionType::LowFreqTransmission = DirectionType::IE_LowFreqTransmission;
+    SLR_API const DirectionType DirectionType::LowFreqScattering = DirectionType::IE_LowFreqScattering;
+    SLR_API const DirectionType DirectionType::HighFreqReflection = DirectionType::IE_HighFreqReflection;
+    SLR_API const DirectionType DirectionType::HighFreqTransmission = DirectionType::IE_HighFreqTransmission;
+    SLR_API const DirectionType DirectionType::HighFreqScattering = DirectionType::IE_HighFreqScattering;
+    SLR_API const DirectionType DirectionType::Delta0DReflection = DirectionType::IE_Delta0DReflection;
+    SLR_API const DirectionType DirectionType::Delta0DTransmission = DirectionType::IE_Delta0DTransmission;
+    SLR_API const DirectionType DirectionType::Delta0DScattering = DirectionType::IE_Delta0DScattering;
     
     SampledSpectrum FresnelNoOp::evaluate(float cosEnter) const {
         return SampledSpectrum::One;

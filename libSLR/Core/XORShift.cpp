@@ -8,7 +8,8 @@
 #include "XORShift.h"
 
 namespace SLR {
-    template <> XORShiftTemplate<Types32bit>::XORShiftTemplate() {
+    template <> 
+    SLR_API XORShiftTemplate<Types32bit>::XORShiftTemplate() {
         Types32bit::Int seed = (Types32bit::Int)time(NULL);
         for (unsigned int i = 0; i < 4; ++i)
             m_state[i] = seed = 1812433253U * (seed ^ (seed >> 30)) + i;
@@ -16,14 +17,16 @@ namespace SLR {
             getUInt();
     }
     
-    template <> XORShiftTemplate<Types32bit>::XORShiftTemplate(Types32bit::Int seed) {
+    template <> 
+    SLR_API XORShiftTemplate<Types32bit>::XORShiftTemplate(Types32bit::Int seed) {
         for (int i = 0; i < 4; ++i)
             m_state[i] = seed = 1812433253U * (seed ^ (seed >> 30)) + i;
         for (int i = 0; i < 50; ++i)
             getUInt();
     }
     
-    template <> Types32bit::UInt XORShiftTemplate<Types32bit>::getUInt() {
+    template <> 
+    SLR_API Types32bit::UInt XORShiftTemplate<Types32bit>::getUInt() {
         Types32bit::UInt* a = m_state;
         Types32bit::UInt t(a[0] ^ (a[0] << 11));
         a[0] = a[1];
@@ -32,5 +35,5 @@ namespace SLR {
         return a[3] = (a[3] ^ (a[3] >> 19)) ^ (t ^ (t >> 8));
     }
     
-    template class XORShiftTemplate<Types32bit>;
+    template class SLR_API XORShiftTemplate<Types32bit>;
 }

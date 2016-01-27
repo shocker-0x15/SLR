@@ -14,7 +14,7 @@
 
 namespace SLR {
     template <typename RealType>
-    struct Point3Template {
+    struct SLR_API Point3Template {
         RealType x, y, z;
         
         Point3Template(RealType v = 0.0f) : x(v), y(v), z(v) { }
@@ -66,7 +66,6 @@ namespace SLR {
         static const Point3Template Inf;
         static const Point3Template NaN;
     };
-    
     template <typename RealType>
     const Point3Template<RealType> Point3Template<RealType>::Zero = Point3Template<RealType>(0);
     template <typename RealType>

@@ -21,7 +21,7 @@
 #include "../BasicTypes/SpectrumTypes.h"
 
 namespace SLR {
-    struct Ray {
+    struct SLR_API Ray {
         static const float Epsilon;
         
         Point3D org;
@@ -34,7 +34,7 @@ namespace SLR {
         org(o), dir(d), distMin(dMin), distMax(dMax), time(t) { };
     };
     
-    struct BoundingBox3D {
+    struct SLR_API BoundingBox3D {
         enum Axis : uint8_t {
             Axis_X = 0,
             Axis_Y,
@@ -111,7 +111,7 @@ namespace SLR {
     };
     
     
-    struct Vertex {
+    struct SLR_API Vertex {
         Point3D position;
         Normal3D normal;
         Tangent3D tangent;
@@ -122,7 +122,7 @@ namespace SLR {
     };
     
     
-    class Surface {
+    class SLR_API Surface {
     public:
         virtual ~Surface() { };
         
@@ -135,7 +135,7 @@ namespace SLR {
         virtual float evaluateAreaPDF(const SurfacePoint& surfPt) const = 0;
     };
     
-    struct ReferenceFrame {
+    struct SLR_API ReferenceFrame {
         Vector3D x, y, z;
         
         Vector3D toLocal(const Vector3D &v) const { return Vector3D(dot(x, v), dot(y, v), dot(z, v)); };
@@ -147,7 +147,7 @@ namespace SLR {
         };
     };
     
-    struct Intersection {
+    struct SLR_API Intersection {
         float time;
         float dist;
         Point3D p;
@@ -162,7 +162,7 @@ namespace SLR {
         void getSurfacePoint(SurfacePoint* surfPt);
     };
     
-    struct SurfacePoint {
+    struct SLR_API SurfacePoint {
         Point3D p;
         bool atInfinity;
         Normal3D gNormal;

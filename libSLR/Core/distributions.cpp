@@ -2,7 +2,7 @@
 //  distributions.cpp
 //
 //  Created by 渡部 心 on 2016/01/26.
-//  Copyright © 2016年 渡部 心. All rights reserved.
+//  Copyright c 2016年 渡部 心. All rights reserved.
 //
 
 #include "distributions.h"
@@ -27,8 +27,8 @@ namespace SLR {
         }
         return 0;
     }
-    template uint32_t sampleDiscrete(const float* importances, float* sumImportances, float* base, uint32_t numImportances, float u);
-    template uint32_t sampleDiscrete(const double* importances, double* sumImportances, double* base, uint32_t numImportances, double u);
+    template SLR_API uint32_t sampleDiscrete(const float* importances, float* sumImportances, float* base, uint32_t numImportances, float u);
+    template SLR_API uint32_t sampleDiscrete(const double* importances, double* sumImportances, double* base, uint32_t numImportances, double u);
     
     
     // "A Low Distortion Map Between Disk and Square"
@@ -67,8 +67,8 @@ namespace SLR {
         *dx = r * cos(theta);
         *dy = r * sin(theta);
     }
-    template void concentricSampleDisk(float u0, float u1, float* dx, float* dy);
-    template void concentricSampleDisk(double u0, double u1, double* dx, double* dy);
+    template SLR_API void concentricSampleDisk(float u0, float u1, float* dx, float* dy);
+    template SLR_API void concentricSampleDisk(double u0, double u1, double* dx, double* dy);
     
     
     template <typename RealType>
@@ -116,8 +116,8 @@ namespace SLR {
         return idx;
     };
     
-    template class RegularConstantDiscrete1DTemplate<float>;
-    template class RegularConstantDiscrete1DTemplate<double>;
+    template class SLR_API RegularConstantDiscrete1DTemplate<float>;
+    template class SLR_API RegularConstantDiscrete1DTemplate<double>;
     
     
     template <typename RealType>
@@ -180,8 +180,8 @@ namespace SLR {
         return m_PDF[(int32_t)(smp * m_numValues)];
     };
     
-    template class RegularConstantContinuous1DTemplate<float>;
-    template class RegularConstantContinuous1DTemplate<double>;
+    template class SLR_API RegularConstantContinuous1DTemplate<float>;
+    template class SLR_API RegularConstantContinuous1DTemplate<double>;
     
     
     template <typename RealType>
@@ -253,6 +253,6 @@ namespace SLR {
         free(data);
     };
     
-    template class RegularConstantContinuous2DTemplate<float>;
-    template class RegularConstantContinuous2DTemplate<double>;
+    template class SLR_API RegularConstantContinuous2DTemplate<float>;
+    template class SLR_API RegularConstantContinuous2DTemplate<double>;
 }

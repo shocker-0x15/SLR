@@ -236,7 +236,7 @@ namespace SLR {
     
     float SurfaceObjectAggregate::evaluateProb(const Light &light) const {
         // if (light.top() != this)
-        // 	return 0.0f;
+        //     return 0.0f;
         // light.pop();
         // float prob = calcProb(light.top()) * light.top()->evaluateProb(light);
         // light.push(this);

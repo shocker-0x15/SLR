@@ -12,7 +12,7 @@
 #include "references.h"
 
 namespace SLRSceneGraph {
-    class Scene {
+    class SLR_SCENEGRAPH_API Scene {
         InternalNodeRef m_rootNode;
         InfiniteSphereNodeRef m_envNode;
         std::unique_ptr<SLR::Scene> m_raw;
@@ -28,7 +28,7 @@ namespace SLRSceneGraph {
         const SLR::Scene* raw() const { return m_raw.get(); }
     };
     
-    struct RenderingContext {
+    struct SLR_SCENEGRAPH_API RenderingContext {
         std::unique_ptr<SLR::Renderer> renderer;
         int32_t width;
         int32_t height;

@@ -13,7 +13,7 @@
 #include "nodes.h"
 
 namespace SLRSceneGraph {
-    class PerspectiveCameraNode : public CameraNode {
+    class SLR_SCENEGRAPH_API PerspectiveCameraNode : public CameraNode {
         float m_sensitivity;
         float m_aspect;
         float m_fovY;
@@ -28,7 +28,7 @@ namespace SLRSceneGraph {
         void createCamera() final;
     };
     
-    class EquirectangularCameraNode : public CameraNode {
+    class SLR_SCENEGRAPH_API EquirectangularCameraNode : public CameraNode {
         float m_sensitivity;
         float m_phiAngle;
         float m_thetaAngle;

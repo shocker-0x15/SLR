@@ -15,7 +15,7 @@
 #include <libSLR/Surface/InfiniteSphere.h>
 
 namespace SLRSceneGraph {
-    class InfiniteSphereNode : public Node {
+    class SLR_SCENEGRAPH_API InfiniteSphereNode : public Node {
         SceneWRef m_scene;
         SLR::InfiniteSphere m_sphere;
         SLR::InfiniteSphereSurfaceObject* m_surfObj;

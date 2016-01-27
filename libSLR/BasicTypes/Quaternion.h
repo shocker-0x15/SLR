@@ -14,7 +14,7 @@
 
 namespace SLR {
     template <typename RealType>
-    struct QuaternionTemplate {
+    struct SLR_API QuaternionTemplate {
         union {
             Vector3Template<RealType> v;
             struct { RealType x, y, z; };
@@ -107,7 +107,7 @@ namespace SLR {
     }
     
     template <typename RealType>
-    void decompose(const Matrix4x4Template<RealType> &mat, Vector3Template<RealType>* T, QuaternionTemplate<RealType>* R, Matrix4x4Template<RealType>* S);
+    SLR_API void decompose(const Matrix4x4Template<RealType> &mat, Vector3Template<RealType>* T, QuaternionTemplate<RealType>* R, Matrix4x4Template<RealType>* S);
 }
 
 #endif

@@ -13,7 +13,7 @@
 #include "../Core/surface_material.h"
 
 namespace SLR {
-    class DiffuseReflection : public SurfaceMaterial {
+    class SLR_API DiffuseReflection : public SurfaceMaterial {
         const SpectrumTexture* m_reflectance;
         const FloatTexture* m_sigma;
     public:
@@ -23,7 +23,7 @@ namespace SLR {
         BSDF* getBSDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem, float scale = 1.0f) const override;
     };
     
-    class SpecularReflection : public SurfaceMaterial {
+    class SLR_API SpecularReflection : public SurfaceMaterial {
         const SpectrumTexture* m_coeffR;
         const SpatialFresnel* m_fresnel;
     public:
@@ -33,7 +33,7 @@ namespace SLR {
         BSDF* getBSDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem, float scale = 1.0f) const override;
     };
     
-    class SpecularTransmission : public SurfaceMaterial {
+    class SLR_API SpecularTransmission : public SurfaceMaterial {
         const SpectrumTexture* m_coeffT;
         const SpectrumTexture* m_etaExt;
         const SpectrumTexture* m_etaInt;

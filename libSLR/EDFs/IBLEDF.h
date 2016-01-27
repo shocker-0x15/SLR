@@ -13,7 +13,7 @@
 #include "../Core/directional_distribution_functions.h"
 
 namespace SLR {
-    class IBLEDF : public EDF {
+    class SLR_API IBLEDF : public EDF {
         float m_worldDiscArea;
     public:
         IBLEDF(float worldDiscArea) : EDF(DirectionType::Emission | DirectionType::LowFreq), m_worldDiscArea(worldDiscArea) { };

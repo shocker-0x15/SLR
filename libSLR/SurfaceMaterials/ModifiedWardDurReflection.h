@@ -13,7 +13,7 @@
 #include "../Core/surface_material.h"
 
 namespace SLR {
-    class ModifiedWardDurReflection : public SurfaceMaterial {
+    class SLR_API ModifiedWardDurReflection : public SurfaceMaterial {
         const SpectrumTexture* m_reflectance;
         const FloatTexture* m_anisoX;
         const FloatTexture* m_anisoY;

@@ -13,7 +13,7 @@
 #include "../Core/directional_distribution_functions.h"
 
 namespace SLR {
-    class MultiEDF : public EDF {
+    class SLR_API MultiEDF : public EDF {
 #define maxNumEDFElems 4
         uint32_t m_numComponents;
         EDF* m_EDFs[maxNumEDFElems];

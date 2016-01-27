@@ -43,7 +43,7 @@ namespace SLR {
             Black2
         };
         
-        extern const float Spectra[24][NumSamples];
+        extern SLR_API const float Spectra[24][NumSamples];
     }
     
     namespace StandardIlluminant {
@@ -51,7 +51,7 @@ namespace SLR {
         static const float MaxWavelength = 830.0f;
         static const uint32_t NumSamples = 531;
         
-        extern const float D65[NumSamples];
+        extern SLR_API const float D65[NumSamples];
     }
 }
 

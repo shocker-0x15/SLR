@@ -18,11 +18,11 @@ namespace SLRSceneGraph {
     // Current implementation uses the vertex for rendering as is.
     typedef SLR::Vertex Vertex;
     
-    struct Triangle {
+    struct SLR_SCENEGRAPH_API Triangle {
         uint64_t vIdx[3];
     };
     
-    class TriangleMeshNode : public SurfaceObjectNode {
+    class SLR_SCENEGRAPH_API TriangleMeshNode : public SurfaceObjectNode {
         SLR::Triangle* m_trianglesForRendering;
         
         std::vector<Vertex> m_vertices;

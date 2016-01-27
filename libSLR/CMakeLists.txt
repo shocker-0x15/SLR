@@ -1,40 +1,40 @@
 set(include_dirs "${EXTLIBS_OpenEXR22_include}")
 set(lib_dirs "${EXTLIBS_OpenEXR22_lib}")
-set(linker_flags "Half")
+set(libs "Half")
 
 file(GLOB libSLR_Sources
-	*.h
-	*.cpp
-	Core/*.h
-	Core/*.cpp
-	Accelerator/*.h
-	Accelerator/*.cpp
-	BasicTypes/*.h
-	BasicTypes/*.cpp
-	BSDFs/*.h
-	BSDFs/*.cpp
-	EDFs/*.h
-	EDFs/*.cpp
-	Cameras/*.h
-	Cameras/*.cpp
-	Helper/*.h
-	Helper/*.cpp
-	Memory/*.h
-	Memory/*.c
-	Memory/*.cpp
-	Renderers/*.h
-	Renderers/*.cpp
-	SceneGraph/*.h
-	SceneGraph/*.cpp
-	Surface/*.h
-	Surface/*.cpp
-	SurfaceMaterials/*.h
-	SurfaceMaterials/*.cpp
-	Textures/*.h
-	Textures/*.cpp
-	)
+     *.h
+     *.cpp
+     Core/*.h
+     Core/*.cpp
+     Accelerator/*.h
+     Accelerator/*.cpp
+     BasicTypes/*.h
+     BasicTypes/*.cpp
+     BSDFs/*.h
+     BSDFs/*.cpp
+     EDFs/*.h
+     EDFs/*.cpp
+     Cameras/*.h
+     Cameras/*.cpp
+     Helper/*.h
+     Helper/*.cpp
+     Memory/*.h
+     Memory/*.c
+     Memory/*.cpp
+     Renderers/*.h
+     Renderers/*.cpp
+     SceneGraph/*.h
+     SceneGraph/*.cpp
+     Surface/*.h
+     Surface/*.cpp
+     SurfaceMaterials/*.h
+     SurfaceMaterials/*.cpp
+     Textures/*.h
+     Textures/*.cpp
+    )
 file(GLOB libSLR_Sources_excluded
-	 Memory/StackAllocator.*
+     Memory/StackAllocator.*
      Memory/MSpaceAllocator.*
      Memory/dlmalloc.*
     )
@@ -57,16 +57,18 @@ source_group("SLR\\Textures" REGULAR_EXPRESSION "Textures/.*\.(h|c|hpp|cpp)")
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
 if(MSVC)
-	add_definitions(-DSLR_API_EXPORTS)
+    add_definitions(-DSLR_API_EXPORTS)
 endif()
 
 include_directories(${include_dirs})
 # link_directories(${lib_dirs})
 foreach(lib_dir ${lib_dirs})
-	link_directories(${lib_dir})
+    link_directories(${lib_dir})
 endforeach()
 add_library(SLR SHARED ${libSLR_Sources})
-target_link_libraries(SLR ${linker_flags})
+foreach(lib ${libs})
+    target_link_libraries(SLR PRIVATE ${lib})
+endforeach()
 
 install(TARGETS SLR CONFIGURATIONS Debug DESTINATION "${CMAKE_BINARY_DIR}/bin/Debug")
 install(TARGETS SLR CONFIGURATIONS Release DESTINATION "${CMAKE_BINARY_DIR}/bin/Release")

@@ -14,8 +14,8 @@
 
 namespace SLRSceneGraph {
     typedef std::function<SurfaceMaterialRef(const aiMaterial*, const std::string &, SLR::Allocator*)> CreateMaterialFunction;
-    SurfaceMaterialRef createMaterialDefaultFunction(const aiMaterial* aiMat, const std::string &pathPrefix, SLR::Allocator* mem);
-    void construct(const std::string &filePath, InternalNodeRef &nodeOut, const CreateMaterialFunction &materialFunc = createMaterialDefaultFunction);
+    SLR_SCENEGRAPH_API SurfaceMaterialRef createMaterialDefaultFunction(const aiMaterial* aiMat, const std::string &pathPrefix, SLR::Allocator* mem);
+    SLR_SCENEGRAPH_API void construct(const std::string &filePath, InternalNodeRef &nodeOut, const CreateMaterialFunction &materialFunc = createMaterialDefaultFunction);
 }
 
 #endif

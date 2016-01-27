@@ -13,24 +13,24 @@
 #include "geometry.h"
 
 namespace SLR {
-    struct LightPosQuery {
+    struct SLR_API LightPosQuery {
         float time;
         WavelengthSamples wls;
         LightPosQuery(float t, const WavelengthSamples &lambdas) : time(t), wls(lambdas) { };
     };
     
-    struct LightPosSample {
+    struct SLR_API LightPosSample {
         float uPos[2];
         LightPosSample(float up0, float up1) : uPos{up0, up1} { }
     };
     
-    struct LightPosQueryResult {
+    struct SLR_API LightPosQueryResult {
         SurfacePoint surfPt;
         float areaPDF;
         bool isDeltaPos;
     };
     
-    class Light {
+    class SLR_API Light {
         mutable std::stack<const SurfaceObject*> m_hierarchy;
     public:
         Light() { };
@@ -43,7 +43,7 @@ namespace SLR {
         SampledSpectrum sample(const LightPosQuery &query, const LightPosSample &smp, LightPosQueryResult* result) const;
     };
     
-    class SurfaceObject {
+    class SLR_API SurfaceObject {
     public:
         SurfaceObject() { };
         virtual ~SurfaceObject() { };
@@ -63,7 +63,7 @@ namespace SLR {
         bool testVisiblility(const SurfacePoint &shdP, const SurfacePoint &lightP, float time) const;
     };
     
-    class SingleSurfaceObject : public SurfaceObject {
+    class SLR_API SingleSurfaceObject : public SurfaceObject {
     protected:
         const Surface* m_surface;
         const SurfaceMaterial* m_material;
@@ -90,7 +90,7 @@ namespace SLR {
         virtual EDF* createEDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem) const;
     };
     
-    class BumpSingleSurfaceObject : public SingleSurfaceObject {
+    class SLR_API BumpSingleSurfaceObject : public SingleSurfaceObject {
         const Normal3DTexture* m_normalMap;
     public:
         BumpSingleSurfaceObject(const Surface* surf, const SurfaceMaterial* mat, const Normal3DTexture* normalMap) :
@@ -99,7 +99,7 @@ namespace SLR {
         void getSurfacePoint(const Intersection &isect, SurfacePoint* surfPt) const override;
     };
     
-    class InfiniteSphereSurfaceObject : public SingleSurfaceObject {
+    class SLR_API InfiniteSphereSurfaceObject : public SingleSurfaceObject {
         const RegularConstantContinuous2D* m_dist;
     public:
         InfiniteSphereSurfaceObject(const Surface* surf, const IBLEmission* emitter);
@@ -115,7 +115,7 @@ namespace SLR {
         float evaluateAreaPDF(const SurfacePoint& surfPt) const override;
     };
     
-    class SurfaceObjectAggregate : public SurfaceObject {
+    class SLR_API SurfaceObjectAggregate : public SurfaceObject {
         BBVH* m_accelerator;
         const SurfaceObject** m_lightList;
         RegularConstantDiscrete1D* m_lightDist1D;
@@ -136,7 +136,7 @@ namespace SLR {
         SampledSpectrum sample(const Light &light, const LightPosQuery &query, const LightPosSample &smp, LightPosQueryResult* result) const override;
     };
     
-    class TransformedSurfaceObject : public SurfaceObject {
+    class SLR_API TransformedSurfaceObject : public SurfaceObject {
         const SurfaceObject* m_surfObj;
         const Transform* m_transform;
         friend class Light;
@@ -157,7 +157,7 @@ namespace SLR {
         void setTransform(const Transform* t) { m_transform = t; };
     };
     
-    class Scene {
+    class SLR_API Scene {
         const SurfaceObjectAggregate* m_aggregate;
         const InfiniteSphereSurfaceObject* m_envSphere;
         Point3D m_worldCenter;

@@ -13,7 +13,7 @@
 #include "geometry.h"
 
 namespace SLR {
-    class Transform {
+    class SLR_API Transform {
     public:
         virtual ~Transform() { };
         
@@ -32,7 +32,7 @@ namespace SLR {
         Normal3D mulInv(const Normal3D &n, float t) const;
     };
     
-    class StaticTransform : public Transform {
+    class SLR_API StaticTransform : public Transform {
         Matrix4x4 mat, matInv;
     public:
         StaticTransform(const Matrix4x4 &m = Matrix4x4::Identity) : mat(m), matInv(invert(m)) { };
@@ -80,7 +80,7 @@ namespace SLR {
         friend StaticTransform transpose(const StaticTransform &t) { return StaticTransform(transpose(t.mat)); };
     };
     
-    class AnimatedTransform : public Transform {
+    class SLR_API AnimatedTransform : public Transform {
         StaticTransform* m_tfBegin;
         StaticTransform* m_tfEnd;
         float m_tBegin, m_tEnd;
@@ -134,7 +134,7 @@ namespace SLR {
         };
     };
     
-    class ChainedTransform : public SLR::Transform {
+    class SLR_API ChainedTransform : public SLR::Transform {
         const SLR::Transform* m_parent;
         const SLR::Transform* m_transform;
     public:

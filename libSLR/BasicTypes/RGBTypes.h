@@ -16,7 +16,7 @@
 namespace SLR {
     // just for compatibility with spectral representation build.
     template <typename RealType>
-    struct RGBSamplesTemplate {
+    struct SLR_API RGBSamplesTemplate {
         enum Flag : uint16_t {
             LambdaSelected = 0x01,
         };
@@ -40,7 +40,8 @@ namespace SLR {
             return ret;
         };
     };
-    template <typename RealType> const uint32_t RGBSamplesTemplate<RealType>::NumComponents = 3;
+    template <typename RealType>
+    const uint32_t RGBSamplesTemplate<RealType>::NumComponents = 3;
     
     template <typename RealType>
     struct RGBTemplate {
@@ -125,8 +126,8 @@ namespace SLR {
         static const RGBTemplate Inf;
         static const RGBTemplate NaN;
     };
-    template <typename RealType> const uint32_t RGBTemplate<RealType>::NumComponents = 3;
-    
+    template <typename RealType>
+    const uint32_t RGBTemplate<RealType>::NumComponents = 3;
     template <typename RealType>
     const RGBTemplate<RealType> RGBTemplate<RealType>::Zero = RGBTemplate<RealType>(0);
     template <typename RealType>
@@ -138,17 +139,17 @@ namespace SLR {
     
     
     template <typename RealType>
-    RGBTemplate<RealType> pow(const RGBTemplate<RealType> &s, RealType p);
+    SLR_API RGBTemplate<RealType> pow(const RGBTemplate<RealType> &s, RealType p);
     
     template <typename RealType>
-    RGBTemplate<RealType> exp(const RGBTemplate<RealType> &s);
+    SLR_API RGBTemplate<RealType> exp(const RGBTemplate<RealType> &s);
     
     template <typename RealType>
-    RGBTemplate<RealType> inverseGammaCorrection(const RGBTemplate<RealType> &s, RealType gamma = 2.2);
+    SLR_API RGBTemplate<RealType> inverseGammaCorrection(const RGBTemplate<RealType> &s, RealType gamma = 2.2);
     
     
     template <typename RealType>
-    struct RGBStorageTemplate {
+    struct SLR_API RGBStorageTemplate {
         CompensatedSum<RGBTemplate<RealType>> value;
         
         RGBStorageTemplate(const RGBTemplate<RealType> &v = RGBTemplate<RealType>::Zero) :

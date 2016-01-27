@@ -15,7 +15,7 @@
 #include "../BasicTypes/CompensatedSum.h"
 
 namespace SLR {
-    class ImageSensor {
+    class SLR_API ImageSensor {
         uint8_t* m_data;
         uint8_t** m_separatedData;
         uint32_t m_numSeparated;

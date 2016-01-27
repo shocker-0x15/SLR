@@ -2,14 +2,25 @@
 //  Matrix4x4.cpp
 //
 //  Created by 渡部 心 on 2016/01/26.
-//  Copyright © 2016年 渡部 心. All rights reserved.
+//  Copyright c 2016年 渡部 心. All rights reserved.
 //
 
 #include "Matrix4x4.h"
 
 namespace SLR {
-    template struct Matrix4x4Template<float>;
-    template struct Matrix4x4Template<double>;
+    template struct SLR_API Matrix4x4Template<float>;
+    template SLR_API const Matrix4x4Template<float> Matrix4x4Template<float>::Identity;
+    template SLR_API const Matrix4x4Template<float> Matrix4x4Template<float>::Zero;
+    template SLR_API const Matrix4x4Template<float> Matrix4x4Template<float>::One;
+    template SLR_API const Matrix4x4Template<float> Matrix4x4Template<float>::Inf;
+    template SLR_API const Matrix4x4Template<float> Matrix4x4Template<float>::NaN;
+
+    template struct SLR_API Matrix4x4Template<double>;
+    template SLR_API const Matrix4x4Template<double> Matrix4x4Template<double>::Identity;
+    template SLR_API const Matrix4x4Template<double> Matrix4x4Template<double>::Zero;
+    template SLR_API const Matrix4x4Template<double> Matrix4x4Template<double>::One;
+    template SLR_API const Matrix4x4Template<double> Matrix4x4Template<double>::Inf;
+    template SLR_API const Matrix4x4Template<double> Matrix4x4Template<double>::NaN;
     
     template <typename RealType>
     Matrix4x4Template<RealType> transpose(const Matrix4x4Template<RealType> &m) {
@@ -18,8 +29,8 @@ namespace SLR {
                                            Vector4Template<RealType>(m.m20, m.m21, m.m22, m.m23),
                                            Vector4Template<RealType>(m.m30, m.m31, m.m32, m.m33));
     }
-    template Matrix4x4Template<float> transpose(const Matrix4x4Template<float> &m);
-    template Matrix4x4Template<double> transpose(const Matrix4x4Template<double> &m);
+    template SLR_API Matrix4x4Template<float> transpose(const Matrix4x4Template<float> &m);
+    template SLR_API Matrix4x4Template<double> transpose(const Matrix4x4Template<double> &m);
     
     template <typename RealType>
     Matrix4x4Template<RealType> invert(const Matrix4x4Template<RealType> &m) {
@@ -76,8 +87,8 @@ namespace SLR {
         
         return mat;
     }
-    template Matrix4x4Template<float> invert(const Matrix4x4Template<float> &m);
-    template Matrix4x4Template<double> invert(const Matrix4x4Template<double> &m);
+    template SLR_API Matrix4x4Template<float> invert(const Matrix4x4Template<float> &m);
+    template SLR_API Matrix4x4Template<double> invert(const Matrix4x4Template<double> &m);
     
     template <typename RealType>
     Matrix4x4Template<RealType> lookAt(const Point3Template<RealType> &eye, const Point3Template<RealType> &tgt, const Vector3Template<RealType> &up) {
@@ -93,8 +104,8 @@ namespace SLR {
                                            Vector4Template<RealType>(x.z, y.z, z.z, 0.0f),
                                            t);
     }
-    template Matrix4x4Template<float> lookAt(const Point3Template<float> &eye, const Point3Template<float> &tgt, const Vector3Template<float> &up);
-    template Matrix4x4Template<double> lookAt(const Point3Template<double> &eye, const Point3Template<double> &tgt, const Vector3Template<double> &up);
+    template SLR_API Matrix4x4Template<float> lookAt(const Point3Template<float> &eye, const Point3Template<float> &tgt, const Vector3Template<float> &up);
+    template SLR_API Matrix4x4Template<double> lookAt(const Point3Template<double> &eye, const Point3Template<double> &tgt, const Vector3Template<double> &up);
     
     template <typename RealType>
     Matrix4x4Template<RealType> rotate(RealType angle, const Vector3Template<RealType> &axis) {
@@ -120,8 +131,8 @@ namespace SLR {
         
         return matrix;
     }
-    template Matrix4x4Template<float> rotate(float angle, const Vector3Template<float> &axis);
-    template Matrix4x4Template<double> rotate(double angle, const Vector3Template<double> &axis);
+    template SLR_API Matrix4x4Template<float> rotate(float angle, const Vector3Template<float> &axis);
+    template SLR_API Matrix4x4Template<double> rotate(double angle, const Vector3Template<double> &axis);
     
     template <typename RealType>
     Matrix4x4Template<RealType> camera(RealType aspect, RealType fovY, RealType near, RealType far) {
@@ -141,6 +152,6 @@ namespace SLR {
         
         return matrix;
     }
-    template Matrix4x4Template<float> camera(float aspect, float fovY, float near, float far);
-    template Matrix4x4Template<double> camera(double aspect, double fovY, double near, double far);
+    template SLR_API Matrix4x4Template<float> camera(float aspect, float fovY, float near, float far);
+    template SLR_API Matrix4x4Template<double> camera(double aspect, double fovY, double near, double far);
 }

@@ -13,7 +13,7 @@
 #include "../Core/directional_distribution_functions.h"
 
 namespace SLR {
-    class ModifiedWardDurBRDF : public BSDF {
+    class SLR_API ModifiedWardDurBRDF : public BSDF {
         SampledSpectrum m_R;
         float m_anisoX, m_anisoY;
         

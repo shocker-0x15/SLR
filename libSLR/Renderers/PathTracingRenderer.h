@@ -13,7 +13,7 @@
 #include "../Core/Renderer.h"
 
 namespace SLR {
-    class PathTracingRenderer : public Renderer {
+    class SLR_API PathTracingRenderer : public Renderer {
         struct Job {
             const Scene* scene;
             

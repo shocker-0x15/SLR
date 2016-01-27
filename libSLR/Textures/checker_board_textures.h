@@ -13,7 +13,7 @@
 #include "../Core/textures.h"
 
 namespace SLR {
-    class CheckerBoardSpectrumTexture : public SpectrumTexture {
+    class SLR_API CheckerBoardSpectrumTexture : public SpectrumTexture {
         const InputSpectrum* m_values[2];
     public:
         CheckerBoardSpectrumTexture(const InputSpectrum* v0, const InputSpectrum* v1) : m_values{v0, v1} { };
@@ -22,7 +22,7 @@ namespace SLR {
         RegularConstantContinuous2D* createIBLImportanceMap() const override;
     };
     
-    class CheckerBoardNormal3DTexture : public Normal3DTexture {
+    class SLR_API CheckerBoardNormal3DTexture : public Normal3DTexture {
         float m_stepWidth;
         bool m_reverse;
     public:
@@ -34,7 +34,7 @@ namespace SLR {
         Normal3D evaluate(const TexCoord2D &tc) const override;
     };
     
-    class CheckerBoardFloatTexture : public FloatTexture {
+    class SLR_API CheckerBoardFloatTexture : public FloatTexture {
         float m_values[2];
     public:
         CheckerBoardFloatTexture(float v0, float v1) : m_values{v0, v1} { };

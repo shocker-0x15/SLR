@@ -13,7 +13,7 @@
 #include "../Core/surface_material.h"
 
 namespace SLR {
-    class SummedSurfaceMaterial : public SurfaceMaterial {
+    class SLR_API SummedSurfaceMaterial : public SurfaceMaterial {
         const SurfaceMaterial* m_mat0;
         const SurfaceMaterial* m_mat1;
     public:

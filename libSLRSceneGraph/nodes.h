@@ -12,14 +12,14 @@
 #include "references.h"
 
 namespace SLRSceneGraph {
-    struct RenderingData {
+    struct SLR_SCENEGRAPH_API RenderingData {
         std::vector<SLR::SurfaceObject*> surfObjs;
         SLR::Camera* camera;
         const SLR::Transform* camTransform;
         RenderingData() : camera(nullptr), camTransform(nullptr) { };
     };
     
-    class Node {
+    class SLR_SCENEGRAPH_API Node {
     protected:
         std::string m_name;
     public:
@@ -40,7 +40,7 @@ namespace SLRSceneGraph {
         virtual void getRenderingData(SLR::ArenaAllocator &mem, const SLR::Transform* subTF, RenderingData *data) { SLRAssert(false, "Not implemented."); };
     };
     
-    class InternalNode : public Node {
+    class SLR_SCENEGRAPH_API InternalNode : public Node {
         std::vector<NodeRef> m_childNodes;
         TransformRef m_localToWorld;
     public:
@@ -63,7 +63,7 @@ namespace SLRSceneGraph {
         void getRenderingData(SLR::ArenaAllocator &mem, const SLR::Transform* subTF, RenderingData *data) override;
     };
     
-    class SurfaceObjectNode : public Node {
+    class SLR_SCENEGRAPH_API SurfaceObjectNode : public Node {
     protected:
         bool m_ready;
         SLR::SingleSurfaceObject** m_refinedObjs;
@@ -76,7 +76,7 @@ namespace SLRSceneGraph {
         void getRenderingData(SLR::ArenaAllocator &mem, const SLR::Transform* subTF, RenderingData *data) final;
     };
     
-    class ReferenceNode : public Node {
+    class SLR_SCENEGRAPH_API ReferenceNode : public Node {
         NodeRef m_node;
         bool m_ready;
         RenderingData m_subData;
@@ -88,7 +88,7 @@ namespace SLRSceneGraph {
         void getRenderingData(SLR::ArenaAllocator &mem, const SLR::Transform* subTF, RenderingData *data) final;
     };
     
-    class CameraNode : public Node {
+    class SLR_SCENEGRAPH_API CameraNode : public Node {
     protected:
         bool m_ready;
         SLR::Camera* m_camera;

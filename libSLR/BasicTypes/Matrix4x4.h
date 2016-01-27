@@ -20,7 +20,7 @@
 
 namespace SLR {
     template <typename RealType>
-    struct Matrix4x4Template {
+    struct SLR_API Matrix4x4Template {
         union {
             struct { RealType m00, m10, m20, m30; };
             Vector4Template<RealType> c0;
@@ -193,7 +193,6 @@ namespace SLR {
         static const Matrix4x4Template Inf;
         static const Matrix4x4Template NaN;
     };
-    
     template <typename RealType>
     const Matrix4x4Template<RealType> Matrix4x4Template<RealType>::Identity = Matrix4x4Template<RealType>(Vector4Template<RealType>(1, 0, 0, 0),
                                                                                                           Vector4Template<RealType>(0, 1, 0, 0),
@@ -222,13 +221,13 @@ namespace SLR {
     
     
     template <typename RealType>
-    Matrix4x4Template<RealType> transpose(const Matrix4x4Template<RealType> &m);
+    SLR_API Matrix4x4Template<RealType> transpose(const Matrix4x4Template<RealType> &m);
     
     template <typename RealType>
-    Matrix4x4Template<RealType> invert(const Matrix4x4Template<RealType> &m);
+    SLR_API Matrix4x4Template<RealType> invert(const Matrix4x4Template<RealType> &m);
     
     template <typename RealType>
-    Matrix4x4Template<RealType> lookAt(const Point3Template<RealType> &eye, const Point3Template<RealType> &tgt, const Vector3Template<RealType> &up);
+    SLR_API Matrix4x4Template<RealType> lookAt(const Point3Template<RealType> &eye, const Point3Template<RealType> &tgt, const Vector3Template<RealType> &up);
     
     template <typename RealType>
     inline Matrix4x4Template<RealType> lookAt(RealType ex, RealType ey, RealType ez, RealType tx, RealType ty, RealType tz, RealType ux, RealType uy, RealType uz) {
@@ -267,7 +266,7 @@ namespace SLR {
     }
     
     template <typename RealType>
-    Matrix4x4Template<RealType> rotate(RealType angle, const Vector3Template<RealType> &axis);
+    SLR_API Matrix4x4Template<RealType> rotate(RealType angle, const Vector3Template<RealType> &axis);
     
     template <typename RealType>
     inline Matrix4x4Template<RealType> rotate(RealType angle, RealType ax, RealType ay, RealType az) {
@@ -282,7 +281,7 @@ namespace SLR {
     inline Matrix4x4Template<RealType> rotateZ(RealType angle) { return rotate(angle, Vector3Template<RealType>::Ez); }
     
     template <typename RealType>
-    Matrix4x4Template<RealType> camera(RealType aspect, RealType fovY, RealType near, RealType far);
+    SLR_API Matrix4x4Template<RealType> camera(RealType aspect, RealType fovY, RealType near, RealType far);
 }
 
 #endif

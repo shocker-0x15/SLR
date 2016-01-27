@@ -10,24 +10,24 @@ SLRSceneGraph::SceneParser::symbol_type yylex(SLRSceneGraph::SceneParsingDriver 
 YY_DECL;
 
 namespace SLRSceneGraph {    
-	struct SceneParsingDriver {        
-		std::string file;
-		bool traceScanning;
-		bool traceParsing;
-		location currentLocation;
+    struct SceneParsingDriver {        
+        std::string file;
+        bool traceScanning;
+        bool traceParsing;
+        location currentLocation;
         
         StatementsRef statements;
 
-		SceneParsingDriver() : 
-		traceScanning(false), traceParsing(false) {
+        SceneParsingDriver() : 
+        traceScanning(false), traceParsing(false) {
 
-		}
+        }
         ~SceneParsingDriver() { }
 
-		void beginScan();
-		void endScan();
+        void beginScan();
+        void endScan();
 
-		StatementsRef parse(const std::string &f) {
+        StatementsRef parse(const std::string &f) {
             file = f;
             beginScan();
             SceneParser parser(*this);
@@ -36,15 +36,15 @@ namespace SLRSceneGraph {
             endScan();
 
             return res == 0 ? statements : nullptr;
-		}
+        }
 
-		void error(const location &loc, const std::string &msg) {
-			std::cerr << loc << ": " << msg << std::endl;
-		}
-		void error(const std::string &msg) {
-			std::cerr << msg << std::endl;
-		}
-	};
+        void error(const location &loc, const std::string &msg) {
+            std::cerr << loc << ": " << msg << std::endl;
+        }
+        void error(const std::string &msg) {
+            std::cerr << msg << std::endl;
+        }
+    };
 }
 
 #endif

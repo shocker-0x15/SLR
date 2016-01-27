@@ -3,7 +3,7 @@
 //  SLR
 //
 //  Created by 渡部 心 on 2015/12/16.
-//  Copyright © 2015年 渡部 心. All rights reserved.
+//  Copyright c 2015年 渡部 心. All rights reserved.
 //
 
 #include "SceneParser.hpp"
@@ -1012,7 +1012,7 @@ namespace SLRSceneGraph {
             var *= m_right->result();
         else if (m_op == "/=")
             var /= m_right->result();
-        else if (m_op == "\%=")
+        else if (m_op == "%=")
             var %= m_right->result();
         if (var.type == Type::Error) {
             *errMsg = var.raw<TypeMap::Error>();
@@ -1063,7 +1063,7 @@ namespace SLRSceneGraph {
             m_result = m_left->result() * m_right->result();
         else if (m_op == "/")
             m_result = m_left->result() / m_right->result();
-        else if (m_op == "\%")
+        else if (m_op == "%")
             m_result = m_left->result() % m_right->result();
         if (m_result.type == Type::Error) {
             *errMsg = m_result.raw<TypeMap::Error>();

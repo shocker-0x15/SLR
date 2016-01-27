@@ -90,7 +90,7 @@ namespace SLRSceneGraph {
         }
     }
     
-    SurfaceMaterialRef createMaterialDefaultFunction(const aiMaterial* aiMat, const std::string &pathPrefix, SLR::Allocator* mem) {
+    SLR_SCENEGRAPH_API SurfaceMaterialRef createMaterialDefaultFunction(const aiMaterial* aiMat, const std::string &pathPrefix, SLR::Allocator* mem) {
         using namespace SLR;
         aiReturn ret;
         aiString strValue;
@@ -115,7 +115,7 @@ namespace SLRSceneGraph {
         return SurfaceMaterial::createMatte(diffuseTex, nullptr);
     };
     
-    void construct(const std::string &filePath, InternalNodeRef &nodeOut, const CreateMaterialFunction &materialFunc) {
+    SLR_SCENEGRAPH_API void construct(const std::string &filePath, InternalNodeRef &nodeOut, const CreateMaterialFunction &materialFunc) {
         using namespace SLR;
         DefaultAllocator &defMem = DefaultAllocator::instance();
         

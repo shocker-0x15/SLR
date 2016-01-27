@@ -15,7 +15,7 @@
 
 namespace SLR {
     template <typename RealType, uint32_t N>
-    struct WavelengthSamplesTemplate {
+    struct SLR_API WavelengthSamplesTemplate {
         enum Flag : uint16_t {
             LambdaSelected = 0x01,
         };
@@ -56,15 +56,17 @@ namespace SLR {
             return wls;
         };
     };
-    template <typename RealType, uint32_t N> const uint32_t WavelengthSamplesTemplate<RealType, N>::NumComponents = N;
+    template <typename RealType, uint32_t N>
+    const uint32_t WavelengthSamplesTemplate<RealType, N>::NumComponents = N;
+
     
     template <typename RealType, uint32_t N>
-    struct ContinuousSpectrumTemplate {
+    struct SLR_API ContinuousSpectrumTemplate {
         virtual SampledSpectrumTemplate<RealType, N> evaluate(const WavelengthSamplesTemplate<RealType, N> &wls) const = 0;
     };
     
     template <typename RealType, uint32_t N>
-    struct RegularContinuousSpectrumTemplate : public ContinuousSpectrumTemplate<RealType, N> {
+    struct SLR_API RegularContinuousSpectrumTemplate : public ContinuousSpectrumTemplate<RealType, N> {
         RealType minLambda, maxLambda;
         uint32_t numSamples;
         RealType* values;
@@ -100,7 +102,7 @@ namespace SLR {
     };
 
     template <typename RealType, uint32_t N>
-    struct IrregularContinuousSpectrumTemplate : public ContinuousSpectrumTemplate<RealType, N> {
+    struct SLR_API IrregularContinuousSpectrumTemplate : public ContinuousSpectrumTemplate<RealType, N> {
         uint32_t numSamples;
         RealType* lambdas;
         RealType* values;
@@ -141,7 +143,7 @@ namespace SLR {
     };
 
     template <typename RealType, uint32_t N>
-    struct UpsampledContinuousSpectrumTemplate : public ContinuousSpectrumTemplate<RealType, N> {
+    struct SLR_API UpsampledContinuousSpectrumTemplate : public ContinuousSpectrumTemplate<RealType, N> {
         RealType u, v, scale;
         
         UpsampledContinuousSpectrumTemplate(RealType uu, RealType vv, RealType ss) : u(uu), v(vv), scale(ss) {};
@@ -308,7 +310,7 @@ namespace SLR {
 
 
     template <typename RealType, uint32_t N>
-    struct SampledSpectrumTemplate {
+    struct SLR_API SampledSpectrumTemplate {
         RealType values[N];
         static const uint32_t NumComponents;
         
@@ -498,8 +500,8 @@ namespace SLR {
         static const SampledSpectrumTemplate Inf;
         static const SampledSpectrumTemplate NaN;
     };
-    template <typename RealType, uint32_t N> const uint32_t SampledSpectrumTemplate<RealType, N>::NumComponents = N;
-
+    template <typename RealType, uint32_t N>
+    const uint32_t SampledSpectrumTemplate<RealType, N>::NumComponents = N;
     template <typename RealType, uint32_t N>
     const SampledSpectrumTemplate<RealType, N> SampledSpectrumTemplate<RealType, N>::Zero = SampledSpectrumTemplate<RealType, N>(0.0);
     template <typename RealType, uint32_t N>
@@ -511,7 +513,7 @@ namespace SLR {
 
 
     template <typename RealType, uint32_t numStrata>
-    struct DiscretizedSpectrumTemplate {
+    struct SLR_API DiscretizedSpectrumTemplate {
         RealType values[numStrata];
         
         DiscretizedSpectrumTemplate(RealType v = 0.0f) { for (int i = 0; i < numStrata; ++i) values[i] = v; };
@@ -733,12 +735,16 @@ namespace SLR {
                 integralCMF += ybar[i];
         };
     };
-    template <typename RealType, uint32_t numStrata> const uint32_t DiscretizedSpectrumTemplate<RealType, numStrata>::NumStrata = numStrata;
-    template <typename RealType, uint32_t numStrata> std::unique_ptr<float[]> DiscretizedSpectrumTemplate<RealType, numStrata>::xbar;
-    template <typename RealType, uint32_t numStrata> std::unique_ptr<float[]> DiscretizedSpectrumTemplate<RealType, numStrata>::ybar;
-    template <typename RealType, uint32_t numStrata> std::unique_ptr<float[]> DiscretizedSpectrumTemplate<RealType, numStrata>::zbar;
-    template <typename RealType, uint32_t numStrata> float DiscretizedSpectrumTemplate<RealType, numStrata>::integralCMF;
-
+    template <typename RealType, uint32_t numStrata>
+    const uint32_t DiscretizedSpectrumTemplate<RealType, numStrata>::NumStrata = numStrata;
+    template <typename RealType, uint32_t numStrata>
+    std::unique_ptr<float[]> DiscretizedSpectrumTemplate<RealType, numStrata>::xbar;
+    template <typename RealType, uint32_t numStrata>
+    std::unique_ptr<float[]> DiscretizedSpectrumTemplate<RealType, numStrata>::ybar;
+    template <typename RealType, uint32_t numStrata>
+    std::unique_ptr<float[]> DiscretizedSpectrumTemplate<RealType, numStrata>::zbar;
+    template <typename RealType, uint32_t numStrata>
+    float DiscretizedSpectrumTemplate<RealType, numStrata>::integralCMF;
     template <typename RealType, uint32_t numStrata>
     const DiscretizedSpectrumTemplate<RealType, numStrata> DiscretizedSpectrumTemplate<RealType, numStrata>::Zero = DiscretizedSpectrumTemplate<RealType, numStrata>(0.0);
     template <typename RealType, uint32_t numStrata>
@@ -750,7 +756,7 @@ namespace SLR {
 
 
     template <typename RealType, uint32_t numStrata>
-    struct SpectrumStorageTemplate {
+    struct SLR_API SpectrumStorageTemplate {
         typedef DiscretizedSpectrumTemplate<RealType, numStrata> ValueType;
         CompensatedSum<ValueType> value;
         

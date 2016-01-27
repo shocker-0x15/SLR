@@ -13,7 +13,7 @@
 #include "../Core/geometry.h"
 
 namespace SLR {
-    class Triangle : public Surface {
+    class SLR_API Triangle : public Surface {
         const Vertex* m_v[3];
         FloatTexture* m_alphaTex;
     public:

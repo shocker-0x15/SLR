@@ -12,20 +12,20 @@
 #include "../references.h"
 
 namespace SLR {
-    struct Types32bit {
+    struct SLR_API Types32bit {
         typedef int32_t Int;
         typedef uint32_t UInt;
         typedef float Float;
     };
     
-    struct Types64bit {
+    struct SLR_API Types64bit {
         typedef int64_t Int;
         typedef uint64_t UInt;
         typedef double Float;
     };
     
     template <typename TypeSet>
-    class RandomNumberGeneratorTemplate {
+    class SLR_API RandomNumberGeneratorTemplate {
     public:
         virtual typename TypeSet::UInt getUInt() = 0;
         

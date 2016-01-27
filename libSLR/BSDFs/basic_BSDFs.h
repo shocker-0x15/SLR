@@ -13,7 +13,7 @@
 #include "../Core/directional_distribution_functions.h"
 
 namespace SLR {
-    class LambertianBRDF : public BSDF {
+    class SLR_API LambertianBRDF : public BSDF {
         SampledSpectrum m_R;
         
         SampledSpectrum sampleInternal(const BSDFQuery &query, const BSDFSample &smp, BSDFQueryResult* result) const override;
@@ -26,7 +26,7 @@ namespace SLR {
         LambertianBRDF(const SampledSpectrum &R) : BSDF(DirectionType::Reflection | DirectionType::LowFreq), m_R(R) { }
     };
     
-    class SpecularBRDF : public BSDF {
+    class SLR_API SpecularBRDF : public BSDF {
         SampledSpectrum m_coeffR;
         const Fresnel* m_fresnel;
         
@@ -40,7 +40,7 @@ namespace SLR {
         SpecularBRDF(const SampledSpectrum &coeffR, const Fresnel* fresnel) : BSDF(DirectionType::Reflection | DirectionType::Delta0D), m_coeffR(coeffR), m_fresnel(fresnel) { }
     };
     
-    class SpecularBTDF : public BSDF {
+    class SLR_API SpecularBTDF : public BSDF {
         SampledSpectrum m_coeffT;
         FresnelDielectric m_fresnel;
         
@@ -56,7 +56,7 @@ namespace SLR {
         m_coeffT(coeffT), m_fresnel(etaExt, etaInt) { }
     };
     
-    class InverseBSDF : public BSDF {
+    class SLR_API InverseBSDF : public BSDF {
         const BSDF* m_baseBSDF;
         
         SampledSpectrum sampleInternal(const BSDFQuery &query, const BSDFSample &smp, BSDFQueryResult* result) const override;

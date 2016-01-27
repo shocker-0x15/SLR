@@ -12,24 +12,24 @@
 
 namespace SLR {
     template <typename RealType>
-    RealType sRGB_gamma(RealType value) {
+    SLR_API RealType sRGB_gamma(RealType value) {
         SLRAssert(value >= 0 && value <= 1.0, "Input valus must be in range [0, 1].");
         if (value <= 0.0031308)
             return 12.92 * value;
         return 1.055 * std::pow(value, 1.0 / 2.4) - 0.055;
     };
-    template float sRGB_gamma(float value);
-    template double sRGB_gamma(double value);
+    template SLR_API float sRGB_gamma(float value);
+    template SLR_API double sRGB_gamma(double value);
     
     template <typename RealType>
-    RealType sRGB_degamma(RealType value) {
+    SLR_API RealType sRGB_degamma(RealType value) {
         SLRAssert(value >= 0 && value <= 1.0, "Input valus must be in range [0, 1].");
         if (value <= 0.04045)
             return value  / 12.92;
         return std::pow((value + 0.055) / 1.055, 2.4);
     };
-    template float sRGB_degamma(float value);
-    template double sRGB_degamma(double value);
+    template SLR_API float sRGB_degamma(float value);
+    template SLR_API double sRGB_degamma(double value);
     
     const float xbar_2deg[] = {
         0.0001299, 0.000145847, 0.000163802, 0.000184004, 0.00020669, 0.0002321, 0.000260728, 0.000293075,
@@ -220,7 +220,7 @@ namespace SLR {
     
     static SpectrumFloat integralCMF;
     
-    void initSpectrum() {
+    SLR_API void initSpectrum() {
         DiscretizedSpectrum::init();
         
         CompensatedSum<SpectrumFloat> cum(0);

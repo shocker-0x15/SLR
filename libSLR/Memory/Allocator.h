@@ -12,7 +12,7 @@
 #include "../references.h"
 
 namespace SLR {
-    class Allocator {
+    class SLR_API Allocator {
     public:
         virtual void* alloc(uintptr_t size, uintptr_t align) = 0;
         virtual void free(void* ptr) = 0;

@@ -17,14 +17,14 @@
 #include "../Core/directional_distribution_functions.h"
 
 namespace SLR {
-    struct Particle {
+    struct SLR_API Particle {
         Point3D position;
         BoundingBox3D::Axis plane;
         Particle() { };
         Particle(const Point3D &pos) : position(pos) { };
     };
     
-    class KDTree {
+    class SLR_API KDTree {
     protected:
         BoundingBox3D m_BBox;
         uint32_t m_numStored;
@@ -46,7 +46,7 @@ namespace SLR {
         };
     };
     
-    class AMCMCPPMRenderer : public Renderer {
+    class SLR_API AMCMCPPMRenderer : public Renderer {
         struct Hitpoint : public Particle {
             float imgX, imgY;
             Normal3D gNormal;
