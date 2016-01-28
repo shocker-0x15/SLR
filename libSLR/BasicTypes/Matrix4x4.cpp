@@ -9,18 +9,18 @@
 
 namespace SLR {
     template struct SLR_API Matrix4x4Template<float>;
-    template SLR_API const Matrix4x4Template<float> Matrix4x4Template<float>::Identity;
-    template SLR_API const Matrix4x4Template<float> Matrix4x4Template<float>::Zero;
-    template SLR_API const Matrix4x4Template<float> Matrix4x4Template<float>::One;
-    template SLR_API const Matrix4x4Template<float> Matrix4x4Template<float>::Inf;
-    template SLR_API const Matrix4x4Template<float> Matrix4x4Template<float>::NaN;
+//    template SLR_API const Matrix4x4Template<float> Matrix4x4Template<float>::Identity;
+//    template SLR_API const Matrix4x4Template<float> Matrix4x4Template<float>::Zero;
+//    template SLR_API const Matrix4x4Template<float> Matrix4x4Template<float>::One;
+//    template SLR_API const Matrix4x4Template<float> Matrix4x4Template<float>::Inf;
+//    template SLR_API const Matrix4x4Template<float> Matrix4x4Template<float>::NaN;
 
     template struct SLR_API Matrix4x4Template<double>;
-    template SLR_API const Matrix4x4Template<double> Matrix4x4Template<double>::Identity;
-    template SLR_API const Matrix4x4Template<double> Matrix4x4Template<double>::Zero;
-    template SLR_API const Matrix4x4Template<double> Matrix4x4Template<double>::One;
-    template SLR_API const Matrix4x4Template<double> Matrix4x4Template<double>::Inf;
-    template SLR_API const Matrix4x4Template<double> Matrix4x4Template<double>::NaN;
+//    template SLR_API const Matrix4x4Template<double> Matrix4x4Template<double>::Identity;
+//    template SLR_API const Matrix4x4Template<double> Matrix4x4Template<double>::Zero;
+//    template SLR_API const Matrix4x4Template<double> Matrix4x4Template<double>::One;
+//    template SLR_API const Matrix4x4Template<double> Matrix4x4Template<double>::Inf;
+//    template SLR_API const Matrix4x4Template<double> Matrix4x4Template<double>::NaN;
     
     template <typename RealType>
     Matrix4x4Template<RealType> transpose(const Matrix4x4Template<RealType> &m) {

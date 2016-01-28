@@ -9,25 +9,25 @@
 
 namespace SLR {
     template struct SLR_API RGBSamplesTemplate<float>;
-    template SLR_API const uint32_t RGBSamplesTemplate<float>::NumComponents;
+//    template SLR_API const uint32_t RGBSamplesTemplate<float>::NumComponents;
 
     template struct SLR_API RGBSamplesTemplate<double>;
-    template SLR_API const uint32_t RGBSamplesTemplate<double>::NumComponents;
+//    template SLR_API const uint32_t RGBSamplesTemplate<double>::NumComponents;
 
 
     template struct SLR_API RGBTemplate<float>;
-    template SLR_API const uint32_t RGBTemplate<float>::NumComponents;
-    template SLR_API const RGBTemplate<float> RGBTemplate<float>::Zero;
-    template SLR_API const RGBTemplate<float> RGBTemplate<float>::One;
-    template SLR_API const RGBTemplate<float> RGBTemplate<float>::Inf;
-    template SLR_API const RGBTemplate<float> RGBTemplate<float>::NaN;
+//    template SLR_API const uint32_t RGBTemplate<float>::NumComponents;
+//    template SLR_API const RGBTemplate<float> RGBTemplate<float>::Zero;
+//    template SLR_API const RGBTemplate<float> RGBTemplate<float>::One;
+//    template SLR_API const RGBTemplate<float> RGBTemplate<float>::Inf;
+//    template SLR_API const RGBTemplate<float> RGBTemplate<float>::NaN;
 
     template struct SLR_API RGBTemplate<double>;
-    template SLR_API const uint32_t RGBTemplate<double>::NumComponents;
-    template SLR_API const RGBTemplate<double> RGBTemplate<double>::Zero;
-    template SLR_API const RGBTemplate<double> RGBTemplate<double>::One;
-    template SLR_API const RGBTemplate<double> RGBTemplate<double>::Inf;
-    template SLR_API const RGBTemplate<double> RGBTemplate<double>::NaN;
+//    template SLR_API const uint32_t RGBTemplate<double>::NumComponents;
+//    template SLR_API const RGBTemplate<double> RGBTemplate<double>::Zero;
+//    template SLR_API const RGBTemplate<double> RGBTemplate<double>::One;
+//    template SLR_API const RGBTemplate<double> RGBTemplate<double>::Inf;
+//    template SLR_API const RGBTemplate<double> RGBTemplate<double>::NaN;
 
     
     template <typename RealType>
