@@ -1,9 +1,11 @@
 %{
-#include <cstdio>
-#include <cstdlib>
-#include <string>
 #include "SceneParsingDriver.h"
 #include "SceneParser.tab.hh"
+#ifdef SLR_Defs_Windows
+#include <io.h>
+#else
+#include <unistd.h>
+#endif
 
 // Work around an incompatibility in flex (at least versions
 // 2.5.31 through 2.5.33): it generates code that does
@@ -13,7 +15,7 @@
 #define yywrap() 1
 %}
 
-%option noyywrap nounput batch debug noinput
+%option noyywrap nounput batch debug noinput nounistd
 
 %x STRING
 %x COMMENT

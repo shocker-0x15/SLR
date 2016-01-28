@@ -25,7 +25,7 @@ source_group("SLR Scene Graph" REGULAR_EXPRESSION ".*\.(h|c|hpp|cpp)")
 source_group("SLR Scene Graph\\Helper" REGULAR_EXPRESSION "Helper/.*\.(h|c|hpp|cpp)")
 source_group("SLR Scene Graph\\Parser" REGULAR_EXPRESSION "Parser/.*\.(h|c|hh|cc|hpp|cpp)")
 
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
 if(MSVC)
     add_definitions(-DSLR_SCENEGRAPH_API_EXPORTS)

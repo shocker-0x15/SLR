@@ -606,9 +606,9 @@ int yy_flex_debug = 1;
 
 static yyconst flex_int16_t yy_rule_linenum[25] =
     {   0,
-       57,   64,   70,   76,   81,   86,   91,   96,  101,  107,
-      119,  147,  159,  163,  168,  172,  176,  180,  183,  187,
-      191,  195,  199,  208
+       59,   66,   72,   78,   83,   88,   93,   98,  103,  109,
+      121,  149,  161,  165,  170,  174,  178,  182,  185,  189,
+      193,  197,  201,  210
     } ;
 
 /* The intent behind this definition is that it'll catch
@@ -623,11 +623,13 @@ static int yy_more_len = 0;
 char *yytext;
 #line 1 "SceneLexer.l"
 #line 2 "SceneLexer.l"
-#include <cstdio>
-#include <cstdlib>
-#include <string>
 #include "SceneParsingDriver.h"
 #include "SceneParser.tab.hh"
+#ifdef SLR_Defs_Windows
+#include <io.h>
+#else
+#include <unistd.h>
+#endif
 
 // Work around an incompatibility in flex (at least versions
 // 2.5.31 through 2.5.33): it generates code that does
@@ -636,14 +638,15 @@ char *yytext;
 #undef yywrap
 #define yywrap() 1
 #define YY_NO_INPUT 1
+#define YY_NO_UNISTD_H 1
 
 
-#line 36 "SceneLexer.l"
+#line 38 "SceneLexer.l"
     // Code run each time a pattern is matched.
     #define YY_USER_ACTION \
     /* printf("b: %u.%u, e: %u.%u, l: %u\n", loc.begin.line, loc.begin.column, loc.end.line, loc.end.column, yyleng); */ \
     loc.columns(yyleng);
-#line 647 "SceneLexer.yy.cpp"
+#line 650 "SceneLexer.yy.cpp"
 
 #define INITIAL 0
 #define STRING 1
@@ -920,7 +923,7 @@ YY_DECL
 
 	{
 /* %% [7.0] user's declarations go here */
-#line 42 "SceneLexer.l"
+#line 44 "SceneLexer.l"
 
 
 
@@ -931,7 +934,7 @@ YY_DECL
     loc.step();
 
 
-#line 935 "SceneLexer.yy.cpp"
+#line 938 "SceneLexer.yy.cpp"
 
 	while ( 1 )		/* loops until end-of-file is reached */
 		{
@@ -1016,7 +1019,7 @@ do_action:	/* This label is used only to access EOF actions. */
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(STRING):
 case YY_STATE_EOF(COMMENT):
-#line 52 "SceneLexer.l"
+#line 54 "SceneLexer.l"
 {
     DPRINTF("End of File\n");
     return SceneParser::make_EOF(loc);
@@ -1024,7 +1027,7 @@ case YY_STATE_EOF(COMMENT):
 	YY_BREAK
 case 1:
 YY_RULE_SETUP
-#line 57 "SceneLexer.l"
+#line 59 "SceneLexer.l"
 {
     std::string str = yytext;
     bool value = str == "True" || str == "true";
@@ -1034,7 +1037,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 64 "SceneLexer.l"
+#line 66 "SceneLexer.l"
 {
     int32_t value = std::atoi(yytext);
     DPRINTF("Integer: %d\n", value);
@@ -1043,7 +1046,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 70 "SceneLexer.l"
+#line 72 "SceneLexer.l"
 {
     double value = std::atof(yytext);
     DPRINTF("Real Number: %g\n", value);
@@ -1052,7 +1055,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 76 "SceneLexer.l"
+#line 78 "SceneLexer.l"
 {
     DPRINTF("%s\n", yytext);
     return SceneParser::make_IF(loc);
@@ -1060,7 +1063,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 81 "SceneLexer.l"
+#line 83 "SceneLexer.l"
 {
     DPRINTF("%s\n", yytext);
     return SceneParser::make_ELSE(loc);
@@ -1068,7 +1071,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 86 "SceneLexer.l"
+#line 88 "SceneLexer.l"
 {
     DPRINTF("%s\n", yytext);
     return SceneParser::make_FOR(loc);
@@ -1076,7 +1079,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 91 "SceneLexer.l"
+#line 93 "SceneLexer.l"
 {
     DPRINTF("%s\n", yytext);
     return SceneParser::make_FUNCTION(loc);
@@ -1084,7 +1087,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 96 "SceneLexer.l"
+#line 98 "SceneLexer.l"
 {
     DPRINTF("%s\n", yytext);
     return SceneParser::make_RETURN(loc);
@@ -1092,7 +1095,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 101 "SceneLexer.l"
+#line 103 "SceneLexer.l"
 {
     std::string value = yytext;
     DPRINTF("ID: %s\n", value.c_str());
@@ -1101,7 +1104,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 107 "SceneLexer.l"
+#line 109 "SceneLexer.l"
 {
     char c = yytext[0];
     DPRINTF("Parenthesis: %c\n", c);
@@ -1116,7 +1119,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 119 "SceneLexer.l"
+#line 121 "SceneLexer.l"
 {
     std::string str = yytext;
     DPRINTF("Operator: %s\n", str.c_str());
@@ -1147,7 +1150,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 147 "SceneLexer.l"
+#line 149 "SceneLexer.l"
 {
     char c = yytext[0];
     DPRINTF("Delimiter: %c\n", c);
@@ -1162,7 +1165,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 159 "SceneLexer.l"
+#line 161 "SceneLexer.l"
 {
     loc.step();
 }
@@ -1170,7 +1173,7 @@ YY_RULE_SETUP
 case 14:
 /* rule 14 can match eol */
 YY_RULE_SETUP
-#line 163 "SceneLexer.l"
+#line 165 "SceneLexer.l"
 {
     loc.lines(yyleng);
     loc.step();
@@ -1181,14 +1184,14 @@ case 15:
 (yy_c_buf_p) = yy_cp -= 1;
 YY_DO_BEFORE_ACTION; /* set up yytext again */
 YY_RULE_SETUP
-#line 168 "SceneLexer.l"
+#line 170 "SceneLexer.l"
 {
     DPRINTF("single line comment(s): (%s)\n", yytext);
 }
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 172 "SceneLexer.l"
+#line 174 "SceneLexer.l"
 {
     BEGIN(COMMENT);
     yymore();
@@ -1196,7 +1199,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 176 "SceneLexer.l"
+#line 178 "SceneLexer.l"
 {
     DPRINTF("Comment(s): (%s)\n", yytext);
     BEGIN(INITIAL);
@@ -1204,7 +1207,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 180 "SceneLexer.l"
+#line 182 "SceneLexer.l"
 {
     yymore();
 }
@@ -1212,14 +1215,14 @@ YY_RULE_SETUP
 case 19:
 /* rule 19 can match eol */
 YY_RULE_SETUP
-#line 183 "SceneLexer.l"
+#line 185 "SceneLexer.l"
 {
     yymore();
 }
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 187 "SceneLexer.l"
+#line 189 "SceneLexer.l"
 {
     BEGIN(STRING);
     yymore();
@@ -1228,7 +1231,7 @@ YY_RULE_SETUP
 case 21:
 /* rule 21 can match eol */
 YY_RULE_SETUP
-#line 191 "SceneLexer.l"
+#line 193 "SceneLexer.l"
 {
     driver.error(loc, std::string("Irregal literal: ") + yytext);
     BEGIN(INITIAL);
@@ -1237,7 +1240,7 @@ YY_RULE_SETUP
 case 22:
 /* rule 22 can match eol */
 YY_RULE_SETUP
-#line 195 "SceneLexer.l"
+#line 197 "SceneLexer.l"
 {
     loc.end = loc.begin + yyleng;
     yymore();
@@ -1245,7 +1248,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 199 "SceneLexer.l"
+#line 201 "SceneLexer.l"
 {
     BEGIN(INITIAL);
     loc.end = loc.begin + yyleng;
@@ -1257,7 +1260,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 208 "SceneLexer.l"
+#line 210 "SceneLexer.l"
 {
     driver.error(loc, std::string("Irregal character: (") + yytext + ")\n");
     return SceneParser::make_CHAR(yytext[0], loc);
@@ -1265,10 +1268,10 @@ YY_RULE_SETUP
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 213 "SceneLexer.l"
+#line 215 "SceneLexer.l"
 ECHO;
 	YY_BREAK
-#line 1272 "SceneLexer.yy.cpp"
+#line 1275 "SceneLexer.yy.cpp"
 
 	case YY_END_OF_BUFFER:
 		{
@@ -2349,7 +2352,7 @@ void yyfree (void * ptr )
 
 /* %ok-for-header */
 
-#line 213 "SceneLexer.l"
+#line 215 "SceneLexer.l"
 
 
 

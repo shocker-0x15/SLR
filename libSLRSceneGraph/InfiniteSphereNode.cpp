@@ -10,7 +10,7 @@
 #include <libSLR/Core/SurfaceObject.h>
 
 namespace SLRSceneGraph {
-    InfiniteSphereNode::InfiniteSphereNode(const SceneWRef &scene, const SpectrumTextureRef &IBLTex, float scale) : m_scene(scene) {
+    InfiniteSphereNode::InfiniteSphereNode(const SceneWRef &scene, const SpectrumTextureRef &IBLTex, float scale) : m_scene(scene), m_ready(false) {
         m_emitter = createShared<IBLEmission>(m_scene, IBLTex, scale);
     }
     

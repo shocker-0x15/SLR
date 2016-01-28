@@ -54,7 +54,7 @@ source_group("SLR\\Surface" REGULAR_EXPRESSION "Surface/.*\.(h|c|hpp|cpp)")
 source_group("SLR\\SurfaceMaterials" REGULAR_EXPRESSION "SurfaceMaterials/.*\.(h|c|hpp|cpp)")
 source_group("SLR\\Textures" REGULAR_EXPRESSION "Textures/.*\.(h|c|hpp|cpp)")
 
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
 if(MSVC)
     add_definitions(-DSLR_API_EXPORTS)
