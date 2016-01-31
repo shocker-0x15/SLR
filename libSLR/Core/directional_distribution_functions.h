@@ -146,10 +146,17 @@ query.dir_sn.x, query.dir_sn.y, query.dir_sn.z);
         BSDFSample(float uComp, float uDir0, float uDir1) : uComponent(uComp), uDir{uDir0, uDir1} { }
     };
     
+    struct SLR_API BSDFReverseInfo {
+        SampledSpectrum fs;
+        float dirPDF;
+    };
+    
     struct SLR_API BSDFQueryResult {
         Vector3D dir_sn;
         float dirPDF;
         DirectionType dirType;
+        BSDFReverseInfo* reverse;
+        BSDFQueryResult() : reverse(nullptr) { }
     };
     
     struct SLR_API IDFSample {
@@ -271,6 +278,7 @@ query.dir_sn.x, query.dir_sn.y, query.dir_sn.z);
         virtual SampledSpectrum sample(const IDFSample &smp, IDFQueryResult* result) const = 0;
         virtual SampledSpectrum evaluate(const Vector3D &dirIn) const = 0;
         virtual float evaluatePDF(const Vector3D &dirIn) const = 0;
+        virtual void calculatePixel(const Vector3D &dirIn, float* hitPx, float* hitPy) const = 0;
         
         virtual bool matches(DirectionType flags) const { return m_type & flags; }
         bool hasNonDelta() const { return matches(DirectionType::WholeSphere | DirectionType::NonDelta); }

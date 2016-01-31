@@ -55,6 +55,9 @@ namespace SLR {
             return *this /= length;
         }
         Vector3Template reciprocal() const { return Vector3Template(1.0f / x, 1.0f / y, 1.0f / z); }
+        static Vector3Template fromPolarYUp(RealType phi, RealType theta) {
+            return Vector3Template(-std::sin(phi) * std::sin(theta), std::cos(theta), std::cos(phi) * std::sin(theta));
+        }
         void toPolarYUp(RealType* theta, RealType* phi) const {
             *theta = std::acos(std::clamp(y, (RealType)-1.0, (RealType)1.0));
             *phi = std::fmod((RealType)(std::atan2(-x, z) + 2 * M_PI), (RealType)(2 * M_PI));

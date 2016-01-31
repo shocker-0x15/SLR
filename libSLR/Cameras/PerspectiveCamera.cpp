@@ -85,5 +85,13 @@ namespace SLR {
                       pFocas.y >= -m_cam.m_opHeight * 0.5f && pFocas.y <= m_cam.m_opHeight * 0.5f);
         float dirPDF = m_cam.m_imgPlaneDistance * m_cam.m_imgPlaneDistance / ((dirIn.z * dirIn.z * dirIn.z) * m_cam.m_imgPlaneArea);
         return valid ? dirPDF : 0.0f;
-    }    
+    }
+    
+    void PerspectiveIDF::calculatePixel(const Vector3D &dirIn, float* hitPx, float* hitPy) const {
+        Point3D pFocas = dirIn * (m_cam.m_objPlaneDistance / dirIn.z) + m_orgLocal;
+        float smpX = 0.5f - pFocas.x / m_cam.m_opWidth;
+        float smpY = 0.5f - pFocas.y / m_cam.m_opHeight;
+        *hitPx = m_cam.m_sensor->width() * smpX;
+        *hitPy = m_cam.m_sensor->height() * smpY;
+    }
 }

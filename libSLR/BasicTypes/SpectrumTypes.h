@@ -17,7 +17,7 @@ namespace SLR {
     template <typename RealType, uint32_t N>
     struct SLR_API WavelengthSamplesTemplate {
         enum Flag : uint16_t {
-            LambdaSelected = 0x01,
+            LambdaIsSelected = 0x01,
         };
         RealType lambdas[N];
         uint16_t selectedLambda;
@@ -41,7 +41,7 @@ namespace SLR {
         }
         
         bool lambdaSelected() const {
-            return (flags & LambdaSelected) != 0;
+            return (flags & LambdaIsSelected) != 0;
         }
         
         static WavelengthSamplesTemplate createWithEqualOffsets(RealType offset, RealType uLambda, RealType* PDF) {

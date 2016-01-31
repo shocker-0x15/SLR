@@ -17,6 +17,8 @@
 		4602E8B71BC4152D00EC16FA /* surface_material_headers.h in Headers */ = {isa = PBXBuildFile; fileRef = 4602E8B61BC4152D00EC16FA /* surface_material_headers.h */; };
 		4602E8BE1BC418FA00EC16FA /* SummedSurfaceMaterial.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4602E8BC1BC418FA00EC16FA /* SummedSurfaceMaterial.cpp */; };
 		4602E8BF1BC418FA00EC16FA /* SummedSurfaceMaterial.h in Headers */ = {isa = PBXBuildFile; fileRef = 4602E8BD1BC418FA00EC16FA /* SummedSurfaceMaterial.h */; };
+		46224C511C5DDFB0009EC594 /* BidirectionalPathTracingRenderer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 46224C4F1C5DDFB0009EC594 /* BidirectionalPathTracingRenderer.cpp */; };
+		46224C541C5DDFF2009EC594 /* BidirectionalPathTracingRenderer.h in Headers */ = {isa = PBXBuildFile; fileRef = 46224C531C5DDFF2009EC594 /* BidirectionalPathTracingRenderer.h */; };
 		4638105B1C21AD0E00211293 /* SceneParser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 463810591C21AD0E00211293 /* SceneParser.cpp */; };
 		4638105C1C21AD0E00211293 /* SceneParser.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 4638105A1C21AD0E00211293 /* SceneParser.hpp */; };
 		4651F3281C56705B0026B8A5 /* Point3.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4651F3271C56705B0026B8A5 /* Point3.cpp */; };
@@ -196,6 +198,8 @@
 		4602E8B61BC4152D00EC16FA /* surface_material_headers.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = surface_material_headers.h; path = libSLR/SurfaceMaterials/surface_material_headers.h; sourceTree = SOURCE_ROOT; };
 		4602E8BC1BC418FA00EC16FA /* SummedSurfaceMaterial.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SummedSurfaceMaterial.cpp; path = libSLR/SurfaceMaterials/SummedSurfaceMaterial.cpp; sourceTree = SOURCE_ROOT; };
 		4602E8BD1BC418FA00EC16FA /* SummedSurfaceMaterial.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SummedSurfaceMaterial.h; path = libSLR/SurfaceMaterials/SummedSurfaceMaterial.h; sourceTree = SOURCE_ROOT; };
+		46224C4F1C5DDFB0009EC594 /* BidirectionalPathTracingRenderer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = BidirectionalPathTracingRenderer.cpp; path = libSLR/Renderers/BidirectionalPathTracingRenderer.cpp; sourceTree = SOURCE_ROOT; };
+		46224C531C5DDFF2009EC594 /* BidirectionalPathTracingRenderer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = BidirectionalPathTracingRenderer.h; path = libSLR/Renderers/BidirectionalPathTracingRenderer.h; sourceTree = SOURCE_ROOT; };
 		4634EC3E1B9B60400047AE54 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		463810591C21AD0E00211293 /* SceneParser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SceneParser.cpp; path = libSLRSceneGraph/Parser/SceneParser.cpp; sourceTree = "<group>"; };
 		4638105A1C21AD0E00211293 /* SceneParser.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = SceneParser.hpp; path = libSLRSceneGraph/Parser/SceneParser.hpp; sourceTree = "<group>"; };
@@ -501,6 +505,8 @@
 				466F6C701BB6B2E30056F2FA /* AMCMCPPMRenderer.h */,
 				466F6C711BB6B2E30056F2FA /* PathTracingRenderer.cpp */,
 				466F6C721BB6B2E30056F2FA /* PathTracingRenderer.h */,
+				46224C4F1C5DDFB0009EC594 /* BidirectionalPathTracingRenderer.cpp */,
+				46224C531C5DDFF2009EC594 /* BidirectionalPathTracingRenderer.h */,
 			);
 			path = Renderers;
 			sourceTree = "<group>";
@@ -671,6 +677,7 @@
 				466F6CD91BB6CA070056F2FA /* TexCoord2.h in Headers */,
 				466F6CD31BB6CA070056F2FA /* Quaternion.h in Headers */,
 				466F6CD71BB6CA070056F2FA /* SpectrumTypes.h in Headers */,
+				46224C541C5DDFF2009EC594 /* BidirectionalPathTracingRenderer.h in Headers */,
 				466F6D551BB715600056F2FA /* constant_textures.h in Headers */,
 				466F6D401BB6DC840056F2FA /* basic_SurfaceMaterials.h in Headers */,
 				466F6CFB1BB6CA420056F2FA /* SurfaceObject.h in Headers */,
@@ -871,6 +878,7 @@
 				466F6CE01BB6CA260056F2FA /* ModifiedWardDurBRDF.cpp in Sources */,
 				466F6CEA1BB6CA420056F2FA /* directional_distribution_functions.cpp in Sources */,
 				466F6CED1BB6CA420056F2FA /* geometry.cpp in Sources */,
+				46224C511C5DDFB0009EC594 /* BidirectionalPathTracingRenderer.cpp in Sources */,
 				466F6CE61BB6CA2D0056F2FA /* PerspectiveCamera.cpp in Sources */,
 				466F6CF81BB6CA420056F2FA /* surface_material.cpp in Sources */,
 				466F6CFC1BB6CA420056F2FA /* textures.cpp in Sources */,

@@ -60,7 +60,7 @@ namespace SLR {
         virtual SampledSpectrum sample(const Light &light, const LightPosQuery &query, const LightPosSample &smp, LightPosQueryResult* result) const = 0;
         
         bool intersect(Ray &ray, SurfacePoint* surfPt) const;
-        bool testVisiblility(const SurfacePoint &shdP, const SurfacePoint &lightP, float time) const;
+        bool testVisibility(const SurfacePoint &shdP, const SurfacePoint &lightP, float time) const;
     };
     
     class SLR_API SingleSurfaceObject : public SurfaceObject {
@@ -175,7 +175,7 @@ namespace SLR {
         float getWorldDiscArea() const { return m_worldDiscArea; };
         
         bool intersect(Ray &ray, Intersection* isect) const;
-        bool testVisiblility(const SurfacePoint &shdP, const SurfacePoint &lightP, float time) const;
+        bool testVisibility(const SurfacePoint &shdP, const SurfacePoint &lightP, float time) const;
         void selectLight(float u, Light* light, float* prob) const;
         float evaluateProb(const Light &light) const;
     };

@@ -27,7 +27,7 @@ namespace SLR {
         return true;
     }
     
-    bool SurfaceObject::testVisiblility(const SurfacePoint &shdP, const SurfacePoint &lightP, float time) const {
+    bool SurfaceObject::testVisibility(const SurfacePoint &shdP, const SurfacePoint &lightP, float time) const {
         SLRAssert(shdP.atInfinity == false && lightP.atInfinity == false, "Points must be in finite region.");
         float dist = distance(lightP.p, shdP.p);
         Ray ray(shdP.p, (lightP.p - shdP.p) / dist, time, Ray::Epsilon, dist * (1 - Ray::Epsilon));
@@ -345,7 +345,7 @@ namespace SLR {
         return false;
     }
     
-    bool Scene::testVisiblility(const SurfacePoint &shdP, const SurfacePoint &lightP, float time) const {
+    bool Scene::testVisibility(const SurfacePoint &shdP, const SurfacePoint &lightP, float time) const {
         SLRAssert(shdP.atInfinity == false, "Shading point must be in finite region.");
         Ray ray;
         if (lightP.atInfinity) {

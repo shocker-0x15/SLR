@@ -24,7 +24,11 @@ namespace SLR {
     }
     
     void PathTracingRenderer::render(const Scene &scene, const RenderSettings &settings) const {
+#ifdef DEBUG
         uint32_t numThreads = std::thread::hardware_concurrency();
+#else
+        uint32_t numThreads = 1;
+#endif
         XORShift topRand(settings.getInt(RenderSettingItem::RNGSeed));
         std::unique_ptr<ArenaAllocator[]> mems = std::unique_ptr<ArenaAllocator[]>(new ArenaAllocator[numThreads]);
         std::unique_ptr<XORShift[]> rngs = std::unique_ptr<XORShift[]>(new XORShift[numThreads]);
@@ -119,7 +123,7 @@ namespace SLR {
                           "Unexpected value detected: %s\n"
                           "pix: (%f, %f)", C.toString().c_str(), px, py);
                 
-                SampledSpectrum weight = (We0 * We1) / (lensResult.areaPDF * WeResult.dirPDF * selectWLPDF);
+                SampledSpectrum weight = (We0 * We1) * (WeResult.dirLocal.z / (lensResult.areaPDF * WeResult.dirPDF * selectWLPDF));
                 SLRAssert(weight.hasNaN() == false && weight.hasInf() == false && weight.hasMinus() == false,
                           "Unexpected value detected: %s\n"
                           "pix: (%f, %f)", weight.toString().c_str(), px, py);
@@ -176,7 +180,7 @@ namespace SLR {
                 float dist2;
                 Vector3D shadowDir = xpResult.surfPt.getShadowDirection(surfPt, &dist2);
                 
-                if (scene.testVisiblility(surfPt, xpResult.surfPt, ray.time)) {
+                if (scene.testVisibility(surfPt, xpResult.surfPt, ray.time)) {
                     EDF* edf = xpResult.surfPt.createEDF(wls, mem);
                     Vector3D shadowDir_l = xpResult.surfPt.shadingFrame.toLocal(-shadowDir);
                     SampledSpectrum Le = M * edf->evaluate(EDFQuery(), shadowDir_l);
@@ -208,7 +212,7 @@ namespace SLR {
                 break;
             if (fsResult.dirType.isDispersive()) {
                 fsResult.dirPDF /= WavelengthSamples::NumComponents;
-                wls.flags |= WavelengthSamples::LambdaSelected;
+                wls.flags |= WavelengthSamples::LambdaIsSelected;
             }
             alpha *= fs * (std::fabs(fsResult.dir_sn.z) / fsResult.dirPDF);
             SLRAssert(!alpha.hasInf() && !alpha.hasNaN(),

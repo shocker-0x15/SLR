@@ -361,7 +361,7 @@ namespace SLR {
             
             jobDRT.wls = wls;
             
-            wls.flags |= WavelengthSamples::LambdaSelected;
+            wls.flags |= WavelengthSamples::LambdaIsSelected;
             for (int i = 0; i < numMCMCs; ++i)
                 jobPSs[i].wls = wls;
             
@@ -445,7 +445,7 @@ namespace SLR {
                 SampledSpectrum We1 = idf->sample(WeSample, &WeResult);
                 
                 Ray ray(lensResult.surfPt.p, lensResult.surfPt.shadingFrame.fromLocal(WeResult.dirLocal), time);
-                SampledSpectrum weight = (We0 * We1) / (lensResult.areaPDF * WeResult.dirPDF);
+                SampledSpectrum weight = (We0 * We1) * (WeResult.dirLocal.z / (lensResult.areaPDF * WeResult.dirPDF));
                 SampledSpectrum C = record(threadID, *scene, wls, px, py, ray, weight, rng, mem);
                 SLRAssert(weight.hasNaN() == false && weight.hasInf() == false,
                           "Unexpected value detected: %s\n"
@@ -505,7 +505,7 @@ namespace SLR {
                 break;
             if (fsResult.dirType.isDispersive()) {
                 fsResult.dirPDF /= WavelengthSamples::NumComponents;
-                wls.flags |= WavelengthSamples::LambdaSelected;
+                wls.flags |= WavelengthSamples::LambdaIsSelected;
             }
             alpha *= fs * (std::fabs(fsResult.dir_sn.z) / fsResult.dirPDF);
             SLRAssert(!alpha.hasInf() && !alpha.hasNaN(), "alpha: unexpected value detected: %s", alpha.toString().c_str());
