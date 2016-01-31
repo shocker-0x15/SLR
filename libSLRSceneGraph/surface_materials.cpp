@@ -55,6 +55,11 @@ namespace SLRSceneGraph {
         m_rawData = new SLR::SpecularTransmission(coeffT->getRaw(), etaExt->getRaw(), etaInt->getRaw());
     }
     
+    InverseSurfaceMaterial::InverseSurfaceMaterial(const SurfaceMaterialRef &baseMat) :
+    m_baseMat(baseMat) {
+        m_rawData = new SLR::InverseSurfaceMaterial(baseMat->getRaw());
+    }
+    
     AshikhminSpecularReflection::AshikhminSpecularReflection(const SpectrumTextureRef &Rs, const FloatTextureRef &nu, const FloatTextureRef &nv) :
     m_Rs(Rs), m_nu(nu), m_nv(nv) {
         m_rawData = new SLR::AshikhminSpecularReflection(Rs->getRaw(), nu->getRaw(), nv->getRaw());
@@ -117,6 +122,10 @@ namespace SLRSceneGraph {
         SurfaceMaterialRef specular = createShared<AshikhminSpecularReflection>(Rs, nu, nv);
         SurfaceMaterialRef diffuse = createShared<AshikhminDiffuseReflection>(Rs, Rd);
         return createSummedMaterial(specular, diffuse);
+    }
+    
+    SurfaceMaterialRef SurfaceMaterial::createInverseMaterial(const SurfaceMaterialRef &baseMat) {
+        return createShared<InverseSurfaceMaterial>(baseMat);
     }
     
     SurfaceMaterialRef SurfaceMaterial::createSummedMaterial(const SurfaceMaterialRef &mat0, const SurfaceMaterialRef &mat1) {

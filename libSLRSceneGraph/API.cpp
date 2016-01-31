@@ -219,6 +219,23 @@ namespace SLRSceneGraph {
                                  return Element(std::clamp(x, min, max));
                              })
                     );
+            stack["sqrt"] =
+            Element(TypeMap::Function(),
+                    Function(1, {{"x", Type::RealNumber}},
+                             [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
+                                 float x = args.at("x").raw<TypeMap::RealNumber>();
+                                 return Element(std::sqrt(x));
+                             })
+                    );
+            stack["pow"] =
+            Element(TypeMap::Function(),
+                    Function(1, {{"x", Type::RealNumber}, {"e", Type::RealNumber}},
+                             [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
+                                 float x = args.at("x").raw<TypeMap::RealNumber>();
+                                 float e = args.at("e").raw<TypeMap::RealNumber>();
+                                 return Element(std::pow(x, e));
+                             })
+                    );
             stack["sin"] =
             Element(TypeMap::Function(),
                     Function(1, {{"x", Type::RealNumber}},
@@ -575,7 +592,8 @@ namespace SLRSceneGraph {
                     Function(1,
                              {
                                  {{"spectrum", Type::Spectrum}},
-                                 {{"image", Type::Image2D}}
+                                 {{"image", Type::Image2D}},
+                                 {{"procedure", Type::String}, {"params", Type::Tuple}}
                              },
                              {
                                  [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
@@ -585,6 +603,25 @@ namespace SLRSceneGraph {
                                  [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
                                      const auto &image = args.at("image").rawRef<TypeMap::Image2D>();
                                      return Element(TypeMap::SpectrumTexture(), createShared<ImageSpectrumTexture>(image));
+                                 },
+                                 [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
+                                     std::string procedure = args.at("procedure").raw<TypeMap::String>();
+                                     const ParameterList &params = args.at("params").raw<TypeMap::Tuple>();
+                                     if (procedure == "checker board") {
+                                         const static Function configFunc{
+                                             0, {
+                                                 {"c0", Type::Spectrum}, {"c1", Type::Spectrum},
+                                             },
+                                             [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
+                                                 const InputSpectrumRef c0 = args.at("c0").rawRef<TypeMap::Spectrum>();
+                                                 const InputSpectrumRef c1 = args.at("c1").rawRef<TypeMap::Spectrum>();
+                                                 return Element(TypeMap::SpectrumTexture(), createShared<CheckerBoardSpectrumTexture>(c0, c1));
+                                             }
+                                         };
+                                         return configFunc(params, context, err);
+                                     }
+                                     *err = ErrorMessage("Specified procedure is invalid.");
+                                     return Element();
                                  }
                              })
                     );
@@ -684,6 +721,18 @@ namespace SLRSceneGraph {
                                              FloatTextureRef nx = args.at("nx").rawRef<TypeMap::FloatTexture>();
                                              FloatTextureRef ny = args.at("ny").rawRef<TypeMap::FloatTexture>();
                                              return Element(TypeMap::SurfaceMaterial(), SurfaceMaterial::createAshikhminShirley(Rd, Rs, nx, ny));
+                                         }
+                                     };
+                                     return configFunc(params, context, err);
+                                 }
+                                 else if (type == "inverse") {
+                                     const static Function configFunc{
+                                         0, {
+                                             {"base", Type::SurfaceMaterial}
+                                         },
+                                         [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
+                                             SurfaceMaterialRef base = args.at("base").rawRef<TypeMap::SurfaceMaterial>();
+                                             return Element(TypeMap::SurfaceMaterial(), SurfaceMaterial::createInverseMaterial(base));
                                          }
                                      };
                                      return configFunc(params, context, err);

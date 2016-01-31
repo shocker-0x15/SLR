@@ -35,5 +35,10 @@ namespace SLR {
         SampledSpectrum etaExt = m_etaExt->evaluate(surfPt.texCoord, wls);
         SampledSpectrum etaInt = m_etaInt->evaluate(surfPt.texCoord, wls);
         return mem.create<SpecularBTDF>(scale * coeffT, etaExt, etaInt, !wls.lambdaSelected());
-    }    
+    }
+    
+    BSDF* InverseSurfaceMaterial::getBSDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem, float scale) const {
+        BSDF* baseBSDF = m_baseMat->getBSDF(surfPt, wls, mem, scale);
+        return mem.create<InverseBSDF>(baseBSDF);
+    }
 }

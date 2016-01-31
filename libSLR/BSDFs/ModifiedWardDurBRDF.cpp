@@ -14,11 +14,10 @@ namespace SLR {
         float cosphi_ax = std::cos(phi_h) / m_anisoX;
         float sinphi_ay = std::sin(phi_h) / m_anisoY;
         float theta_h = std::atan(std::sqrt(-std::log(1 - smp.uDir[0]) / (cosphi_ax * cosphi_ax + sinphi_ay * sinphi_ay)));
-        //    if (query.dirLocal.z < 0)
-        //        theta_h = M_PI - theta_h;
         Vector3D halfv = Vector3D(std::sin(theta_h) * std::cos(phi_h), std::sin(theta_h) * std::sin(phi_h), std::cos(theta_h));
+        halfv.z *= query.dir_sn.z > 0 ? 1 : -1;
         result->dir_sn = 2 * dot(query.dir_sn, halfv) * halfv - query.dir_sn;
-        if (result->dir_sn.z /** query.dirLocal.z*/ <= 0) {
+        if (result->dir_sn.z * query.dir_sn.z <= 0) {
             result->dirPDF = 0.0f;
             return SampledSpectrum::Zero;
         }

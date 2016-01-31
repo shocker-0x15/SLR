@@ -26,6 +26,7 @@ namespace SLRSceneGraph {
         static SurfaceMaterialRef createGlass(const SpectrumTextureRef &coeffR, const SpectrumTextureRef &coeffT, const SpectrumTextureRef &etaExt, const SpectrumTextureRef &etaInt);
         static SurfaceMaterialRef createModifiedWardDur(const SpectrumTextureRef &reflectance, const FloatTextureRef &anisoX, const FloatTextureRef &anisoY);
         static SurfaceMaterialRef createAshikhminShirley(const SpectrumTextureRef &Rd, const SpectrumTextureRef &Rs, const FloatTextureRef &nx, const FloatTextureRef &ny);
+        static SurfaceMaterialRef createInverseMaterial(const SurfaceMaterialRef &baseMat);
         static SurfaceMaterialRef createSummedMaterial(const SurfaceMaterialRef &mat0, const SurfaceMaterialRef &mat1);
         static SurfaceMaterialRef createMixedMaterial(const SurfaceMaterialRef &mat0, const SurfaceMaterialRef &mat1, const FloatTextureRef &factor);
         static EmitterSurfacePropertyRef createDiffuseEmitter(const SpectrumTextureRef &emittance);
@@ -100,6 +101,12 @@ namespace SLRSceneGraph {
         SpectrumTextureRef m_etaInt;
     public:
         SpecularTransmission(const SpectrumTextureRef &coeffT, const SpectrumTextureRef &etaExt, const SpectrumTextureRef &etaInt);
+    };
+    
+    class SLR_SCENEGRAPH_API InverseSurfaceMaterial : public SurfaceMaterial {
+        SurfaceMaterialRef m_baseMat;
+    public:
+        InverseSurfaceMaterial(const SurfaceMaterialRef &baseMat);
     };
     
     

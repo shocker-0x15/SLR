@@ -29,20 +29,20 @@ namespace SLR {
             for (int i = 0; i < N; ++i)
                 lambdas[i] = values[i];
             flags = 0;
-        };
+        }
         
         RealType &operator[](uint32_t index) {
             SLRAssert(index < N, "\"index\" is out of range [0, %u].", N - 1);
             return lambdas[index];
-        };
+        }
         RealType operator[](uint32_t index) const {
             SLRAssert(index < N, "\"index\" is out of range [0, %u].", N - 1);
             return lambdas[index];
-        };
+        }
         
         bool lambdaSelected() const {
             return (flags & LambdaSelected) != 0;
-        };
+        }
         
         static WavelengthSamplesTemplate createWithEqualOffsets(RealType offset, RealType uLambda, RealType* PDF) {
             SLRAssert(offset >= 0 && offset < 1, "\"offset\" must be in range [0, 1).");
@@ -54,7 +54,7 @@ namespace SLR {
             wls.flags = 0;
             *PDF = N / (WavelengthHighBound - WavelengthLowBound);
             return wls;
-        };
+        }
     };
     template <typename RealType, uint32_t N>
     const uint32_t WavelengthSamplesTemplate<RealType, N>::NumComponents = N;
@@ -63,6 +63,7 @@ namespace SLR {
     template <typename RealType, uint32_t N>
     struct SLR_API ContinuousSpectrumTemplate {
         virtual SampledSpectrumTemplate<RealType, N> evaluate(const WavelengthSamplesTemplate<RealType, N> &wls) const = 0;
+        virtual ContinuousSpectrumTemplate* createScaled(RealType scale) const = 0;
     };
     
     template <typename RealType, uint32_t N>
@@ -75,10 +76,10 @@ namespace SLR {
             values = new RealType[numSamples];
             for (int i = 0; i < numSamples; ++i)
                 values[i] = vals[i];
-        };
+        }
         ~RegularContinuousSpectrumTemplate() {
             delete[] values;
-        };
+        }
         
         SampledSpectrumTemplate<RealType, N> evaluate(const WavelengthSamplesTemplate<RealType, N> &wls) const override {
             SampledSpectrumTemplate<RealType, N> ret(0.0f);
@@ -98,7 +99,16 @@ namespace SLR {
                 ret[i] = (1 - t) * values[bin] + t * values[bin + 1];
             }
             return ret;
-        };
+        }
+        
+        ContinuousSpectrumTemplate<RealType, N>* createScaled(RealType scale) const override {
+            RealType* sValues = new RealType[numSamples];
+            for (int i = 0; i < numSamples; ++i)
+                sValues[i] = scale * values[i];
+            ContinuousSpectrumTemplate<RealType, N>* ret = new RegularContinuousSpectrumTemplate(minLambda, maxLambda, sValues, numSamples);
+            delete[] sValues;
+            return ret;
+        }
     };
 
     template <typename RealType, uint32_t N>
@@ -114,11 +124,11 @@ namespace SLR {
                 lambdas[i] = wls[i];
                 values[i] = vals[i];
             }
-        };
+        }
         ~IrregularContinuousSpectrumTemplate() {
             delete[] lambdas;
             delete[] values;
-        };
+        }
         
         SampledSpectrumTemplate<RealType, N> evaluate(const WavelengthSamplesTemplate<RealType, N> &wls) const override {
             SampledSpectrumTemplate<RealType, N> ret(0.0f);
@@ -139,14 +149,23 @@ namespace SLR {
                 ret[i] = (1 - t) * values[lowIdx] + t * values[lowIdx + 1];
             }
             return ret;
-        };
+        }
+        
+        ContinuousSpectrumTemplate<RealType, N>* createScaled(RealType scale) const override {
+            RealType* sValues = new RealType[numSamples];
+            for (int i = 0; i < numSamples; ++i)
+                sValues[i] = scale * values[i];
+            ContinuousSpectrumTemplate<RealType, N>* ret = new IrregularContinuousSpectrumTemplate(lambdas, sValues, numSamples);
+            delete[] sValues;
+            return ret;
+        }
     };
 
     template <typename RealType, uint32_t N>
     struct SLR_API UpsampledContinuousSpectrumTemplate : public ContinuousSpectrumTemplate<RealType, N> {
         RealType u, v, scale;
         
-        UpsampledContinuousSpectrumTemplate(RealType uu, RealType vv, RealType ss) : u(uu), v(vv), scale(ss) {};
+        UpsampledContinuousSpectrumTemplate(RealType uu, RealType vv, RealType ss) : u(uu), v(vv), scale(ss) {}
         
         UpsampledContinuousSpectrumTemplate(SpectrumType spType, ColorSpace space, RealType e0, RealType e1, RealType e2) {
             RealType x, y, brightness;
@@ -205,7 +224,7 @@ namespace SLR {
             RealType xy[2] = {x, y};
             Upsampling::xy_to_uv(xy, &u);
             SLRAssert(!std::isinf(u) && !std::isnan(u) && !std::isinf(v) && !std::isnan(v) && !std::isinf(scale) && !std::isnan(scale), "Invalid value.");
-        };
+        }
         
         SampledSpectrumTemplate<RealType, N> evaluate(const WavelengthSamplesTemplate<RealType, N> &wls) const override {
             using namespace Upsampling;
@@ -305,7 +324,11 @@ namespace SLR {
             }
             
             return ret * scale;
-        };
+        }
+        
+        ContinuousSpectrumTemplate<RealType, N>* createScaled(RealType scale) const override {
+            return new UpsampledContinuousSpectrumTemplate(u, v, this->scale * scale);
+        }
     };
 
 

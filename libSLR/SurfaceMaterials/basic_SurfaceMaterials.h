@@ -43,6 +43,15 @@ namespace SLR {
         
         BSDF* getBSDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem, float scale = 1.0f) const override;
     };
+    
+    class SLR_API InverseSurfaceMaterial : public SurfaceMaterial {
+        const SurfaceMaterial* m_baseMat;
+    public:
+        InverseSurfaceMaterial(const SurfaceMaterial* baseMat) :
+        m_baseMat(baseMat) { };
+        
+        BSDF* getBSDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem, float scale = 1.0f) const override;
+    };
 }
 
 #endif /* defined(__SLR__basic_SurfaceMaterials__) */

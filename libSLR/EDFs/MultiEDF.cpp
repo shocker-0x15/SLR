@@ -26,7 +26,7 @@ namespace SLR {
         SampledSpectrum value = selectedEDF->sample(query, smp, result);
         result->dirPDF *= weights[idx];
         
-        if (!result->dirType.hasDelta()) {
+        if (!result->dirType.isDelta()) {
             EDFQuery mQuery = query;
             for (int i = 0; i < m_numComponents; ++i) {
                 value += m_EDFs[i]->evaluate(mQuery, result->dir_sn);

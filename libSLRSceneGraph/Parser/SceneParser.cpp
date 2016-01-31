@@ -549,6 +549,7 @@ namespace SLRSceneGraph {
                 info.convertFunctions[(Type)i] = [](const Element &v) { return v; };
             }
             
+            // Bool
             {
                 TypeInfo &info = infos[(uint32_t)Type::Bool];
                 
@@ -621,6 +622,7 @@ namespace SLRSceneGraph {
                 info.convertFunctions[Type::RealNumber] = [](const Element &elemFrom) { return Element(TypeMap::RealNumber(), elemFrom.raw<TypeMap::Bool>()); };
             }
             
+            // Integer
             {
                 TypeInfo &info = infos[(uint32_t)Type::Integer];
                 
@@ -707,6 +709,8 @@ namespace SLRSceneGraph {
                 info.convertFunctions[Type::Bool] = [](const Element &elemFrom) { return Element(TypeMap::Bool(), elemFrom.raw<TypeMap::Integer>()); };
                 info.convertFunctions[Type::RealNumber] = [](const Element &elemFrom) { return Element(TypeMap::RealNumber(), elemFrom.raw<TypeMap::Integer>()); };
             }
+            
+            // Real Number
             {
                 TypeInfo &info = infos[(uint32_t)Type::RealNumber];
                 
@@ -770,6 +774,8 @@ namespace SLRSceneGraph {
                     return Element(ErrorMessage("== operator does not support the right operand type."));
                 };
             }
+            
+            // String
             {
                 TypeInfo &info = infos[(uint32_t)Type::String];
                 
@@ -786,6 +792,8 @@ namespace SLRSceneGraph {
                     return Element(ErrorMessage("== operator does not support the right operand type."));
                 };
             }
+            
+            // Point
             {
                 TypeInfo &info = infos[(uint32_t)Type::Point];
                 
@@ -799,6 +807,8 @@ namespace SLRSceneGraph {
                     return Element(ErrorMessage("== operator does not support the right operand type."));
                 };
             }
+            
+            // Vector
             {
                 TypeInfo &info = infos[(uint32_t)Type::Vector];
                 
@@ -812,6 +822,8 @@ namespace SLRSceneGraph {
                     return Element(ErrorMessage("== operator does not support the right operand type."));
                 };
             }
+            
+            // Normal
             {
                 TypeInfo &info = infos[(uint32_t)Type::Normal];
                 
@@ -827,6 +839,8 @@ namespace SLRSceneGraph {
                 
                 info.convertFunctions[Type::Vector] = [](const Element &elemFrom) { return Element(SLR::Vector3D(elemFrom.raw<TypeMap::Normal>())); };
             }
+            
+            // Matrix
             {
                 TypeInfo &info = infos[(uint32_t)Type::Matrix];
                 
@@ -859,6 +873,18 @@ namespace SLRSceneGraph {
                 
                 info.convertFunctions[Type::Transform] = [](const Element &elemFrom) {
                     return Element(TypeMap::Transform(), createShared<SLR::StaticTransform>(elemFrom.raw<TypeMap::Matrix>()));
+                };
+            }
+            
+            // Spectrum
+            {
+                TypeInfo &info = infos[(uint32_t)Type::Spectrum];
+                
+                info.mulOperator = [](const Element &v0, const Element &v1) {
+                    auto lVal = v0.rawRef<TypeMap::Spectrum>();
+                    if (v1.isConvertibleTo<TypeMap::RealNumber>())
+                        return Element(TypeMap::Spectrum(), InputSpectrumRef(lVal->createScaled(v1.asRaw<TypeMap::RealNumber>())));
+                    return Element(ErrorMessage("* operator does not support the right operand type."));
                 };
             }
             initialized = true;

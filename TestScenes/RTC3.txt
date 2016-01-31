@@ -9,9 +9,12 @@ addChild(root, plain);
 
 function grassMaterial(name, attrs) {
     difCol = attrs["diffuse color"];
-    RTex = SpectrumTexture(Spectrum("Reflectance", "sRGB", 
-                                    2 * difCol[0], 2 * difCol[1], 2 * difCol[2]));
-    return createSurfaceMaterial("matte", (RTex,));
+    baseColor = Spectrum("Reflectance", "sRGB", 
+                         2 * difCol[0], 2 * difCol[1], 2 * difCol[2]);
+    r = createSurfaceMaterial("matte", (SpectrumTexture(baseColor * 0.7),));
+    tBase = createSurfaceMaterial("matte", (SpectrumTexture(baseColor * 0.3),));
+    t = createSurfaceMaterial("inverse", (tBase,));
+    return createSurfaceMaterial("sum", (r, t));
 }
 grass = load3DModel("models/grass.assbin", grassMaterial);
 grassReference = createReferenceNode(grass);

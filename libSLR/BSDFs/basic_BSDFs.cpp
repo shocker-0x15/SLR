@@ -135,16 +135,16 @@ namespace SLR {
     
     SampledSpectrum InverseBSDF::sampleInternal(const BSDFQuery &query, const BSDFSample &smp, BSDFQueryResult* result) const {
         BSDFQuery mQuery = query;
-        mQuery.flags.flip();
+        mQuery.flags = mQuery.flags.flip();
         SampledSpectrum ret = m_baseBSDF->sample(mQuery, smp, result);
-        result->dirType.flip();
+        result->dirType = result->dirType.flip();
         result->dir_sn.z *= -1;
         return ret;
     }
     
     SampledSpectrum InverseBSDF::evaluateInternal(const BSDFQuery &query, const Vector3D &dir) const {
         BSDFQuery mQuery = query;
-        mQuery.flags.flip();
+        mQuery.flags = mQuery.flags.flip();
         Vector3D mDir = dir;
         mDir.z *= -1;
         return m_baseBSDF->evaluate(mQuery, mDir);
@@ -160,13 +160,13 @@ namespace SLR {
     
     float InverseBSDF::weightInternal(const BSDFQuery &query, const BSDFSample &smp) const {
         BSDFQuery mQuery = query;
-        mQuery.flags.flip();
+        mQuery.flags = mQuery.flags.flip();
         return m_baseBSDF->weight(mQuery, smp);
     }
     
     float InverseBSDF::weightInternal(const BSDFQuery &query, const Vector3D &dir) const {
         BSDFQuery mQuery = query;
-        mQuery.flags.flip();
+        mQuery.flags = mQuery.flags.flip();
         Vector3D mDir = dir;
         mDir.z *= -1;
         return m_baseBSDF->weight(mQuery, mDir);

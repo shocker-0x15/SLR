@@ -32,7 +32,7 @@ namespace SLR {
         SampledSpectrum value = selectedBSDF->sampleInternal(query, smp, result);
         result->dirPDF *= weights[idx];
         
-        if (!result->dirType.hasDelta()) {
+        if (!result->dirType.isDelta()) {
             BSDFQuery mQuery = query;
             mQuery.flags &= sideTest(query.gNormal_sn, query.dir_sn, result->dir_sn);
             value = SampledSpectrum::Zero;
