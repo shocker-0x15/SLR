@@ -493,7 +493,7 @@ namespace SLR {
             RealType sum = 0;
             for (int i = 0; i < N; ++i)
                 sum += values[i];
-            return sum;
+            return sum / N;
         };
         
         std::string toString() const {

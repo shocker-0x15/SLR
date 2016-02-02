@@ -17,6 +17,7 @@
 #include <libSLR/BasicTypes/Spectrum.h>
 #include <libSLR/Memory/ArenaAllocator.h>
 #include <libSLR/Renderers/PathTracingRenderer.h>
+#include <libSLR/Renderers/BidirectionalPathTracingRenderer.h>
 
 #include "nodes.h"
 #include "node_constructor.h"
@@ -1111,6 +1112,17 @@ namespace SLRSceneGraph {
                                          }
                                      };
                                      return configPT(config, context, err);
+                                 }
+                                 else if (method == "BPT") {
+                                     const static Function configBPT{
+                                         0, {{"samples", Type::Integer, Element(8)}},
+                                         [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
+                                             uint32_t spp = args.at("samples").raw<TypeMap::Integer>();
+                                             context.renderingContext->renderer = createUnique<SLR::BidirectionalPathTracingRenderer>(spp);
+                                             return Element();
+                                         }
+                                     };
+                                     return configBPT(config, context, err);
                                  }
                                  else {
                                      *err = ErrorMessage("Unknown method is specified.");

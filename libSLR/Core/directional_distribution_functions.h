@@ -15,23 +15,23 @@
 #include <type_traits>
 
 namespace SLR {
-#define BSDF_SAMPLE_ASSERT \
-SLRAssert(ret.hasInf() == false && ret.hasNaN() == false,\
+#define BSDF_SAMPLE_ASSERT(value) \
+SLRAssert((value).hasInf() == false && (value).hasNaN() == false,\
 "BSDF value is an expected value.\n"\
 "uComponent: %f, uDir: (%f, %f), dirIn: (%f, %f, %f), dirOut: (%f, %f, %f)",\
 smp.uComponent, smp.uDir[0], smp.uDir[1], \
 query.dir_sn.x, query.dir_sn.y, query.dir_sn.z, \
 result->dir_sn.x, result->dir_sn.y, result->dir_sn.z)
     
-#define BSDF_EVALUATE_ASSERT \
-SLRAssert(ret.hasInf() == false && ret.hasNaN() == false,\
+#define BSDF_EVALUATE_ASSERT(value) \
+SLRAssert((value).hasInf() == false && (value).hasNaN() == false,\
 "BSDF value is an expected value.\n"\
 "dirIn: (%f, %f, %f), dirOut: (%f, %f, %f)",\
 query.dir_sn.x, query.dir_sn.y, query.dir_sn.z, \
 dir.x, dir.y, dir.z)
     
-#define BSDF_EVALUATE_PDF_ASSERT \
-SLRAssert(std::isinf(ret) == false && std::isnan(ret) == false,\
+#define BSDF_EVALUATE_PDF_ASSERT(value) \
+SLRAssert(std::isinf((value)) == false && std::isnan((value)) == false,\
 "PDF value is an expected value. : dirIn: (%f, %f, %f)",\
 query.dir_sn.x, query.dir_sn.y, query.dir_sn.z);
     
@@ -211,10 +211,10 @@ query.dir_sn.x, query.dir_sn.y, query.dir_sn.z);
             return false;
         }
         virtual SampledSpectrum sampleInternal(const BSDFQuery &query, const BSDFSample &smp, BSDFQueryResult* result) const = 0;
-        virtual SampledSpectrum evaluateInternal(const BSDFQuery &query, const Vector3D &dir) const = 0;
-        virtual float evaluatePDFInternal(const BSDFQuery &query, const Vector3D &dir) const = 0;
+        virtual SampledSpectrum evaluateInternal(const BSDFQuery &query, const Vector3D &dir, SampledSpectrum* rev_fs) const = 0;
+        virtual float evaluatePDFInternal(const BSDFQuery &query, const Vector3D &dir, float* revPDF) const = 0;
         virtual float weightInternal(const BSDFQuery &query, const BSDFSample &smp) const = 0;
-        virtual float weightInternal(const BSDFQuery &query, const Vector3D &dir) const = 0;
+        virtual float weightInternal(const BSDFQuery &query, const Vector3D &dir, float* revWeight) const = 0;
         virtual SampledSpectrum getBaseColorInternal(DirectionType flags) const = 0;
         friend class MultiBSDF;
         friend class InverseBSDF;
@@ -225,29 +225,62 @@ query.dir_sn.x, query.dir_sn.y, query.dir_sn.z);
         SampledSpectrum sample(const BSDFQuery &query, const BSDFSample &smp, BSDFQueryResult* result) const {
             if (!matches(query.flags, result))
                 return SampledSpectrum::Zero;
-            return sampleInternal(query, smp, result);
+            SampledSpectrum fs_sn = sampleInternal(query, smp, result);
+            if (query.adjoint) {
+                float commonTerm = std::fabs(query.dir_sn.z / dot(query.dir_sn, (Vector3D)query.gNormal_sn));
+                if (result->reverse)
+                    result->reverse->fs *= commonTerm;
+                return fs_sn * commonTerm;
+            }
+            else {
+                float commonTerm = std::fabs(result->dir_sn.z / dot(result->dir_sn, (Vector3D)query.gNormal_sn));
+                if (result->reverse)
+                    result->reverse->fs *= commonTerm;
+                return fs_sn * commonTerm;
+            }
         }
-        SampledSpectrum evaluate(const BSDFQuery &query, const Vector3D &dir) const {
+        SampledSpectrum evaluate(const BSDFQuery &query, const Vector3D &dir, SampledSpectrum* rev_fs = nullptr) const {
             BSDFQuery mQuery = query;
             mQuery.flags &= sideTest(query.gNormal_sn, query.dir_sn, dir);
-            if (!matches(mQuery.flags))
+            if (!matches(mQuery.flags)) {
+                if (rev_fs)
+                    *rev_fs = SampledSpectrum::Zero;
                 return SampledSpectrum::Zero;
-            return evaluateInternal(mQuery, dir);
+            }
+            SampledSpectrum fs_sn = evaluateInternal(mQuery, dir, rev_fs);
+            if (query.adjoint) {
+                float commonTerm = std::fabs(query.dir_sn.z / dot(query.dir_sn, (Vector3D)query.gNormal_sn));
+                if (rev_fs)
+                    *rev_fs *= commonTerm;
+                return fs_sn * commonTerm;
+            }
+            else {
+                float commonTerm = std::fabs(dir.z / dot(dir, (Vector3D)query.gNormal_sn));
+                if (rev_fs)
+                    *rev_fs *= commonTerm;
+                return fs_sn * commonTerm;
+            }
         }
-        float evaluatePDF(const BSDFQuery &query, const Vector3D &dir) const {
-            if (!matches(query.flags))
+        float evaluatePDF(const BSDFQuery &query, const Vector3D &dir, float* revPDF = nullptr) const {
+            if (!matches(query.flags)) {
+                if (revPDF)
+                    *revPDF = 0;
                 return 0;
-            return evaluatePDFInternal(query, dir);
+            }
+            return evaluatePDFInternal(query, dir, revPDF);
         }
         float weight(const BSDFQuery &query, const BSDFSample &smp) const {
             if (!matches(query.flags))
                 return 0;
             return weightInternal(query, smp);
         }
-        float weight(const BSDFQuery &query, const Vector3D &dir) const {
-            if (!matches(query.flags))
+        float weight(const BSDFQuery &query, const Vector3D &dir, float* revWeight = nullptr) const {
+            if (!matches(query.flags)) {
+                if (revWeight)
+                    *revWeight = 0.0f;
                 return 0;
-            return weightInternal(query, dir);
+            }
+            return weightInternal(query, dir, revWeight);
         }
         
         SampledSpectrum getBaseColor(DirectionType flags) const {

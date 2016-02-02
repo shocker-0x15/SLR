@@ -78,8 +78,10 @@ namespace SLR {
             float revAreaPDF;
             float revRRProb;
             int16_t wlFlags;
-            BPTVertex(const SurfacePoint &surfacePoint, const DDFProxy* proxy, const SampledSpectrum &alp, float _areaPDF, float _RRProb, int16_t _wlFlags) :
-            surfPt(surfacePoint), ddf(proxy), alpha(alp), areaPDF(_areaPDF), RRProb(_RRProb), wlFlags(_wlFlags) {}
+            BPTVertex(const SurfacePoint &_surfPt, const Vector3D &_dirIn_sn, const Normal3D &_gNormal_sn, const DDFProxy* _ddf,
+                      const SampledSpectrum &_alpha, float _areaPDF, float _RRProb, int16_t _wlFlags) :
+            surfPt(_surfPt), dirIn_sn(_dirIn_sn), gNormal_sn(_gNormal_sn), ddf(_ddf),
+            alpha(_alpha), areaPDF(_areaPDF), RRProb(_RRProb), revAreaPDF(NAN), revRRProb(NAN), wlFlags(_wlFlags) {}
         };
         
         struct Job {
@@ -101,6 +103,7 @@ namespace SLR {
             uint32_t basePixelY;
             
             // working area
+            float curPx, curPy;
             int16_t wlHint;
             std::vector<BPTVertex> lightVertices;
             std::vector<BPTVertex> eyeVertices;

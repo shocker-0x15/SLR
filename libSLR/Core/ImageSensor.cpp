@@ -54,8 +54,10 @@ namespace SLR {
         uint32_t curIdx = m_numSeparated;
         m_numSeparated = numBuffers;
         m_separatedData = (uint8_t**)SLR_memalign(sizeof(uint8_t*) * numBuffers, SLR_L1_Cacheline_Size);
-        for (int i = curIdx; i < m_numSeparated; ++i)
+        for (int i = curIdx; i < m_numSeparated; ++i) {
             m_separatedData[i] = (uint8_t*)SLR_memalign(m_allocSize, SLR_L1_Cacheline_Size);
+            SLRAssert(m_separatedData[i], "Failed to allocate a separated buffer.");
+        }
         clearSeparatedBuffers();
     }
     

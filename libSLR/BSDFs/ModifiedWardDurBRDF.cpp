@@ -31,12 +31,20 @@ namespace SLR {
         
         result->dirPDF = numerator / commonDenom;
         result->dirType = m_type;
-        SampledSpectrum ret = m_R * (numerator / (commonDenom * dotHI * dotHN));
-        BSDF_SAMPLE_ASSERT;
-        return ret;
+        SampledSpectrum fs = m_R * (numerator / (commonDenom * dotHI * dotHN));
+        if (result->reverse) {
+            result->reverse->fs = fs;
+            result->reverse->dirPDF = result->dirPDF;
+        }
+        return fs;
     }
     
-    SampledSpectrum ModifiedWardDurBRDF::evaluateInternal(const BSDFQuery &query, const Vector3D &dir) const {
+    SampledSpectrum ModifiedWardDurBRDF::evaluateInternal(const BSDFQuery &query, const Vector3D &dir, SampledSpectrum* rev_fs) const {
+        if (dir.z * query.dir_sn.z <= 0) {
+            if (rev_fs)
+                *rev_fs = SampledSpectrum::Zero;
+            return SampledSpectrum::Zero;
+        }
         Vector3D halfv = normalize(query.dir_sn + dir);
         float hx_ax = halfv.x / m_anisoX;
         float hy_ay = halfv.y / m_anisoY;
@@ -44,12 +52,18 @@ namespace SLR {
         float dotHI = dot(halfv, dir);
         float numerator = std::exp(-(hx_ax * hx_ax + hy_ay * hy_ay) / (dotHN * dotHN));
         float denominator = 4 * M_PI * m_anisoX * m_anisoY * dotHI * dotHI * dotHN * dotHN * dotHN * dotHN;
-        SampledSpectrum ret = m_R * numerator / denominator;
-        BSDF_EVALUATE_ASSERT;
-        return ret;
+        SampledSpectrum fs = m_R * numerator / denominator;
+        if (rev_fs)
+            *rev_fs = fs;
+        return fs;
     }
     
-    float ModifiedWardDurBRDF::evaluatePDFInternal(const BSDFQuery &query, const Vector3D &dir) const {
+    float ModifiedWardDurBRDF::evaluatePDFInternal(const BSDFQuery &query, const Vector3D &dir, float* revPDF) const {
+        if (dir.z * query.dir_sn.z <= 0) {
+            if (revPDF)
+                *revPDF = 0.0f;
+            return 0.0f;
+        }
         Vector3D halfv = normalize(query.dir_sn + dir);
         float hx_ax = halfv.x / m_anisoX;
         float hy_ay = halfv.y / m_anisoY;
@@ -58,7 +72,8 @@ namespace SLR {
         float numerator = std::exp(-(hx_ax * hx_ax + hy_ay * hy_ay) / (dotHN * dotHN));
         float denominator = 4 * M_PI * m_anisoX * m_anisoY * dotHI * dotHN * dotHN * dotHN;
         float ret = numerator / denominator;
-        BSDF_EVALUATE_PDF_ASSERT;
+        if (revPDF)
+            *revPDF = ret;
         return ret;
     }
     
@@ -72,12 +87,28 @@ namespace SLR {
 #endif
     }
     
-    float ModifiedWardDurBRDF::weightInternal(const BSDFQuery &query, const Vector3D &dir) const {
+    float ModifiedWardDurBRDF::weightInternal(const BSDFQuery &query, const Vector3D &dir, float* revWeight) const {
 #ifdef Use_BSDF_Actual_Weights
-        BSDFQueryResult result;
-        float fs = evaluate(query, dir).maxValue();
-        float dirPDF = evaluatePDF(query, dir);
-        return dirPDF > 0.0f ? fs * std::fabs(dir.z) / dirPDF : 0.0f;
+        if (revWeight) {
+            SampledSpectrum rev_fs;
+            float revDirPDF;
+            float fs = evaluate(query, dir, &rev_fs).maxValue();
+            float dirPDF = evaluatePDF(query, dir, &revDirPDF);
+            if (dirPDF > 0.0f) {
+                *revWeight = rev_fs.maxValue() * std::fabs(query.dir_sn.z) / revDirPDF;
+                return fs * std::fabs(dir.z) / dirPDF;
+            }
+            else {
+                *revWeight = 0.0f;
+                return 0.0f;
+            }
+        }
+        else {
+            BSDFQueryResult result;
+            float fs = evaluate(query, dir).maxValue();
+            float dirPDF = evaluatePDF(query, dir);
+            return dirPDF > 0.0f ? fs * std::fabs(dir.z) / dirPDF : 0.0f;
+        }
 #else
         return weight(query, BSDFSample(0, 0, 0));
 #endif

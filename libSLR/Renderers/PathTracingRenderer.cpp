@@ -25,9 +25,9 @@ namespace SLR {
     
     void PathTracingRenderer::render(const Scene &scene, const RenderSettings &settings) const {
 #ifdef DEBUG
-        uint32_t numThreads = std::thread::hardware_concurrency();
-#else
         uint32_t numThreads = 1;
+#else
+        uint32_t numThreads = std::thread::hardware_concurrency();
 #endif
         XORShift topRand(settings.getInt(RenderSettingItem::RNGSeed));
         std::unique_ptr<ArenaAllocator[]> mems = std::unique_ptr<ArenaAllocator[]>(new ArenaAllocator[numThreads]);
@@ -66,11 +66,7 @@ namespace SLR {
         sensor->init(job.imageWidth, job.imageHeight);
         
         for (int s = 0; s < m_samplesPerPixel; ++s) {
-#ifdef DEBUG
-            ThreadPool threadPool(1);
-#else
-            ThreadPool threadPool;
-#endif
+            ThreadPool threadPool(numThreads);
             for (int ty = 0; ty < sensor->numTileY(); ++ty) {
                 for (int tx = 0; tx < sensor->numTileX(); ++tx) {
                     job.basePixelX = tx * sensor->tileWidth();
@@ -214,7 +210,7 @@ namespace SLR {
                 fsResult.dirPDF /= WavelengthSamples::NumComponents;
                 wls.flags |= WavelengthSamples::LambdaIsSelected;
             }
-            alpha *= fs * (std::fabs(fsResult.dir_sn.z) / fsResult.dirPDF);
+            alpha *= fs * (std::fabs(dot(fsResult.dir_sn, (Vector3D)gNorm_sn)) / fsResult.dirPDF);
             SLRAssert(!alpha.hasInf() && !alpha.hasNaN(),
                       "alpha: unexpected value detected:\nalpha: %s\nfs: %s\nlength: %u, cos: %g, dirPDF: %g",
                       alpha.toString().c_str(), fs.toString().c_str(), pathLength, std::fabs(fsResult.dir_sn.z), fsResult.dirPDF);

@@ -14,15 +14,32 @@ namespace SLR {
         result->dirPDF = result->dir_sn.z / M_PI;
         result->dirType = m_type;
         result->dir_sn.z *= query.dir_sn.z > 0 ? 1 : -1;
-        return m_R / M_PI;
+        SampledSpectrum fs = m_R / M_PI;
+        if (result->reverse) {
+            result->reverse->fs = fs;
+            result->reverse->dirPDF = std::fabs(query.dir_sn.z) / M_PI;
+        }
+        return fs;
     }
     
-    SampledSpectrum LambertianBRDF::evaluateInternal(const BSDFQuery &query, const Vector3D &dir) const {
-        return m_R / M_PI;
+    SampledSpectrum LambertianBRDF::evaluateInternal(const BSDFQuery &query, const Vector3D &dir, SampledSpectrum* rev_fs) const {
+        SampledSpectrum fs = m_R / M_PI;
+        if (rev_fs)
+            *rev_fs = fs;
+        return fs;
     }
     
-    float LambertianBRDF::evaluatePDFInternal(const BSDFQuery &query, const Vector3D &dir) const {
-        return query.dir_sn.z * dir.z >= 0.0f ? std::abs(dir.z) / M_PI : 0.0f;
+    float LambertianBRDF::evaluatePDFInternal(const BSDFQuery &query, const Vector3D &dir, float* revPDF) const {
+        if (query.dir_sn.z * dir.z >= 0.0f) {
+            if (revPDF)
+                *revPDF = std::fabs(query.dir_sn.z) / M_PI;
+            return std::abs(dir.z) / M_PI;
+        }
+        else {
+            if (revPDF)
+                *revPDF = 0.0f;
+            return 0.0f;
+        }
     }
     
     float LambertianBRDF::weightInternal(const BSDFQuery &query, const BSDFSample &smp) const {
@@ -33,9 +50,12 @@ namespace SLR {
 #endif
     }
     
-    float LambertianBRDF::weightInternal(const BSDFQuery &query, const Vector3D &dir) const {
+    float LambertianBRDF::weightInternal(const BSDFQuery &query, const Vector3D &dir, float* revWeight) const {
 #ifdef Use_BSDF_Actual_Weights
-        return m_R.maxValue();
+        float weight = m_R.maxValue();
+        if (revWeight)
+            *revWeight = weight;
+        return weight;
 #else
         return m_R.maxValue();
 #endif
@@ -49,16 +69,23 @@ namespace SLR {
         result->dir_sn = Vector3D(-query.dir_sn.x, -query.dir_sn.y, query.dir_sn.z);
         result->dirPDF = 1.0f;
         result->dirType = m_type;
-        SampledSpectrum ret = m_coeffR * m_fresnel->evaluate(query.dir_sn.z) / std::fabs(query.dir_sn.z);
-        BSDF_SAMPLE_ASSERT;
-        return ret;
+        SampledSpectrum fs = m_coeffR * m_fresnel->evaluate(query.dir_sn.z) / std::fabs(query.dir_sn.z);
+        if (result->reverse) {
+            result->reverse->fs = fs;
+            result->reverse->dirPDF = 1.0f;
+        }
+        return fs;
     }
     
-    SampledSpectrum SpecularBRDF::evaluateInternal(const BSDFQuery &query, const Vector3D &dir) const {
+    SampledSpectrum SpecularBRDF::evaluateInternal(const BSDFQuery &query, const Vector3D &dir, SampledSpectrum* rev_fs) const {
+        if (rev_fs)
+            *rev_fs = SampledSpectrum::Zero;
         return SampledSpectrum::Zero;
     }
     
-    float SpecularBRDF::evaluatePDFInternal(const BSDFQuery &query, const Vector3D &dir) const {
+    float SpecularBRDF::evaluatePDFInternal(const BSDFQuery &query, const Vector3D &dir, float* revPDF) const {
+        if (revPDF)
+            *revPDF = 0.0f;
         return 0.0f;
     }
     
@@ -72,7 +99,9 @@ namespace SLR {
 #endif
     }
     
-    float SpecularBRDF::weightInternal(const BSDFQuery &query, const Vector3D &dir) const {
+    float SpecularBRDF::weightInternal(const BSDFQuery &query, const Vector3D &dir, float* revWeight) const {
+        if (revWeight)
+            *revWeight = 0.0f;
         return 0.0f;
     }
     
@@ -101,17 +130,25 @@ namespace SLR {
         result->dirType = m_type;
         cosExit = std::fabs(cosExit);
         float F = FresnelDielectric::evalF(eEnter, eExit, std::fabs(query.dir_sn.z), cosExit);
-        SampledSpectrum ret = SampledSpectrum::Zero;
-        ret[query.wlHint] = m_coeffT[query.wlHint] * (1.0f - F) / cosExit;
-        BSDF_SAMPLE_ASSERT;
-        return ret;
+        SampledSpectrum eng = SampledSpectrum::Zero;
+        eng[query.wlHint] = m_coeffT[query.wlHint] * (1.0f - F);
+        if (result->reverse) {
+            result->reverse->fs = eng / std::fabs(query.dir_sn.z);
+            result->reverse->dirPDF = 1.0f;
+        }
+        SampledSpectrum fs = eng / cosExit;
+        return fs;
     }
     
-    SampledSpectrum SpecularBTDF::evaluateInternal(const BSDFQuery &query, const Vector3D &dir) const {
+    SampledSpectrum SpecularBTDF::evaluateInternal(const BSDFQuery &query, const Vector3D &dir, SampledSpectrum* rev_fs) const {
+        if (rev_fs)
+            *rev_fs = SampledSpectrum::Zero;
         return SampledSpectrum::Zero;
     }
     
-    float SpecularBTDF::evaluatePDFInternal(const BSDFQuery &query, const Vector3D &dir) const {
+    float SpecularBTDF::evaluatePDFInternal(const BSDFQuery &query, const Vector3D &dir, float* revPDF) const {
+        if (revPDF)
+            *revPDF = 0.0f;
         return 0.0f;
     }
     
@@ -125,7 +162,9 @@ namespace SLR {
 #endif
     }
     
-    float SpecularBTDF::weightInternal(const BSDFQuery &query, const Vector3D &dir) const {
+    float SpecularBTDF::weightInternal(const BSDFQuery &query, const Vector3D &dir, float* revWeight) const {
+        if (revWeight)
+            *revWeight = 0.0f;
         return 0.0f;
     }
     
@@ -142,20 +181,20 @@ namespace SLR {
         return ret;
     }
     
-    SampledSpectrum InverseBSDF::evaluateInternal(const BSDFQuery &query, const Vector3D &dir) const {
+    SampledSpectrum InverseBSDF::evaluateInternal(const BSDFQuery &query, const Vector3D &dir, SampledSpectrum* rev_fs) const {
         BSDFQuery mQuery = query;
         mQuery.flags = mQuery.flags.flip();
         Vector3D mDir = dir;
         mDir.z *= -1;
-        return m_baseBSDF->evaluate(mQuery, mDir);
+        return m_baseBSDF->evaluate(mQuery, mDir, rev_fs);
     }
     
-    float InverseBSDF::evaluatePDFInternal(const BSDFQuery &query, const Vector3D &dir) const {
+    float InverseBSDF::evaluatePDFInternal(const BSDFQuery &query, const Vector3D &dir, float* revPDF) const {
         BSDFQuery mQuery = query;
         mQuery.flags.flip();
         Vector3D mDir = dir;
         mDir.z *= -1;
-        return m_baseBSDF->evaluatePDF(mQuery, mDir);
+        return m_baseBSDF->evaluatePDF(mQuery, mDir, revPDF);
     }
     
     float InverseBSDF::weightInternal(const BSDFQuery &query, const BSDFSample &smp) const {
@@ -164,12 +203,12 @@ namespace SLR {
         return m_baseBSDF->weight(mQuery, smp);
     }
     
-    float InverseBSDF::weightInternal(const BSDFQuery &query, const Vector3D &dir) const {
+    float InverseBSDF::weightInternal(const BSDFQuery &query, const Vector3D &dir, float* revWeight) const {
         BSDFQuery mQuery = query;
         mQuery.flags = mQuery.flags.flip();
         Vector3D mDir = dir;
         mDir.z *= -1;
-        return m_baseBSDF->weight(mQuery, mDir);
+        return m_baseBSDF->weight(mQuery, mDir, revWeight);
     }
     
     SampledSpectrum InverseBSDF::getBaseColorInternal(DirectionType flags) const {

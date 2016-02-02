@@ -185,6 +185,7 @@ namespace SLR {
     struct EDFQueryResult;
     struct BSDFQuery;
     struct BSDFSample;
+    struct BSDFReverseInfo;
     struct BSDFQueryResult;
     struct IDFQuery;
     struct IDFSample;
@@ -215,6 +216,7 @@ namespace SLR {
     
     // Renderers
     class PathTracingRenderer;
+    class BidirectionalPathTracingRenderer;
     class AMCMCPPMRenderer;
 }
 

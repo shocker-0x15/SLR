@@ -18,10 +18,10 @@ namespace SLR {
         float m_nu, m_nv;
         
         SampledSpectrum sampleInternal(const BSDFQuery &query, const BSDFSample &smp, BSDFQueryResult* result) const override;
-        SampledSpectrum evaluateInternal(const BSDFQuery &query, const Vector3D &dir) const override;
-        float evaluatePDFInternal(const BSDFQuery &query, const Vector3D &dir) const override;
+        SampledSpectrum evaluateInternal(const BSDFQuery &query, const Vector3D &dir, SampledSpectrum* rev_fs) const override;
+        float evaluatePDFInternal(const BSDFQuery &query, const Vector3D &dir, float* revPDF) const override;
         float weightInternal(const BSDFQuery &query, const BSDFSample &smp) const override;
-        float weightInternal(const BSDFQuery &query, const Vector3D &dir) const override;
+        float weightInternal(const BSDFQuery &query, const Vector3D &dir, float* revWeight) const override;
         SampledSpectrum getBaseColorInternal(DirectionType flags) const override;
     public:
         AshikhminSpecularBRDF(const SampledSpectrum &Rs, float nu, float nv) : BSDF(DirectionType::Reflection | DirectionType::HighFreq),
@@ -33,10 +33,10 @@ namespace SLR {
         SampledSpectrum m_Rd;
         
         SampledSpectrum sampleInternal(const BSDFQuery &query, const BSDFSample &smp, BSDFQueryResult* result) const override;
-        SampledSpectrum evaluateInternal(const BSDFQuery &query, const Vector3D &dir) const override;
-        float evaluatePDFInternal(const BSDFQuery &query, const Vector3D &dir) const override;
+        SampledSpectrum evaluateInternal(const BSDFQuery &query, const Vector3D &dir, SampledSpectrum* rev_fs) const override;
+        float evaluatePDFInternal(const BSDFQuery &query, const Vector3D &dir, float* revPDF) const override;
         float weightInternal(const BSDFQuery &query, const BSDFSample &smp) const override;
-        float weightInternal(const BSDFQuery &query, const Vector3D &dir) const override;
+        float weightInternal(const BSDFQuery &query, const Vector3D &dir, float* revWeight) const override;
         SampledSpectrum getBaseColorInternal(DirectionType flags) const override;
     public:
         AshikhminDiffuseBRDF(const SampledSpectrum &Rs, const SampledSpectrum &Rd) : BSDF(DirectionType::Reflection | DirectionType::LowFreq), 
