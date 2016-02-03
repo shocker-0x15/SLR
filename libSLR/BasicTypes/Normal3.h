@@ -94,6 +94,16 @@ namespace SLR {
     }
     
     template <typename RealType>
+    inline RealType absDot(const Vector3Template<RealType> &vec, const Normal3Template<RealType> &norm) {
+        return std::abs(vec.x * norm.x + vec.y * norm.y + vec.z * norm.z);
+    }
+    
+    template <typename RealType>
+    inline RealType absDot(const Normal3Template<RealType> &norm, const Vector3Template<RealType> &vec) {
+        return std::abs(vec.x * norm.x + vec.y * norm.y + vec.z * norm.z);
+    }
+    
+    template <typename RealType>
     inline Vector3Template<RealType> min(const Normal3Template<RealType> &p1, const Normal3Template<RealType> &p2) {
         using std::fmin;
         return Vector3Template<RealType>(fmin(p1.x, p2.x), fmin(p1.y, p2.y), fmin(p1.z, p2.z));

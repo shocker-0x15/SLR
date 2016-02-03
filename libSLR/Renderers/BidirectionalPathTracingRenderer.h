@@ -26,18 +26,18 @@ namespace SLR {
         
         struct DDFProxy {
             virtual const void* getDDF() const = 0;
-            virtual SampledSpectrum evaluate(const DDFQuery &query, const Vector3D &dir_sn) const = 0;
-            virtual float evaluatePDF(const DDFQuery &query, const Vector3D &dir_sn) const = 0;
+            virtual SampledSpectrum evaluate(const DDFQuery &query, const Vector3D &dir_sn, SampledSpectrum* revVal) const = 0;
+            virtual float evaluatePDF(const DDFQuery &query, const Vector3D &dir_sn, float* revVal = nullptr) const = 0;
         };
         struct EDFProxy : public DDFProxy {
             const EDF* edf;
             EDFProxy(const EDF* _edf) : edf(_edf) {}
             const void* getDDF() const override { return edf; }
-            SampledSpectrum evaluate(const DDFQuery &query, const Vector3D &dir_sn) const override {
+            SampledSpectrum evaluate(const DDFQuery &query, const Vector3D &dir_sn, SampledSpectrum* revVal) const override {
                 EDFQuery edfQuery;
                 return edf->evaluate(edfQuery, dir_sn);
             }
-            float evaluatePDF(const DDFQuery &query, const Vector3D &dir_sn) const override {
+            float evaluatePDF(const DDFQuery &query, const Vector3D &dir_sn, float* revVal) const override {
                 EDFQuery edfQuery;
                 return edf->evaluatePDF(edfQuery, dir_sn);
             }
@@ -46,23 +46,23 @@ namespace SLR {
             const BSDF* bsdf;
             BSDFProxy(const BSDF* _bsdf) : bsdf(_bsdf) {}
             const void* getDDF() const override { return bsdf; }
-            SampledSpectrum evaluate(const DDFQuery &query, const Vector3D &dir_sn) const override {
+            SampledSpectrum evaluate(const DDFQuery &query, const Vector3D &dir_sn, SampledSpectrum* revVal) const override {
                 BSDFQuery bsdfQuery(query.dir_sn, query.gNormal_sn, query.wlHint, DirectionType::All, query.adjoint);
-                return bsdf->evaluate(bsdfQuery, dir_sn);
+                return bsdf->evaluate(bsdfQuery, dir_sn, revVal);
             }
-            float evaluatePDF(const DDFQuery &query, const Vector3D &dir_sn) const override {
+            float evaluatePDF(const DDFQuery &query, const Vector3D &dir_sn, float* revVal) const override {
                 BSDFQuery bsdfQuery(query.dir_sn, query.gNormal_sn, query.wlHint, DirectionType::All, query.adjoint);
-                return bsdf->evaluatePDF(bsdfQuery, dir_sn);
+                return bsdf->evaluatePDF(bsdfQuery, dir_sn, revVal);
             }
         };
         struct IDFProxy : public DDFProxy {
             const IDF* idf;
             IDFProxy(const IDF* _idf) : idf(_idf) {}
             const void* getDDF() const override { return idf; }
-            SampledSpectrum evaluate(const DDFQuery &query, const Vector3D &dir_sn) const override {
+            SampledSpectrum evaluate(const DDFQuery &query, const Vector3D &dir_sn, SampledSpectrum* revVal) const override {
                 return idf->evaluate(dir_sn);
             }
-            float evaluatePDF(const DDFQuery &query, const Vector3D &dir_sn) const override {
+            float evaluatePDF(const DDFQuery &query, const Vector3D &dir_sn, float* revVal) const override {
                 return idf->evaluatePDF(dir_sn);
             }
         };
@@ -111,7 +111,8 @@ namespace SLR {
             void kernel(uint32_t threadID);
             void generateSubPath(const WavelengthSamples &initWLs, const SampledSpectrum &initAlpha, const SLR::Ray &initRay, float dirPDF, float cosLast,
                                  bool adjoint, RandomNumberGenerator &rng, SLR::ArenaAllocator &mem);
-            float calculateMISWeight(float lExtendAreaPDF, float lExtendRRProb, float eExtendAreaPDF, float eExtendRRProb,
+            float calculateMISWeight(float lExtend1stAreaPDF, float lExtend1stRRProb, float lExtend2ndAreaPDF, float lExtend2ndRRProb,
+                                     float eExtend1stAreaPDF, float eExtend1stRRProb, float eExtend2ndAreaPDF, float eExtend2ndRRProb,
                                      uint32_t numLVtx, uint32_t numEVtx) const;
         };
         
