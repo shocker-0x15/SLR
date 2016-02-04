@@ -1,4 +1,5 @@
 setRenderer("method": "PT", ("samples": 512,));
+//setRenderer("method": "BPT", ("samples": 512,));
 setRenderSettings("width": 1024, "height": 1024, "brightness": 4.0);
 
 CBNode = load3DModel("models/Cornell_box_RB.assbin");
@@ -56,13 +57,13 @@ for (i = 0; i < 24; ++i) {
 colorCheckerMesh = createMesh(vertices, indices);
 addChild(CBNode, colorCheckerMesh);
 
-pikachuNode = load3DModel("models/Pikachu_corrected_subdivided.assbin");
-setTransform(pikachuNode, translate(0, -1, 0) * scale(0.75) * translate(0, 1, 0));
-addChild(CBNode, pikachuNode);
+//pikachuNode = load3DModel("models/Pikachu_corrected_subdivided.assbin");
+//setTransform(pikachuNode, translate(0, -1, 0) * scale(0.75) * translate(0, 1, 0));
+//addChild(CBNode, pikachuNode);
 
 cameraNode = createNode();
     camera = createPerspectiveCamera("aspect": 1.0, "fovY": 0.5235987756, "radius": 0.1, 
-                                     "imgDist": 1.0, "objDist": 4.75);
+                                     "imgDist": 1.0, "objDist": 6);
     addChild(cameraNode, camera);
 setTransform(cameraNode, translate(0, 0, 5) * rotateY(-3.1415926536));
 

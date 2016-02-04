@@ -76,7 +76,7 @@ namespace SLR {
             return SampledSpectrum::Zero;
         }
         m_surface->sample(smp.uPos[0], smp.uPos[1], &result->surfPt, &result->areaPDF);
-        result->isDeltaPos = false;// TODO: consider sampling delta function.
+        result->posType = DirectionType::LowFreq;// TODO: consider sampling delta function. and dedicated enum?
         result->surfPt.obj = this;
         return m_material->emittance(result->surfPt, query.wls);
     }
@@ -157,7 +157,7 @@ namespace SLR {
         surfPt.shadingFrame.z = surfPt.gNormal;
         surfPt.shadingFrame.y = cross(surfPt.shadingFrame.z, surfPt.shadingFrame.x);
         surfPt.obj = this;
-        result->isDeltaPos = false;
+        result->posType = DirectionType::LowFreq;
         result->areaPDF = uvPDF / (2 * M_PI * M_PI * std::sin(theta));
         return m_material->emittance(result->surfPt, query.wls);
     }

@@ -11,6 +11,7 @@
 #include "../defines.h"
 #include "../references.h"
 #include "geometry.h"
+#include "directional_distribution_functions.h"
 
 namespace SLR {
     struct SLR_API LightPosQuery {
@@ -27,7 +28,7 @@ namespace SLR {
     struct SLR_API LightPosQueryResult {
         SurfacePoint surfPt;
         float areaPDF;
-        bool isDeltaPos;
+        DirectionType posType;
     };
     
     class SLR_API Light {

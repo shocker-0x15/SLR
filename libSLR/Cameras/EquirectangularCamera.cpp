@@ -41,7 +41,7 @@ namespace SLR {
         surfPt.shadingFrame.x = staticTF * Vector3D(1, 0, 0);// assume the transform doesn't include scaling.
         surfPt.shadingFrame.y = cross(surfPt.shadingFrame.z, surfPt.shadingFrame.x);
         surfPt.obj = nullptr;
-        result->isDeltaPos = true;
+        result->posType = DirectionType::Delta0D;
         result->areaPDF = 1.0f;
         
         return SampledSpectrum::One;
@@ -57,6 +57,7 @@ namespace SLR {
         result->dirLocal = Vector3D::fromPolarYUp(phi, theta);
         float sinTheta = (1.0f - result->dirLocal.y * result->dirLocal.y);
         result->dirPDF = 1.0f / (m_cam.m_phiAngle * m_cam.m_thetaAngle * sinTheta);
+        result->dirType = m_type;
         
         return SampledSpectrum::One;
     }

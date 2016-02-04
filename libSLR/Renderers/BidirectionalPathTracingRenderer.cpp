@@ -128,7 +128,7 @@ namespace SLR {
                     
                     // register the first light vertex.
                     lightVertices.emplace_back(lightResult.surfPt, Vector3D::Zero, Normal3D(0, 0, 1), mem.create<EDFProxy>(edf),
-                                               Le0 / lightAreaPDF, lightAreaPDF, 1.0f, WavelengthSamples::Flag(0));
+                                               Le0 / lightAreaPDF, lightAreaPDF, 1.0f, lightResult.posType, WavelengthSamples::Flag(0));
                     
                     // sample a direction from EDF, then create subsequent light subpath vertices by tracing in the scene.
                     EDFQuery edfQuery;
@@ -137,7 +137,7 @@ namespace SLR {
                     SampledSpectrum Le1 = edf->sample(edfQuery, LeSample, &LeResult);
                     Ray ray(lightResult.surfPt.p + Ray::Epsilon * lightResult.surfPt.gNormal, lightResult.surfPt.shadingFrame.fromLocal(LeResult.dir_sn), time);
                     SampledSpectrum alpha = lightVertices.back().alpha * Le1 * (LeResult.dir_sn.z / LeResult.dirPDF);
-                    generateSubPath(wls, alpha, ray, LeResult.dirPDF, LeResult.dir_sn.z, true, rng, mem);
+                    generateSubPath(wls, alpha, ray, LeResult.dirPDF, LeResult.dirType, LeResult.dir_sn.z, true, rng, mem);
                 }
                 
                 // eye subpath generation
@@ -151,7 +151,7 @@ namespace SLR {
                     
                     // register the first eye vertex.
                     eyeVertices.emplace_back(lensResult.surfPt, Vector3D::Zero, Normal3D(0, 0, 1), mem.create<IDFProxy>(idf),
-                                             We0 / (lensResult.areaPDF * selectWLPDF), lensResult.areaPDF, 1.0f, WavelengthSamples::Flag(0));
+                                             We0 / (lensResult.areaPDF * selectWLPDF), lensResult.areaPDF, 1.0f, lensResult.posType, WavelengthSamples::Flag(0));
                     
                     // sample a direction (directional importance) from IDF, then create subsequent eye subpath vertices by tracing in the scene.
                     IDFSample WeSample(px / imageWidth, py / imageHeight);
@@ -159,7 +159,7 @@ namespace SLR {
                     SampledSpectrum We1 = idf->sample(WeSample, &WeResult);
                     Ray ray(lensResult.surfPt.p, lensResult.surfPt.shadingFrame.fromLocal(WeResult.dirLocal), time);
                     SampledSpectrum alpha = eyeVertices.back().alpha * We1 * (WeResult.dirLocal.z / WeResult.dirPDF);
-                    generateSubPath(wls, alpha, ray, WeResult.dirPDF, WeResult.dirLocal.z, false, rng, mem);
+                    generateSubPath(wls, alpha, ray, WeResult.dirPDF, WeResult.dirType, WeResult.dirLocal.z, false, rng, mem);
                 }
                 
                 // connection
@@ -230,7 +230,9 @@ namespace SLR {
                         // calculate MIS weight and store weighted contribution to a sensor.
                         float MISWeight = calculateMISWeight(lExtend1stAreaPDF, lExtend1stRRProb, lExtend2ndAreaPDF, lExtend2ndRRProb,
                                                              eExtend1stAreaPDF, eExtend1stRRProb, eExtend2ndAreaPDF, eExtend2ndRRProb, s, t);
-                        SLRAssert(!std::isinf(MISWeight) && !std::isnan(MISWeight), "invalid MIS weight.");
+//                        SLRAssert(!std::isinf(MISWeight) && !std::isnan(MISWeight), "invalid MIS weight.");
+                        if (std::isinf(MISWeight) || std::isnan(MISWeight))
+                            continue;
                         SampledSpectrum contribution = MISWeight * lVtx.alpha * connectionTerm * eVtx.alpha;
                         if (t > 1) {
                             sensor->add(px, py, wls, contribution);
@@ -249,8 +251,8 @@ namespace SLR {
         }
     }
     
-    void BidirectionalPathTracingRenderer::Job::generateSubPath(const WavelengthSamples &initWLs, const SampledSpectrum &initAlpha, const SLR::Ray &initRay, float dirPDF, float cosLast,
-                                                                bool adjoint, RandomNumberGenerator &rng, SLR::ArenaAllocator &mem) {
+    void BidirectionalPathTracingRenderer::Job::generateSubPath(const WavelengthSamples &initWLs, const SampledSpectrum &initAlpha, const SLR::Ray &initRay, float dirPDF, DirectionType sampledType,
+                                                                float cosLast, bool adjoint, RandomNumberGenerator &rng, SLR::ArenaAllocator &mem) {
         std::vector<BPTVertex> &vertices = adjoint ? lightVertices : eyeVertices;
         
         WavelengthSamples wls = initWLs;
@@ -269,7 +271,7 @@ namespace SLR {
             float areaPDF = dirPDF * absDot(dirOut_sn, gNorm_sn) / (isect.dist * isect.dist);
             if (areaPDF == 0.0f)// outlier values should be rejected in MIS calculation?
                 break;
-            vertices.emplace_back(surfPt, dirOut_sn, gNorm_sn, mem.create<BSDFProxy>(bsdf), alpha, areaPDF, RRProb, wls.flags);
+            vertices.emplace_back(surfPt, dirOut_sn, gNorm_sn, mem.create<BSDFProxy>(bsdf), alpha, areaPDF, RRProb, sampledType, wls.flags);
             
             // implicit path (zero light subpath vertices, s = 0)
             if (!adjoint && surfPt.isEmitting()) {
@@ -284,13 +286,15 @@ namespace SLR {
                 float MISWeight = calculateMISWeight(extend1stAreaPDF, 1.0f, extend2ndAreaPDF, 1.0f,
                                                      0.0f, 0.0f, 0.0f, 0.0f,
                                                      0, (uint32_t)vertices.size());
-                SLRAssert(!std::isinf(MISWeight) && !std::isnan(MISWeight), "invalid MIS weight.");
                 SampledSpectrum contribution = MISWeight * alpha * Le0 * Le1;
-                sensor->add(curPx, curPy, wls, contribution);
+                if (!std::isinf(MISWeight) && !std::isnan(MISWeight))
+                    sensor->add(curPx, curPy, wls, contribution);
             }
             
-            if (surfPt.atInfinity)
+            if (surfPt.atInfinity) {
+                vertices.pop_back();
                 break;
+            }
             
             BSDFQuery fsQuery(dirOut_sn, gNorm_sn, wls.selectedLambda, DirectionType::All, adjoint);
             BSDFSample fsSample(rng.getFloat0cTo1o(), rng.getFloat0cTo1o(), rng.getFloat0cTo1o());
@@ -302,9 +306,8 @@ namespace SLR {
                 break;
             if (fsResult.dirType.isDispersive())
                 wls.flags |= WavelengthSamples::LambdaIsSelected;
-            dirPDF = fsResult.dirPDF;
             float cosIn = absDot(fsResult.dir_sn, gNorm_sn);
-            SampledSpectrum weight = fs * (cosIn / dirPDF);
+            SampledSpectrum weight = fs * (cosIn / fsResult.dirPDF);
             
             // Russian roulette
             RRProb = std::min(weight.luminance(), 1.0f);
@@ -316,18 +319,24 @@ namespace SLR {
             alpha *= weight;
             SLRAssert(!weight.hasInf() && !weight.hasNaN(),
                       "weight: unexpected value detected:\nweight: %s\nfs: %s\nlength: %u, cos: %g, dirPDF: %g",
-                      weight.toString().c_str(), fs.toString().c_str(), uint32_t(vertices.size()) - 1, cosIn, dirPDF);
+                      weight.toString().c_str(), fs.toString().c_str(), uint32_t(vertices.size()) - 1, cosIn, fsResult.dirPDF);
             
             Vector3D dirIn = surfPt.shadingFrame.fromLocal(fsResult.dir_sn);
             ray = Ray(surfPt.p + Ray::Epsilon * dirIn, dirIn, ray.time);
-            isect = Intersection();
             
             BPTVertex &vtxNextToLast = vertices[vertices.size() - 2];
             vtxNextToLast.revAreaPDF = revInfo.dirPDF * cosLast / (isect.dist * isect.dist);
             vtxNextToLast.revRRProb = std::min((revInfo.fs * absDot(dirOut_sn, gNorm_sn) / revInfo.dirPDF).luminance(), 1.0f);
-            SLRAssert(!std::isnan(vtxNextToLast.revAreaPDF) && !std::isinf(vtxNextToLast.revAreaPDF), "invalid reverse area PDF.");
-            SLRAssert(!std::isnan(vtxNextToLast.revRRProb) && !std::isinf(vtxNextToLast.revRRProb), "invalid reverse RR probability.");
+//            SLRAssert(!std::isnan(vtxNextToLast.revAreaPDF) && !std::isinf(vtxNextToLast.revAreaPDF),
+//                      "invalid reverse area PDF: %g, dirPDF: %g, cos: %g, dist2: %g", vtxNextToLast.revAreaPDF, revInfo.dirPDF, cosLast, isect.dist * isect.dist);
+//            SLRAssert(!std::isnan(vtxNextToLast.revRRProb) && !std::isinf(vtxNextToLast.revRRProb),
+//                      "invalid reverse RR probability: %g\nfs: %s\n, absDot: %g, dirPDF: %g",
+//                      vtxNextToLast.revRRProb, revInfo.fs.toString().c_str(), absDot(dirOut_sn, gNorm_sn), revInfo.dirPDF);
+            
             cosLast = cosIn;
+            dirPDF = fsResult.dirPDF;
+            sampledType = fsResult.dirType;
+            isect = Intersection();
         }
     }
     
@@ -346,7 +355,7 @@ namespace SLR {
             recMISWeight += PDFRatio * PDFRatio;
             if (numEVtx - 1 > minEyeVertices) {
                 const BPTVertex &newLightVtx = eyeVertices[numEVtx - 2];
-                PDFRatio = lExtend2ndAreaPDF * lExtend2ndRRProb / (newLightVtx.areaPDF * newLightVtx.RRProb);
+                PDFRatio *= lExtend2ndAreaPDF * lExtend2ndRRProb / (newLightVtx.areaPDF * newLightVtx.RRProb);
                 recMISWeight += PDFRatio * PDFRatio;
                 for (int t = numEVtx - 2; t > minEyeVertices; --t) {
                     const BPTVertex &newLightVtx = eyeVertices[t - 1];

@@ -50,7 +50,7 @@ namespace SLR {
         surfPt.shadingFrame.x = staticTF * Vector3D(1, 0, 0);// assume the transform doesn't include scaling.
         surfPt.shadingFrame.y = cross(surfPt.shadingFrame.z, surfPt.shadingFrame.x);
         surfPt.obj = nullptr;
-        result->isDeltaPos = m_lensRadius == 0.0f;
+        result->posType = m_lensRadius > 0.0f ? DirectionType::LowFreq : DirectionType::Delta0D;
         result->areaPDF = m_lensRadius > 0.0f ? 1.0f / (M_PI * m_lensRadius * m_lensRadius) : 1.0f;
         
         return SampledSpectrum::One;
@@ -68,6 +68,7 @@ namespace SLR {
         Vector3D dirLocal = normalize(pFocus - m_orgLocal);
         result->dirLocal = dirLocal;
         result->dirPDF = m_cam.m_imgPlaneDistance * m_cam.m_imgPlaneDistance / ((dirLocal.z * dirLocal.z * dirLocal.z) * m_cam.m_imgPlaneArea);
+        result->dirType = m_type;
         
         return SampledSpectrum::One;
     }

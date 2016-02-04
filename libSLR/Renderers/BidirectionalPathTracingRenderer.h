@@ -77,11 +77,12 @@ namespace SLR {
             float RRProb;
             float revAreaPDF;
             float revRRProb;
+            DirectionType sampledType;
             int16_t wlFlags;
             BPTVertex(const SurfacePoint &_surfPt, const Vector3D &_dirIn_sn, const Normal3D &_gNormal_sn, const DDFProxy* _ddf,
-                      const SampledSpectrum &_alpha, float _areaPDF, float _RRProb, int16_t _wlFlags) :
+                      const SampledSpectrum &_alpha, float _areaPDF, float _RRProb, DirectionType _sampledType, int16_t _wlFlags) :
             surfPt(_surfPt), dirIn_sn(_dirIn_sn), gNormal_sn(_gNormal_sn), ddf(_ddf),
-            alpha(_alpha), areaPDF(_areaPDF), RRProb(_RRProb), revAreaPDF(NAN), revRRProb(NAN), wlFlags(_wlFlags) {}
+            alpha(_alpha), areaPDF(_areaPDF), RRProb(_RRProb), revAreaPDF(NAN), revRRProb(NAN), sampledType(_sampledType), wlFlags(_wlFlags) {}
         };
         
         struct Job {
@@ -109,8 +110,8 @@ namespace SLR {
             std::vector<BPTVertex> eyeVertices;
             
             void kernel(uint32_t threadID);
-            void generateSubPath(const WavelengthSamples &initWLs, const SampledSpectrum &initAlpha, const SLR::Ray &initRay, float dirPDF, float cosLast,
-                                 bool adjoint, RandomNumberGenerator &rng, SLR::ArenaAllocator &mem);
+            void generateSubPath(const WavelengthSamples &initWLs, const SampledSpectrum &initAlpha, const SLR::Ray &initRay, float dirPDF, DirectionType sampledType,
+                                 float cosLast, bool adjoint, RandomNumberGenerator &rng, SLR::ArenaAllocator &mem);
             float calculateMISWeight(float lExtend1stAreaPDF, float lExtend1stRRProb, float lExtend2ndAreaPDF, float lExtend2ndRRProb,
                                      float eExtend1stAreaPDF, float eExtend1stRRProb, float eExtend2ndAreaPDF, float eExtend2ndRRProb,
                                      uint32_t numLVtx, uint32_t numEVtx) const;

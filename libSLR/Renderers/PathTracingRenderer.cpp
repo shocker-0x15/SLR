@@ -167,20 +167,20 @@ namespace SLR {
                 scene.selectLight(rng.getFloat0cTo1o(), &light, &lightProb);
                 SLRAssert(!std::isnan(lightProb) && !std::isinf(lightProb), "lightProb: unexpected value detected: %f", lightProb);
                 
-                LightPosQuery xpQuery(ray.time, wls);
-                LightPosSample xpSample(rng.getFloat0cTo1o(), rng.getFloat0cTo1o());
-                LightPosQueryResult xpResult;
-                SampledSpectrum M = light.sample(xpQuery, xpSample, &xpResult);
-                SLRAssert(!std::isnan(xpResult.areaPDF)/* && !std::isinf(xpResult.areaPDF)*/, "areaPDF: unexpected value detected: %f", xpResult.areaPDF);
+                LightPosQuery lpQuery(ray.time, wls);
+                LightPosSample lpSample(rng.getFloat0cTo1o(), rng.getFloat0cTo1o());
+                LightPosQueryResult lpResult;
+                SampledSpectrum M = light.sample(lpQuery, lpSample, &lpResult);
+                SLRAssert(!std::isnan(lpResult.areaPDF)/* && !std::isinf(xpResult.areaPDF)*/, "areaPDF: unexpected value detected: %f", xpResult.areaPDF);
                 
                 float dist2;
-                Vector3D shadowDir = xpResult.surfPt.getShadowDirection(surfPt, &dist2);
+                Vector3D shadowDir = lpResult.surfPt.getShadowDirection(surfPt, &dist2);
                 
-                if (scene.testVisibility(surfPt, xpResult.surfPt, ray.time)) {
-                    EDF* edf = xpResult.surfPt.createEDF(wls, mem);
-                    Vector3D shadowDir_l = xpResult.surfPt.shadingFrame.toLocal(-shadowDir);
+                if (scene.testVisibility(surfPt, lpResult.surfPt, ray.time)) {
+                    EDF* edf = lpResult.surfPt.createEDF(wls, mem);
+                    Vector3D shadowDir_l = lpResult.surfPt.shadingFrame.toLocal(-shadowDir);
                     SampledSpectrum Le = M * edf->evaluate(EDFQuery(), shadowDir_l);
-                    float lightPDF = lightProb * xpResult.areaPDF;
+                    float lightPDF = lightProb * lpResult.areaPDF;
                     SLRAssert(!Le.hasNaN() && !Le.hasInf(), "Le: unexpected value detected: %s", Le.toString().c_str());
                     
                     Vector3D shadowDir_sn = surfPt.shadingFrame.toLocal(shadowDir);
@@ -191,7 +191,7 @@ namespace SLR {
                     SLRAssert(!fs.hasNaN() && !fs.hasInf(), "fs: unexpected value detected: %s", fs.toString().c_str());
                     
                     float MISWeight = 1.0f;
-                    if (!xpResult.isDeltaPos && !std::isinf(xpResult.areaPDF))
+                    if (!lpResult.posType.isDelta() && !std::isinf(lpResult.areaPDF))
                         MISWeight = (lightPDF * lightPDF) / (lightPDF * lightPDF + bsdfPDF * bsdfPDF);
                     
                     float G = std::fabs(shadowDir_sn.z) * std::fabs(shadowDir_l.z) / dist2;
@@ -210,7 +210,7 @@ namespace SLR {
                 fsResult.dirPDF /= WavelengthSamples::NumComponents;
                 wls.flags |= WavelengthSamples::LambdaIsSelected;
             }
-            alpha *= fs * (std::fabs(dot(fsResult.dir_sn, (Vector3D)gNorm_sn)) / fsResult.dirPDF);
+            alpha *= fs * absDot(fsResult.dir_sn, gNorm_sn) / fsResult.dirPDF;
             SLRAssert(!alpha.hasInf() && !alpha.hasNaN(),
                       "alpha: unexpected value detected:\nalpha: %s\nfs: %s\nlength: %u, cos: %g, dirPDF: %g",
                       alpha.toString().c_str(), fs.toString().c_str(), pathLength, std::fabs(fsResult.dir_sn.z), fsResult.dirPDF);
@@ -234,7 +234,7 @@ namespace SLR {
                 SampledSpectrum Le = surfPt.emittance(wls) * edf->evaluate(EDFQuery(), dirOut_sn);
                 float lightProb = scene.evaluateProb(Light(isect.obj));
                 float dist2 = surfPt.atInfinity ? 1.0f : sqDistance(ray.org, surfPt.p);
-                float lightPDF = lightProb * surfPt.evaluateAreaPDF() * dist2 / std::fabs(dirOut_sn.z);
+                float lightPDF = lightProb * surfPt.evaluateAreaPDF() * dist2 / absDot(fsResult.dir_sn, gNorm_sn);
                 SLRAssert(!Le.hasNaN() && !Le.hasInf(), "Le: unexpected value detected: %s", Le.toString().c_str());
                 SLRAssert(!std::isnan(lightProb) && !std::isinf(lightProb), "lightProb: unexpected value detected: %f", lightProb);
                 SLRAssert(!std::isnan(lightPDF)/* && !std::isinf(lightPDF)*/, "lightPDF: unexpected value detected: %f", lightPDF);

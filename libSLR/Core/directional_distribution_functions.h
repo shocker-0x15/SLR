@@ -167,6 +167,7 @@ query.dir_sn.x, query.dir_sn.y, query.dir_sn.z);
     struct SLR_API IDFQueryResult {
         Vector3D dirLocal;
         float dirPDF;
+        DirectionType dirType;
     };
     
     
