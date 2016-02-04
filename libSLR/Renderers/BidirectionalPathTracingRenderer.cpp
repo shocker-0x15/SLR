@@ -352,15 +352,24 @@ namespace SLR {
         if (numEVtx > minEyeVertices) {
             const BPTVertex &eyeEndVtx = eyeVertices[numEVtx - 1];
             float PDFRatio = lExtend1stAreaPDF * lExtend1stRRProb / (eyeEndVtx.areaPDF * eyeEndVtx.RRProb);
-            recMISWeight += PDFRatio * PDFRatio;
+            bool shortenIsDeltaSampled = eyeEndVtx.sampledType.isDelta();
+            if (!shortenIsDeltaSampled)
+                recMISWeight += PDFRatio * PDFRatio;
+            bool prevIsDeltaSampled = shortenIsDeltaSampled;
             if (numEVtx - 1 > minEyeVertices) {
                 const BPTVertex &newLightVtx = eyeVertices[numEVtx - 2];
                 PDFRatio *= lExtend2ndAreaPDF * lExtend2ndRRProb / (newLightVtx.areaPDF * newLightVtx.RRProb);
-                recMISWeight += PDFRatio * PDFRatio;
+                shortenIsDeltaSampled = newLightVtx.sampledType.isDelta();
+                if (!shortenIsDeltaSampled && !prevIsDeltaSampled)
+                    recMISWeight += PDFRatio * PDFRatio;
+                prevIsDeltaSampled = shortenIsDeltaSampled;
                 for (int t = numEVtx - 2; t > minEyeVertices; --t) {
                     const BPTVertex &newLightVtx = eyeVertices[t - 1];
                     PDFRatio *= newLightVtx.revAreaPDF * newLightVtx.revRRProb / (newLightVtx.areaPDF * newLightVtx.RRProb);
-                    recMISWeight += PDFRatio * PDFRatio;
+                    shortenIsDeltaSampled = newLightVtx.sampledType.isDelta();
+                    if (!shortenIsDeltaSampled && !prevIsDeltaSampled)
+                        recMISWeight += PDFRatio * PDFRatio;
+                    prevIsDeltaSampled = shortenIsDeltaSampled;
                 }
             }
         }
@@ -369,15 +378,24 @@ namespace SLR {
         if (numLVtx > minLightVertices) {
             const BPTVertex &lightEndVtx = lightVertices[numLVtx - 1];
             float PDFRatio = eExtend1stAreaPDF * eExtend1stRRProb / (lightEndVtx.areaPDF * lightEndVtx.RRProb);
-            recMISWeight += PDFRatio * PDFRatio;
+            bool shortenIsDeltaSampled = lightEndVtx.sampledType.isDelta();
+            if (!shortenIsDeltaSampled)
+                recMISWeight += PDFRatio * PDFRatio;
+            bool prevIsDeltaSampled = shortenIsDeltaSampled;
             if (numLVtx - 1 > minLightVertices) {
                 const BPTVertex &newEyeVtx = lightVertices[numLVtx - 2];
                 PDFRatio *= eExtend2ndAreaPDF * eExtend2ndRRProb / (newEyeVtx.areaPDF * newEyeVtx.RRProb);
-                recMISWeight += PDFRatio * PDFRatio;
+                shortenIsDeltaSampled = newEyeVtx.sampledType.isDelta();
+                if (!shortenIsDeltaSampled && !prevIsDeltaSampled)
+                    recMISWeight += PDFRatio * PDFRatio;
+                prevIsDeltaSampled = shortenIsDeltaSampled;
                 for (int s = numLVtx - 2; s > minLightVertices; --s) {
                     const BPTVertex &newEyeVtx = lightVertices[s - 1];
                     PDFRatio *= newEyeVtx.revAreaPDF * newEyeVtx.revRRProb / (newEyeVtx.areaPDF * newEyeVtx.RRProb);
-                    recMISWeight += PDFRatio * PDFRatio;
+                    shortenIsDeltaSampled = newEyeVtx.sampledType.isDelta();
+                    if (!shortenIsDeltaSampled && !prevIsDeltaSampled)
+                        recMISWeight += PDFRatio * PDFRatio;
+                    prevIsDeltaSampled = shortenIsDeltaSampled;
                 }
             }
         }
