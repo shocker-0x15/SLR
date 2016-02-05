@@ -135,7 +135,7 @@ namespace SLR {
         Ray ray = initRay;
         SurfacePoint surfPt;
         SampledSpectrum alpha = SampledSpectrum::One;
-        float initY = alpha.luminance();
+        float initY = alpha[wls.selectedLambda];
         SampledSpectrumSum sp(SampledSpectrum::Zero);
         uint32_t pathLength = 0;
         
@@ -171,7 +171,7 @@ namespace SLR {
                 LightPosSample lpSample(rng.getFloat0cTo1o(), rng.getFloat0cTo1o());
                 LightPosQueryResult lpResult;
                 SampledSpectrum M = light.sample(lpQuery, lpSample, &lpResult);
-                SLRAssert(!std::isnan(lpResult.areaPDF)/* && !std::isinf(xpResult.areaPDF)*/, "areaPDF: unexpected value detected: %f", xpResult.areaPDF);
+                SLRAssert(!std::isnan(lpResult.areaPDF)/* && !std::isinf(xpResult.areaPDF)*/, "areaPDF: unexpected value detected: %f", lpResult.areaPDF);
                 
                 float dist2;
                 Vector3D shadowDir = lpResult.surfPt.getShadowDirection(surfPt, &dist2);
@@ -249,7 +249,7 @@ namespace SLR {
                 break;
             
             // Russian roulette
-            float continueProb = std::min(alpha.luminance() / initY, 1.0f);
+            float continueProb = std::min(alpha[wls.selectedLambda] / initY, 1.0f);
             if (rng.getFloat0cTo1o() < continueProb)
                 alpha /= continueProb;
             else

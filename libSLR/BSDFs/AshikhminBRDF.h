@@ -22,6 +22,7 @@ namespace SLR {
         float evaluatePDFInternal(const BSDFQuery &query, const Vector3D &dir, float* revPDF) const override;
         float weightInternal(const BSDFQuery &query, const BSDFSample &smp) const override;
         float weightInternal(const BSDFQuery &query, const Vector3D &dir, float* revWeight) const override;
+        float weightInternal(const BSDFQuery &query) const override;
         SampledSpectrum getBaseColorInternal(DirectionType flags) const override;
     public:
         AshikhminSpecularBRDF(const SampledSpectrum &Rs, float nu, float nv) : BSDF(DirectionType::Reflection | DirectionType::HighFreq),
@@ -37,6 +38,7 @@ namespace SLR {
         float evaluatePDFInternal(const BSDFQuery &query, const Vector3D &dir, float* revPDF) const override;
         float weightInternal(const BSDFQuery &query, const BSDFSample &smp) const override;
         float weightInternal(const BSDFQuery &query, const Vector3D &dir, float* revWeight) const override;
+        float weightInternal(const BSDFQuery &query) const override;
         SampledSpectrum getBaseColorInternal(DirectionType flags) const override;
     public:
         AshikhminDiffuseBRDF(const SampledSpectrum &Rs, const SampledSpectrum &Rd) : BSDF(DirectionType::Reflection | DirectionType::LowFreq), 

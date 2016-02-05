@@ -57,26 +57,19 @@ namespace SLR {
     }
     
     float AshikhminSpecularBRDF::weightInternal(const BSDFQuery &query, const BSDFSample &smp) const {
-#ifdef Use_BSDF_Actual_Weights
         BSDFQueryResult result;
-        float fs = sample(query, smp, &result).maxValue();
+        float fs = sample(query, smp, &result)[query.wlHint];
         return result.dirPDF > 0.0f ? fs * std::fabs(result.dir_sn.z) / result.dirPDF : 0.0f;
-#else
-        SampledSpectrum F = m_Rs + (SampledSpectrum::One - m_Rs) * std::pow(1.0f - std::fabs(query.dir_sn.z), 5);
-        return F.maxValue();
-        //    return m_Rs.maxValue();
-#endif
     }
     
     float AshikhminSpecularBRDF::weightInternal(const BSDFQuery &query, const Vector3D &dir, float* revWeight) const {
-#ifdef Use_BSDF_Actual_Weights
         if (revWeight) {
             SampledSpectrum rev_fs;
             float revDirPDF;
-            float fs = evaluate(query, dir, &rev_fs).maxValue();
+            float fs = evaluate(query, dir, &rev_fs)[query.wlHint];
             float dirPDF = evaluatePDF(query, dir, &revDirPDF);
             if (dirPDF > 0.0f) {
-                *revWeight = rev_fs.maxValue() * std::fabs(query.dir_sn.z) / revDirPDF;
+                *revWeight = rev_fs[query.wlHint] * std::fabs(query.dir_sn.z) / revDirPDF;
                 return fs * std::fabs(dir.z) / dirPDF;
             }
             else {
@@ -86,13 +79,15 @@ namespace SLR {
         }
         else {
             BSDFQueryResult result;
-            float fs = evaluate(query, dir).maxValue();
+            float fs = evaluate(query, dir)[query.wlHint];
             float dirPDF = evaluatePDF(query, dir);
             return dirPDF > 0 ? fs * std::fabs(dir.z) / dirPDF : 0.0f;
         }
-#else
-        return weight(query, BSDFSample(0, 0, 0));
-#endif
+    }
+    
+    float AshikhminSpecularBRDF::weightInternal(const SLR::BSDFQuery &query) const {
+        float dotHV = std::fabs(query.dir_sn.z);
+        return m_Rs[query.wlHint] + (1 - m_Rs[query.wlHint]) * std::pow(1.0f - dotHV, 5);
     }
     
     SampledSpectrum AshikhminSpecularBRDF::getBaseColorInternal(DirectionType flags) const {
@@ -136,15 +131,9 @@ namespace SLR {
     }
     
     float AshikhminDiffuseBRDF::weightInternal(const BSDFQuery &query, const BSDFSample &smp) const {
-#ifdef Use_BSDF_Actual_Weights
         BSDFQueryResult result;
-        float fs = sample(query, smp, &result).maxValue();
+        float fs = sample(query, smp, &result)[query.wlHint];
         return result.dirPDF > 0.0f ? fs * std::fabs(result.dir_sn.z) / result.dirPDF : 0.0f;
-#else
-        float F = std::pow((1.0f - std::pow(1.0f - std::fabs(query.dir_sn.z) / 2, 5)), 2);
-        return (28 * m_Rd / (23 * M_PI) * (SampledSpectrum::One - m_Rs) * F).maxValue();
-        //    return m_Rd.maxValue();
-#endif
     }
     
     float AshikhminDiffuseBRDF::weightInternal(const BSDFQuery &query, const Vector3D &dir, float* revWeight) const {
@@ -153,10 +142,10 @@ namespace SLR {
         if (revWeight) {
             SampledSpectrum rev_fs;
             float revDirPDF;
-            float fs = evaluate(query, dir, &rev_fs).maxValue();
+            float fs = evaluate(query, dir, &rev_fs)[query.wlHint];
             float dirPDF = evaluatePDF(query, dir, &revDirPDF);
             if (dirPDF > 0.0f) {
-                *revWeight = rev_fs.maxValue() * std::fabs(query.dir_sn.z) / revDirPDF;
+                *revWeight = rev_fs[query.wlHint] * std::fabs(query.dir_sn.z) / revDirPDF;
                 return fs * std::fabs(dir.z) / dirPDF;
             }
             else {
@@ -165,13 +154,17 @@ namespace SLR {
             }
         }
         else {
-            float fs = evaluate(query, dir).maxValue();
+            float fs = evaluate(query, dir)[query.wlHint];
             float dirPDF = evaluatePDF(query, dir);
             return dirPDF > 0.0f ? fs * std::fabs(dir.z) / dirPDF : 0.0f;
         }
 #else
         return weight(query, BSDFSample(0, 0, 0));
 #endif
+    }
+    
+    float AshikhminDiffuseBRDF::weightInternal(const SLR::BSDFQuery &query) const {
+        return (2954.0f / 1863.0f * m_Rd[query.wlHint] * (1 - m_Rs[query.wlHint]) * (1.0f - std::pow(1.0f - std::fabs(query.dir_sn.z) / 2, 5)));
     }
     
     SampledSpectrum AshikhminDiffuseBRDF::getBaseColorInternal(DirectionType flags) const {

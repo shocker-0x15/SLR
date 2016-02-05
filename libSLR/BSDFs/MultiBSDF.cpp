@@ -19,7 +19,7 @@ namespace SLR {
     SampledSpectrum MultiBSDF::sampleInternalNoRev(const BSDFQuery &query, const BSDFSample &smp, BSDFQueryResult *result) const {
         float weights[maxNumElems];
         for (int i = 0; i < m_numComponents; ++i)
-            weights[i] = m_BSDFs[i]->weight(query, smp);
+            weights[i] = m_BSDFs[i]->weight(query);
         
         float sumWeights, base;
         uint32_t idx = sampleDiscrete(weights, &sumWeights, &base, m_numComponents, smp.uComponent);
@@ -53,7 +53,7 @@ namespace SLR {
     SampledSpectrum MultiBSDF::sampleInternalWithRev(const BSDFQuery &query, const BSDFSample &smp, BSDFQueryResult *result) const {
         float weights[maxNumElems];
         for (int i = 0; i < m_numComponents; ++i)
-            weights[i] = m_BSDFs[i]->weight(query, smp);
+            weights[i] = m_BSDFs[i]->weight(query);
         
         float sumWeights, base;
         uint32_t idx = sampleDiscrete(weights, &sumWeights, &base, m_numComponents, smp.uComponent);
@@ -72,7 +72,7 @@ namespace SLR {
         float revWeights[maxNumElems];
         FloatSum sumRevWeights = 0;
         for (int i = 0; i < m_numComponents; ++i) {
-            revWeights[i] = m_BSDFs[i]->weight(revQuery, revDirIn);
+            revWeights[i] = m_BSDFs[i]->weight(revQuery);
             sumRevWeights += revWeights[i];
         }
         
@@ -131,7 +131,7 @@ namespace SLR {
         FloatSum sumWeights = 0.0f;
         float weights[maxNumElems];
         for (int i = 0; i < m_numComponents; ++i) {
-            weights[i] = m_BSDFs[i]->weight(query, dirOut);
+            weights[i] = m_BSDFs[i]->weight(query);
             sumWeights += weights[i];
         }
         if (sumWeights == 0.0f)
@@ -148,13 +148,19 @@ namespace SLR {
     }
     
     float MultiBSDF::evaluatePDFInternalWithRev(const BSDFQuery &query, const Vector3D &dirOut, float* revPDF) const {
+        BSDFQuery revQuery = query;// mQuery?
+        Vector3D revDirIn = dirOut;
+        std::swap(revQuery.dir_sn, revDirIn);
+        revQuery.adjoint ^= true;
+        
         FloatSum sumWeights = 0.0f;
         FloatSum sumRevWeights = 0.0f;
         float weights[maxNumElems];
         float revWeights[maxNumElems];
         for (int i = 0; i < m_numComponents; ++i) {
-            weights[i] = m_BSDFs[i]->weight(query, dirOut, &revWeights[i]);
+            weights[i] = m_BSDFs[i]->weight(query);
             sumWeights += weights[i];
+            revWeights[i] = m_BSDFs[i]->weight(revQuery);
             sumRevWeights += revWeights[i];
         }
         if (sumWeights == 0.0f) {
@@ -202,6 +208,13 @@ namespace SLR {
                 sumWeights += m_BSDFs[i]->weight(query, dir);
             return sumWeights;
         }
+    }
+    
+    float MultiBSDF::weightInternal(const SLR::BSDFQuery &query) const {
+        FloatSum sumWeights = 0.0f;
+        for (int i = 0; i < m_numComponents; ++i)
+            sumWeights += m_BSDFs[i]->weight(query);
+        return sumWeights;
     }
     
     SampledSpectrum MultiBSDF::getBaseColorInternal(DirectionType flags) const {

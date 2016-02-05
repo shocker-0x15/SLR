@@ -32,6 +32,7 @@ namespace SLR {
         }
         float weightInternal(const BSDFQuery &query, const BSDFSample &smp) const override;
         float weightInternal(const BSDFQuery &query, const Vector3D &dir, float* revWeight) const override;
+        float weightInternal(const BSDFQuery &query) const override;
         SampledSpectrum getBaseColorInternal(DirectionType flags) const override;
     public:
         MultiBSDF() : BSDF(DirectionType()), m_numComponents(0) { }

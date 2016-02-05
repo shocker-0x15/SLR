@@ -137,7 +137,6 @@ std::unique_ptr<T> createUnique(ArgTypes&&... args) {
     return std::unique_ptr<T>(new T(std::forward<ArgTypes>(args)...));
 }
 
-#define Use_BSDF_Actual_Weights
 #define Use_Spectral_Representation
 
 #endif

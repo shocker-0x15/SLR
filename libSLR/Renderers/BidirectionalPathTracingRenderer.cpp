@@ -192,7 +192,10 @@ namespace SLR {
                         float cosEyeEnd = absDot(connectionVector, eVtx.surfPt.gNormal);
                         
                         float G = cosEyeEnd * cosLightEnd / dist2;
-                        SampledSpectrum connectionTerm = ddfL * G * ddfE;
+                        float wlProb = 1.0f;
+                        if ((lVtx.wlFlags | eVtx.wlFlags) & WavelengthSamples::LambdaIsSelected)
+                            wlProb = 1.0f / WavelengthSamples::NumComponents;
+                        SampledSpectrum connectionTerm = ddfL * (G / wlProb) * ddfE;
                         if (connectionTerm == SampledSpectrum::Zero)
                             continue;
                         
@@ -201,7 +204,7 @@ namespace SLR {
                         float lExtend1stAreaPDF, lExtend1stRRProb, lExtend2ndAreaPDF, lExtend2ndRRProb;
                         {
                             lExtend1stAreaPDF = lExtend1stDirPDF * cosEyeEnd / dist2;
-                            lExtend1stRRProb = s > 1 ? std::min((ddfL * cosLightEnd / lExtend1stDirPDF).luminance(), 1.0f) : 1.0f;
+                            lExtend1stRRProb = s > 1 ? std::min((ddfL * cosLightEnd / lExtend1stDirPDF)[wlHint], 1.0f) : 1.0f;
                             
                             if (t > 1) {
                                 BPTVertex &eVtxNextToEnd = eyeVertices[t - 2];
@@ -209,13 +212,13 @@ namespace SLR {
                                 float dist2 = dir2nd.sqLength();
                                 dir2nd /= std::sqrt(dist2);
                                 lExtend2ndAreaPDF = lExtend2ndDirPDF * absDot(eVtxNextToEnd.surfPt.gNormal, dir2nd) / dist2;
-                                lExtend2ndRRProb = std::min((revDDFE * absDot(eVtx.gNormal_sn, eVtx.dirIn_sn) / lExtend2ndDirPDF).luminance(), 1.0f);
+                                lExtend2ndRRProb = std::min((revDDFE * absDot(eVtx.gNormal_sn, eVtx.dirIn_sn) / lExtend2ndDirPDF)[wlHint], 1.0f);
                             }
                         }
                         float eExtend1stAreaPDF, eExtend1stRRProb, eExtend2ndAreaPDF, eExtend2ndRRProb;
                         {
                             eExtend1stAreaPDF = eExtend1stDirPDF * cosLightEnd / dist2;
-                            eExtend1stRRProb = t > 1 ? std::min((ddfE * cosEyeEnd / eExtend1stDirPDF).luminance(), 1.0f) : 1.0f;
+                            eExtend1stRRProb = t > 1 ? std::min((ddfE * cosEyeEnd / eExtend1stDirPDF)[wlHint], 1.0f) : 1.0f;
                             
                             if (s > 1) {
                                 BPTVertex &lVtxNextToEnd = lightVertices[s - 2];
@@ -223,7 +226,7 @@ namespace SLR {
                                 float dist2 = dir2nd.sqLength();
                                 dir2nd /= std::sqrt(dist2);
                                 eExtend2ndAreaPDF = eExtend2ndDirPDF * absDot(lVtxNextToEnd.surfPt.gNormal, dir2nd) / dist2;
-                                eExtend2ndRRProb = std::min((revDDFL * absDot(lVtx.gNormal_sn, lVtx.dirIn_sn) / eExtend2ndDirPDF).luminance(), 1.0f);
+                                eExtend2ndRRProb = std::min((revDDFL * absDot(lVtx.gNormal_sn, lVtx.dirIn_sn) / eExtend2ndDirPDF)[wlHint], 1.0f);
                             }
                         }
                         
@@ -269,8 +272,6 @@ namespace SLR {
             BSDF* bsdf = surfPt.createBSDF(wls, mem);
             
             float areaPDF = dirPDF * absDot(dirOut_sn, gNorm_sn) / (isect.dist * isect.dist);
-            if (areaPDF == 0.0f)// outlier values should be rejected in MIS calculation?
-                break;
             vertices.emplace_back(surfPt, dirOut_sn, gNorm_sn, mem.create<BSDFProxy>(bsdf), alpha, areaPDF, RRProb, sampledType, wls.flags);
             
             // implicit path (zero light subpath vertices, s = 0)
@@ -287,6 +288,8 @@ namespace SLR {
                                                      0.0f, 0.0f, 0.0f, 0.0f,
                                                      0, (uint32_t)vertices.size());
                 SampledSpectrum contribution = MISWeight * alpha * Le0 * Le1;
+                if (wls.flags & WavelengthSamples::LambdaIsSelected)
+                    contribution *= WavelengthSamples::NumComponents;
                 if (!std::isinf(MISWeight) && !std::isnan(MISWeight))
                     sensor->add(curPx, curPy, wls, contribution);
             }
@@ -310,7 +313,7 @@ namespace SLR {
             SampledSpectrum weight = fs * (cosIn / fsResult.dirPDF);
             
             // Russian roulette
-            RRProb = std::min(weight.luminance(), 1.0f);
+            RRProb = std::min(weight[wlHint], 1.0f);
             if (rng.getFloat0cTo1o() < RRProb)
                 weight /= RRProb;
             else
@@ -326,7 +329,7 @@ namespace SLR {
             
             BPTVertex &vtxNextToLast = vertices[vertices.size() - 2];
             vtxNextToLast.revAreaPDF = revInfo.dirPDF * cosLast / (isect.dist * isect.dist);
-            vtxNextToLast.revRRProb = std::min((revInfo.fs * absDot(dirOut_sn, gNorm_sn) / revInfo.dirPDF).luminance(), 1.0f);
+            vtxNextToLast.revRRProb = std::min((revInfo.fs * absDot(dirOut_sn, gNorm_sn) / revInfo.dirPDF)[wlHint], 1.0f);
 //            SLRAssert(!std::isnan(vtxNextToLast.revAreaPDF) && !std::isinf(vtxNextToLast.revAreaPDF),
 //                      "invalid reverse area PDF: %g, dirPDF: %g, cos: %g, dist2: %g", vtxNextToLast.revAreaPDF, revInfo.dirPDF, cosLast, isect.dist * isect.dist);
 //            SLRAssert(!std::isnan(vtxNextToLast.revRRProb) && !std::isinf(vtxNextToLast.revRRProb),

@@ -21,6 +21,7 @@ namespace SLR {
         float evaluatePDFInternal(const BSDFQuery &query, const Vector3D &dir, float* revPDF) const override;
         float weightInternal(const BSDFQuery &query, const BSDFSample &smp) const override;
         float weightInternal(const BSDFQuery &query, const Vector3D &dir, float* revWeight) const override;
+        float weightInternal(const BSDFQuery &query) const override;
         SampledSpectrum getBaseColorInternal(DirectionType flags) const override;
     public:
         LambertianBRDF(const SampledSpectrum &R) : BSDF(DirectionType::Reflection | DirectionType::LowFreq), m_R(R) { }
@@ -35,6 +36,7 @@ namespace SLR {
         float evaluatePDFInternal(const BSDFQuery &query, const Vector3D &dir, float* revPDF) const override;
         float weightInternal(const BSDFQuery &query, const BSDFSample &smp) const override;
         float weightInternal(const BSDFQuery &query, const Vector3D &dir, float* revWeight) const override;
+        float weightInternal(const BSDFQuery &query) const override;
         SampledSpectrum getBaseColorInternal(DirectionType flags) const override;
     public:
         SpecularBRDF(const SampledSpectrum &coeffR, const Fresnel* fresnel) : BSDF(DirectionType::Reflection | DirectionType::Delta0D), m_coeffR(coeffR), m_fresnel(fresnel) { }
@@ -49,6 +51,7 @@ namespace SLR {
         float evaluatePDFInternal(const BSDFQuery &query, const Vector3D &dir, float* revPDF) const override;
         float weightInternal(const BSDFQuery &query, const BSDFSample &smp) const override;
         float weightInternal(const BSDFQuery &query, const Vector3D &dir, float* revWeight) const override;
+        float weightInternal(const BSDFQuery &query) const override;
         SampledSpectrum getBaseColorInternal(DirectionType flags) const override;
     public:
         SpecularBTDF(const SampledSpectrum &coeffT, const SampledSpectrum &etaExt, const SampledSpectrum &etaInt, bool dispersive) :
@@ -64,6 +67,7 @@ namespace SLR {
         float evaluatePDFInternal(const BSDFQuery &query, const Vector3D &dir, float* revPDF) const override;
         float weightInternal(const BSDFQuery &query, const BSDFSample &smp) const override;
         float weightInternal(const BSDFQuery &query, const Vector3D &dir, float* revWeight) const override;
+        float weightInternal(const BSDFQuery &query) const override;
         SampledSpectrum getBaseColorInternal(DirectionType flags) const override;
     public:
         InverseBSDF(const BSDF* baseBSDF) : BSDF(baseBSDF->m_type.flip()), m_baseBSDF(baseBSDF) { }

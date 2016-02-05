@@ -34,7 +34,7 @@ function leftBoxMat(name, attrs) {
     k = SpectrumTexture(Spectrum("ID": "Titanium", 1));
     return createSurfaceMaterial("metal", (SpectrumTexture(Spectrum("Reflectance", 1.0)), eta, k));
 }
-leftBoxNode = load3DModel("models/box.assbin", leftBoxMat);
+leftBoxNode = load3DModel("models/box.assbin"/*, leftBoxMat*/);
 setTransform(leftBoxNode, translate(-0.4, -0.999, -0.4) * rotateY(0.2617993878) * scale(0.25, 0.5, 0.25) * translate(0, 1, 0));
 addChild(CBNode, leftBoxNode);
 
@@ -43,7 +43,7 @@ function rightBoxMat(name, attrs) {
     anisoX = anisoY = FloatTexture(0.1);
     return createSurfaceMaterial("Ward", (Rs, anisoX, anisoY));
 }
-rightBoxNode = load3DModel("models/box.assbin", rightBoxMat);
+rightBoxNode = load3DModel("models/box.assbin"/*, rightBoxMat*/);
 setTransform(rightBoxNode, translate(0.4, -0.999, 0.4) * rotateY(-0.2617993878) * scale(0.25) * translate(0, 1, 0));
 addChild(CBNode, rightBoxNode);
 

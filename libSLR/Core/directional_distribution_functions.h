@@ -216,6 +216,7 @@ query.dir_sn.x, query.dir_sn.y, query.dir_sn.z);
         virtual float evaluatePDFInternal(const BSDFQuery &query, const Vector3D &dir, float* revPDF) const = 0;
         virtual float weightInternal(const BSDFQuery &query, const BSDFSample &smp) const = 0;
         virtual float weightInternal(const BSDFQuery &query, const Vector3D &dir, float* revWeight) const = 0;
+        virtual float weightInternal(const BSDFQuery &query) const = 0;
         virtual SampledSpectrum getBaseColorInternal(DirectionType flags) const = 0;
         friend class MultiBSDF;
         friend class InverseBSDF;
@@ -283,6 +284,18 @@ query.dir_sn.x, query.dir_sn.y, query.dir_sn.z);
             }
             return weightInternal(query, dir, revWeight);
         }
+        float weight(const BSDFQuery &query) const {
+            if (!matches(query.flags))
+                return 0;
+            float weight_sn = weightInternal(query);
+            if (query.adjoint) {
+                float commonTerm = std::fabs(query.dir_sn.z / dot(query.dir_sn, (Vector3D)query.gNormal_sn));
+                return weight_sn * commonTerm;
+            }
+            else {
+                return weight_sn;
+            }
+        }
         
         SampledSpectrum getBaseColor(DirectionType flags) const {
             if (!matches(flags))
@@ -323,11 +336,13 @@ query.dir_sn.x, query.dir_sn.y, query.dir_sn.z);
     public:
         virtual ~Fresnel() { };
         virtual SampledSpectrum evaluate(float cosEnter) const = 0;
+        virtual float evaluate(float cosEnter, uint32_t wlIdx) const = 0;
     };
     
     class SLR_API FresnelNoOp : public Fresnel {
     public:
         SampledSpectrum evaluate(float cosEnter) const override;
+        float evaluate(float cosEnter, uint32_t wlIdx) const override;
     };
     
     class SLR_API FresnelConductor : public Fresnel {
@@ -337,6 +352,7 @@ query.dir_sn.x, query.dir_sn.y, query.dir_sn.z);
         FresnelConductor(const SampledSpectrum &eta, const SampledSpectrum &k) : m_eta(eta), m_k(k) { };
         
         SampledSpectrum evaluate(float cosEnter) const override;
+        float evaluate(float cosEnter, uint32_t wlIdx) const override;
     };
     
     class SLR_API FresnelDielectric : public Fresnel {
@@ -349,6 +365,7 @@ query.dir_sn.x, query.dir_sn.y, query.dir_sn.z);
         SampledSpectrum etaInt() const { return m_etaInt; };
         
         SampledSpectrum evaluate(float cosEnter) const override;
+        float evaluate(float cosEnter, uint32_t wlIdx) const override;
         
         static float evalF(float etaEnter, float etaExit, float cosEnter, float cosExit);
     };    

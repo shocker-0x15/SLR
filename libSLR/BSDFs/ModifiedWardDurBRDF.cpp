@@ -78,24 +78,19 @@ namespace SLR {
     }
     
     float ModifiedWardDurBRDF::weightInternal(const BSDFQuery &query, const BSDFSample &smp) const {
-#ifdef Use_BSDF_Actual_Weights
         BSDFQueryResult result;
-        float fs = sample(query, smp, &result).maxValue();
+        float fs = sample(query, smp, &result)[query.wlHint];
         return result.dirPDF > 0.0f ? fs * std::fabs(result.dir_sn.z) / result.dirPDF : 0.0f;
-#else
-        return m_R.maxValue();
-#endif
     }
     
     float ModifiedWardDurBRDF::weightInternal(const BSDFQuery &query, const Vector3D &dir, float* revWeight) const {
-#ifdef Use_BSDF_Actual_Weights
         if (revWeight) {
             SampledSpectrum rev_fs;
             float revDirPDF;
-            float fs = evaluate(query, dir, &rev_fs).maxValue();
+            float fs = evaluate(query, dir, &rev_fs)[query.wlHint];
             float dirPDF = evaluatePDF(query, dir, &revDirPDF);
             if (dirPDF > 0.0f) {
-                *revWeight = rev_fs.maxValue() * std::fabs(query.dir_sn.z) / revDirPDF;
+                *revWeight = rev_fs[query.wlHint] * std::fabs(query.dir_sn.z) / revDirPDF;
                 return fs * std::fabs(dir.z) / dirPDF;
             }
             else {
@@ -105,13 +100,14 @@ namespace SLR {
         }
         else {
             BSDFQueryResult result;
-            float fs = evaluate(query, dir).maxValue();
+            float fs = evaluate(query, dir)[query.wlHint];
             float dirPDF = evaluatePDF(query, dir);
             return dirPDF > 0.0f ? fs * std::fabs(dir.z) / dirPDF : 0.0f;
         }
-#else
-        return weight(query, BSDFSample(0, 0, 0));
-#endif
+    }
+    
+    float ModifiedWardDurBRDF::weightInternal(const SLR::BSDFQuery &query) const {
+        return m_R[query.wlHint];
     }
     
     SampledSpectrum ModifiedWardDurBRDF::getBaseColorInternal(DirectionType flags) const {

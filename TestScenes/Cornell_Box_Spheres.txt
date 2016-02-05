@@ -1,0 +1,139 @@
+//setRenderer("method": "PT", ("samples": 16384,));
+setRenderer("method": "BPT", ("samples": 16384,));
+setRenderSettings("width": 1024, "height": 768);
+
+CBNode = createNode();
+setTransform(CBNode, translate(0, 0, 0));
+
+// left wall
+diffuseTex = SpectrumTexture(Spectrum(0.75, 0.25, 0.25));
+surfMat = createSurfaceMaterial("matte", (diffuseTex,));
+leftWall = createMesh(
+  (
+    ((-1.5,   0,  2.55), (1, 0, 0), (0, 0, -1), (0, 0)), 
+    ((-1.5,   0, -2.55), (1, 0, 0), (0, 0, -1), (1, 0)), 
+    ((-1.5, 2.5, -2.55), (1, 0, 0), (0, 0, -1), (1, 1)), 
+    ((-1.5, 2.5,  2.55), (1, 0, 0), (0, 0, -1), (0, 1))
+  ), 
+  (
+    ((0, 1, 2), surfMat), ((0, 2, 3), surfMat)
+  )
+);
+addChild(CBNode, leftWall);
+
+// right wall
+diffuseTex = SpectrumTexture(Spectrum(0.25, 0.25, 0.75));
+surfMat = createSurfaceMaterial("matte", (diffuseTex,));
+rightWall = createMesh(
+  (
+    ((1.5,   0, -2.55), (-1, 0, 0), (0, 0, 1), (0, 0)), 
+    ((1.5,   0,  2.55), (-1, 0, 0), (0, 0, 1), (1, 0)), 
+    ((1.5, 2.5,  2.55), (-1, 0, 0), (0, 0, 1), (1, 1)), 
+    ((1.5, 2.5, -2.55), (-1, 0, 0), (0, 0, 1), (0, 1))
+  ), 
+  (
+    ((0, 1, 2), surfMat), ((0, 2, 3), surfMat)
+  )
+);
+addChild(CBNode, rightWall);
+
+// floor
+diffuseTex = SpectrumTexture(Spectrum(0.75, 0.75, 0.75));
+surfMat = createSurfaceMaterial("matte", (diffuseTex,));
+floor = createMesh(
+  (
+    ((-1.5, 0,  2.55), (0, 1, 0), (1, 0, 0), (0, 0)), 
+    (( 1.5, 0,  2.55), (0, 1, 0), (1, 0, 0), (1, 0)), 
+    (( 1.5, 0, -2.55), (0, 1, 0), (1, 0, 0), (1, 1)), 
+    ((-1.5, 0, -2.55), (0, 1, 0), (1, 0, 0), (0, 1))
+  ), 
+  (
+    ((0, 1, 2), surfMat), ((0, 2, 3), surfMat)
+  )
+);
+addChild(CBNode, floor);
+
+// inner wall
+diffuseTex = SpectrumTexture(Spectrum(0.75, 0.75, 0.75));
+surfMat = createSurfaceMaterial("matte", (diffuseTex,));
+innerWall = createMesh(
+  (
+    ((-1.5,   0, -2.55), (0, 0, 1), (1, 0, 0), (0, 0)), 
+    (( 1.5,   0, -2.55), (0, 0, 1), (1, 0, 0), (1, 0)), 
+    (( 1.5, 2.5, -2.55), (0, 0, 1), (1, 0, 0), (1, 1)), 
+    ((-1.5, 2.5, -2.55), (0, 0, 1), (1, 0, 0), (0, 1))
+  ), 
+  (
+    ((0, 1, 2), surfMat), ((0, 2, 3), surfMat)
+  )
+);
+addChild(CBNode, innerWall);
+
+// ceiling
+diffuseTex = SpectrumTexture(Spectrum(0.75, 0.75, 0.75));
+surfMat = createSurfaceMaterial("matte", (diffuseTex,));
+ceiling = createMesh(
+  (
+    ((-1.5, 2.5, -2.55), (0, -1, 0), (1, 0, 0), (0, 0)), 
+    (( 1.5, 2.5, -2.55), (0, -1, 0), (1, 0, 0), (1, 0)), 
+    (( 1.5, 2.5,  2.55), (0, -1, 0), (1, 0, 0), (1, 1)), 
+    ((-1.5, 2.5,  2.55), (0, -1, 0), (1, 0, 0), (0, 1))
+  ), 
+  (
+    ((0, 1, 2), surfMat), ((0, 2, 3), surfMat)
+  )
+);
+addChild(CBNode, ceiling);
+
+// light
+diffuseTex = SpectrumTexture(Spectrum(0.9, 0.9, 0.9));
+scatterMat = createSurfaceMaterial("matte", (diffuseTex,));
+difLightTex = SpectrumTexture(Spectrum("ID": "D65") * 4);
+emitterMat = createEmitterSurfaceProperty("diffuse", (difLightTex,));
+surfMat = createSurfaceMaterial("emitter", (scatterMat, emitterMat));
+lightMesh = createMesh(
+  (
+    ((-0.5, 2.499, -0.5), (0, -1, 0), (1, 0, 0), (0, 0)), 
+    (( 0.5, 2.499, -0.5), (0, -1, 0), (1, 0, 0), (1, 0)),
+    (( 0.5, 2.499,  0.5), (0, -1, 0), (1, 0, 0), (1, 1)),
+    ((-0.5, 2.499,  0.5), (0, -1, 0), (1, 0, 0), (0, 1))
+  ),
+  (
+    ((0, 1, 2), surfMat), ((0, 2, 3), surfMat)
+  )
+);
+addChild(CBNode, lightMesh);
+
+addChild(root, CBNode);
+
+function leftSphereMat(name, attrs) {
+    eta = SpectrumTexture(Spectrum("ID": "Aluminium", 0));
+    k = SpectrumTexture(Spectrum("ID": "Aluminium", 1));
+    return createSurfaceMaterial("metal", (SpectrumTexture(Spectrum("Reflectance", 1.0)), eta, k));
+}
+leftSphereNode = load3DModel("models/sphere.assbin", leftSphereMat);
+setTransform(leftSphereNode, translate(-0.7, 0, -1.05) * 
+                             scale(0.5) * translate(0, 1, 0));
+addChild(CBNode, leftSphereNode);
+
+function rightSphereMat(name, attrs) {
+    etaExt = SpectrumTexture(Spectrum("ID": "Air", 0));
+    etaInt = SpectrumTexture(Spectrum("ID": "Glass_BK7", 0));
+    R = SpectrumTexture(Spectrum("Reflectance", 0.999));
+    T = SpectrumTexture(Spectrum("Reflectance", 0.999));
+    return createSurfaceMaterial("glass", (R, T, etaExt, etaInt));
+}
+rightSphereNode = load3DModel("models/sphere.assbin", rightSphereMat);
+setTransform(rightSphereNode, translate(0.7, 0, 0) * 
+                              scale(0.5) * translate(0, 1, 0));
+addChild(CBNode, rightSphereNode);
+
+cameraNode = createNode();
+camera = createPerspectiveCamera("aspect": 4.0 / 3.0, "fovY": 0.4807705238, 
+                                 "radius": 0.025, "imgDist": 1.0, "objDist": 6.3);
+addChild(cameraNode, camera);
+setTransform(cameraNode, translate(0.0, 1.689714, 6.70284) * 
+                         rotateY(3.1415926536) * 
+                         rotateX(0.0563936));
+
+addChild(root, cameraNode);
