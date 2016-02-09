@@ -68,6 +68,7 @@ namespace SLRSceneGraph {
                 const aiVector3D &uv = mesh->mNumUVComponents[0] > 0 ? mesh->mTextureCoords[0][v] : aiVector3D(0, 0, 0);
                 
                 SLR::Vertex outVtx{SLR::Point3D(p.x, p.y, p.z), SLR::Normal3D(n.x, n.y, n.z), SLR::Tangent3D(t.x, t.y, t.z), SLR::TexCoord2D(uv.x, uv.y)};
+                SLRAssert(absDot(outVtx.normal, outVtx.tangent) < 0.01f, "shading normal and tangent must be orthogonal.");
                 surfMesh->addVertex(outVtx);
             }
             

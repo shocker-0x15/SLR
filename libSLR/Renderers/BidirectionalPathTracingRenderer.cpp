@@ -325,7 +325,7 @@ namespace SLR {
                       weight.toString().c_str(), fs.toString().c_str(), uint32_t(vertices.size()) - 1, cosIn, fsResult.dirPDF);
             
             Vector3D dirIn = surfPt.shadingFrame.fromLocal(fsResult.dir_sn);
-            ray = Ray(surfPt.p + Ray::Epsilon * dirIn, dirIn, ray.time);
+            ray = Ray(surfPt.p, dirIn, ray.time, Ray::Epsilon);
             
             BPTVertex &vtxNextToLast = vertices[vertices.size() - 2];
             vtxNextToLast.revAreaPDF = revInfo.dirPDF * cosLast / (isect.dist * isect.dist);

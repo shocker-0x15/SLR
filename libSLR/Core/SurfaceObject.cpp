@@ -156,6 +156,7 @@ namespace SLR {
         surfPt.shadingFrame.x = surfPt.texCoord0Dir;
         surfPt.shadingFrame.z = surfPt.gNormal;
         surfPt.shadingFrame.y = cross(surfPt.shadingFrame.z, surfPt.shadingFrame.x);
+        SLRAssert(absDot(surfPt.shadingFrame.z, surfPt.shadingFrame.x) < 0.01f, "shading normal and tangent must be orthogonal.");
         surfPt.obj = this;
         result->posType = DirectionType::LowFreq;
         result->areaPDF = uvPDF / (2 * M_PI * M_PI * std::sin(theta));

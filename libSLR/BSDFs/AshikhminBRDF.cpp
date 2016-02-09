@@ -19,14 +19,19 @@ namespace SLR {
             theta_h = M_PI - theta_h;
         Vector3D halfv = Vector3D(std::sin(theta_h) * std::cos(phi_h), std::sin(theta_h) * std::sin(phi_h), std::cos(theta_h));
         result->dir_sn = 2 * dot(query.dir_sn, halfv) * halfv - query.dir_sn;
-        result->dirType = m_type;
+        if (result->dir_sn.z * query.dir_sn.z <= 0) {
+            result->dirPDF = 0.0f;
+            return SampledSpectrum::Zero;
+        }
         
         float dotHV = dot(halfv, query.dir_sn);
         float exp = (m_nu * halfv.x * halfv.x + m_nv * halfv.y * halfv.y) / (1 - halfv.z * halfv.z);
         SampledSpectrum F = m_Rs + (SampledSpectrum::One - m_Rs) * std::pow(1.0f - dotHV, 5);
         float commonTerm = std::sqrt((m_nu + 1) * (m_nv + 1)) / (8 * M_PI * dotHV) * std::pow(std::fabs(halfv.z), exp);
-        SampledSpectrum fs = commonTerm / std::fmax(std::fabs(query.dir_sn.z), std::fabs(result->dir_sn.z)) * F;
+        
         result->dirPDF = commonTerm;
+        result->dirType = m_type;
+        SampledSpectrum fs = commonTerm / std::fmax(std::fabs(query.dir_sn.z), std::fabs(result->dir_sn.z)) * F;
         if (result->reverse) {
             result->reverse->fs = fs;
             result->reverse->dirPDF = commonTerm;
@@ -35,6 +40,11 @@ namespace SLR {
     }
     
     SampledSpectrum AshikhminSpecularBRDF::evaluateInternal(const BSDFQuery &query, const Vector3D &dir, SampledSpectrum* rev_fs) const {
+        if (dir.z * query.dir_sn.z <= 0) {
+            if (rev_fs)
+                *rev_fs = SampledSpectrum::Zero;
+            return SampledSpectrum::Zero;
+        }
         Vector3D halfv = halfVector(query.dir_sn, dir);
         float dotHV = dot(halfv, query.dir_sn);
         float exp = (m_nu * halfv.x * halfv.x + m_nv * halfv.y * halfv.y) / (1 - halfv.z * halfv.z);
@@ -47,6 +57,11 @@ namespace SLR {
     }
     
     float AshikhminSpecularBRDF::evaluatePDFInternal(const BSDFQuery &query, const Vector3D &dir, float* revPDF) const {
+        if (dir.z * query.dir_sn.z <= 0) {
+            if (revPDF)
+                *revPDF = 0.0f;
+            return 0.0f;
+        }
         Vector3D halfv = halfVector(query.dir_sn, dir);
         float dotHV = dot(halfv, query.dir_sn);
         float exp = (m_nu * halfv.x * halfv.x + m_nv * halfv.y * halfv.y) / (1 - halfv.z * halfv.z);
@@ -100,6 +115,7 @@ namespace SLR {
         result->dirPDF = result->dir_sn.z / M_PI;
         result->dirType = m_type;
         SampledSpectrum fs = evaluateInternal(query, result->dir_sn, nullptr);
+        result->dir_sn.z *= dot(query.dir_sn, query.gNormal_sn) > 0 ? 1 : -1;
         if (result->reverse) {
             result->reverse->fs = fs;
             result->reverse->dirPDF = std::fabs(query.dir_sn.z) / M_PI;

@@ -15,7 +15,7 @@ namespace SLR {
     
     ImageSensor::ImageSensor(float sensitivity) :
     m_data(nullptr), m_separatedData(nullptr), m_numSeparated(0), m_sensitivity(sensitivity)
-    { };
+    {}
     
     ImageSensor::ImageSensor(uint32_t width, uint32_t height, float sensitivity) :
     m_data(nullptr), m_separatedData(nullptr), m_numSeparated(0), m_sensitivity(sensitivity) {
@@ -60,7 +60,7 @@ namespace SLR {
         }
         clearSeparatedBuffers();
     }
-    
+
     uint32_t ImageSensor::tileWidth() const {
         return s_tileWidth;
     }

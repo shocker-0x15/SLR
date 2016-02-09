@@ -13,7 +13,7 @@ namespace SLR {
         result->dir_sn = cosineSampleHemisphere(smp.uDir[0], smp.uDir[1]);
         result->dirPDF = result->dir_sn.z / M_PI;
         result->dirType = m_type;
-        result->dir_sn.z *= query.dir_sn.z > 0 ? 1 : -1;
+        result->dir_sn.z *= dot(query.dir_sn, query.gNormal_sn) > 0 ? 1 : -1;
         SampledSpectrum fs = m_R / M_PI;
         if (result->reverse) {
             result->reverse->fs = fs;
@@ -23,6 +23,12 @@ namespace SLR {
     }
     
     SampledSpectrum LambertianBRDF::evaluateInternal(const BSDFQuery &query, const Vector3D &dir, SampledSpectrum* rev_fs) const {
+        if (query.dir_sn.z * dir.z <= 0.0f) {
+            SampledSpectrum fs = SampledSpectrum::Zero;
+            if (rev_fs)
+                *rev_fs = fs;
+            return fs;
+        }
         SampledSpectrum fs = m_R / M_PI;
         if (rev_fs)
             *rev_fs = fs;
@@ -30,16 +36,14 @@ namespace SLR {
     }
     
     float LambertianBRDF::evaluatePDFInternal(const BSDFQuery &query, const Vector3D &dir, float* revPDF) const {
-        if (query.dir_sn.z * dir.z >= 0.0f) {
-            if (revPDF)
-                *revPDF = std::fabs(query.dir_sn.z) / M_PI;
-            return std::abs(dir.z) / M_PI;
-        }
-        else {
+        if (query.dir_sn.z * dir.z <= 0.0f) {
             if (revPDF)
                 *revPDF = 0.0f;
             return 0.0f;
         }
+        if (revPDF)
+            *revPDF = std::fabs(query.dir_sn.z) / M_PI;
+        return std::abs(dir.z) / M_PI;
     }
     
     float LambertianBRDF::weightInternal(const BSDFQuery &query, const BSDFSample &smp) const {

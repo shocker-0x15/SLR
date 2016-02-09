@@ -16,6 +16,7 @@
 #include <libSLR/Core/XORShift.h>
 #include <libSLR/BasicTypes/Spectrum.h>
 #include <libSLR/Memory/ArenaAllocator.h>
+#include <libSLR/Renderers/DebugRenderer.h>
 #include <libSLR/Renderers/PathTracingRenderer.h>
 #include <libSLR/Renderers/BidirectionalPathTracingRenderer.h>
 
@@ -1123,6 +1124,34 @@ namespace SLRSceneGraph {
                                          }
                                      };
                                      return configBPT(config, context, err);
+                                 }
+                                 else if (method == "debug") {
+                                     const static Function configDebug{
+                                         0, {{"outputs", Type::Tuple}},
+                                         [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
+                                             const ParameterList &outputs = args.at("outputs").raw<TypeMap::Tuple>();
+                                             bool chFlags[(int)SLR::ExtraChannel::NumChannels];
+                                             for (int i = 0; i < (int)SLR::ExtraChannel::NumChannels; ++i)
+                                                 chFlags[i] = false;
+                                             for (int i = 0; i < outputs.numUnnamed(); ++i) {
+                                                 Element elem = outputs(i);
+                                                 if (elem.type != SLRSceneGraph::Type::String)
+                                                     continue;
+                                                 std::string chName = elem.raw<TypeMap::String>();
+                                                 if (chName == "geometric normal")
+                                                     chFlags[(int)SLR::ExtraChannel::GeometricNormal] = true;
+                                                 else if (chName == "shading normal")
+                                                     chFlags[(int)SLR::ExtraChannel::ShadingNormal] = true;
+                                                 else if (chName == "shading tangent")
+                                                     chFlags[(int)SLR::ExtraChannel::ShadingTangent] = true;
+                                                 else if (chName == "distance")
+                                                     chFlags[(int)SLR::ExtraChannel::Distance] = true;
+                                             }
+                                             context.renderingContext->renderer = createUnique<SLR::DebugRenderer>(chFlags);
+                                             return Element();
+                                         }
+                                     };
+                                     return configDebug(config, context, err);
                                  }
                                  else {
                                      *err = ErrorMessage("Unknown method is specified.");

@@ -45,21 +45,23 @@ namespace SLR {
         virtual const void* getInternal(uint32_t x, uint32_t y) const = 0;
         virtual void setInternal(uint32_t x, uint32_t y, const void* data, size_t size) = 0;
     public:
-        Image2D() { };
-        Image2D(uint32_t w, uint32_t h, ColorFormat fmt, SpectrumType spType) : m_width(w), m_height(h), m_colorFormat(fmt), m_spType(spType) { };
-        ~Image2D() { };
+        Image2D() { }
+        Image2D(uint32_t w, uint32_t h, ColorFormat fmt, SpectrumType spType) : m_width(w), m_height(h), m_colorFormat(fmt), m_spType(spType) { }
+        ~Image2D() { }
         
         template <typename ColFmt>
-        const ColFmt &get(uint32_t x, uint32_t y) const { return *(const ColFmt*)getInternal(x, y); };
+        const ColFmt &get(uint32_t x, uint32_t y) const { return *(const ColFmt*)getInternal(x, y); }
         template <typename ColFmt>
-        void set(uint32_t x, uint32_t y, const ColFmt &data) { setInternal(x, y, &data, sizeof(data)); };
+        void set(uint32_t x, uint32_t y, const ColFmt &data) { setInternal(x, y, &data, sizeof(data)); }
         
         void areaAverage(float xLeft, float xRight, float yTop, float yBottom, void* avg) const;
         
-        uint32_t width() const { return m_width; };
-        uint32_t height() const { return m_height; };
-        SpectrumType spectrumType() const { return m_spType; };
-        ColorFormat format() const { return m_colorFormat; };
+        uint32_t width() const { return m_width; }
+        uint32_t height() const { return m_height; }
+        SpectrumType spectrumType() const { return m_spType; }
+        ColorFormat format() const { return m_colorFormat; }
+        
+        void saveImage(const std::string &filepath, bool gammaCorrection) const;
     };
     
     
@@ -78,7 +80,7 @@ namespace SLR {
             uint32_t lx = x & localMask;
             uint32_t ly = y & localMask;
             return m_data + m_stride * ((ty * m_numTileX + tx) * tileWidth * tileWidth + ly * tileWidth + lx);
-        };
+        }
         
         void setInternal(uint32_t x, uint32_t y, const void* data, size_t size) override {
             uint32_t tx = x >> log2_tileWidth;
@@ -86,35 +88,50 @@ namespace SLR {
             uint32_t lx = x & localMask;
             uint32_t ly = y & localMask;
             std::memcpy(m_data + m_stride * ((ty * m_numTileX + tx) * tileWidth * tileWidth + ly * tileWidth + lx), data, size);
-        };
+        }
     public:
-        ~TiledImage2DTemplate() { };
+        ~TiledImage2DTemplate() {
+            
+        }
+        
+        TiledImage2DTemplate(uint32_t width, uint32_t height, ColorFormat fmt, Allocator* mem) {
+            m_width = width;
+            m_height = height;
+            m_spType = SpectrumType::Reflectance;
+            m_colorFormat = fmt;
+            m_stride = sizesOfColorFormats[(uint32_t)m_colorFormat];
+            m_numTileX = (m_width + (tileWidth - 1)) >> log2_tileWidth;
+            size_t numTileY = (m_height + (tileWidth - 1)) >> log2_tileWidth;
+            size_t tileSize = m_stride * tileWidth * tileWidth;
+            m_allocSize = m_numTileX * numTileY * tileSize;
+            m_data = (uint8_t*)mem->alloc(m_allocSize, SLR_L1_Cacheline_Size);
+            
+            memset(m_data, 0, m_allocSize);
+        }
         
         TiledImage2DTemplate(const void* linearData, uint32_t width, uint32_t height, ColorFormat fmt, Allocator* mem, SpectrumType spType) {
             m_width = width;
             m_height = height;
-            m_colorFormat = fmt;
             m_spType = spType;
             
 #ifdef Use_Spectral_Representation
-            ColorFormat intermFormat;
-            switch (m_colorFormat) {
+            switch (fmt) {
                 case ColorFormat::RGB8x3:
                 case ColorFormat::RGB_8x4:
-                    intermFormat = ColorFormat::uvs16Fx3;
+                    m_colorFormat = ColorFormat::uvs16Fx3;
                     break;
                 case ColorFormat::RGBA8x4:
                 case ColorFormat::RGBA16Fx4:
-                    intermFormat = ColorFormat::uvsA16Fx4;
+                    m_colorFormat = ColorFormat::uvsA16Fx4;
                     break;
                 case ColorFormat::Gray8:
-                    intermFormat = ColorFormat::Gray8;
+                    m_colorFormat = ColorFormat::Gray8;
                     break;
                 default:
                     SLRAssert(false, "Color format is invalid.");
                     break;
             }
-            m_stride = sizesOfColorFormats[(uint32_t)intermFormat];
+            m_stride = sizesOfColorFormats[(uint32_t)m_colorFormat];
             m_numTileX = (m_width + (tileWidth - 1)) >> log2_tileWidth;
             size_t numTileY = (m_height + (tileWidth - 1)) >> log2_tileWidth;
             size_t tileSize = m_stride * tileWidth * tileWidth;
@@ -184,9 +201,8 @@ namespace SLR {
                     }
                 }
             }
-            
-            m_colorFormat = intermFormat;
 #else
+            m_colorFormat = fmt;
             m_stride = sizesOfColorFormats[(uint32_t)m_colorFormat];
             m_numTileX = (m_width + (tileWidth - 1)) >> log2_tileWidth;
             size_t numTileY = (m_height + (tileWidth - 1)) >> log2_tileWidth;
@@ -200,10 +216,10 @@ namespace SLR {
                 }
             }
 #endif
-        };
+        }
         
-        const uint8_t* data() const { return m_data; };
-        size_t size() const { return m_allocSize; };
+        const uint8_t* data() const { return m_data; }
+        size_t size() const { return m_allocSize; }
     };    
 }
 

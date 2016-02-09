@@ -15,26 +15,6 @@
 #include <type_traits>
 
 namespace SLR {
-#define BSDF_SAMPLE_ASSERT(value) \
-SLRAssert((value).hasInf() == false && (value).hasNaN() == false,\
-"BSDF value is an expected value.\n"\
-"uComponent: %f, uDir: (%f, %f), dirIn: (%f, %f, %f), dirOut: (%f, %f, %f)",\
-smp.uComponent, smp.uDir[0], smp.uDir[1], \
-query.dir_sn.x, query.dir_sn.y, query.dir_sn.z, \
-result->dir_sn.x, result->dir_sn.y, result->dir_sn.z)
-    
-#define BSDF_EVALUATE_ASSERT(value) \
-SLRAssert((value).hasInf() == false && (value).hasNaN() == false,\
-"BSDF value is an expected value.\n"\
-"dirIn: (%f, %f, %f), dirOut: (%f, %f, %f)",\
-query.dir_sn.x, query.dir_sn.y, query.dir_sn.z, \
-dir.x, dir.y, dir.z)
-    
-#define BSDF_EVALUATE_PDF_ASSERT(value) \
-SLRAssert(std::isinf((value)) == false && std::isnan((value)) == false,\
-"PDF value is an expected value. : dirIn: (%f, %f, %f)",\
-query.dir_sn.x, query.dir_sn.y, query.dir_sn.z);
-    
     struct SLR_API DirectionType {
         enum InternalEnum : uint32_t {
             IE_LowFreq = 1 << 0,
@@ -229,13 +209,13 @@ query.dir_sn.x, query.dir_sn.y, query.dir_sn.z);
                 return SampledSpectrum::Zero;
             SampledSpectrum fs_sn = sampleInternal(query, smp, result);
             if (query.adjoint) {
-                float commonTerm = std::fabs(query.dir_sn.z / dot(query.dir_sn, (Vector3D)query.gNormal_sn));
+                float commonTerm = std::fabs(query.dir_sn.z / dot(query.dir_sn, query.gNormal_sn));
                 if (result->reverse)
                     result->reverse->fs *= commonTerm;
                 return fs_sn * commonTerm;
             }
             else {
-                float commonTerm = std::fabs(result->dir_sn.z / dot(result->dir_sn, (Vector3D)query.gNormal_sn));
+                float commonTerm = std::fabs(result->dir_sn.z / dot(result->dir_sn, query.gNormal_sn));
                 if (result->reverse)
                     result->reverse->fs *= commonTerm;
                 return fs_sn * commonTerm;
@@ -251,13 +231,13 @@ query.dir_sn.x, query.dir_sn.y, query.dir_sn.z);
             }
             SampledSpectrum fs_sn = evaluateInternal(mQuery, dir, rev_fs);
             if (query.adjoint) {
-                float commonTerm = std::fabs(query.dir_sn.z / dot(query.dir_sn, (Vector3D)query.gNormal_sn));
+                float commonTerm = std::fabs(query.dir_sn.z / dot(query.dir_sn, query.gNormal_sn));
                 if (rev_fs)
                     *rev_fs *= commonTerm;
                 return fs_sn * commonTerm;
             }
             else {
-                float commonTerm = std::fabs(dir.z / dot(dir, (Vector3D)query.gNormal_sn));
+                float commonTerm = std::fabs(dir.z / dot(dir, query.gNormal_sn));
                 if (rev_fs)
                     *rev_fs *= commonTerm;
                 return fs_sn * commonTerm;
@@ -317,10 +297,10 @@ query.dir_sn.x, query.dir_sn.y, query.dir_sn.z);
             result->dirPDF = 0.0f;
             result->dirType = DirectionType();
             return false;
-        };
+        }
     public:
-        IDF(DirectionType type) : m_type(type) { };
-        virtual ~IDF() { };
+        IDF(DirectionType type) : m_type(type) { }
+        virtual ~IDF() { }
         
         virtual SampledSpectrum sample(const IDFSample &smp, IDFQueryResult* result) const = 0;
         virtual SampledSpectrum evaluate(const Vector3D &dirIn) const = 0;
@@ -349,7 +329,7 @@ query.dir_sn.x, query.dir_sn.y, query.dir_sn.z);
         SampledSpectrum m_eta;
         SampledSpectrum m_k;
     public:
-        FresnelConductor(const SampledSpectrum &eta, const SampledSpectrum &k) : m_eta(eta), m_k(k) { };
+        FresnelConductor(const SampledSpectrum &eta, const SampledSpectrum &k) : m_eta(eta), m_k(k) { }
         
         SampledSpectrum evaluate(float cosEnter) const override;
         float evaluate(float cosEnter, uint32_t wlIdx) const override;
@@ -359,10 +339,10 @@ query.dir_sn.x, query.dir_sn.y, query.dir_sn.z);
         SampledSpectrum m_etaExt;
         SampledSpectrum m_etaInt;
     public:
-        FresnelDielectric(const SampledSpectrum &etaExt, const SampledSpectrum &etaInt) : m_etaExt(etaExt), m_etaInt(etaInt) { };
+        FresnelDielectric(const SampledSpectrum &etaExt, const SampledSpectrum &etaInt) : m_etaExt(etaExt), m_etaInt(etaInt) { }
         
-        SampledSpectrum etaExt() const { return m_etaExt; };
-        SampledSpectrum etaInt() const { return m_etaInt; };
+        SampledSpectrum etaExt() const { return m_etaExt; }
+        SampledSpectrum etaInt() const { return m_etaInt; }
         
         SampledSpectrum evaluate(float cosEnter) const override;
         float evaluate(float cosEnter, uint32_t wlIdx) const override;

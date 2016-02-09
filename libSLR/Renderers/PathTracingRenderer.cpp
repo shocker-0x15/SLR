@@ -186,7 +186,8 @@ namespace SLR {
                     Vector3D shadowDir_sn = surfPt.shadingFrame.toLocal(shadowDir);
                     BSDFQuery queryBSDF(dirOut_sn, gNorm_sn, wls.selectedLambda);
                     SampledSpectrum fs = bsdf->evaluate(queryBSDF, shadowDir_sn);
-                    float bsdfPDF = bsdf->evaluatePDF(queryBSDF, shadowDir_sn) * std::fabs(shadowDir_l.z) / dist2;
+                    float cosLight = absDot(-shadowDir, lpResult.surfPt.gNormal);
+                    float bsdfPDF = bsdf->evaluatePDF(queryBSDF, shadowDir_sn) * cosLight / dist2;
                     SLRAssert(!std::isnan(bsdfPDF) && !std::isinf(bsdfPDF), "bsdfPDF: unexpected value detected: %f", bsdfPDF);
                     SLRAssert(!fs.hasNaN() && !fs.hasInf(), "fs: unexpected value detected: %s", fs.toString().c_str());
                     
@@ -194,7 +195,7 @@ namespace SLR {
                     if (!lpResult.posType.isDelta() && !std::isinf(lpResult.areaPDF))
                         MISWeight = (lightPDF * lightPDF) / (lightPDF * lightPDF + bsdfPDF * bsdfPDF);
                     
-                    float G = std::fabs(shadowDir_sn.z) * std::fabs(shadowDir_l.z) / dist2;
+                    float G = absDot(shadowDir_sn, gNorm_sn) * cosLight / dist2;
                     sp += alpha * Le * fs * (G * MISWeight / lightPDF);
                     SLRAssert(!std::isnan(G) && !std::isinf(G), "G: unexpected value detected: %f", G);
                 }
@@ -216,7 +217,7 @@ namespace SLR {
                       alpha.toString().c_str(), fs.toString().c_str(), pathLength, std::fabs(fsResult.dir_sn.z), fsResult.dirPDF);
             
             Vector3D dirIn = surfPt.shadingFrame.fromLocal(fsResult.dir_sn);
-            ray = Ray(surfPt.p + Ray::Epsilon * dirIn, dirIn, ray.time);
+            ray = Ray(surfPt.p, dirIn, ray.time, Ray::Epsilon);
             
             isect = Intersection();
             if (!scene.intersect(ray, &isect))

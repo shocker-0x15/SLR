@@ -28,7 +28,14 @@ namespace SLR {
         WavelengthSamplesTemplate(const RealType* values) {
             for (int i = 0; i < N; ++i)
                 lambdas[i] = values[i];
+            selectedLambda = 0;
             flags = 0;
+        }
+        WavelengthSamplesTemplate(const WavelengthSamplesTemplate &wls) {
+            for (int i = 0; i < N; ++i)
+                lambdas[i] = wls.lambdas[i];
+            selectedLambda = wls.selectedLambda;
+            flags = wls.flags;
         }
         
         RealType &operator[](uint32_t index) {

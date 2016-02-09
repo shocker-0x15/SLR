@@ -7,6 +7,7 @@
 
 #include "Image.h"
 #include "../BasicTypes/CompensatedSum.h"
+#include "../Helper/bmp_exporter.h"
 
 namespace SLR {
     const size_t sizesOfColorFormats[(uint32_t)ColorFormat::Num] = {
@@ -302,5 +303,38 @@ namespace SLR {
             default:
                 break;
         }
-    }    
+    }
+    
+    void Image2D::saveImage(const std::string &filepath, bool gammaCorrection) const {
+        struct BMP_RGB {
+            uint8_t B, G, R;
+        };
+        
+        uint32_t byteWidth = 3 * m_width + m_width % 4;
+        uint8_t* bmp = (uint8_t*)malloc(m_height * byteWidth);
+        for (int i = 0; i < m_height; ++i) {
+            for (int j = 0; j < m_width; ++j) {
+                uint32_t idx = (m_height - i - 1) * byteWidth + 3 * j;
+                BMP_RGB &dst = *(BMP_RGB*)(bmp + idx);
+                switch (m_colorFormat) {
+                    case ColorFormat::RGB8x3: {
+                        RGB8x3 val = get<RGB8x3>(j, i);
+                        dst.R = val.r; dst.G = val.g; dst.B = val.b;
+                        break;
+                    }
+                    case ColorFormat::Gray8: {
+                        uint8_t val = get<Gray8>(j, i).v;
+                        dst.R = val; dst.G = val; dst.B = val;
+                        break;
+                    }
+                    default:
+                        SLRAssert(false, "invalid format");
+                        break;
+                }
+            }
+        }
+        
+        saveBMP(filepath.c_str(), bmp, m_width, m_height);
+        free(bmp);
+    }
 }

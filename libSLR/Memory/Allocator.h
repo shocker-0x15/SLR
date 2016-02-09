@@ -14,6 +14,8 @@
 namespace SLR {
     class SLR_API Allocator {
     public:
+        typedef std::function<void(void*)> DeleterType;
+        
         virtual void* alloc(uintptr_t size, uintptr_t align) = 0;
         virtual void free(void* ptr) = 0;
         
@@ -34,6 +36,14 @@ namespace SLR {
             new (rawPtr) T(std::forward<ArgTypes>(args)...);
             std::function<void(void*)> deleter = std::bind(&Allocator::free, this, std::placeholders::_1);
             return std::shared_ptr<T>(rawPtr, deleter);
+        };
+        
+        template <typename T, typename ...ArgTypes>
+        std::unique_ptr<T, DeleterType> createUnique(ArgTypes&&... args) {
+            T* rawPtr = alloc<T>();
+            new (rawPtr) T(std::forward<ArgTypes>(args)...);
+            DeleterType deleter = std::bind(&Allocator::free, this, std::placeholders::_1);
+            return std::unique_ptr<T, DeleterType>(rawPtr, deleter);
         };
     };
     
