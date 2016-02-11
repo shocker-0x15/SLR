@@ -29,9 +29,9 @@ namespace SLR {
         float distMin, distMax;
         float time;
         
-        Ray() { };
+        Ray() { }
         Ray(const Point3D &o, const Vector3D &d, float t, float dMin = 0.0f, float dMax = INFINITY) :
-        org(o), dir(d), distMin(dMin), distMax(dMax), time(t) { };
+        org(o), dir(d), distMin(dMin), distMax(dMax), time(t) { }
     };
     
     struct SLR_API BoundingBox3D {
@@ -46,18 +46,18 @@ namespace SLR {
         BoundingBox3D() {
             minP.x = minP.y = minP.z = INFINITY;
             maxP.x = maxP.y = maxP.z = -INFINITY;
-        };
-        BoundingBox3D(const Point3D &p) : minP(p), maxP(p) { };
-        BoundingBox3D(const Point3D &pmin, const Point3D &pmax) : minP(pmin), maxP(pmax) { };
+        }
+        BoundingBox3D(const Point3D &p) : minP(p), maxP(p) { }
+        BoundingBox3D(const Point3D &pmin, const Point3D &pmax) : minP(pmin), maxP(pmax) { }
         
         Point3D centroid() const {
             return (minP + maxP) * 0.5f;
-        };
+        }
         
         float surfaceArea() const {
             Vector3D d = maxP - minP;
             return 2 * (d.x * d.y + d.y * d.z + d.z * d.x);
-        };
+        }
         
         Point3D corner(uint32_t c) const {
             SLRAssert(c >= 0 && c < 8, "\"c\" is out of range [0, 8]");
@@ -65,11 +65,11 @@ namespace SLR {
             return Point3D(*(&minP.x + offset * (c & 0x01)),
                            *(&minP.y + offset * (c & 0x02)),
                            *(&minP.z + offset * (c & 0x04)));
-        };
+        }
         
         float centerOfAxis(uint8_t axis) const {
             return (minP[axis] + maxP[axis]) * 0.5f;
-        };
+        }
         
         Axis widestAxis() const {
             Vector3D d = maxP - minP;
@@ -79,19 +79,19 @@ namespace SLR {
                 return Axis_Y;
             else
                 return Axis_Z;
-        };
+        }
         
         BoundingBox3D &unify(const Point3D &p) {
             minP = min(minP, p);
             maxP = max(maxP, p);
             return *this;
-        };
+        }
         
         BoundingBox3D unify(const BoundingBox3D &b) {
             minP = min(minP, b.minP);
             maxP = max(maxP, b.maxP);
             return *this;
-        };
+        }
         
         bool intersect(const Ray &r) const {
             float dist0 = r.distMin, dist1 = r.distMax;
@@ -107,7 +107,7 @@ namespace SLR {
                     return false;
             }
             return true;
-        };
+        }
     };
     
     
@@ -117,14 +117,14 @@ namespace SLR {
         Tangent3D tangent;
         TexCoord2D texCoord;
         
-        Vertex() { };
-        Vertex(const Point3D &pos, const Normal3D &norm, const Tangent3D &tang, const TexCoord2D &tc) : position(pos), normal(norm), tangent(tang), texCoord(tc) { };
+        Vertex() { }
+        Vertex(const Point3D &pos, const Normal3D &norm, const Tangent3D &tang, const TexCoord2D &tc) : position(pos), normal(norm), tangent(tang), texCoord(tc) { }
     };
     
     
     class SLR_API Surface {
     public:
-        virtual ~Surface() { };
+        virtual ~Surface() { }
         
         virtual BoundingBox3D bounds() const = 0;
         virtual bool preTransformed() const = 0;
@@ -138,13 +138,13 @@ namespace SLR {
     struct SLR_API ReferenceFrame {
         Vector3D x, y, z;
         
-        Vector3D toLocal(const Vector3D &v) const { return Vector3D(dot(x, v), dot(y, v), dot(z, v)); };
+        Vector3D toLocal(const Vector3D &v) const { return Vector3D(dot(x, v), dot(y, v), dot(z, v)); }
         Vector3D fromLocal(const Vector3D &v) const {
             // assume orthonormal basis
             return Vector3D(dot(Vector3D(x.x, y.x, z.x), v),
                             dot(Vector3D(x.y, y.y, z.y), v),
                             dot(Vector3D(x.z, y.z, z.z), v));
-        };
+        }
     };
     
     struct SLR_API Intersection {
@@ -157,7 +157,7 @@ namespace SLR {
         mutable std::stack<const SurfaceObject*> obj;
         //    const SurfaceObject* obj;
         
-        Intersection() : dist(INFINITY) { };
+        Intersection() : dist(INFINITY) { }
         
         void getSurfacePoint(SurfacePoint* surfPt);
     };
@@ -172,7 +172,8 @@ namespace SLR {
         ReferenceFrame shadingFrame;
         const SingleSurfaceObject* obj;
         
-        Vector3D getShadowDirection(const SurfacePoint &shadingPoint, float* dist2);
+        float getSquaredDistance(const Point3D &shadingPoint) const { return atInfinity ? 1.0f : sqDistance(p, shadingPoint); }
+        Vector3D getDirectionFrom(const Point3D &shadingPoint, float* dist2) const;
         bool isEmitting() const;
         SampledSpectrum emittance(const WavelengthSamples &wls) const;
         float evaluateAreaPDF() const;

@@ -134,16 +134,14 @@ namespace SLR {
     }
     
     float AshikhminDiffuseBRDF::evaluatePDFInternal(const BSDFQuery &query, const Vector3D &dir, float* revPDF) const {
-        if (query.dir_sn.z * dir.z >= 0.0f) {
-            if (revPDF)
-                *revPDF = std::fabs(query.dir_sn.z) / M_PI;
-            return std::fabs(dir.z) / M_PI;
-        }
-        else {
+        if (query.dir_sn.z * dir.z <= 0.0f) {
             if (revPDF)
                 *revPDF = 0.0f;
             return 0.0f;
         }
+        if (revPDF)
+            *revPDF = std::fabs(query.dir_sn.z) / M_PI;
+        return std::fabs(dir.z) / M_PI;
     }
     
     float AshikhminDiffuseBRDF::weightInternal(const BSDFQuery &query, const BSDFSample &smp) const {

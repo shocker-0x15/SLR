@@ -13,7 +13,7 @@
 namespace SLR {
     template <typename RealType>
     SLR_API RealType sRGB_gamma(RealType value) {
-		SLRAssert(value >= 0, "Input value must be equal to or greater than 0.");
+		SLRAssert(value >= 0, "Input value must be equal to or greater than 0: %g", value);
         if (value <= 0.0031308)
             return 12.92 * value;
         return 1.055 * std::pow(value, 1.0 / 2.4) - 0.055;
@@ -23,7 +23,7 @@ namespace SLR {
     
     template <typename RealType>
     SLR_API RealType sRGB_degamma(RealType value) {
-        SLRAssert(value >= 0, "Input value must be equal to or greater than 0.");
+        SLRAssert(value >= 0, "Input value must be equal to or greater than 0: %g", value);
         if (value <= 0.04045)
             return value  / 12.92;
         return std::pow((value + 0.055) / 1.055, 2.4);

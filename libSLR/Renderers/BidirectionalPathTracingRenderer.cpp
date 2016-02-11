@@ -135,8 +135,8 @@ namespace SLR {
                     EDFSample LeSample(rng.getFloat0cTo1o(), rng.getFloat0cTo1o(), rng.getFloat0cTo1o());
                     EDFQueryResult LeResult;
                     SampledSpectrum Le1 = edf->sample(edfQuery, LeSample, &LeResult);
-                    Ray ray(lightResult.surfPt.p + Ray::Epsilon * lightResult.surfPt.gNormal, lightResult.surfPt.shadingFrame.fromLocal(LeResult.dir_sn), time);
-                    SampledSpectrum alpha = lightVertices.back().alpha * Le1 * (LeResult.dir_sn.z / LeResult.dirPDF);
+                    Ray ray(lightResult.surfPt.p, lightResult.surfPt.shadingFrame.fromLocal(LeResult.dir_sn), time, Ray::Epsilon);
+                    SampledSpectrum alpha = lightVertices.back().alpha * Le1 * (absDot(ray.dir, lightResult.surfPt.gNormal) / LeResult.dirPDF);
                     generateSubPath(wls, alpha, ray, LeResult.dirPDF, LeResult.dirType, LeResult.dir_sn.z, true, rng, mem);
                 }
                 
@@ -158,7 +158,7 @@ namespace SLR {
                     IDFQueryResult WeResult;
                     SampledSpectrum We1 = idf->sample(WeSample, &WeResult);
                     Ray ray(lensResult.surfPt.p, lensResult.surfPt.shadingFrame.fromLocal(WeResult.dirLocal), time);
-                    SampledSpectrum alpha = eyeVertices.back().alpha * We1 * (WeResult.dirLocal.z / WeResult.dirPDF);
+                    SampledSpectrum alpha = eyeVertices.back().alpha * We1 * (absDot(ray.dir, lensResult.surfPt.gNormal) / WeResult.dirPDF);
                     generateSubPath(wls, alpha, ray, WeResult.dirPDF, WeResult.dirType, WeResult.dirLocal.z, false, rng, mem);
                 }
                 
@@ -171,11 +171,10 @@ namespace SLR {
                         if (!scene->testVisibility(eVtx.surfPt, lVtx.surfPt, time))
                             continue;
                         
-                        Vector3D connectionVector = eVtx.surfPt.p - lVtx.surfPt.p;
-                        float dist2 = connectionVector.sqLength();
-                        connectionVector /= std::sqrt(dist2);
+                        float dist2;
+                        Vector3D connectionVector = lVtx.surfPt.getDirectionFrom(eVtx.surfPt.p, &dist2);
                         
-                        Vector3D cVecL = lVtx.surfPt.shadingFrame.toLocal(connectionVector);
+                        Vector3D cVecL = lVtx.surfPt.shadingFrame.toLocal(-connectionVector);
                         DDFQuery queryLightEnd{lVtx.dirIn_sn, lVtx.gNormal_sn, wlHint, true};
                         SampledSpectrum revDDFL;
                         SampledSpectrum ddfL = lVtx.ddf->evaluate(queryLightEnd, cVecL, &revDDFL);
@@ -183,7 +182,7 @@ namespace SLR {
                         float lExtend1stDirPDF = lVtx.ddf->evaluatePDF(queryLightEnd, cVecL, &eExtend2ndDirPDF);
                         float cosLightEnd = absDot(connectionVector, lVtx.surfPt.gNormal);
                         
-                        Vector3D cVecE = eVtx.surfPt.shadingFrame.toLocal(-connectionVector);
+                        Vector3D cVecE = eVtx.surfPt.shadingFrame.toLocal(connectionVector);
                         DDFQuery queryEyeEnd{eVtx.dirIn_sn, eVtx.gNormal_sn, wlHint, false};
                         SampledSpectrum revDDFE;
                         SampledSpectrum ddfE = eVtx.ddf->evaluate(queryEyeEnd, cVecE, &revDDFE);
@@ -233,10 +232,13 @@ namespace SLR {
                         // calculate MIS weight and store weighted contribution to a sensor.
                         float MISWeight = calculateMISWeight(lExtend1stAreaPDF, lExtend1stRRProb, lExtend2ndAreaPDF, lExtend2ndRRProb,
                                                              eExtend1stAreaPDF, eExtend1stRRProb, eExtend2ndAreaPDF, eExtend2ndRRProb, s, t);
-//                        SLRAssert(!std::isinf(MISWeight) && !std::isnan(MISWeight), "invalid MIS weight.");
                         if (std::isinf(MISWeight) || std::isnan(MISWeight))
                             continue;
+                        SLRAssert(MISWeight >= 0 && MISWeight <= 1.0f, "invalid MIS weight: %g", MISWeight);
                         SampledSpectrum contribution = MISWeight * lVtx.alpha * connectionTerm * eVtx.alpha;
+                        SLRAssert(contribution.hasNaN() == false && contribution.hasInf() == false && contribution.hasMinus() == false,
+                                  "Unexpected value detected: %s\n"
+                                  "pix: (%f, %f)", contribution.toString().c_str(), px, py);
                         if (t > 1) {
                             sensor->add(px, py, wls, contribution);
                         }
@@ -257,6 +259,10 @@ namespace SLR {
     void BidirectionalPathTracingRenderer::Job::generateSubPath(const WavelengthSamples &initWLs, const SampledSpectrum &initAlpha, const SLR::Ray &initRay, float dirPDF, DirectionType sampledType,
                                                                 float cosLast, bool adjoint, RandomNumberGenerator &rng, SLR::ArenaAllocator &mem) {
         std::vector<BPTVertex> &vertices = adjoint ? lightVertices : eyeVertices;
+        
+        // reject invalid values.
+        if (dirPDF == 0.0f)
+            return;
         
         WavelengthSamples wls = initWLs;
         Ray ray = initRay;
@@ -288,10 +294,15 @@ namespace SLR {
                                                      0.0f, 0.0f, 0.0f, 0.0f,
                                                      0, (uint32_t)vertices.size());
                 SampledSpectrum contribution = MISWeight * alpha * Le0 * Le1;
+                SLRAssert(contribution.hasNaN() == false && contribution.hasInf() == false && contribution.hasMinus() == false,
+                          "Unexpected value detected: %s\n"
+                          "pix: (%f, %f)", contribution.toString().c_str(), curPx, curPy);
                 if (wls.flags & WavelengthSamples::LambdaIsSelected)
                     contribution *= WavelengthSamples::NumComponents;
-                if (!std::isinf(MISWeight) && !std::isnan(MISWeight))
+                if (!std::isinf(MISWeight) && !std::isnan(MISWeight)) {
+                    SLRAssert(MISWeight >= 0 && MISWeight <= 1.0f, "invalid MIS weight: %g", MISWeight);
                     sensor->add(curPx, curPy, wls, contribution);
+                }
             }
             
             if (surfPt.atInfinity) {
@@ -320,12 +331,10 @@ namespace SLR {
                 break;
             
             alpha *= weight;
+            ray = Ray(surfPt.p, surfPt.shadingFrame.fromLocal(fsResult.dir_sn), ray.time, Ray::Epsilon);
             SLRAssert(!weight.hasInf() && !weight.hasNaN(),
                       "weight: unexpected value detected:\nweight: %s\nfs: %s\nlength: %u, cos: %g, dirPDF: %g",
                       weight.toString().c_str(), fs.toString().c_str(), uint32_t(vertices.size()) - 1, cosIn, fsResult.dirPDF);
-            
-            Vector3D dirIn = surfPt.shadingFrame.fromLocal(fsResult.dir_sn);
-            ray = Ray(surfPt.p, dirIn, ray.time, Ray::Epsilon);
             
             BPTVertex &vtxNextToLast = vertices[vertices.size() - 2];
             vtxNextToLast.revAreaPDF = revInfo.dirPDF * cosLast / (isect.dist * isect.dist);

@@ -18,14 +18,14 @@ namespace SLR {
         obj.top()->getSurfacePoint(*this, surfPt);
     }
     
-    Vector3D SurfacePoint::getShadowDirection(const SurfacePoint &shadingPoint, float* dist2) {
-        SLRAssert(shadingPoint.atInfinity == false, "Shading point must be in finite region.");
+    
+    Vector3D SurfacePoint::getDirectionFrom(const Point3D &shadingPoint, float* dist2) const {
         if (atInfinity) {
             *dist2 = 1.0f;
             return normalize(p - Point3D::Zero);
         }
         else {
-            Vector3D ret(p - shadingPoint.p);
+            Vector3D ret(p - shadingPoint);
             *dist2 = ret.sqLength();
             return ret / std::sqrt(*dist2);
         }

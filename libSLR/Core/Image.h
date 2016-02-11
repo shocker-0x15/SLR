@@ -140,7 +140,7 @@ namespace SLR {
             
             for (int i = 0; i < m_height; ++i) {
                 for (int j = 0; j < m_width; ++j) {
-                    switch (m_colorFormat) {
+                    switch (fmt) {
                         case ColorFormat::RGB8x3: {
                             const RGB8x3 &val = *((RGB8x3*)linearData + m_width * i + j);
                             float RGB[3] = {val.r / 255.0f, val.g / 255.0f, val.b / 255.0f};

@@ -119,7 +119,7 @@ namespace SLR {
                           "Unexpected value detected: %s\n"
                           "pix: (%f, %f)", C.toString().c_str(), px, py);
                 
-                SampledSpectrum weight = (We0 * We1) * (WeResult.dirLocal.z / (lensResult.areaPDF * WeResult.dirPDF * selectWLPDF));
+                SampledSpectrum weight = (We0 * We1) * (absDot(ray.dir, lensResult.surfPt.gNormal) / (lensResult.areaPDF * WeResult.dirPDF * selectWLPDF));
                 SLRAssert(weight.hasNaN() == false && weight.hasInf() == false && weight.hasMinus() == false,
                           "Unexpected value detected: %s\n"
                           "pix: (%f, %f)", weight.toString().c_str(), px, py);
@@ -173,17 +173,17 @@ namespace SLR {
                 SampledSpectrum M = light.sample(lpQuery, lpSample, &lpResult);
                 SLRAssert(!std::isnan(lpResult.areaPDF)/* && !std::isinf(xpResult.areaPDF)*/, "areaPDF: unexpected value detected: %f", lpResult.areaPDF);
                 
-                float dist2;
-                Vector3D shadowDir = lpResult.surfPt.getShadowDirection(surfPt, &dist2);
-                
                 if (scene.testVisibility(surfPt, lpResult.surfPt, ray.time)) {
-                    EDF* edf = lpResult.surfPt.createEDF(wls, mem);
+                    float dist2;
+                    Vector3D shadowDir = lpResult.surfPt.getDirectionFrom(surfPt.p, &dist2);
                     Vector3D shadowDir_l = lpResult.surfPt.shadingFrame.toLocal(-shadowDir);
+                    Vector3D shadowDir_sn = surfPt.shadingFrame.toLocal(shadowDir);
+                    
+                    EDF* edf = lpResult.surfPt.createEDF(wls, mem);
                     SampledSpectrum Le = M * edf->evaluate(EDFQuery(), shadowDir_l);
                     float lightPDF = lightProb * lpResult.areaPDF;
                     SLRAssert(!Le.hasNaN() && !Le.hasInf(), "Le: unexpected value detected: %s", Le.toString().c_str());
                     
-                    Vector3D shadowDir_sn = surfPt.shadingFrame.toLocal(shadowDir);
                     BSDFQuery queryBSDF(dirOut_sn, gNorm_sn, wls.selectedLambda);
                     SampledSpectrum fs = bsdf->evaluate(queryBSDF, shadowDir_sn);
                     float cosLight = absDot(-shadowDir, lpResult.surfPt.gNormal);
@@ -234,7 +234,7 @@ namespace SLR {
                 EDF* edf = surfPt.createEDF(wls, mem);
                 SampledSpectrum Le = surfPt.emittance(wls) * edf->evaluate(EDFQuery(), dirOut_sn);
                 float lightProb = scene.evaluateProb(Light(isect.obj));
-                float dist2 = surfPt.atInfinity ? 1.0f : sqDistance(ray.org, surfPt.p);
+                float dist2 = surfPt.getSquaredDistance(ray.org);
                 float lightPDF = lightProb * surfPt.evaluateAreaPDF() * dist2 / absDot(fsResult.dir_sn, gNorm_sn);
                 SLRAssert(!Le.hasNaN() && !Le.hasInf(), "Le: unexpected value detected: %s", Le.toString().c_str());
                 SLRAssert(!std::isnan(lightProb) && !std::isinf(lightProb), "lightProb: unexpected value detected: %f", lightProb);

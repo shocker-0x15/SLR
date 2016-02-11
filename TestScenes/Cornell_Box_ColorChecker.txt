@@ -58,9 +58,9 @@ for (i = 0; i < 24; ++i) {
 colorCheckerMesh = createMesh(vertices, indices);
 addChild(CBNode, colorCheckerMesh);
 
-teapot = load3DModel("models/wt_teapot.assbin");
-setTransform(teapot, translate(0, -0.5, 0) * scale(0.75));
-addChild(CBNode, teapot);
+//teapot = load3DModel("models/wt_teapot.assbin");
+//setTransform(teapot, translate(0, -0.5, 0) * scale(0.75));
+//addChild(CBNode, teapot);
 
 //pikachuNode = load3DModel("models/Pikachu_corrected_subdivided.assbin");
 //setTransform(pikachuNode, translate(0, -1, 0) * scale(0.75) * translate(0, 1, 0));

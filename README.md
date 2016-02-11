@@ -23,6 +23,7 @@ SLR consists of the following components.
 * Camera / Object Motion Blur
 * Geometry Instancing
 * Binned SAH BVH
+* Correct handling of non-symmetric scattering due to shading normals.
 * Unidirectional Path Tracing \[2\] with MIS
 * Bidirectional Path Tracing \[3\]
 * ~~Adaptive MCMC Progressive Photon Mapping~~ \[4\]  
