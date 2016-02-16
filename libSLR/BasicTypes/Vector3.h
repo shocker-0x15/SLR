@@ -55,6 +55,17 @@ namespace SLR {
             return *this /= length;
         }
         Vector3Template reciprocal() const { return Vector3Template(1.0f / x, 1.0f / y, 1.0f / z); }
+        void makeCoordinateSystem(Vector3Template<RealType>* vx, Vector3Template<RealType>* vy) const {
+            if (std::fabs(x) > std::fabs(y)) {
+                float invLen = 1.0f / std::sqrt(x * x + z * z);
+                *vx = Vector3Template<RealType>(-z * invLen, 0.0f, x * invLen);
+            }
+            else {
+                float invLen = 1.0f / std::sqrt(y * y + z * z);
+                *vx = Vector3Template<RealType>(0.0f, z * invLen, -y * invLen);
+            }
+            *vy = cross(*this, *vx);
+        }
         static Vector3Template fromPolarYUp(RealType phi, RealType theta) {
             return Vector3Template(-std::sin(phi) * std::sin(theta), std::cos(theta), std::cos(phi) * std::sin(theta));
         }

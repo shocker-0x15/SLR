@@ -42,6 +42,9 @@ namespace SLR {
         const SurfaceObject* top() const { return m_hierarchy.top(); };
         
         SampledSpectrum sample(const LightPosQuery &query, const LightPosSample &smp, LightPosQueryResult* result) const;
+        Ray sampleRay(const LightPosQuery &lightPosQuery, const LightPosSample &lightPosSample, LightPosQueryResult* lightPosResult, SampledSpectrum* Le0, EDF** edf,
+                      const EDFQuery &edfQuery, const EDFSample &edfSample, EDFQueryResult* edfResult, SampledSpectrum* Le1,
+                      ArenaAllocator &mem) const;
     };
     
     class SLR_API SurfaceObject {
@@ -59,6 +62,10 @@ namespace SLR {
         virtual float evaluateProb(const Light &light) const = 0;
         
         virtual SampledSpectrum sample(const Light &light, const LightPosQuery &query, const LightPosSample &smp, LightPosQueryResult* result) const = 0;
+        virtual Ray sampleRay(const Light &light,
+                              const LightPosQuery &lightPosQuery, const LightPosSample &lightPosSample, LightPosQueryResult* lightPosResult, SampledSpectrum* Le0, EDF** edf,
+                              const EDFQuery &edfQuery, const EDFSample &edfSample, EDFQueryResult* edfResult, SampledSpectrum* Le1,
+                              ArenaAllocator &mem) const = 0;
         
         bool intersect(Ray &ray, SurfacePoint* surfPt) const;
         bool testVisibility(const SurfacePoint &shdP, const SurfacePoint &lightP, float time) const;
@@ -83,6 +90,10 @@ namespace SLR {
         float evaluateProb(const Light &light) const override;
         
         SampledSpectrum sample(const Light &light, const LightPosQuery &query, const LightPosSample &smp, LightPosQueryResult* result) const override;
+        virtual Ray sampleRay(const Light &light,
+                              const LightPosQuery &lightPosQuery, const LightPosSample &lightPosSample, LightPosQueryResult* lightPosResult, SampledSpectrum* Le0, EDF** edf,
+                              const EDFQuery &edfQuery, const EDFSample &edfSample, EDFQueryResult* edfResult, SampledSpectrum* Le1,
+                              ArenaAllocator &mem) const override;
         
         virtual BSDF* createBSDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem) const;
         
@@ -101,15 +112,20 @@ namespace SLR {
     };
     
     class SLR_API InfiniteSphereSurfaceObject : public SingleSurfaceObject {
+        const Scene* m_scene;
         const RegularConstantContinuous2D* m_dist;
     public:
-        InfiniteSphereSurfaceObject(const Surface* surf, const IBLEmission* emitter);
+        InfiniteSphereSurfaceObject(const Scene* scene, const IBLEmission* emitter);
         ~InfiniteSphereSurfaceObject();
         
         bool isEmitting() const override;
         float importance() const override;
         
         SampledSpectrum sample(const Light &light, const LightPosQuery &query, const LightPosSample &smp, LightPosQueryResult* result) const override;
+        Ray sampleRay(const Light &light,
+                      const LightPosQuery &lightPosQuery, const LightPosSample &lightPosSample, LightPosQueryResult* lightPosResult, SampledSpectrum* Le0, EDF** edf,
+                      const EDFQuery &edfQuery, const EDFSample &edfSample, EDFQueryResult* edfResult, SampledSpectrum* Le1,
+                      ArenaAllocator &mem) const override;
         
         BSDF* createBSDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem) const override;
         
@@ -135,6 +151,10 @@ namespace SLR {
         float evaluateProb(const Light &light) const override;
         
         SampledSpectrum sample(const Light &light, const LightPosQuery &query, const LightPosSample &smp, LightPosQueryResult* result) const override;
+        Ray sampleRay(const Light &light,
+                      const LightPosQuery &lightPosQuery, const LightPosSample &lightPosSample, LightPosQueryResult* lightPosResult, SampledSpectrum* Le0, EDF** edf,
+                      const EDFQuery &edfQuery, const EDFSample &edfSample, EDFQueryResult* edfResult, SampledSpectrum* Le1,
+                      ArenaAllocator &mem) const override;
     };
     
     class SLR_API TransformedSurfaceObject : public SurfaceObject {
@@ -154,6 +174,10 @@ namespace SLR {
         float evaluateProb(const Light &light) const override;
         
         SampledSpectrum sample(const Light &light, const LightPosQuery &query, const LightPosSample &smp, LightPosQueryResult* result) const override;
+        Ray sampleRay(const Light &light,
+                      const LightPosQuery &lightPosQuery, const LightPosSample &lightPosSample, LightPosQueryResult* lightPosResult, SampledSpectrum* Le0, EDF** edf,
+                      const EDFQuery &edfQuery, const EDFSample &edfSample, EDFQueryResult* edfResult, SampledSpectrum* Le1,
+                      ArenaAllocator &mem) const override;
         
         void setTransform(const Transform* t) { m_transform = t; };
     };

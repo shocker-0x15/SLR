@@ -17,6 +17,8 @@
 #include "../Core/cameras.h"
 #include "../Core/SurfaceObject.h"
 
+#include "../Core/distributions.h"
+
 namespace SLR {
     BidirectionalPathTracingRenderer::BidirectionalPathTracingRenderer(uint32_t spp) : m_samplesPerPixel(spp) {
     }
@@ -117,47 +119,44 @@ namespace SLR {
                     scene->selectLight(rng.getFloat0cTo1o(), &light, &lightProb);
                     SLRAssert(!std::isnan(lightProb) && !std::isinf(lightProb), "lightProb: unexpected value detected: %f", lightProb);
                     
-                    // sample a position (emittance) on the selected light's surface.
-                    LightPosQuery lightQuery(time, wls);
-                    LightPosSample lightSample(rng.getFloat0cTo1o(), rng.getFloat0cTo1o());
-                    LightPosQueryResult lightResult;
-                    SampledSpectrum Le0 = light.sample(lightQuery, lightSample, &lightResult);
-                    EDF* edf = lightResult.surfPt.createEDF(wls, mem);
-                    float lightAreaPDF = lightProb * lightResult.areaPDF;
-                    SLRAssert(!std::isnan(lightResult.areaPDF)/* && !std::isinf(lightResult)*/, "areaPDF: unexpected value detected: %f", lightResult.areaPDF);
+                    // sample a ray with its radiance (emittance, EDF value) from the selected light.
+                    LightPosQuery lightPosQuery(time, wls);
+                    LightPosSample lightPosSample(rng.getFloat0cTo1o(), rng.getFloat0cTo1o());
+                    LightPosQueryResult lightPosResult;
+                    EDFQuery edfQuery;
+                    EDFSample edfSample(rng.getFloat0cTo1o(), rng.getFloat0cTo1o(), rng.getFloat0cTo1o());
+                    EDFQueryResult edfResult;
+                    EDF* edf;
+                    SampledSpectrum Le0, Le1;
+                    Ray ray = light.sampleRay(lightPosQuery, lightPosSample, &lightPosResult, &Le0, &edf, edfQuery, edfSample, &edfResult, &Le1, mem);
                     
                     // register the first light vertex.
-                    lightVertices.emplace_back(lightResult.surfPt, Vector3D::Zero, Normal3D(0, 0, 1), mem.create<EDFProxy>(edf),
-                                               Le0 / lightAreaPDF, lightAreaPDF, 1.0f, lightResult.posType, WavelengthSamples::Flag(0));
+                    float lightAreaPDF = lightProb * lightPosResult.areaPDF;
+                    lightVertices.emplace_back(lightPosResult.surfPt, Vector3D::Zero, Normal3D(0, 0, 1), mem.create<EDFProxy>(edf),
+                                               Le0 / lightAreaPDF, lightAreaPDF, 1.0f, lightPosResult.posType, WavelengthSamples::Flag(0));
                     
-                    // sample a direction from EDF, then create subsequent light subpath vertices by tracing in the scene.
-                    EDFQuery edfQuery;
-                    EDFSample LeSample(rng.getFloat0cTo1o(), rng.getFloat0cTo1o(), rng.getFloat0cTo1o());
-                    EDFQueryResult LeResult;
-                    SampledSpectrum Le1 = edf->sample(edfQuery, LeSample, &LeResult);
-                    Ray ray(lightResult.surfPt.p, lightResult.surfPt.shadingFrame.fromLocal(LeResult.dir_sn), time, Ray::Epsilon);
-                    SampledSpectrum alpha = lightVertices.back().alpha * Le1 * (absDot(ray.dir, lightResult.surfPt.gNormal) / LeResult.dirPDF);
-                    generateSubPath(wls, alpha, ray, LeResult.dirPDF, LeResult.dirType, LeResult.dir_sn.z, true, rng, mem);
+                    // create subsequent light subpath vertices by tracing in the scene.
+                    SampledSpectrum alpha = lightVertices.back().alpha * Le1 * (absDot(ray.dir, lightPosResult.surfPt.gNormal) / edfResult.dirPDF);
+                    generateSubPath(wls, alpha, ray, edfResult.dirPDF, edfResult.dirType, edfResult.dir_sn.z, true, rng, mem);
                 }
                 
                 // eye subpath generation
                 {
-                    // sample a position (We0, spatial importance) on the lens surface of the camera.
+                    // sample a ray with its importances (spatial, directional) from the lens and its IDF.
                     LensPosQuery lensQuery(time, wls);
                     LensPosSample lensSample(rng.getFloat0cTo1o(), rng.getFloat0cTo1o());
                     LensPosQueryResult lensResult;
-                    SampledSpectrum We0 = camera->sample(lensQuery, lensSample, &lensResult);
-                    IDF* idf = camera->createIDF(lensResult.surfPt, wls, mem);
+                    IDFSample WeSample(px / imageWidth, py / imageHeight);
+                    IDFQueryResult WeResult;
+                    IDF* idf;
+                    SampledSpectrum We0, We1;
+                    Ray ray = camera->sampleRay(lensQuery, lensSample, &lensResult, &We0, &idf, WeSample, &WeResult, &We1, mem);
                     
                     // register the first eye vertex.
                     eyeVertices.emplace_back(lensResult.surfPt, Vector3D::Zero, Normal3D(0, 0, 1), mem.create<IDFProxy>(idf),
                                              We0 / (lensResult.areaPDF * selectWLPDF), lensResult.areaPDF, 1.0f, lensResult.posType, WavelengthSamples::Flag(0));
                     
-                    // sample a direction (directional importance) from IDF, then create subsequent eye subpath vertices by tracing in the scene.
-                    IDFSample WeSample(px / imageWidth, py / imageHeight);
-                    IDFQueryResult WeResult;
-                    SampledSpectrum We1 = idf->sample(WeSample, &WeResult);
-                    Ray ray(lensResult.surfPt.p, lensResult.surfPt.shadingFrame.fromLocal(WeResult.dirLocal), time);
+                    // create subsequent eye subpath vertices by tracing in the scene.
                     SampledSpectrum alpha = eyeVertices.back().alpha * We1 * (absDot(ray.dir, lensResult.surfPt.gNormal) / WeResult.dirPDF);
                     generateSubPath(wls, alpha, ray, WeResult.dirPDF, WeResult.dirType, WeResult.dirLocal.z, false, rng, mem);
                 }
@@ -273,11 +272,12 @@ namespace SLR {
         float RRProb = 1.0f;
         while (scene->intersect(ray, &isect)) {
             isect.getSurfacePoint(&surfPt);
+            float dist2 = squaredDistance(vertices.back().surfPt, surfPt);
             Vector3D dirOut_sn = surfPt.shadingFrame.toLocal(-ray.dir);
             Normal3D gNorm_sn = surfPt.shadingFrame.toLocal(surfPt.gNormal);
             BSDF* bsdf = surfPt.createBSDF(wls, mem);
             
-            float areaPDF = dirPDF * absDot(dirOut_sn, gNorm_sn) / (isect.dist * isect.dist);
+            float areaPDF = dirPDF * absDot(dirOut_sn, gNorm_sn) / dist2;
             vertices.emplace_back(surfPt, dirOut_sn, gNorm_sn, mem.create<BSDFProxy>(bsdf), alpha, areaPDF, RRProb, sampledType, wls.flags);
             
             // implicit path (zero light subpath vertices, s = 0)
@@ -288,7 +288,7 @@ namespace SLR {
                 
                 float lightProb = scene->evaluateProb(Light(isect.obj));
                 float extend1stAreaPDF = lightProb * surfPt.evaluateAreaPDF();
-                float extend2ndAreaPDF = edf->evaluatePDF(EDFQuery(), dirOut_sn) * cosLast / (isect.dist * isect.dist);
+                float extend2ndAreaPDF = edf->evaluatePDF(EDFQuery(), dirOut_sn) * cosLast / dist2;
                 
                 float MISWeight = calculateMISWeight(extend1stAreaPDF, 1.0f, extend2ndAreaPDF, 1.0f,
                                                      0.0f, 0.0f, 0.0f, 0.0f,
@@ -337,10 +337,10 @@ namespace SLR {
                       weight.toString().c_str(), fs.toString().c_str(), uint32_t(vertices.size()) - 1, cosIn, fsResult.dirPDF);
             
             BPTVertex &vtxNextToLast = vertices[vertices.size() - 2];
-            vtxNextToLast.revAreaPDF = revInfo.dirPDF * cosLast / (isect.dist * isect.dist);
+            vtxNextToLast.revAreaPDF = revInfo.dirPDF * cosLast / dist2;
             vtxNextToLast.revRRProb = std::min((revInfo.fs * absDot(dirOut_sn, gNorm_sn) / revInfo.dirPDF)[wlHint], 1.0f);
 //            SLRAssert(!std::isnan(vtxNextToLast.revAreaPDF) && !std::isinf(vtxNextToLast.revAreaPDF),
-//                      "invalid reverse area PDF: %g, dirPDF: %g, cos: %g, dist2: %g", vtxNextToLast.revAreaPDF, revInfo.dirPDF, cosLast, isect.dist * isect.dist);
+//                      "invalid reverse area PDF: %g, dirPDF: %g, cos: %g, dist2: %g", vtxNextToLast.revAreaPDF, revInfo.dirPDF, cosLast, dist2);
 //            SLRAssert(!std::isnan(vtxNextToLast.revRRProb) && !std::isinf(vtxNextToLast.revRRProb),
 //                      "invalid reverse RR probability: %g\nfs: %s\n, absDot: %g, dirPDF: %g",
 //                      vtxNextToLast.revRRProb, revInfo.fs.toString().c_str(), absDot(dirOut_sn, gNorm_sn), revInfo.dirPDF);

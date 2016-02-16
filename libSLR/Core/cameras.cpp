@@ -10,5 +10,5 @@
 namespace SLR {
     void Camera::setTransform(const Transform *t) {
         m_transform = t;
-    }    
+    }
 }

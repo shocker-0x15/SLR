@@ -74,6 +74,39 @@ namespace SLR {
         
         bool matches(DirectionType flags) const override { return m_baseBSDF->matches(flags.flip()); }
     };
+    
+    class SLR_API NullBSDF : public BSDF {
+        SampledSpectrum sampleInternal(const BSDFQuery &query, const BSDFSample &smp, BSDFQueryResult* result) const override {
+            SLRAssert(false, "NullBSDF's method should not be called.");
+            return SampledSpectrum::Zero;
+        };
+        SampledSpectrum evaluateInternal(const BSDFQuery &query, const Vector3D &dir, SampledSpectrum* rev_fs) const override {
+            SLRAssert(false, "NullBSDF's method should not be called.");
+            return SampledSpectrum::Zero;
+        };
+        float evaluatePDFInternal(const BSDFQuery &query, const Vector3D &dir, float* revPDF) const override {
+            SLRAssert(false, "NullBSDF's method should not be called.");
+            return 0;
+        };
+        float weightInternal(const BSDFQuery &query, const BSDFSample &smp) const override {
+            SLRAssert(false, "NullBSDF's method should not be called.");
+            return 0;
+        };
+        float weightInternal(const BSDFQuery &query, const Vector3D &dir, float* revWeight) const override {
+            SLRAssert(false, "NullBSDF's method should not be called.");
+            return 0;
+        };
+        float weightInternal(const BSDFQuery &query) const override {
+            SLRAssert(false, "NullBSDF's method should not be called.");
+            return 0;
+        };
+        SampledSpectrum getBaseColorInternal(DirectionType flags) const override {
+            SLRAssert(false, "NullBSDF's method should not be called.");
+            return SampledSpectrum::Zero;
+        };
+    public:
+        NullBSDF() : BSDF(DirectionType()) { }
+    };
 }
 
 #endif /* defined(__SLR__basic_BSDFs__) */

@@ -57,6 +57,17 @@ namespace SLR {
             z *= rcpLength;
             return *this;
         }
+        void makeCoordinateSystem(Vector3Template<RealType>* tangent, Vector3Template<RealType>* bitangent) const {
+            if (std::fabs(x) > std::fabs(y)) {
+                float invLen = 1.0f / std::sqrt(x * x + z * z);
+                *tangent = Vector3Template<RealType>(-z * invLen, 0.0f, x * invLen);
+            }
+            else {
+                float invLen = 1.0f / std::sqrt(y * y + z * z);
+                *tangent = Vector3Template<RealType>(0.0f, z * invLen, -y * invLen);
+            }
+            *bitangent = cross(*this, *tangent);
+        }
         
         RealType maxValue() const { using std::fmax; return fmax(x, fmax(y, z)); }
         RealType minValue() const { using std::fmin; return fmin(x, fmin(y, z)); }
@@ -84,6 +95,20 @@ namespace SLR {
     inline Normal3Template<RealType> normalize(const Normal3Template<RealType> &n) {
         RealType l = n.length();
         return n / l;
+    }
+    
+    template <typename RealType>
+    inline Vector3Template<RealType> cross(const Vector3Template<RealType> &vec, const Normal3Template<RealType> &norm) {
+        return Vector3Template<RealType>(vec.y * norm.z - vec.z * norm.y,
+                                         vec.z * norm.x - vec.x * norm.z,
+                                         vec.x * norm.y - vec.y * norm.x);
+    }
+    
+    template <typename RealType>
+    inline Vector3Template<RealType> cross(const Normal3Template<RealType> &norm, const Vector3Template<RealType> &vec) {
+        return Vector3Template<RealType>(norm.y * vec.z - norm.z * vec.y,
+                                         norm.z * vec.x - norm.x * vec.z,
+                                         norm.x * vec.y - norm.y * vec.x);
     }
     
     template <typename RealType>
@@ -123,7 +148,7 @@ namespace SLR {
     inline Vector3Template<RealType> max(const Normal3Template<RealType> &p1, const Normal3Template<RealType> &p2) {
         using std::fmax;
         return Vector3Template<RealType>(fmax(p1.x, p2.x), fmax(p1.y, p2.y), fmax(p1.z, p2.z));
-    }    
+    }
 }
 
 #endif

@@ -8,6 +8,7 @@
 #include "InfiniteSphereNode.h"
 #include "surface_materials.hpp"
 #include <libSLR/Core/SurfaceObject.h>
+#include "Scene.h"
 
 namespace SLRSceneGraph {
     InfiniteSphereNode::InfiniteSphereNode(const SceneWRef &scene, const SpectrumTextureRef &IBLTex, float scale) : m_scene(scene), m_ready(false) {
@@ -20,7 +21,8 @@ namespace SLRSceneGraph {
     
     SLR::InfiniteSphereSurfaceObject* InfiniteSphereNode::getSurfaceObject() {
         if (!m_ready) {
-            m_surfObj = new SLR::InfiniteSphereSurfaceObject(&m_sphere, (SLR::IBLEmission*)m_emitter->getRaw());
+            SceneRef sceneRef = m_scene.lock();
+            m_surfObj = new SLR::InfiniteSphereSurfaceObject(sceneRef->raw(), (SLR::IBLEmission*)m_emitter->getRaw());
             m_ready = true;
         }
         return m_surfObj;

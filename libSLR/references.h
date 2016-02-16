@@ -204,6 +204,7 @@ namespace SLR {
     class SpecularBRDF;
     class SpecularBTDF;
     class InverseBSDF;
+    class NullBSDF;
     class ModifiedWardDurBRDF;
     class AshikhminSpecularBRDF;
     class AshikhminDiffuseBRDF;

@@ -11,11 +11,20 @@
 #include "distributions.h"
 #include "../Accelerator/BBVH.h"
 #include "textures.h"
+#include "../Surface/InfiniteSphere.h"
 #include "../SurfaceMaterials/IBLEmission.h"
+#include "../Memory/ArenaAllocator.h"
+#include "../BSDFs/basic_BSDFs.h"
 
 namespace SLR {
     SampledSpectrum Light::sample(const LightPosQuery &query, const LightPosSample &smp, LightPosQueryResult* result) const {
         return m_hierarchy.top()->sample(*this, query, smp, result);
+    }
+    
+    Ray Light::sampleRay(const LightPosQuery &lightPosQuery, const LightPosSample &lightPosSample, LightPosQueryResult* lightPosResult, SampledSpectrum* Le0, EDF** edf,
+                         const EDFQuery &edfQuery, const EDFSample &edfSample, EDFQueryResult* edfResult, SampledSpectrum* Le1,
+                         ArenaAllocator &mem) const {
+        return m_hierarchy.top()->sampleRay(*this, lightPosQuery, lightPosSample, lightPosResult, Le0, edf, edfQuery, edfSample, edfResult, Le1, mem);
     }
     
     
@@ -81,6 +90,19 @@ namespace SLR {
         return m_material->emittance(result->surfPt, query.wls);
     }
     
+    Ray SingleSurfaceObject::sampleRay(const Light &light,
+                                       const LightPosQuery &lightPosQuery, const LightPosSample &lightPosSample, LightPosQueryResult* lightPosResult, SampledSpectrum* Le0, EDF** edf,
+                                       const EDFQuery &edfQuery, const EDFSample &edfSample, EDFQueryResult* edfResult, SampledSpectrum* Le1,
+                                       ArenaAllocator &mem) const {
+        // sample a position with emittance on the selected light's surface.
+        *Le0 = sample(light, lightPosQuery, lightPosSample, lightPosResult);
+        *edf = lightPosResult->surfPt.createEDF(lightPosQuery.wls, mem);
+        SLRAssert(!std::isnan(lightPosResult->areaPDF)/* && !std::isinf(lightResult)*/, "areaPDF: unexpected value detected: %f", lightPosResult->areaPDF);
+        // sample a direction from EDF.
+        *Le1 = (*edf)->sample(edfQuery, edfSample, edfResult);
+        return Ray(lightPosResult->surfPt.p, lightPosResult->surfPt.shadingFrame.fromLocal(edfResult->dir_sn), lightPosQuery.time, Ray::Epsilon);
+    }
+    
     BSDF* SingleSurfaceObject::createBSDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem) const {
         return m_material->getBSDF(surfPt, wls, mem);
     }
@@ -115,8 +137,8 @@ namespace SLR {
     }
     
     
-    InfiniteSphereSurfaceObject::InfiniteSphereSurfaceObject(const Surface* surf, const IBLEmission* emitter) {
-        m_surface = surf;
+    InfiniteSphereSurfaceObject::InfiniteSphereSurfaceObject(const Scene* scene, const IBLEmission* emitter) : m_scene(scene) {
+        m_surface = new InfiniteSphere();
         m_material = new EmitterSurfaceMaterial(nullptr, emitter);
         m_dist = emitter->createIBLImportanceMap();
     }
@@ -124,6 +146,7 @@ namespace SLR {
     InfiniteSphereSurfaceObject::~InfiniteSphereSurfaceObject() {
         delete m_dist;
         delete m_material;
+        delete m_surface;
     }
     
     bool InfiniteSphereSurfaceObject::isEmitting() const {
@@ -163,9 +186,34 @@ namespace SLR {
         return m_material->emittance(result->surfPt, query.wls);
     }
     
+    Ray InfiniteSphereSurfaceObject::sampleRay(const Light &light,
+                                               const LightPosQuery &lightPosQuery, const LightPosSample &lightPosSample, LightPosQueryResult* lightPosResult, SampledSpectrum* Le0, EDF** edf,
+                                               const EDFQuery &edfQuery, const EDFSample &edfSample, EDFQueryResult* edfResult, SampledSpectrum* Le1,
+                                               ArenaAllocator &mem) const {
+        // sample a position with emittance on the selected light's surface.
+        *Le0 = light.sample(lightPosQuery, lightPosSample, lightPosResult);
+        *edf = lightPosResult->surfPt.createEDF(lightPosQuery.wls, mem);
+        SLRAssert(!std::isnan(lightPosResult->areaPDF)/* && !std::isinf(lightResult)*/, "areaPDF: unexpected value detected: %f", lightPosResult->areaPDF);
+        
+        // sample a direction from EDF.
+        // Sampled directions for a certain sampled position (on the infinite sphere) must be parallel,
+        // but be able to reach any position in the scene.
+        // Therefore, it requires modification to ray's origin.
+        *Le1 = (*edf)->sample(edfQuery, edfSample, edfResult);
+        Vector3D vx, vy;
+        Vector3D vz = lightPosResult->surfPt.shadingFrame.fromLocal(edfResult->dir_sn);
+        vz.makeCoordinateSystem(&vx, &vy);
+        float dx, dy;
+        concentricSampleDisk(edfSample.uDir[0], edfSample.uDir[1], &dx, &dy);
+        
+        float worldRadius = m_scene->getWorldRadius();
+        return Ray(1.1f * worldRadius * lightPosResult->surfPt.p + worldRadius * (dx * vx + dy * vy), vz, lightPosQuery.time, 0);
+    }
+    
     BSDF* InfiniteSphereSurfaceObject::createBSDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem) const {
-        SLRAssert(false, "InfiniteSphereSurfaceObject::createBSDF() should not be called.");
-        return nullptr;
+        //SLRAssert(false, "InfiniteSphereSurfaceObject::createBSDF() should not be called.");
+        //return nullptr;
+        return mem.create<NullBSDF>();
     }
     
     float InfiniteSphereSurfaceObject::evaluateAreaPDF(const SurfacePoint& surfPt) const {
@@ -260,6 +308,13 @@ namespace SLR {
         return light.top()->sample(light, query, smp, result);
     }
     
+    Ray SurfaceObjectAggregate::sampleRay(const Light &light,
+                                          const LightPosQuery &lightPosQuery, const LightPosSample &lightPosSample, LightPosQueryResult* lightPosResult, SampledSpectrum* Le0, EDF** edf,
+                                          const EDFQuery &edfQuery, const EDFSample &edfSample, EDFQueryResult* edfResult, SampledSpectrum* Le1,
+                                          ArenaAllocator &mem) const {
+        return light.top()->sampleRay(light, lightPosQuery, lightPosSample, lightPosResult, Le0, edf, edfQuery, edfSample, edfResult, Le1, mem);
+    }
+    
     
     BoundingBox3D TransformedSurfaceObject::bounds() const {
         return m_transform->motionBounds(m_surfObj->bounds());
@@ -322,6 +377,26 @@ namespace SLR {
         return M;
     }
     
+    Ray TransformedSurfaceObject::sampleRay(const Light &light,
+                                            const LightPosQuery &lightPosQuery, const LightPosSample &lightPosSample, LightPosQueryResult* lightPosResult, SampledSpectrum* Le0, EDF** edf,
+                                            const EDFQuery &edfQuery, const EDFSample &edfSample, EDFQueryResult* edfResult, SampledSpectrum* Le1,
+                                            ArenaAllocator &mem) const {
+        if (light.top() != this) {
+            lightPosResult->areaPDF = 0.0f;
+            *Le0 = SampledSpectrum::Zero;
+            edfResult->dirPDF = 0.0f;
+            *Le1 = SampledSpectrum::Zero;
+            return Ray();
+        }
+        light.pop();
+        Ray ray = light.top()->sampleRay(light, lightPosQuery, lightPosSample, lightPosResult, Le0, edf, edfQuery, edfSample, edfResult, Le1, mem);
+        StaticTransform sampledTF;
+        m_transform->sample(lightPosQuery.time, &sampledTF);
+        lightPosResult->surfPt = sampledTF * lightPosResult->surfPt;
+        light.push(this);
+        return sampledTF * ray;
+    }
+    
     
     
     void Scene::build(const SurfaceObjectAggregate* aggregate, const InfiniteSphereSurfaceObject* envSphere, const Camera* camera) {
@@ -350,7 +425,7 @@ namespace SLR {
         SLRAssert(shdP.atInfinity == false, "Shading point must be in finite region.");
         Ray ray;
         if (lightP.atInfinity) {
-            ray = Ray(shdP.p, normalize(lightP.p - Point3D::Zero), time, Ray::Epsilon, m_worldRadius);
+            ray = Ray(shdP.p, normalize(lightP.p - Point3D::Zero), time, Ray::Epsilon, FLT_MAX);
         }
         else {
             float dist = distance(lightP.p, shdP.p);

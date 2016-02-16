@@ -124,6 +124,11 @@ namespace SLR {
     }
     
     SampledSpectrum AshikhminDiffuseBRDF::evaluateInternal(const BSDFQuery &query, const Vector3D &dir, SampledSpectrum* rev_fs) const {
+        if (dir.z * query.dir_sn.z <= 0) {
+            if (rev_fs)
+                *rev_fs = SampledSpectrum::Zero;
+            return SampledSpectrum::Zero;
+        }
         SampledSpectrum fs = (28 * m_Rd / (23 * M_PI) * (SampledSpectrum::One - m_Rs) *
                               (1.0f - std::pow(1.0f - std::fabs(query.dir_sn.z) / 2, 5)) *
                               (1.0f - std::pow(1.0f - std::fabs(dir.z) / 2, 5))

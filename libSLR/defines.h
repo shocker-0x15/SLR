@@ -44,6 +44,7 @@
 #include <cstdlib>
 #include <cstdarg>
 #include <cmath>
+#include <cfloat>
 
 #include <iostream>
 #include <iomanip>

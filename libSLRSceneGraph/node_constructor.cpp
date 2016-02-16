@@ -15,15 +15,16 @@
 #include <libSLR/Memory/Allocator.h>
 #include <libSLR/Core/Transform.h>
 
-inline void makeTangent(float nx, float ny, float nz, float* s) {
-    if (fabsf(nx) > fabsf(ny)) {
-        float invLen = 1.0f / sqrtf(nx * nx + nz * nz);
+template <typename RealType>
+inline void makeTangent(RealType nx, RealType ny, RealType nz, RealType* s) {
+    if (std::fabs(nx) > std::fabs(ny)) {
+        RealType invLen = 1.0f / std::sqrt(nx * nx + nz * nz);
         s[0] = -nz * invLen;
         s[1] = 0.0f;
         s[2] = nx * invLen;
     }
     else {
-        float invLen = 1.0f / sqrtf(ny * ny + nz * nz);
+        RealType invLen = 1.0f / std::sqrt(ny * ny + nz * nz);
         s[0] = 0.0f;
         s[1] = nz * invLen;
         s[2] = -ny * invLen;
@@ -68,7 +69,10 @@ namespace SLRSceneGraph {
                 const aiVector3D &uv = mesh->mNumUVComponents[0] > 0 ? mesh->mTextureCoords[0][v] : aiVector3D(0, 0, 0);
                 
                 SLR::Vertex outVtx{SLR::Point3D(p.x, p.y, p.z), SLR::Normal3D(n.x, n.y, n.z), SLR::Tangent3D(t.x, t.y, t.z), SLR::TexCoord2D(uv.x, uv.y)};
-                SLRAssert(absDot(outVtx.normal, outVtx.tangent) < 0.01f, "shading normal and tangent must be orthogonal.");
+                float dotNT = dot(outVtx.normal, outVtx.tangent);
+                if (std::fabs(dotNT) >= 0.01f)
+                    outVtx.tangent = SLR::normalize(outVtx.tangent - dotNT * outVtx.normal);
+                //SLRAssert(absDot(outVtx.normal, outVtx.tangent) < 0.01f, "shading normal and tangent must be orthogonal: %g", absDot(outVtx.normal, outVtx.tangent));
                 surfMesh->addVertex(outVtx);
             }
             

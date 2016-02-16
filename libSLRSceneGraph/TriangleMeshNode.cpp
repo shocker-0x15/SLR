@@ -24,6 +24,17 @@ namespace SLRSceneGraph {
     }
     
     void TriangleMeshNode::addTriangle(uint64_t v0, uint64_t v1, uint64_t v2, const SurfaceMaterialRef &mat, const Normal3DTextureRef &normalMap) {
+        const SLR::Vertex &vtx0 = m_vertices[v0];
+        const SLR::Vertex &vtx1 = m_vertices[v1];
+        const SLR::Vertex &vtx2 = m_vertices[v2];
+        SLR::Vector3D gNormal = SLR::cross(vtx1.position - vtx0.position, vtx2.position - vtx0.position);
+        bool faceAway = false;
+        faceAway |= SLR::dot(vtx0.normal, gNormal) <= 0;
+        faceAway |= SLR::dot(vtx1.normal, gNormal) <= 0;
+        faceAway |= SLR::dot(vtx2.normal, gNormal) <= 0;
+        if (faceAway)
+            printf("Warning: triangle [%llu, %llu, %llu] has a shading normal too faced away from a geometric normal.\n", v0, v1, v2);
+        
         Triangle tri{{v0, v1, v2}};
         m_triangles.push_back(tri);
         m_materials.push_back(mat);

@@ -76,14 +76,16 @@ namespace SLR {
     SampledSpectrum PerspectiveIDF::evaluate(const Vector3D &dirIn) const {
         Point3D pFocas = dirIn * (m_cam.m_objPlaneDistance / dirIn.z) + m_orgLocal;
         bool valid = (pFocas.x >= -m_cam.m_opWidth * 0.5f && pFocas.x <= m_cam.m_opWidth * 0.5f &&
-                      pFocas.y >= -m_cam.m_opHeight * 0.5f && pFocas.y <= m_cam.m_opHeight * 0.5f);
+                      pFocas.y >= -m_cam.m_opHeight * 0.5f && pFocas.y <= m_cam.m_opHeight * 0.5f &&
+                      dirIn.z >= 0);
         return valid ? SampledSpectrum::One : SampledSpectrum::Zero;
     }
     
     float PerspectiveIDF::evaluatePDF(const Vector3D &dirIn) const {
         Point3D pFocas = dirIn * (m_cam.m_objPlaneDistance / dirIn.z) + m_orgLocal;
         bool valid = (pFocas.x >= -m_cam.m_opWidth * 0.5f && pFocas.x <= m_cam.m_opWidth * 0.5f &&
-                      pFocas.y >= -m_cam.m_opHeight * 0.5f && pFocas.y <= m_cam.m_opHeight * 0.5f);
+                      pFocas.y >= -m_cam.m_opHeight * 0.5f && pFocas.y <= m_cam.m_opHeight * 0.5f &&
+                      dirIn.z >= 0);
         float dirPDF = m_cam.m_imgPlaneDistance * m_cam.m_imgPlaneDistance / ((dirIn.z * dirIn.z * dirIn.z) * m_cam.m_imgPlaneArea);
         return valid ? dirPDF : 0.0f;
     }
