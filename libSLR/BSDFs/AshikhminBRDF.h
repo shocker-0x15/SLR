@@ -20,8 +20,6 @@ namespace SLR {
         SampledSpectrum sampleInternal(const BSDFQuery &query, const BSDFSample &smp, BSDFQueryResult* result) const override;
         SampledSpectrum evaluateInternal(const BSDFQuery &query, const Vector3D &dir, SampledSpectrum* rev_fs) const override;
         float evaluatePDFInternal(const BSDFQuery &query, const Vector3D &dir, float* revPDF) const override;
-        float weightInternal(const BSDFQuery &query, const BSDFSample &smp) const override;
-        float weightInternal(const BSDFQuery &query, const Vector3D &dir, float* revWeight) const override;
         float weightInternal(const BSDFQuery &query) const override;
         SampledSpectrum getBaseColorInternal(DirectionType flags) const override;
     public:
@@ -36,8 +34,6 @@ namespace SLR {
         SampledSpectrum sampleInternal(const BSDFQuery &query, const BSDFSample &smp, BSDFQueryResult* result) const override;
         SampledSpectrum evaluateInternal(const BSDFQuery &query, const Vector3D &dir, SampledSpectrum* rev_fs) const override;
         float evaluatePDFInternal(const BSDFQuery &query, const Vector3D &dir, float* revPDF) const override;
-        float weightInternal(const BSDFQuery &query, const BSDFSample &smp) const override;
-        float weightInternal(const BSDFQuery &query, const Vector3D &dir, float* revWeight) const override;
         float weightInternal(const BSDFQuery &query) const override;
         SampledSpectrum getBaseColorInternal(DirectionType flags) const override;
     public:

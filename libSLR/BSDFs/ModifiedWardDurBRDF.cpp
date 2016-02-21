@@ -76,36 +76,7 @@ namespace SLR {
             *revPDF = ret;
         return ret;
     }
-    
-    float ModifiedWardDurBRDF::weightInternal(const BSDFQuery &query, const BSDFSample &smp) const {
-        BSDFQueryResult result;
-        float fs = sample(query, smp, &result)[query.wlHint];
-        return result.dirPDF > 0.0f ? fs * std::fabs(result.dir_sn.z) / result.dirPDF : 0.0f;
-    }
-    
-    float ModifiedWardDurBRDF::weightInternal(const BSDFQuery &query, const Vector3D &dir, float* revWeight) const {
-        if (revWeight) {
-            SampledSpectrum rev_fs;
-            float revDirPDF;
-            float fs = evaluate(query, dir, &rev_fs)[query.wlHint];
-            float dirPDF = evaluatePDF(query, dir, &revDirPDF);
-            if (dirPDF > 0.0f) {
-                *revWeight = rev_fs[query.wlHint] * std::fabs(query.dir_sn.z) / revDirPDF;
-                return fs * std::fabs(dir.z) / dirPDF;
-            }
-            else {
-                *revWeight = 0.0f;
-                return 0.0f;
-            }
-        }
-        else {
-            BSDFQueryResult result;
-            float fs = evaluate(query, dir)[query.wlHint];
-            float dirPDF = evaluatePDF(query, dir);
-            return dirPDF > 0.0f ? fs * std::fabs(dir.z) / dirPDF : 0.0f;
-        }
-    }
-    
+
     float ModifiedWardDurBRDF::weightInternal(const SLR::BSDFQuery &query) const {
         return m_R[query.wlHint];
     }

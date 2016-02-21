@@ -182,6 +182,7 @@ namespace SLR {
         SLRAssert(absDot(surfPt.shadingFrame.z, surfPt.shadingFrame.x) < 0.01f, "shading normal and tangent must be orthogonal.");
         surfPt.obj = this;
         result->posType = DirectionType::LowFreq;
+        // The true value is: lim_{l to inf} uvPDF / (2 * M_PI * M_PI * std::sin(theta)) / l^2
         result->areaPDF = uvPDF / (2 * M_PI * M_PI * std::sin(theta));
         return m_material->emittance(result->surfPt, query.wls);
     }
@@ -207,7 +208,7 @@ namespace SLR {
         concentricSampleDisk(edfSample.uDir[0], edfSample.uDir[1], &dx, &dy);
         
         float worldRadius = m_scene->getWorldRadius();
-        return Ray(1.1f * worldRadius * lightPosResult->surfPt.p + worldRadius * (dx * vx + dy * vy), vz, lightPosQuery.time, 0);
+        return Ray(m_scene->getWorldCenter() + 1.1f * worldRadius * lightPosResult->surfPt.p + worldRadius * (dx * vx + dy * vy), vz, lightPosQuery.time, 0);
     }
     
     BSDF* InfiniteSphereSurfaceObject::createBSDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem) const {

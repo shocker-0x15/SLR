@@ -197,7 +197,7 @@ namespace SLR {
                         if (connectionTerm == SampledSpectrum::Zero)
                             continue;
                         
-                        // calculate 1st and 2nd subpath extending PDFs and probabilities.
+                        // calculate the 1st and 2nd subpath extending PDFs and probabilities.
                         // They can't be stored in advance because they depend on the connection.
                         float lExtend1stAreaPDF, lExtend1stRRProb, lExtend2ndAreaPDF, lExtend2ndRRProb;
                         {
@@ -206,9 +206,7 @@ namespace SLR {
                             
                             if (t > 1) {
                                 BPTVertex &eVtxNextToEnd = eyeVertices[t - 2];
-                                Vector3D dir2nd = eVtx.surfPt.p - eVtxNextToEnd.surfPt.p;
-                                float dist2 = dir2nd.sqLength();
-                                dir2nd /= std::sqrt(dist2);
+                                Vector3D dir2nd = eVtx.surfPt.getDirectionFrom(eVtxNextToEnd.surfPt.p, &dist2);
                                 lExtend2ndAreaPDF = lExtend2ndDirPDF * absDot(eVtxNextToEnd.surfPt.gNormal, dir2nd) / dist2;
                                 lExtend2ndRRProb = std::min((revDDFE * absDot(eVtx.gNormal_sn, eVtx.dirIn_sn) / lExtend2ndDirPDF)[wlHint], 1.0f);
                             }
@@ -220,9 +218,7 @@ namespace SLR {
                             
                             if (s > 1) {
                                 BPTVertex &lVtxNextToEnd = lightVertices[s - 2];
-                                Vector3D dir2nd = lVtx.surfPt.p - lVtxNextToEnd.surfPt.p;
-                                float dist2 = dir2nd.sqLength();
-                                dir2nd /= std::sqrt(dist2);
+                                Vector3D dir2nd = lVtxNextToEnd.surfPt.getDirectionFrom(lVtx.surfPt.p, &dist2);
                                 eExtend2ndAreaPDF = eExtend2ndDirPDF * absDot(lVtxNextToEnd.surfPt.gNormal, dir2nd) / dist2;
                                 eExtend2ndRRProb = std::min((revDDFL * absDot(lVtx.gNormal_sn, lVtx.dirIn_sn) / eExtend2ndDirPDF)[wlHint], 1.0f);
                             }

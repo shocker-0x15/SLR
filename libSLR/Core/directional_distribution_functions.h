@@ -194,8 +194,6 @@ namespace SLR {
         virtual SampledSpectrum sampleInternal(const BSDFQuery &query, const BSDFSample &smp, BSDFQueryResult* result) const = 0;
         virtual SampledSpectrum evaluateInternal(const BSDFQuery &query, const Vector3D &dir, SampledSpectrum* rev_fs) const = 0;
         virtual float evaluatePDFInternal(const BSDFQuery &query, const Vector3D &dir, float* revPDF) const = 0;
-        virtual float weightInternal(const BSDFQuery &query, const BSDFSample &smp) const = 0;
-        virtual float weightInternal(const BSDFQuery &query, const Vector3D &dir, float* revWeight) const = 0;
         virtual float weightInternal(const BSDFQuery &query) const = 0;
         virtual SampledSpectrum getBaseColorInternal(DirectionType flags) const = 0;
         friend class MultiBSDF;
@@ -208,18 +206,12 @@ namespace SLR {
             if (!matches(query.flags, result))
                 return SampledSpectrum::Zero;
             SampledSpectrum fs_sn = sampleInternal(query, smp, result);
-            if (query.adjoint) {
-                float commonTerm = std::fabs(query.dir_sn.z / dot(query.dir_sn, query.gNormal_sn));
-                if (result->reverse)
-                    result->reverse->fs *= commonTerm;
-                return fs_sn * commonTerm;
-            }
-            else {
-                float commonTerm = std::fabs(result->dir_sn.z / dot(result->dir_sn, query.gNormal_sn));
-                if (result->reverse)
-                    result->reverse->fs *= commonTerm;
-                return fs_sn * commonTerm;
-            }
+            float snCorrection = (query.adjoint ?
+                                  std::fabs(query.dir_sn.z / dot(query.dir_sn, query.gNormal_sn)) :
+                                  std::fabs(result->dir_sn.z / dot(result->dir_sn, query.gNormal_sn)));
+            if (result->reverse)
+                result->reverse->fs *= snCorrection;
+            return fs_sn * snCorrection;
         }
         SampledSpectrum evaluate(const BSDFQuery &query, const Vector3D &dir, SampledSpectrum* rev_fs = nullptr) const {
             BSDFQuery mQuery = query;
@@ -230,18 +222,12 @@ namespace SLR {
                 return SampledSpectrum::Zero;
             }
             SampledSpectrum fs_sn = evaluateInternal(mQuery, dir, rev_fs);
-            if (query.adjoint) {
-                float commonTerm = std::fabs(query.dir_sn.z / dot(query.dir_sn, query.gNormal_sn));
-                if (rev_fs)
-                    *rev_fs *= commonTerm;
-                return fs_sn * commonTerm;
-            }
-            else {
-                float commonTerm = std::fabs(dir.z / dot(dir, query.gNormal_sn));
-                if (rev_fs)
-                    *rev_fs *= commonTerm;
-                return fs_sn * commonTerm;
-            }
+            float snCorrection = (query.adjoint ?
+                                  std::fabs(query.dir_sn.z / dot(query.dir_sn, query.gNormal_sn)) :
+                                  std::fabs(dir.z / dot(dir, query.gNormal_sn)));
+            if (rev_fs)
+                *rev_fs *= snCorrection;
+            return fs_sn * snCorrection;
         }
         float evaluatePDF(const BSDFQuery &query, const Vector3D &dir, float* revPDF = nullptr) const {
             if (!matches(query.flags)) {
@@ -251,30 +237,12 @@ namespace SLR {
             }
             return evaluatePDFInternal(query, dir, revPDF);
         }
-        float weight(const BSDFQuery &query, const BSDFSample &smp) const {
-            if (!matches(query.flags))
-                return 0;
-            return weightInternal(query, smp);
-        }
-        float weight(const BSDFQuery &query, const Vector3D &dir, float* revWeight = nullptr) const {
-            if (!matches(query.flags)) {
-                if (revWeight)
-                    *revWeight = 0.0f;
-                return 0;
-            }
-            return weightInternal(query, dir, revWeight);
-        }
         float weight(const BSDFQuery &query) const {
             if (!matches(query.flags))
                 return 0;
             float weight_sn = weightInternal(query);
-            if (query.adjoint) {
-                float commonTerm = std::fabs(query.dir_sn.z / dot(query.dir_sn, (Vector3D)query.gNormal_sn));
-                return weight_sn * commonTerm;
-            }
-            else {
-                return weight_sn;
-            }
+            float snCorrection = query.adjoint ? std::fabs(query.dir_sn.z / dot(query.dir_sn, query.gNormal_sn)) : 1;
+            return weight_sn * snCorrection;
         }
         
         SampledSpectrum getBaseColor(DirectionType flags) const {

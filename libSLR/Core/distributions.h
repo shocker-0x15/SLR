@@ -28,6 +28,20 @@ namespace SLR {
         return Vector3Template<RealType>(x, y, std::sqrt(std::fmax(0.0f, 1.0f - x * x - y * y)));
     }
     
+    template <typename RealType, int N>
+    inline Vector3Template<RealType> cosNSampleHemisphere(RealType u0, RealType u1) {
+        RealType phi = 2 * M_PI * u1;
+        RealType theta = std::acos(std::pow(u0, 1.0 / (1 + N)));
+        return Vector3Template<RealType>(std::cos(phi) * std::sin(theta), std::sin(phi) * std::sin(theta), std::cos(theta));
+    }
+    
+    template <typename RealType>
+    inline Vector3Template<RealType> uniformSampleHemisphere(RealType u0, RealType u1) {
+        RealType phi = 2 * M_PI * u1;
+        RealType theta = std::acos(1 - u0);
+        return Vector3Template<RealType>(std::cos(phi) * std::sin(theta), std::sin(phi) * std::sin(theta), std::cos(theta));
+    }
+    
     template <typename RealType>
     inline Vector3Template<RealType> uniformSampleSphere(RealType u0, RealType u1) {
         RealType phi = 2 * M_PI * u1;

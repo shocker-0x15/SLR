@@ -71,35 +71,6 @@ namespace SLR {
         return ret;
     }
     
-    float AshikhminSpecularBRDF::weightInternal(const BSDFQuery &query, const BSDFSample &smp) const {
-        BSDFQueryResult result;
-        float fs = sample(query, smp, &result)[query.wlHint];
-        return result.dirPDF > 0.0f ? fs * std::fabs(result.dir_sn.z) / result.dirPDF : 0.0f;
-    }
-    
-    float AshikhminSpecularBRDF::weightInternal(const BSDFQuery &query, const Vector3D &dir, float* revWeight) const {
-        if (revWeight) {
-            SampledSpectrum rev_fs;
-            float revDirPDF;
-            float fs = evaluate(query, dir, &rev_fs)[query.wlHint];
-            float dirPDF = evaluatePDF(query, dir, &revDirPDF);
-            if (dirPDF > 0.0f) {
-                *revWeight = rev_fs[query.wlHint] * std::fabs(query.dir_sn.z) / revDirPDF;
-                return fs * std::fabs(dir.z) / dirPDF;
-            }
-            else {
-                *revWeight = 0.0f;
-                return 0.0f;
-            }
-        }
-        else {
-            BSDFQueryResult result;
-            float fs = evaluate(query, dir)[query.wlHint];
-            float dirPDF = evaluatePDF(query, dir);
-            return dirPDF > 0 ? fs * std::fabs(dir.z) / dirPDF : 0.0f;
-        }
-    }
-    
     float AshikhminSpecularBRDF::weightInternal(const SLR::BSDFQuery &query) const {
         float dotHV = std::fabs(query.dir_sn.z);
         return m_Rs[query.wlHint] + (1 - m_Rs[query.wlHint]) * std::pow(1.0f - dotHV, 5);
@@ -147,39 +118,6 @@ namespace SLR {
         if (revPDF)
             *revPDF = std::fabs(query.dir_sn.z) / M_PI;
         return std::fabs(dir.z) / M_PI;
-    }
-    
-    float AshikhminDiffuseBRDF::weightInternal(const BSDFQuery &query, const BSDFSample &smp) const {
-        BSDFQueryResult result;
-        float fs = sample(query, smp, &result)[query.wlHint];
-        return result.dirPDF > 0.0f ? fs * std::fabs(result.dir_sn.z) / result.dirPDF : 0.0f;
-    }
-    
-    float AshikhminDiffuseBRDF::weightInternal(const BSDFQuery &query, const Vector3D &dir, float* revWeight) const {
-#ifdef Use_BSDF_Actual_Weights
-        BSDFQueryResult result;
-        if (revWeight) {
-            SampledSpectrum rev_fs;
-            float revDirPDF;
-            float fs = evaluate(query, dir, &rev_fs)[query.wlHint];
-            float dirPDF = evaluatePDF(query, dir, &revDirPDF);
-            if (dirPDF > 0.0f) {
-                *revWeight = rev_fs[query.wlHint] * std::fabs(query.dir_sn.z) / revDirPDF;
-                return fs * std::fabs(dir.z) / dirPDF;
-            }
-            else {
-                *revWeight = 0.0f;
-                return 0.0f;
-            }
-        }
-        else {
-            float fs = evaluate(query, dir)[query.wlHint];
-            float dirPDF = evaluatePDF(query, dir);
-            return dirPDF > 0.0f ? fs * std::fabs(dir.z) / dirPDF : 0.0f;
-        }
-#else
-        return weight(query, BSDFSample(0, 0, 0));
-#endif
     }
     
     float AshikhminDiffuseBRDF::weightInternal(const SLR::BSDFQuery &query) const {

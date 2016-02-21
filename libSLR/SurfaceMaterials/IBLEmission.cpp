@@ -13,6 +13,7 @@
 
 namespace SLR {
     SampledSpectrum IBLEmission::emittance(const SurfacePoint &surfPt, const WavelengthSamples &wls) const {
+        // The true value is: lim_{l to inf} pi * r_w^2 / l^2 * L_e => 0
         return m_scene->getWorldDiscArea() * m_coeffM->evaluate(surfPt.texCoord, wls) * m_scale;
     }
     

@@ -33,19 +33,23 @@ namespace SLR {
         result->dirPDF *= weights[idx];
         
         if (!result->dirType.isDelta()) {
+            for (int i = 0; i < m_numComponents; ++i) {
+                if (i != idx && m_BSDFs[i]->matches(query.flags))
+                    result->dirPDF += m_BSDFs[i]->evaluatePDFInternal(query, result->dir_sn, nullptr) * weights[i];
+            }
+        }
+        result->dirPDF /= sumWeights;
+        
+        if (!result->dirType.isDelta()) {
             BSDFQuery mQuery = query;
             mQuery.flags &= sideTest(query.gNormal_sn, query.dir_sn, result->dir_sn);
             value = SampledSpectrum::Zero;
             for (int i = 0; i < m_numComponents; ++i) {
-                const BSDF* BSDF = m_BSDFs[i];
-                if (!BSDF->matches(mQuery.flags))
+                if (!m_BSDFs[i]->matches(mQuery.flags))
                     continue;
-                value += BSDF->evaluateInternal(mQuery, result->dir_sn, nullptr);
-                if (i != idx)
-                    result->dirPDF += BSDF->evaluatePDFInternal(mQuery, result->dir_sn, nullptr) * weights[i];
+                value += m_BSDFs[i]->evaluateInternal(mQuery, result->dir_sn, nullptr);
             }
         }
-        result->dirPDF /= sumWeights;
         
         return value;
     }
@@ -80,20 +84,10 @@ namespace SLR {
         result->reverse->dirPDF *= revWeights[idx];
         
         if (!result->dirType.isDelta()) {
-            BSDFQuery mQuery = query;
-            mQuery.flags &= sideTest(query.gNormal_sn, query.dir_sn, result->dir_sn);
-            value = SampledSpectrum::Zero;
-
             for (int i = 0; i < m_numComponents; ++i) {
-                const BSDF* BSDF = m_BSDFs[i];
-                if (!BSDF->matches(mQuery.flags))
-                    continue;
-                SampledSpectrum rev_fs;
                 float revPDF;
-                value += BSDF->evaluateInternal(mQuery, result->dir_sn, &rev_fs);
-                result->reverse->fs += rev_fs;
-                if (i != idx) {
-                    result->dirPDF += BSDF->evaluatePDFInternal(mQuery, result->dir_sn, &revPDF) * weights[i];
+                if (i != idx && m_BSDFs[i]->matches(query.flags)) {
+                    result->dirPDF += m_BSDFs[i]->evaluatePDFInternal(query, result->dir_sn, &revPDF) * weights[i];
                     result->reverse->dirPDF += revPDF * revWeights[i];
                 }
             }
@@ -101,12 +95,28 @@ namespace SLR {
         result->dirPDF /= sumWeights;
         result->reverse->dirPDF /= sumRevWeights;
         
+        if (!result->dirType.isDelta()) {
+            BSDFQuery mQuery = query;
+            mQuery.flags &= sideTest(query.gNormal_sn, query.dir_sn, result->dir_sn);
+            value = SampledSpectrum::Zero;
+            result->reverse->fs = SampledSpectrum::Zero;
+            
+            for (int i = 0; i < m_numComponents; ++i) {
+                if (!m_BSDFs[i]->matches(mQuery.flags))
+                    continue;
+                SampledSpectrum eRev_fs;
+                value += m_BSDFs[i]->evaluateInternal(mQuery, result->dir_sn, &eRev_fs);
+                result->reverse->fs += eRev_fs;
+            }
+        }
+        
         return value;
     }
     
     SampledSpectrum MultiBSDF::evaluateInternal(const BSDFQuery &query, const Vector3D &dirOut, SampledSpectrum* rev_fs) const {
         if (rev_fs) {
-            SampledSpectrum retValue;
+            SampledSpectrum retValue = SampledSpectrum::Zero;
+            *rev_fs = SampledSpectrum::Zero;
             for (int i = 0; i < m_numComponents; ++i) {
                 if (!m_BSDFs[i]->matches(query.flags))
                     continue;
@@ -117,7 +127,7 @@ namespace SLR {
             return retValue;
         }
         else {
-            SampledSpectrum retValue;
+            SampledSpectrum retValue = SampledSpectrum::Zero;
             for (int i = 0; i < m_numComponents; ++i) {
                 if (!m_BSDFs[i]->matches(query.flags))
                     continue;
@@ -181,33 +191,6 @@ namespace SLR {
         *revPDF /= sumRevWeights;
         
         return retPDF;
-    }
-    
-    float MultiBSDF::weightInternal(const BSDFQuery &query, const BSDFSample &smp) const {
-        FloatSum sumWeights = 0.0f;
-        for (int i = 0; i < m_numComponents; ++i)
-            sumWeights += m_BSDFs[i]->weight(query, smp);
-        return sumWeights;
-    }
-    
-    float MultiBSDF::weightInternal(const BSDFQuery &query, const Vector3D &dir, float* revWeight) const {
-        if (revWeight) {
-            FloatSum sumWeights = 0.0f;
-            FloatSum sumRevWeights = 0.0f;
-            for (int i = 0; i < m_numComponents; ++i) {
-                float eRevWeights = 0.0f;
-                sumWeights += m_BSDFs[i]->weight(query, dir, &eRevWeights);
-                sumRevWeights += eRevWeights;
-            }
-            *revWeight = sumRevWeights;
-            return sumWeights;
-        }
-        else {
-            FloatSum sumWeights = 0.0f;
-            for (int i = 0; i < m_numComponents; ++i)
-                sumWeights += m_BSDFs[i]->weight(query, dir);
-            return sumWeights;
-        }
     }
     
     float MultiBSDF::weightInternal(const SLR::BSDFQuery &query) const {

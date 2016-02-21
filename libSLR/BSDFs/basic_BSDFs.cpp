@@ -46,17 +46,6 @@ namespace SLR {
         return std::abs(dir.z) / M_PI;
     }
     
-    float LambertianBRDF::weightInternal(const BSDFQuery &query, const BSDFSample &smp) const {
-        return m_R[query.wlHint];
-    }
-    
-    float LambertianBRDF::weightInternal(const BSDFQuery &query, const Vector3D &dir, float* revWeight) const {
-        float weight = m_R[query.wlHint];
-        if (revWeight)
-            *revWeight = weight;
-        return weight;
-    }
-    
     float LambertianBRDF::weightInternal(const SLR::BSDFQuery &query) const {
         return m_R[query.wlHint];
     }
@@ -86,18 +75,6 @@ namespace SLR {
     float SpecularBRDF::evaluatePDFInternal(const BSDFQuery &query, const Vector3D &dir, float* revPDF) const {
         if (revPDF)
             *revPDF = 0.0f;
-        return 0.0f;
-    }
-    
-    float SpecularBRDF::weightInternal(const BSDFQuery &query, const BSDFSample &smp) const {
-        BSDFQueryResult result;
-        float fs = sample(query, smp, &result)[query.wlHint];
-        return fs * std::fabs(result.dir_sn.z) / result.dirPDF;
-    }
-    
-    float SpecularBRDF::weightInternal(const BSDFQuery &query, const Vector3D &dir, float* revWeight) const {
-        if (revWeight)
-            *revWeight = 0.0f;
         return 0.0f;
     }
     
@@ -152,18 +129,6 @@ namespace SLR {
         return 0.0f;
     }
     
-    float SpecularBTDF::weightInternal(const BSDFQuery &query, const BSDFSample &smp) const {
-        BSDFQueryResult result;
-        float fs = sample(query, smp, &result)[query.wlHint];
-        return result.dirPDF > 0.0f ? fs * std::fabs(result.dir_sn.z) / result.dirPDF : 0.0f;
-    }
-    
-    float SpecularBTDF::weightInternal(const BSDFQuery &query, const Vector3D &dir, float* revWeight) const {
-        if (revWeight)
-            *revWeight = 0.0f;
-        return 0.0f;
-    }
-    
     float SpecularBTDF::weightInternal(const SLR::BSDFQuery &query) const {
         float F = m_fresnel.evaluate(query.dir_sn.z, query.wlHint);
         return m_coeffT[query.wlHint] * (1.0f - F);
@@ -196,20 +161,6 @@ namespace SLR {
         Vector3D mDir = dir;
         mDir.z *= -1;
         return m_baseBSDF->evaluatePDF(mQuery, mDir, revPDF);
-    }
-    
-    float InverseBSDF::weightInternal(const BSDFQuery &query, const BSDFSample &smp) const {
-        BSDFQuery mQuery = query;
-        mQuery.flags = mQuery.flags.flip();
-        return m_baseBSDF->weight(mQuery, smp);
-    }
-    
-    float InverseBSDF::weightInternal(const BSDFQuery &query, const Vector3D &dir, float* revWeight) const {
-        BSDFQuery mQuery = query;
-        mQuery.flags = mQuery.flags.flip();
-        Vector3D mDir = dir;
-        mDir.z *= -1;
-        return m_baseBSDF->weight(mQuery, mDir, revWeight);
     }
     
     float InverseBSDF::weightInternal(const SLR::BSDFQuery &query) const {
