@@ -170,8 +170,8 @@ namespace SLR {
                         if (!scene->testVisibility(eVtx.surfPt, lVtx.surfPt, time))
                             continue;
                         
-                        float dist2;
-                        Vector3D connectionVector = lVtx.surfPt.getDirectionFrom(eVtx.surfPt.p, &dist2);
+                        float connectDist2;
+                        Vector3D connectionVector = lVtx.surfPt.getDirectionFrom(eVtx.surfPt.p, &connectDist2);
                         
                         Vector3D cVecL = lVtx.surfPt.shadingFrame.toLocal(-connectionVector);
                         DDFQuery queryLightEnd{lVtx.dirIn_sn, lVtx.gNormal_sn, wlHint, true};
@@ -189,7 +189,7 @@ namespace SLR {
                         float eExtend1stDirPDF = eVtx.ddf->evaluatePDF(queryEyeEnd, cVecE, &lExtend2ndDirPDF);
                         float cosEyeEnd = absDot(connectionVector, eVtx.surfPt.gNormal);
                         
-                        float G = cosEyeEnd * cosLightEnd / dist2;
+                        float G = cosEyeEnd * cosLightEnd / connectDist2;
                         float wlProb = 1.0f;
                         if ((lVtx.wlFlags | eVtx.wlFlags) & WavelengthSamples::LambdaIsSelected)
                             wlProb = 1.0f / WavelengthSamples::NumComponents;
@@ -201,11 +201,12 @@ namespace SLR {
                         // They can't be stored in advance because they depend on the connection.
                         float lExtend1stAreaPDF, lExtend1stRRProb, lExtend2ndAreaPDF, lExtend2ndRRProb;
                         {
-                            lExtend1stAreaPDF = lExtend1stDirPDF * cosEyeEnd / dist2;
+                            lExtend1stAreaPDF = lExtend1stDirPDF * cosEyeEnd / connectDist2;
                             lExtend1stRRProb = s > 1 ? std::min((ddfL * cosLightEnd / lExtend1stDirPDF)[wlHint], 1.0f) : 1.0f;
                             
                             if (t > 1) {
                                 BPTVertex &eVtxNextToEnd = eyeVertices[t - 2];
+                                float dist2;
                                 Vector3D dir2nd = eVtx.surfPt.getDirectionFrom(eVtxNextToEnd.surfPt.p, &dist2);
                                 lExtend2ndAreaPDF = lExtend2ndDirPDF * absDot(eVtxNextToEnd.surfPt.gNormal, dir2nd) / dist2;
                                 lExtend2ndRRProb = std::min((revDDFE * absDot(eVtx.gNormal_sn, eVtx.dirIn_sn) / lExtend2ndDirPDF)[wlHint], 1.0f);
@@ -213,11 +214,12 @@ namespace SLR {
                         }
                         float eExtend1stAreaPDF, eExtend1stRRProb, eExtend2ndAreaPDF, eExtend2ndRRProb;
                         {
-                            eExtend1stAreaPDF = eExtend1stDirPDF * cosLightEnd / dist2;
+                            eExtend1stAreaPDF = eExtend1stDirPDF * cosLightEnd / connectDist2;
                             eExtend1stRRProb = t > 1 ? std::min((ddfE * cosEyeEnd / eExtend1stDirPDF)[wlHint], 1.0f) : 1.0f;
                             
                             if (s > 1) {
                                 BPTVertex &lVtxNextToEnd = lightVertices[s - 2];
+                                float dist2;
                                 Vector3D dir2nd = lVtxNextToEnd.surfPt.getDirectionFrom(lVtx.surfPt.p, &dist2);
                                 eExtend2ndAreaPDF = eExtend2ndDirPDF * absDot(lVtxNextToEnd.surfPt.gNormal, dir2nd) / dist2;
                                 eExtend2ndRRProb = std::min((revDDFL * absDot(lVtx.gNormal_sn, lVtx.dirIn_sn) / eExtend2ndDirPDF)[wlHint], 1.0f);
