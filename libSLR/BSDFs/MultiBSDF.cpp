@@ -37,10 +37,7 @@ namespace SLR {
                 if (i != idx && m_BSDFs[i]->matches(query.flags))
                     result->dirPDF += m_BSDFs[i]->evaluatePDFInternal(query, result->dir_sn, nullptr) * weights[i];
             }
-        }
-        result->dirPDF /= sumWeights;
-        
-        if (!result->dirType.isDelta()) {
+            
             BSDFQuery mQuery = query;
             mQuery.flags &= sideTest(query.gNormal_sn, query.dir_sn, result->dir_sn);
             value = SampledSpectrum::Zero;
@@ -50,6 +47,7 @@ namespace SLR {
                 value += m_BSDFs[i]->evaluateInternal(mQuery, result->dir_sn, nullptr);
             }
         }
+        result->dirPDF /= sumWeights;
         
         return value;
     }
@@ -91,11 +89,7 @@ namespace SLR {
                     result->reverse->dirPDF += revPDF * revWeights[i];
                 }
             }
-        }
-        result->dirPDF /= sumWeights;
-        result->reverse->dirPDF /= sumRevWeights;
-        
-        if (!result->dirType.isDelta()) {
+            
             BSDFQuery mQuery = query;
             mQuery.flags &= sideTest(query.gNormal_sn, query.dir_sn, result->dir_sn);
             value = SampledSpectrum::Zero;
@@ -109,6 +103,8 @@ namespace SLR {
                 result->reverse->fs += eRev_fs;
             }
         }
+        result->dirPDF /= sumWeights;
+        result->reverse->dirPDF /= sumRevWeights;
         
         return value;
     }

@@ -167,62 +167,66 @@ namespace SLR {
                     for (int s = 1; s <= lightVertices.size(); ++s) {
                         const BPTVertex &lVtx = lightVertices[s - 1];
                         
-                        if (!scene->testVisibility(eVtx.surfPt, lVtx.surfPt, time))
-                            continue;
-                        
+                        // calculate the remaining factors of the full path
+                        // that are not included in the precomputed weights.
+                        // ----------------------------------------------------------------
                         float connectDist2;
                         Vector3D connectionVector = lVtx.surfPt.getDirectionFrom(eVtx.surfPt.p, &connectDist2);
-                        
-                        Vector3D cVecL = lVtx.surfPt.shadingFrame.toLocal(-connectionVector);
-                        DDFQuery queryLightEnd{lVtx.dirIn_sn, lVtx.gNormal_sn, wlHint, true};
-                        SampledSpectrum revDDFL;
-                        SampledSpectrum ddfL = lVtx.ddf->evaluate(queryLightEnd, cVecL, &revDDFL);
-                        float eExtend2ndDirPDF;
-                        float lExtend1stDirPDF = lVtx.ddf->evaluatePDF(queryLightEnd, cVecL, &eExtend2ndDirPDF);
                         float cosLightEnd = absDot(connectionVector, lVtx.surfPt.gNormal);
-                        
-                        Vector3D cVecE = eVtx.surfPt.shadingFrame.toLocal(connectionVector);
-                        DDFQuery queryEyeEnd{eVtx.dirIn_sn, eVtx.gNormal_sn, wlHint, false};
-                        SampledSpectrum revDDFE;
-                        SampledSpectrum ddfE = eVtx.ddf->evaluate(queryEyeEnd, cVecE, &revDDFE);
-                        float lExtend2ndDirPDF;
-                        float eExtend1stDirPDF = eVtx.ddf->evaluatePDF(queryEyeEnd, cVecE, &lExtend2ndDirPDF);
                         float cosEyeEnd = absDot(connectionVector, eVtx.surfPt.gNormal);
-                        
                         float G = cosEyeEnd * cosLightEnd / connectDist2;
+                        
+                        Vector3D lConnectVector = lVtx.surfPt.shadingFrame.toLocal(-connectionVector);
+                        DDFQuery queryLightEnd{lVtx.dirIn_sn, lVtx.gNormal_sn, wlHint, true};
+                        SampledSpectrum lRevDDF;
+                        SampledSpectrum lDDF = lVtx.ddf->evaluate(queryLightEnd, lConnectVector, &lRevDDF);
+                        float eExtend2ndDirPDF;
+                        float lExtend1stDirPDF = lVtx.ddf->evaluatePDF(queryLightEnd, lConnectVector, &eExtend2ndDirPDF);
+                        
+                        Vector3D eConnectVector = eVtx.surfPt.shadingFrame.toLocal(connectionVector);
+                        DDFQuery queryEyeEnd{eVtx.dirIn_sn, eVtx.gNormal_sn, wlHint, false};
+                        SampledSpectrum eRevDDF;
+                        SampledSpectrum eDDF = eVtx.ddf->evaluate(queryEyeEnd, eConnectVector, &eRevDDF);
+                        float lExtend2ndDirPDF;
+                        float eExtend1stDirPDF = eVtx.ddf->evaluatePDF(queryEyeEnd, eConnectVector, &lExtend2ndDirPDF);
+                        
                         float wlProb = 1.0f;
                         if ((lVtx.wlFlags | eVtx.wlFlags) & WavelengthSamples::LambdaIsSelected)
                             wlProb = 1.0f / WavelengthSamples::NumComponents;
-                        SampledSpectrum connectionTerm = ddfL * (G / wlProb) * ddfE;
+                        SampledSpectrum connectionTerm = lDDF * (G / wlProb) * eDDF;
                         if (connectionTerm == SampledSpectrum::Zero)
                             continue;
+                        
+                        if (!scene->testVisibility(eVtx.surfPt, lVtx.surfPt, time))
+                            continue;
+                        // ----------------------------------------------------------------
                         
                         // calculate the 1st and 2nd subpath extending PDFs and probabilities.
                         // They can't be stored in advance because they depend on the connection.
                         float lExtend1stAreaPDF, lExtend1stRRProb, lExtend2ndAreaPDF, lExtend2ndRRProb;
                         {
                             lExtend1stAreaPDF = lExtend1stDirPDF * cosEyeEnd / connectDist2;
-                            lExtend1stRRProb = s > 1 ? std::min((ddfL * cosLightEnd / lExtend1stDirPDF)[wlHint], 1.0f) : 1.0f;
+                            lExtend1stRRProb = s > 1 ? std::min((lDDF * cosLightEnd / lExtend1stDirPDF)[wlHint], 1.0f) : 1.0f;
                             
                             if (t > 1) {
                                 BPTVertex &eVtxNextToEnd = eyeVertices[t - 2];
                                 float dist2;
                                 Vector3D dir2nd = eVtx.surfPt.getDirectionFrom(eVtxNextToEnd.surfPt.p, &dist2);
                                 lExtend2ndAreaPDF = lExtend2ndDirPDF * absDot(eVtxNextToEnd.surfPt.gNormal, dir2nd) / dist2;
-                                lExtend2ndRRProb = std::min((revDDFE * absDot(eVtx.gNormal_sn, eVtx.dirIn_sn) / lExtend2ndDirPDF)[wlHint], 1.0f);
+                                lExtend2ndRRProb = std::min((eRevDDF * absDot(eVtx.gNormal_sn, eVtx.dirIn_sn) / lExtend2ndDirPDF)[wlHint], 1.0f);
                             }
                         }
                         float eExtend1stAreaPDF, eExtend1stRRProb, eExtend2ndAreaPDF, eExtend2ndRRProb;
                         {
                             eExtend1stAreaPDF = eExtend1stDirPDF * cosLightEnd / connectDist2;
-                            eExtend1stRRProb = t > 1 ? std::min((ddfE * cosEyeEnd / eExtend1stDirPDF)[wlHint], 1.0f) : 1.0f;
+                            eExtend1stRRProb = t > 1 ? std::min((eDDF * cosEyeEnd / eExtend1stDirPDF)[wlHint], 1.0f) : 1.0f;
                             
                             if (s > 1) {
                                 BPTVertex &lVtxNextToEnd = lightVertices[s - 2];
                                 float dist2;
                                 Vector3D dir2nd = lVtxNextToEnd.surfPt.getDirectionFrom(lVtx.surfPt.p, &dist2);
                                 eExtend2ndAreaPDF = eExtend2ndDirPDF * absDot(lVtxNextToEnd.surfPt.gNormal, dir2nd) / dist2;
-                                eExtend2ndRRProb = std::min((revDDFL * absDot(lVtx.gNormal_sn, lVtx.dirIn_sn) / eExtend2ndDirPDF)[wlHint], 1.0f);
+                                eExtend2ndRRProb = std::min((lRevDDF * absDot(lVtx.gNormal_sn, lVtx.dirIn_sn) / eExtend2ndDirPDF)[wlHint], 1.0f);
                             }
                         }
                         
@@ -242,7 +246,7 @@ namespace SLR {
                         else {
                             const IDF* idf = (const IDF*)eVtx.ddf->getDDF();
                             float hitPx, hitPy;
-                            idf->calculatePixel(cVecE, &hitPx, &hitPy);
+                            idf->calculatePixel(eConnectVector, &hitPx, &hitPy);
                             sensor->add(threadID, hitPx, hitPy, wls, contribution);
                         }
                     }
@@ -337,11 +341,6 @@ namespace SLR {
             BPTVertex &vtxNextToLast = vertices[vertices.size() - 2];
             vtxNextToLast.revAreaPDF = revInfo.dirPDF * cosLast / dist2;
             vtxNextToLast.revRRProb = std::min((revInfo.fs * absDot(dirOut_sn, gNorm_sn) / revInfo.dirPDF)[wlHint], 1.0f);
-//            SLRAssert(!std::isnan(vtxNextToLast.revAreaPDF) && !std::isinf(vtxNextToLast.revAreaPDF),
-//                      "invalid reverse area PDF: %g, dirPDF: %g, cos: %g, dist2: %g", vtxNextToLast.revAreaPDF, revInfo.dirPDF, cosLast, dist2);
-//            SLRAssert(!std::isnan(vtxNextToLast.revRRProb) && !std::isinf(vtxNextToLast.revRRProb),
-//                      "invalid reverse RR probability: %g\nfs: %s\n, absDot: %g, dirPDF: %g",
-//                      vtxNextToLast.revRRProb, revInfo.fs.toString().c_str(), absDot(dirOut_sn, gNorm_sn), revInfo.dirPDF);
             
             cosLast = cosIn;
             dirPDF = fsResult.dirPDF;
