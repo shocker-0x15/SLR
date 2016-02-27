@@ -12,14 +12,13 @@ namespace SLR {
         result->dir_sn = Vector3D(0, 0, 1);
         result->dirPDF = 1.0f / m_worldDiscArea;
         result->dirType = m_type;
-        return 1.0f / m_worldDiscArea;
+        return 1.0f / M_PI;
     }
     
     SampledSpectrum IBLEDF::evaluate(const EDFQuery &query, const Vector3D &dir) const {
         if (!query.flags.matches(m_type))
             return SampledSpectrum::Zero;
-        // The true value is: lim_{l to inf} l^2 / (pi * r_w^2) => inf
-        return 1.0f / m_worldDiscArea;
+        return 1.0f / M_PI;
     }
     
     float IBLEDF::evaluatePDF(const EDFQuery &query, const Vector3D &dir) const {
