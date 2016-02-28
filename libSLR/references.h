@@ -37,12 +37,12 @@ namespace SLR {
     typedef float SpectrumFloat;
     typedef RGBTemplate<SpectrumFloat> RGBInputSpectrum;
     const static uint32_t NumSpectralSamples = 16;
+    const static uint32_t NumStrataForStorage = 16;
     typedef ContinuousSpectrumTemplate<SpectrumFloat, NumSpectralSamples> ContinuousSpectrum;
     typedef RegularContinuousSpectrumTemplate<SpectrumFloat, NumSpectralSamples> RegularContinuousSpectrum;
     typedef IrregularContinuousSpectrumTemplate<SpectrumFloat, NumSpectralSamples> IrregularContinuousSpectrum;
     typedef UpsampledContinuousSpectrumTemplate<SpectrumFloat, NumSpectralSamples> UpsampledContinuousSpectrum;
 #ifdef Use_Spectral_Representation
-    const static uint32_t NumStrataForStorage = 16;
     typedef WavelengthSamplesTemplate<SpectrumFloat, NumSpectralSamples> WavelengthSamples;
     typedef SampledSpectrumTemplate<SpectrumFloat, NumSpectralSamples> SampledSpectrum;
     typedef DiscretizedSpectrumTemplate<SpectrumFloat, NumStrataForStorage> DiscretizedSpectrum;

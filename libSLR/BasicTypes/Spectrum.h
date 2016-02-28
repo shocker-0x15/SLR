@@ -576,6 +576,7 @@ namespace SLR {
 #include "spectrum_library.h"
 
 namespace SLR {
+    extern SLR_API SpectrumFloat integralCMF;
     SLR_API void initSpectrum();
 }
 

@@ -217,8 +217,7 @@ namespace SLR {
         0, 0, 0, 0, 0, 0, 0
     };
     
-    
-    static SpectrumFloat integralCMF;
+    SpectrumFloat integralCMF;
     
     SLR_API void initSpectrum() {
         DiscretizedSpectrum::init();

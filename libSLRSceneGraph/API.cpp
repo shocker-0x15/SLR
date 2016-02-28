@@ -1333,7 +1333,7 @@ namespace SLRSceneGraph {
                 if (curWL < lambdas[0]) {
                     value = values[0];
                 }
-                else if (curWL > lambdas[1]) {
+                else if (curWL > lambdas[numSamples - 1]) {
                     value = values[numSamples - 1];
                 }
                 else if (curWL == lambdas[baseIdx]) {
@@ -1341,7 +1341,7 @@ namespace SLRSceneGraph {
                     ++baseIdx;
                 }
                 else {
-                    const SpectrumFloat* lb = std::lower_bound(lambdas + std::max(baseIdx - 1, 0u), lambdas + numSamples, curWL);
+                    const SpectrumFloat* lb = std::lower_bound(lambdas + std::max((int32_t)baseIdx - 1, 0), lambdas + numSamples, curWL);
                     uint32_t idx = std::max(int32_t(std::distance(lambdas, lb)) - 1, 0);
                     SpectrumFloat t = (curWL - lambdas[idx]) / (lambdas[idx + 1] - lambdas[idx]);
                     value = (1 - t) * values[idx] + t * values[idx + 1];
