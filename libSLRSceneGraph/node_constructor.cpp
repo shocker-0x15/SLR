@@ -145,7 +145,7 @@ namespace SLRSceneGraph {
             aiString strValue;
             Normal3DTextureRef normalTex;
             if (aiMat->Get(AI_MATKEY_TEXTURE_DISPLACEMENT(0), strValue) == aiReturn_SUCCESS) {
-                TiledImage2DRef image = Image::createTiledImage((pathPrefix + strValue.C_Str()).c_str(), &defMem, SpectrumType::Illuminant);
+                TiledImage2DRef image = Image::createTiledImage((pathPrefix + strValue.C_Str()).c_str(), &defMem, SpectrumType::Reflectance);
                 normalTex = createShared<ImageNormal3DTexture>(image);
             }
             normalMaps.push_back(normalTex);

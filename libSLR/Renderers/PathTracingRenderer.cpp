@@ -194,6 +194,7 @@ namespace SLR {
                     float MISWeight = 1.0f;
                     if (!lpResult.posType.isDelta() && !std::isinf(lpResult.areaPDF))
                         MISWeight = (lightPDF * lightPDF) / (lightPDF * lightPDF + bsdfPDF * bsdfPDF);
+                    SLRAssert(MISWeight <= 1.0f, "Invalid MIS weight: %g", MISWeight);
                     
                     float G = absDot(shadowDir_sn, gNorm_sn) * cosLight / dist2;
                     sp += alpha * Le * fs * (G * MISWeight / lightPDF);
@@ -243,6 +244,7 @@ namespace SLR {
                 float MISWeight = 1.0f;
                 if (!fsResult.dirType.isDelta())
                     MISWeight = (bsdfPDF * bsdfPDF) / (lightPDF * lightPDF + bsdfPDF * bsdfPDF);
+                SLRAssert(MISWeight <= 1.0f, "Invalid MIS weight: %g", MISWeight);
                 
                 sp += alpha * Le * MISWeight;
             }
@@ -250,7 +252,7 @@ namespace SLR {
                 break;
             
             // Russian roulette
-            float continueProb = std::min(alpha[wls.selectedLambda] / initY, 1.0f);
+            float continueProb = std::min(alpha.luminance() / initY, 1.0f);
             if (rng.getFloat0cTo1o() < continueProb)
                 alpha /= continueProb;
             else

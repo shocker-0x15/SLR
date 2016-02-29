@@ -73,7 +73,7 @@ namespace SLR {
     
     float AshikhminSpecularBRDF::weightInternal(const SLR::BSDFQuery &query) const {
         float dotHV = std::fabs(query.dir_sn.z);
-        return m_Rs[query.wlHint] + (1 - m_Rs[query.wlHint]) * std::pow(1.0f - dotHV, 5);
+        return m_Rs.luminance() + (1 - m_Rs.luminance()) * std::pow(1.0f - dotHV, 5);
     }
     
     SampledSpectrum AshikhminSpecularBRDF::getBaseColorInternal(DirectionType flags) const {
@@ -121,7 +121,7 @@ namespace SLR {
     }
     
     float AshikhminDiffuseBRDF::weightInternal(const SLR::BSDFQuery &query) const {
-        return (2954.0f / 1863.0f * m_Rd[query.wlHint] * (1 - m_Rs[query.wlHint]) * (1.0f - std::pow(1.0f - std::fabs(query.dir_sn.z) / 2, 5)));
+        return (2954.0f / 1863.0f * m_Rd.luminance() * (1 - m_Rs.luminance()) * (1.0f - std::pow(1.0f - std::fabs(query.dir_sn.z) / 2, 5)));
     }
     
     SampledSpectrum AshikhminDiffuseBRDF::getBaseColorInternal(DirectionType flags) const {

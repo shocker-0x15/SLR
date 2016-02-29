@@ -24,7 +24,11 @@ namespace SLR {
         uint16_t flags;
         static const uint32_t NumComponents;
         
-        RGBSamplesTemplate() { }
+        RGBSamplesTemplate() : selectedLambda(0), flags(0) { }
+        RGBSamplesTemplate(const RGBSamplesTemplate &wls) {
+            selectedLambda = wls.selectedLambda;
+            flags = wls.flags;
+        }
         
         bool lambdaSelected() const {
             return (flags & LambdaIsSelected) != 0;

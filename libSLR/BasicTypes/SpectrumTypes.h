@@ -191,7 +191,7 @@ namespace SLR {
                             sRGB_E_to_XYZ(RGB, XYZ);
                             break;
                         case SpectrumType::Illuminant:
-                            sRGB_E_to_XYZ(RGB, XYZ);
+                            sRGB_to_XYZ(RGB, XYZ);
                             break;
                         default:
                             SLRAssert(false, "Invalid Spectrum Type");
