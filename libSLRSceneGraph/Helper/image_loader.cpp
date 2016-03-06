@@ -253,7 +253,7 @@ bool loadPNG(const std::string &filePath, uint8_t* storage, bool gammaCorrection
     png_read_update_info(pngStructures.pngStruct, pngStructures.pngInfo);
     
     uint32_t stride;
-    if (colorType == PNG_COLOR_TYPE_RGB || colorType == PNG_COLOR_TYPE_RGBA)
+    if (colorType == PNG_COLOR_TYPE_RGB || colorType == PNG_COLOR_TYPE_RGBA || colorType == PNG_COLOR_TYPE_PALETTE)
         stride = 4;
     else
         stride = 1;

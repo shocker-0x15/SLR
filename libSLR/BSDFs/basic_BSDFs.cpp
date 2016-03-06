@@ -79,7 +79,7 @@ namespace SLR {
     }
     
     float SpecularBRDF::weightInternal(const BSDFQuery &query) const {
-        return m_coeffR.luminance() * m_fresnel->evaluate(query.dir_sn.z, query.wlHint);
+        return m_coeffR.luminance() * m_fresnel->evaluate(query.dir_sn.z).luminance();
     }
     
     SampledSpectrum SpecularBRDF::getBaseColorInternal(DirectionType flags) const {
