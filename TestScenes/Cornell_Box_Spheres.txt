@@ -1,5 +1,5 @@
-//setRenderer("method": "PT", ("samples": 16384,));
-setRenderer("method": "BPT", ("samples": 16384,));
+setRenderer("method": "PT", ("samples": 16384,));
+//setRenderer("method": "BPT", ("samples": 16384,));
 setRenderSettings("width": 1024, "height": 768);
 
 CBNode = createNode();

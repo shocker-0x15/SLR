@@ -17,14 +17,14 @@ namespace SLR {
     }
     
     SampledSpectrum MultiBSDF::sampleInternalNoRev(const BSDFQuery &query, const BSDFSample &smp, BSDFQueryResult *result) const {
-        float weights[maxNumElems];
+        SampledSpectrum weights[maxNumElems];
         for (int i = 0; i < m_numComponents; ++i)
             weights[i] = m_BSDFs[i]->weight(query);
         
-        float sumWeights, base;
-        uint32_t idx = sampleDiscrete(weights, &sumWeights, &base, m_numComponents, smp.uComponent);
+        SampledSpectrum sumWeights;
+        uint32_t idx = sampleDiscrete(weights, query.heroIndex, &sumWeights, m_numComponents, smp.uComponent);
         const BSDF* selectedBSDF = m_BSDFs[idx];
-        if (sumWeights == 0.0f) {
+        if (sumWeights[query.heroIndex] == 0.0f) {
             result->dirPDF = 0.0f;
             return SampledSpectrum::Zero;
         }
@@ -53,14 +53,14 @@ namespace SLR {
     }
     
     SampledSpectrum MultiBSDF::sampleInternalWithRev(const BSDFQuery &query, const BSDFSample &smp, BSDFQueryResult *result) const {
-        float weights[maxNumElems];
+        SampledSpectrum weights[maxNumElems];
         for (int i = 0; i < m_numComponents; ++i)
             weights[i] = m_BSDFs[i]->weight(query);
         
-        float sumWeights, base;
-        uint32_t idx = sampleDiscrete(weights, &sumWeights, &base, m_numComponents, smp.uComponent);
+        SampledSpectrum sumWeights;
+        uint32_t idx = sampleDiscrete(weights, query.heroIndex, &sumWeights, m_numComponents, smp.uComponent);
         const BSDF* selectedBSDF = m_BSDFs[idx];
-        if (sumWeights == 0.0f) {
+        if (sumWeights[query.heroIndex] == 0.0f) {
             result->dirPDF = 0.0f;
             return SampledSpectrum::Zero;
         }
@@ -71,8 +71,8 @@ namespace SLR {
         Vector3D revDirIn = result->dir_sn;
         std::swap(revQuery.dir_sn, revDirIn);
         revQuery.adjoint ^= true;
-        float revWeights[maxNumElems];
-        FloatSum sumRevWeights = 0;
+        SampledSpectrum revWeights[maxNumElems];
+        SampledSpectrumSum sumRevWeights = SampledSpectrum::Zero;
         for (int i = 0; i < m_numComponents; ++i) {
             revWeights[i] = m_BSDFs[i]->weight(revQuery);
             sumRevWeights += revWeights[i];
@@ -83,7 +83,7 @@ namespace SLR {
         
         if (!result->dirType.isDelta()) {
             for (int i = 0; i < m_numComponents; ++i) {
-                float revPDF;
+                SampledSpectrum revPDF;
                 if (i != idx && m_BSDFs[i]->matches(query.flags)) {
                     result->dirPDF += m_BSDFs[i]->evaluatePDFInternal(query, result->dir_sn, &revPDF) * weights[i];
                     result->reverse->dirPDF += revPDF * revWeights[i];
@@ -133,55 +133,52 @@ namespace SLR {
         }
     }
     
-    float MultiBSDF::evaluatePDFInternalNoRev(const BSDFQuery &query, const Vector3D &dirOut, float* revPDF) const {
-        FloatSum sumWeights = 0.0f;
-        float weights[maxNumElems];
+    SampledSpectrum MultiBSDF::evaluatePDFInternalNoRev(const BSDFQuery &query, const Vector3D &dirOut, SampledSpectrum* revPDF) const {
+        SampledSpectrumSum sumWeights = SampledSpectrum::Zero;
+        SampledSpectrum weights[maxNumElems];
         for (int i = 0; i < m_numComponents; ++i) {
             weights[i] = m_BSDFs[i]->weight(query);
             sumWeights += weights[i];
         }
-        if (sumWeights == 0.0f)
+        if (sumWeights.result[query.heroIndex] == 0.0f)
             return 0.0f;
         
-        float retPDF = 0.0f;
+        SampledSpectrum retPDF = 0.0f;
         for (int i = 0; i < m_numComponents; ++i) {
-            if (weights[i] > 0)
-                retPDF += m_BSDFs[i]->evaluatePDFInternal(query, dirOut, nullptr) * weights[i];
+            retPDF += m_BSDFs[i]->evaluatePDFInternal(query, dirOut, nullptr) * weights[i];
         }
         retPDF /= sumWeights;
         
         return retPDF;
     }
     
-    float MultiBSDF::evaluatePDFInternalWithRev(const BSDFQuery &query, const Vector3D &dirOut, float* revPDF) const {
+    SampledSpectrum MultiBSDF::evaluatePDFInternalWithRev(const BSDFQuery &query, const Vector3D &dirOut, SampledSpectrum* revPDF) const {
         BSDFQuery revQuery = query;// mQuery?
         Vector3D revDirIn = dirOut;
         std::swap(revQuery.dir_sn, revDirIn);
         revQuery.adjoint ^= true;
         
-        FloatSum sumWeights = 0.0f;
-        FloatSum sumRevWeights = 0.0f;
-        float weights[maxNumElems];
-        float revWeights[maxNumElems];
+        SampledSpectrumSum sumWeights = SampledSpectrum::Zero;
+        SampledSpectrumSum sumRevWeights = SampledSpectrum::Zero;
+        SampledSpectrum weights[maxNumElems];
+        SampledSpectrum revWeights[maxNumElems];
         for (int i = 0; i < m_numComponents; ++i) {
             weights[i] = m_BSDFs[i]->weight(query);
             sumWeights += weights[i];
             revWeights[i] = m_BSDFs[i]->weight(revQuery);
             sumRevWeights += revWeights[i];
         }
-        if (sumWeights == 0.0f) {
+        if (sumWeights.result[query.heroIndex] == 0.0f) {
             *revPDF = 0.0f;
             return 0.0f;
         }
         
-        float retPDF = 0.0f;
+        SampledSpectrum retPDF = 0.0f;
         *revPDF = 0.0f;
         for (int i = 0; i < m_numComponents; ++i) {
-            if (weights[i] > 0) {
-                float eRevPDF;
-                retPDF += m_BSDFs[i]->evaluatePDFInternal(query, dirOut, &eRevPDF) * weights[i];
-                *revPDF += eRevPDF * revWeights[i];
-            }
+            SampledSpectrum eRevPDF;
+            retPDF += m_BSDFs[i]->evaluatePDFInternal(query, dirOut, &eRevPDF) * weights[i];
+            *revPDF += eRevPDF * revWeights[i];
         }
         retPDF /= sumWeights;
         *revPDF /= sumRevWeights;
@@ -189,8 +186,8 @@ namespace SLR {
         return retPDF;
     }
     
-    float MultiBSDF::weightInternal(const SLR::BSDFQuery &query) const {
-        FloatSum sumWeights = 0.0f;
+    SampledSpectrum MultiBSDF::weightInternal(const SLR::BSDFQuery &query) const {
+        SampledSpectrumSum sumWeights = SampledSpectrum::Zero;
         for (int i = 0; i < m_numComponents; ++i)
             sumWeights += m_BSDFs[i]->weight(query);
         return sumWeights;

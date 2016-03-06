@@ -24,8 +24,8 @@ namespace SLR {
         void add(EDF* edf);
         SampledSpectrum sample(const EDFQuery &query, const EDFSample &smp, EDFQueryResult* result) const override;
         SampledSpectrum evaluate(const EDFQuery &query, const Vector3D &dirOut) const override;
-        float evaluatePDF(const EDFQuery &query, const Vector3D &dirOut) const override;
-        float weight(const EDFQuery &query) const override;
+        SampledSpectrum evaluatePDF(const EDFQuery &query, const Vector3D &dirOut) const override;
+        SampledSpectrum weight(const EDFQuery &query) const override;
         
         bool matches(DirectionType flags) const override {
             for (int i = 0; i < m_numComponents; ++i)

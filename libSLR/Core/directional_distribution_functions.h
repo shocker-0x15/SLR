@@ -93,8 +93,9 @@ namespace SLR {
     
     
     struct SLR_API EDFQuery {
+        uint8_t heroIndex;
         DirectionType flags;
-        EDFQuery(DirectionType f = DirectionType::All) : flags(f) { };
+        EDFQuery(uint8_t heroIdx, DirectionType f = DirectionType::All) : heroIndex(heroIdx), flags(f) { };
     };
     
     struct SLR_API EDFSample {
@@ -105,19 +106,19 @@ namespace SLR {
     
     struct SLR_API EDFQueryResult {
         Vector3D dir_sn;
-        float dirPDF;
+        SampledSpectrum dirPDF;
         DirectionType dirType;
     };
     
     struct SLR_API BSDFQuery {
+        uint8_t heroIndex;
         Vector3D dir_sn;
         Normal3D gNormal_sn;
-        int16_t wlHint;
         DirectionType flags;
         bool adjoint;
         
-        BSDFQuery(const Vector3D &dirSN, const Normal3D &gNormalSN, int16_t wl, DirectionType f = DirectionType::All, bool adj = false) :
-        dir_sn(dirSN), gNormal_sn(gNormalSN), wlHint(wl), flags(f), adjoint(adj) { }
+        BSDFQuery(uint8_t heroIdx, const Vector3D &dirSN, const Normal3D &gNormalSN, DirectionType f = DirectionType::All, bool adj = false) :
+        heroIndex(heroIdx), dir_sn(dirSN), gNormal_sn(gNormalSN), flags(f), adjoint(adj) { }
     };
     
     struct SLR_API BSDFSample {
@@ -128,12 +129,12 @@ namespace SLR {
     
     struct SLR_API BSDFReverseInfo {
         SampledSpectrum fs;
-        float dirPDF;
+        SampledSpectrum dirPDF;
     };
     
     struct SLR_API BSDFQueryResult {
         Vector3D dir_sn;
-        float dirPDF;
+        SampledSpectrum dirPDF;
         DirectionType dirType;
         BSDFReverseInfo* reverse;
         BSDFQueryResult() : reverse(nullptr) { }
@@ -146,7 +147,7 @@ namespace SLR {
     
     struct SLR_API IDFQueryResult {
         Vector3D dirLocal;
-        float dirPDF;
+        SampledSpectrum dirPDF;
         DirectionType dirType;
     };
     
@@ -158,7 +159,7 @@ namespace SLR {
         bool matches(DirectionType flags, EDFQueryResult* result) const {
             if (matches(flags))
                 return true;
-            result->dirPDF = 0.0f;
+            result->dirPDF = SampledSpectrum::Zero;
             result->dirType = DirectionType();
             return false;
         }
@@ -169,8 +170,8 @@ namespace SLR {
         
         virtual SampledSpectrum sample(const EDFQuery &query, const EDFSample &smp, EDFQueryResult* result) const = 0;
         virtual SampledSpectrum evaluate(const EDFQuery &query, const Vector3D &dir) const = 0;
-        virtual float evaluatePDF(const EDFQuery &query, const Vector3D &dir) const = 0;
-        virtual float weight(const EDFQuery &query) const = 0;
+        virtual SampledSpectrum evaluatePDF(const EDFQuery &query, const Vector3D &dir) const = 0;
+        virtual SampledSpectrum weight(const EDFQuery &query) const = 0;
         
         virtual bool matches(DirectionType flags) const { return m_type & flags; }
         bool hasNonDelta() const { return matches(DirectionType::WholeSphere | DirectionType::NonDelta); }
@@ -187,14 +188,14 @@ namespace SLR {
         bool matches(DirectionType flags, BSDFQueryResult* result) const {
             if (matches(flags))
                 return true;
-            result->dirPDF = 0.0f;
+            result->dirPDF = SampledSpectrum::Zero;
             result->dirType = DirectionType();
             return false;
         }
         virtual SampledSpectrum sampleInternal(const BSDFQuery &query, const BSDFSample &smp, BSDFQueryResult* result) const = 0;
         virtual SampledSpectrum evaluateInternal(const BSDFQuery &query, const Vector3D &dir, SampledSpectrum* rev_fs) const = 0;
-        virtual float evaluatePDFInternal(const BSDFQuery &query, const Vector3D &dir, float* revPDF) const = 0;
-        virtual float weightInternal(const BSDFQuery &query) const = 0;
+        virtual SampledSpectrum evaluatePDFInternal(const BSDFQuery &query, const Vector3D &dir, SampledSpectrum* revPDF) const = 0;
+        virtual SampledSpectrum weightInternal(const BSDFQuery &query) const = 0;
         virtual SampledSpectrum getBaseColorInternal(DirectionType flags) const = 0;
         friend class MultiBSDF;
         friend class InverseBSDF;
@@ -229,18 +230,18 @@ namespace SLR {
                 *rev_fs *= snCorrection;
             return fs_sn * snCorrection;
         }
-        float evaluatePDF(const BSDFQuery &query, const Vector3D &dir, float* revPDF = nullptr) const {
+        SampledSpectrum evaluatePDF(const BSDFQuery &query, const Vector3D &dir, SampledSpectrum* revPDF = nullptr) const {
             if (!matches(query.flags)) {
                 if (revPDF)
-                    *revPDF = 0;
-                return 0;
+                    *revPDF = SampledSpectrum::Zero;
+                return SampledSpectrum::Zero;
             }
             return evaluatePDFInternal(query, dir, revPDF);
         }
-        float weight(const BSDFQuery &query) const {
+        SampledSpectrum weight(const BSDFQuery &query) const {
             if (!matches(query.flags))
-                return 0;
-            float weight_sn = weightInternal(query);
+                return SampledSpectrum::Zero;
+            SampledSpectrum weight_sn = weightInternal(query);
             float snCorrection = query.adjoint ? std::fabs(query.dir_sn.z / dot(query.dir_sn, query.gNormal_sn)) : 1;
             return weight_sn * snCorrection;
         }
@@ -272,7 +273,7 @@ namespace SLR {
         
         virtual SampledSpectrum sample(const IDFSample &smp, IDFQueryResult* result) const = 0;
         virtual SampledSpectrum evaluate(const Vector3D &dirIn) const = 0;
-        virtual float evaluatePDF(const Vector3D &dirIn) const = 0;
+        virtual SampledSpectrum evaluatePDF(const Vector3D &dirIn) const = 0;
         virtual void calculatePixel(const Vector3D &dirIn, float* hitPx, float* hitPy) const = 0;
         
         virtual bool matches(DirectionType flags) const { return m_type & flags; }
@@ -284,13 +285,11 @@ namespace SLR {
     public:
         virtual ~Fresnel() { };
         virtual SampledSpectrum evaluate(float cosEnter) const = 0;
-        virtual float evaluate(float cosEnter, uint32_t wlIdx) const = 0;
     };
     
     class SLR_API FresnelNoOp : public Fresnel {
     public:
         SampledSpectrum evaluate(float cosEnter) const override;
-        float evaluate(float cosEnter, uint32_t wlIdx) const override;
     };
     
     class SLR_API FresnelConductor : public Fresnel {
@@ -300,7 +299,6 @@ namespace SLR {
         FresnelConductor(const SampledSpectrum &eta, const SampledSpectrum &k) : m_eta(eta), m_k(k) { }
         
         SampledSpectrum evaluate(float cosEnter) const override;
-        float evaluate(float cosEnter, uint32_t wlIdx) const override;
     };
     
     class SLR_API FresnelDielectric : public Fresnel {
@@ -313,7 +311,6 @@ namespace SLR {
         SampledSpectrum etaInt() const { return m_etaInt; }
         
         SampledSpectrum evaluate(float cosEnter) const override;
-        float evaluate(float cosEnter, uint32_t wlIdx) const override;
         
         static float evalF(float etaEnter, float etaExit, float cosEnter, float cosExit);
     };    

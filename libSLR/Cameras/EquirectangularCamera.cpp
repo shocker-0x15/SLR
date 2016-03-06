@@ -70,7 +70,7 @@ namespace SLR {
         return valid ? SampledSpectrum::One : SampledSpectrum::Zero;
     }
     
-    float EquirectangularIDF::evaluatePDF(const Vector3D &dirIn) const {
+    SampledSpectrum EquirectangularIDF::evaluatePDF(const Vector3D &dirIn) const {
         float phi, theta;
         dirIn.toPolarYUp(&theta, &phi);
         bool valid = (phi >= -m_cam.m_phiAngle * 0.5f && phi < m_cam.m_phiAngle * 0.5f &&

@@ -13,8 +13,8 @@ SLR consists of the following components.
 * HostProgram
 
 ##特徴 / Features
-* Full Spectral Rendering (Monte Carlo Spectral Sampling)  
-  (For RGB resources, RGB->Spectrum conversion is performed using Meng-Simon's method \[1\].)
+* Full Spectral Rendering (Monte Carlo Spectral Sampling using Hero Wavelength \[1\])  
+  (For RGB resources, RGB->Spectrum conversion is performed using Meng-Simon's method \[2\].)
 * RGB Rendering
 * Various BSDF Types (including Mixed and ~~Layered~~ (under Dev.) BSDF)
 * Image Based Environmental Light
@@ -23,18 +23,19 @@ SLR consists of the following components.
 * Camera / Object Motion Blur
 * Geometry Instancing
 * Binned SAH BVH
-* Correct handling of non-symmetric scattering due to shading normals \[2\]
-* Unidirectional Path Tracing \[3\] with MIS
-* Bidirectional Path Tracing \[4\]
-* ~~Adaptive MCMC Progressive Photon Mapping~~ \[5\]  
+* Correct handling of non-symmetric scattering due to shading normals \[3\]
+* Unidirectional Path Tracing \[4\] with MIS
+* Bidirectional Path Tracing \[5\]
+* ~~Adaptive MCMC Progressive Photon Mapping~~ \[6\]  
   (current implementation is buggy and does not support IBL.)
 * SLR Custom Language (C/Python-like syntax) for flexible scene description
 
-[1] "Physically Meaningful Rendering using Tristimulus Colours", 2015  
-[2] "Non-symmetric Scattering in Light Transport Algorithms", 1996  
-[3] "THE RENDERING EQUATION", 1986  
-[4] "Bidirectional Estimators for Light Transport", 1994  
-[5] "Robust Adaptive Photon Tracing Using Photon Path Visibility", 2011
+[1] "Hero Wavelength Spectral Sampling", 2014  
+[2] "Physically Meaningful Rendering using Tristimulus Colours", 2015  
+[3] "Non-symmetric Scattering in Light Transport Algorithms", 1996  
+[4] "THE RENDERING EQUATION", 1986  
+[5] "Bidirectional Estimators for Light Transport", 1994  
+[6] "Robust Adaptive Photon Tracing Using Photon Path Visibility", 2011
 
 ##動作環境 / Confirmed Environment
 現状以下の環境で動作を確認しています。  

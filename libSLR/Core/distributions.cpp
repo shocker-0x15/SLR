@@ -8,6 +8,8 @@
 #include "distributions.h"
 #include "../BasicTypes/CompensatedSum.h"
 #include "../Helper/bmp_exporter.h"
+#include "../BasicTypes/SpectrumTypes.h"
+#include "../BasicTypes/RGBTypes.h"
 
 namespace SLR {
     template <typename RealType>
@@ -29,6 +31,26 @@ namespace SLR {
     }
     template SLR_API uint32_t sampleDiscrete(const float* importances, float* sumImportances, float* base, uint32_t numImportances, float u);
     template SLR_API uint32_t sampleDiscrete(const double* importances, double* sumImportances, double* base, uint32_t numImportances, double u);
+    
+    
+    template <typename RealType>
+    SLR_API uint32_t sampleDiscrete(const SampledSpectrum* importances, uint8_t wlIdx, SampledSpectrum* sumImportances, uint32_t numImportances, RealType u) {
+        SampledSpectrumSum sum(SampledSpectrum::Zero);
+        for (int i = 0; i < numImportances; ++i)
+            sum += importances[i];
+        *sumImportances = sum.result;
+        
+        RealType su = u * sum.result[wlIdx];
+        CompensatedSum<RealType> cum(0);
+        for (int i = 0; i < numImportances; ++i) {
+            cum += importances[i][wlIdx];
+            if (su < cum.result)
+                return i;
+        }
+        return 0;
+    }
+    template SLR_API uint32_t sampleDiscrete(const SampledSpectrum* importances, uint8_t wlIdx, SampledSpectrum* sumImportances, uint32_t numImportances, float u);
+    template SLR_API uint32_t sampleDiscrete(const SampledSpectrum* importances, uint8_t wlIdx, SampledSpectrum* sumImportances, uint32_t numImportances, double u);
     
     
     // "A Low Distortion Map Between Disk and Square"

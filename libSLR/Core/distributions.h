@@ -16,6 +16,9 @@ namespace SLR {
     SLR_API uint32_t sampleDiscrete(const RealType* importances, RealType* sumImportances, RealType* base, uint32_t numImportances, RealType u);
     
     template <typename RealType>
+    SLR_API uint32_t sampleDiscrete(const SampledSpectrum* importances, uint8_t wlIdx, SampledSpectrum* sumImportances, uint32_t numImportances, RealType u);
+    
+    template <typename RealType>
     SLR_API void concentricSampleDisk(RealType u0, RealType u1, RealType* dx, RealType* dy);
     
     template <typename RealType>

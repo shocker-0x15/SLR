@@ -101,25 +101,31 @@ namespace SLR {
                 float py = basePixelY + ly + rng.getFloat0cTo1o();
                 
                 float selectWLPDF;
-                WavelengthSamples wls = WavelengthSamples::createWithEqualOffsets(rng.getFloat0cTo1o(), rng.getFloat0cTo1o(), &selectWLPDF);
+                WavelengthSamples wls = WavelengthSamples::sampleUniform(rng.getFloat0cTo1o(), &selectWLPDF);
+                // Each component of wlPDFs is a probability density composed of
+                // the probability density to sample each wavelength and the probability to select the wavelength as the hero wavelength,
+                // the probability density to sample a path based on the hero wavelength.
+                SampledSpectrum wlPDFs = selectWLPDF / WavelengthSamples::NumComponents;
                 
                 LensPosQuery lensQuery(time, wls);
                 LensPosSample lensSample(rng.getFloat0cTo1o(), rng.getFloat0cTo1o());
                 LensPosQueryResult lensResult;
                 SampledSpectrum We0 = camera->sample(lensQuery, lensSample, &lensResult);
+                wlPDFs *= lensResult.areaPDF;
                 
                 IDFSample WeSample(px / imageWidth, py / imageHeight);
                 IDFQueryResult WeResult;
                 IDF* idf = camera->createIDF(lensResult.surfPt, wls, mem);
                 SampledSpectrum We1 = idf->sample(WeSample, &WeResult);
+                wlPDFs *= WeResult.dirPDF;
                 
                 Ray ray(lensResult.surfPt.p, lensResult.surfPt.shadingFrame.fromLocal(WeResult.dirLocal), time);
-                SampledSpectrum C = contribution(*scene, wls, ray, rng, mem);
+                SampledSpectrum C = contribution(*scene, wls, wlPDFs, ray, rng, mem);
                 SLRAssert(C.hasNaN() == false && C.hasInf() == false && C.hasMinus() == false,
                           "Unexpected value detected: %s\n"
                           "pix: (%f, %f)", C.toString().c_str(), px, py);
                 
-                SampledSpectrum weight = (We0 * We1) * (absDot(ray.dir, lensResult.surfPt.gNormal) / (lensResult.areaPDF * WeResult.dirPDF * selectWLPDF));
+                SampledSpectrum weight = We0 * We1 * absDot(ray.dir, lensResult.surfPt.gNormal) / wlPDFs[wls.heroIdx];
                 SLRAssert(weight.hasNaN() == false && weight.hasInf() == false && weight.hasMinus() == false,
                           "Unexpected value detected: %s\n"
                           "pix: (%f, %f)", weight.toString().c_str(), px, py);
@@ -130,12 +136,13 @@ namespace SLR {
         }
     }
     
-    SampledSpectrum PathTracingRenderer::Job::contribution(const Scene &scene, const WavelengthSamples &initWLs, const Ray &initRay, RandomNumberGenerator &rng, ArenaAllocator &mem) const {
-        WavelengthSamples wls = initWLs;
+    SampledSpectrum PathTracingRenderer::Job::contribution(const Scene &scene, const WavelengthSamples &wls, const SampledSpectrum &initWLPDFs,
+                                                           const Ray &initRay, RandomNumberGenerator &rng, ArenaAllocator &mem) const {
         Ray ray = initRay;
         SurfacePoint surfPt;
         SampledSpectrum alpha = SampledSpectrum::One;
-        float initY = alpha[wls.selectedLambda];
+        SampledSpectrum wlPDFs = initWLPDFs;
+        SampledSpectrum initY = alpha;
         SampledSpectrumSum sp(SampledSpectrum::Zero);
         uint32_t pathLength = 0;
         
@@ -147,8 +154,12 @@ namespace SLR {
         Vector3D dirOut_sn = surfPt.shadingFrame.toLocal(-ray.dir);
         if (surfPt.isEmitting()) {
             EDF* edf = surfPt.createEDF(wls, mem);
-            SampledSpectrum Le = surfPt.emittance(wls) * edf->evaluate(EDFQuery(), dirOut_sn);
-            sp += alpha * Le;
+            SampledSpectrum Le = surfPt.emittance(wls) * edf->evaluate(EDFQuery(wls.heroIdx), dirOut_sn);
+            float denom = 0.0f;
+            for (int i = 0; i < WavelengthSamples::NumComponents; ++i)
+                denom += wlPDFs[i];
+            float MISWeight = wlPDFs[wls.heroIdx] / denom;
+            sp += MISWeight * alpha * Le;
         }
         if (surfPt.atInfinity)
             return sp;
@@ -171,7 +182,7 @@ namespace SLR {
                 LightPosSample lpSample(rng.getFloat0cTo1o(), rng.getFloat0cTo1o());
                 LightPosQueryResult lpResult;
                 SampledSpectrum M = light.sample(lpQuery, lpSample, &lpResult);
-                SLRAssert(!std::isnan(lpResult.areaPDF)/* && !std::isinf(xpResult.areaPDF)*/, "areaPDF: unexpected value detected: %f", lpResult.areaPDF);
+                SLRAssert(!lpResult.areaPDF.hasNaN()/* && !std::isinf(xpResult.areaPDF)*/, "areaPDF: unexpected value detected: %s", lpResult.areaPDF.toString().c_str());
                 
                 if (scene.testVisibility(surfPt, lpResult.surfPt, ray.time)) {
                     float dist2;
@@ -180,42 +191,46 @@ namespace SLR {
                     Vector3D shadowDir_sn = surfPt.shadingFrame.toLocal(shadowDir);
                     
                     EDF* edf = lpResult.surfPt.createEDF(wls, mem);
-                    SampledSpectrum Le = M * edf->evaluate(EDFQuery(), shadowDir_l);
-                    float lightPDF = lightProb * lpResult.areaPDF;
+                    SampledSpectrum Le = M * edf->evaluate(EDFQuery(wls.heroIdx), shadowDir_l);
+                    SampledSpectrum lightPDFs = lightProb * lpResult.areaPDF * wlPDFs;
                     SLRAssert(!Le.hasNaN() && !Le.hasInf(), "Le: unexpected value detected: %s", Le.toString().c_str());
                     
-                    BSDFQuery queryBSDF(dirOut_sn, gNorm_sn, wls.selectedLambda);
+                    BSDFQuery queryBSDF(wls.heroIdx, dirOut_sn, gNorm_sn);
                     SampledSpectrum fs = bsdf->evaluate(queryBSDF, shadowDir_sn);
                     float cosLight = absDot(-shadowDir, lpResult.surfPt.gNormal);
-                    float bsdfPDF = bsdf->evaluatePDF(queryBSDF, shadowDir_sn) * cosLight / dist2;
-                    SLRAssert(!std::isnan(bsdfPDF) && !std::isinf(bsdfPDF), "bsdfPDF: unexpected value detected: %f", bsdfPDF);
+                    SampledSpectrum bsdfPDFs = bsdf->evaluatePDF(queryBSDF, shadowDir_sn) * wlPDFs * (cosLight / dist2);
+                    SLRAssert(!bsdfPDFs.hasNaN() && !bsdfPDFs.hasInf(), "bsdfPDFs: unexpected value detected: %s", bsdfPDFs.toString().c_str());
                     SLRAssert(!fs.hasNaN() && !fs.hasInf(), "fs: unexpected value detected: %s", fs.toString().c_str());
                     
                     float MISWeight = 1.0f;
-                    if (!lpResult.posType.isDelta() && !std::isinf(lpResult.areaPDF))
-                        MISWeight = (lightPDF * lightPDF) / (lightPDF * lightPDF + bsdfPDF * bsdfPDF);
-                    SLRAssert(MISWeight <= 1.0f, "Invalid MIS weight: %g", MISWeight);
-                    
-                    float G = absDot(shadowDir_sn, gNorm_sn) * cosLight / dist2;
-                    sp += alpha * Le * fs * (G * MISWeight / lightPDF);
-                    SLRAssert(!std::isnan(G) && !std::isinf(G), "G: unexpected value detected: %f", G);
+                    float num = lightPDFs[wls.heroIdx] * lightPDFs[wls.heroIdx];
+                    float denom = 0.0f;
+                    for (int i = 0; i < WavelengthSamples::NumComponents; ++i) {
+                        denom += lightPDFs[i] * lightPDFs[i];
+                        if (!lpResult.posType.isDelta() && !lpResult.areaPDF.hasInf())
+                            denom += bsdfPDFs[i] * bsdfPDFs[i];
+                    }
+                    MISWeight = num / denom;
+                    if (!std::isnan(MISWeight)) {
+                        SLRAssert(MISWeight >= 0.0f && MISWeight <= 1.0f, "Invalid MIS weight: %g", MISWeight);
+                        
+                        float G = absDot(shadowDir_sn, gNorm_sn) * cosLight / dist2;
+                        sp += alpha * Le * fs * (G * MISWeight / (lightProb * lpResult.areaPDF[wls.heroIdx]));
+                        SLRAssert(!std::isnan(G) && !std::isinf(G), "G: unexpected value detected: %f", G);
+                    }
                 }
             }
             
-            BSDFQuery fsQuery(dirOut_sn, gNorm_sn, wls.selectedLambda);
+            BSDFQuery fsQuery(wls.heroIdx, dirOut_sn, gNorm_sn);
             BSDFSample fsSample(rng.getFloat0cTo1o(), rng.getFloat0cTo1o(), rng.getFloat0cTo1o());
             BSDFQueryResult fsResult;
             SampledSpectrum fs = bsdf->sample(fsQuery, fsSample, &fsResult);
-            if (fs == SampledSpectrum::Zero || fsResult.dirPDF == 0.0f)
+            if (fs == SampledSpectrum::Zero || fsResult.dirPDF[wls.heroIdx] == 0.0f)
                 break;
-            if (fsResult.dirType.isDispersive()) {
-                fsResult.dirPDF /= WavelengthSamples::NumComponents;
-                wls.flags |= WavelengthSamples::LambdaIsSelected;
-            }
-            alpha *= fs * absDot(fsResult.dir_sn, gNorm_sn) / fsResult.dirPDF;
+            alpha *= fs * absDot(fsResult.dir_sn, gNorm_sn) / fsResult.dirPDF[wls.heroIdx];
             SLRAssert(!alpha.hasInf() && !alpha.hasNaN(),
-                      "alpha: unexpected value detected:\nalpha: %s\nfs: %s\nlength: %u, cos: %g, dirPDF: %g",
-                      alpha.toString().c_str(), fs.toString().c_str(), pathLength, std::fabs(fsResult.dir_sn.z), fsResult.dirPDF);
+                      "alpha: unexpected value detected:\nalpha: %s\nfs: %s\nlength: %u, cos: %g, dirPDF: %s",
+                      alpha.toString().c_str(), fs.toString().c_str(), pathLength, std::fabs(fsResult.dir_sn.z), fsResult.dirPDF.toString().c_str());
             
             Vector3D dirIn = surfPt.shadingFrame.fromLocal(fsResult.dir_sn);
             ray = Ray(surfPt.p, dirIn, ray.time, Ray::Epsilon);
@@ -229,34 +244,42 @@ namespace SLR {
             
             // implicit light sampling
             if (surfPt.isEmitting()) {
-                float bsdfPDF = fsResult.dirPDF;
-                SLRAssert(!std::isnan(bsdfPDF) && !std::isinf(bsdfPDF), "bsdfPDF: unexpected value detected: %f", bsdfPDF);
+                SampledSpectrum bsdfPDFs = fsResult.dirPDF * wlPDFs;
+                SLRAssert(!bsdfPDFs.hasNaN() && !bsdfPDFs.hasInf(), "bsdfPDFs: unexpected value detected: %s", bsdfPDFs.toString().c_str());
                 
                 EDF* edf = surfPt.createEDF(wls, mem);
-                SampledSpectrum Le = surfPt.emittance(wls) * edf->evaluate(EDFQuery(), dirOut_sn);
+                SampledSpectrum Le = surfPt.emittance(wls) * edf->evaluate(EDFQuery(wls.heroIdx), dirOut_sn);
                 float lightProb = scene.evaluateProb(Light(isect.obj));
                 float dist2 = surfPt.getSquaredDistance(ray.org);
-                float lightPDF = lightProb * surfPt.evaluateAreaPDF() * dist2 / absDot(ray.dir, surfPt.gNormal);
+                SampledSpectrum lightPDFs = lightProb * surfPt.evaluateAreaPDF() * wlPDFs * (dist2 / absDot(ray.dir, surfPt.gNormal));
                 SLRAssert(!Le.hasNaN() && !Le.hasInf(), "Le: unexpected value detected: %s", Le.toString().c_str());
                 SLRAssert(!std::isnan(lightProb) && !std::isinf(lightProb), "lightProb: unexpected value detected: %f", lightProb);
-                SLRAssert(!std::isnan(lightPDF)/* && !std::isinf(lightPDF)*/, "lightPDF: unexpected value detected: %f", lightPDF);
+                SLRAssert(!lightPDFs.hasNaN()/* && !std::isinf(lightPDF)*/, "lightPDFs: unexpected value detected: %s", lightPDFs.toString().c_str());
                 
                 float MISWeight = 1.0f;
-                if (!fsResult.dirType.isDelta())
-                    MISWeight = (bsdfPDF * bsdfPDF) / (lightPDF * lightPDF + bsdfPDF * bsdfPDF);
-                SLRAssert(MISWeight <= 1.0f, "Invalid MIS weight: %g", MISWeight);
-                
-                sp += alpha * Le * MISWeight;
+                float num = bsdfPDFs[wls.heroIdx] * bsdfPDFs[wls.heroIdx];
+                float denom = 0.0f;
+                for (int i = 0; i < WavelengthSamples::NumComponents; ++i) {
+                    if (!fsResult.dirType.isDelta())
+                        denom += lightPDFs[i] * lightPDFs[i];
+                    denom += bsdfPDFs[i] * bsdfPDFs[i];
+                }
+                MISWeight = num / denom;
+                if (!std::isnan(MISWeight)) {
+                    SLRAssert(MISWeight >= 0.0f && MISWeight <= 1.0f, "Invalid MIS weight: %g", MISWeight);
+                    sp += alpha * Le * MISWeight;
+                }
             }
             if (surfPt.atInfinity)
                 break;
             
             // Russian roulette
-            float continueProb = std::min(alpha.luminance() / initY, 1.0f);
-            if (rng.getFloat0cTo1o() < continueProb)
-                alpha /= continueProb;
+            SampledSpectrum continueProbs = min(alpha / initY, SampledSpectrum::One);
+            if (rng.getFloat0cTo1o() < continueProbs[wls.heroIdx])
+                alpha /= continueProbs[wls.heroIdx];
             else
                 break;
+            wlPDFs *= fsResult.dirPDF * continueProbs;
         }
         
         return sp;

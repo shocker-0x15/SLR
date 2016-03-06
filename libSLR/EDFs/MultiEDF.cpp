@@ -15,12 +15,12 @@ namespace SLR {
     }
     
     SampledSpectrum MultiEDF::sample(const EDFQuery &query, const EDFSample &smp, EDFQueryResult *result) const {
-        float weights[maxNumEDFElems];
+        SampledSpectrum weights[maxNumEDFElems];
         for (int i = 0; i < m_numComponents; ++i)
             weights[i] = m_EDFs[i]->weight(query);
         
-        float sumWeights, base;
-        uint32_t idx = sampleDiscrete(weights, &sumWeights, &base, m_numComponents, smp.uComponent);
+        SampledSpectrum sumWeights;
+        uint32_t idx = sampleDiscrete(weights, query.heroIndex, &sumWeights, m_numComponents, smp.uComponent);
         EDF* selectedEDF = m_EDFs[idx];
         
         SampledSpectrum value = selectedEDF->sample(query, smp, result);
@@ -46,15 +46,15 @@ namespace SLR {
         return retValue;
     }
     
-    float MultiEDF::evaluatePDF(const EDFQuery &query, const Vector3D &dir) const {
-        float sumWeights = 0.0f;
-        float weights[maxNumEDFElems];
+    SampledSpectrum MultiEDF::evaluatePDF(const EDFQuery &query, const Vector3D &dir) const {
+        SampledSpectrumSum sumWeights = SampledSpectrum::Zero;
+        SampledSpectrum weights[maxNumEDFElems];
         for (int i = 0; i < m_numComponents; ++i) {
             weights[i] = m_EDFs[i]->weight(query);
             sumWeights += weights[i];
         }
         
-        float retPDF = 0.0f;
+        SampledSpectrum retPDF = 0.0f;
         for (int i = 0; i < m_numComponents; ++i) {
             retPDF += m_EDFs[i]->evaluatePDF(query, dir) * weights[i];
         }
@@ -63,8 +63,8 @@ namespace SLR {
         return retPDF;
     }
     
-    float MultiEDF::weight(const EDFQuery &query) const {
-        float sumWeights = 0.0f;
+    SampledSpectrum MultiEDF::weight(const EDFQuery &query) const {
+        SampledSpectrumSum sumWeights = SampledSpectrum::Zero;
         for (int i = 0; i < m_numComponents; ++i)
             sumWeights += m_EDFs[i]->weight(query);
         return sumWeights;

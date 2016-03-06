@@ -84,7 +84,9 @@ namespace SLR {
             result->areaPDF = 0.0f;
             return SampledSpectrum::Zero;
         }
-        m_surface->sample(smp.uPos[0], smp.uPos[1], &result->surfPt, &result->areaPDF);
+        float singleWLAreaPDF;
+        m_surface->sample(smp.uPos[0], smp.uPos[1], &result->surfPt, &singleWLAreaPDF);
+        result->areaPDF = singleWLAreaPDF;
         result->posType = DirectionType::LowFreq;// TODO: consider sampling delta function. and dedicated enum?
         result->surfPt.obj = this;
         return m_material->emittance(result->surfPt, query.wls);
@@ -97,7 +99,7 @@ namespace SLR {
         // sample a position with emittance on the selected light's surface.
         *Le0 = sample(light, lightPosQuery, lightPosSample, lightPosResult);
         *edf = lightPosResult->surfPt.createEDF(lightPosQuery.wls, mem);
-        SLRAssert(!std::isnan(lightPosResult->areaPDF)/* && !std::isinf(lightResult)*/, "areaPDF: unexpected value detected: %f", lightPosResult->areaPDF);
+        SLRAssert(!lightPosResult->areaPDF.hasNaN()/* && !std::isinf(lightResult)*/, "areaPDF: unexpected value detected: %s", lightPosResult->areaPDF.toString().c_str());
         // sample a direction from EDF.
         *Le1 = (*edf)->sample(edfQuery, edfSample, edfResult);
         return Ray(lightPosResult->surfPt.p, lightPosResult->surfPt.shadingFrame.fromLocal(edfResult->dir_sn), lightPosQuery.time, Ray::Epsilon);
@@ -194,7 +196,7 @@ namespace SLR {
         // sample a position with emittance on the selected light's surface.
         *Le0 = light.sample(lightPosQuery, lightPosSample, lightPosResult);
         *edf = lightPosResult->surfPt.createEDF(lightPosQuery.wls, mem);
-        SLRAssert(!std::isnan(lightPosResult->areaPDF)/* && !std::isinf(lightResult)*/, "areaPDF: unexpected value detected: %f", lightPosResult->areaPDF);
+        SLRAssert(!lightPosResult->areaPDF.hasNaN()/* && !std::isinf(lightResult)*/, "areaPDF: unexpected value detected: %s", lightPosResult->areaPDF.toString().c_str());
         
         // sample a direction from EDF.
         // Sampled directions for a certain sampled position (on the infinite sphere) must be parallel,

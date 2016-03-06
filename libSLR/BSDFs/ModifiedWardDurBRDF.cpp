@@ -58,7 +58,7 @@ namespace SLR {
         return fs;
     }
     
-    float ModifiedWardDurBRDF::evaluatePDFInternal(const BSDFQuery &query, const Vector3D &dir, float* revPDF) const {
+    SampledSpectrum ModifiedWardDurBRDF::evaluatePDFInternal(const BSDFQuery &query, const Vector3D &dir, SampledSpectrum* revPDF) const {
         if (dir.z * query.dir_sn.z <= 0) {
             if (revPDF)
                 *revPDF = 0.0f;
@@ -77,8 +77,8 @@ namespace SLR {
         return ret;
     }
 
-    float ModifiedWardDurBRDF::weightInternal(const SLR::BSDFQuery &query) const {
-        return m_R.luminance();
+    SampledSpectrum ModifiedWardDurBRDF::weightInternal(const SLR::BSDFQuery &query) const {
+        return m_R;
     }
     
     SampledSpectrum ModifiedWardDurBRDF::getBaseColorInternal(DirectionType flags) const {

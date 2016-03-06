@@ -27,7 +27,7 @@ namespace SLR {
     
     struct SLR_API LightPosQueryResult {
         SurfacePoint surfPt;
-        float areaPDF;
+        SampledSpectrum areaPDF;
         DirectionType posType;
     };
     

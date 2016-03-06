@@ -16,26 +16,15 @@
 namespace SLR {
     template <typename RealType, uint32_t N>
     struct SLR_API WavelengthSamplesTemplate {
-        enum Flag : uint16_t {
-            LambdaIsSelected = 0x01,
-        };
         RealType lambdas[N];
-        uint16_t selectedLambda;
-        uint16_t flags;
+        uint8_t heroIdx;
         static const uint32_t NumComponents;
         
-        WavelengthSamplesTemplate() : selectedLambda(0), flags(0) {};
-        WavelengthSamplesTemplate(const RealType* values) {
-            for (int i = 0; i < N; ++i)
-                lambdas[i] = values[i];
-            selectedLambda = 0;
-            flags = 0;
-        }
+        WavelengthSamplesTemplate() : heroIdx(0) {};
         WavelengthSamplesTemplate(const WavelengthSamplesTemplate &wls) {
             for (int i = 0; i < N; ++i)
                 lambdas[i] = wls.lambdas[i];
-            selectedLambda = wls.selectedLambda;
-            flags = wls.flags;
+            heroIdx = wls.heroIdx;
         }
         
         RealType &operator[](uint32_t index) {
@@ -47,18 +36,22 @@ namespace SLR {
             return lambdas[index];
         }
         
-        bool lambdaSelected() const {
-            return (flags & LambdaIsSelected) != 0;
+        RealType hero() const {
+            return lambdas[heroIdx];
         }
         
-        static WavelengthSamplesTemplate createWithEqualOffsets(RealType offset, RealType uLambda, RealType* PDF) {
-            SLRAssert(offset >= 0 && offset < 1, "\"offset\" must be in range [0, 1).");
-            SLRAssert(uLambda >= 0 && uLambda < 1, "\"uLambda\" must be in range [0, 1).");
+        static WavelengthSamplesTemplate sampleUniform(RealType uHero, RealType* PDF) {
+            SLRAssert(uHero >= 0 && uHero < 1, "\"uHero\" must be in range [0, 1).");
+            
             WavelengthSamplesTemplate wls;
-            for (int i = 0; i < N; ++i)
-                wls.lambdas[i] = WavelengthLowBound + (WavelengthHighBound - WavelengthLowBound) * (i + offset) / N;
-            wls.selectedLambda = std::min(uint16_t(N * uLambda), uint16_t(N - 1));
-            wls.flags = 0;
+            const RealType WavelengthRange = WavelengthHighBound - WavelengthLowBound;
+            RealType heroWavelength = WavelengthLowBound + (WavelengthHighBound - WavelengthLowBound) * uHero;
+            
+            wls.lambdas[0] = heroWavelength;
+            for (int i = 1; i < N; ++i)
+                wls.lambdas[i] = std::fmod(heroWavelength - WavelengthLowBound + i * WavelengthRange / NumSpectralSamples, WavelengthRange) + WavelengthLowBound;;
+            std::sort(&wls.lambdas[0], &wls.lambdas[0] + N);
+            wls.heroIdx = std::distance(&wls.lambdas[0], std::find(&wls.lambdas[0], &wls.lambdas[0] + N, heroWavelength));
             *PDF = N / (WavelengthHighBound - WavelengthLowBound);
             return wls;
         }
@@ -540,6 +533,22 @@ namespace SLR {
     const SampledSpectrumTemplate<RealType, N> SampledSpectrumTemplate<RealType, N>::Inf = SampledSpectrumTemplate<RealType, N>(std::numeric_limits<RealType>::infinity());
     template <typename RealType, uint32_t N>
     const SampledSpectrumTemplate<RealType, N> SampledSpectrumTemplate<RealType, N>::NaN = SampledSpectrumTemplate<RealType, N>(std::numeric_limits<RealType>::quiet_NaN());
+    
+    template <typename RealType, uint32_t N>
+    inline SampledSpectrumTemplate<RealType, N> min(const SampledSpectrumTemplate<RealType, N> &smp1, const SampledSpectrumTemplate<RealType, N> &smp2) {
+        SampledSpectrumTemplate<RealType, N> ret;
+        for (int i = 0; i < N; ++i)
+            ret[i] = std::fmin(smp1[i], smp2[i]);
+        return ret;
+    }
+    
+    template <typename RealType, uint32_t N>
+    inline SampledSpectrumTemplate<RealType, N> max(const SampledSpectrumTemplate<RealType, N> &smp1, const SampledSpectrumTemplate<RealType, N> &smp2) {
+        SampledSpectrumTemplate<RealType, N> ret;
+        for (int i = 0; i < N; ++i)
+            ret[i] = std::fmax(smp1[i], smp2[i]);
+        return ret;
+    }
 
 
     template <typename RealType, uint32_t numStrata>

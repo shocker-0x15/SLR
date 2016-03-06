@@ -81,7 +81,7 @@ namespace SLR {
         return valid ? SampledSpectrum::One : SampledSpectrum::Zero;
     }
     
-    float PerspectiveIDF::evaluatePDF(const Vector3D &dirIn) const {
+    SampledSpectrum PerspectiveIDF::evaluatePDF(const Vector3D &dirIn) const {
         Point3D pFocas = dirIn * (m_cam.m_objPlaneDistance / dirIn.z) + m_orgLocal;
         bool valid = (pFocas.x >= -m_cam.m_opWidth * 0.5f && pFocas.x <= m_cam.m_opWidth * 0.5f &&
                       pFocas.y >= -m_cam.m_opHeight * 0.5f && pFocas.y <= m_cam.m_opHeight * 0.5f &&

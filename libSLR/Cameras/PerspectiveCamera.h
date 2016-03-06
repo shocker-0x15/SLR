@@ -48,7 +48,7 @@ namespace SLR {
         
         SampledSpectrum sample(const IDFSample &smp, IDFQueryResult* result) const override;
         SampledSpectrum evaluate(const Vector3D &dirIn) const override;
-        float evaluatePDF(const Vector3D &dirIn) const override;
+        SampledSpectrum evaluatePDF(const Vector3D &dirIn) const override;
         void calculatePixel(const Vector3D &dirIn, float* hitPx, float* hitPy) const override;
     };    
 }

@@ -36,7 +36,7 @@ namespace SLR {
     // FIXME: Current code is inconsistent with respect to float precision.
     typedef float SpectrumFloat;
     typedef RGBTemplate<SpectrumFloat> RGBInputSpectrum;
-    const static uint32_t NumSpectralSamples = 16;
+    const static uint32_t NumSpectralSamples = 4;
     const static uint32_t NumStrataForStorage = 16;
     typedef ContinuousSpectrumTemplate<SpectrumFloat, NumSpectralSamples> ContinuousSpectrum;
     typedef RegularContinuousSpectrumTemplate<SpectrumFloat, NumSpectralSamples> RegularContinuousSpectrum;

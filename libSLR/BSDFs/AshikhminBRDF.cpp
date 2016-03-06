@@ -56,7 +56,7 @@ namespace SLR {
         return fs;
     }
     
-    float AshikhminSpecularBRDF::evaluatePDFInternal(const BSDFQuery &query, const Vector3D &dir, float* revPDF) const {
+    SampledSpectrum AshikhminSpecularBRDF::evaluatePDFInternal(const BSDFQuery &query, const Vector3D &dir, SampledSpectrum* revPDF) const {
         if (dir.z * query.dir_sn.z <= 0) {
             if (revPDF)
                 *revPDF = 0.0f;
@@ -71,9 +71,9 @@ namespace SLR {
         return ret;
     }
     
-    float AshikhminSpecularBRDF::weightInternal(const SLR::BSDFQuery &query) const {
+    SampledSpectrum AshikhminSpecularBRDF::weightInternal(const SLR::BSDFQuery &query) const {
         float dotHV = std::fabs(query.dir_sn.z);
-        return m_Rs.luminance() + (1 - m_Rs.luminance()) * std::pow(1.0f - dotHV, 5);
+        return m_Rs + (SampledSpectrum::One - m_Rs) * std::pow(1.0f - dotHV, 5);
     }
     
     SampledSpectrum AshikhminSpecularBRDF::getBaseColorInternal(DirectionType flags) const {
@@ -109,7 +109,7 @@ namespace SLR {
         return fs;
     }
     
-    float AshikhminDiffuseBRDF::evaluatePDFInternal(const BSDFQuery &query, const Vector3D &dir, float* revPDF) const {
+    SampledSpectrum AshikhminDiffuseBRDF::evaluatePDFInternal(const BSDFQuery &query, const Vector3D &dir, SampledSpectrum* revPDF) const {
         if (query.dir_sn.z * dir.z <= 0.0f) {
             if (revPDF)
                 *revPDF = 0.0f;
@@ -120,8 +120,8 @@ namespace SLR {
         return std::fabs(dir.z) / M_PI;
     }
     
-    float AshikhminDiffuseBRDF::weightInternal(const SLR::BSDFQuery &query) const {
-        return (2954.0f / 1863.0f * m_Rd.luminance() * (1 - m_Rs.luminance()) * (1.0f - std::pow(1.0f - std::fabs(query.dir_sn.z) / 2, 5)));
+    SampledSpectrum AshikhminDiffuseBRDF::weightInternal(const SLR::BSDFQuery &query) const {
+        return (2954.0f / 1863.0f * m_Rd * (SampledSpectrum::One - m_Rs) * (1.0f - std::pow(1.0f - std::fabs(query.dir_sn.z) / 2, 5)));
     }
     
     SampledSpectrum AshikhminDiffuseBRDF::getBaseColorInternal(DirectionType flags) const {

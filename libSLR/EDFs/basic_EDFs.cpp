@@ -22,9 +22,9 @@ namespace SLR {
         return dir.z > 0.0f ? 1.0f / M_PI : 0.0f;
     }
     
-    float DiffuseEDF::evaluatePDF(const EDFQuery &query, const Vector3D &dir) const {
+    SampledSpectrum DiffuseEDF::evaluatePDF(const EDFQuery &query, const Vector3D &dir) const {
         if (!query.flags.matches(m_type))
-            return 0;
+            return 0.0f;
         return dir.z > 0.0f ? dir.z / M_PI : 0.0f;
     }    
 }

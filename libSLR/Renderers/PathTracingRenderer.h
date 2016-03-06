@@ -33,7 +33,8 @@ namespace SLR {
             uint32_t basePixelY;
             
             void kernel(uint32_t threadID);
-            SampledSpectrum contribution(const Scene &scene, const WavelengthSamples &initWLs, const Ray &initRay, RandomNumberGenerator &rng, ArenaAllocator &mem) const;
+            SampledSpectrum contribution(const Scene &scene, const WavelengthSamples &wls, const SampledSpectrum &initWLPDFs,
+                                         const Ray &initRay, RandomNumberGenerator &rng, ArenaAllocator &mem) const;
         };
         
         uint32_t m_samplesPerPixel;

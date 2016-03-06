@@ -20,17 +20,17 @@ namespace SLR {
         
         SampledSpectrum sampleInternalNoRev(const BSDFQuery &query, const BSDFSample &smp, BSDFQueryResult *result) const;
         SampledSpectrum sampleInternalWithRev(const BSDFQuery &query, const BSDFSample &smp, BSDFQueryResult *result) const;
-        float evaluatePDFInternalNoRev(const BSDFQuery &query, const Vector3D &dirOut, float* revPDF) const;
-        float evaluatePDFInternalWithRev(const BSDFQuery &query, const Vector3D &dirOut, float* revPDF) const;
+        SampledSpectrum evaluatePDFInternalNoRev(const BSDFQuery &query, const Vector3D &dirOut, SampledSpectrum* revPDF) const;
+        SampledSpectrum evaluatePDFInternalWithRev(const BSDFQuery &query, const Vector3D &dirOut, SampledSpectrum* revPDF) const;
         
         SampledSpectrum sampleInternal(const BSDFQuery &query, const BSDFSample &smp, BSDFQueryResult* result) const override {
             return result->reverse ? sampleInternalWithRev(query, smp, result) : sampleInternalNoRev(query, smp, result);
         }
         SampledSpectrum evaluateInternal(const BSDFQuery &query, const Vector3D &dirOut, SampledSpectrum* rev_fs) const override;
-        float evaluatePDFInternal(const BSDFQuery &query, const Vector3D &dirOut, float* revPDF) const override {
+        SampledSpectrum evaluatePDFInternal(const BSDFQuery &query, const Vector3D &dirOut, SampledSpectrum* revPDF) const override {
             return revPDF ? evaluatePDFInternalWithRev(query, dirOut, revPDF) : evaluatePDFInternalNoRev(query, dirOut, revPDF);
         }
-        float weightInternal(const BSDFQuery &query) const override;
+        SampledSpectrum weightInternal(const BSDFQuery &query) const override;
         SampledSpectrum getBaseColorInternal(DirectionType flags) const override;
     public:
         MultiBSDF() : BSDF(DirectionType()), m_numComponents(0) { }

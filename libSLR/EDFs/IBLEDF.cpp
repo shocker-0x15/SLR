@@ -21,9 +21,9 @@ namespace SLR {
         return 1.0f / M_PI;
     }
     
-    float IBLEDF::evaluatePDF(const EDFQuery &query, const Vector3D &dir) const {
+    SampledSpectrum IBLEDF::evaluatePDF(const EDFQuery &query, const Vector3D &dir) const {
         if (!query.flags.matches(m_type))
-            return 0;
+            return 0.0f;
         // The true value is: lim_{l to inf} l^2 / (pi * r_w^2) => inf
         return 1.0f / m_worldDiscArea;
     }    

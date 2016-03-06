@@ -34,7 +34,7 @@ namespace SLR {
         SampledSpectrum coeffT = m_coeffT->evaluate(surfPt.texCoord, wls);
         SampledSpectrum etaExt = m_etaExt->evaluate(surfPt.texCoord, wls);
         SampledSpectrum etaInt = m_etaInt->evaluate(surfPt.texCoord, wls);
-        return mem.create<SpecularBTDF>(scale * coeffT, etaExt, etaInt, !wls.lambdaSelected());
+        return mem.create<SpecularBTDF>(scale * coeffT, etaExt, etaInt);
     }
     
     BSDF* InverseSurfaceMaterial::getBSDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem, float scale) const {

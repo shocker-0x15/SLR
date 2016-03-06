@@ -19,8 +19,8 @@ namespace SLR {
         
         SampledSpectrum sampleInternal(const BSDFQuery &query, const BSDFSample &smp, BSDFQueryResult* result) const override;
         SampledSpectrum evaluateInternal(const BSDFQuery &query, const Vector3D &dir, SampledSpectrum* rev_fs) const override;
-        float evaluatePDFInternal(const BSDFQuery &query, const Vector3D &dir, float* revPDF) const override;
-        float weightInternal(const BSDFQuery &query) const override;
+        SampledSpectrum evaluatePDFInternal(const BSDFQuery &query, const Vector3D &dir, SampledSpectrum* revPDF) const override;
+        SampledSpectrum weightInternal(const BSDFQuery &query) const override;
         SampledSpectrum getBaseColorInternal(DirectionType flags) const override;
     public:
         ModifiedWardDurBRDF(const SampledSpectrum &R, float ax, float ay) : BSDF(DirectionType::Reflection | DirectionType::HighFreq),
