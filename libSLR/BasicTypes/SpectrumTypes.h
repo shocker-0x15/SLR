@@ -549,6 +549,14 @@ namespace SLR {
             ret[i] = std::fmax(smp1[i], smp2[i]);
         return ret;
     }
+    
+    template <typename RealType, uint32_t N>
+    inline SampledSpectrumTemplate<RealType, N> positiveMask(const SampledSpectrumTemplate<RealType, N> &value, const SampledSpectrumTemplate<RealType, N> &mask) {
+        SampledSpectrumTemplate<RealType, N> ret;
+        for (int i = 0; i < N; ++i)
+            ret[i] = mask[i] > 0 ? value[i] : 0;
+        return ret;
+    }
 
 
     template <typename RealType, uint32_t numStrata>

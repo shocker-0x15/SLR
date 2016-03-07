@@ -297,12 +297,12 @@ namespace SLR {
                 float MISWeight = calculateMISWeight(extend1stAreaPDF, SampledSpectrum::One, extend2ndAreaPDF, SampledSpectrum::One,
                                                      SampledSpectrum::Zero, SampledSpectrum::Zero, SampledSpectrum::Zero, SampledSpectrum::Zero,
                                                      0, (uint32_t)vertices.size());
-                SampledSpectrum contribution = MISWeight * alpha * Le0 * Le1 / wlPDFs[heroIndex];
-                SLRAssert(contribution.hasNaN() == false && contribution.hasInf() == false && contribution.hasMinus() == false,
-                          "Unexpected value detected: %s\n"
-                          "pix: (%f, %f)", contribution.toString().c_str(), curPx, curPy);
                 if (!std::isinf(MISWeight) && !std::isnan(MISWeight)) {
                     SLRAssert(MISWeight >= 0 && MISWeight <= 1.0f, "invalid MIS weight: %g", MISWeight);
+                    SampledSpectrum contribution = MISWeight * alpha * Le0 * Le1 / wlPDFs[heroIndex];
+                    SLRAssert(contribution.hasNaN() == false && contribution.hasInf() == false && contribution.hasMinus() == false,
+                              "Unexpected value detected: %s\n"
+                              "pix: (%f, %f)", contribution.toString().c_str(), curPx, curPy);
                     sensor->add(curPx, curPy, wls, contribution);
                 }
             }
@@ -321,13 +321,13 @@ namespace SLR {
             if (fs == SampledSpectrum::Zero || fsResult.dirPDF[wls.heroIdx] == 0.0f)
                 break;
             float cosIn = absDot(fsResult.dir_sn, gNorm_sn);
-            SampledSpectrum weight = fs * (cosIn / fsResult.dirPDF[wls.heroIdx]);
             
             // Russian roulette
-            RRProb = min(weight, SampledSpectrum::One);
+            RRProb = min(positiveMask(fs / fsResult.dirPDF * cosIn, fs), SampledSpectrum::One);
             if (rng.getFloat0cTo1o() >= RRProb[wls.heroIdx])
                 break;
             
+            SampledSpectrum weight = fs * (cosIn / fsResult.dirPDF[wls.heroIdx]);
             alpha *= weight / RRProb[wls.heroIdx];
             ray = Ray(surfPt.p, surfPt.shadingFrame.fromLocal(fsResult.dir_sn), ray.time, Ray::Epsilon);
             SLRAssert(!weight.hasInf() && !weight.hasNaN(),
@@ -336,7 +336,7 @@ namespace SLR {
             
             BPTVertex &vtxNextToLast = vertices[vertices.size() - 2];
             vtxNextToLast.revAreaPDF = revInfo.dirPDF * cosLast / dist2;
-            vtxNextToLast.revRRProb = min(revInfo.fs * absDot(dirOut_sn, gNorm_sn) / revInfo.dirPDF, SampledSpectrum::One);
+            vtxNextToLast.revRRProb = min(positiveMask(revInfo.fs * absDot(dirOut_sn, gNorm_sn) / revInfo.dirPDF, revInfo.fs), SampledSpectrum::One);
             
             cosLast = cosIn;
             dirPDF = fsResult.dirPDF;
@@ -369,7 +369,7 @@ namespace SLR {
         // extend/shorten light/eye subpath, not consider implicit light subpath reaching a lens.
         if (numEVtx > minEyeVertices) {
             const BPTVertex &eyeEndVtx = eyeVertices[numEVtx - 1];
-            SampledSpectrum extendedPathPDF = weightingPathPDFs * lExtend1stAreaPDF * lExtend1stRRProb / (eyeEndVtx.areaPDF * eyeEndVtx.RRProb);
+            SampledSpectrum extendedPathPDF = positiveMask(weightingPathPDFs * lExtend1stAreaPDF * lExtend1stRRProb / (eyeEndVtx.areaPDF * eyeEndVtx.RRProb), weightingPathPDFs);
             bool shortenIsDeltaSampled = eyeEndVtx.sampledType.isDelta();
             if (!shortenIsDeltaSampled)
                 accumulateWLVariants(denomMISWeight, extendedPathPDF);
@@ -377,7 +377,7 @@ namespace SLR {
             
             if (numEVtx - 1 > minEyeVertices) {
                 const BPTVertex &newLightVtx = eyeVertices[numEVtx - 2];
-                extendedPathPDF *= lExtend2ndAreaPDF * lExtend2ndRRProb / (newLightVtx.areaPDF * newLightVtx.RRProb);
+                extendedPathPDF *= positiveMask(lExtend2ndAreaPDF * lExtend2ndRRProb / (newLightVtx.areaPDF * newLightVtx.RRProb), weightingPathPDFs);
                 shortenIsDeltaSampled = newLightVtx.sampledType.isDelta();
                 if (!shortenIsDeltaSampled && !prevIsDeltaSampled)
                     accumulateWLVariants(denomMISWeight, extendedPathPDF);
@@ -385,7 +385,7 @@ namespace SLR {
                 
                 for (int t = numEVtx - 2; t > minEyeVertices; --t) {
                     const BPTVertex &newLightVtx = eyeVertices[t - 1];
-                    extendedPathPDF *= newLightVtx.revAreaPDF * newLightVtx.revRRProb / (newLightVtx.areaPDF * newLightVtx.RRProb);
+                    extendedPathPDF *= positiveMask(newLightVtx.revAreaPDF * newLightVtx.revRRProb / (newLightVtx.areaPDF * newLightVtx.RRProb), weightingPathPDFs);
                     shortenIsDeltaSampled = newLightVtx.sampledType.isDelta();
                     if (!shortenIsDeltaSampled && !prevIsDeltaSampled)
                         accumulateWLVariants(denomMISWeight, extendedPathPDF);
@@ -397,7 +397,7 @@ namespace SLR {
         // extend/shorten eye/light subpath, consider implicit eye subpath reaching a light.
         if (numLVtx > minLightVertices) {
             const BPTVertex &lightEndVtx = lightVertices[numLVtx - 1];
-            SampledSpectrum extendedPathPDF = weightingPathPDFs * eExtend1stAreaPDF * eExtend1stRRProb / (lightEndVtx.areaPDF * lightEndVtx.RRProb);
+            SampledSpectrum extendedPathPDF = positiveMask(weightingPathPDFs * eExtend1stAreaPDF * eExtend1stRRProb / (lightEndVtx.areaPDF * lightEndVtx.RRProb), weightingPathPDFs);
             bool shortenIsDeltaSampled = lightEndVtx.sampledType.isDelta();
             if (!shortenIsDeltaSampled)
                 accumulateWLVariants(denomMISWeight, extendedPathPDF);
@@ -405,7 +405,7 @@ namespace SLR {
             
             if (numLVtx - 1 > minLightVertices) {
                 const BPTVertex &newEyeVtx = lightVertices[numLVtx - 2];
-                extendedPathPDF *= eExtend2ndAreaPDF * eExtend2ndRRProb / (newEyeVtx.areaPDF * newEyeVtx.RRProb);
+                extendedPathPDF *= positiveMask(eExtend2ndAreaPDF * eExtend2ndRRProb / (newEyeVtx.areaPDF * newEyeVtx.RRProb), weightingPathPDFs);
                 shortenIsDeltaSampled = newEyeVtx.sampledType.isDelta();
                 if (!shortenIsDeltaSampled && !prevIsDeltaSampled)
                     accumulateWLVariants(denomMISWeight, extendedPathPDF);
@@ -413,7 +413,7 @@ namespace SLR {
                 
                 for (int s = numLVtx - 2; s > minLightVertices; --s) {
                     const BPTVertex &newEyeVtx = lightVertices[s - 1];
-                    extendedPathPDF *= newEyeVtx.revAreaPDF * newEyeVtx.revRRProb / (newEyeVtx.areaPDF * newEyeVtx.RRProb);
+                    extendedPathPDF *= positiveMask(newEyeVtx.revAreaPDF * newEyeVtx.revRRProb / (newEyeVtx.areaPDF * newEyeVtx.RRProb), weightingPathPDFs);
                     shortenIsDeltaSampled = newEyeVtx.sampledType.isDelta();
                     if (!shortenIsDeltaSampled && !prevIsDeltaSampled)
                         accumulateWLVariants(denomMISWeight, extendedPathPDF);
