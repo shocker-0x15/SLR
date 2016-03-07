@@ -145,6 +145,10 @@
 		46BF49871BB7303D0036033F /* spectrum_library.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 46BF49861BB7303D0036033F /* spectrum_library.cpp */; };
 		46BF49891BB731CF0036033F /* spectrum_library.h in Headers */ = {isa = PBXBuildFile; fileRef = 46BF49881BB731CF0036033F /* spectrum_library.h */; };
 		46BF49911BB7E7760036033F /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 46BF49901BB7E7760036033F /* main.cpp */; };
+		46CCC79E1C8DBC350094E8D9 /* BidirectionalPathTracingRenderer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 46CCC79B1C8C75F50094E8D9 /* BidirectionalPathTracingRenderer.cpp */; };
+		46CCC79F1C8DBC350094E8D9 /* BidirectionalPathTracingRenderer.h in Headers */ = {isa = PBXBuildFile; fileRef = 46CCC79C1C8C75F50094E8D9 /* BidirectionalPathTracingRenderer.h */; };
+		46CCC7A21C8DC94B0094E8D9 /* DebugRenderer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 46CCC7A01C8DC94B0094E8D9 /* DebugRenderer.cpp */; };
+		46CCC7A31C8DC94B0094E8D9 /* DebugRenderer.h in Headers */ = {isa = PBXBuildFile; fileRef = 46CCC7A11C8DC94B0094E8D9 /* DebugRenderer.h */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -328,6 +332,10 @@
 		46BF49881BB731CF0036033F /* spectrum_library.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = spectrum_library.h; path = libSLR/BasicTypes/spectrum_library.h; sourceTree = SOURCE_ROOT; };
 		46BF49901BB7E7760036033F /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = main.cpp; path = HostProgram/main.cpp; sourceTree = "<group>"; };
 		46BF49921BB7EB860036033F /* StopWatch.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = StopWatch.h; path = HostProgram/StopWatch.h; sourceTree = "<group>"; };
+		46CCC79B1C8C75F50094E8D9 /* BidirectionalPathTracingRenderer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = BidirectionalPathTracingRenderer.cpp; path = libSLR/Renderers/BidirectionalPathTracingRenderer.cpp; sourceTree = SOURCE_ROOT; };
+		46CCC79C1C8C75F50094E8D9 /* BidirectionalPathTracingRenderer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = BidirectionalPathTracingRenderer.h; path = libSLR/Renderers/BidirectionalPathTracingRenderer.h; sourceTree = SOURCE_ROOT; };
+		46CCC7A01C8DC94B0094E8D9 /* DebugRenderer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DebugRenderer.cpp; path = libSLR/Renderers/DebugRenderer.cpp; sourceTree = SOURCE_ROOT; };
+		46CCC7A11C8DC94B0094E8D9 /* DebugRenderer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DebugRenderer.h; path = libSLR/Renderers/DebugRenderer.h; sourceTree = SOURCE_ROOT; };
 		46D7E0841BC8F58900AFF96F /* Makefile */ = {isa = PBXFileReference; explicitFileType = text; fileEncoding = 4; name = Makefile; path = libSLRSceneGraph/Parser/Makefile; sourceTree = "<group>"; usesTabs = 1; };
 		46FFDDFD1B9B258400E47537 /* HostProgram */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = HostProgram; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -493,6 +501,10 @@
 		4634EBDF1B9B529B0047AE54 /* Renderers */ = {
 			isa = PBXGroup;
 			children = (
+				46CCC7A01C8DC94B0094E8D9 /* DebugRenderer.cpp */,
+				46CCC7A11C8DC94B0094E8D9 /* DebugRenderer.h */,
+				46CCC79B1C8C75F50094E8D9 /* BidirectionalPathTracingRenderer.cpp */,
+				46CCC79C1C8C75F50094E8D9 /* BidirectionalPathTracingRenderer.h */,
 				466F6C711BB6B2E30056F2FA /* PathTracingRenderer.cpp */,
 				466F6C721BB6B2E30056F2FA /* PathTracingRenderer.h */,
 			);
@@ -665,6 +677,7 @@
 				466F6CD91BB6CA070056F2FA /* TexCoord2.h in Headers */,
 				466F6CD31BB6CA070056F2FA /* Quaternion.h in Headers */,
 				466F6CD71BB6CA070056F2FA /* SpectrumTypes.h in Headers */,
+				46CCC79F1C8DBC350094E8D9 /* BidirectionalPathTracingRenderer.h in Headers */,
 				466F6D551BB715600056F2FA /* constant_textures.h in Headers */,
 				466F6D401BB6DC840056F2FA /* basic_SurfaceMaterials.h in Headers */,
 				466F6CFB1BB6CA420056F2FA /* SurfaceObject.h in Headers */,
@@ -718,6 +731,7 @@
 				466F6D4D1BB7153E0056F2FA /* TriangleMesh.h in Headers */,
 				466F6D071BB6CA510056F2FA /* MultiEDF.h in Headers */,
 				466F6CFF1BB6CA420056F2FA /* Transform.h in Headers */,
+				46CCC7A31C8DC94B0094E8D9 /* DebugRenderer.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -874,12 +888,14 @@
 				466F6CDC1BB6CA260056F2FA /* AshikhminBRDF.cpp in Sources */,
 				466F6D061BB6CA510056F2FA /* MultiEDF.cpp in Sources */,
 				466F6D411BB6DC840056F2FA /* DiffuseEmission.cpp in Sources */,
+				46CCC79E1C8DBC350094E8D9 /* BidirectionalPathTracingRenderer.cpp in Sources */,
 				466F6D361BB6DC080056F2FA /* bmp_exporter.cpp in Sources */,
 				466F6D431BB6DC840056F2FA /* IBLEmission.cpp in Sources */,
 				4651F3361C567A820026B8A5 /* RGBTypes.cpp in Sources */,
 				466F6D561BB715600056F2FA /* image_textures.cpp in Sources */,
 				466F6CDE1BB6CA260056F2FA /* basic_BSDFs.cpp in Sources */,
 				46BF49851BB72F600036033F /* common_spectra.cpp in Sources */,
+				46CCC7A21C8DC94B0094E8D9 /* DebugRenderer.cpp in Sources */,
 				4651F3341C5678AB0026B8A5 /* TexCoord2.cpp in Sources */,
 				466F6CEF1BB6CA420056F2FA /* Image.cpp in Sources */,
 				466F6D3D1BB6DC840056F2FA /* AshikhminReflection.cpp in Sources */,

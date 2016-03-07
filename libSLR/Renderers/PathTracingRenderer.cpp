@@ -155,10 +155,10 @@ namespace SLR {
         if (surfPt.isEmitting()) {
             EDF* edf = surfPt.createEDF(wls, mem);
             SampledSpectrum Le = surfPt.emittance(wls) * edf->evaluate(EDFQuery(wls.heroIdx), dirOut_sn);
-            float denom = 0.0f;
+            FloatSum denomMISWeight = 0.0f;
             for (int i = 0; i < WavelengthSamples::NumComponents; ++i)
-                denom += wlPDFs[i];
-            float MISWeight = wlPDFs[wls.heroIdx] / denom;
+                denomMISWeight += wlPDFs[i];
+            float MISWeight = wlPDFs[wls.heroIdx] / denomMISWeight;
             sp += MISWeight * alpha * Le;
         }
         if (surfPt.atInfinity)
@@ -202,15 +202,13 @@ namespace SLR {
                     SLRAssert(!bsdfPDFs.hasNaN() && !bsdfPDFs.hasInf(), "bsdfPDFs: unexpected value detected: %s", bsdfPDFs.toString().c_str());
                     SLRAssert(!fs.hasNaN() && !fs.hasInf(), "fs: unexpected value detected: %s", fs.toString().c_str());
                     
-                    float MISWeight = 1.0f;
-                    float num = lightPDFs[wls.heroIdx] * lightPDFs[wls.heroIdx];
-                    float denom = 0.0f;
+                    FloatSum denomMISWeight = 0.0f;
                     for (int i = 0; i < WavelengthSamples::NumComponents; ++i) {
-                        denom += lightPDFs[i] * lightPDFs[i];
+                        denomMISWeight += lightPDFs[i] * lightPDFs[i];
                         if (!lpResult.posType.isDelta() && !lpResult.areaPDF.hasInf())
-                            denom += bsdfPDFs[i] * bsdfPDFs[i];
+                            denomMISWeight += bsdfPDFs[i] * bsdfPDFs[i];
                     }
-                    MISWeight = num / denom;
+                    float MISWeight = lightPDFs[wls.heroIdx] * lightPDFs[wls.heroIdx] / denomMISWeight;
                     if (!std::isnan(MISWeight)) {
                         SLRAssert(MISWeight >= 0.0f && MISWeight <= 1.0f, "Invalid MIS weight: %g", MISWeight);
                         
@@ -256,15 +254,13 @@ namespace SLR {
                 SLRAssert(!std::isnan(lightProb) && !std::isinf(lightProb), "lightProb: unexpected value detected: %f", lightProb);
                 SLRAssert(!lightPDFs.hasNaN()/* && !std::isinf(lightPDF)*/, "lightPDFs: unexpected value detected: %s", lightPDFs.toString().c_str());
                 
-                float MISWeight = 1.0f;
-                float num = bsdfPDFs[wls.heroIdx] * bsdfPDFs[wls.heroIdx];
-                float denom = 0.0f;
+                FloatSum denomMISWeight = 0.0f;
                 for (int i = 0; i < WavelengthSamples::NumComponents; ++i) {
                     if (!fsResult.dirType.isDelta())
-                        denom += lightPDFs[i] * lightPDFs[i];
-                    denom += bsdfPDFs[i] * bsdfPDFs[i];
+                        denomMISWeight += lightPDFs[i] * lightPDFs[i];
+                    denomMISWeight += bsdfPDFs[i] * bsdfPDFs[i];
                 }
-                MISWeight = num / denom;
+                float MISWeight = bsdfPDFs[wls.heroIdx] * bsdfPDFs[wls.heroIdx] / denomMISWeight;
                 if (!std::isnan(MISWeight)) {
                     SLRAssert(MISWeight >= 0.0f && MISWeight <= 1.0f, "Invalid MIS weight: %g", MISWeight);
                     sp += alpha * Le * MISWeight;
@@ -275,10 +271,9 @@ namespace SLR {
             
             // Russian roulette
             SampledSpectrum continueProbs = min(alpha / initY, SampledSpectrum::One);
-            if (rng.getFloat0cTo1o() < continueProbs[wls.heroIdx])
-                alpha /= continueProbs[wls.heroIdx];
-            else
+            if (rng.getFloat0cTo1o() >= continueProbs[wls.heroIdx])
                 break;
+            alpha /= continueProbs[wls.heroIdx];
             wlPDFs *= fsResult.dirPDF * continueProbs;
         }
         

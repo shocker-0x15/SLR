@@ -102,12 +102,13 @@ namespace SLR {
                 float py = basePixelY + ly + rng.getFloat0cTo1o();
                 
                 float selectWLPDF;
-                WavelengthSamples wls = WavelengthSamples::createWithEqualOffsets(rng.getFloat0cTo1o(), rng.getFloat0cTo1o(), &selectWLPDF);
+                WavelengthSamples wls = WavelengthSamples::sampleUniform(rng.getFloat0cTo1o(), &selectWLPDF);
                 
                 // initialize working area for the current pixel.
+                heroIndex = wls.heroIdx;
+                wlPDFs = selectWLPDF / WavelengthSamples::NumComponents;
                 curPx = px;
                 curPy = py;
-                wlHint = wls.selectedLambda;
                 eyeVertices.clear();
                 lightVertices.clear();
                 
@@ -123,7 +124,7 @@ namespace SLR {
                     LightPosQuery lightPosQuery(time, wls);
                     LightPosSample lightPosSample(rng.getFloat0cTo1o(), rng.getFloat0cTo1o());
                     LightPosQueryResult lightPosResult;
-                    EDFQuery edfQuery;
+                    EDFQuery edfQuery(wls.heroIdx);
                     EDFSample edfSample(rng.getFloat0cTo1o(), rng.getFloat0cTo1o(), rng.getFloat0cTo1o());
                     EDFQueryResult edfResult;
                     EDF* edf;
@@ -131,13 +132,14 @@ namespace SLR {
                     Ray ray = light.sampleRay(lightPosQuery, lightPosSample, &lightPosResult, &Le0, &edf, edfQuery, edfSample, &edfResult, &Le1, mem);
                     
                     // register the first light vertex.
-                    float lightAreaPDF = lightProb * lightPosResult.areaPDF;
+                    SampledSpectrum lightAreaPDF = lightProb * lightPosResult.areaPDF;
+                    SampledSpectrum wlLightPDFs = lightAreaPDF;
                     lightVertices.emplace_back(lightPosResult.surfPt, Vector3D::Zero, Normal3D(0, 0, 1), mem.create<EDFProxy>(edf),
-                                               Le0 / lightAreaPDF, lightAreaPDF, 1.0f, lightPosResult.posType, WavelengthSamples::Flag(0));
+                                               wlLightPDFs, Le0 / lightAreaPDF[wls.heroIdx], lightAreaPDF, SampledSpectrum::One, lightPosResult.posType);
                     
                     // create subsequent light subpath vertices by tracing in the scene.
-                    SampledSpectrum alpha = lightVertices.back().alpha * Le1 * (absDot(ray.dir, lightPosResult.surfPt.gNormal) / edfResult.dirPDF);
-                    generateSubPath(wls, alpha, ray, edfResult.dirPDF, edfResult.dirType, edfResult.dir_sn.z, true, rng, mem);
+                    SampledSpectrum alpha = lightVertices.back().alpha * Le1 * (absDot(ray.dir, lightPosResult.surfPt.gNormal) / edfResult.dirPDF[wls.heroIdx]);
+                    generateSubPath(wls, wlLightPDFs, alpha, ray, edfResult.dirPDF, edfResult.dirType, edfResult.dir_sn.z, true, rng, mem);
                 }
                 
                 // eye subpath generation
@@ -153,12 +155,13 @@ namespace SLR {
                     Ray ray = camera->sampleRay(lensQuery, lensSample, &lensResult, &We0, &idf, WeSample, &WeResult, &We1, mem);
                     
                     // register the first eye vertex.
+                    SampledSpectrum wlEyePDFs = lensResult.areaPDF;
                     eyeVertices.emplace_back(lensResult.surfPt, Vector3D::Zero, Normal3D(0, 0, 1), mem.create<IDFProxy>(idf),
-                                             We0 / (lensResult.areaPDF * selectWLPDF), lensResult.areaPDF, 1.0f, lensResult.posType, WavelengthSamples::Flag(0));
+                                             wlEyePDFs, We0 / lensResult.areaPDF[wls.heroIdx], lensResult.areaPDF, SampledSpectrum::One, lensResult.posType);
                     
                     // create subsequent eye subpath vertices by tracing in the scene.
-                    SampledSpectrum alpha = eyeVertices.back().alpha * We1 * (absDot(ray.dir, lensResult.surfPt.gNormal) / WeResult.dirPDF);
-                    generateSubPath(wls, alpha, ray, WeResult.dirPDF, WeResult.dirType, WeResult.dirLocal.z, false, rng, mem);
+                    SampledSpectrum alpha = eyeVertices.back().alpha * We1 * (absDot(ray.dir, lensResult.surfPt.gNormal) / WeResult.dirPDF[wls.heroIdx]);
+                    generateSubPath(wls, wlEyePDFs, alpha, ray, WeResult.dirPDF, WeResult.dirType, WeResult.dirLocal.z, false, rng, mem);
                 }
                 
                 // connection
@@ -177,23 +180,18 @@ namespace SLR {
                         float G = cosEyeEnd * cosLightEnd / connectDist2;
                         
                         Vector3D lConnectVector = lVtx.surfPt.shadingFrame.toLocal(-connectionVector);
-                        DDFQuery queryLightEnd{lVtx.dirIn_sn, lVtx.gNormal_sn, wlHint, true};
-                        SampledSpectrum lRevDDF;
+                        DDFQuery queryLightEnd{lVtx.dirIn_sn, lVtx.gNormal_sn, wls.heroIdx, true};
+                        SampledSpectrum lRevDDF, eExtend2ndDirPDF;
                         SampledSpectrum lDDF = lVtx.ddf->evaluate(queryLightEnd, lConnectVector, &lRevDDF);
-                        float eExtend2ndDirPDF;
-                        float lExtend1stDirPDF = lVtx.ddf->evaluatePDF(queryLightEnd, lConnectVector, &eExtend2ndDirPDF);
+                        SampledSpectrum lExtend1stDirPDF = lVtx.ddf->evaluatePDF(queryLightEnd, lConnectVector, &eExtend2ndDirPDF);
                         
                         Vector3D eConnectVector = eVtx.surfPt.shadingFrame.toLocal(connectionVector);
-                        DDFQuery queryEyeEnd{eVtx.dirIn_sn, eVtx.gNormal_sn, wlHint, false};
-                        SampledSpectrum eRevDDF;
+                        DDFQuery queryEyeEnd{eVtx.dirIn_sn, eVtx.gNormal_sn, wls.heroIdx, false};
+                        SampledSpectrum eRevDDF, lExtend2ndDirPDF;
                         SampledSpectrum eDDF = eVtx.ddf->evaluate(queryEyeEnd, eConnectVector, &eRevDDF);
-                        float lExtend2ndDirPDF;
-                        float eExtend1stDirPDF = eVtx.ddf->evaluatePDF(queryEyeEnd, eConnectVector, &lExtend2ndDirPDF);
+                        SampledSpectrum eExtend1stDirPDF = eVtx.ddf->evaluatePDF(queryEyeEnd, eConnectVector, &lExtend2ndDirPDF);
                         
-                        float wlProb = 1.0f;
-                        if ((lVtx.wlFlags | eVtx.wlFlags) & WavelengthSamples::LambdaIsSelected)
-                            wlProb = 1.0f / WavelengthSamples::NumComponents;
-                        SampledSpectrum connectionTerm = lDDF * (G / wlProb) * eDDF;
+                        SampledSpectrum connectionTerm = lDDF * G * eDDF;
                         if (connectionTerm == SampledSpectrum::Zero)
                             continue;
                         
@@ -203,30 +201,30 @@ namespace SLR {
                         
                         // calculate the 1st and 2nd subpath extending PDFs and probabilities.
                         // They can't be stored in advance because they depend on the connection.
-                        float lExtend1stAreaPDF, lExtend1stRRProb, lExtend2ndAreaPDF, lExtend2ndRRProb;
+                        SampledSpectrum lExtend1stAreaPDF, lExtend1stRRProb, lExtend2ndAreaPDF, lExtend2ndRRProb;
                         {
                             lExtend1stAreaPDF = lExtend1stDirPDF * cosEyeEnd / connectDist2;
-                            lExtend1stRRProb = s > 1 ? std::min((lDDF * cosLightEnd / lExtend1stDirPDF).luminance(), 1.0f) : 1.0f;
+                            lExtend1stRRProb = s > 1 ? min(lDDF * cosLightEnd / lExtend1stDirPDF, SampledSpectrum::One) : SampledSpectrum::One;
                             
                             if (t > 1) {
                                 BPTVertex &eVtxNextToEnd = eyeVertices[t - 2];
                                 float dist2;
                                 Vector3D dir2nd = eVtx.surfPt.getDirectionFrom(eVtxNextToEnd.surfPt.p, &dist2);
                                 lExtend2ndAreaPDF = lExtend2ndDirPDF * absDot(eVtxNextToEnd.surfPt.gNormal, dir2nd) / dist2;
-                                lExtend2ndRRProb = std::min((eRevDDF * absDot(eVtx.gNormal_sn, eVtx.dirIn_sn) / lExtend2ndDirPDF).luminance(), 1.0f);
+                                lExtend2ndRRProb = min(eRevDDF * absDot(eVtx.gNormal_sn, eVtx.dirIn_sn) / lExtend2ndDirPDF, SampledSpectrum::One);
                             }
                         }
-                        float eExtend1stAreaPDF, eExtend1stRRProb, eExtend2ndAreaPDF, eExtend2ndRRProb;
+                        SampledSpectrum eExtend1stAreaPDF, eExtend1stRRProb, eExtend2ndAreaPDF, eExtend2ndRRProb;
                         {
                             eExtend1stAreaPDF = eExtend1stDirPDF * cosLightEnd / connectDist2;
-                            eExtend1stRRProb = t > 1 ? std::min((eDDF * cosEyeEnd / eExtend1stDirPDF).luminance(), 1.0f) : 1.0f;
+                            eExtend1stRRProb = t > 1 ? min(eDDF * cosEyeEnd / eExtend1stDirPDF, SampledSpectrum::One) : SampledSpectrum::One;
                             
                             if (s > 1) {
                                 BPTVertex &lVtxNextToEnd = lightVertices[s - 2];
                                 float dist2;
                                 Vector3D dir2nd = lVtxNextToEnd.surfPt.getDirectionFrom(lVtx.surfPt.p, &dist2);
                                 eExtend2ndAreaPDF = eExtend2ndDirPDF * absDot(lVtxNextToEnd.surfPt.gNormal, dir2nd) / dist2;
-                                eExtend2ndRRProb = std::min((lRevDDF * absDot(lVtx.gNormal_sn, lVtx.dirIn_sn) / eExtend2ndDirPDF).luminance(), 1.0f);
+                                eExtend2ndRRProb = min(lRevDDF * absDot(lVtx.gNormal_sn, lVtx.dirIn_sn) / eExtend2ndDirPDF, SampledSpectrum::One);
                             }
                         }
                         
@@ -236,7 +234,7 @@ namespace SLR {
                         if (std::isinf(MISWeight) || std::isnan(MISWeight))
                             continue;
                         SLRAssert(MISWeight >= 0 && MISWeight <= 1.0f, "invalid MIS weight: %g", MISWeight);
-                        SampledSpectrum contribution = MISWeight * lVtx.alpha * connectionTerm * eVtx.alpha;
+                        SampledSpectrum contribution = MISWeight * lVtx.alpha * connectionTerm * eVtx.alpha / wlPDFs[heroIndex];
                         SLRAssert(contribution.hasNaN() == false && contribution.hasInf() == false && contribution.hasMinus() == false,
                                   "Unexpected value detected: %s\n"
                                   "pix: (%f, %f)", contribution.toString().c_str(), px, py);
@@ -257,21 +255,24 @@ namespace SLR {
         }
     }
     
-    void BidirectionalPathTracingRenderer::Job::generateSubPath(const WavelengthSamples &initWLs, const SampledSpectrum &initAlpha, const SLR::Ray &initRay, float dirPDF, DirectionType sampledType,
+    void BidirectionalPathTracingRenderer::Job::generateSubPath(const WavelengthSamples &initWLs, const SampledSpectrum &initWLPDFs,
+                                                                const SampledSpectrum &initAlpha, const SLR::Ray &initRay, const SampledSpectrum &initDirPDF, DirectionType sampledType,
                                                                 float cosLast, bool adjoint, RandomNumberGenerator &rng, SLR::ArenaAllocator &mem) {
         std::vector<BPTVertex> &vertices = adjoint ? lightVertices : eyeVertices;
         
         // reject invalid values.
-        if (dirPDF == 0.0f)
+        if (initDirPDF[initWLs.heroIdx] == 0.0f)
             return;
         
         WavelengthSamples wls = initWLs;
-        Ray ray = initRay;
+        SampledSpectrum subpathWLPDFs = initWLPDFs;
         SampledSpectrum alpha = initAlpha;
+        Ray ray = initRay;
+        SampledSpectrum dirPDF = initDirPDF;
         
         Intersection isect;
         SurfacePoint surfPt;
-        float RRProb = 1.0f;
+        SampledSpectrum RRProb = 1.0f;
         while (scene->intersect(ray, &isect)) {
             isect.getSurfacePoint(&surfPt);
             float dist2 = squaredDistance(vertices.back().surfPt, surfPt);
@@ -279,28 +280,27 @@ namespace SLR {
             Normal3D gNorm_sn = surfPt.shadingFrame.toLocal(surfPt.gNormal);
             BSDF* bsdf = surfPt.createBSDF(wls, mem);
             
-            float areaPDF = dirPDF * absDot(dirOut_sn, gNorm_sn) / dist2;
-            vertices.emplace_back(surfPt, dirOut_sn, gNorm_sn, mem.create<BSDFProxy>(bsdf), alpha, areaPDF, RRProb, sampledType, wls.flags);
+            SampledSpectrum areaPDF = dirPDF * absDot(dirOut_sn, gNorm_sn) / dist2;
+            subpathWLPDFs *= areaPDF * RRProb;
+            vertices.emplace_back(surfPt, dirOut_sn, gNorm_sn, mem.create<BSDFProxy>(bsdf), subpathWLPDFs, alpha, areaPDF, RRProb, sampledType);
             
             // implicit path (zero light subpath vertices, s = 0)
             if (!adjoint && surfPt.isEmitting()) {
                 EDF* edf = surfPt.createEDF(wls, mem);
                 SampledSpectrum Le0 = surfPt.emittance(wls);
-                SampledSpectrum Le1 = edf->evaluate(EDFQuery(), dirOut_sn);
+                SampledSpectrum Le1 = edf->evaluate(EDFQuery(wls.heroIdx), dirOut_sn);
                 
                 float lightProb = scene->evaluateProb(Light(isect.obj));
-                float extend1stAreaPDF = lightProb * surfPt.evaluateAreaPDF();
-                float extend2ndAreaPDF = edf->evaluatePDF(EDFQuery(), dirOut_sn) * cosLast / dist2;
+                SampledSpectrum extend1stAreaPDF = lightProb * surfPt.evaluateAreaPDF();
+                SampledSpectrum extend2ndAreaPDF = edf->evaluatePDF(EDFQuery(wls.heroIdx), dirOut_sn) * cosLast / dist2;
                 
-                float MISWeight = calculateMISWeight(extend1stAreaPDF, 1.0f, extend2ndAreaPDF, 1.0f,
-                                                     0.0f, 0.0f, 0.0f, 0.0f,
+                float MISWeight = calculateMISWeight(extend1stAreaPDF, SampledSpectrum::One, extend2ndAreaPDF, SampledSpectrum::One,
+                                                     SampledSpectrum::Zero, SampledSpectrum::Zero, SampledSpectrum::Zero, SampledSpectrum::Zero,
                                                      0, (uint32_t)vertices.size());
-                SampledSpectrum contribution = MISWeight * alpha * Le0 * Le1;
+                SampledSpectrum contribution = MISWeight * alpha * Le0 * Le1 / wlPDFs[heroIndex];
                 SLRAssert(contribution.hasNaN() == false && contribution.hasInf() == false && contribution.hasMinus() == false,
                           "Unexpected value detected: %s\n"
                           "pix: (%f, %f)", contribution.toString().c_str(), curPx, curPy);
-                if (wls.flags & WavelengthSamples::LambdaIsSelected)
-                    contribution *= WavelengthSamples::NumComponents;
                 if (!std::isinf(MISWeight) && !std::isnan(MISWeight)) {
                     SLRAssert(MISWeight >= 0 && MISWeight <= 1.0f, "invalid MIS weight: %g", MISWeight);
                     sensor->add(curPx, curPy, wls, contribution);
@@ -312,35 +312,31 @@ namespace SLR {
                 break;
             }
             
-            BSDFQuery fsQuery(dirOut_sn, gNorm_sn, wls.selectedLambda, DirectionType::All, adjoint);
+            BSDFQuery fsQuery(wls.heroIdx, dirOut_sn, gNorm_sn, DirectionType::All, adjoint);
             BSDFSample fsSample(rng.getFloat0cTo1o(), rng.getFloat0cTo1o(), rng.getFloat0cTo1o());
             BSDFQueryResult fsResult;
             BSDFReverseInfo revInfo;
             fsResult.reverse = &revInfo;
             SampledSpectrum fs = bsdf->sample(fsQuery, fsSample, &fsResult);
-            if (fs == SampledSpectrum::Zero || fsResult.dirPDF == 0.0f)
+            if (fs == SampledSpectrum::Zero || fsResult.dirPDF[wls.heroIdx] == 0.0f)
                 break;
-            if (fsResult.dirType.isDispersive())
-                wls.flags |= WavelengthSamples::LambdaIsSelected;
             float cosIn = absDot(fsResult.dir_sn, gNorm_sn);
-            SampledSpectrum weight = fs * (cosIn / fsResult.dirPDF);
+            SampledSpectrum weight = fs * (cosIn / fsResult.dirPDF[wls.heroIdx]);
             
             // Russian roulette
-            RRProb = std::min(weight.luminance(), 1.0f);
-            if (rng.getFloat0cTo1o() < RRProb)
-                weight /= RRProb;
-            else
+            RRProb = min(weight, SampledSpectrum::One);
+            if (rng.getFloat0cTo1o() >= RRProb[wls.heroIdx])
                 break;
             
-            alpha *= weight;
+            alpha *= weight / RRProb[wls.heroIdx];
             ray = Ray(surfPt.p, surfPt.shadingFrame.fromLocal(fsResult.dir_sn), ray.time, Ray::Epsilon);
             SLRAssert(!weight.hasInf() && !weight.hasNaN(),
-                      "weight: unexpected value detected:\nweight: %s\nfs: %s\nlength: %u, cos: %g, dirPDF: %g",
-                      weight.toString().c_str(), fs.toString().c_str(), uint32_t(vertices.size()) - 1, cosIn, fsResult.dirPDF);
+                      "weight: unexpected value detected:\nweight: %s\nfs: %s\nlength: %u, cos: %g, dirPDF: %s",
+                      weight.toString().c_str(), fs.toString().c_str(), uint32_t(vertices.size()) - 1, cosIn, fsResult.dirPDF.toString().c_str());
             
             BPTVertex &vtxNextToLast = vertices[vertices.size() - 2];
             vtxNextToLast.revAreaPDF = revInfo.dirPDF * cosLast / dist2;
-            vtxNextToLast.revRRProb = std::min((revInfo.fs * absDot(dirOut_sn, gNorm_sn) / revInfo.dirPDF).luminance(), 1.0f);
+            vtxNextToLast.revRRProb = min(revInfo.fs * absDot(dirOut_sn, gNorm_sn) / revInfo.dirPDF, SampledSpectrum::One);
             
             cosLast = cosIn;
             dirPDF = fsResult.dirPDF;
@@ -350,34 +346,49 @@ namespace SLR {
     }
     
     // calculate power heuristic MIS weight
-    float BidirectionalPathTracingRenderer::Job::calculateMISWeight(float lExtend1stAreaPDF, float lExtend1stRRProb, float lExtend2ndAreaPDF, float lExtend2ndRRProb,
-                                                                    float eExtend1stAreaPDF, float eExtend1stRRProb, float eExtend2ndAreaPDF, float eExtend2ndRRProb,
+    float BidirectionalPathTracingRenderer::Job::calculateMISWeight(const SampledSpectrum &lExtend1stAreaPDF, const SampledSpectrum &lExtend1stRRProb,
+                                                                    const SampledSpectrum &lExtend2ndAreaPDF, const SampledSpectrum &lExtend2ndRRProb,
+                                                                    const SampledSpectrum &eExtend1stAreaPDF, const SampledSpectrum &eExtend1stRRProb,
+                                                                    const SampledSpectrum &eExtend2ndAreaPDF, const SampledSpectrum &eExtend2ndRRProb,
                                                                     uint32_t numLVtx, uint32_t numEVtx) const {
         const uint32_t minEyeVertices = 1;
         const uint32_t minLightVertices = 0;
-        FloatSum recMISWeight = 1;
+        FloatSum denomMISWeight = 0;
+        
+        const auto accumulateWLVariants = [](FloatSum &sum, const SampledSpectrum &PDFs) {
+            for (int i = 0; i < WavelengthSamples::NumComponents; ++i)
+                sum += PDFs[i] * PDFs[i];
+        };
+        
+        const SampledSpectrum &eyeEndWLPDFs = numEVtx > 1 ? eyeVertices[numEVtx - 1].wlPDFs : SampledSpectrum::One;
+        const SampledSpectrum &lightEndWLPDFs = numLVtx > 1 ? lightVertices[numLVtx - 1].wlPDFs : SampledSpectrum::One;
+        const SampledSpectrum weightingPathPDFs = wlPDFs * lightEndWLPDFs * eyeEndWLPDFs;
+        float numMISWeight = weightingPathPDFs[heroIndex] * weightingPathPDFs[heroIndex];
+        accumulateWLVariants(denomMISWeight, weightingPathPDFs);
         
         // extend/shorten light/eye subpath, not consider implicit light subpath reaching a lens.
         if (numEVtx > minEyeVertices) {
             const BPTVertex &eyeEndVtx = eyeVertices[numEVtx - 1];
-            float PDFRatio = lExtend1stAreaPDF * lExtend1stRRProb / (eyeEndVtx.areaPDF * eyeEndVtx.RRProb);
+            SampledSpectrum extendedPathPDF = weightingPathPDFs * lExtend1stAreaPDF * lExtend1stRRProb / (eyeEndVtx.areaPDF * eyeEndVtx.RRProb);
             bool shortenIsDeltaSampled = eyeEndVtx.sampledType.isDelta();
             if (!shortenIsDeltaSampled)
-                recMISWeight += PDFRatio * PDFRatio;
+                accumulateWLVariants(denomMISWeight, extendedPathPDF);
             bool prevIsDeltaSampled = shortenIsDeltaSampled;
+            
             if (numEVtx - 1 > minEyeVertices) {
                 const BPTVertex &newLightVtx = eyeVertices[numEVtx - 2];
-                PDFRatio *= lExtend2ndAreaPDF * lExtend2ndRRProb / (newLightVtx.areaPDF * newLightVtx.RRProb);
+                extendedPathPDF *= lExtend2ndAreaPDF * lExtend2ndRRProb / (newLightVtx.areaPDF * newLightVtx.RRProb);
                 shortenIsDeltaSampled = newLightVtx.sampledType.isDelta();
                 if (!shortenIsDeltaSampled && !prevIsDeltaSampled)
-                    recMISWeight += PDFRatio * PDFRatio;
+                    accumulateWLVariants(denomMISWeight, extendedPathPDF);
                 prevIsDeltaSampled = shortenIsDeltaSampled;
+                
                 for (int t = numEVtx - 2; t > minEyeVertices; --t) {
                     const BPTVertex &newLightVtx = eyeVertices[t - 1];
-                    PDFRatio *= newLightVtx.revAreaPDF * newLightVtx.revRRProb / (newLightVtx.areaPDF * newLightVtx.RRProb);
+                    extendedPathPDF *= newLightVtx.revAreaPDF * newLightVtx.revRRProb / (newLightVtx.areaPDF * newLightVtx.RRProb);
                     shortenIsDeltaSampled = newLightVtx.sampledType.isDelta();
                     if (!shortenIsDeltaSampled && !prevIsDeltaSampled)
-                        recMISWeight += PDFRatio * PDFRatio;
+                        accumulateWLVariants(denomMISWeight, extendedPathPDF);
                     prevIsDeltaSampled = shortenIsDeltaSampled;
                 }
             }
@@ -386,29 +397,31 @@ namespace SLR {
         // extend/shorten eye/light subpath, consider implicit eye subpath reaching a light.
         if (numLVtx > minLightVertices) {
             const BPTVertex &lightEndVtx = lightVertices[numLVtx - 1];
-            float PDFRatio = eExtend1stAreaPDF * eExtend1stRRProb / (lightEndVtx.areaPDF * lightEndVtx.RRProb);
+            SampledSpectrum extendedPathPDF = weightingPathPDFs * eExtend1stAreaPDF * eExtend1stRRProb / (lightEndVtx.areaPDF * lightEndVtx.RRProb);
             bool shortenIsDeltaSampled = lightEndVtx.sampledType.isDelta();
             if (!shortenIsDeltaSampled)
-                recMISWeight += PDFRatio * PDFRatio;
+                accumulateWLVariants(denomMISWeight, extendedPathPDF);
             bool prevIsDeltaSampled = shortenIsDeltaSampled;
+            
             if (numLVtx - 1 > minLightVertices) {
                 const BPTVertex &newEyeVtx = lightVertices[numLVtx - 2];
-                PDFRatio *= eExtend2ndAreaPDF * eExtend2ndRRProb / (newEyeVtx.areaPDF * newEyeVtx.RRProb);
+                extendedPathPDF *= eExtend2ndAreaPDF * eExtend2ndRRProb / (newEyeVtx.areaPDF * newEyeVtx.RRProb);
                 shortenIsDeltaSampled = newEyeVtx.sampledType.isDelta();
                 if (!shortenIsDeltaSampled && !prevIsDeltaSampled)
-                    recMISWeight += PDFRatio * PDFRatio;
+                    accumulateWLVariants(denomMISWeight, extendedPathPDF);
                 prevIsDeltaSampled = shortenIsDeltaSampled;
+                
                 for (int s = numLVtx - 2; s > minLightVertices; --s) {
                     const BPTVertex &newEyeVtx = lightVertices[s - 1];
-                    PDFRatio *= newEyeVtx.revAreaPDF * newEyeVtx.revRRProb / (newEyeVtx.areaPDF * newEyeVtx.RRProb);
+                    extendedPathPDF *= newEyeVtx.revAreaPDF * newEyeVtx.revRRProb / (newEyeVtx.areaPDF * newEyeVtx.RRProb);
                     shortenIsDeltaSampled = newEyeVtx.sampledType.isDelta();
                     if (!shortenIsDeltaSampled && !prevIsDeltaSampled)
-                        recMISWeight += PDFRatio * PDFRatio;
+                        accumulateWLVariants(denomMISWeight, extendedPathPDF);
                     prevIsDeltaSampled = shortenIsDeltaSampled;
                 }
             }
         }
         
-        return 1.0f / recMISWeight;
+        return numMISWeight / denomMISWeight;
     }
 }

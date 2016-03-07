@@ -138,7 +138,7 @@ namespace SLR {
                 float py = basePixelY + ly + rng.getFloat0cTo1o();
                 
                 float selectWLPDF;
-                WavelengthSamples wls = WavelengthSamples::createWithEqualOffsets(rng.getFloat0cTo1o(), rng.getFloat0cTo1o(), &selectWLPDF);
+                WavelengthSamples wls = WavelengthSamples::sampleUniform(rng.getFloat0cTo1o(), &selectWLPDF);
                 
                 LensPosQuery lensQuery(time, wls);
                 LensPosSample lensSample(rng.getFloat0cTo1o(), rng.getFloat0cTo1o());
