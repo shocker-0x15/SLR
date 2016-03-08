@@ -270,6 +270,7 @@ namespace SLR {
                 break;
             
             // Russian roulette
+            // FIXME: ?? alpha at this point is wavelength-dependent value. Does this cause bias?
             SampledSpectrum continueProbs = min(alpha / initY, SampledSpectrum::One);
             if (rng.getFloat0cTo1o() >= continueProbs[wls.heroIdx])
                 break;
