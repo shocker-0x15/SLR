@@ -17,29 +17,19 @@ namespace SLR {
     // just for compatibility with spectral representation build.
     template <typename RealType>
     struct SLR_API RGBSamplesTemplate {
-        enum Flag : uint16_t {
-            LambdaIsSelected = 0x01,
-        };
-        uint16_t selectedLambda;
-        uint16_t flags;
+        uint8_t heroIdx;
         static const uint32_t NumComponents;
         
-        RGBSamplesTemplate() : selectedLambda(0), flags(0) { }
+        RGBSamplesTemplate() : heroIdx(0) { }
         RGBSamplesTemplate(const RGBSamplesTemplate &wls) {
-            selectedLambda = wls.selectedLambda;
-            flags = wls.flags;
+            heroIdx = wls.heroIdx;
         }
         
-        bool lambdaSelected() const {
-            return (flags & LambdaIsSelected) != 0;
-        }
-        
-        static RGBSamplesTemplate createWithEqualOffsets(RealType offset, RealType uLambda, RealType* PDF) {
-            SLRAssert(offset >= 0 && offset < 1, "\"offset\" must be in range [0, 1).");
-            SLRAssert(uLambda >= 0 && uLambda < 1, "\"uLambda\" must be in range [0, 1).");
+        static RGBSamplesTemplate sampleUniform(RealType uHero, RealType* PDF) {
+            SLRAssert(uHero >= 0 && uHero < 1, "\"offset\" must be in range [0, 1).");
+            
             RGBSamplesTemplate ret;
-            ret.selectedLambda = std::min(uint16_t(3 * uLambda), uint16_t(2));
-            ret.flags = 0;
+            ret.heroIdx = std::min(uint8_t(3 * uHero), uint8_t(2));
             *PDF = 1;
             return ret;
         }
@@ -143,6 +133,33 @@ namespace SLR {
     const RGBTemplate<RealType> RGBTemplate<RealType>::Inf = RGBTemplate<RealType>(std::numeric_limits<RealType>::infinity());
     template <typename RealType>
     const RGBTemplate<RealType> RGBTemplate<RealType>::NaN = RGBTemplate<RealType>(std::numeric_limits<RealType>::quiet_NaN());
+    
+    template <typename RealType>
+    inline RGBTemplate<RealType> min(const RGBTemplate<RealType> &smp1, const RGBTemplate<RealType> &smp2) {
+        RGBTemplate<RealType> ret;
+        ret.r = std::fmin(smp1.r, smp2.r);
+        ret.g = std::fmin(smp1.g, smp2.g);
+        ret.b = std::fmin(smp1.b, smp2.b);
+        return ret;
+    }
+    
+    template <typename RealType>
+    inline RGBTemplate<RealType> max(const RGBTemplate<RealType> &smp1, const RGBTemplate<RealType> &smp2) {
+        RGBTemplate<RealType> ret;
+        ret.r = std::fmax(smp1.r, smp2.r);
+        ret.g = std::fmax(smp1.g, smp2.g);
+        ret.b = std::fmax(smp1.b, smp2.b);
+        return ret;
+    }
+    
+    template <typename RealType>
+    inline RGBTemplate<RealType> positiveMask(const RGBTemplate<RealType> &value, const RGBTemplate<RealType> &mask) {
+        RGBTemplate<RealType> ret;
+        ret.r = mask.r > 0 ? value.r : 0;
+        ret.g = mask.g > 0 ? value.g : 0;
+        ret.b = mask.b > 0 ? value.b : 0;
+        return ret;
+    }
     
     
     template <typename RealType>
