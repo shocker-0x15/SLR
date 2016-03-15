@@ -78,7 +78,7 @@ namespace SLR {
     }
 
     float ModifiedWardDurBRDF::weightInternal(const SLR::BSDFQuery &query) const {
-        return m_R.luminance();
+        return m_R.importance(query.wlHint);
     }
     
     SampledSpectrum ModifiedWardDurBRDF::getBaseColorInternal(DirectionType flags) const {

@@ -31,6 +31,13 @@ namespace SLR {
 
     
     template <typename RealType>
+    RGBTemplate<RealType> sqrt(const RGBTemplate<RealType> &value) {
+        return RGBTemplate<RealType>(std::sqrt(value.r), std::sqrt(value.g), std::sqrt(value.b));
+    }
+    template SLR_API RGBTemplate<float> sqrt(const RGBTemplate<float> &value);
+    template SLR_API RGBTemplate<double> sqrt(const RGBTemplate<double> &value);
+    
+    template <typename RealType>
     RGBTemplate<RealType> pow(const RGBTemplate<RealType> &s, RealType p) {
         return RGBTemplate<RealType>(std::pow(s.r, p), std::pow(s.g, p), std::pow(s.b, p));
     }

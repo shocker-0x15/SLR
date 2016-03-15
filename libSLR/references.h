@@ -21,7 +21,7 @@ namespace SLR {
     class MSpaceAllocator;
     
     // RGB & Spectrum
-    template<typename RealType> struct CompensatedSum;
+    template <typename RealType> struct CompensatedSum;
     template <typename RealType> struct RGBSamplesTemplate;
     template <typename RealType> struct RGBTemplate;
     template <typename RealType> struct RGBStorageTemplate;

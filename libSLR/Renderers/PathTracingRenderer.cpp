@@ -135,7 +135,7 @@ namespace SLR {
         Ray ray = initRay;
         SurfacePoint surfPt;
         SampledSpectrum alpha = SampledSpectrum::One;
-        float initY = alpha[wls.selectedLambda];
+        float initY = alpha.importance(wls.selectedLambda);
         SampledSpectrumSum sp(SampledSpectrum::Zero);
         uint32_t pathLength = 0;
         
@@ -252,7 +252,7 @@ namespace SLR {
                 break;
             
             // Russian roulette
-            float continueProb = std::min(alpha.luminance() / initY, 1.0f);
+            float continueProb = std::min(alpha.importance(wls.selectedLambda) / initY, 1.0f);
             if (rng.getFloat0cTo1o() < continueProb)
                 alpha /= continueProb;
             else

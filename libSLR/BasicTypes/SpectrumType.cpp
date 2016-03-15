@@ -44,6 +44,26 @@ namespace SLR {
 //    template SLR_API const SampledSpectrumTemplate<double, NumSpectralSamples> SampledSpectrumTemplate<double, NumSpectralSamples>::One;
 //    template SLR_API const SampledSpectrumTemplate<double, NumSpectralSamples> SampledSpectrumTemplate<double, NumSpectralSamples>::Inf;
 //    template SLR_API const SampledSpectrumTemplate<double, NumSpectralSamples> SampledSpectrumTemplate<double, NumSpectralSamples>::NaN;
+    
+    template <typename RealType, uint32_t N>
+    SampledSpectrumTemplate<RealType, N> sqrt(const SampledSpectrumTemplate<RealType, N> &value) {
+        SampledSpectrumTemplate<RealType, N> ret;
+        for (int i = 0; i < N; ++i)
+            ret[i] = std::sqrt(value[i]);
+        return ret;
+    }
+    template SLR_API SampledSpectrumTemplate<float, NumSpectralSamples> sqrt(const SampledSpectrumTemplate<float, NumSpectralSamples> &value);
+    template SLR_API SampledSpectrumTemplate<double, NumSpectralSamples> sqrt(const SampledSpectrumTemplate<double, NumSpectralSamples> &value);
+    
+    template <typename RealType, uint32_t N>
+    SampledSpectrumTemplate<RealType, N> exp(const SampledSpectrumTemplate<RealType, N> &value) {
+        SampledSpectrumTemplate<RealType, N> ret;
+        for (int i = 0; i < N; ++i)
+            ret[i] = std::exp(value[i]);
+        return ret;
+    }
+    template SLR_API SampledSpectrumTemplate<float, NumSpectralSamples> exp(const SampledSpectrumTemplate<float, NumSpectralSamples> &value);
+    template SLR_API SampledSpectrumTemplate<double, NumSpectralSamples> exp(const SampledSpectrumTemplate<double, NumSpectralSamples> &value);
 
     
     template struct DiscretizedSpectrumTemplate<float, NumStrataForStorage>;

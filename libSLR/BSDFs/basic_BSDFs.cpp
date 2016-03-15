@@ -47,7 +47,7 @@ namespace SLR {
     }
     
     float LambertianBRDF::weightInternal(const SLR::BSDFQuery &query) const {
-        return m_R.luminance();
+        return m_R.importance(query.wlHint);
     }
     
     SampledSpectrum LambertianBRDF::getBaseColorInternal(DirectionType flags) const {
@@ -79,7 +79,7 @@ namespace SLR {
     }
     
     float SpecularBRDF::weightInternal(const BSDFQuery &query) const {
-        return m_coeffR.luminance() * m_fresnel->evaluate(query.dir_sn.z).luminance();
+        return m_coeffR.importance(query.wlHint) * m_fresnel->evaluate(query.dir_sn.z).importance(query.wlHint);
     }
     
     SampledSpectrum SpecularBRDF::getBaseColorInternal(DirectionType flags) const {
@@ -130,8 +130,8 @@ namespace SLR {
     }
     
     float SpecularBTDF::weightInternal(const SLR::BSDFQuery &query) const {
-        float F = m_fresnel.evaluate(query.dir_sn.z, query.wlHint);
-        return m_coeffT.luminance() * (1.0f - F);
+        float F = m_fresnel.evaluate(query.dir_sn.z).importance(query.wlHint);
+        return m_coeffT.importance(query.wlHint) * (1.0f - F);
     }
     
     SampledSpectrum SpecularBTDF::getBaseColorInternal(DirectionType flags) const {
