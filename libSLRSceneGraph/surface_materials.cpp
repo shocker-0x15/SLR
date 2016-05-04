@@ -15,6 +15,8 @@ namespace SLRSceneGraph {
         delete m_rawData;
     }
     
+    
+    
     EmitterSurfaceProperty::~EmitterSurfaceProperty() {
         delete m_rawData;
     }
@@ -24,28 +26,41 @@ namespace SLRSceneGraph {
         m_rawData = new SLR::EmitterSurfaceMaterial(mat->getRaw(), emit->getRaw());
     }
     
-    SpatialFresnel::~SpatialFresnel() {
+    
+    
+    SVFresnel::~SVFresnel() {
         delete m_rawData;
     }
     
-    SpatialFresnelNoOp::SpatialFresnelNoOp() {
-        m_rawData = new SLR::SpatialFresnelNoOp();
+    SVFresnelNoOp::SVFresnelNoOp() {
+        m_rawData = new SLR::SVFresnelNoOp();
     }
     
-    SpatialFresnelConductor::SpatialFresnelConductor(const SpectrumTextureRef &eta, const SpectrumTextureRef &k) : m_eta(eta), m_k(k) {
-        m_rawData = new SLR::SpatialFresnelConductor(eta->getRaw(), k->getRaw());
+    SVFresnelConductor::SVFresnelConductor(const SpectrumTextureRef &eta, const SpectrumTextureRef &k) : m_eta(eta), m_k(k) {
+        m_rawData = new SLR::SVFresnelConductor(eta->getRaw(), k->getRaw());
     }
     
-    SpatialFresnelDielectric::SpatialFresnelDielectric(const SpectrumTextureRef &etaExt, const SpectrumTextureRef &etaInt) : m_etaExt(etaExt), m_etaInt(etaInt) {
-        m_rawData = new SLR::SpatialFresnelDielectric(etaExt->getRaw(), etaInt->getRaw());
+    SVFresnelDielectric::SVFresnelDielectric(const SpectrumTextureRef &etaExt, const SpectrumTextureRef &etaInt) : m_etaExt(etaExt), m_etaInt(etaInt) {
+        m_rawData = new SLR::SVFresnelDielectric(etaExt->getRaw(), etaInt->getRaw());
     }
+    
+    
+    SVMicrofacetDistribution::~SVMicrofacetDistribution() {
+        delete m_rawData;
+    }
+    
+    SVGGX::SVGGX(const FloatTextureRef &alpha_g) : m_alpha_g(alpha_g) {
+        m_rawData = new SLR::SVGGX(alpha_g->getRaw());
+    }
+    
+    
     
     DiffuseReflection::DiffuseReflection(const SpectrumTextureRef &reflectance, const FloatTextureRef &sigma) :
     m_reflectance(reflectance), m_sigma(sigma) {
         m_rawData = new SLR::DiffuseReflection(reflectance->getRaw(), m_sigma ? sigma->getRaw() : nullptr);
     }
     
-    SpecularReflection::SpecularReflection(const SpectrumTextureRef &coeffR, const SpatialFresnelRef &fresnel) :
+    SpecularReflection::SpecularReflection(const SpectrumTextureRef &coeffR, const SVFresnelRef &fresnel) :
     m_coeffR(coeffR), m_fresnel(fresnel) {
         m_rawData = new SLR::SpecularReflection(coeffR->getRaw(), fresnel->getRaw());
     }
@@ -60,19 +75,24 @@ namespace SLRSceneGraph {
         m_rawData = new SLR::InverseSurfaceMaterial(baseMat->getRaw());
     }
     
-    AshikhminSpecularReflection::AshikhminSpecularReflection(const SpectrumTextureRef &Rs, const FloatTextureRef &nu, const FloatTextureRef &nv) :
-    m_Rs(Rs), m_nu(nu), m_nv(nv) {
-        m_rawData = new SLR::AshikhminSpecularReflection(Rs->getRaw(), nu->getRaw(), nv->getRaw());
-    }
-    
-    AshikhminDiffuseReflection::AshikhminDiffuseReflection(const SpectrumTextureRef &Rs, const SpectrumTextureRef &Rd) :
-    m_Rs(Rs), m_Rd(Rd) {
-        m_rawData = new SLR::AshikhminDiffuseReflection(Rs->getRaw(), Rd->getRaw());
+    AshikhminShirleyReflection::AshikhminShirleyReflection(const SpectrumTextureRef &Rs, const SpectrumTextureRef &Rd, const FloatTextureRef &nu, const FloatTextureRef &nv) :
+    m_Rs(Rs), m_Rd(Rd), m_nu(nu), m_nv(nv) {
+        m_rawData = new SLR::AshikhminShirleyReflection(Rs->getRaw(), Rd->getRaw(), nu->getRaw(), nv->getRaw());
     }
     
     ModifiedWardDurReflection::ModifiedWardDurReflection(const SpectrumTextureRef &reflectance, const FloatTextureRef &anisoX, const FloatTextureRef &anisoY) :
     m_reflectance(reflectance), m_anisoX(anisoX), m_anisoY(anisoY) {
         m_rawData = new SLR::ModifiedWardDurReflection(reflectance->getRaw(), anisoX->getRaw(), anisoY->getRaw());
+    }
+    
+    MicrofacetReflection::MicrofacetReflection(const SVFresnelRef &F, const SVMicrofacetDistributionRef &D) :
+    m_F(F), m_D(D) {
+        m_rawData = new SLR::MicrofacetReflection(F->getRaw(), D->getRaw());
+    }
+    
+    MicrofacetTransmission::MicrofacetTransmission(const SpectrumTextureRef &etaExt, const SpectrumTextureRef &etaInt, const SVMicrofacetDistributionRef &D) :
+    m_etaExt(etaExt), m_etaInt(etaInt), m_D(D) {
+        m_rawData = new SLR::MicrofacetTransmission(etaExt->getRaw(), etaInt->getRaw(), D->getRaw());
     }
     
     SummedSurfaceMaterial::SummedSurfaceMaterial(const SurfaceMaterialRef &m0, const SurfaceMaterialRef &m1) :
@@ -84,6 +104,7 @@ namespace SLRSceneGraph {
     m_mat0(m0), m_mat1(m1), m_factor(factor) {
         m_rawData = new SLR::MixedSurfaceMaterial(m0->getRaw(), m1->getRaw(), factor->getRaw());
     }
+    
     
     
     DiffuseEmission::DiffuseEmission(const SpectrumTextureRef &emittance) :
@@ -98,17 +119,18 @@ namespace SLRSceneGraph {
     };
     
     
+    
     SurfaceMaterialRef SurfaceMaterial::createMatte(const SpectrumTextureRef &reflectance, const FloatTextureRef &sigma) {
         return createShared<DiffuseReflection>(reflectance, sigma);
     }
     
     SurfaceMaterialRef SurfaceMaterial::createMetal(const SpectrumTextureRef &coeffR, const SpectrumTextureRef &eta, const SpectrumTextureRef &k) {
-        SpatialFresnelRef fresnel = createShared<SpatialFresnelConductor>(eta, k);
+        SVFresnelRef fresnel = createShared<SVFresnelConductor>(eta, k);
         return createShared<SpecularReflection>(coeffR, fresnel);
     }
     
     SurfaceMaterialRef SurfaceMaterial::createGlass(const SpectrumTextureRef &coeffR, const SpectrumTextureRef &coeffT, const SpectrumTextureRef &etaExt, const SpectrumTextureRef &etaInt) {
-        SpatialFresnelRef frDiel = createShared<SpatialFresnelDielectric>(etaExt, etaInt);
+        SVFresnelRef frDiel = createShared<SVFresnelDielectric>(etaExt, etaInt);
         SurfaceMaterialRef r = createShared<SpecularReflection>(coeffR, frDiel);
         SurfaceMaterialRef t = createShared<SpecularTransmission>(coeffT, etaExt, etaInt);
         return createSummedMaterial(r, t);
@@ -119,9 +141,21 @@ namespace SLRSceneGraph {
     }
     
     SurfaceMaterialRef SurfaceMaterial::createAshikhminShirley(const SpectrumTextureRef &Rd, const SpectrumTextureRef &Rs, const FloatTextureRef &nu, const FloatTextureRef &nv) {
-        SurfaceMaterialRef specular = createShared<AshikhminSpecularReflection>(Rs, nu, nv);
-        SurfaceMaterialRef diffuse = createShared<AshikhminDiffuseReflection>(Rs, Rd);
-        return createSummedMaterial(specular, diffuse);
+        return createShared<AshikhminShirleyReflection>(Rs, Rd, nu, nv);
+    }
+    
+    SurfaceMaterialRef SurfaceMaterial::createMicrofacetMetal(const SpectrumTextureRef &eta, const SpectrumTextureRef &k, const FloatTextureRef &alpha_g) {
+        SVFresnelRef fresnel = createShared<SVFresnelConductor>(eta, k);
+        SVMicrofacetDistributionRef dist = createShared<SVGGX>(alpha_g);
+        return createShared<MicrofacetReflection>(fresnel, dist);
+    }
+    
+    SurfaceMaterialRef SurfaceMaterial::createMicrofacetGlass(const SpectrumTextureRef &etaExt, const SpectrumTextureRef &etaInt, const FloatTextureRef &alpha_g) {
+        SVMicrofacetDistributionRef dist = createShared<SVGGX>(alpha_g);
+        SVFresnelRef frDiel = createShared<SVFresnelDielectric>(etaExt, etaInt);
+        SurfaceMaterialRef r = createShared<MicrofacetReflection>(frDiel, dist);
+        SurfaceMaterialRef t = createShared<MicrofacetTransmission>(etaExt, etaInt, dist);
+        return createSummedMaterial(r, t);
     }
     
     SurfaceMaterialRef SurfaceMaterial::createInverseMaterial(const SurfaceMaterialRef &baseMat) {

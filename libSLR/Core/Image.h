@@ -26,6 +26,12 @@ namespace SLR {
         Num
     };
     
+    enum class ImageStoreMode {
+        AsIs = 0,
+        NormalTexture,
+        AlphaTexture,
+    };
+    
     struct SLR_API RGB8x3 { uint8_t r, g, b; };
     struct SLR_API RGB_8x4 { uint8_t r, g, b, dummy; };
     struct SLR_API RGBA8x4  { uint8_t r, g, b, a; };
@@ -35,6 +41,8 @@ namespace SLR {
     struct SLR_API Gray8 { uint8_t v; };
     
     extern SLR_API const size_t sizesOfColorFormats[(uint32_t)ColorFormat::Num];
+    
+    
     
     class SLR_API Image2D {
     protected:
@@ -63,6 +71,7 @@ namespace SLR {
         
         void saveImage(const std::string &filepath, bool gammaCorrection) const;
     };
+    
     
     
     template <uint32_t log2_tileWidth>
@@ -109,23 +118,212 @@ namespace SLR {
             memset(m_data, 0, m_allocSize);
         }
         
-        TiledImage2DTemplate(const void* linearData, uint32_t width, uint32_t height, ColorFormat fmt, Allocator* mem, SpectrumType spType) {
+        TiledImage2DTemplate(const void* linearData, uint32_t width, uint32_t height, ColorFormat fmt, Allocator* mem, ImageStoreMode mode, SpectrumType spType) {
             m_width = width;
             m_height = height;
             m_spType = spType;
             
-#ifdef Use_Spectral_Representation
+            std::function<void(int32_t, int32_t)> convertFunc;
             switch (fmt) {
                 case ColorFormat::RGB8x3:
+                    switch (mode) {
+                        case ImageStoreMode::AsIs:
+#ifdef Use_Spectral_Representation
+                            m_colorFormat = ColorFormat::uvs16Fx3;
+                            convertFunc = [this, &linearData, &spType](int32_t x, int32_t y) {
+                                const RGB8x3 &val = *((RGB8x3*)linearData + m_width * y + x);
+                                float RGB[3] = {val.r / 255.0f, val.g / 255.0f, val.b / 255.0f};
+                                float uvs[3];
+                                Upsampling::sRGB_to_uvs(spType, RGB, uvs);
+                                uvs16Fx3 storedVal{(half)uvs[0], (half)uvs[1], (half)uvs[2]};
+                                SLRAssert(!std::isnan((float)storedVal.u) && !std::isinf((float)storedVal.u) &&
+                                          !std::isnan((float)storedVal.v) && !std::isinf((float)storedVal.v) &&
+                                          !std::isnan((float)storedVal.s) && !std::isinf((float)storedVal.s), "Invalid value.");
+                                setInternal(x, y, &storedVal, m_stride);
+                            };
+#else
+                            m_colorFormat = ColorFormat::RGB8x3;
+                            convertFunc = [this, &linearData, &spType](int32_t x, int32_t y) {
+                                const RGB8x3 &val = *((RGB8x3*)linearData + m_width * y + x);
+                                RGB8x3 storedVal{val.r, val.g, val.b};
+                                setInternal(x, y, &storedVal, m_stride);
+                            };
+#endif
+                            break;
+                        case ImageStoreMode::NormalTexture:
+                            m_colorFormat = ColorFormat::RGB8x3;
+                            convertFunc = [this, &linearData, &spType](int32_t x, int32_t y) {
+                                const RGB8x3 &val = *((RGB8x3*)linearData + m_width * y + x);
+                                RGB8x3 storedVal{val.r, val.g, val.b};
+                                setInternal(x, y, &storedVal, m_stride);
+                            };
+                            break;
+                        case ImageStoreMode::AlphaTexture:
+                            m_colorFormat = ColorFormat::Gray8;
+                            convertFunc = [this, &linearData, &spType](int32_t x, int32_t y) {
+                                const RGB8x3 &val = *((RGB8x3*)linearData + m_width * y + x);
+                                Gray8 storedVal{val.r};
+                                setInternal(x, y, &storedVal, m_stride);
+                            };
+                            break;
+                        default:
+                            break;
+                    }
+                    break;
                 case ColorFormat::RGB_8x4:
-                    m_colorFormat = ColorFormat::uvs16Fx3;
+                    switch (mode) {
+                        case ImageStoreMode::AsIs:
+#ifdef Use_Spectral_Representation
+                            m_colorFormat = ColorFormat::uvs16Fx3;
+                            convertFunc = [this, &linearData, &spType](int32_t x, int32_t y) {
+                                const RGB_8x4 &val = *((RGB_8x4*)linearData + m_width * y + x);
+                                float RGB[3] = {val.r / 255.0f, val.g / 255.0f, val.b / 255.0f};
+                                float uvs[3];
+                                Upsampling::sRGB_to_uvs(spType, RGB, uvs);
+                                uvs16Fx3 storedVal{(half)uvs[0], (half)uvs[1], (half)uvs[2]};
+                                SLRAssert(!std::isnan((float)storedVal.u) && !std::isinf((float)storedVal.u) &&
+                                          !std::isnan((float)storedVal.v) && !std::isinf((float)storedVal.v) &&
+                                          !std::isnan((float)storedVal.s) && !std::isinf((float)storedVal.s), "Invalid value.");
+                                setInternal(x, y, &storedVal, m_stride);
+                            };
+#else
+                            m_colorFormat = ColorFormat::RGB8x3;
+                            convertFunc = [this, &linearData, &spType](int32_t x, int32_t y) {
+                                const RGB_8x4 &val = *((RGB_8x4*)linearData + m_width * y + x);
+                                RGB8x3 storedVal{val.r, val.g, val.b};
+                                setInternal(x, y, &storedVal, m_stride);
+                            };
+#endif
+                            break;
+                        case ImageStoreMode::NormalTexture:
+                            m_colorFormat = ColorFormat::RGB8x3;
+                            convertFunc = [this, &linearData, &spType](int32_t x, int32_t y) {
+                                const RGB_8x4 &val = *((RGB_8x4*)linearData + m_width * y + x);
+                                RGB8x3 storedVal{val.r, val.g, val.b};
+                                setInternal(x, y, &storedVal, m_stride);
+                            };
+                            break;
+                        case ImageStoreMode::AlphaTexture:
+                            m_colorFormat = ColorFormat::Gray8;
+                            convertFunc = [this, &linearData, &spType](int32_t x, int32_t y) {
+                                const RGB_8x4 &val = *((RGB_8x4*)linearData + m_width * y + x);
+                                Gray8 storedVal{val.r};
+                                setInternal(x, y, &storedVal, m_stride);
+                            };
+                            break;
+                        default:
+                            break;
+                    }
                     break;
                 case ColorFormat::RGBA8x4:
+                    switch (mode) {
+                        case ImageStoreMode::AsIs:
+#ifdef Use_Spectral_Representation
+                            m_colorFormat = ColorFormat::uvsA16Fx4;
+                            convertFunc = [this, &linearData, &spType](int32_t x, int32_t y) {
+                                const RGBA8x4 &val = *((RGBA8x4*)linearData + m_width * y + x);
+                                float RGB[3] = {val.r / 255.0f, val.g / 255.0f, val.b / 255.0f};
+                                float uvs[3];
+                                Upsampling::sRGB_to_uvs(spType, RGB, uvs);
+                                uvsA16Fx4 storedVal{(half)uvs[0], (half)uvs[1], (half)uvs[2], (half)(val.a / 255.0f)};
+                                SLRAssert(!std::isnan((float)storedVal.u) && !std::isinf((float)storedVal.u) &&
+                                          !std::isnan((float)storedVal.v) && !std::isinf((float)storedVal.v) &&
+                                          !std::isnan((float)storedVal.s) && !std::isinf((float)storedVal.s) &&
+                                          !std::isnan((float)storedVal.a) && !std::isinf((float)storedVal.a) && (float)storedVal.a > 0, "Invalid value.");
+                                setInternal(x, y, &storedVal, m_stride);
+                            };
+#else
+                            m_colorFormat = ColorFormat::RGBA8x4;
+                            convertFunc = [this, &linearData, &spType](int32_t x, int32_t y) {
+                                const RGBA8x4 &val = *((RGBA8x4*)linearData + m_width * y + x);
+                                RGBA8x4 storedVal{val.r, val.g, val.b, val.a};
+                                setInternal(x, y, &storedVal, m_stride);
+                            };
+#endif
+                            break;
+                        case ImageStoreMode::NormalTexture:
+                            m_colorFormat = ColorFormat::RGB8x3;
+                            convertFunc = [this, &linearData, &spType](int32_t x, int32_t y) {
+                                const RGBA8x4 &val = *((RGBA8x4*)linearData + m_width * y + x);
+                                RGB8x3 storedVal{val.r, val.g, val.b};
+                                setInternal(x, y, &storedVal, m_stride);
+                            };
+                            break;
+                        case ImageStoreMode::AlphaTexture:
+                            m_colorFormat = ColorFormat::Gray8;
+                            convertFunc = [this, &linearData, &spType](int32_t x, int32_t y) {
+                                const RGBA8x4 &val = *((RGBA8x4*)linearData + m_width * y + x);
+                                Gray8 storedVal{val.a};
+                                setInternal(x, y, &storedVal, m_stride);
+                            };
+                            break;
+                        default:
+                            break;
+                    }
+                    break;
                 case ColorFormat::RGBA16Fx4:
-                    m_colorFormat = ColorFormat::uvsA16Fx4;
+                    switch (mode) {
+                        case ImageStoreMode::AsIs:
+#ifdef Use_Spectral_Representation
+                            m_colorFormat = ColorFormat::uvsA16Fx4;
+                            convertFunc = [this, &linearData, &spType](int32_t x, int32_t y) {
+                                const RGBA16Fx4 &val = *((RGBA16Fx4*)linearData + m_width * y + x);
+                                float RGB[3] = {val.r, val.g, val.b};
+                                float uvs[3];
+                                Upsampling::sRGB_to_uvs(spType, RGB, uvs);
+                                uvsA16Fx4 storedVal{(half)uvs[0], (half)uvs[1], (half)uvs[2], (half)val.a};
+                                SLRAssert(!std::isnan((float)storedVal.u) && !std::isinf((float)storedVal.u) &&
+                                          !std::isnan((float)storedVal.v) && !std::isinf((float)storedVal.v) &&
+                                          !std::isnan((float)storedVal.s) && !std::isinf((float)storedVal.s) &&
+                                          !std::isnan((float)storedVal.a) && !std::isinf((float)storedVal.a) && (float)storedVal.a > 0, "Invalid value.");
+                                setInternal(x, y, &storedVal, m_stride);
+                            };
+#else
+                            m_colorFormat = ColorFormat::RGBA16Fx4;
+                            convertFunc = [this, &linearData, &spType](int32_t x, int32_t y) {
+                                const RGBA16Fx4 &val = *((RGBA16Fx4*)linearData + m_width * y + x);
+                                RGBA16Fx4 storedVal{val.r, val.g, val.b, val.a};
+                                setInternal(x, y, &storedVal, m_stride);
+                            };
+#endif
+                            break;
+                        case ImageStoreMode::NormalTexture:
+                            SLRAssert(false, "Source image format is not compatible to the specified format.");
+                            break;
+                        case ImageStoreMode::AlphaTexture:
+                            m_colorFormat = ColorFormat::Gray8;
+                            convertFunc = [this, &linearData, &spType](int32_t x, int32_t y) {
+                                const RGBA16Fx4 &val = *((RGBA16Fx4*)linearData + m_width * y + x);
+                                Gray8 storedVal{(uint8_t)std::min(uint32_t(255 * val.a), uint32_t(255))};
+                                setInternal(x, y, &storedVal, m_stride);
+                            };
+                            break;
+                        default:
+                            break;
+                    }
                     break;
                 case ColorFormat::Gray8:
-                    m_colorFormat = ColorFormat::Gray8;
+                    switch (mode) {
+                        case ImageStoreMode::AsIs:
+                            m_colorFormat = ColorFormat::Gray8;
+                            convertFunc = [this, &linearData, &spType](int32_t x, int32_t y) {
+                                const Gray8 &val = *((Gray8*)linearData + m_width * y + x);
+                                setInternal(x, y, &val, m_stride);
+                            };
+                            break;
+                        case ImageStoreMode::NormalTexture:
+                            SLRAssert(false, "Source image format is not compatible to the specified format.");
+                            break;
+                        case ImageStoreMode::AlphaTexture:
+                            m_colorFormat = ColorFormat::Gray8;
+                            convertFunc = [this, &linearData, &spType](int32_t x, int32_t y) {
+                                const Gray8 &val = *((Gray8*)linearData + m_width * y + x);
+                                setInternal(x, y, &val, m_stride);
+                            };
+                            break;
+                        default:
+                            break;
+                    }
                     break;
                 default:
                     SLRAssert(false, "Color format is invalid.");
@@ -140,82 +338,9 @@ namespace SLR {
             
             for (int i = 0; i < m_height; ++i) {
                 for (int j = 0; j < m_width; ++j) {
-                    switch (fmt) {
-                        case ColorFormat::RGB8x3: {
-                            const RGB8x3 &val = *((RGB8x3*)linearData + m_width * i + j);
-                            float RGB[3] = {val.r / 255.0f, val.g / 255.0f, val.b / 255.0f};
-                            float uvs[3];
-                            Upsampling::sRGB_to_uvs(spType, RGB, uvs);
-                            uvs16Fx3 storedVal{(half)uvs[0], (half)uvs[1], (half)uvs[2]};
-                            SLRAssert(!std::isnan((float)storedVal.u) && !std::isinf((float)storedVal.u) &&
-                                      !std::isnan((float)storedVal.v) && !std::isinf((float)storedVal.v) &&
-                                      !std::isnan((float)storedVal.s) && !std::isinf((float)storedVal.s), "Invalid value.");
-                            setInternal(j, i, &storedVal, m_stride);
-                            break;
-                        }
-                        case ColorFormat::RGB_8x4: {
-                            const RGB_8x4 &val = *((RGB_8x4*)linearData + m_width * i + j);
-                            float RGB[3] = {val.r / 255.0f, val.g / 255.0f, val.b / 255.0f};
-                            float uvs[3];
-                            Upsampling::sRGB_to_uvs(spType, RGB, uvs);
-                            uvs16Fx3 storedVal{(half)uvs[0], (half)uvs[1], (half)uvs[2]};
-                            SLRAssert(!std::isnan((float)storedVal.u) && !std::isinf((float)storedVal.u) &&
-                                      !std::isnan((float)storedVal.v) && !std::isinf((float)storedVal.v) &&
-                                      !std::isnan((float)storedVal.s) && !std::isinf((float)storedVal.s), "Invalid value.");
-                            setInternal(j, i, &storedVal, m_stride);
-                            break;
-                        }
-                        case ColorFormat::RGBA8x4: {
-                            const RGBA8x4 &val = *((RGBA8x4*)linearData + m_width * i + j);
-                            float RGB[3] = {val.r / 255.0f, val.g / 255.0f, val.b / 255.0f};
-                            float uvs[3];
-                            Upsampling::sRGB_to_uvs(spType, RGB, uvs);
-                            uvsA16Fx4 storedVal{(half)uvs[0], (half)uvs[1], (half)uvs[2], (half)(val.a / 255.0f)};
-                            SLRAssert(!std::isnan((float)storedVal.u) && !std::isinf((float)storedVal.u) &&
-                                      !std::isnan((float)storedVal.v) && !std::isinf((float)storedVal.v) &&
-                                      !std::isnan((float)storedVal.s) && !std::isinf((float)storedVal.s) &&
-                                      !std::isnan((float)storedVal.a) && !std::isinf((float)storedVal.a) && (float)storedVal.a > 0, "Invalid value.");
-                            setInternal(j, i, &storedVal, m_stride);
-                            break;
-                        }
-                        case ColorFormat::RGBA16Fx4: {
-                            const RGBA16Fx4 &val = *((RGBA16Fx4*)linearData + m_width * i + j);
-                            float RGB[3] = {val.r, val.g, val.b};
-                            float uvs[3];
-                            Upsampling::sRGB_to_uvs(spType, RGB, uvs);
-                            uvsA16Fx4 storedVal{(half)uvs[0], (half)uvs[1], (half)uvs[2], (half)val.a};
-                            SLRAssert(!std::isnan((float)storedVal.u) && !std::isinf((float)storedVal.u) &&
-                                      !std::isnan((float)storedVal.v) && !std::isinf((float)storedVal.v) &&
-                                      !std::isnan((float)storedVal.s) && !std::isinf((float)storedVal.s) &&
-                                      !std::isnan((float)storedVal.a) && !std::isinf((float)storedVal.a) && (float)storedVal.a > 0, "Invalid value.");
-                            setInternal(j, i, &storedVal, m_stride);
-                            break;
-                        }
-                        case ColorFormat::Gray8: {
-                            const Gray8 &val = *((Gray8*)linearData + m_width * i + j);
-                            setInternal(j, i, &val, m_stride);
-                            break;
-                        }
-                        default:
-                            break;
-                    }
+                    convertFunc(j, i);
                 }
             }
-#else
-            m_colorFormat = fmt;
-            m_stride = sizesOfColorFormats[(uint32_t)m_colorFormat];
-            m_numTileX = (m_width + (tileWidth - 1)) >> log2_tileWidth;
-            size_t numTileY = (m_height + (tileWidth - 1)) >> log2_tileWidth;
-            size_t tileSize = m_stride * tileWidth * tileWidth;
-            m_allocSize = m_numTileX * numTileY * tileSize;
-            m_data = (uint8_t*)mem->alloc(m_allocSize, SLR_L1_Cacheline_Size);
-            
-            for (int i = 0; i < m_height; ++i) {
-                for (int j = 0; j < m_width; ++j) {
-                    setInternal(j, i, (uint8_t*)linearData + m_stride * (m_width * i + j), m_stride);
-                }
-            }
-#endif
         }
         
         const uint8_t* data() const { return m_data; }

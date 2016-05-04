@@ -17,6 +17,7 @@ namespace SLR {
             float sigma = m_sigma->evaluate(surfPt.texCoord);
             bsdf = nullptr;
             SLRAssert(false, "Oren-Nayer BSDF is not implemented.");
+//            bsdf = mem.create<OrenNayerBRDF>(scale * m_reflectance->evaluate(surfPt.texCoord, wls), sigma);
         }
         else {
             bsdf = mem.create<LambertianBRDF>(scale * m_reflectance->evaluate(surfPt.texCoord, wls));
@@ -24,11 +25,15 @@ namespace SLR {
         return bsdf;
     }
     
+    
+    
     BSDF* SpecularReflection::getBSDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem, float scale) const {
         SampledSpectrum coeffR = m_coeffR->evaluate(surfPt.texCoord, wls);
         const Fresnel* fresnel = m_fresnel->getFresnel(surfPt, wls, mem);
         return mem.create<SpecularBRDF>(scale * coeffR, fresnel);
     }
+    
+    
     
     BSDF* SpecularTransmission::getBSDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem, float scale) const {
         SampledSpectrum coeffT = m_coeffT->evaluate(surfPt.texCoord, wls);
@@ -36,6 +41,8 @@ namespace SLR {
         SampledSpectrum etaInt = m_etaInt->evaluate(surfPt.texCoord, wls);
         return mem.create<SpecularBTDF>(scale * coeffT, etaExt, etaInt, !wls.lambdaSelected());
     }
+    
+    
     
     BSDF* InverseSurfaceMaterial::getBSDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem, float scale) const {
         BSDF* baseBSDF = m_baseMat->getBSDF(surfPt, wls, mem, scale);

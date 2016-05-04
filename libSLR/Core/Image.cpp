@@ -14,6 +14,8 @@ namespace SLR {
         sizeof(RGB8x3), sizeof(RGB_8x4), sizeof(RGBA8x4), sizeof(RGBA16Fx4), sizeof(Gray8), sizeof(uvs16Fx3), sizeof(uvsA16Fx4)
     };
     
+    
+    
     void Image2D::areaAverage(float xLeft, float xRight, float yTop, float yBottom, void *avg) const {
         uint32_t xLeftPix = (uint32_t)xLeft;
         uint32_t xRightPix = (uint32_t)ceilf(xRight) - 1;

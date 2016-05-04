@@ -16,7 +16,7 @@ leftWall = createMesh(
     ((-1.5, 2.5,  2.55), (1, 0, 0), (0, 0, -1), (0, 1))
   ), 
   (
-    ((0, 1, 2), surfMat), ((0, 2, 3), surfMat)
+    (surfMat, ((0, 1, 2), (0, 2, 3))),
   )
 );
 addChild(CBNode, leftWall);
@@ -32,7 +32,7 @@ rightWall = createMesh(
     ((1.5, 2.5, -2.55), (-1, 0, 0), (0, 0, 1), (0, 1))
   ), 
   (
-    ((0, 1, 2), surfMat), ((0, 2, 3), surfMat)
+    (surfMat, ((0, 1, 2), (0, 2, 3))),
   )
 );
 addChild(CBNode, rightWall);
@@ -48,7 +48,7 @@ floor = createMesh(
     ((-1.5, 0, -2.55), (0, 1, 0), (1, 0, 0), (0, 1))
   ), 
   (
-    ((0, 1, 2), surfMat), ((0, 2, 3), surfMat)
+    (surfMat, ((0, 1, 2), (0, 2, 3))),
   )
 );
 addChild(CBNode, floor);
@@ -64,7 +64,7 @@ innerWall = createMesh(
     ((-1.5, 2.5, -2.55), (0, 0, 1), (1, 0, 0), (0, 1))
   ), 
   (
-    ((0, 1, 2), surfMat), ((0, 2, 3), surfMat)
+    (surfMat, ((0, 1, 2), (0, 2, 3))),
   )
 );
 addChild(CBNode, innerWall);
@@ -80,7 +80,7 @@ ceiling = createMesh(
     ((-1.5, 2.5,  2.55), (0, -1, 0), (1, 0, 0), (0, 1))
   ), 
   (
-    ((0, 1, 2), surfMat), ((0, 2, 3), surfMat)
+    (surfMat, ((0, 1, 2), (0, 2, 3))),
   )
 );
 addChild(CBNode, ceiling);
@@ -99,7 +99,7 @@ lightMesh = createMesh(
     ((-0.5, 2.499,  0.5), (0, -1, 0), (1, 0, 0), (0, 1))
   ),
   (
-    ((0, 1, 2), surfMat), ((0, 2, 3), surfMat)
+    (surfMat, ((0, 1, 2), (0, 2, 3))),
   )
 );
 addChild(CBNode, lightMesh);

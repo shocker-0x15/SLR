@@ -11,8 +11,12 @@
 
 namespace SLR {
     SampledSpectrum ImageSpectrumTexture::evaluate(const TexCoord2D &tc, const WavelengthSamples &wls) const {
-        uint32_t px = std::clamp((uint32_t)std::fmod(m_data->width() * tc.u, m_data->width()), 0u, m_data->width() - 1);
-        uint32_t py = std::clamp((uint32_t)std::fmod(m_data->height() * tc.v, m_data->height()), 0u, m_data->height() - 1);
+        float u = std::fmod(tc.u, 1.0f);
+        float v = std::fmod(tc.v, 1.0f);
+        u += u < 0 ? 1.0f : 0.0f;
+        v += v < 0 ? 1.0f : 0.0f;
+        uint32_t px = std::min((uint32_t)(m_data->width() * u), m_data->width() - 1);
+        uint32_t py = std::min((uint32_t)(m_data->height() * v), m_data->height() - 1);
         SampledSpectrum ret;
         switch (m_data->format()) {
 #ifdef Use_Spectral_Representation

@@ -34,6 +34,8 @@ namespace SLR {
         org(o), dir(d), distMin(dMin), distMax(dMax), time(t) { }
     };
     
+    
+    
     struct SLR_API BoundingBox3D {
         enum Axis : uint8_t {
             Axis_X = 0,
@@ -111,6 +113,7 @@ namespace SLR {
     };
     
     
+    
     struct SLR_API Vertex {
         Point3D position;
         Normal3D normal;
@@ -120,6 +123,7 @@ namespace SLR {
         Vertex() { }
         Vertex(const Point3D &pos, const Normal3D &norm, const Tangent3D &tang, const TexCoord2D &tc) : position(pos), normal(norm), tangent(tang), texCoord(tc) { }
     };
+    
     
     
     class SLR_API Surface {
@@ -135,17 +139,7 @@ namespace SLR {
         virtual float evaluateAreaPDF(const SurfacePoint& surfPt) const = 0;
     };
     
-    struct SLR_API ReferenceFrame {
-        Vector3D x, y, z;
-        
-        Vector3D toLocal(const Vector3D &v) const { return Vector3D(dot(x, v), dot(y, v), dot(z, v)); }
-        Vector3D fromLocal(const Vector3D &v) const {
-            // assume orthonormal basis
-            return Vector3D(dot(Vector3D(x.x, y.x, z.x), v),
-                            dot(Vector3D(x.y, y.y, z.y), v),
-                            dot(Vector3D(x.z, y.z, z.z), v));
-        }
-    };
+    
     
     struct SLR_API Intersection {
         float time;
@@ -161,6 +155,22 @@ namespace SLR {
         
         void getSurfacePoint(SurfacePoint* surfPt);
     };
+    
+    
+    
+    struct SLR_API ReferenceFrame {
+        Vector3D x, y, z;
+        
+        Vector3D toLocal(const Vector3D &v) const { return Vector3D(dot(x, v), dot(y, v), dot(z, v)); }
+        Vector3D fromLocal(const Vector3D &v) const {
+            // assume orthonormal basis
+            return Vector3D(dot(Vector3D(x.x, y.x, z.x), v),
+                            dot(Vector3D(x.y, y.y, z.y), v),
+                            dot(Vector3D(x.z, y.z, z.z), v));
+        }
+    };
+    
+    
     
     struct SLR_API SurfacePoint {
         Point3D p;
@@ -179,9 +189,12 @@ namespace SLR {
         float evaluateAreaPDF() const;
         BSDF* createBSDF(const WavelengthSamples &wls, ArenaAllocator &mem) const;
         EDF* createEDF(const WavelengthSamples &wls, ArenaAllocator &mem) const;
+        BSSRDF* createBSSRDF(bool lowerHemisphere, const WavelengthSamples &wls, ArenaAllocator &mem) const;
         
         friend SurfacePoint operator*(const StaticTransform &transform, const SurfacePoint &surfPt);
     };
+    
+    
     
     inline float squaredDistance(const SurfacePoint &p0, const SurfacePoint &p1) {
         return (p0.atInfinity || p1.atInfinity) ? 1.0f : sqDistance(p0.p, p1.p);

@@ -38,9 +38,11 @@ namespace SLRSceneGraph {
     
     class SurfaceMaterial;
     class EmitterSurfaceProperty;
-    class SpatialFresnel;
+    class SVFresnel;
+    class SVMicrofacetDistribution;
     
-    typedef std::shared_ptr<SpatialFresnel> SpatialFresnelRef;
+    typedef std::shared_ptr<SVFresnel> SVFresnelRef;
+    typedef std::shared_ptr<SVMicrofacetDistribution> SVMicrofacetDistributionRef;
     typedef std::shared_ptr<SurfaceMaterial> SurfaceMaterialRef;
     typedef std::shared_ptr<EmitterSurfaceProperty> EmitterSurfacePropertyRef;
     

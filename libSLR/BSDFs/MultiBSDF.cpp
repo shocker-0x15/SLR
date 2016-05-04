@@ -13,6 +13,7 @@ namespace SLR {
         if (!bsdf)
             return;
         SLRAssert(m_numComponents < maxNumElems, "Number of MultiBSDF elements exceeds the limit: %u", maxNumElems);
+        m_type |= bsdf->m_type;
         m_BSDFs[m_numComponents++] = bsdf;
     }
     

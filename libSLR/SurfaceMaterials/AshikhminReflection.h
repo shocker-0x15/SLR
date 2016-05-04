@@ -13,23 +13,14 @@
 #include "../Core/surface_material.h"
 
 namespace SLR {
-    class SLR_API AshikhminSpecularReflection : public SurfaceMaterial {
+    class SLR_API AshikhminShirleyReflection : public SurfaceMaterial {
         const SpectrumTexture* m_Rs;
+        const SpectrumTexture* m_Rd;
         const FloatTexture* m_nu;
         const FloatTexture* m_nv;
     public:
-        AshikhminSpecularReflection(const SpectrumTexture* Rs, const FloatTexture* nu, const FloatTexture* nv) :
-        m_Rs(Rs), m_nu(nu), m_nv(nv) { };
-        
-        BSDF* getBSDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem, float scale = 1.0f) const override;
-    };
-    
-    class SLR_API AshikhminDiffuseReflection : public SurfaceMaterial {
-        const SpectrumTexture* m_Rs;
-        const SpectrumTexture* m_Rd;
-    public:
-        AshikhminDiffuseReflection(const SpectrumTexture* Rs, const SpectrumTexture* Rd) :
-        m_Rs(Rs), m_Rd(Rd) { };
+        AshikhminShirleyReflection(const SpectrumTexture* Rs, const SpectrumTexture* Rd, const FloatTexture* nu, const FloatTexture* nv) :
+        m_Rs(Rs), m_Rd(Rd), m_nu(nu), m_nv(nv) {}
         
         BSDF* getBSDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem, float scale = 1.0f) const override;
     };

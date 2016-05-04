@@ -56,6 +56,8 @@ namespace SLR {
         *b1 = u1 * su1;
     }
     
+    
+    
     template <typename RealType>
     class SLR_API RegularConstantDiscrete1DTemplate {
         RealType* m_PMF;
@@ -79,6 +81,8 @@ namespace SLR {
         RealType integral() const { return m_integral; };
     };
     
+    
+    
     template <typename RealType>
     class SLR_API RegularConstantContinuous1DTemplate {
         RealType* m_PDF;
@@ -99,6 +103,8 @@ namespace SLR {
         uint32_t numValues() const { return m_numValues; };
         const RealType* PDF() const { return m_PDF; };
     };
+    
+    
     
     template <typename RealType>
     class SLR_API RegularConstantContinuous2DTemplate {

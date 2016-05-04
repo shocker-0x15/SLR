@@ -10,11 +10,9 @@
 
 #include "Parser/SceneParsingDriver.h"
 
-#include <libSLR/Core/Image.h>
 #include <libSLR/Core/Transform.h>
 #include <libSLR/Core/SurfaceObject.h>
 #include <libSLR/Core/XORShift.h>
-#include <libSLR/BasicTypes/Spectrum.h>
 #include <libSLR/Memory/ArenaAllocator.h>
 #include <libSLR/Renderers/DebugRenderer.h>
 #include <libSLR/Renderers/PathTracingRenderer.h>
@@ -31,6 +29,18 @@
 #include "surface_materials.hpp"
 
 namespace SLRSceneGraph {
+    static bool strToImageStoreMode(const std::string &str, SLR::ImageStoreMode* mode) {
+        if (str == "AsIs")
+            *mode = SLR::ImageStoreMode::AsIs;
+        else if (str == "Normal")
+            *mode = SLR::ImageStoreMode::NormalTexture;
+        else if (str == "Alpha")
+            *mode = SLR::ImageStoreMode::AlphaTexture;
+        else
+            return false;
+        return true;
+    }
+    
     static bool strToSpectrumType(const std::string &str, SLR::SpectrumType* type) {
         if (str == "Reflectance")
             *type = SLR::SpectrumType::Reflectance;
@@ -573,10 +583,21 @@ namespace SLRSceneGraph {
                     );
             stack["Image2D"] =
             Element(TypeMap::Function(),
-                    Function(1, {{"path", Type::String}, {"type", Type::String, Element(TypeMap::String(), "Reflectance")}},
+                    Function(1,
+                             {
+                                 {"path", Type::String},
+                                 {"mode", Type::String, Element(TypeMap::String(), "AsIs")},
+                                 {"type", Type::String, Element(TypeMap::String(), "Reflectance")}
+                             },
                              [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
                                  std::string path = args.at("path").raw<TypeMap::String>();
+                                 std::string modeStr = args.at("mode").raw<TypeMap::String>();
                                  std::string typeStr = args.at("type").raw<TypeMap::String>();
+                                 SLR::ImageStoreMode mode;
+                                 if (!strToImageStoreMode(modeStr, &mode)) {
+                                     *err = ErrorMessage("Specified image store mode is invalid.");
+                                     return Element();
+                                 }
                                  SLR::SpectrumType type;
                                  if (!strToSpectrumType(typeStr, &type)) {
                                      *err = ErrorMessage("Specified spectrum type is invalid.");
@@ -585,7 +606,7 @@ namespace SLRSceneGraph {
                                  
                                  // TODO: ?? make a memory allocator selectable.
                                  SLR::DefaultAllocator &defMem = SLR::DefaultAllocator::instance();
-                                 TiledImage2DRef image = Image::createTiledImage(path.c_str(), &defMem, type);
+                                 TiledImage2DRef image = Image::createTiledImage(path.c_str(), &defMem, mode, type);
                                  return Element(TypeMap::Image2D(), image);
                              })
                     );
@@ -727,6 +748,36 @@ namespace SLRSceneGraph {
                                      };
                                      return configFunc(params, context, err);
                                  }
+                                 else if (type == "microfacet metal") {
+                                     const static Function configFunc{
+                                         0, {
+                                             {"eta", Type::SpectrumTexture}, {"k", Type::SpectrumTexture},
+                                             {"alpha_g", Type::FloatTexture}
+                                         },
+                                         [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
+                                             SpectrumTextureRef eta = args.at("eta").rawRef<TypeMap::SpectrumTexture>();
+                                             SpectrumTextureRef k = args.at("k").rawRef<TypeMap::SpectrumTexture>();
+                                             FloatTextureRef alpha_g = args.at("alpha_g").rawRef<TypeMap::FloatTexture>();
+                                             return Element(TypeMap::SurfaceMaterial(), SurfaceMaterial::createMicrofacetMetal(eta, k, alpha_g));
+                                         }
+                                     };
+                                     return configFunc(params, context, err);
+                                 }
+                                 else if (type == "microfacet glass") {
+                                     const static Function configFunc{
+                                         0, {
+                                             {"etaExt", Type::SpectrumTexture}, {"etaInt", Type::SpectrumTexture},
+                                             {"alpha_g", Type::FloatTexture}
+                                         },
+                                         [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
+                                             SpectrumTextureRef etaExt = args.at("etaExt").rawRef<TypeMap::SpectrumTexture>();
+                                             SpectrumTextureRef etaInt = args.at("etaInt").rawRef<TypeMap::SpectrumTexture>();
+                                             FloatTextureRef alpha_g = args.at("alpha_g").rawRef<TypeMap::FloatTexture>();
+                                             return Element(TypeMap::SurfaceMaterial(), SurfaceMaterial::createMicrofacetGlass(etaExt, etaInt, alpha_g));
+                                         }
+                                     };
+                                     return configFunc(params, context, err);
+                                 }
                                  else if (type == "inverse") {
                                      const static Function configFunc{
                                          0, {
@@ -809,27 +860,41 @@ namespace SLRSceneGraph {
                     );
             stack["createMesh"] =
             Element(TypeMap::Function(),
-                    Function(1, {{"vertices", Type::Tuple}, {"faces", Type::Tuple}},
+                    Function(1, {{"vertices", Type::Tuple}, {"matGroups", Type::Tuple}},
                              [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
                                  const std::vector<Element> &vertices = args.at("vertices").raw<TypeMap::Tuple>().unnamed;
-                                 const std::vector<Element> &faces = args.at("faces").raw<TypeMap::Tuple>().unnamed;
+                                 const std::vector<Element> &matGroups = args.at("matGroups").raw<TypeMap::Tuple>().unnamed;
                                  
-                                 struct Face {
-                                     uint32_t v0, v1, v2;
-                                     SurfaceMaterialRef mat;
+                                 TriangleMeshNode::MaterialGroup resultMatGroup;
+                                 
+                                 static const Function sigMatGroup{
+                                     1, {
+                                         {"mat", Type::SurfaceMaterial},
+                                         {"normal", Type::NormalTexture, Element(TypeMap::NormalTexture(), nullptr)},
+                                         {"alpha", Type::FloatTexture, Element(TypeMap::FloatTexture(), nullptr)},
+                                         {"triangles", Type::Tuple}
+                                     }
                                  };
-                                 static const Function sigFace{
-                                     1, {{"indices", Type::Tuple}, {"material", Type::SurfaceMaterial}}
-                                 };
-                                 static const auto procFace = [](const std::map<std::string, Element> &arg) {
-                                     std::map<std::string, Element> indices;
-                                     mapParamsToArgs(arg.at("indices").raw<TypeMap::Tuple>(),
-                                                     {{"v0", Type::Integer}, {"v1", Type::Integer}, {"v2", Type::Integer}},
-                                                     &indices);
-                                     uint32_t v0 = indices.at("v0").raw<TypeMap::Integer>();
-                                     uint32_t v1 = indices.at("v1").raw<TypeMap::Integer>();
-                                     uint32_t v2 = indices.at("v2").raw<TypeMap::Integer>();
-                                     return Face{v0, v1, v2, arg.at("material").rawRef<TypeMap::SurfaceMaterial>()};
+                                 static const auto procMatGroup = [&resultMatGroup, &err](const std::map<std::string, Element> &args) {
+                                     resultMatGroup.material = args.at("mat").rawRef<TypeMap::SurfaceMaterial>();
+                                     resultMatGroup.normalMap = args.at("normal").rawRef<TypeMap::NormalTexture>();
+                                     resultMatGroup.alphaMap = args.at("alpha").rawRef<TypeMap::FloatTexture>();
+                                     
+                                     static const Function sigTriangle{
+                                         1, {{"v0", Type::Integer}, {"v1", Type::Integer}, {"v2", Type::Integer}}
+                                     };
+                                     static const auto procTriangle = [](const std::map<std::string, Element> &args) {
+                                         return Triangle(args.at("v0").raw<TypeMap::Integer>(),
+                                                         args.at("v1").raw<TypeMap::Integer>(),
+                                                         args.at("v2").raw<TypeMap::Integer>());
+                                     };
+                                     
+                                     const std::vector<Element> &triangles = args.at("triangles").raw<TypeMap::Tuple>().unnamed;
+                                     for (int i = 0; i < triangles.size(); ++i) {
+                                         resultMatGroup.triangles.push_back(sigTriangle.perform<Triangle>(procTriangle, triangles[i].raw<TypeMap::Tuple>(), Triangle(), err));
+                                     }
+                                     
+                                     return 0;
                                  };
                                  
                                  TriangleMeshNodeRef lightMesh = createShared<TriangleMeshNode>();
@@ -845,11 +910,15 @@ namespace SLRSceneGraph {
                                          lightMesh->addVertex(vtx.raw<TypeMap::Vertex>());
                                      }
                                  }
-                                 for (int i = 0; i < faces.size(); ++i) {
-                                     Face f = sigFace.perform<Face>(procFace, faces[i].raw<TypeMap::Tuple>(), Face(), err);
+                                 for (int i = 0; i < matGroups.size(); ++i) {
+                                     resultMatGroup.material = nullptr;
+                                     resultMatGroup.normalMap = nullptr;
+                                     resultMatGroup.alphaMap = nullptr;
+                                     resultMatGroup.triangles.clear();
+                                     sigMatGroup.perform<uint32_t>(procMatGroup, matGroups[i].raw<TypeMap::Tuple>(), 0, err);
                                      if (err->error)
                                          return Element();
-                                     lightMesh->addTriangle(f.v0, f.v1, f.v2, f.mat);
+                                     lightMesh->addTriangles(resultMatGroup.material, resultMatGroup.normalMap, resultMatGroup.alphaMap, std::move(resultMatGroup.triangles));
                                  }
                                  
                                  return Element(TypeMap::Mesh(), lightMesh);
@@ -923,12 +992,12 @@ namespace SLRSceneGraph {
                              [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
                                  std::string path = context.absFileDirPath + args.at("path").raw<TypeMap::String>();
                                  std::string pathPrefix = path.substr(0, path.find_last_of("/") + 1);
-                                 auto matProcRef = args.at("matProc").rawRef<TypeMap::Function>();
+                                 auto userMatProcRef = args.at("matProc").rawRef<TypeMap::Function>();
                                  
-                                 CreateMaterialFunction nativeMatProc = createMaterialDefaultFunction;
-                                 if (matProcRef) {
-                                     const Function &matProc = *matProcRef.get();
-                                     nativeMatProc = [&pathPrefix, &matProc, &context, &err](const aiMaterial* aiMat, const std::string &pathPrefix, SLR::Allocator* mem) {
+                                 CreateMaterialFunction matProc = createMaterialDefaultFunction;
+                                 if (userMatProcRef) {
+                                     const Function &userMatProc = *userMatProcRef.get();
+                                     matProc = [&pathPrefix, &userMatProc, &context, &err](const aiMaterial* aiMat, const std::string &pathPrefix, SLR::Allocator* mem) {
                                          using namespace SLR;
                                          aiString aiStr;
                                          float color[3];
@@ -1005,13 +1074,15 @@ namespace SLRSceneGraph {
                                          ParameterList params;
                                          params.add("", matName);
                                          params.add("", matAttrs);
-                                         Element result = matProc(params, context, err);
+                                         Element result = userMatProc(params, context, err);
+                                         if (result.type != Type::SurfaceMaterial)
+                                             return createMaterialDefaultFunction(aiMat, pathPrefix, mem);
                                          return result.rawRef<TypeMap::SurfaceMaterial>();
                                      };
                                  }
                                  
                                  InternalNodeRef modelNode;
-                                 construct(path, modelNode, nativeMatProc);
+                                 construct(path, modelNode, matProc);
                                  if (!modelNode) {
                                      *err = ErrorMessage("Some errors occur during loading a 3D model.");
                                      return Element();
@@ -1192,7 +1263,7 @@ namespace SLRSceneGraph {
                                  SLR::DefaultAllocator &defMem = SLR::DefaultAllocator::instance();
                                  
                                  // TODO: make memory allocator selectable.
-                                 TiledImage2DRef img = Image::createTiledImage(path, &defMem, SLR::SpectrumType::Illuminant);
+                                 TiledImage2DRef img = Image::createTiledImage(path, &defMem, SLR::ImageStoreMode::AsIs, SLR::SpectrumType::Illuminant);
                                  SpectrumTextureRef IBLTex = createShared<ImageSpectrumTexture>(img);
                                  std::weak_ptr<Scene> sceneWRef = context.scene;
                                  InfiniteSphereNodeRef infSphere = createShared<InfiniteSphereNode>(sceneWRef, IBLTex, scale);
@@ -1464,7 +1535,7 @@ namespace SLRSceneGraph {
         using namespace SLR;
         std::map<std::string, Image2DRef> s_imageDB;
         
-        SLR_SCENEGRAPH_API std::shared_ptr<SLR::TiledImage2D> createTiledImage(const std::string &filepath, SLR::Allocator *mem, SLR::SpectrumType spType, bool gammaCorrection) {
+        SLR_SCENEGRAPH_API std::shared_ptr<SLR::TiledImage2D> createTiledImage(const std::string &filepath, SLR::Allocator *mem, SLR::ImageStoreMode mode, SLR::SpectrumType spType, bool gammaCorrection) {
             if (s_imageDB.count(filepath) > 0) {
                 return std::static_pointer_cast<SLR::TiledImage2D>(s_imageDB[filepath]);
             }
@@ -1481,7 +1552,7 @@ namespace SLRSceneGraph {
                 SLRAssert(imgSuccess, "failed to load the image\n%s", filepath.c_str());
                 
                 SLR::ColorFormat internalFormat = (SLR::ColorFormat)colorFormat;
-                TiledImage2D* texData = new SLR::TiledImage2D(linearData, width, height, internalFormat, mem, spType);
+                TiledImage2D* texData = new SLR::TiledImage2D(linearData, width, height, internalFormat, mem, mode, spType);
                 free(linearData);
                 
                 std::shared_ptr<TiledImage2D> ret = std::shared_ptr<SLR::TiledImage2D>(texData);

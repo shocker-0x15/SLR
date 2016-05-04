@@ -28,6 +28,7 @@ namespace SLR {
     }
     
     
+    
     bool SurfaceObject::intersect(Ray &ray, SurfacePoint *surfPt) const {
         Intersection isect;
         if (!intersect(ray, &isect))
@@ -43,6 +44,7 @@ namespace SLR {
         Intersection isect;
         return !intersect(ray, &isect);
     }
+    
     
     
     BoundingBox3D SingleSurfaceObject::bounds() const {
@@ -117,6 +119,10 @@ namespace SLR {
     
     EDF* SingleSurfaceObject::createEDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem) const {
         return m_material->getEDF(surfPt, wls, mem);
+    }
+    
+    BSSRDF* SingleSurfaceObject::createBSSRDF(bool lowerHemisphere, const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem) const {
+        return m_material->getBSSRDF(lowerHemisphere, surfPt, wls, mem);
     }
     
     
@@ -223,6 +229,7 @@ namespace SLR {
         float uvPDF = m_dist->evaluatePDF(phi / (2 * M_PI), theta / M_PI);
         return uvPDF / (2 * M_PI * M_PI * std::sin(theta));
     }
+    
     
     
     SurfaceObjectAggregate::SurfaceObjectAggregate(std::vector<SurfaceObject*> &objs) {
@@ -332,6 +339,8 @@ namespace SLR {
         isect->obj.push(this);
         return true;
     }
+    
+    
     
     void TransformedSurfaceObject::getSurfacePoint(const Intersection &isect, SurfacePoint *surfPt) const {
         isect.obj.pop();

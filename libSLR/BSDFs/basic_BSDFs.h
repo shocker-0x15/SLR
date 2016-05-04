@@ -25,6 +25,8 @@ namespace SLR {
         LambertianBRDF(const SampledSpectrum &R) : BSDF(DirectionType::Reflection | DirectionType::LowFreq), m_R(R) { }
     };
     
+    
+    
     class SLR_API SpecularBRDF : public BSDF {
         SampledSpectrum m_coeffR;
         const Fresnel* m_fresnel;
@@ -37,6 +39,8 @@ namespace SLR {
     public:
         SpecularBRDF(const SampledSpectrum &coeffR, const Fresnel* fresnel) : BSDF(DirectionType::Reflection | DirectionType::Delta0D), m_coeffR(coeffR), m_fresnel(fresnel) { }
     };
+    
+    
     
     class SLR_API SpecularBTDF : public BSDF {
         SampledSpectrum m_coeffT;
@@ -53,6 +57,8 @@ namespace SLR {
         m_coeffT(coeffT), m_fresnel(etaExt, etaInt) { }
     };
     
+    
+    
     class SLR_API InverseBSDF : public BSDF {
         const BSDF* m_baseBSDF;
         
@@ -63,9 +69,9 @@ namespace SLR {
         SampledSpectrum getBaseColorInternal(DirectionType flags) const override;
     public:
         InverseBSDF(const BSDF* baseBSDF) : BSDF(baseBSDF->m_type.flip()), m_baseBSDF(baseBSDF) { }
-        
-        bool matches(DirectionType flags) const override { return m_baseBSDF->matches(flags.flip()); }
     };
+    
+    
     
     class SLR_API NullBSDF : public BSDF {
         SampledSpectrum sampleInternal(const BSDFQuery &query, const BSDFSample &smp, BSDFQueryResult* result) const override {

@@ -19,6 +19,7 @@ namespace SLR {
     }
     
     
+    
     Vector3D SurfacePoint::getDirectionFrom(const Point3D &shadingPoint, float* dist2) const {
         if (atInfinity) {
             *dist2 = 1.0f;
@@ -49,6 +50,10 @@ namespace SLR {
     
     EDF* SurfacePoint::createEDF(const WavelengthSamples &wls, ArenaAllocator &mem) const {
         return obj->createEDF(*this, wls, mem);
+    }
+    
+    BSSRDF* SurfacePoint::createBSSRDF(bool lowerHemisphere, const WavelengthSamples &wls, ArenaAllocator &mem) const {
+        return obj->createBSSRDF(lowerHemisphere, *this, wls, mem);
     }
     
     SurfacePoint operator*(const StaticTransform &transform, const SurfacePoint &surfPt) {

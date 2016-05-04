@@ -21,9 +21,8 @@ namespace SLR {
             IE_HighFreq = 1 << 1,
             IE_Delta0D = 1 << 2,
             IE_Delta1D = 1 << 3,
-            IE_Dispersive = 1 << 4,
-            IE_NonDelta = IE_LowFreq | IE_HighFreq | IE_Dispersive,
-            IE_Delta = IE_Delta0D | IE_Delta1D | IE_Dispersive,
+            IE_NonDelta = IE_LowFreq | IE_HighFreq,
+            IE_Delta = IE_Delta0D | IE_Delta1D,
             IE_AllFreq = IE_NonDelta | IE_Delta,
             
             IE_Reflection = 1 << 5,
@@ -33,6 +32,8 @@ namespace SLR {
             IE_WholeSphere = IE_Reflection | IE_Transmission,
             
             IE_All = IE_AllFreq | IE_WholeSphere,
+            
+            IE_Dispersive = 1 << 7,
             
             IE_LowFreqReflection = IE_LowFreq | IE_Reflection,
             IE_LowFreqTransmission = IE_LowFreq | IE_Transmission,
@@ -48,7 +49,6 @@ namespace SLR {
         static const DirectionType HighFreq;
         static const DirectionType Delta0D;
         static const DirectionType Delta1D;
-        static const DirectionType Dispersive;
         static const DirectionType NonDelta;
         static const DirectionType Delta;
         static const DirectionType AllFreq;
@@ -58,6 +58,7 @@ namespace SLR {
         static const DirectionType Acquisition;
         static const DirectionType WholeSphere;
         static const DirectionType All;
+        static const DirectionType Dispersive;
         static const DirectionType LowFreqReflection;
         static const DirectionType LowFreqTransmission;
         static const DirectionType LowFreqScattering;
@@ -75,20 +76,18 @@ namespace SLR {
         DirectionType operator|(const DirectionType &r) const { return (InternalEnum)(value | r.value); }
         DirectionType &operator&=(const DirectionType &r) { value = (InternalEnum)(value & r.value); return *this; }
         DirectionType &operator|=(const DirectionType &r) { value = (InternalEnum)(value | r.value); return *this; }
-        DirectionType flip() const {
-            bool r = value & IE_Reflection;
-            bool t = value & IE_Transmission;
-            return InternalEnum((value & IE_AllFreq) | (r ? IE_Transmission : 0) | (t ? IE_Reflection : 0));
-        }
+        DirectionType flip() const { return InternalEnum(value ^ IE_WholeSphere); }
         operator bool() const { return value; }
         bool operator==(const DirectionType &r) const { return value == r.value; }
         bool operator!=(const DirectionType &r) const { return value != r.value; }
         
-        bool matches(DirectionType t) const { return (value & t.value) == t.value; }
-        bool isDelta() const { return (*this & (Delta | WholeSphere)) == *this; }
-        bool hasNonDelta() const { return *this & NonDelta; }
-        bool hasDelta() const { return *this & Delta; }
-        bool isDispersive() const { return *this & Dispersive; }
+        bool matches(DirectionType t) const { uint32_t res = value & t.value; return (res & IE_WholeSphere) && (res & IE_AllFreq); }
+        bool hasNonDelta() const { return value & IE_NonDelta; }
+        bool hasDelta() const { return value & IE_Delta; }
+        bool isDelta() const { return (value & IE_Delta) && !(value & IE_NonDelta); }
+        bool isReflection() const { return (value & IE_Reflection) && !(value & IE_Transmission); }
+        bool isTransmission() const { return !(value & IE_Reflection) && (value & IE_Transmission); }
+        bool isDispersive() const { return value & IE_Dispersive; }
     };
     
     
@@ -123,7 +122,8 @@ namespace SLR {
     struct SLR_API BSDFSample {
         float uComponent;
         float uDir[2];
-        BSDFSample(float uComp, float uDir0, float uDir1) : uComponent(uComp), uDir{uDir0, uDir1} { }
+        BSDFSample() {}
+        BSDFSample(float uComp, float uDir0, float uDir1) : uComponent(uComp), uDir{uDir0, uDir1} {}
     };
     
     struct SLR_API BSDFReverseInfo {
@@ -150,6 +150,28 @@ namespace SLR {
         DirectionType dirType;
     };
     
+    struct SLR_API BSSRDFQuery {
+        const Scene &scene;
+        const SurfacePoint &surfPt;
+        int16_t wlHint;
+        bool adjoint;
+        
+        BSSRDFQuery(const Scene &scn, const SurfacePoint &sp) : scene(scn), surfPt(sp) {}
+    };
+    
+    struct SLR_API BSSRDFSample {
+        float uPos[2];
+        float uDir[2];
+        BSSRDFSample(float uPos0, float uPos1, float uDir0, float uDir1) : uPos{uPos0, uPos1}, uDir{uDir0, uDir1} { }
+    };
+    
+    struct SLR_API BSSRDFQueryResult {
+        Intersection isect;
+        Vector3D dir;
+        float areaPDF;
+        float dirPDF;
+    };
+    
     
     class SLR_API EDF {
     protected:
@@ -172,13 +194,13 @@ namespace SLR {
         virtual float evaluatePDF(const EDFQuery &query, const Vector3D &dir) const = 0;
         virtual float weight(const EDFQuery &query) const = 0;
         
-        virtual bool matches(DirectionType flags) const { return m_type & flags; }
+        virtual bool matches(DirectionType flags) const { return m_type.matches(flags); }
         bool hasNonDelta() const { return matches(DirectionType::WholeSphere | DirectionType::NonDelta); }
     };
     
     class SLR_API BSDF {
     protected:
-        const DirectionType m_type;
+        DirectionType m_type;
         
         DirectionType sideTest(const Normal3D& ng, const Vector3D& d0, const Vector3D &d1) const {
             bool reflect = dot(Vector3D(ng), d0) * dot(Vector3D(ng), d1) > 0;
@@ -211,6 +233,7 @@ namespace SLR {
                                   std::fabs(result->dir_sn.z / dot(result->dir_sn, query.gNormal_sn)));
             if (result->reverse)
                 result->reverse->fs *= snCorrection;
+            SLRAssert(result->dirPDF >= 0, "PDF value must be positive: %g.", result->dirPDF);
             return fs_sn * snCorrection;
         }
         SampledSpectrum evaluate(const BSDFQuery &query, const Vector3D &dir, SampledSpectrum* rev_fs = nullptr) const {
@@ -235,7 +258,9 @@ namespace SLR {
                     *revPDF = 0;
                 return 0;
             }
-            return evaluatePDFInternal(query, dir, revPDF);
+            float ret = evaluatePDFInternal(query, dir, revPDF);
+            SLRAssert(ret >= 0, "PDF value must be positive: %g.", ret);
+            return ret;
         }
         float weight(const BSDFQuery &query) const {
             if (!matches(query.flags))
@@ -245,13 +270,15 @@ namespace SLR {
             return weight_sn * snCorrection;
         }
         
+        SampledSpectrum rho(uint32_t numSamples, BSDFSample* samples, float* uDir0, float* uDir1, float* uWl, DirectionType flags = DirectionType::All, bool fromUpper = true) const;
+        
         SampledSpectrum getBaseColor(DirectionType flags) const {
             if (!matches(flags))
                 return SampledSpectrum::Zero;
             return getBaseColorInternal(flags);
         }
         
-        virtual bool matches(DirectionType flags) const { return (m_type & flags) == m_type; };
+        virtual bool matches(DirectionType flags) const { return m_type.matches(flags); };
         bool hasNonDelta() const { return matches(DirectionType::WholeSphere | DirectionType::NonDelta); }
     };
     
@@ -275,8 +302,38 @@ namespace SLR {
         virtual float evaluatePDF(const Vector3D &dirIn) const = 0;
         virtual void calculatePixel(const Vector3D &dirIn, float* hitPx, float* hitPy) const = 0;
         
-        virtual bool matches(DirectionType flags) const { return m_type & flags; }
+        virtual bool matches(DirectionType flags) const { return m_type.matches(flags); }
         bool hasNonDelta() const { return matches(DirectionType::WholeSphere | DirectionType::NonDelta); }
+    };
+    
+    
+    class SLR_API BSSRDF {
+        SampledSpectrum m_sigma_a;
+        SampledSpectrum m_sigma_s_p;
+        SampledSpectrum m_internalHHReflectance;
+        
+        SampledSpectrum Rd(float r) const {
+            SampledSpectrum sigma_e_p = m_sigma_s_p + m_sigma_a;
+            SampledSpectrum alpha_p = m_sigma_s_p / sigma_e_p;
+            SampledSpectrum sigma_tr = sqrt(3 * m_sigma_a * sigma_e_p);
+            SampledSpectrum A = (SampledSpectrum::One + m_internalHHReflectance) / (SampledSpectrum::One - m_internalHHReflectance);
+            SampledSpectrum z_r = SampledSpectrum::One / sigma_e_p;
+            SampledSpectrum z_v = z_r * (SampledSpectrum::One + 4.0f / 3.0f * A);
+            SampledSpectrum d_r = sqrt(z_r * z_r + r * r);
+            SampledSpectrum d_v = sqrt(z_v * z_v + r * r);
+            
+            SampledSpectrum sigma_tr_d_r = sigma_tr * d_r;
+            SampledSpectrum realTerm = z_r * (sigma_tr_d_r + 1) * exp(-sigma_tr_d_r) / (d_r * d_r * d_r);
+            SampledSpectrum sigma_tr_d_v = sigma_tr * d_v;
+            SampledSpectrum virtualTerm = z_v * (sigma_tr_d_v + 1) * exp(-sigma_tr_d_v) / (d_v * d_v * d_v);
+            
+            return alpha_p / (4 * M_PI) * (realTerm + virtualTerm);
+        }
+    public:
+        BSSRDF(const SampledSpectrum &sigma_a, const SampledSpectrum &sigma_s, float g, const SampledSpectrum &internalHHReflectance) :
+        m_sigma_a(sigma_a), m_sigma_s_p(sigma_s * (1 - g)), m_internalHHReflectance(internalHHReflectance) {}
+        
+        SampledSpectrum sample(const BSSRDFQuery &query, const BSSRDFSample &smp, BSSRDFQueryResult* result) const;
     };
     
     
@@ -316,7 +373,27 @@ namespace SLR {
         float evaluate(float cosEnter, uint32_t wlIdx) const override;
         
         static float evalF(float etaEnter, float etaExit, float cosEnter, float cosExit);
-    };    
+    };
+    
+    
+    class SLR_API MicrofacetDistribution {
+    public:
+        virtual float sample(float u0, float u1, Normal3D* m, float* normalPDF) const = 0;
+        virtual float evaluate(const Normal3D &m) const = 0;
+        virtual float evaluatePDF(const Normal3D &m) const = 0;
+        virtual float evaluateSmithG1(const Vector3D &v, const Normal3D &m) const = 0;
+    };
+    
+    class SLR_API GGX : public MicrofacetDistribution {
+        float m_alpha_g;
+    public:
+        GGX(float alpha_g) : m_alpha_g(alpha_g) {}
+        
+        float sample(float u0, float u1, Normal3D* m, float* normalPDF) const override;
+        float evaluate(const Normal3D &m) const override;
+        float evaluatePDF(const Normal3D &m) const override;
+        float evaluateSmithG1(const Vector3D &v, const Normal3D &m) const override;
+    };
 }
 
 #endif

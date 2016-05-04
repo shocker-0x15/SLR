@@ -12,6 +12,7 @@
 #include "basic_SurfaceMaterials.h"
 #include "ModifiedWardDurReflection.h"
 #include "AshikhminReflection.h"
+#include "MicrofacetSurfaceMaterial.h"
 #include "SummedSurfaceMaterial.h"
 #include "MixedSurfaceMaterial.h"
 

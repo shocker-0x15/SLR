@@ -17,13 +17,13 @@ namespace SLR {
     }
     
     SampledSpectrum DiffuseEDF::evaluate(const EDFQuery &query, const Vector3D &dir) const {
-        if (!query.flags.matches(m_type))
+        if (!matches(query.flags))
             return SampledSpectrum::Zero;
         return dir.z > 0.0f ? 1.0f / M_PI : 0.0f;
     }
     
     float DiffuseEDF::evaluatePDF(const EDFQuery &query, const Vector3D &dir) const {
-        if (!query.flags.matches(m_type))
+        if (!matches(query.flags))
             return 0;
         return dir.z > 0.0f ? dir.z / M_PI : 0.0f;
     }    

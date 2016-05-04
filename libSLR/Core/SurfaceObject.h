@@ -47,6 +47,8 @@ namespace SLR {
                       ArenaAllocator &mem) const;
     };
     
+    
+    
     class SLR_API SurfaceObject {
     public:
         SurfaceObject() { };
@@ -70,6 +72,8 @@ namespace SLR {
         bool intersect(Ray &ray, SurfacePoint* surfPt) const;
         bool testVisibility(const SurfacePoint &shdP, const SurfacePoint &lightP, float time) const;
     };
+    
+    
     
     class SLR_API SingleSurfaceObject : public SurfaceObject {
     protected:
@@ -100,6 +104,8 @@ namespace SLR {
         virtual float evaluateAreaPDF(const SurfacePoint& surfPt) const;
         virtual SampledSpectrum emittance(const SurfacePoint& surfPt, const WavelengthSamples &wls) const;
         virtual EDF* createEDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem) const;
+        
+        virtual BSSRDF* createBSSRDF(bool lowerHemisphere, const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem) const;
     };
     
     class SLR_API BumpSingleSurfaceObject : public SingleSurfaceObject {
@@ -132,6 +138,8 @@ namespace SLR {
         float evaluateAreaPDF(const SurfacePoint& surfPt) const override;
     };
     
+    
+    
     class SLR_API SurfaceObjectAggregate : public SurfaceObject {
         BBVH* m_accelerator;
         const SurfaceObject** m_lightList;
@@ -157,6 +165,8 @@ namespace SLR {
                       ArenaAllocator &mem) const override;
     };
     
+    
+    
     class SLR_API TransformedSurfaceObject : public SurfaceObject {
         const SurfaceObject* m_surfObj;
         const Transform* m_transform;
@@ -181,6 +191,8 @@ namespace SLR {
         
         void setTransform(const Transform* t) { m_transform = t; };
     };
+    
+    
     
     class SLR_API Scene {
         const SurfaceObjectAggregate* m_aggregate;

@@ -202,6 +202,7 @@ namespace SLR {
                 }
             }
             
+            // get a next direction by sampling BSDF.
             BSDFQuery fsQuery(dirOut_sn, gNorm_sn, wls.selectedLambda);
             BSDFSample fsSample(rng.getFloat0cTo1o(), rng.getFloat0cTo1o(), rng.getFloat0cTo1o());
             BSDFQueryResult fsResult;
@@ -220,15 +221,29 @@ namespace SLR {
             Vector3D dirIn = surfPt.shadingFrame.fromLocal(fsResult.dir_sn);
             ray = Ray(surfPt.p, dirIn, ray.time, Ray::Epsilon);
             
+            // find a next intersection point.
             isect = Intersection();
-            if (!scene.intersect(ray, &isect))
-                break;
+            BSSRDF* bssrdf = surfPt.createBSSRDF(dirIn.z < 0, wls, mem);
+            if (bssrdf) {
+                BSSRDFQuery sssQuery{scene, surfPt};
+                BSSRDFSample sssSample{rng.getFloat0cTo1o(), rng.getFloat0cTo1o(), rng.getFloat0cTo1o(), rng.getFloat0cTo1o()};
+                BSSRDFQueryResult sssResult;
+                SampledSpectrum R = bssrdf->sample(sssQuery, sssSample, &sssResult);
+                if (sssResult.areaPDF == 0.0f)
+                    break;
+                ray = Ray(isect.p, sssResult.dir, ray.time);
+                alpha *= R * (absDot(isect.gNormal, ray.dir) / M_PI) / (sssResult.areaPDF * sssResult.dirPDF);
+            }
+            else {
+                if (!scene.intersect(ray, &isect))
+                    break;
+            }
             isect.getSurfacePoint(&surfPt);
             
             dirOut_sn = surfPt.shadingFrame.toLocal(-ray.dir);
             
             // implicit light sampling
-            if (surfPt.isEmitting()) {
+            if (surfPt.isEmitting() && bssrdf == nullptr) {
                 float bsdfPDF = fsResult.dirPDF;
                 SLRAssert(!std::isnan(bsdfPDF) && !std::isinf(bsdfPDF), "bsdfPDF: unexpected value detected: %f", bsdfPDF);
                 

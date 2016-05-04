@@ -17,6 +17,7 @@ SLR consists of the following components.
   (For RGB resources, RGB->Spectrum conversion is performed using Meng-Simon's method \[1\].)
 * RGB Rendering
 * Various BSDF Types (including Mixed and ~~Layered~~ (under Dev.) BSDF)
+* BSSRDF without pre-pass
 * Image Based Environmental Light
 * Bump Mapping (Normal Map)
 * Depth of Field
@@ -27,7 +28,7 @@ SLR consists of the following components.
 * Unidirectional Path Tracing \[3\] with MIS
 * Bidirectional Path Tracing \[4\]
 * ~~Adaptive MCMC Progressive Photon Mapping~~ \[5\]  
-  (current implementation is buggy and does not support IBL.)
+  (has been dropped from recent SLR implementation.)
 * SLR Custom Language (C/Python-like syntax) for flexible scene description
 
 [1] "Physically Meaningful Rendering using Tristimulus Colours", 2015  

@@ -23,15 +23,19 @@ namespace SLR {
         BSDF* getBSDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem, float scale = 1.0f) const override;
     };
     
+    
+    
     class SLR_API SpecularReflection : public SurfaceMaterial {
         const SpectrumTexture* m_coeffR;
-        const SpatialFresnel* m_fresnel;
+        const SVFresnel* m_fresnel;
     public:
-        SpecularReflection(const SpectrumTexture* coeffR, const SpatialFresnel* fresnel) :
+        SpecularReflection(const SpectrumTexture* coeffR, const SVFresnel* fresnel) :
         m_coeffR(coeffR), m_fresnel(fresnel) { };
         
         BSDF* getBSDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem, float scale = 1.0f) const override;
     };
+    
+    
     
     class SLR_API SpecularTransmission : public SurfaceMaterial {
         const SpectrumTexture* m_coeffT;
@@ -43,6 +47,8 @@ namespace SLR {
         
         BSDF* getBSDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem, float scale = 1.0f) const override;
     };
+    
+    
     
     class SLR_API InverseSurfaceMaterial : public SurfaceMaterial {
         const SurfaceMaterial* m_baseMat;

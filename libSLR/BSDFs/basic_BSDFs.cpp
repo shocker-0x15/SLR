@@ -54,6 +54,8 @@ namespace SLR {
         return m_R;
     }
     
+    
+    
     SampledSpectrum SpecularBRDF::sampleInternal(const BSDFQuery &query, const BSDFSample &smp, BSDFQueryResult* result) const {
         result->dir_sn = Vector3D(-query.dir_sn.x, -query.dir_sn.y, query.dir_sn.z);
         result->dirPDF = 1.0f;
@@ -85,6 +87,8 @@ namespace SLR {
     SampledSpectrum SpecularBRDF::getBaseColorInternal(DirectionType flags) const {
         return m_coeffR;
     }
+    
+    
     
     SampledSpectrum SpecularBTDF::sampleInternal(const BSDFQuery &query, const BSDFSample &smp, BSDFQueryResult* result) const {
         bool entering = query.dir_sn.z > 0.0f;
@@ -137,6 +141,8 @@ namespace SLR {
     SampledSpectrum SpecularBTDF::getBaseColorInternal(DirectionType flags) const {
         return m_coeffT;
     }
+    
+    
     
     SampledSpectrum InverseBSDF::sampleInternal(const BSDFQuery &query, const BSDFSample &smp, BSDFQueryResult* result) const {
         BSDFQuery mQuery = query;

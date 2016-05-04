@@ -36,13 +36,6 @@ namespace SLR {
         MultiBSDF() : BSDF(DirectionType()), m_numComponents(0) { }
         
         void add(const BSDF* bsdf);
-        
-        bool matches(DirectionType flags) const override {
-            for (int i = 0; i < m_numComponents; ++i)
-                if (m_BSDFs[i]->matches(flags))
-                    return true;
-            return false;
-        }
     };    
 }
 
