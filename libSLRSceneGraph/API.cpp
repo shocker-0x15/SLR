@@ -704,15 +704,14 @@ namespace SLRSceneGraph {
                                  else if (type == "glass") {
                                      const static Function configFunc{
                                          0, {
-                                             {"coeffR", Type::SpectrumTexture}, {"coeffT", Type::SpectrumTexture},
+                                             {"coeff", Type::SpectrumTexture},
                                              {"etaExt", Type::SpectrumTexture}, {"etaInt", Type::SpectrumTexture}
                                          },
                                          [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
-                                             SpectrumTextureRef coeffR = args.at("coeffR").rawRef<TypeMap::SpectrumTexture>();
-                                             SpectrumTextureRef coeffT = args.at("coeffT").rawRef<TypeMap::SpectrumTexture>();
+                                             SpectrumTextureRef coeff = args.at("coeff").rawRef<TypeMap::SpectrumTexture>();
                                              SpectrumTextureRef etaExt = args.at("etaExt").rawRef<TypeMap::SpectrumTexture>();
                                              SpectrumTextureRef etaInt = args.at("etaInt").rawRef<TypeMap::SpectrumTexture>();
-                                             return Element(TypeMap::SurfaceMaterial(), SurfaceMaterial::createGlass(coeffR, coeffT, etaExt, etaInt));
+                                             return Element(TypeMap::SurfaceMaterial(), SurfaceMaterial::createGlass(coeff, etaExt, etaInt));
                                          }
                                      };
                                      return configFunc(params, context, err);

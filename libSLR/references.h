@@ -171,9 +171,11 @@ namespace SLR {
     class SubSurfaceScatteringSurfaceMaterial;
     class DiffuseReflection;
     class SpecularReflection;
-    class SpecularTransmission;
+    class SpecularScattering;
     class ModifiedWardDurReflection;
     class AshikhminShirleyReflection;
+    class MicrofacetReflection;
+    class MicrofacetScattering;
     class SummedSurfaceMaterial;
     class MixedSurfaceMaterial;
     class EmitterSurfaceMaterial;
@@ -210,13 +212,13 @@ namespace SLR {
     class GGX;
     class LambertianBRDF;
     class SpecularBRDF;
-    class SpecularBTDF;
+    class SpecularBSDF;
     class InverseBSDF;
     class NullBSDF;
     class ModifiedWardDurBRDF;
     class AshikhminShirleyBRDF;
     class MicrofacetBRDF;
-    class MicrofacetBTDF;
+    class MicrofacetBSDF;
     class MultiBSDF;
     class PerspectiveIDF;
     class EquirectangularIDF;

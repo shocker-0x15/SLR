@@ -18,13 +18,13 @@ namespace SLR {
         uint32_t m_numComponents;
         const BSDF* m_BSDFs[maxNumElems];
         
-        SampledSpectrum sampleInternalNoRev(const BSDFQuery &query, const BSDFSample &smp, BSDFQueryResult *result) const;
-        SampledSpectrum sampleInternalWithRev(const BSDFQuery &query, const BSDFSample &smp, BSDFQueryResult *result) const;
+        SampledSpectrum sampleInternalNoRev(const BSDFQuery &query, float uComponent, const float uDir[2], BSDFQueryResult *result) const;
+        SampledSpectrum sampleInternalWithRev(const BSDFQuery &query, float uComponent, const float uDir[2], BSDFQueryResult *result) const;
         float evaluatePDFInternalNoRev(const BSDFQuery &query, const Vector3D &dirOut, float* revPDF) const;
         float evaluatePDFInternalWithRev(const BSDFQuery &query, const Vector3D &dirOut, float* revPDF) const;
         
-        SampledSpectrum sampleInternal(const BSDFQuery &query, const BSDFSample &smp, BSDFQueryResult* result) const override {
-            return result->reverse ? sampleInternalWithRev(query, smp, result) : sampleInternalNoRev(query, smp, result);
+        SampledSpectrum sampleInternal(const BSDFQuery &query, float uComponent, const float uDir[2], BSDFQueryResult* result) const override {
+            return result->reverse ? sampleInternalWithRev(query, uComponent, uDir, result) : sampleInternalNoRev(query, uComponent, uDir, result);
         }
         SampledSpectrum evaluateInternal(const BSDFQuery &query, const Vector3D &dirOut, SampledSpectrum* rev_fs) const override;
         float evaluatePDFInternal(const BSDFQuery &query, const Vector3D &dirOut, float* revPDF) const override {

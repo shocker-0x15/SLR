@@ -16,7 +16,7 @@ namespace SLR {
     class SLR_API LambertianBRDF : public BSDF {
         SampledSpectrum m_R;
         
-        SampledSpectrum sampleInternal(const BSDFQuery &query, const BSDFSample &smp, BSDFQueryResult* result) const override;
+        SampledSpectrum sampleInternal(const BSDFQuery &query, float uComponent, const float uDir[2], BSDFQueryResult* result) const override;
         SampledSpectrum evaluateInternal(const BSDFQuery &query, const Vector3D &dir, SampledSpectrum* rev_fs) const override;
         float evaluatePDFInternal(const BSDFQuery &query, const Vector3D &dir, float* revPDF) const override;
         float weightInternal(const BSDFQuery &query) const override;
@@ -29,32 +29,32 @@ namespace SLR {
     
     class SLR_API SpecularBRDF : public BSDF {
         SampledSpectrum m_coeffR;
-        const Fresnel* m_fresnel;
+        FresnelConductor m_fresnel;
         
-        SampledSpectrum sampleInternal(const BSDFQuery &query, const BSDFSample &smp, BSDFQueryResult* result) const override;
+        SampledSpectrum sampleInternal(const BSDFQuery &query, float uComponent, const float uDir[2], BSDFQueryResult* result) const override;
         SampledSpectrum evaluateInternal(const BSDFQuery &query, const Vector3D &dir, SampledSpectrum* rev_fs) const override;
         float evaluatePDFInternal(const BSDFQuery &query, const Vector3D &dir, float* revPDF) const override;
         float weightInternal(const BSDFQuery &query) const override;
         SampledSpectrum getBaseColorInternal(DirectionType flags) const override;
     public:
-        SpecularBRDF(const SampledSpectrum &coeffR, const Fresnel* fresnel) : BSDF(DirectionType::Reflection | DirectionType::Delta0D), m_coeffR(coeffR), m_fresnel(fresnel) { }
+        SpecularBRDF(const SampledSpectrum &coeffR, const SampledSpectrum &eta, const SampledSpectrum &k) : BSDF(DirectionType::Reflection | DirectionType::Delta0D), m_coeffR(coeffR), m_fresnel(eta, k) { }
     };
     
     
     
-    class SLR_API SpecularBTDF : public BSDF {
-        SampledSpectrum m_coeffT;
+    class SLR_API SpecularBSDF : public BSDF {
+        SampledSpectrum m_coeff;
         FresnelDielectric m_fresnel;
         
-        SampledSpectrum sampleInternal(const BSDFQuery &query, const BSDFSample &smp, BSDFQueryResult* result) const override;
+        SampledSpectrum sampleInternal(const BSDFQuery &query, float uComponent, const float uDir[2], BSDFQueryResult* result) const override;
         SampledSpectrum evaluateInternal(const BSDFQuery &query, const Vector3D &dir, SampledSpectrum* rev_fs) const override;
         float evaluatePDFInternal(const BSDFQuery &query, const Vector3D &dir, float* revPDF) const override;
         float weightInternal(const BSDFQuery &query) const override;
         SampledSpectrum getBaseColorInternal(DirectionType flags) const override;
     public:
-        SpecularBTDF(const SampledSpectrum &coeffT, const SampledSpectrum &etaExt, const SampledSpectrum &etaInt, bool dispersive) :
-        BSDF(DirectionType::Transmission | DirectionType::Delta0D | (dispersive ? DirectionType::Dispersive : DirectionType())),
-        m_coeffT(coeffT), m_fresnel(etaExt, etaInt) { }
+        SpecularBSDF(const SampledSpectrum &coeff, const SampledSpectrum &etaExt, const SampledSpectrum &etaInt, bool dispersive) :
+        BSDF(DirectionType::Reflection | DirectionType::Transmission | DirectionType::Delta0D | (dispersive ? DirectionType::Dispersive : DirectionType())),
+        m_coeff(coeff), m_fresnel(etaExt, etaInt) { }
     };
     
     
@@ -62,7 +62,7 @@ namespace SLR {
     class SLR_API InverseBSDF : public BSDF {
         const BSDF* m_baseBSDF;
         
-        SampledSpectrum sampleInternal(const BSDFQuery &query, const BSDFSample &smp, BSDFQueryResult* result) const override;
+        SampledSpectrum sampleInternal(const BSDFQuery &query, float uComponent, const float uDir[2], BSDFQueryResult* result) const override;
         SampledSpectrum evaluateInternal(const BSDFQuery &query, const Vector3D &dir, SampledSpectrum* rev_fs) const override;
         float evaluatePDFInternal(const BSDFQuery &query, const Vector3D &dir, float* revPDF) const override;
         float weightInternal(const BSDFQuery &query) const override;
@@ -74,7 +74,7 @@ namespace SLR {
     
     
     class SLR_API NullBSDF : public BSDF {
-        SampledSpectrum sampleInternal(const BSDFQuery &query, const BSDFSample &smp, BSDFQueryResult* result) const override {
+        SampledSpectrum sampleInternal(const BSDFQuery &query, float uComponent, const float uDir[2], BSDFQueryResult* result) const override {
             SLRAssert(false, "NullBSDF's method should not be called.");
             return SampledSpectrum::Zero;
         };

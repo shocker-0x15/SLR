@@ -23,7 +23,7 @@ namespace SLRSceneGraph {
         
         static SurfaceMaterialRef createMatte(const SpectrumTextureRef &reflectance, const FloatTextureRef &sigma);
         static SurfaceMaterialRef createMetal(const SpectrumTextureRef &coeffR, const SpectrumTextureRef &eta, const SpectrumTextureRef &k);
-        static SurfaceMaterialRef createGlass(const SpectrumTextureRef &coeffR, const SpectrumTextureRef &coeffT, const SpectrumTextureRef &etaExt, const SpectrumTextureRef &etaInt);
+        static SurfaceMaterialRef createGlass(const SpectrumTextureRef &coeff, const SpectrumTextureRef &etaExt, const SpectrumTextureRef &etaInt);
         static SurfaceMaterialRef createModifiedWardDur(const SpectrumTextureRef &reflectance, const FloatTextureRef &anisoX, const FloatTextureRef &anisoY);
         static SurfaceMaterialRef createAshikhminShirley(const SpectrumTextureRef &Rd, const SpectrumTextureRef &Rs, const FloatTextureRef &nx, const FloatTextureRef &ny);
         static SurfaceMaterialRef createMicrofacetMetal(const SpectrumTextureRef &eta, const SpectrumTextureRef &k, const FloatTextureRef &alpha_g);
@@ -125,17 +125,18 @@ namespace SLRSceneGraph {
     
     class SLR_SCENEGRAPH_API SpecularReflection : public SurfaceMaterial {
         SpectrumTextureRef m_coeffR;
-        SVFresnelRef m_fresnel;
+        SpectrumTextureRef m_eta;
+        SpectrumTextureRef m_k;
     public:
-        SpecularReflection(const SpectrumTextureRef &coeffR, const SVFresnelRef &fresnel);
+        SpecularReflection(const SpectrumTextureRef &coeffR, const SpectrumTextureRef &eta, const SpectrumTextureRef &k);
     };
     
-    class SLR_SCENEGRAPH_API SpecularTransmission : public SurfaceMaterial {
-        SpectrumTextureRef m_coeffT;
+    class SLR_SCENEGRAPH_API SpecularScattering : public SurfaceMaterial {
+        SpectrumTextureRef m_coeff;
         SpectrumTextureRef m_etaExt;
         SpectrumTextureRef m_etaInt;
     public:
-        SpecularTransmission(const SpectrumTextureRef &coeffT, const SpectrumTextureRef &etaExt, const SpectrumTextureRef &etaInt);
+        SpecularScattering(const SpectrumTextureRef &coeff, const SpectrumTextureRef &etaExt, const SpectrumTextureRef &etaInt);
     };
     
     class SLR_SCENEGRAPH_API InverseSurfaceMaterial : public SurfaceMaterial {
@@ -162,18 +163,19 @@ namespace SLRSceneGraph {
     };
     
     class SLR_SCENEGRAPH_API MicrofacetReflection : public SurfaceMaterial {
-        const SVFresnelRef m_F;
+        SpectrumTextureRef m_eta;
+        SpectrumTextureRef m_k;
         const SVMicrofacetDistributionRef m_D;
     public:
-        MicrofacetReflection(const SVFresnelRef &F, const SVMicrofacetDistributionRef &D);
+        MicrofacetReflection(const SpectrumTextureRef &eta, const SpectrumTextureRef &k, const SVMicrofacetDistributionRef &D);
     };
     
-    class SLR_SCENEGRAPH_API MicrofacetTransmission : public SurfaceMaterial {
+    class SLR_SCENEGRAPH_API MicrofacetScattering : public SurfaceMaterial {
         SpectrumTextureRef m_etaExt;
         SpectrumTextureRef m_etaInt;
         SVMicrofacetDistributionRef m_D;
     public:
-        MicrofacetTransmission(const SpectrumTextureRef &etaExt, const SpectrumTextureRef &etaInt, const SVMicrofacetDistributionRef &D);
+        MicrofacetScattering(const SpectrumTextureRef &etaExt, const SpectrumTextureRef &etaInt, const SVMicrofacetDistributionRef &D);
     };
     
     class SLR_SCENEGRAPH_API SummedSurfaceMaterial : public SurfaceMaterial {

@@ -18,7 +18,7 @@ namespace SLR {
         SampledSpectrum m_Rd;
         float m_nu, m_nv;
         
-        SampledSpectrum sampleInternal(const BSDFQuery &query, const BSDFSample &smp, BSDFQueryResult* result) const override;
+        SampledSpectrum sampleInternal(const BSDFQuery &query, float uComponent, const float uDir[2], BSDFQueryResult* result) const override;
         SampledSpectrum evaluateInternal(const BSDFQuery &query, const Vector3D &dir, SampledSpectrum* rev_fs) const override;
         float evaluatePDFInternal(const BSDFQuery &query, const Vector3D &dir, float* revPDF) const override;
         float weightInternal(const BSDFQuery &query) const override;

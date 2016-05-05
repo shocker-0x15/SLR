@@ -13,17 +13,18 @@
 
 namespace SLR {
     BSDF* MicrofacetReflection::getBSDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem, float scale) const {
-        Fresnel* fresnel = m_F->getFresnel(surfPt, wls, mem);
+        SampledSpectrum eta = m_eta->evaluate(surfPt.texCoord, wls);
+        SampledSpectrum k = m_k->evaluate(surfPt.texCoord, wls);
         MicrofacetDistribution* dist = m_D->getMicrofacetDistribution(surfPt, mem);
-        return mem.create<MicrofacetBRDF>(fresnel, dist);
+        return mem.create<MicrofacetBRDF>(eta, k, dist);
     }
     
     
     
-    BSDF* MicrofacetTransmission::getBSDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem, float scale) const {
+    BSDF* MicrofacetScattering::getBSDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem, float scale) const {
         SampledSpectrum etaExt = m_etaExt->evaluate(surfPt.texCoord, wls);
         SampledSpectrum etaInt = m_etaInt->evaluate(surfPt.texCoord, wls);
         MicrofacetDistribution* dist = m_D->getMicrofacetDistribution(surfPt, mem);
-        return mem.create<MicrofacetBTDF>(etaExt, etaInt, !wls.lambdaSelected(), dist);
+        return mem.create<MicrofacetBSDF>(etaExt, etaInt, !wls.lambdaSelected(), dist);
     }
 }

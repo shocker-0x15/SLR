@@ -213,7 +213,7 @@ namespace SLR {
             result->dirType = DirectionType();
             return false;
         }
-        virtual SampledSpectrum sampleInternal(const BSDFQuery &query, const BSDFSample &smp, BSDFQueryResult* result) const = 0;
+        virtual SampledSpectrum sampleInternal(const BSDFQuery &query, float uComponent, const float uDir[2], BSDFQueryResult* result) const = 0;
         virtual SampledSpectrum evaluateInternal(const BSDFQuery &query, const Vector3D &dir, SampledSpectrum* rev_fs) const = 0;
         virtual float evaluatePDFInternal(const BSDFQuery &query, const Vector3D &dir, float* revPDF) const = 0;
         virtual float weightInternal(const BSDFQuery &query) const = 0;
@@ -227,7 +227,7 @@ namespace SLR {
         SampledSpectrum sample(const BSDFQuery &query, const BSDFSample &smp, BSDFQueryResult* result) const {
             if (!matches(query.flags, result))
                 return SampledSpectrum::Zero;
-            SampledSpectrum fs_sn = sampleInternal(query, smp, result);
+            SampledSpectrum fs_sn = sampleInternal(query, smp.uComponent, smp.uDir, result);
             float snCorrection = (query.adjoint ?
                                   std::fabs(query.dir_sn.z / dot(query.dir_sn, query.gNormal_sn)) :
                                   std::fabs(result->dir_sn.z / dot(result->dir_sn, query.gNormal_sn)));

@@ -29,17 +29,18 @@ namespace SLR {
     
     BSDF* SpecularReflection::getBSDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem, float scale) const {
         SampledSpectrum coeffR = m_coeffR->evaluate(surfPt.texCoord, wls);
-        const Fresnel* fresnel = m_fresnel->getFresnel(surfPt, wls, mem);
-        return mem.create<SpecularBRDF>(scale * coeffR, fresnel);
+        SampledSpectrum eta = m_eta->evaluate(surfPt.texCoord, wls);
+        SampledSpectrum k = m_k->evaluate(surfPt.texCoord, wls);
+        return mem.create<SpecularBRDF>(scale * coeffR, eta, k);
     }
     
     
     
-    BSDF* SpecularTransmission::getBSDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem, float scale) const {
-        SampledSpectrum coeffT = m_coeffT->evaluate(surfPt.texCoord, wls);
+    BSDF* SpecularScattering::getBSDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem, float scale) const {
+        SampledSpectrum coeff = m_coeff->evaluate(surfPt.texCoord, wls);
         SampledSpectrum etaExt = m_etaExt->evaluate(surfPt.texCoord, wls);
         SampledSpectrum etaInt = m_etaInt->evaluate(surfPt.texCoord, wls);
-        return mem.create<SpecularBTDF>(scale * coeffT, etaExt, etaInt, !wls.lambdaSelected());
+        return mem.create<SpecularBSDF>(scale * coeff, etaExt, etaInt, !wls.lambdaSelected());
     }
     
     

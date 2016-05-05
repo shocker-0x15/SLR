@@ -9,7 +9,7 @@
 #include "../Core/distributions.h"
 
 namespace SLR {
-    SampledSpectrum AshikhminShirleyBRDF::sampleInternal(const BSDFQuery &query, const BSDFSample &smp, BSDFQueryResult *result) const {
+    SampledSpectrum AshikhminShirleyBRDF::sampleInternal(const BSDFQuery &query, float uComponent, const float uDir[2], BSDFQueryResult *result) const {
         float iRs = m_Rs.importance(query.wlHint);
         float iRd = m_Rd.importance(query.wlHint);
         float vDotHV = std::fabs(query.dir_sn.z);
@@ -18,19 +18,17 @@ namespace SLR {
         float diffuseWeght = 28 * iRd / 23 * (1 - iRs) * transmissionTerm * transmissionTerm;
         float sumWeights = specularWeight + diffuseWeght;
         
-        float uComponent = smp.uDir[0] * sumWeights;
         float specularDirPDF, diffuseDirPDF;
         float revSpecularDirPDF, revDiffuseDirPDF;
         SampledSpectrum fs;
-        if (uComponent < specularWeight) {
-            float uDir0 = uComponent / specularWeight;
+        if (uComponent * sumWeights < specularWeight) {
             result->dirType = DirectionType::Reflection | DirectionType::HighFreq;
             
-            float quad = 2 * M_PI * smp.uDir[1];
+            float quad = 2 * M_PI * uDir[1];
             float phi_h = std::atan2(std::sqrt(m_nu + 1) * std::sin(quad), std::sqrt(m_nv + 1) * std::cos(quad));
             float cosphi = std::cos(phi_h);
             float sinphi = std::sin(phi_h);
-            float theta_h = std::acos(std::pow(1 - uDir0, 1.0f / (m_nu * cosphi * cosphi + m_nv * sinphi * sinphi + 1)));
+            float theta_h = std::acos(std::pow(1 - uDir[0], 1.0f / (m_nu * cosphi * cosphi + m_nv * sinphi * sinphi + 1)));
             if (query.dir_sn.z < 0)
                 theta_h = M_PI - theta_h;
             Vector3D halfv = Vector3D(std::sin(theta_h) * std::cos(phi_h), std::sin(theta_h) * std::sin(phi_h), std::cos(theta_h));
@@ -59,10 +57,9 @@ namespace SLR {
             fs = specular_fs + diffuse_fs;
         }
         else {
-            float uDir0 = (uComponent - specularWeight) / diffuseWeght;
             result->dirType = DirectionType::Reflection | DirectionType::LowFreq;
             
-            result->dir_sn = cosineSampleHemisphere(uDir0, smp.uDir[1]);
+            result->dir_sn = cosineSampleHemisphere(uDir[0], uDir[1]);
             diffuseDirPDF = result->dir_sn.z / M_PI;
             revDiffuseDirPDF = std::fabs(query.dir_sn.z) / M_PI;
             result->dir_sn.z *= dot(query.dir_sn, query.gNormal_sn) > 0 ? 1 : -1;

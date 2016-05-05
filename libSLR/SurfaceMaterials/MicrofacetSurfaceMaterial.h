@@ -15,21 +15,22 @@
 
 namespace SLR {
     class SLR_API MicrofacetReflection : public SurfaceMaterial {
-        const SVFresnel* m_F;
+        const SpectrumTexture* m_eta;
+        const SpectrumTexture* m_k;
         const SVMicrofacetDistribution* m_D;
     public:
-        MicrofacetReflection(const SVFresnel* F, const SVMicrofacetDistribution* D) :
-        m_F(F), m_D(D) {}
+        MicrofacetReflection(const SpectrumTexture* eta, const SpectrumTexture* k, const SVMicrofacetDistribution* D) :
+        m_eta(eta), m_k(k), m_D(D) {}
         
         BSDF* getBSDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem, float scale = 1.0f) const override;
     };
     
-    class SLR_API MicrofacetTransmission : public SurfaceMaterial {
+    class SLR_API MicrofacetScattering : public SurfaceMaterial {
         const SpectrumTexture* m_etaExt;
         const SpectrumTexture* m_etaInt;
         const SVMicrofacetDistribution* m_D;
     public:
-        MicrofacetTransmission(const SpectrumTexture* etaExt, const SpectrumTexture* etaInt, const SVMicrofacetDistribution* D) :
+        MicrofacetScattering(const SpectrumTexture* etaExt, const SpectrumTexture* etaInt, const SVMicrofacetDistribution* D) :
         m_etaExt(etaExt), m_etaInt(etaInt), m_D(D) {}
         
         BSDF* getBSDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem, float scale = 1.0f) const override;
