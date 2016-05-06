@@ -26,7 +26,7 @@ namespace SLR {
         result->dirType = m_type;
         
         SampledSpectrum F = m_F.evaluate(dotHV);
-        float G = m_D->evaluateSmithG1(query.dir_sn * sign, m) * m_D->evaluateSmithG1(result->dir_sn * sign, m);
+        float G = m_D->evaluateSmithG1(query.dir_sn, m) * m_D->evaluateSmithG1(result->dir_sn, m);
         SampledSpectrum fs = F * D * G / (4 * query.dir_sn.z * result->dir_sn.z);
         if (result->reverse) {
             result->reverse->dirPDF = result->dirPDF;
@@ -51,7 +51,7 @@ namespace SLR {
         float D = m_D->evaluate(m);
         
         SampledSpectrum F = m_F.evaluate(dotHV);
-        float G = m_D->evaluateSmithG1(query.dir_sn * sign, m) * m_D->evaluateSmithG1(dir * sign, m);
+        float G = m_D->evaluateSmithG1(query.dir_sn, m) * m_D->evaluateSmithG1(dir, m);
         SampledSpectrum fs = F * D * G / (4 * query.dir_sn.z * dir.z);
         
         if (rev_fs)
@@ -121,14 +121,13 @@ namespace SLR {
             result->dirPDF = reflectProb * mPDF / (4 * dotHV * sign);
             result->dirType = DirectionType::Reflection | DirectionType::HighFreq;
             
-            SampledSpectrum F = m_F.evaluate(dotHV);
-            float G = m_D->evaluateSmithG1(query.dir_sn * sign, m) * m_D->evaluateSmithG1(result->dir_sn * sign, m);
+            float G = m_D->evaluateSmithG1(query.dir_sn, m) * m_D->evaluateSmithG1(result->dir_sn, m);
             SampledSpectrum fs = F * D * G / (4 * query.dir_sn.z * result->dir_sn.z);
+            
             if (result->reverse) {
                 result->reverse->dirPDF = result->dirPDF;
                 result->reverse->fs = fs;
             }
-            
             return fs;
         }
         else {
@@ -154,17 +153,18 @@ namespace SLR {
                 float dotHV_wl = dot(query.dir_sn, m_wl);
                 float dotHL_wl = dot(result->dir_sn, m_wl);
                 float F_wl = m_F.evaluate(dotHV_wl, wlIdx);
-                float G_wl = m_D->evaluateSmithG1(query.dir_sn * sign, m_wl) * m_D->evaluateSmithG1(result->dir_sn * -sign, m_wl);
+                float G_wl = m_D->evaluateSmithG1(query.dir_sn, m_wl) * m_D->evaluateSmithG1(result->dir_sn, m_wl);
                 float D_wl = m_D->evaluate(m_wl);
                 ret[wlIdx] = std::fabs(dotHV_wl * dotHL_wl) * (1 - F_wl) * G_wl * D_wl / std::pow(eEnter[wlIdx] * dotHV_wl + eExit[wlIdx] * dotHL_wl, 2);
             }
             ret /= std::fabs(query.dir_sn.z * result->dir_sn.z);
+            ret *= query.adjoint ? (eExit * eExit) : (eEnter * eEnter);// !adjoint: eExit^2 * (eEnter / eExit)^2
             
             if (result->reverse) {
                 result->reverse->dirPDF = commonPDFTerm * eEnter[query.wlHint] * eEnter[query.wlHint] * std::fabs(dotHV);
-                result->reverse->fs = eEnter * eEnter * ret;
+                result->reverse->fs = ret;
             }
-            return eExit * eExit * ret;
+            return ret;
         }
     }
     
@@ -178,7 +178,7 @@ namespace SLR {
             float D = m_D->evaluate(m);
             
             SampledSpectrum F = m_F.evaluate(dotHV);
-            float G = m_D->evaluateSmithG1(query.dir_sn * sign, m) * m_D->evaluateSmithG1(dir * sign, m);
+            float G = m_D->evaluateSmithG1(query.dir_sn, m) * m_D->evaluateSmithG1(dir, m);
             SampledSpectrum fs = F * D * G / (4 * query.dir_sn.z * dir.z);
             
             if (rev_fs)
@@ -195,15 +195,16 @@ namespace SLR {
                 float dotHV_wl = dot(query.dir_sn, m_wl);
                 float dotHL_wl = dot(dir, m_wl);
                 float F_wl = m_F.evaluate(dotHV_wl, wlIdx);
-                float G_wl = m_D->evaluateSmithG1(query.dir_sn * sign, m_wl) * m_D->evaluateSmithG1(dir * -sign, m_wl);
+                float G_wl = m_D->evaluateSmithG1(query.dir_sn, m_wl) * m_D->evaluateSmithG1(dir, m_wl);
                 float D_wl = m_D->evaluate(m_wl);
                 ret[wlIdx] = std::fabs(dotHV_wl * dotHL_wl) * (1 - F_wl) * G_wl * D_wl / std::pow(eEnter[wlIdx] * dotHV_wl + eExit[wlIdx] * dotHL_wl, 2);
             }
             ret /= std::fabs(query.dir_sn.z * dir.z);
+            ret *= query.adjoint ? (eExit * eExit) : (eEnter * eEnter);// !adjoint: eExit^2 * (eEnter / eExit)^2
             
             if (rev_fs)
-                *rev_fs = eEnter * eEnter * ret;
-            return eExit * eExit * ret;
+                *rev_fs = ret;
+            return ret;
         }
     }
     
@@ -238,11 +239,10 @@ namespace SLR {
         else {
             float dotHL = dot(dir, m);
             float commonPDFTerm = (1 - reflectProb) * mPDF / std::pow(eEnter[query.wlHint] * dotHV + eExit[query.wlHint] * dotHL, 2);
-            float ret = commonPDFTerm * eExit[query.wlHint] * eExit[query.wlHint] * std::fabs(dotHL);
             
             if (revPDF)
                 *revPDF = commonPDFTerm * eEnter[query.wlHint] * eEnter[query.wlHint] * std::fabs(dotHV);
-            return ret;
+            return commonPDFTerm * eExit[query.wlHint] * eExit[query.wlHint] * std::fabs(dotHL);
         }
     }
     

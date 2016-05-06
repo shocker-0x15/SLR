@@ -207,17 +207,11 @@ namespace SLR {
     }
     
     float GGX::evaluatePDF(const Normal3D &m) const {
-        if (m.z <= 0)
-            return 0.0f;
-        float theta_m = std::acos(m.z);
-        float cosTheta_m = m.z;
-        float tanTheta_m = std::tan(theta_m);
-        float D = m_alpha_g * m_alpha_g / (M_PI * std::pow(cosTheta_m, 4) * std::pow(m_alpha_g * m_alpha_g + tanTheta_m * tanTheta_m, 2));
-        return D * m.z;
+        return evaluate(m) * m.z;
     }
     
     float GGX::evaluateSmithG1(const Vector3D &v, const Normal3D &m) const {
-        float chi = (dot(v, m) / std::copysign(v.z, m.z)) > 0 ? 1 : 0;
+        float chi = (dot(v, m) / v.z) > 0 ? 1 : 0;
         float theta_v = std::acos(std::clamp(v.z, -1.0f, 1.0f));
         return chi * 2 / (1 + std::sqrt(1 + std::pow(m_alpha_g * std::tan(theta_v), 2)));
     }
