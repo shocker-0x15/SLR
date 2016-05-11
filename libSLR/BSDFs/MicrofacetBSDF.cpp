@@ -15,21 +15,26 @@ namespace SLR {
         
         Normal3D m;
         float mPDF;
-        float D = m_D->sample(uDir[0], uDir[1], &m, &mPDF);
+        float D = m_D->sample(sign * query.dir_sn, uDir[0], uDir[1], &m, &mPDF);
         float dotHV = dot(query.dir_sn, m);
         if (dotHV * sign <= 0) {
             result->dirPDF = 0.0f;
             return SampledSpectrum::Zero;
         }
         result->dir_sn = 2 * dotHV * m - query.dir_sn;
-        result->dirPDF = mPDF / (4 * dotHV * sign);
+        if (result->dir_sn.z * query.dir_sn.z <= 0) {
+            result->dirPDF = 0.0f;
+            return SampledSpectrum::Zero;
+        }
+        float commonPDFTerm = 1.0f / (4 * dotHV * sign);
+        result->dirPDF = commonPDFTerm * mPDF;
         result->dirType = m_type;
         
         SampledSpectrum F = m_F.evaluate(dotHV);
         float G = m_D->evaluateSmithG1(query.dir_sn, m) * m_D->evaluateSmithG1(result->dir_sn, m);
         SampledSpectrum fs = F * D * G / (4 * query.dir_sn.z * result->dir_sn.z);
         if (result->reverse) {
-            result->reverse->dirPDF = result->dirPDF;
+            result->reverse->dirPDF = commonPDFTerm * m_D->evaluatePDF(sign * result->dir_sn, m);
             result->reverse->fs = fs;
         }
         
@@ -76,11 +81,12 @@ namespace SLR {
                 *revPDF = 0.0f;
             return 0.0f;
         }
-        float mPDF = m_D->evaluatePDF(m);
-        float ret = mPDF / (4 * dotHV * sign);
+        float mPDF = m_D->evaluatePDF(sign * query.dir_sn, m);
+        float commonPDFTerm = 1.0f / (4 * dotHV * sign);
+        float ret = commonPDFTerm * mPDF;
         
         if (revPDF)
-            *revPDF = ret;
+            *revPDF = commonPDFTerm * m_D->evaluatePDF(sign * dir, m);
         return ret;
     }
     
@@ -103,7 +109,7 @@ namespace SLR {
         
         Normal3D m;
         float mPDF;
-        float D = m_D->sample(uDir[0], uDir[1], &m, &mPDF);
+        float D = m_D->sample(sign * query.dir_sn, uDir[0], uDir[1], &m, &mPDF);
         float dotHV = dot(query.dir_sn, m);
         if (dotHV * sign <= 0) {
             result->dirPDF = 0.0f;
@@ -118,14 +124,15 @@ namespace SLR {
                 result->dirPDF = 0.0f;
                 return SampledSpectrum::Zero;
             }
-            result->dirPDF = reflectProb * mPDF / (4 * dotHV * sign);
+            float commonPDFTerm = reflectProb / (4 * dotHV * sign);
+            result->dirPDF = commonPDFTerm * mPDF;
             result->dirType = DirectionType::Reflection | DirectionType::HighFreq;
             
             float G = m_D->evaluateSmithG1(query.dir_sn, m) * m_D->evaluateSmithG1(result->dir_sn, m);
             SampledSpectrum fs = F * D * G / (4 * query.dir_sn.z * result->dir_sn.z);
             
             if (result->reverse) {
-                result->reverse->dirPDF = result->dirPDF;
+                result->reverse->dirPDF = commonPDFTerm * m_D->evaluatePDF(sign * result->dir_sn, m);
                 result->reverse->fs = fs;
             }
             return fs;
@@ -143,8 +150,8 @@ namespace SLR {
                 return SampledSpectrum::Zero;
             }
             float dotHL = dot(result->dir_sn, m);
-            float commonPDFTerm = (1 - reflectProb) * mPDF / std::pow(eEnter[query.wlHint] * dotHV + eExit[query.wlHint] * dotHL, 2);
-            result->dirPDF = commonPDFTerm * eExit[query.wlHint] * eExit[query.wlHint] * std::fabs(dotHL);
+            float commonPDFTerm = (1 - reflectProb) / std::pow(eEnter[query.wlHint] * dotHV + eExit[query.wlHint] * dotHL, 2);
+            result->dirPDF = commonPDFTerm * mPDF * eExit[query.wlHint] * eExit[query.wlHint] * std::fabs(dotHL);
             result->dirType = DirectionType::Transmission | DirectionType::HighFreq;
             
             SampledSpectrum ret = SampledSpectrum::Zero;
@@ -161,7 +168,7 @@ namespace SLR {
             ret *= query.adjoint ? (eExit * eExit) : (eEnter * eEnter);// !adjoint: eExit^2 * (eEnter / eExit)^2
             
             if (result->reverse) {
-                result->reverse->dirPDF = commonPDFTerm * eEnter[query.wlHint] * eEnter[query.wlHint] * std::fabs(dotHV);
+                result->reverse->dirPDF = commonPDFTerm * m_D->evaluatePDF(-sign * result->dir_sn, m) * eEnter[query.wlHint] * eEnter[query.wlHint] * std::fabs(dotHV);
                 result->reverse->fs = ret;
             }
             return ret;
@@ -225,24 +232,24 @@ namespace SLR {
                 *revPDF = 0.0f;
             return 0.0f;
         }
-        float mPDF = m_D->evaluatePDF(m);
+        float mPDF = m_D->evaluatePDF(sign * query.dir_sn, m);
         
         SampledSpectrum F = m_F.evaluate(dotHV);
         float reflectProb = F.importance(query.wlHint);
         if (dir.z * query.dir_sn.z > 0) {
-            float ret = reflectProb * mPDF / (4 * dotHV * sign);
+            float commonPDFTerm = reflectProb / (4 * dotHV * sign);
             
             if (revPDF)
-                *revPDF = ret;
-            return ret;
+                *revPDF = commonPDFTerm * m_D->evaluatePDF(sign * dir, m);
+            return commonPDFTerm * mPDF;
         }
         else {
             float dotHL = dot(dir, m);
-            float commonPDFTerm = (1 - reflectProb) * mPDF / std::pow(eEnter[query.wlHint] * dotHV + eExit[query.wlHint] * dotHL, 2);
+            float commonPDFTerm = (1 - reflectProb) / std::pow(eEnter[query.wlHint] * dotHV + eExit[query.wlHint] * dotHL, 2);
             
             if (revPDF)
-                *revPDF = commonPDFTerm * eEnter[query.wlHint] * eEnter[query.wlHint] * std::fabs(dotHV);
-            return commonPDFTerm * eExit[query.wlHint] * eExit[query.wlHint] * std::fabs(dotHL);
+                *revPDF = commonPDFTerm * m_D->evaluatePDF(-sign * dir, m) * eEnter[query.wlHint] * eEnter[query.wlHint] * std::fabs(dotHV);
+            return commonPDFTerm * mPDF * eExit[query.wlHint] * eExit[query.wlHint] * std::fabs(dotHL);
         }
     }
     

@@ -210,6 +210,77 @@ namespace SLR {
         return evaluate(m) * m.z;
     }
     
+    float GGX::sample(const Vector3D &v, float u0, float u1, Normal3D* m, float* normalPDF) const {
+        float alpha_gx = m_alpha_g;
+        float alpha_gy = m_alpha_g;
+        
+        // stretch the input vector
+        Vector3D sv = Vector3D(alpha_gx * v.x, alpha_gy * v.y, v.z).normalize();
+        float theta_sv = std::acos(sv.z);
+        float phi_sv = std::atan2(sv.y, sv.x);
+        if (sv.z > 0.99999f) {
+            theta_sv = 0.0f;
+            phi_sv = 0.0f;
+        }
+        
+        // sample slopes
+        float slope_x, slope_y;
+        if (theta_sv < 0.0001) {
+            // special case (normal incidence)
+            const float r = std::sqrt(u0 / (1 - u0));
+            const float phi = 2 * M_PI * u1;
+            slope_x = r * cos(phi);
+            slope_y = r * sin(phi);
+        }
+        else {
+            // precomputations
+            const float tan_theta_i = tan(theta_sv);
+            const float a = 1 / tan_theta_i;
+            const float G1 = 2 / (1 + std::sqrt(1.0 + 1.0 / (a * a)));
+            
+            // sample slope_x
+            const float A = 2.0 * u0 / G1 - 1.0;
+            const float tmp = 1.0 / (A * A - 1.0);
+            const float B = tan_theta_i;
+            const float D = std::sqrt(B * B * tmp * tmp - (A * A - B * B) * tmp);
+            const float slope_x_1 = B * tmp - D;
+            const float slope_x_2 = B * tmp + D;
+            slope_x = (A < 0 || slope_x_2 > 1.0 / tan_theta_i) ? slope_x_1 : slope_x_2;
+            
+            // sample slope_y
+            float S;
+            if (u1 > 0.5) {
+                S = 1.0;
+                u1 = 2.0 * (u1 - 0.5);
+            }
+            else {
+                S = -1.0;
+                u1 = 2.0 * (0.5 - u1);
+            }
+            const float z = (u1 * (u1 * (u1 * 0.27385 - 0.73369) + 0.46341)) / (u1 * (u1 * (u1 * 0.093073 + 0.309420) - 1.000000) + 0.597999);
+            slope_y = S * z * std::sqrt(1.0 + slope_x * slope_x);
+        }
+        
+        // rotate
+        float tmp = std::cos(phi_sv) * slope_x - std::sin(phi_sv) * slope_y;
+        slope_y = std::sin(phi_sv) * slope_x + std::cos(phi_sv) * slope_y;
+        slope_x = tmp;
+        
+        // unstretch
+        slope_x *= alpha_gx;
+        slope_y *= alpha_gy;
+        
+        *m = normalize(Normal3D(-slope_x, -slope_y, 1));
+        float D = evaluate(*m);
+        *normalPDF = evaluateSmithG1(v, *m) * absDot(v, *m) * D / std::abs(v.z);
+        
+        return D;
+    }
+    
+    float GGX::evaluatePDF(const Vector3D &v, const Normal3D &m) const {
+        return evaluateSmithG1(v, m) * absDot(v, m) * evaluate(m) / std::abs(v.z);
+    }
+    
     float GGX::evaluateSmithG1(const Vector3D &v, const Normal3D &m) const {
         float chi = (dot(v, m) / v.z) > 0 ? 1 : 0;
         float theta_v = std::acos(std::clamp(v.z, -1.0f, 1.0f));
