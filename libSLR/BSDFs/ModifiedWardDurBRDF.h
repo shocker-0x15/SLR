@@ -5,6 +5,10 @@
 //  Copyright (c) 2015年 渡部 心. All rights reserved.
 //
 
+// References
+// Notes on the Ward BRDF
+// A New Ward BRDF Model with Bounded Albedo
+
 #ifndef __SLR__ModifiedWardDurBRDF__
 #define __SLR__ModifiedWardDurBRDF__
 

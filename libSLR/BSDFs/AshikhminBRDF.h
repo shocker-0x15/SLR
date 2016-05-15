@@ -5,6 +5,9 @@
 //  Copyright (c) 2015年 渡部 心. All rights reserved.
 //
 
+// References
+// An Anisotropic Phong BRDF Model
+
 #ifndef __SLR__AshikhminShirleyBRDF__
 #define __SLR__AshikhminShirleyBRDF__
 

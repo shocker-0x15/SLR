@@ -6,6 +6,10 @@
 //  Copyright © 2016年 渡部 心. All rights reserved.
 //
 
+// References
+// Microfacet Models for Refraction through Rough Surfaces
+// Importance Sampling Microfacet-Based BSDFs using the Distribution of Visible Normals
+
 #ifndef MicrofacetBSDF_h
 #define MicrofacetBSDF_h
 

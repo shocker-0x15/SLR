@@ -398,6 +398,29 @@ namespace SLRSceneGraph {
                                  }
                              })
                     );
+            stack["lookAt"] =
+            Element(TypeMap::Function(),
+                    Function(1, {{"eye", Type::Tuple}, {"target", Type::Tuple}, {"up", Type::Tuple}},
+                             [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
+                                 static const Function sigEye = Function(1, {{"x", Type::RealNumber}, {"y", Type::RealNumber}, {"z", Type::RealNumber}});
+                                 static const Function sigTarget = Function(1, {{"x", Type::RealNumber}, {"y", Type::RealNumber}, {"z", Type::RealNumber}});
+                                 static const Function sigUp = Function(1, {{"x", Type::RealNumber}, {"y", Type::RealNumber}, {"z", Type::RealNumber}});
+                                 static const auto procEye = [](const std::map<std::string, Element> &arg) {
+                                     return SLR::Point3D(arg.at("x").raw<TypeMap::RealNumber>(), arg.at("y").raw<TypeMap::RealNumber>(), arg.at("z").raw<TypeMap::RealNumber>());
+                                 };
+                                 static const auto procTarget = [](const std::map<std::string, Element> &arg) {
+                                     return SLR::Point3D(arg.at("x").raw<TypeMap::RealNumber>(), arg.at("y").raw<TypeMap::RealNumber>(), arg.at("z").raw<TypeMap::RealNumber>());
+                                 };
+                                 static const auto procUp = [](const std::map<std::string, Element> &arg) {
+                                     return SLR::Vector3D(arg.at("x").raw<TypeMap::RealNumber>(), arg.at("y").raw<TypeMap::RealNumber>(), arg.at("z").raw<TypeMap::RealNumber>());
+                                 };
+                                 SLR::Matrix4x4 matRawLookAt = SLR::lookAt(sigEye.perform<SLR::Point3D>(procEye, args.at("eye").raw<TypeMap::Tuple>()),
+                                                                           sigTarget.perform<SLR::Point3D>(procTarget, args.at("target").raw<TypeMap::Tuple>()),
+                                                                           sigUp.perform<SLR::Vector3D>(procUp, args.at("up").raw<TypeMap::Tuple>()));
+                                 SLR::Matrix4x4 mat = SLR::invert(matRawLookAt) * SLR::rotateY((float)M_PI);
+                                 return Element(TypeMap::Matrix(), mat);
+                             })
+                    );
             stack["createVertex"] =
             Element(TypeMap::Function(),
                     Function(1, {{"position", Type::Tuple}, {"normal", Type::Tuple}, {"tangent", Type::Tuple}, {"texCoord", Type::Tuple}},
