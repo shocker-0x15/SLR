@@ -153,12 +153,14 @@ namespace SLR {
         if (surfPt.atInfinity)
             return sp;
         
+        DirectionType fsType = DirectionType::All;
         while (true) {
             ++pathLength;
             if (pathLength >= 100)
                 break;
             Normal3D gNorm_sn = surfPt.shadingFrame.toLocal(surfPt.gNormal);
             BSDF* bsdf = surfPt.createBSDF(wls, mem);
+            BSDFQuery fsQuery(dirOut_sn, gNorm_sn, wls.selectedLambda, fsType);
             
             // Next Event Estimation (explicit light sampling)
             if (bsdf->hasNonDelta()) {
@@ -184,12 +186,9 @@ namespace SLR {
                     float lightPDF = lightProb * lpResult.areaPDF;
                     SLRAssert(!Le.hasNaN() && !Le.hasInf(), "Le: unexpected value detected: %s", Le.toString().c_str());
                     
-                    BSDFQuery queryBSDF(dirOut_sn, gNorm_sn, wls.selectedLambda);
-                    SampledSpectrum fs = bsdf->evaluate(queryBSDF, shadowDir_sn);
+                    SampledSpectrum fs = bsdf->evaluate(fsQuery, shadowDir_sn);
                     float cosLight = absDot(-shadowDir, lpResult.surfPt.gNormal);
-                    float bsdfPDF = bsdf->evaluatePDF(queryBSDF, shadowDir_sn) * cosLight / dist2;
-                    SLRAssert(!std::isnan(bsdfPDF) && !std::isinf(bsdfPDF), "bsdfPDF: unexpected value detected: %f", bsdfPDF);
-                    SLRAssert(!fs.hasNaN() && !fs.hasInf(), "fs: unexpected value detected: %s", fs.toString().c_str());
+                    float bsdfPDF = bsdf->evaluatePDF(fsQuery, shadowDir_sn) * cosLight / dist2;
                     
                     float MISWeight = 1.0f;
                     if (!lpResult.posType.isDelta() && !std::isinf(lpResult.areaPDF))
@@ -203,7 +202,6 @@ namespace SLR {
             }
             
             // get a next direction by sampling BSDF.
-            BSDFQuery fsQuery(dirOut_sn, gNorm_sn, wls.selectedLambda);
             BSDFSample fsSample(rng.getFloat0cTo1o(), rng.getFloat0cTo1o(), rng.getFloat0cTo1o());
             BSDFQueryResult fsResult;
             SampledSpectrum fs = bsdf->sample(fsQuery, fsSample, &fsResult);
@@ -216,29 +214,50 @@ namespace SLR {
             alpha *= fs * absDot(fsResult.dir_sn, gNorm_sn) / fsResult.dirPDF;
             SLRAssert(!alpha.hasInf() && !alpha.hasNaN(),
                       "alpha: unexpected value detected:\nalpha: %s\nfs: %s\nlength: %u, cos: %g, dirPDF: %g",
-                      alpha.toString().c_str(), fs.toString().c_str(), pathLength, std::fabs(fsResult.dir_sn.z), fsResult.dirPDF);
+                      alpha.toString().c_str(), fs.toString().c_str(), pathLength, absDot(fsResult.dir_sn, gNorm_sn), fsResult.dirPDF);
             
             Vector3D dirIn = surfPt.shadingFrame.fromLocal(fsResult.dir_sn);
             ray = Ray(surfPt.p, dirIn, ray.time, Ray::Epsilon);
             
             // find a next intersection point.
             isect = Intersection();
-            BSSRDF* bssrdf = surfPt.createBSSRDF(dirIn.z < 0, wls, mem);
+            BSSRDF* bssrdf = surfPt.createBSSRDF(fsResult.dir_sn.z < 0, wls, mem);
             if (bssrdf) {
-                BSSRDFQuery sssQuery{scene, surfPt};
-                BSSRDFSample sssSample{rng.getFloat0cTo1o(), rng.getFloat0cTo1o(), rng.getFloat0cTo1o(), rng.getFloat0cTo1o()};
+//                SampledSpectrumSum integ = SampledSpectrum::Zero;
+//                uint32_t numSuccesses = 0;
+//                for (int i = 0; i < 1000000; ++i) {
+//                    BSSRDFQuery sssQuery(scene, surfPt, ray.time, wls.selectedLambda);
+//                    BSSRDFSample sssSample(rng.getFloat0cTo1o(), rng.getFloat0cTo1o(), rng.getFloat0cTo1o(), rng.getFloat0cTo1o(), rng.getFloat0cTo1o());
+//                    BSSRDFQueryResult sssResult;
+//                    SampledSpectrum R = bssrdf->sample(sssQuery, sssSample, &sssResult);
+//                    if (sssResult.areaPDF == 0)
+//                        continue;
+//                    ++numSuccesses;
+//                    integ += R / sssResult.areaPDF / M_PI;
+//                    if (integ.result.hasNaN()) {
+//                        R = bssrdf->sample(sssQuery, sssSample, &sssResult);
+//                    }
+//                }
+                BSSRDFQuery sssQuery(scene, surfPt, ray.time, wls.selectedLambda);
+                BSSRDFSample sssSample(rng.getFloat0cTo1o(), rng.getFloat0cTo1o(), rng.getFloat0cTo1o(), rng.getFloat0cTo1o(), rng.getFloat0cTo1o());
                 BSSRDFQueryResult sssResult;
                 SampledSpectrum R = bssrdf->sample(sssQuery, sssSample, &sssResult);
-                if (sssResult.areaPDF == 0.0f)
+                if (sssResult.areaPDF == 0.0f || sssResult.dirPDF == 0)
                     break;
-                ray = Ray(isect.p, sssResult.dir, ray.time);
-                alpha *= R * (absDot(isect.gNormal, ray.dir) / M_PI) / (sssResult.areaPDF * sssResult.dirPDF);
+                surfPt = std::move(sssResult.surfPt);
+                ray = Ray(surfPt.p, -sssResult.dir, ray.time, 0, 0);
+                alpha *= R * (absDot(surfPt.gNormal, ray.dir) / M_PI) / (sssResult.areaPDF * sssResult.dirPDF);
+                SLRAssert(!alpha.hasInf() && !alpha.hasNaN(),
+                          "alpha: unexpected value detected:\nalpha: %s\nR: %s\nlength: %u, cos: %g, areaPDF: %g, dirPDF: %g",
+                          alpha.toString().c_str(), R.toString().c_str(), pathLength, absDot(surfPt.gNormal, ray.dir), sssResult.areaPDF, sssResult.dirPDF);
+                fsType = DirectionType::Transmission | DirectionType::AllFreq;
             }
             else {
                 if (!scene.intersect(ray, &isect))
                     break;
+                isect.getSurfacePoint(&surfPt);
+                fsType = DirectionType::All;
             }
-            isect.getSurfacePoint(&surfPt);
             
             dirOut_sn = surfPt.shadingFrame.toLocal(-ray.dir);
             

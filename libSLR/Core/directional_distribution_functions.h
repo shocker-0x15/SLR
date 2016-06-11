@@ -25,15 +25,15 @@ namespace SLR {
             IE_Delta = IE_Delta0D | IE_Delta1D,
             IE_AllFreq = IE_NonDelta | IE_Delta,
             
-            IE_Reflection = 1 << 5,
-            IE_Transmission = 1 << 6,
+            IE_Reflection = 1 << 4,
+            IE_Transmission = 1 << 5,
             IE_Emission = IE_Reflection,
             IE_Acquisition = IE_Reflection,
             IE_WholeSphere = IE_Reflection | IE_Transmission,
             
             IE_All = IE_AllFreq | IE_WholeSphere,
             
-            IE_Dispersive = 1 << 7,
+            IE_Dispersive = 1 << 6,
             
             IE_LowFreqReflection = IE_LowFreq | IE_Reflection,
             IE_LowFreqTransmission = IE_LowFreq | IE_Transmission,
@@ -153,20 +153,23 @@ namespace SLR {
     struct SLR_API BSSRDFQuery {
         const Scene &scene;
         const SurfacePoint &surfPt;
+        float time;
         int16_t wlHint;
         bool adjoint;
         
-        BSSRDFQuery(const Scene &scn, const SurfacePoint &sp) : scene(scn), surfPt(sp) {}
+        BSSRDFQuery(const Scene &scn, const SurfacePoint &sp, float t, int16_t wl, bool adj = false) :
+        scene(scn), surfPt(sp), time(t), wlHint(wl), adjoint(adj) {}
     };
     
     struct SLR_API BSSRDFSample {
         float uPos[2];
         float uDir[2];
-        BSSRDFSample(float uPos0, float uPos1, float uDir0, float uDir1) : uPos{uPos0, uPos1}, uDir{uDir0, uDir1} { }
+        float uAuxiliary;
+        BSSRDFSample(float uPos0, float uPos1, float uDir0, float uDir1, float uAux) : uPos{uPos0, uPos1}, uDir{uDir0, uDir1}, uAuxiliary(uAux) { }
     };
     
     struct SLR_API BSSRDFQueryResult {
-        Intersection isect;
+        SurfacePoint surfPt;
         Vector3D dir;
         float areaPDF;
         float dirPDF;
@@ -233,7 +236,11 @@ namespace SLR {
                                   std::fabs(result->dir_sn.z / dot(result->dir_sn, query.gNormal_sn)));
             if (result->reverse)
                 result->reverse->fs *= snCorrection;
-            SLRAssert(result->dirPDF >= 0, "PDF value must be positive: %g.", result->dirPDF);
+            SLRAssert(result->dirPDF == 0 || (!fs_sn.hasNaN() && !fs_sn.hasInf() && !std::isnan(snCorrection) && !std::isinf(snCorrection) &&
+                                              !std::isnan(result->dirPDF) && !std::isinf(result->dirPDF)),
+                      "fs_sn: %s, snCorrection: %g, PDF: %g, wlIdx: %u, qDir: %s, rDir: %s, gNormal: %s",
+                      fs_sn.toString().c_str(), snCorrection, result->dirPDF, query.wlHint,
+                      query.dir_sn.toString().c_str(), result->dir_sn.toString().c_str(), query.gNormal_sn.toString().c_str());
             return fs_sn * snCorrection;
         }
         SampledSpectrum evaluate(const BSDFQuery &query, const Vector3D &dir, SampledSpectrum* rev_fs = nullptr) const {
@@ -248,6 +255,11 @@ namespace SLR {
             float snCorrection = (query.adjoint ?
                                   std::fabs(query.dir_sn.z / dot(query.dir_sn, query.gNormal_sn)) :
                                   std::fabs(dir.z / dot(dir, query.gNormal_sn)));
+            SLRAssert(!fs_sn.hasNaN() && !fs_sn.hasInf() && !std::isnan(snCorrection) && !std::isinf(snCorrection),
+                      "fs_sn: %s, snCorrection: %g, wlIdx: %u, qDir: %s, rDir: %s, gNormal: %s",
+                      fs_sn.toString().c_str(), snCorrection, query.wlHint,
+                      query.dir_sn.toString().c_str(), dir.toString().c_str(), query.gNormal_sn.toString().c_str());
+            
             if (rev_fs)
                 *rev_fs *= snCorrection;
             return fs_sn * snCorrection;
@@ -259,7 +271,9 @@ namespace SLR {
                 return 0;
             }
             float ret = evaluatePDFInternal(query, dir, revPDF);
-            SLRAssert(ret >= 0, "PDF value must be positive: %g.", ret);
+            SLRAssert(!std::isnan(ret) && !std::isinf(ret) && ret >= 0,
+                      "PDF: %g, wlIdx: %u, qDir: %s, rDir: %s",
+                      ret, query.wlHint, query.dir_sn.toString().c_str(), dir.toString().c_str());
             return ret;
         }
         float weight(const BSDFQuery &query) const {
@@ -267,6 +281,9 @@ namespace SLR {
                 return 0;
             float weight_sn = weightInternal(query);
             float snCorrection = query.adjoint ? std::fabs(query.dir_sn.z / dot(query.dir_sn, query.gNormal_sn)) : 1;
+            SLRAssert(!std::isnan(weight_sn) && !std::isinf(weight_sn) && !std::isnan(snCorrection) && !std::isinf(snCorrection),
+                      "weight_sn: %g, snCorrection: %g, wlIdx: %u, qDir: %s",
+                      weight_sn, snCorrection, query.wlHint, query.dir_sn.toString().c_str());
             return weight_sn * snCorrection;
         }
         
@@ -308,30 +325,22 @@ namespace SLR {
     
     
     class SLR_API BSSRDF {
-        SampledSpectrum m_sigma_a;
-        SampledSpectrum m_sigma_s_p;
-        SampledSpectrum m_internalHHReflectance;
+        SampledSpectrum m_sigma_tr;
+        SampledSpectrum m_z_r;
+        SampledSpectrum m_z_v;
         
-        SampledSpectrum Rd(float r) const {
-            SampledSpectrum sigma_e_p = m_sigma_s_p + m_sigma_a;
-            SampledSpectrum alpha_p = m_sigma_s_p / sigma_e_p;
-            SampledSpectrum sigma_tr = sqrt(3 * m_sigma_a * sigma_e_p);
-            SampledSpectrum A = (SampledSpectrum::One + m_internalHHReflectance) / (SampledSpectrum::One - m_internalHHReflectance);
-            SampledSpectrum z_r = SampledSpectrum::One / sigma_e_p;
-            SampledSpectrum z_v = z_r * (SampledSpectrum::One + 4.0f / 3.0f * A);
-            SampledSpectrum d_r = sqrt(z_r * z_r + r * r);
-            SampledSpectrum d_v = sqrt(z_v * z_v + r * r);
-            
-            SampledSpectrum sigma_tr_d_r = sigma_tr * d_r;
-            SampledSpectrum realTerm = z_r * (sigma_tr_d_r + 1) * exp(-sigma_tr_d_r) / (d_r * d_r * d_r);
-            SampledSpectrum sigma_tr_d_v = sigma_tr * d_v;
-            SampledSpectrum virtualTerm = z_v * (sigma_tr_d_v + 1) * exp(-sigma_tr_d_v) / (d_v * d_v * d_v);
-            
-            return alpha_p / (4 * M_PI) * (realTerm + virtualTerm);
-        }
+        float sample_distance(float rMax, int16_t wlIdx, float u, float* radPDF) const;
+        float evaludateDistancePDF(float rMax, int16_t wlIdx, float r) const;
+        SampledSpectrum Rd(float r) const;
     public:
-        BSSRDF(const SampledSpectrum &sigma_a, const SampledSpectrum &sigma_s, float g, const SampledSpectrum &internalHHReflectance) :
-        m_sigma_a(sigma_a), m_sigma_s_p(sigma_s * (1 - g)), m_internalHHReflectance(internalHHReflectance) {}
+        BSSRDF(const SampledSpectrum &sigma_a, const SampledSpectrum &sigma_s, float g, const SampledSpectrum &internalHHReflectance) {
+            SampledSpectrum sigma_e_p = sigma_s * (1 - g) + sigma_a;
+            SampledSpectrum A = (SampledSpectrum::One + internalHHReflectance) / (SampledSpectrum::One - internalHHReflectance);
+            
+            m_sigma_tr = sqrt(3 * sigma_a * sigma_e_p);
+            m_z_r = SampledSpectrum::One / sigma_e_p;
+            m_z_v = (SampledSpectrum::One + 4.0f / 3.0f * A) / sigma_e_p;
+        }
         
         SampledSpectrum sample(const BSSRDFQuery &query, const BSSRDFSample &smp, BSSRDFQueryResult* result) const;
     };

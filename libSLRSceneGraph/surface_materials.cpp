@@ -55,6 +55,23 @@ namespace SLRSceneGraph {
     
     
     
+    SubSurfaceScatteringSurfaceMaterial::SubSurfaceScatteringSurfaceMaterial(const InputSpectrumRef &etaExt, const InputSpectrumRef &etaInt, float alpha_g,
+                                                                             const InputSpectrumRef &l_sigma_a, const InputSpectrumRef &l_sigma_s, float l_g,
+                                                                             const InputSpectrumRef &u_sigma_a, const InputSpectrumRef &u_sigma_s, float u_g) :
+    m_l_sigma_a(l_sigma_a), m_l_sigma_s(l_sigma_s), m_l_g(l_g),
+    m_u_sigma_a(u_sigma_a), m_u_sigma_s(u_sigma_s), m_u_g(u_g) {
+        SpectrumTextureRef etaExtTex = createShared<ConstantSpectrumTexture>(etaExt);
+        SpectrumTextureRef etaIntTex = createShared<ConstantSpectrumTexture>(etaInt);
+        FloatTextureRef alpha_g_tex = createShared<ConstantFloatTexture>(alpha_g);
+        SVMicrofacetDistributionRef D = createShared<SVGGX>(alpha_g_tex);
+        m_surfMat = createShared<MicrofacetScattering>(etaExtTex, etaIntTex, D);
+        
+        m_rawData = new SLR::SubSurfaceScatteringSurfaceMaterial(etaExt.get(), etaInt.get(), alpha_g,
+                                                                 l_sigma_a.get(), l_sigma_s.get(), l_g, u_sigma_a.get(), u_sigma_s.get(), u_g);
+    }
+    
+    
+    
     DiffuseReflection::DiffuseReflection(const SpectrumTextureRef &reflectance, const FloatTextureRef &sigma) :
     m_reflectance(reflectance), m_sigma(sigma) {
         m_rawData = new SLR::DiffuseReflection(reflectance->getRaw(), sigma ? sigma->getRaw() : nullptr);
@@ -162,11 +179,17 @@ namespace SLRSceneGraph {
         return createShared<MixedSurfaceMaterial>(mat0, mat1, factor);
     }
     
+    EmitterSurfacePropertyRef SurfaceMaterial::createDiffuseEmitter(const SpectrumTextureRef &emittance) {
+        return createShared<DiffuseEmission>(emittance);
+    }
+    
     SurfaceMaterialRef SurfaceMaterial::createEmitterSurfaceMaterial(const SurfaceMaterialRef &mat, const EmitterSurfacePropertyRef &emit) {
         return createShared<EmitterSurfaceMaterial>(mat, emit);
     }
     
-    EmitterSurfacePropertyRef SurfaceMaterial::createDiffuseEmitter(const SpectrumTextureRef &emittance) {
-        return createShared<DiffuseEmission>(emittance);
+    SurfaceMaterialRef SurfaceMaterial::createSSSSurfaceMaterial(const InputSpectrumRef &etaExt, const InputSpectrumRef &etaInt, float alpha_g,
+                                                                 const InputSpectrumRef &l_sigma_a, const InputSpectrumRef &l_sigma_s, float l_g,
+                                                                 const InputSpectrumRef &u_sigma_a, const InputSpectrumRef &u_sigma_s, float u_g) {
+        return createShared<SubSurfaceScatteringSurfaceMaterial>(etaExt, etaInt, alpha_g, l_sigma_a, l_sigma_s, l_g, u_sigma_a, u_sigma_s, u_g);
     }
 }

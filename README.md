@@ -14,28 +14,52 @@ SLR consists of the following components.
 
 ##特徴 / Features
 * Full Spectral Rendering (Monte Carlo Spectral Sampling)  
-  (For RGB resources, RGB->Spectrum conversion is performed using Meng-Simon's method \[1\].)
+  (For RGB resources, RGB->Spectrum conversion is performed using Meng-Simon's method \[Meng2015\].)
 * RGB Rendering
-* Various BSDF Types (including Mixed and ~~Layered~~ (under Dev.) BSDF)
-* BSSRDF without pre-pass
-* Image Based Environmental Light
+* Various BSDF Types
+    * Ideal Diffuse BRDF (Lambert)
+    * Ideal Specular BRDF and BSDF
+    * Improved Ward-Dür BRDF \[Moroder2010\]
+    * Ashikhmin-Shirley BRDF \[Ashikhmin2000\]
+    * Microfacet BRDF and BSDF \[Walter2007\] with visible normal sampling \[Heitz2014\]
+    * Mixed BSDF
+    * ~~Layered BSDF~~ (TODO)
+* BSSRDF for Sub-Surface Scattering
+    * Dipole Diffusion without pre-pass \[Jensen2001\]
+    * generalized to rough surfaces \[Donner2006\]
+    * Axis MIS \[King2013\]
 * Bump Mapping (Normal Map)
-* Depth of Field
-* Camera / Object Motion Blur
+* Correct handling of non-symmetric scattering due to shading normals \[Veach1996, 1997\]
+* ~~Volume Rendering~~ (TODO)
+* Image Based Environmental Light
+* Camera
+    * Perspective Camera with Depth of Field (thin-lens model)
+    * Environment Camera
+    * Camera Motion Blur
+    * Object Motion Blur
+    * ~~Deformation Blur~~ (TODO)
 * Geometry Instancing
 * Binned SAH BVH
-* Correct handling of non-symmetric scattering due to shading normals \[2\]
-* Unidirectional Path Tracing \[3\] with MIS
-* Bidirectional Path Tracing \[4\]
-* ~~Adaptive MCMC Progressive Photon Mapping~~ \[5\]  
-  (has been dropped from recent SLR implementation.)
+* Light Transport Algorithms
+    * Unidirectional Path Tracing \[Kajiya1986\] with MIS
+    * Bidirectional Path Tracing \[Veach1994, 1997\]
+    * ~~Adaptive MCMC Progressive Photon Mapping~~ \[Hachisuka2011\]  
+(has been dropped from current SLR implementation.)
 * SLR Custom Language (C/Python-like syntax) for flexible scene description
 
-[1] "Physically Meaningful Rendering using Tristimulus Colours", 2015  
-[2] "Non-symmetric Scattering in Light Transport Algorithms", 1996  
-[3] "THE RENDERING EQUATION", 1986  
-[4] "Bidirectional Estimators for Light Transport", 1994  
-[5] "Robust Adaptive Photon Tracing Using Photon Path Visibility", 2011
+[Ashikhmin2000] "An Anisotropic Phong BRDF Model"  
+[Donner2006] "Towards Realistic Image Synthesis of Scattering Materials"  
+[Hachisuka2011] "Robust Adaptive Photon Tracing Using Photon Path Visibility"  
+[Heitz2014] "Importance Sampling Microfacet-Based BSDFs using the Distribution of Visible Normals"  
+[Jensen2001] "A Practical Model for Subsurface Light Transport"  
+[Kajiya1986] "THE RENDERING EQUATION"  
+[King2013] "BSSRDF Importance Sampling"  
+[Meng2015] "Physically Meaningful Rendering using Tristimulus Colours"  
+[Moroder2010] "A New Ward BRDF Model with Bounded Albedo"  
+[Veach1994] "Bidirectional Estimators for Light Transport"  
+[Veach1996] "Non-symmetric Scattering in Light Transport Algorithms"  
+[Veach1997] "ROBUST MONTE CARLO METHODS FOR LIGHT TRANSPORT SIMULATION"  
+[Walter2007] "Microfacet Models for Refraction through Rough Surfaces"  
 
 ##動作環境 / Confirmed Environment
 現状以下の環境で動作を確認しています。  

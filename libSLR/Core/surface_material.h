@@ -75,29 +75,28 @@ namespace SLR {
     
     
     class SLR_API SubSurfaceScatteringSurfaceMaterial : public SurfaceMaterial {
-        const SurfaceMaterial* m_surfMat;
+        SpectrumTexture* m_etaExtTex;
+        SpectrumTexture* m_etaIntTex;
+        FloatTexture* m_alpha_g;
+        SVMicrofacetDistribution* m_D;
+        SurfaceMaterial* m_surfMat;
         const InputSpectrum* m_l_sigma_a;
         const InputSpectrum* m_l_sigma_s;
         float m_l_g;
-        const InputSpectrum* m_innerHHReflectance;
+        InputSpectrum* m_innerHHReflectance;
         const InputSpectrum* m_u_sigma_a;
         const InputSpectrum* m_u_sigma_s;
         float m_u_g;
-        const InputSpectrum* m_outerHHReflectance;
+        InputSpectrum* m_outerHHReflectance;
     public:
-        SubSurfaceScatteringSurfaceMaterial(const SurfaceMaterial* surfMat,
+        SubSurfaceScatteringSurfaceMaterial(const InputSpectrum* etaExt, const InputSpectrum* etaInt, float alpha_g,
                                             const InputSpectrum* l_sigma_a, const InputSpectrum* l_sigma_s, float l_g,
                                             const InputSpectrum* u_sigma_a, const InputSpectrum* u_sigma_s, float u_g);
-        ~SubSurfaceScatteringSurfaceMaterial() {
-            if (m_innerHHReflectance)
-                delete m_innerHHReflectance;
-            if (m_outerHHReflectance)
-                delete m_outerHHReflectance;
-        }
+        ~SubSurfaceScatteringSurfaceMaterial();
         
         BSDF* getBSDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem, float scale = 1.0f) const override { return m_surfMat->getBSDF(surfPt, wls, mem); }
         SampledSpectrum emittance(const SurfacePoint &surfPt, const WavelengthSamples &wls) const override { return m_surfMat->emittance(surfPt, wls); }
-        bool isEmitting() const override { return true; }
+        bool isEmitting() const override { return false; }
         EDF* getEDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem, float scale) const override { return m_surfMat->getEDF(surfPt, wls, mem); }
         BSSRDF* getBSSRDF(bool lowerHemisphere, const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem) const override;
     };

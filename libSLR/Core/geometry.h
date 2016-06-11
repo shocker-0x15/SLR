@@ -141,6 +141,7 @@ namespace SLR {
     
     
     
+    // It is not safe to directly use the point and normal because they need to be applied several transforms.
     struct SLR_API Intersection {
         float time;
         float dist;
@@ -153,7 +154,9 @@ namespace SLR {
         
         Intersection() : dist(INFINITY) { }
         
-        void getSurfacePoint(SurfacePoint* surfPt);
+        Point3D getIntersectionPoint() const;
+        const SurfaceMaterial* getSurfaceMaterial() const;
+        void getSurfacePoint(SurfacePoint* surfPt) const;
     };
     
     

@@ -69,6 +69,7 @@ namespace SLR {
     
     template <typename RealType, uint32_t N>
     struct SLR_API ContinuousSpectrumTemplate {
+        virtual ~ContinuousSpectrumTemplate() { }
         virtual SampledSpectrumTemplate<RealType, N> evaluate(const WavelengthSamplesTemplate<RealType, N> &wls) const = 0;
         virtual ContinuousSpectrumTemplate* createScaled(RealType scale) const = 0;
     };

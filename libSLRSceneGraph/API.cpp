@@ -826,6 +826,24 @@ namespace SLRSceneGraph {
                                      };
                                      return configFunc(params, context, err);
                                  }
+                                 else if (type == "SSS") {
+                                     const static Function configFunc{
+                                         0, {
+                                             {"etaExt", Type::Spectrum}, {"etaInt", Type::Spectrum}, {"alpha_g", Type::RealNumber},
+                                             {"sigma_a", Type::Spectrum}, {"sigma_s", Type::Spectrum}, {"g", Type::RealNumber}
+                                         },
+                                         [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
+                                             InputSpectrumRef etaExt = args.at("etaExt").rawRef<TypeMap::Spectrum>();
+                                             InputSpectrumRef etaInt = args.at("etaInt").rawRef<TypeMap::Spectrum>();
+                                             float alpha_g = args.at("alpha_g").raw<TypeMap::RealNumber>();
+                                             InputSpectrumRef sigma_a = args.at("sigma_a").rawRef<TypeMap::Spectrum>();
+                                             InputSpectrumRef sigma_s = args.at("sigma_s").rawRef<TypeMap::Spectrum>();
+                                             float g = args.at("g").raw<TypeMap::RealNumber>();
+                                             return Element(TypeMap::SurfaceMaterial(), SurfaceMaterial::createSSSSurfaceMaterial(etaExt, etaInt, alpha_g, sigma_a, sigma_s, g, nullptr, nullptr, 0));
+                                         }
+                                     };
+                                     return configFunc(params, context, err);
+                                 }
                                  else if (type == "mix") {
                                      const static Function configFunc{
                                          0, {

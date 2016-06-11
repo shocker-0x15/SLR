@@ -270,10 +270,6 @@ namespace SLR {
         return m_accelerator->intersect(ray, isect);
     }
     
-    void SurfaceObjectAggregate::getSurfacePoint(const Intersection &isect, SurfacePoint* surfPt) const {
-        isect.obj.top()->getSurfacePoint(isect, surfPt);
-    }
-    
     bool SurfaceObjectAggregate::isEmitting() const {
         return m_revMap.size() > 0;
     }
@@ -304,24 +300,6 @@ namespace SLR {
         return prob * light.top()->evaluateProb(light);
     }
     
-    SampledSpectrum SurfaceObjectAggregate::sample(const Light &light, const LightPosQuery &query, const LightPosSample &smp, LightPosQueryResult* result) const {
-        //    if (light.top() != this) {
-        //        result->areaPDF = 0.0f;
-        //        return SampledSpectrum::Zero;
-        //    }
-        //    light.pop();
-        //    SampledSpectrum M = light.top()->sample(light, query, result);
-        //    light.push(this);
-        //    return M;
-        return light.top()->sample(light, query, smp, result);
-    }
-    
-    Ray SurfaceObjectAggregate::sampleRay(const Light &light,
-                                          const LightPosQuery &lightPosQuery, const LightPosSample &lightPosSample, LightPosQueryResult* lightPosResult, SampledSpectrum* Le0, EDF** edf,
-                                          const EDFQuery &edfQuery, const EDFSample &edfSample, EDFQueryResult* edfResult, SampledSpectrum* Le1,
-                                          ArenaAllocator &mem) const {
-        return light.top()->sampleRay(light, lightPosQuery, lightPosSample, lightPosResult, Le0, edf, edfQuery, edfSample, edfResult, Le1, mem);
-    }
     
     
     BoundingBox3D TransformedSurfaceObject::bounds() const {
@@ -340,7 +318,15 @@ namespace SLR {
         return true;
     }
     
-    
+    Point3D TransformedSurfaceObject::getIntersectionPoint(const Intersection &isect) const {
+        isect.obj.pop();
+        Point3D ret = isect.obj.top()->getIntersectionPoint(isect);
+        StaticTransform sampledTF;
+        m_transform->sample(isect.time, &sampledTF);
+        ret = sampledTF * ret;
+        isect.obj.push(this);
+        return ret;
+    }
     
     void TransformedSurfaceObject::getSurfacePoint(const Intersection &isect, SurfacePoint *surfPt) const {
         isect.obj.pop();

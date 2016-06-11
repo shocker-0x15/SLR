@@ -93,6 +93,10 @@ namespace SLR {
     SampledSpectrum SpecularBSDF::sampleInternal(const BSDFQuery &query, float uComponent, const float uDir[2], BSDFQueryResult* result) const {
         SampledSpectrum F = m_fresnel.evaluate(query.dir_sn.z);
         float reflectProb = F.importance(query.wlHint);
+        if (query.flags.isReflection())
+            reflectProb = 1.0f;
+        if (query.flags.isTransmission())
+            reflectProb = 0.0f;
         if (uComponent < reflectProb) {
             result->dir_sn = Vector3D(-query.dir_sn.x, -query.dir_sn.y, query.dir_sn.z);
             result->dirPDF = reflectProb;

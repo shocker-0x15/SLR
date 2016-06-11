@@ -38,6 +38,9 @@ namespace SLR {
             result->reverse->fs = fs;
         }
         
+        SLRAssert(!fs.hasInf() && !fs.hasNaN(), "fs: %s, F: %s, G, %g, D: %g, wlIdx: %u, qDir: %s, rDir: %s",
+                  fs.toString().c_str(), F.toString().c_str(), G, D, query.wlHint, query.dir_sn.toString().c_str(), result->dir_sn.toString().c_str());
+        
         return fs;
     }
     
@@ -58,6 +61,9 @@ namespace SLR {
         SampledSpectrum F = m_F.evaluate(dotHV);
         float G = m_D->evaluateSmithG1(query.dir_sn, m) * m_D->evaluateSmithG1(dir, m);
         SampledSpectrum fs = F * D * G / (4 * query.dir_sn.z * dir.z);
+        
+        SLRAssert(!fs.hasInf() && !fs.hasNaN(), "fs: %s, F: %s, G, %g, D: %g, wlIdx: %u, qDir: %s, dir: %s",
+                  fs.toString().c_str(), F.toString().c_str(), G, D, query.wlHint, query.dir_sn.toString().c_str(), dir.toString().c_str());
         
         if (rev_fs)
             *rev_fs = fs;
@@ -85,6 +91,10 @@ namespace SLR {
         float commonPDFTerm = 1.0f / (4 * dotHV * sign);
         float ret = commonPDFTerm * mPDF;
         
+        SLRAssert(!std::isnan(commonPDFTerm) && !std::isinf(commonPDFTerm) && !std::isnan(mPDF) && !std::isinf(mPDF),
+                  "commonPDFTerm: %g, mPDF: %g, wlIdx: %u, qDir: %s, dir: %s",
+                  commonPDFTerm, mPDF, query.wlHint, query.dir_sn.toString().c_str(), dir.toString().c_str());
+        
         if (revPDF)
             *revPDF = commonPDFTerm * m_D->evaluatePDF(sign * dir, m);
         return ret;
@@ -111,13 +121,17 @@ namespace SLR {
         float mPDF;
         float D = m_D->sample(sign * query.dir_sn, uDir[0], uDir[1], &m, &mPDF);
         float dotHV = dot(query.dir_sn, m);
-        if (dotHV * sign <= 0) {
+        if (dotHV * sign <= 0 || std::isnan(D)) {
             result->dirPDF = 0.0f;
             return SampledSpectrum::Zero;
         }
         
         SampledSpectrum F = m_F.evaluate(dotHV);
         float reflectProb = F.importance(query.wlHint);
+        if (query.flags.isReflection())
+            reflectProb = 1.0f;
+        if (query.flags.isTransmission())
+            reflectProb = 0.0f;
         if (uComponent < reflectProb) {
             result->dir_sn = 2 * dotHV * m - query.dir_sn;
             if (result->dir_sn.z * query.dir_sn.z <= 0) {
@@ -130,6 +144,9 @@ namespace SLR {
             
             float G = m_D->evaluateSmithG1(query.dir_sn, m) * m_D->evaluateSmithG1(result->dir_sn, m);
             SampledSpectrum fs = F * D * G / (4 * query.dir_sn.z * result->dir_sn.z);
+            
+            SLRAssert(!fs.hasInf() && !fs.hasNaN(), "fs: %s, F: %s, G, %g, D: %g, wlIdx: %u, qDir: %s, rDir: %s",
+                      fs.toString().c_str(), F.toString().c_str(), G, D, query.wlHint, query.dir_sn.toString().c_str(), result->dir_sn.toString().c_str());
             
             if (result->reverse) {
                 result->reverse->dirPDF = commonPDFTerm * m_D->evaluatePDF(sign * result->dir_sn, m);
@@ -163,9 +180,15 @@ namespace SLR {
                 float G_wl = m_D->evaluateSmithG1(query.dir_sn, m_wl) * m_D->evaluateSmithG1(result->dir_sn, m_wl);
                 float D_wl = m_D->evaluate(m_wl);
                 ret[wlIdx] = std::fabs(dotHV_wl * dotHL_wl) * (1 - F_wl) * G_wl * D_wl / std::pow(eEnter[wlIdx] * dotHV_wl + eExit[wlIdx] * dotHL_wl, 2);
+                
+                SLRAssert(!std::isnan(ret[wlIdx]) && !std::isinf(ret[wlIdx]), "fs: %g, F: %g, G, %g, D: %g, wlIdx: %u, qDir: %s",
+                          ret[wlIdx], F_wl, G_wl, D_wl, query.wlHint, query.dir_sn.toString().c_str());
             }
             ret /= std::fabs(query.dir_sn.z * result->dir_sn.z);
             ret *= query.adjoint ? (eExit * eExit) : (eEnter * eEnter);// !adjoint: eExit^2 * (eEnter / eExit)^2
+            
+            SLRAssert(!ret.hasInf() && !ret.hasNaN(), "fs: %s, wlIdx: %u, qDir: %s, rDir: %s",
+                      ret.toString().c_str(), query.wlHint, query.dir_sn.toString().c_str(), result->dir_sn.toString().c_str());
             
             if (result->reverse) {
                 result->reverse->dirPDF = commonPDFTerm * m_D->evaluatePDF(-sign * result->dir_sn, m) * eEnter[query.wlHint] * eEnter[query.wlHint] * std::fabs(dotHV);
@@ -179,7 +202,7 @@ namespace SLR {
         bool entering = query.dir_sn.z >= 0.0f;
         int32_t sign = entering ? 1 : -1;
         
-        if (dir.z * query.dir_sn.z > 0) {
+        if (dir.z * query.dir_sn.z > 0 && query.flags.matches(DirectionType::Reflection | DirectionType::AllFreq)) {
             Normal3D m = sign * halfVector(query.dir_sn, dir);
             float dotHV = dot(query.dir_sn, m);
             float D = m_D->evaluate(m);
@@ -188,11 +211,14 @@ namespace SLR {
             float G = m_D->evaluateSmithG1(query.dir_sn, m) * m_D->evaluateSmithG1(dir, m);
             SampledSpectrum fs = F * D * G / (4 * query.dir_sn.z * dir.z);
             
+            SLRAssert(!fs.hasInf() && !fs.hasNaN(), "fs: %s, F: %s, G, %g, D: %g, wlIdx: %u, qDir: %s, dir: %s",
+                      fs.toString().c_str(), F.toString().c_str(), G, D, query.wlHint, query.dir_sn.toString().c_str(), dir.toString().c_str());
+            
             if (rev_fs)
                 *rev_fs = fs;
             return fs;
         }
-        else {
+        else if (query.flags.matches(DirectionType::Transmission | DirectionType::AllFreq)) {
             const SampledSpectrum &eEnter = entering ? m_F.etaExt() : m_F.etaInt();
             const SampledSpectrum &eExit = entering ? m_F.etaInt() : m_F.etaExt();
             
@@ -205,14 +231,24 @@ namespace SLR {
                 float G_wl = m_D->evaluateSmithG1(query.dir_sn, m_wl) * m_D->evaluateSmithG1(dir, m_wl);
                 float D_wl = m_D->evaluate(m_wl);
                 ret[wlIdx] = std::fabs(dotHV_wl * dotHL_wl) * (1 - F_wl) * G_wl * D_wl / std::pow(eEnter[wlIdx] * dotHV_wl + eExit[wlIdx] * dotHL_wl, 2);
+                
+                SLRAssert(!std::isnan(ret[wlIdx]) && !std::isinf(ret[wlIdx]), "fs: %g, F: %g, G, %g, D: %g, wlIdx: %u, qDir: %s, dir: %s",
+                          ret[wlIdx], F_wl, G_wl, D_wl, query.wlHint, query.dir_sn.toString().c_str(), dir.toString().c_str());
             }
             ret /= std::fabs(query.dir_sn.z * dir.z);
             ret *= query.adjoint ? (eExit * eExit) : (eEnter * eEnter);// !adjoint: eExit^2 * (eEnter / eExit)^2
+            
+            SLRAssert(!ret.hasInf() && !ret.hasNaN(), "fs: %s, wlIdx: %u, qDir: %s, dir: %s",
+                      ret.toString().c_str(), query.wlHint, query.dir_sn.toString().c_str(), dir.toString().c_str());
             
             if (rev_fs)
                 *rev_fs = ret;
             return ret;
         }
+        
+        if (rev_fs)
+            *rev_fs = SampledSpectrum::Zero;
+        return SampledSpectrum::Zero;
     }
     
     float MicrofacetBSDF::evaluatePDFInternal(const BSDFQuery &query, const Vector3D &dir, float* revPDF) const {
@@ -236,8 +272,16 @@ namespace SLR {
         
         SampledSpectrum F = m_F.evaluate(dotHV);
         float reflectProb = F.importance(query.wlHint);
+        if (query.flags.isReflection())
+            reflectProb = 1.0f;
+        if (query.flags.isTransmission())
+            reflectProb = 0.0f;
         if (dir.z * query.dir_sn.z > 0) {
             float commonPDFTerm = reflectProb / (4 * dotHV * sign);
+            
+            SLRAssert(!std::isnan(commonPDFTerm) && !std::isinf(commonPDFTerm) && !std::isnan(mPDF) && !std::isinf(mPDF),
+                      "commonPDFTerm: %g, mPDF: %g, F: %s, wlIdx: %u, qDir: %s, dir: %s",
+                      commonPDFTerm, mPDF, F.toString().c_str(), query.wlHint, query.dir_sn.toString().c_str(), dir.toString().c_str());
             
             if (revPDF)
                 *revPDF = commonPDFTerm * m_D->evaluatePDF(sign * dir, m);
@@ -246,6 +290,10 @@ namespace SLR {
         else {
             float dotHL = dot(dir, m);
             float commonPDFTerm = (1 - reflectProb) / std::pow(eEnter[query.wlHint] * dotHV + eExit[query.wlHint] * dotHL, 2);
+            
+            SLRAssert(!std::isnan(commonPDFTerm) && !std::isinf(commonPDFTerm) && !std::isnan(mPDF) && !std::isinf(mPDF),
+                      "commonPDFTerm: %g, mPDF: %g, F: %s, wlIdx: %u, qDir: %s, dir: %s",
+                      commonPDFTerm, mPDF, F.toString().c_str(), query.wlHint, query.dir_sn.toString().c_str(), dir.toString().c_str());
             
             if (revPDF)
                 *revPDF = commonPDFTerm * m_D->evaluatePDF(-sign * dir, m) * eEnter[query.wlHint] * eEnter[query.wlHint] * std::fabs(dotHV);
