@@ -186,7 +186,6 @@ namespace SLR {
         Ray probeRay{probeOrg, u, query.time, 0.0f, probeLength};
         
         std::vector<Intersection> isects;
-//        int32_t count = 0;
         while (true) {
             Intersection isect;
             if (!query.scene.intersect(probeRay, &isect))
@@ -195,10 +194,6 @@ namespace SLR {
                 isects.push_back(isect);
             probeRay.distMin = isect.dist + Ray::Epsilon;
             probeRay.distMax = probeLength;
-//            ++count;
-//            if (count > 5) {
-//                printf("invalid: dist: %g, rMax: %g, probeLength: %g, %g, %g\n", dist, rMax, probeLength, probeRay.distMin, probeRay.distMax);
-//            }
         }
         if (isects.empty()) {
             result->areaPDF = 0.0f;
@@ -247,6 +242,11 @@ namespace SLR {
         geometricFrame.z = result->surfPt.gNormal;
         geometricFrame.z.makeCoordinateSystem(&geometricFrame.x, &geometricFrame.y);
         result->dir = geometricFrame.fromLocal(dirLocal);
+        
+        SLRAssert(!ret.hasInf() && !ret.hasNaN(),
+                  "R: %s, u(%g, %g, %g, %g, %g), p: %s, gNormal: %s",
+                  ret.toString().c_str(), smp.uPos[0], smp.uPos[1], smp.uDir[0], smp.uDir[1], smp.uAuxiliary,
+                  query.surfPt.p.toString().c_str(), query.surfPt.gNormal.toString().c_str());
         
         return ret;
     }

@@ -201,15 +201,16 @@ namespace SLR {
     SampledSpectrum MicrofacetBSDF::evaluateInternal(const BSDFQuery &query, const Vector3D &dir, SampledSpectrum* rev_fs) const {
         bool entering = query.dir_sn.z >= 0.0f;
         int32_t sign = entering ? 1 : -1;
+        float dotNVdotNL = dir.z * query.dir_sn.z;
         
-        if (dir.z * query.dir_sn.z > 0 && query.flags.matches(DirectionType::Reflection | DirectionType::AllFreq)) {
+        if (dotNVdotNL > 0 && query.flags.matches(DirectionType::Reflection | DirectionType::AllFreq)) {
             Normal3D m = sign * halfVector(query.dir_sn, dir);
             float dotHV = dot(query.dir_sn, m);
             float D = m_D->evaluate(m);
             
             SampledSpectrum F = m_F.evaluate(dotHV);
             float G = m_D->evaluateSmithG1(query.dir_sn, m) * m_D->evaluateSmithG1(dir, m);
-            SampledSpectrum fs = F * D * G / (4 * query.dir_sn.z * dir.z);
+            SampledSpectrum fs = F * D * G / (4 * dotNVdotNL);
             
             SLRAssert(!fs.hasInf() && !fs.hasNaN(), "fs: %s, F: %s, G, %g, D: %g, wlIdx: %u, qDir: %s, dir: %s",
                       fs.toString().c_str(), F.toString().c_str(), G, D, query.wlHint, query.dir_sn.toString().c_str(), dir.toString().c_str());
@@ -218,7 +219,7 @@ namespace SLR {
                 *rev_fs = fs;
             return fs;
         }
-        else if (query.flags.matches(DirectionType::Transmission | DirectionType::AllFreq)) {
+        else if (dotNVdotNL < 0 && query.flags.matches(DirectionType::Transmission | DirectionType::AllFreq)) {
             const SampledSpectrum &eEnter = entering ? m_F.etaExt() : m_F.etaInt();
             const SampledSpectrum &eExit = entering ? m_F.etaInt() : m_F.etaExt();
             
@@ -235,7 +236,7 @@ namespace SLR {
                 SLRAssert(!std::isnan(ret[wlIdx]) && !std::isinf(ret[wlIdx]), "fs: %g, F: %g, G, %g, D: %g, wlIdx: %u, qDir: %s, dir: %s",
                           ret[wlIdx], F_wl, G_wl, D_wl, query.wlHint, query.dir_sn.toString().c_str(), dir.toString().c_str());
             }
-            ret /= std::fabs(query.dir_sn.z * dir.z);
+            ret /= std::fabs(dotNVdotNL);
             ret *= query.adjoint ? (eExit * eExit) : (eEnter * eEnter);// !adjoint: eExit^2 * (eEnter / eExit)^2
             
             SLRAssert(!ret.hasInf() && !ret.hasNaN(), "fs: %s, wlIdx: %u, qDir: %s, dir: %s",
@@ -254,11 +255,14 @@ namespace SLR {
     float MicrofacetBSDF::evaluatePDFInternal(const BSDFQuery &query, const Vector3D &dir, float* revPDF) const {
         bool entering = query.dir_sn.z >= 0.0f;
         int32_t sign = entering ? 1 : -1;
+        float dotNVdotNL = dir.z * query.dir_sn.z;
+        if (dotNVdotNL == 0)
+            return 0.0f;
         const SampledSpectrum &eEnter = entering ? m_F.etaExt() : m_F.etaInt();
         const SampledSpectrum &eExit = entering ? m_F.etaInt() : m_F.etaExt();
         
         Normal3D m;
-        if (dir.z * query.dir_sn.z > 0)
+        if (dotNVdotNL > 0)
             m = sign * halfVector(query.dir_sn, dir);
         else
             m = normalize(-(eEnter[query.wlHint] * query.dir_sn + eExit[query.wlHint] * dir));
@@ -276,7 +280,7 @@ namespace SLR {
             reflectProb = 1.0f;
         if (query.flags.isTransmission())
             reflectProb = 0.0f;
-        if (dir.z * query.dir_sn.z > 0) {
+        if (dotNVdotNL > 0) {
             float commonPDFTerm = reflectProb / (4 * dotHV * sign);
             
             SLRAssert(!std::isnan(commonPDFTerm) && !std::isinf(commonPDFTerm) && !std::isnan(mPDF) && !std::isinf(mPDF),

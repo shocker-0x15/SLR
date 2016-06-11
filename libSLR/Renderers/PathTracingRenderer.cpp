@@ -213,8 +213,8 @@ namespace SLR {
             }
             alpha *= fs * absDot(fsResult.dir_sn, gNorm_sn) / fsResult.dirPDF;
             SLRAssert(!alpha.hasInf() && !alpha.hasNaN(),
-                      "alpha: unexpected value detected:\nalpha: %s\nfs: %s\nlength: %u, cos: %g, dirPDF: %g",
-                      alpha.toString().c_str(), fs.toString().c_str(), pathLength, absDot(fsResult.dir_sn, gNorm_sn), fsResult.dirPDF);
+                      "alpha: %s\nlength: %u, cos: %g, dirPDF: %g",
+                      alpha.toString().c_str(), pathLength, absDot(fsResult.dir_sn, gNorm_sn), fsResult.dirPDF);
             
             Vector3D dirIn = surfPt.shadingFrame.fromLocal(fsResult.dir_sn);
             ray = Ray(surfPt.p, dirIn, ray.time, Ray::Epsilon);
@@ -223,21 +223,6 @@ namespace SLR {
             isect = Intersection();
             BSSRDF* bssrdf = surfPt.createBSSRDF(fsResult.dir_sn.z < 0, wls, mem);
             if (bssrdf) {
-//                SampledSpectrumSum integ = SampledSpectrum::Zero;
-//                uint32_t numSuccesses = 0;
-//                for (int i = 0; i < 1000000; ++i) {
-//                    BSSRDFQuery sssQuery(scene, surfPt, ray.time, wls.selectedLambda);
-//                    BSSRDFSample sssSample(rng.getFloat0cTo1o(), rng.getFloat0cTo1o(), rng.getFloat0cTo1o(), rng.getFloat0cTo1o(), rng.getFloat0cTo1o());
-//                    BSSRDFQueryResult sssResult;
-//                    SampledSpectrum R = bssrdf->sample(sssQuery, sssSample, &sssResult);
-//                    if (sssResult.areaPDF == 0)
-//                        continue;
-//                    ++numSuccesses;
-//                    integ += R / sssResult.areaPDF / M_PI;
-//                    if (integ.result.hasNaN()) {
-//                        R = bssrdf->sample(sssQuery, sssSample, &sssResult);
-//                    }
-//                }
                 BSSRDFQuery sssQuery(scene, surfPt, ray.time, wls.selectedLambda);
                 BSSRDFSample sssSample(rng.getFloat0cTo1o(), rng.getFloat0cTo1o(), rng.getFloat0cTo1o(), rng.getFloat0cTo1o(), rng.getFloat0cTo1o());
                 BSSRDFQueryResult sssResult;
@@ -247,9 +232,6 @@ namespace SLR {
                 surfPt = std::move(sssResult.surfPt);
                 ray = Ray(surfPt.p, -sssResult.dir, ray.time, 0, 0);
                 alpha *= R * (absDot(surfPt.gNormal, ray.dir) / M_PI) / (sssResult.areaPDF * sssResult.dirPDF);
-                SLRAssert(!alpha.hasInf() && !alpha.hasNaN(),
-                          "alpha: unexpected value detected:\nalpha: %s\nR: %s\nlength: %u, cos: %g, areaPDF: %g, dirPDF: %g",
-                          alpha.toString().c_str(), R.toString().c_str(), pathLength, absDot(surfPt.gNormal, ray.dir), sssResult.areaPDF, sssResult.dirPDF);
                 fsType = DirectionType::Transmission | DirectionType::AllFreq;
             }
             else {
@@ -264,7 +246,6 @@ namespace SLR {
             // implicit light sampling
             if (surfPt.isEmitting() && bssrdf == nullptr) {
                 float bsdfPDF = fsResult.dirPDF;
-                SLRAssert(!std::isnan(bsdfPDF) && !std::isinf(bsdfPDF), "bsdfPDF: unexpected value detected: %f", bsdfPDF);
                 
                 EDF* edf = surfPt.createEDF(wls, mem);
                 SampledSpectrum Le = surfPt.emittance(wls) * edf->evaluate(EDFQuery(), dirOut_sn);
@@ -272,7 +253,6 @@ namespace SLR {
                 float dist2 = surfPt.getSquaredDistance(ray.org);
                 float lightPDF = lightProb * surfPt.evaluateAreaPDF() * dist2 / absDot(ray.dir, surfPt.gNormal);
                 SLRAssert(!Le.hasNaN() && !Le.hasInf(), "Le: unexpected value detected: %s", Le.toString().c_str());
-                SLRAssert(!std::isnan(lightProb) && !std::isinf(lightProb), "lightProb: unexpected value detected: %f", lightProb);
                 SLRAssert(!std::isnan(lightPDF)/* && !std::isinf(lightPDF)*/, "lightPDF: unexpected value detected: %f", lightPDF);
                 
                 float MISWeight = 1.0f;

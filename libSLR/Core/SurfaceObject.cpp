@@ -452,17 +452,18 @@ namespace SLR {
     }
     
     float Scene::evaluateProb(const Light &light) const {
+        float ret = 0.0f;
         if (m_envSphere) {
             float sumImps = m_aggregate->importance() + m_envSphere->importance();
-            if (light.top() == m_envSphere) {
-                return m_envSphere->importance() / sumImps;
-            }
-            else {
-                return m_aggregate->importance()  / sumImps * m_aggregate->evaluateProb(light);
-            }
+            if (light.top() == m_envSphere)
+                ret = m_envSphere->importance() / sumImps;
+            else
+                ret = m_aggregate->importance()  / sumImps * m_aggregate->evaluateProb(light);
         }
         else {
-            return m_aggregate->evaluateProb(light);
+            ret = m_aggregate->evaluateProb(light);
         }
+        SLRAssert(!std::isnan(ret) && !std::isinf(ret), "%g", ret);
+        return ret;
     }
 }
