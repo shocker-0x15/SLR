@@ -30,7 +30,7 @@ namespace SLR {
         
         Vector3D p = cross(ray.dir, edge02);
         float det = dot(edge01, p);
-        if (det > -0.000001f && det < 0.000001f)
+        if (det == 0.0f)
             return false;
         float invDet = 1.0f / det;
         

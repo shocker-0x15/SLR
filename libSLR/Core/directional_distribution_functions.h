@@ -153,12 +153,13 @@ namespace SLR {
     struct SLR_API BSSRDFQuery {
         const Scene &scene;
         const SurfacePoint &surfPt;
+        Vector3D dir;
         float time;
         int16_t wlHint;
         bool adjoint;
         
-        BSSRDFQuery(const Scene &scn, const SurfacePoint &sp, float t, int16_t wl, bool adj = false) :
-        scene(scn), surfPt(sp), time(t), wlHint(wl), adjoint(adj) {}
+        BSSRDFQuery(const Scene &scn, const SurfacePoint &sp, const Vector3D d, float t, int16_t wl, bool adj = false) :
+        scene(scn), surfPt(sp), dir(d), time(t), wlHint(wl), adjoint(adj) {}
     };
     
     struct SLR_API BSSRDFSample {
@@ -328,12 +329,16 @@ namespace SLR {
         SampledSpectrum m_sigma_tr;
         SampledSpectrum m_z_r;
         SampledSpectrum m_z_v;
+        SampledSpectrum m_sigma_s;
+        SampledSpectrum m_sigma_e;
+        float m_g;
         
         float sample_distance(float rMax, int16_t wlIdx, float u, float* radPDF) const;
         float evaludateDistancePDF(float rMax, int16_t wlIdx, float r) const;
         SampledSpectrum Rd(float r) const;
     public:
-        BSSRDF(const SampledSpectrum &sigma_a, const SampledSpectrum &sigma_s, float g, const SampledSpectrum &internalHHReflectance) {
+        BSSRDF(const SampledSpectrum &sigma_a, const SampledSpectrum &sigma_s, float g, const SampledSpectrum &internalHHReflectance) :
+        m_sigma_s(sigma_s), m_sigma_e(sigma_s + sigma_a), m_g(g) {
             SampledSpectrum sigma_e_p = sigma_s * (1 - g) + sigma_a;
             SampledSpectrum A = (SampledSpectrum::One + internalHHReflectance) / (SampledSpectrum::One - internalHHReflectance);
             

@@ -223,15 +223,15 @@ namespace SLR {
             isect = Intersection();
             BSSRDF* bssrdf = surfPt.createBSSRDF(fsResult.dir_sn.z < 0, wls, mem);
             if (bssrdf) {
-                BSSRDFQuery sssQuery(scene, surfPt, ray.time, wls.selectedLambda);
+                BSSRDFQuery sssQuery(scene, surfPt, dirIn, ray.time, wls.selectedLambda);
                 BSSRDFSample sssSample(rng.getFloat0cTo1o(), rng.getFloat0cTo1o(), rng.getFloat0cTo1o(), rng.getFloat0cTo1o(), rng.getFloat0cTo1o());
                 BSSRDFQueryResult sssResult;
-                SampledSpectrum R = bssrdf->sample(sssQuery, sssSample, &sssResult);
-                if (sssResult.areaPDF == 0.0f || sssResult.dirPDF == 0)
+                SampledSpectrum T = bssrdf->sample(sssQuery, sssSample, &sssResult);
+                if (sssResult.areaPDF == 0.0f || sssResult.dirPDF == 0.0f)
                     break;
                 surfPt = std::move(sssResult.surfPt);
                 ray = Ray(surfPt.p, -sssResult.dir, ray.time, 0, 0);
-                alpha *= R * (absDot(surfPt.gNormal, ray.dir) / M_PI) / (sssResult.areaPDF * sssResult.dirPDF);
+                alpha *= T / (sssResult.areaPDF * sssResult.dirPDF);
                 fsType = DirectionType::Transmission | DirectionType::AllFreq;
             }
             else {

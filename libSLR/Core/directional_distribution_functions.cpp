@@ -137,6 +137,56 @@ namespace SLR {
     }
     
     SampledSpectrum BSSRDF::sample(const SLR::BSSRDFQuery &query, const SLR::BSSRDFSample &smp, SLR::BSSRDFQueryResult *result) const {
+        if (smp.uAuxiliary < 0.25f)  {
+            float so = -std::log(smp.uPos[0]) / m_sigma_e[query.wlHint];
+            float distPDF = m_sigma_e[query.wlHint] * std::exp(-m_sigma_e[query.wlHint] * so);
+            Ray ray{query.surfPt.p, query.dir, query.time, Ray::Epsilon, so};
+            Intersection isect;
+            if (query.scene.intersect(ray, &isect)) {
+                isect.getSurfacePoint(&result->surfPt);
+                result->dir = -ray.dir;
+                float distProb = std::exp(-m_sigma_e[query.wlHint] * isect.dist);
+                result->areaPDF = 1.0f * 0.25f * distProb;
+                result->dirPDF = 1.0f;
+                return exp(-m_sigma_e * isect.dist);
+            }
+            auto sampleHenyeyGreenstein = [](float g, float u, float* theta) {
+                float cosTheta;
+                if (g == 0)
+                    cosTheta = 1 - 2 * u;
+                else
+                    cosTheta = 1 / (2 * g) * (1 + g * g - std::pow((1 - g * g) / (1 - g + 2 * g * u), 2));
+                cosTheta = std::clamp(cosTheta, -1.0f, 1.0f);
+                *theta = std::acos(cosTheta);
+                return (1 - g * g) / (4 * M_PI * std::pow(1 + g * g - 2 * g * cosTheta, 1.5));
+            };
+            float theta;
+            float fp = sampleHenyeyGreenstein(m_g, smp.uDir[0], &theta);
+            float phi = 2 * M_PI * smp.uDir[1];
+            
+            ReferenceFrame scatterFrame;
+            scatterFrame.z = ray.dir;
+            scatterFrame.z.makeCoordinateSystem(&scatterFrame.x, &scatterFrame.y);
+            float sinTheta = std::sin(theta);
+            Vector3D scatterDir = scatterFrame.fromLocal(Vector3D(std::cos(phi) * sinTheta, std::sin(phi) * sinTheta, std::cos(theta)));
+            
+            ray = Ray(ray.org + ray.dir * so, scatterDir, ray.time, 0.0f, INFINITY);
+            isect = Intersection();
+            if (!query.scene.intersect(ray, &isect)) {
+                result->areaPDF = 0.0f;
+                result->dirPDF = 0.0f;
+                return SampledSpectrum::Zero;
+            }
+            isect.getSurfacePoint(&result->surfPt);
+            result->dir = -ray.dir;
+            result->areaPDF = 1.0f * 0.25f * fp;
+            result->dirPDF = 1.0f * distPDF;
+            
+            return m_sigma_s * fp * exp(-m_sigma_e * (so + isect.dist));
+        }
+        
+        float uAxis = (smp.uAuxiliary - 0.25f) / 0.75f;
+        
         Vector3D s, t, u;
         float uSelect;
         Vector3D bases[3];
@@ -145,23 +195,23 @@ namespace SLR {
         const float axisProbs[] = {0.5f, 0.25f, 0.25f};
         int8_t selectedAxis = 0;
         // Should it use shading frame for this?
-        if (smp.uAuxiliary < 0.5f) {
+        if (uAxis < 0.5f) {
             selectedAxis = 0;
-            uSelect = smp.uAuxiliary / 0.5f;
+            uSelect = uAxis / 0.5f;
             s = bases[0];//query.surfPt.shadingFrame.x;
             t = bases[1];//query.surfPt.shadingFrame.y;
             u = bases[2];//query.surfPt.shadingFrame.z;
         }
         else if (smp.uAuxiliary < 0.75f) {
             selectedAxis = 1;
-            uSelect = (smp.uAuxiliary - 0.5f) / 0.25f;
+            uSelect = (uAxis - 0.5f) / 0.25f;
             s = bases[1];//query.surfPt.shadingFrame.y;
             t = bases[2];//query.surfPt.shadingFrame.z;
             u = bases[0];//query.surfPt.shadingFrame.x;
         }
         else {
             selectedAxis = 2;
-            uSelect = (smp.uAuxiliary - 0.75f) / 0.25f;
+            uSelect = (uAxis - 0.75f) / 0.25f;
             s = bases[2];//query.surfPt.shadingFrame.z;
             t = bases[0];//query.surfPt.shadingFrame.x;
             u = bases[1];//query.surfPt.shadingFrame.y;
@@ -227,12 +277,8 @@ namespace SLR {
                       "otherDist: %g, otherAxisPDF: %g, rMax: %g, wlIdx: %u", otherDist, otherAxisPDF, rMax, query.wlHint);
             areaPDF += otherAxisPDF;
         }
-        result->areaPDF = areaPDF;
-        
-//        float z = dot(distVec, query.surfPt.gNormal);
-        SampledSpectrum ret = Rd(distVec.length());
-        SLRAssert(!ret.hasNaN() && !ret.hasInf(), "Rd: %s, dist: %g", ret.toString().c_str(), distVec.length());
-        
+        result->areaPDF = 0.75f * areaPDF;
+    
         // it might be good to sample this direction by sampling BSDF with randomly sampled the opposite side direction.
         Vector3D dirLocal = cosineSampleHemisphere(smp.uDir[0], smp.uDir[1]);
         result->dirPDF = dirLocal.z / M_PI;
@@ -243,6 +289,8 @@ namespace SLR {
         geometricFrame.z.makeCoordinateSystem(&geometricFrame.x, &geometricFrame.y);
         result->dir = geometricFrame.fromLocal(dirLocal);
         
+//        float z = dot(distVec, query.surfPt.gNormal);
+        SampledSpectrum ret = Rd(distVec.length()) * (absDot(result->surfPt.gNormal, result->dir) / M_PI);        
         SLRAssert(!ret.hasInf() && !ret.hasNaN(),
                   "R: %s, u(%g, %g, %g, %g, %g), p: %s, gNormal: %s",
                   ret.toString().c_str(), smp.uPos[0], smp.uPos[1], smp.uDir[0], smp.uDir[1], smp.uAuxiliary,

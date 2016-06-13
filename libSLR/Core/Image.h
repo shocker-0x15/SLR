@@ -270,6 +270,10 @@ namespace SLR {
                                 const RGBA16Fx4 &val = *((RGBA16Fx4*)linearData + m_width * y + x);
                                 float RGB[3] = {val.r, val.g, val.b};
                                 float uvs[3];
+                                RGB[0] = std::max(RGB[0], 0.0f);
+                                RGB[1] = std::max(RGB[1], 0.0f);
+                                RGB[2] = std::max(RGB[2], 0.0f);
+                                SLRAssert(val.a > 0.0f, "Invalid alpha value.");
                                 Upsampling::sRGB_to_uvs(spType, RGB, uvs);
                                 uvsA16Fx4 storedVal{(half)uvs[0], (half)uvs[1], (half)uvs[2], (half)val.a};
                                 SLRAssert(!std::isnan((float)storedVal.u) && !std::isinf((float)storedVal.u) &&
@@ -294,6 +298,7 @@ namespace SLR {
                             m_colorFormat = ColorFormat::Gray8;
                             convertFunc = [this, &linearData, &spType](int32_t x, int32_t y) {
                                 const RGBA16Fx4 &val = *((RGBA16Fx4*)linearData + m_width * y + x);
+                                SLRAssert(val.a > 0.0f, "Invalid alpha value.");
                                 Gray8 storedVal{(uint8_t)std::min(uint32_t(255 * val.a), uint32_t(255))};
                                 setInternal(x, y, &storedVal, m_stride);
                             };
