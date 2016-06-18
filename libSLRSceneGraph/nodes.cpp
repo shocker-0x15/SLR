@@ -80,12 +80,12 @@ namespace SLRSceneGraph {
     }
     
     void InternalNode::applyTransform(const SLR::StaticTransform &tf) {
-        SLRAssert(false, "Not implemented.");
+        SLRAssert_NotImplemented();
         //    m_localToWorld = tf * m_localToWorld;
     }
     
     void InternalNode::applyTransformToLeaf(const SLR::StaticTransform &tf) {
-        SLRAssert(false, "Not implemented.");
+        SLRAssert_NotImplemented();
         //    StaticTransform cumT = tf * m_localToWorld;
         //    for (int i = 0; i < m_childNodes.size(); ++i) {
         //        NodeRef &child = m_childNodes[i];

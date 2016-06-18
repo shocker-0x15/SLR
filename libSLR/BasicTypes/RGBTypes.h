@@ -99,6 +99,14 @@ namespace SLR {
             return 0.0f;
         }
         
+        // setting "primary" to 1.0 might introduce bias.
+        RealType importance(uint16_t selectedLambda) const {
+            RealType sum = r + g + b;
+            const RealType primary = 0.9f;
+            const RealType marginal = (1 - primary) / 2;
+            return sum * marginal + (*this)[selectedLambda] * (primary - marginal);
+        }
+        
         // TODO: consider which RGB color space should be used for rendering calculation and converting.
         void getRGB(RealType RGB[3], RGBColorSpace space = RGBColorSpace::sRGB) const {
             RGB[0] = r;
@@ -144,6 +152,9 @@ namespace SLR {
     template <typename RealType>
     const RGBTemplate<RealType> RGBTemplate<RealType>::NaN = RGBTemplate<RealType>(std::numeric_limits<RealType>::quiet_NaN());
     
+    
+    template <typename RealType>
+    SLR_API RGBTemplate<RealType> sqrt(const RGBTemplate<RealType> &value);
     
     template <typename RealType>
     SLR_API RGBTemplate<RealType> pow(const RGBTemplate<RealType> &s, RealType p);

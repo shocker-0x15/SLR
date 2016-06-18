@@ -52,4 +52,16 @@ namespace SLRSceneGraph {
     CheckerBoardFloatTexture::CheckerBoardFloatTexture(float v0, float v1) : m_values{v0, v1} {
         m_rawData = new SLR::CheckerBoardFloatTexture(v0, v1);
     }
+    
+    VoronoiSpectrumTexture::VoronoiSpectrumTexture(float scale) : m_scale(scale) {
+        m_rawData = new SLR::VoronoiSpectrumTexture(scale);
+    }
+    
+    VoronoiNormal3DTexture::VoronoiNormal3DTexture(float scale) : m_scale(scale) {
+        m_rawData = new SLR::VoronoiNormal3DTexture(scale);
+    }
+    
+    VoronoiFloatTexture::VoronoiFloatTexture(float scale) : m_scale(scale) {
+        m_rawData = new SLR::VoronoiFloatTexture(scale);
+    }
 }

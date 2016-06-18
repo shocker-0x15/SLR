@@ -69,6 +69,7 @@ namespace SLR {
     
     template <typename RealType, uint32_t N>
     struct SLR_API ContinuousSpectrumTemplate {
+        virtual ~ContinuousSpectrumTemplate() { }
         virtual SampledSpectrumTemplate<RealType, N> evaluate(const WavelengthSamplesTemplate<RealType, N> &wls) const = 0;
         virtual ContinuousSpectrumTemplate* createScaled(RealType scale) const = 0;
     };
@@ -344,8 +345,8 @@ namespace SLR {
         RealType values[N];
         static const uint32_t NumComponents;
         
-        SampledSpectrumTemplate(RealType v = 0.0f) { for (int i = 0; i < N; ++i) values[i] = v; };
-        SampledSpectrumTemplate(const RealType* vals) { for (int i = 0; i < N; ++i) values[i] = vals[i]; };
+        SampledSpectrumTemplate(RealType v = 0.0f) { for (int i = 0; i < N; ++i) values[i] = v; }
+        SampledSpectrumTemplate(const RealType* vals) { for (int i = 0; i < N; ++i) values[i] = vals[i]; }
         
         SampledSpectrumTemplate operator+() const { return *this; };
         SampledSpectrumTemplate operator-() const {
@@ -353,155 +354,172 @@ namespace SLR {
             for (int i = 0; i < N; ++i)
                 vals[i] = -values[i];
             return SampledSpectrumTemplate(vals);
-        };
+        }
         
         SampledSpectrumTemplate operator+(const SampledSpectrumTemplate &c) const {
             RealType vals[N];
             for (int i = 0; i < N; ++i)
                 vals[i] = values[i] + c.values[i];
             return SampledSpectrumTemplate(vals);
-        };
+        }
         SampledSpectrumTemplate operator-(const SampledSpectrumTemplate &c) const {
             RealType vals[N];
             for (int i = 0; i < N; ++i)
                 vals[i] = values[i] - c.values[i];
             return SampledSpectrumTemplate(vals);
-        };
+        }
         SampledSpectrumTemplate operator*(const SampledSpectrumTemplate &c) const {
             RealType vals[N];
             for (int i = 0; i < N; ++i)
                 vals[i] = values[i] * c.values[i];
             return SampledSpectrumTemplate(vals);
-        };
+        }
         SampledSpectrumTemplate operator/(const SampledSpectrumTemplate &c) const {
             RealType vals[N];
             for (int i = 0; i < N; ++i)
                 vals[i] = values[i] / c.values[i];
             return SampledSpectrumTemplate(vals);
-        };
+        }
         SampledSpectrumTemplate operator*(RealType s) const {
             RealType vals[N];
             for (int i = 0; i < N; ++i)
                 vals[i] = values[i] * s;
             return SampledSpectrumTemplate(vals);
-        };
+        }
         SampledSpectrumTemplate operator/(RealType s) const {
             RealType vals[N];
             RealType r = 1 / s;
             for (int i = 0; i < N; ++i)
                 vals[i] = values[i] * r;
             return SampledSpectrumTemplate(vals);
-        };
+        }
         friend inline SampledSpectrumTemplate operator*(RealType s, const SampledSpectrumTemplate &c) {
             RealType vals[N];
             for (int i = 0; i < N; ++i)
                 vals[i] = c.values[i] * s;
             return SampledSpectrumTemplate(vals);
-        };
+        }
         
         SampledSpectrumTemplate &operator+=(const SampledSpectrumTemplate &c) {
             for (int i = 0; i < N; ++i)
                 values[i] += c.values[i];
             return *this;
-        };
+        }
         SampledSpectrumTemplate &operator-=(const SampledSpectrumTemplate &c) {
             for (int i = 0; i < N; ++i)
                 values[i] -= c.values[i];
             return *this;
-        };
+        }
         SampledSpectrumTemplate &operator*=(const SampledSpectrumTemplate &c) {
             for (int i = 0; i < N; ++i)
                 values[i] *= c.values[i];
             return *this;
-        };
+        }
         SampledSpectrumTemplate &operator/=(const SampledSpectrumTemplate &c) {
             for (int i = 0; i < N; ++i)
                 values[i] /= c.values[i];
             return *this;
-        };
+        }
         SampledSpectrumTemplate &operator*=(RealType s) {
             for (int i = 0; i < N; ++i)
                 values[i] *= s;
             return *this;
-        };
+        }
         SampledSpectrumTemplate &operator/=(RealType s) {
             RealType r = 1 / s;
             for (int i = 0; i < N; ++i)
                 values[i] *= r;
             return *this;
-        };
+        }
         
         bool operator==(const SampledSpectrumTemplate &c) const {
             for (int i = 0; i < N; ++i)
                 if (values[i] != c.values[i])
                     return false;
             return true;
-        };
+        }
         bool operator!=(const SampledSpectrumTemplate &c) const {
             for (int i = 0; i < N; ++i)
                 if (values[i] != c.values[i])
                     return true;
             return false;
-        };
+        }
         
         RealType &operator[](unsigned int index) {
             SLRAssert(index < N, "\"index\" is out of range [0, %u].", N - 1);
             return values[index];
-        };
+        }
         RealType operator[](unsigned int index) const {
             SLRAssert(index < N, "\"index\" is out of range [0, %u].", N - 1);
             return values[index];
-        };
+        }
         
         RealType avgValue() const {
             RealType sumVal = values[0];
             for (int i = 1; i < N; ++i)
                 sumVal += values[i];
             return sumVal / N;
-        };
+        }
         RealType maxValue() const {
             RealType maxVal = values[0];
             for (int i = 1; i < N; ++i)
                 maxVal = std::fmax(values[i], maxVal);
             return maxVal;
-        };
+        }
         RealType minValue() const {
             RealType minVal = values[0];
             for (int i = 1; i < N; ++i)
                 minVal = std::fmin(values[i], minVal);
             return minVal;
-        };
+        }
         bool hasNonZero() const {
             for (int i = 0; i < N; ++i)
                 if (values[i] != 0)
                     return true;
             return false;
-        };
+        }
         bool hasNaN() const {
             for (int i = 0; i < N; ++i)
                 if (std::isnan(values[i]))
                     return true;
             return false;
-        };
+        }
         bool hasInf() const {
             for (int i = 0; i < N; ++i)
                 if (std::isinf(values[i]))
                     return true;
             return false;
-        };
+        }
         bool hasMinus() const {
             for (int i = 0; i < N; ++i)
                 if (values[i] < 0)
                     return true;
             return false;
-        };
+        }
         
         RealType luminance(RGBColorSpace space = RGBColorSpace::sRGB) const {
             RealType sum = 0;
             for (int i = 0; i < N; ++i)
                 sum += values[i];
             return sum / N;
-        };
+        }
+        
+        // setting "primary" to 1.0 might introduce bias.
+        RealType importance(uint16_t selectedLambda) const {
+            // I hope a compiler to optimize away this if statement...
+            // What I want to do is just only member function specialization of a template class while reusing other function definitions.
+            if (N > 1) {
+                RealType sum = 0;
+                for (int i = 0; i < N; ++i)
+                    sum += values[i];
+                const RealType primary = 0.9f;
+                const RealType marginal = (1 - primary) / (N - 1);
+                return sum * marginal + values[selectedLambda] * (primary - marginal);
+            }
+            else {
+                return values[0];
+            }
+        }
         
         std::string toString() const {
             std::string ret = "(";
@@ -513,7 +531,7 @@ namespace SLR {
             sprintf(str, "%g)", values[N - 1]);
             ret += str;
             return ret;
-        };
+        }
         
         std::string toString(const WavelengthSamplesTemplate<RealType, N> &wls) const {
             std::string ret = "";
@@ -523,7 +541,7 @@ namespace SLR {
                 ret += str;
             }
             return ret;
-        };
+        }
         
         static const SampledSpectrumTemplate Zero;
         static const SampledSpectrumTemplate One;
@@ -540,6 +558,13 @@ namespace SLR {
     const SampledSpectrumTemplate<RealType, N> SampledSpectrumTemplate<RealType, N>::Inf = SampledSpectrumTemplate<RealType, N>(std::numeric_limits<RealType>::infinity());
     template <typename RealType, uint32_t N>
     const SampledSpectrumTemplate<RealType, N> SampledSpectrumTemplate<RealType, N>::NaN = SampledSpectrumTemplate<RealType, N>(std::numeric_limits<RealType>::quiet_NaN());
+    
+    
+    template <typename RealType, uint32_t N>
+    SLR_API SampledSpectrumTemplate<RealType, N> sqrt(const SampledSpectrumTemplate<RealType, N> &value);
+    
+    template <typename RealType, uint32_t N>
+    SLR_API SampledSpectrumTemplate<RealType, N> exp(const SampledSpectrumTemplate<RealType, N> &value);
 
 
     template <typename RealType, uint32_t numStrata>

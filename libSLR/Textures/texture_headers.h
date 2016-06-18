@@ -11,5 +11,6 @@
 #include "constant_textures.h"
 #include "image_textures.h"
 #include "checker_board_textures.h"
+#include "voronoi_textures.h"
 
 #endif /* texture_headers_h */

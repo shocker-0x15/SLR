@@ -8,12 +8,12 @@
 #include "ModifiedWardDurBRDF.h"
 
 namespace SLR {
-    SampledSpectrum ModifiedWardDurBRDF::sampleInternal(const BSDFQuery &query, const BSDFSample &smp, BSDFQueryResult *result) const {
-        float quad = 2 * M_PI * smp.uDir[1];
+    SampledSpectrum ModifiedWardDurBRDF::sampleInternal(const BSDFQuery &query, float uComponent, const float uDir[2], BSDFQueryResult *result) const {
+        float quad = 2 * M_PI * uDir[1];
         float phi_h = std::atan2(m_anisoY * std::sin(quad), m_anisoX * std::cos(quad));
         float cosphi_ax = std::cos(phi_h) / m_anisoX;
         float sinphi_ay = std::sin(phi_h) / m_anisoY;
-        float theta_h = std::atan(std::sqrt(-std::log(1 - smp.uDir[0]) / (cosphi_ax * cosphi_ax + sinphi_ay * sinphi_ay)));
+        float theta_h = std::atan(std::sqrt(-std::log(1 - uDir[0]) / (cosphi_ax * cosphi_ax + sinphi_ay * sinphi_ay)));
         Vector3D halfv = Vector3D(std::sin(theta_h) * std::cos(phi_h), std::sin(theta_h) * std::sin(phi_h), std::cos(theta_h));
         halfv.z *= query.dir_sn.z > 0 ? 1 : -1;
         result->dir_sn = 2 * dot(query.dir_sn, halfv) * halfv - query.dir_sn;
@@ -78,10 +78,10 @@ namespace SLR {
     }
 
     float ModifiedWardDurBRDF::weightInternal(const SLR::BSDFQuery &query) const {
-        return m_R.luminance();
+        return m_R.importance(query.wlHint);
     }
     
     SampledSpectrum ModifiedWardDurBRDF::getBaseColorInternal(DirectionType flags) const {
         return m_R;
-    }    
+    }
 }

@@ -32,7 +32,9 @@ inline void makeTangent(RealType nx, RealType ny, RealType nz, RealType* s) {
 }
 
 namespace SLRSceneGraph {
-    static void recursiveConstruct(const aiScene* objSrc, const aiNode* nodeSrc, const std::vector<SurfaceMaterialRef> &materials, InternalNodeRef &nodeOut) {
+    static void recursiveConstruct(const aiScene* objSrc, const aiNode* nodeSrc,
+                                   const std::vector<SurfaceMaterialRef> &materials, const std::vector<Normal3DTextureRef> &normalMaps, const std::vector<FloatTextureRef> &alphaMaps,
+                                   InternalNodeRef &nodeOut) {
         if (nodeSrc->mNumMeshes == 0 && nodeSrc->mNumChildren == 0) {
             nodeOut = nullptr;
             return;
@@ -49,6 +51,7 @@ namespace SLRSceneGraph {
         };
         nodeOut->setTransform(createShared<SLR::StaticTransform>(SLR::Matrix4x4(tfElems)));
         
+        std::vector<Triangle> meshIndices;
         for (int m = 0; m < nodeSrc->mNumMeshes; ++m) {
             const aiMesh* mesh = objSrc->mMeshes[nodeSrc->mMeshes[m]];
             if (mesh->mPrimitiveTypes != aiPrimitiveType_TRIANGLE) {
@@ -58,6 +61,8 @@ namespace SLRSceneGraph {
             
             TriangleMeshNodeRef surfMesh = createShared<TriangleMeshNode>();
             const SurfaceMaterialRef &surfMat = materials[mesh->mMaterialIndex];
+            const Normal3DTextureRef &normalMap = normalMaps[mesh->mMaterialIndex];
+            const FloatTextureRef &alphaMap = alphaMaps[mesh->mMaterialIndex];
             
             for (int v = 0; v < mesh->mNumVertices; ++v) {
                 const aiVector3D &p = mesh->mVertices[v];
@@ -76,10 +81,12 @@ namespace SLRSceneGraph {
                 surfMesh->addVertex(outVtx);
             }
             
+            meshIndices.clear();
             for (int f = 0; f < mesh->mNumFaces; ++f) {
                 const aiFace &face = mesh->mFaces[f];
-                surfMesh->addTriangle(face.mIndices[0], face.mIndices[1], face.mIndices[2], surfMat);
+                meshIndices.emplace_back(face.mIndices[0], face.mIndices[1], face.mIndices[2]);
             }
+            surfMesh->addTriangles(surfMat, normalMap, alphaMap, std::move(meshIndices));
             
             surfMesh->setName(mesh->mName.C_Str());
             nodeOut->addChildNode(surfMesh);
@@ -88,7 +95,7 @@ namespace SLRSceneGraph {
         if (nodeSrc->mNumChildren) {
             for (int c = 0; c < nodeSrc->mNumChildren; ++c) {
                 InternalNodeRef subNode;
-                recursiveConstruct(objSrc, nodeSrc->mChildren[c], materials, subNode);
+                recursiveConstruct(objSrc, nodeSrc->mChildren[c], materials, normalMaps, alphaMaps, subNode);
                 if (subNode != nullptr)
                     nodeOut->addChildNode(subNode);
             }
@@ -105,7 +112,7 @@ namespace SLRSceneGraph {
         
         SpectrumTextureRef diffuseTex;
         if (aiMat->Get(AI_MATKEY_TEXTURE_DIFFUSE(0), strValue) == aiReturn_SUCCESS) {
-            TiledImage2DRef image = Image::createTiledImage((pathPrefix + strValue.C_Str()).c_str(), mem, SpectrumType::Reflectance);
+            TiledImage2DRef image = Image::createTiledImage((pathPrefix + strValue.C_Str()).c_str(), mem, ImageStoreMode::AsIs, SpectrumType::Reflectance);
             diffuseTex = createShared<ImageSpectrumTexture>(image);
         }
         else if (aiMat->Get(AI_MATKEY_COLOR_DIFFUSE, color, nullptr) == aiReturn_SUCCESS) {
@@ -137,21 +144,30 @@ namespace SLRSceneGraph {
         // マテリアルの生成。
         std::vector<SurfaceMaterialRef> materials;
         std::vector<Normal3DTextureRef> normalMaps;
+        std::vector<FloatTextureRef> alphaMaps;
         for (int m = 0; m < scene->mNumMaterials; ++m) {
             const aiMaterial* aiMat = scene->mMaterials[m];
             SurfaceMaterialRef surfMat = materialFunc(aiMat, pathPrefix, &defMem);
             materials.push_back(surfMat);
             
             aiString strValue;
+            
             Normal3DTextureRef normalTex;
             if (aiMat->Get(AI_MATKEY_TEXTURE_DISPLACEMENT(0), strValue) == aiReturn_SUCCESS) {
-                TiledImage2DRef image = Image::createTiledImage((pathPrefix + strValue.C_Str()).c_str(), &defMem, SpectrumType::Reflectance);
+                TiledImage2DRef image = Image::createTiledImage((pathPrefix + strValue.C_Str()).c_str(), &defMem, ImageStoreMode::NormalTexture, SpectrumType::Reflectance);
                 normalTex = createShared<ImageNormal3DTexture>(image);
             }
             normalMaps.push_back(normalTex);
+            
+            FloatTextureRef alphaTex;
+            if (aiMat->Get(AI_MATKEY_TEXTURE_OPACITY(0), strValue) == aiReturn_SUCCESS) {
+                TiledImage2DRef image = Image::createTiledImage((pathPrefix + strValue.C_Str()).c_str(), &defMem, ImageStoreMode::AlphaTexture, SpectrumType::Reflectance);
+                alphaTex = createShared<ImageFloatTexture>(image);
+            }
+            alphaMaps.push_back(alphaTex);
         }
         
-        recursiveConstruct(scene, scene->mRootNode, materials, nodeOut);
+        recursiveConstruct(scene, scene->mRootNode, materials, normalMaps, alphaMaps, nodeOut);
         
         nodeOut->setName(filePath);
         

@@ -9,7 +9,7 @@
 
 #include "../Core/RenderSettings.h"
 #include "../Helper/ThreadPool.h"
-#include "../Core/XORShift.h"
+#include "../Core/XORShiftRNG.h"
 #include "../Core/ImageSensor.h"
 #include "../Core/RandomNumberGenerator.h"
 #include "../Memory/ArenaAllocator.h"
@@ -288,16 +288,16 @@ namespace SLR {
 #else
         uint32_t numThreads = std::thread::hardware_concurrency();
 #endif
-        XORShift topRand(settings.getInt(RenderSettingItem::RNGSeed));
+        XORShiftRNG topRand(settings.getInt(RenderSettingItem::RNGSeed));
         auto mems = std::unique_ptr<ArenaAllocator[]>(new ArenaAllocator[numThreads]);
         auto memPTs = std::unique_ptr<ArenaAllocator[]>(new ArenaAllocator[numThreads]);
-        auto rngs = std::unique_ptr<XORShift[]>(new XORShift[numThreads]);
+        auto rngs = std::unique_ptr<XORShiftRNG[]>(new XORShiftRNG[numThreads]);
         auto rngRefs = std::unique_ptr<RandomNumberGenerator*[]>(new RandomNumberGenerator*[numThreads]);
         auto scales = std::unique_ptr<float[]>(new float[numThreads]);
         for (int i = 0; i < numThreads; ++i) {
             new (mems.get() + i) ArenaAllocator();
             new (memPTs.get() + i) ArenaAllocator();
-            rngRefs[i] = new (rngs.get() + i) XORShift(topRand.getUInt());
+            rngRefs[i] = new (rngs.get() + i) XORShiftRNG(topRand.getUInt());
         }
         
         const Camera* camera = scene.getCamera();
@@ -324,7 +324,7 @@ namespace SLR {
         const uint32_t numMCMCs = 16;
         const uint32_t numPhotonsPerPass = 100000;
         PhotonSplattingJob jobPSs[numMCMCs];
-        std::unique_ptr<XORShift[]> rngPSs = std::unique_ptr<XORShift[]>(new XORShift[numMCMCs]);
+        std::unique_ptr<XORShiftRNG[]> rngPSs = std::unique_ptr<XORShiftRNG[]>(new XORShiftRNG[numMCMCs]);
         for (int i = 0; i < numMCMCs; ++i) {
             PhotonSplattingJob &jobPS = jobPSs[i];
             jobPS.scene = &scene;

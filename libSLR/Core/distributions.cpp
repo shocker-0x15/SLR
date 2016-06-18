@@ -31,6 +31,7 @@ namespace SLR {
     template SLR_API uint32_t sampleDiscrete(const double* importances, double* sumImportances, double* base, uint32_t numImportances, double u);
     
     
+    
     // "A Low Distortion Map Between Disk and Square"
     template <typename RealType>
     void concentricSampleDisk(RealType u0, RealType u1, RealType* dx, RealType* dy) {
@@ -69,6 +70,7 @@ namespace SLR {
     }
     template SLR_API void concentricSampleDisk(float u0, float u1, float* dx, float* dy);
     template SLR_API void concentricSampleDisk(double u0, double u1, double* dx, double* dy);
+    
     
     
     template <typename RealType>
@@ -118,6 +120,7 @@ namespace SLR {
     
     template class SLR_API RegularConstantDiscrete1DTemplate<float>;
     template class SLR_API RegularConstantDiscrete1DTemplate<double>;
+    
     
     
     template <typename RealType>
@@ -182,6 +185,7 @@ namespace SLR {
     
     template class SLR_API RegularConstantContinuous1DTemplate<float>;
     template class SLR_API RegularConstantContinuous1DTemplate<double>;
+    
     
     
     template <typename RealType>

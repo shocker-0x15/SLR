@@ -79,7 +79,7 @@ namespace SLR {
         bool hasNaN() const { using std::isnan; return isnan(x) || isnan(y) || isnan(z); }
         bool hasInf() const { using std::isinf; return isinf(x) || isinf(y) || isinf(z); }
         
-        void print() const { printf("(%f, %f, %f)\n", x, y, z); }
+        std::string toString() const { char str[256]; sprintf(str, "(%g, %g, %g)", x, y, z); return str; }
         
         static const Vector3Template Zero;
         static const Vector3Template One;

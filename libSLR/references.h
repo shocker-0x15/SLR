@@ -21,7 +21,7 @@ namespace SLR {
     class MSpaceAllocator;
     
     // RGB & Spectrum
-    template<typename RealType> struct CompensatedSum;
+    template <typename RealType> struct CompensatedSum;
     template <typename RealType> struct RGBSamplesTemplate;
     template <typename RealType> struct RGBTemplate;
     template <typename RealType> struct RGBStorageTemplate;
@@ -88,10 +88,12 @@ namespace SLR {
     struct Types32bit;
     struct Types64bit;
     template <typename TypeSet> class RandomNumberGeneratorTemplate;
-    template <typename TypeSet> class XORShiftTemplate;
+    template <typename TypeSet> class XORShiftRNGTemplate;
+    template <typename TypeSet> class LinearCongruentialRNGTemplate;
     
     typedef RandomNumberGeneratorTemplate<Types32bit> RandomNumberGenerator;
-    typedef XORShiftTemplate<Types32bit> XORShift;
+    typedef XORShiftRNGTemplate<Types32bit> XORShiftRNG;
+    typedef LinearCongruentialRNGTemplate<Types32bit> LinearCongruentialRNG;
     
     // Distributions
     template <typename RealType> class RegularConstantDiscrete1DTemplate;
@@ -158,20 +160,22 @@ namespace SLR {
     class CheckerBoardSpectrumTexture;
     class CheckerBoardNormal3DTexture;
     class CheckerBoardFloatTexture;
+    class VoronoiSpectrumTexture;
+    class VoronoiNormal3DTexture;
+    class VoronoiFloatTexture;
     
     // Materials
-    class SpatialFresnel;
-    class SpatialFresnelNoOp;
-    class SpatialFresnelConductor;
-    class SpatialFresnelDielectric;
+    class SVFresnel;
+    class SVFresnelNoOp;
+    class SVFresnelConductor;
+    class SVFresnelDielectric;
     class SurfaceMaterial;
     class EmitterSurfaceProperty;
     class DiffuseReflection;
     class SpecularReflection;
-    class SpecularTransmission;
+    class SpecularScattering;
     class ModifiedWardDurReflection;
-    class AshikhminSpecularReflection;
-    class AshikhminDiffuseReflection;
+    class AshikhminShirleyReflection;
     class SummedSurfaceMaterial;
     class MixedSurfaceMaterial;
     class EmitterSurfaceMaterial;
@@ -202,12 +206,12 @@ namespace SLR {
     class FresnelDielectric;
     class LambertianBRDF;
     class SpecularBRDF;
-    class SpecularBTDF;
+    class SpecularBSDF;
     class InverseBSDF;
     class NullBSDF;
+    class OrenNayerBRDF;
     class ModifiedWardDurBRDF;
-    class AshikhminSpecularBRDF;
-    class AshikhminDiffuseBRDF;
+    class AshikhminShirleyBRDF;
     class MultiBSDF;
     class PerspectiveIDF;
     class EquirectangularIDF;

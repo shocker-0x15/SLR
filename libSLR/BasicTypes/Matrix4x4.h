@@ -176,7 +176,7 @@ namespace SLR {
         }
         
         Matrix4x4Template &invert() {
-            SLRAssert(false, "Not implemented.");
+            SLRAssert_NotImplemented();
             return *this;
         }
         

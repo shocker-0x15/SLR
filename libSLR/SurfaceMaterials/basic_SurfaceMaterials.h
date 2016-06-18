@@ -18,31 +18,38 @@ namespace SLR {
         const FloatTexture* m_sigma;
     public:
         DiffuseReflection(const SpectrumTexture* reflectance, const FloatTexture* sigma) :
-        m_reflectance(reflectance), m_sigma(sigma) {};
+        m_reflectance(reflectance), m_sigma(sigma) {}
         
         BSDF* getBSDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem, float scale = 1.0f) const override;
     };
+    
+    
     
     class SLR_API SpecularReflection : public SurfaceMaterial {
         const SpectrumTexture* m_coeffR;
-        const SpatialFresnel* m_fresnel;
+        const SpectrumTexture* m_eta;
+        const SpectrumTexture* m_k;
     public:
-        SpecularReflection(const SpectrumTexture* coeffR, const SpatialFresnel* fresnel) :
-        m_coeffR(coeffR), m_fresnel(fresnel) { };
+        SpecularReflection(const SpectrumTexture* coeffR, const SpectrumTexture* eta, const SpectrumTexture* k) :
+        m_coeffR(coeffR), m_eta(eta), m_k(k) { }
         
         BSDF* getBSDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem, float scale = 1.0f) const override;
     };
     
-    class SLR_API SpecularTransmission : public SurfaceMaterial {
-        const SpectrumTexture* m_coeffT;
+    
+    
+    class SLR_API SpecularScattering : public SurfaceMaterial {
+        const SpectrumTexture* m_coeff;
         const SpectrumTexture* m_etaExt;
         const SpectrumTexture* m_etaInt;
     public:
-        SpecularTransmission(const SpectrumTexture* coeffT, const SpectrumTexture* etaExt, const SpectrumTexture* etaInt) :
-        m_coeffT(coeffT), m_etaExt(etaExt), m_etaInt(etaInt) { };
+        SpecularScattering(const SpectrumTexture* coeff, const SpectrumTexture* etaExt, const SpectrumTexture* etaInt) :
+        m_coeff(coeff), m_etaExt(etaExt), m_etaInt(etaInt) { }
         
         BSDF* getBSDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem, float scale = 1.0f) const override;
     };
+    
+    
     
     class SLR_API InverseSurfaceMaterial : public SurfaceMaterial {
         const SurfaceMaterial* m_baseMat;

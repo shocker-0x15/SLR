@@ -20,21 +20,29 @@ namespace SLRSceneGraph {
     
     struct SLR_SCENEGRAPH_API Triangle {
         uint64_t vIdx[3];
+        Triangle() {}
+        Triangle(uint64_t v0, uint64_t v1, uint64_t v2) : vIdx{v0, v1, v2} {}
     };
     
     class SLR_SCENEGRAPH_API TriangleMeshNode : public SurfaceObjectNode {
+    public:
+        struct MaterialGroup {
+            SurfaceMaterialRef material;
+            Normal3DTextureRef normalMap;
+            FloatTextureRef alphaMap;
+            std::vector<Triangle> triangles;
+        };
+    private:
         SLR::Triangle* m_trianglesForRendering;
         
         std::vector<Vertex> m_vertices;
-        std::vector<Triangle> m_triangles;
-        std::vector<SurfaceMaterialRef> m_materials;
-        std::vector<Normal3DTextureRef> m_normalMaps;
+        std::vector<MaterialGroup> m_matGroups;
     public:
         TriangleMeshNode() : SurfaceObjectNode(), m_trianglesForRendering(nullptr) { };
         ~TriangleMeshNode();
         
         uint64_t addVertex(const SLR::Vertex &v);
-        void addTriangle(uint64_t v0, uint64_t v1, uint64_t v2, const SurfaceMaterialRef &mat, const Normal3DTextureRef &normalMap = nullptr);
+        void addTriangles(const SurfaceMaterialRef &mat, const Normal3DTextureRef &normalMap, const FloatTextureRef &alphaMap, const std::vector<Triangle> &&triangles);
         
         void applyTransform(const SLR::StaticTransform &t) final;
         void createSurfaceObjects() final;

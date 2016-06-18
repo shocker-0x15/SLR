@@ -14,6 +14,7 @@
 #include "Scene.h"
 #include "Parser/SceneParser.hpp"
 #include <libSLR/BasicTypes/Spectrum.h>
+#include <libSLR/Core/Image.h>
 
 namespace SLRSceneGraph {
     SLR_SCENEGRAPH_API bool readScene(const std::string &filePath, const SceneRef &scene, RenderingContext* context);
@@ -29,7 +30,7 @@ namespace SLRSceneGraph {
     namespace Image {
         extern std::map<std::string, Image2DRef> s_imageDB;
         
-        SLR_SCENEGRAPH_API std::shared_ptr<SLR::TiledImage2D> createTiledImage(const std::string &filepath, SLR::Allocator *mem, SLR::SpectrumType spType, bool gammaCorrection = false);
+        SLR_SCENEGRAPH_API std::shared_ptr<SLR::TiledImage2D> createTiledImage(const std::string &filepath, SLR::Allocator *mem, SLR::ImageStoreMode mode, SLR::SpectrumType spType, bool gammaCorrection = false);
     }
 }
 

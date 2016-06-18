@@ -38,15 +38,15 @@ namespace SLR {
         
         switch (m_colorFormat) {
             case ColorFormat::RGB8x3: {
-                SLRAssert(false, "Not implemented.");
+                SLRAssert_NotImplemented();
                 break;
             }
             case ColorFormat::RGB_8x4: {
-                SLRAssert(false, "Not implemented.");
+                SLRAssert_NotImplemented();
                 break;
             }
             case ColorFormat::RGBA8x4: {
-                SLRAssert(false, "Not implemented.");
+                SLRAssert_NotImplemented();
                 break;
             }
             case ColorFormat::RGBA16Fx4: {
@@ -297,7 +297,7 @@ namespace SLR {
                 break;
             }
             case ColorFormat::Gray8: {
-                SLRAssert(false, "Not implemented.");
+                SLRAssert_NotImplemented();
                 break;
             }
             default:
