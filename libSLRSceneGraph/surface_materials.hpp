@@ -126,6 +126,7 @@ namespace SLRSceneGraph {
     
     
     
+    
     class SLR_SCENEGRAPH_API DiffuseReflection : public SurfaceMaterial {
         SpectrumTextureRef m_reflectance;
         FloatTextureRef m_sigma;

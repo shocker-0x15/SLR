@@ -93,6 +93,25 @@ namespace SLRSceneGraph {
     public:
         CheckerBoardFloatTexture(float v0, float v1);
     };
+    
+    
+    class SLR_SCENEGRAPH_API VoronoiSpectrumTexture : public SpectrumTexture {
+        float m_scale;
+    public:
+        VoronoiSpectrumTexture(float scale);
+    };
+    
+    class SLR_SCENEGRAPH_API VoronoiNormal3DTexture : public Normal3DTexture {
+        float m_scale;
+    public:
+        VoronoiNormal3DTexture(float scale);
+    };
+    
+    class SLR_SCENEGRAPH_API VoronoiFloatTexture : public FloatTexture {
+        float m_scale;
+    public:
+        VoronoiFloatTexture(float scale);
+    };
 }
 
 #endif /* textures_hpp */

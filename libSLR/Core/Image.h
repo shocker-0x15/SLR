@@ -350,7 +350,7 @@ namespace SLR {
         
         const uint8_t* data() const { return m_data; }
         size_t size() const { return m_allocSize; }
-    };    
+    };
 }
 
 #endif

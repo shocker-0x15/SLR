@@ -247,7 +247,7 @@ namespace SLRSceneGraph {
 		std::vector<Procedure> m_nativeProcs;
 		const std::vector<StatementRef> m_stmts;
 
-		static Element NoOpProcedure(const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) { SLRAssert(false, "Not implemented."); return Element(); };
+		static Element NoOpProcedure(const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) { SLRAssert_NotImplemented(); return Element(); };
 	public:
 		Function(uint32_t depth, const std::vector<ArgInfo> &sig, const StatementRef &stmt = nullptr) :
 			m_depth(depth), m_signatures{ sig }, m_nativeProcs{ NoOpProcedure }, m_stmts{ stmt } { }
@@ -264,7 +264,7 @@ namespace SLRSceneGraph {
         const std::vector<Procedure> m_nativeProcs;
         const std::vector<StatementRef> m_stmts;
         
-        static Element NoOpProcedure(const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) { SLRAssert(false, "Not implemented."); return Element(); };
+        static Element NoOpProcedure(const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) { SLRAssert_NotImplemented(); return Element(); };
     public:
         Function(uint32_t depth, const std::vector<ArgInfo> &sig, const StatementRef &stmt = nullptr) :
         m_depth(depth), m_signatures{sig}, m_nativeProcs{NoOpProcedure}, m_stmts{stmt} { }

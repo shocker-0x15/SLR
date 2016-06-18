@@ -9,7 +9,7 @@
 
 namespace SLR {
     RegularConstantContinuous2D* CheckerBoardSpectrumTexture::createIBLImportanceMap() const {
-        SLRAssert(false, "Not implemented.");
+        SLRAssert_NotImplemented();
         return nullptr;
     }
     

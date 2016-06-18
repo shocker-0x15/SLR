@@ -215,5 +215,5 @@ namespace SLR {
                 break;
         }
         return baseColor;
-    }    
+    }
 }

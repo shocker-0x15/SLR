@@ -26,5 +26,5 @@ namespace SLR {
         if (!matches(query.flags))
             return 0;
         return dir.z > 0.0f ? dir.z / M_PI : 0.0f;
-    }    
+    }
 }

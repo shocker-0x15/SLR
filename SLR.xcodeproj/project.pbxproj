@@ -85,8 +85,6 @@
 		466F6CFD1BB6CA420056F2FA /* textures.h in Headers */ = {isa = PBXBuildFile; fileRef = 466F6C401BB6B2AA0056F2FA /* textures.h */; };
 		466F6CFE1BB6CA420056F2FA /* Transform.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 466F6C411BB6B2AA0056F2FA /* Transform.cpp */; };
 		466F6CFF1BB6CA420056F2FA /* Transform.h in Headers */ = {isa = PBXBuildFile; fileRef = 466F6C421BB6B2AA0056F2FA /* Transform.h */; };
-		466F6D001BB6CA420056F2FA /* XORShift.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 466F6C431BB6B2AA0056F2FA /* XORShift.cpp */; };
-		466F6D011BB6CA420056F2FA /* XORShift.h in Headers */ = {isa = PBXBuildFile; fileRef = 466F6C441BB6B2AA0056F2FA /* XORShift.h */; };
 		466F6D021BB6CA510056F2FA /* basic_EDFs.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 466F6C511BB6B2B60056F2FA /* basic_EDFs.cpp */; };
 		466F6D031BB6CA510056F2FA /* basic_EDFs.h in Headers */ = {isa = PBXBuildFile; fileRef = 466F6C521BB6B2B60056F2FA /* basic_EDFs.h */; };
 		466F6D041BB6CA510056F2FA /* IBLEDF.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 466F6C531BB6B2B60056F2FA /* IBLEDF.cpp */; };
@@ -273,8 +271,6 @@
 		466F6C401BB6B2AA0056F2FA /* textures.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = textures.h; path = libSLR/Core/textures.h; sourceTree = SOURCE_ROOT; };
 		466F6C411BB6B2AA0056F2FA /* Transform.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Transform.cpp; path = libSLR/Core/Transform.cpp; sourceTree = SOURCE_ROOT; };
 		466F6C421BB6B2AA0056F2FA /* Transform.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Transform.h; path = libSLR/Core/Transform.h; sourceTree = SOURCE_ROOT; };
-		466F6C431BB6B2AA0056F2FA /* XORShift.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = XORShift.cpp; path = libSLR/Core/XORShift.cpp; sourceTree = SOURCE_ROOT; };
-		466F6C441BB6B2AA0056F2FA /* XORShift.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XORShift.h; path = libSLR/Core/XORShift.h; sourceTree = SOURCE_ROOT; };
 		466F6C511BB6B2B60056F2FA /* basic_EDFs.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = basic_EDFs.cpp; path = libSLR/EDFs/basic_EDFs.cpp; sourceTree = SOURCE_ROOT; };
 		466F6C521BB6B2B60056F2FA /* basic_EDFs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = basic_EDFs.h; path = libSLR/EDFs/basic_EDFs.h; sourceTree = SOURCE_ROOT; };
 		466F6C531BB6B2B60056F2FA /* IBLEDF.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = IBLEDF.cpp; path = libSLR/EDFs/IBLEDF.cpp; sourceTree = SOURCE_ROOT; };
@@ -346,6 +342,14 @@
 		46BF49881BB731CF0036033F /* spectrum_library.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = spectrum_library.h; path = libSLR/BasicTypes/spectrum_library.h; sourceTree = SOURCE_ROOT; };
 		46BF49901BB7E7760036033F /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = main.cpp; path = HostProgram/main.cpp; sourceTree = "<group>"; };
 		46BF49921BB7EB860036033F /* StopWatch.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = StopWatch.h; path = HostProgram/StopWatch.h; sourceTree = "<group>"; };
+		46C4A0FF1D12F8E6003530DA /* voronoi_textures.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = voronoi_textures.cpp; path = libSLR/Textures/voronoi_textures.cpp; sourceTree = SOURCE_ROOT; };
+		46C4A1011D12F8FD003530DA /* voronoi_textures.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = voronoi_textures.h; path = libSLR/Textures/voronoi_textures.h; sourceTree = SOURCE_ROOT; };
+		46C4A1091D1301C9003530DA /* LinearCongruentialRNG.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LinearCongruentialRNG.cpp; path = libSLR/Core/LinearCongruentialRNG.cpp; sourceTree = SOURCE_ROOT; };
+		46C4A10A1D1301C9003530DA /* LinearCongruentialRNG.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LinearCongruentialRNG.h; path = libSLR/Core/LinearCongruentialRNG.h; sourceTree = SOURCE_ROOT; };
+		46C4A10B1D1301C9003530DA /* XORShiftRNG.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = XORShiftRNG.cpp; path = libSLR/Core/XORShiftRNG.cpp; sourceTree = SOURCE_ROOT; };
+		46C4A10C1D1301C9003530DA /* XORShiftRNG.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XORShiftRNG.h; path = libSLR/Core/XORShiftRNG.h; sourceTree = SOURCE_ROOT; };
+		46C4A1111D130895003530DA /* OrenNayerBRDF.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = OrenNayerBRDF.h; path = libSLR/BSDFs/OrenNayerBRDF.h; sourceTree = SOURCE_ROOT; };
+		46C4A1131D1308A6003530DA /* OrenNayerBRDF.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = OrenNayerBRDF.cpp; path = libSLR/BSDFs/OrenNayerBRDF.cpp; sourceTree = SOURCE_ROOT; };
 		46D7E0841BC8F58900AFF96F /* Makefile */ = {isa = PBXFileReference; explicitFileType = text; fileEncoding = 4; name = Makefile; path = libSLRSceneGraph/Parser/Makefile; sourceTree = "<group>"; usesTabs = 1; };
 		46F0BB111CD9FA2B00F81BFC /* MicrofacetSurfaceMaterial.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MicrofacetSurfaceMaterial.cpp; path = libSLR/SurfaceMaterials/MicrofacetSurfaceMaterial.cpp; sourceTree = SOURCE_ROOT; };
 		46F0BB151CD9FA7100F81BFC /* MicrofacetSurfaceMaterial.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MicrofacetSurfaceMaterial.h; path = libSLR/SurfaceMaterials/MicrofacetSurfaceMaterial.h; sourceTree = SOURCE_ROOT; };
@@ -420,6 +424,8 @@
 		4634EB9A1B9B529B0047AE54 /* BSDFs */ = {
 			isa = PBXGroup;
 			children = (
+				46C4A1131D1308A6003530DA /* OrenNayerBRDF.cpp */,
+				46C4A1111D130895003530DA /* OrenNayerBRDF.h */,
 				466F6C191BB6B2900056F2FA /* AshikhminBRDF.cpp */,
 				466F6C1A1BB6B2900056F2FA /* AshikhminBRDF.h */,
 				466F6C1B1BB6B2900056F2FA /* basic_BSDFs.cpp */,
@@ -473,8 +479,10 @@
 				466F6C3F1BB6B2AA0056F2FA /* textures.cpp */,
 				466F6C421BB6B2AA0056F2FA /* Transform.h */,
 				466F6C411BB6B2AA0056F2FA /* Transform.cpp */,
-				466F6C441BB6B2AA0056F2FA /* XORShift.h */,
-				466F6C431BB6B2AA0056F2FA /* XORShift.cpp */,
+				46C4A10A1D1301C9003530DA /* LinearCongruentialRNG.h */,
+				46C4A1091D1301C9003530DA /* LinearCongruentialRNG.cpp */,
+				46C4A10C1D1301C9003530DA /* XORShiftRNG.h */,
+				46C4A10B1D1301C9003530DA /* XORShiftRNG.cpp */,
 			);
 			path = Core;
 			sourceTree = "<group>";
@@ -571,6 +579,8 @@
 				466F6CA51BB6B31D0056F2FA /* constant_textures.h */,
 				466F6CA61BB6B31D0056F2FA /* image_textures.cpp */,
 				466F6CA71BB6B31D0056F2FA /* image_textures.h */,
+				46C4A0FF1D12F8E6003530DA /* voronoi_textures.cpp */,
+				46C4A1011D12F8FD003530DA /* voronoi_textures.h */,
 				4602E8B41BC414C000EC16FA /* texture_headers.h */,
 			);
 			path = Textures;
@@ -701,18 +711,19 @@
 				466F6CFB1BB6CA420056F2FA /* SurfaceObject.h in Headers */,
 				466F6CD01BB6CA070056F2FA /* Matrix4x4.h in Headers */,
 				466F6CD11BB6CA070056F2FA /* Normal3.h in Headers */,
-				466F6D011BB6CA420056F2FA /* XORShift.h in Headers */,
 				466F6D031BB6CA510056F2FA /* basic_EDFs.h in Headers */,
 				466F6CD61BB6CA070056F2FA /* Spectrum.h in Headers */,
 				466F6CE71BB6CA2D0056F2FA /* PerspectiveCamera.h in Headers */,
 				466F6D371BB6DC080056F2FA /* bmp_exporter.h in Headers */,
 				466F6D4B1BB7153E0056F2FA /* InfiniteSphere.h in Headers */,
+				46C4A10E1D1301C9003530DA /* LinearCongruentialRNG.h in Headers */,
 				4602E8BF1BC418FA00EC16FA /* SummedSurfaceMaterial.h in Headers */,
 				462018D11CD7D09E00A5CAF1 /* MicrofacetBSDF.h in Headers */,
 				466F6D051BB6CA510056F2FA /* IBLEDF.h in Headers */,
 				466F6CF71BB6CA420056F2FA /* RenderSettings.h in Headers */,
 				4602E8B51BC414C000EC16FA /* texture_headers.h in Headers */,
 				466F6D461BB6DC840056F2FA /* MixedSurfaceMaterial.h in Headers */,
+				46C4A1121D130895003530DA /* OrenNayerBRDF.h in Headers */,
 				466F6D581BB715660056F2FA /* defines.h in Headers */,
 				466F6CE11BB6CA260056F2FA /* ModifiedWardDurBRDF.h in Headers */,
 				462982D31C65FF980052228B /* DebugRenderer.h in Headers */,
@@ -729,6 +740,7 @@
 				466F6CF41BB6CA420056F2FA /* RandomNumberGenerator.h in Headers */,
 				466F6D421BB6DC840056F2FA /* DiffuseEmission.h in Headers */,
 				466F6CCC1BB6C9D60056F2FA /* BBVH.h in Headers */,
+				46C4A1021D12F8FD003530DA /* voronoi_textures.h in Headers */,
 				466F6CCE1BB6CA070056F2FA /* CompensatedSum.h in Headers */,
 				4602E8B71BC4152D00EC16FA /* surface_material_headers.h in Headers */,
 				466F6CEC1BB6CA420056F2FA /* distributions.h in Headers */,
@@ -746,6 +758,7 @@
 				466F6CF91BB6CA420056F2FA /* surface_material.h in Headers */,
 				46BF49891BB731CF0036033F /* spectrum_library.h in Headers */,
 				466F6CDF1BB6CA260056F2FA /* basic_BSDFs.h in Headers */,
+				46C4A1101D1301C9003530DA /* XORShiftRNG.h in Headers */,
 				466F6CF01BB6CA420056F2FA /* Image.h in Headers */,
 				466F6CF21BB6CA420056F2FA /* ImageSensor.h in Headers */,
 				466F6CFD1BB6CA420056F2FA /* textures.h in Headers */,
@@ -888,12 +901,14 @@
 				4651F32A1C5670C70026B8A5 /* Vector3.cpp in Sources */,
 				4651F3301C5673BC0026B8A5 /* Matrix4x4.cpp in Sources */,
 				466F6D451BB6DC840056F2FA /* MixedSurfaceMaterial.cpp in Sources */,
+				46C4A10D1D1301C9003530DA /* LinearCongruentialRNG.cpp in Sources */,
 				4602E8BE1BC418FA00EC16FA /* SummedSurfaceMaterial.cpp in Sources */,
+				46C4A1141D1308A6003530DA /* OrenNayerBRDF.cpp in Sources */,
+				46C4A1001D12F8E6003530DA /* voronoi_textures.cpp in Sources */,
 				466F6CF11BB6CA420056F2FA /* ImageSensor.cpp in Sources */,
 				466F6D521BB715600056F2FA /* checker_board_textures.cpp in Sources */,
 				466F6D4E1BB715490056F2FA /* AMCMCPPMRenderer.cpp in Sources */,
 				466F6D381BB6DC170056F2FA /* ArenaAllocator.cpp in Sources */,
-				466F6D001BB6CA420056F2FA /* XORShift.cpp in Sources */,
 				4651F3381C567CA30026B8A5 /* SpectrumType.cpp in Sources */,
 				466F6CFA1BB6CA420056F2FA /* SurfaceObject.cpp in Sources */,
 				462018CE1CD7D05800A5CAF1 /* MicrofacetBSDF.cpp in Sources */,
@@ -920,6 +935,7 @@
 				466F6D561BB715600056F2FA /* image_textures.cpp in Sources */,
 				466F6CDE1BB6CA260056F2FA /* basic_BSDFs.cpp in Sources */,
 				46BF49851BB72F600036033F /* common_spectra.cpp in Sources */,
+				46C4A10F1D1301C9003530DA /* XORShiftRNG.cpp in Sources */,
 				4651F3341C5678AB0026B8A5 /* TexCoord2.cpp in Sources */,
 				466F6CEF1BB6CA420056F2FA /* Image.cpp in Sources */,
 				466F6D3D1BB6DC840056F2FA /* AshikhminReflection.cpp in Sources */,

@@ -83,5 +83,5 @@ namespace SLR {
     
     SampledSpectrum ModifiedWardDurBRDF::getBaseColorInternal(DirectionType flags) const {
         return m_R;
-    }    
+    }
 }

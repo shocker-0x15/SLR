@@ -88,10 +88,12 @@ namespace SLR {
     struct Types32bit;
     struct Types64bit;
     template <typename TypeSet> class RandomNumberGeneratorTemplate;
-    template <typename TypeSet> class XORShiftTemplate;
+    template <typename TypeSet> class XORShiftRNGTemplate;
+    template <typename TypeSet> class LinearCongruentialRNGTemplate;
     
     typedef RandomNumberGeneratorTemplate<Types32bit> RandomNumberGenerator;
-    typedef XORShiftTemplate<Types32bit> XORShift;
+    typedef XORShiftRNGTemplate<Types32bit> XORShiftRNG;
+    typedef LinearCongruentialRNGTemplate<Types32bit> LinearCongruentialRNG;
     
     // Distributions
     template <typename RealType> class RegularConstantDiscrete1DTemplate;
@@ -158,6 +160,9 @@ namespace SLR {
     class CheckerBoardSpectrumTexture;
     class CheckerBoardNormal3DTexture;
     class CheckerBoardFloatTexture;
+    class VoronoiSpectrumTexture;
+    class VoronoiNormal3DTexture;
+    class VoronoiFloatTexture;
     
     // Materials
     class SVFresnel;
@@ -215,6 +220,7 @@ namespace SLR {
     class SpecularBSDF;
     class InverseBSDF;
     class NullBSDF;
+    class OrenNayerBRDF;
     class ModifiedWardDurBRDF;
     class AshikhminShirleyBRDF;
     class MicrofacetBRDF;

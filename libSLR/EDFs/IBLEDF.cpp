@@ -26,5 +26,5 @@ namespace SLR {
             return 0;
         // The true value is: lim_{l to inf} l^2 / (pi * r_w^2) => inf
         return 1.0f / m_worldDiscArea;
-    }    
+    }
 }

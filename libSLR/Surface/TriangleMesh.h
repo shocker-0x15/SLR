@@ -28,7 +28,7 @@ namespace SLR {
         float area() const override;
         void sample(float u0, float u1, SurfacePoint* surfPt, float* areaPDF) const override;
         float evaluateAreaPDF(const SurfacePoint& surfPt) const override;
-    };    
+    };
 }
 
 #endif

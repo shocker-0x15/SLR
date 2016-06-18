@@ -329,7 +329,7 @@ namespace SLRSceneGraph {
             Element(TypeMap::Function(),
                     Function(1, {},
                              [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
-                                 static SLR::XORShift rng{2112984105};
+                                 static SLR::XORShiftRNG rng{2112984105};
                                  return Element(rng.getFloat0cTo1o());
                              })
                     );
@@ -666,6 +666,18 @@ namespace SLRSceneGraph {
                                          };
                                          return configFunc(params, context, err);
                                      }
+                                     else if (procedure == "voronoi") {
+                                         const static Function configFunc{
+                                             0, {
+                                                 {"scale", Type::RealNumber},
+                                             },
+                                             [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
+                                                 float scale = args.at("scale").raw<TypeMap::RealNumber>();
+                                                 return Element(TypeMap::SpectrumTexture(), createShared<VoronoiSpectrumTexture>(scale));
+                                             }
+                                         };
+                                         return configFunc(params, context, err);
+                                     }
                                      *err = ErrorMessage("Specified procedure is invalid.");
                                      return Element();
                                  }
@@ -676,7 +688,8 @@ namespace SLRSceneGraph {
                     Function(1,
                              {
                                  {{"value", Type::RealNumber}},
-                                 {{"image", Type::Image2D}}
+                                 {{"image", Type::Image2D}},
+                                 {{"procedure", Type::String}, {"params", Type::Tuple}}
                              },
                              {
                                  [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
@@ -686,6 +699,37 @@ namespace SLRSceneGraph {
                                  [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
                                      const auto &image = args.at("image").rawRef<TypeMap::Image2D>();
                                      return Element(TypeMap::FloatTexture(), createShared<ImageFloatTexture>(image));
+                                 },
+                                 [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
+                                     std::string procedure = args.at("procedure").raw<TypeMap::String>();
+                                     const ParameterList &params = args.at("params").raw<TypeMap::Tuple>();
+                                     if (procedure == "checker board") {
+                                         const static Function configFunc{
+                                             0, {
+                                                 {"c0", Type::RealNumber}, {"c1", Type::RealNumber},
+                                             },
+                                             [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
+                                                 float c0 = args.at("c0").raw<TypeMap::RealNumber>();
+                                                 float c1 = args.at("c1").raw<TypeMap::RealNumber>();
+                                                 return Element(TypeMap::FloatTexture(), createShared<CheckerBoardFloatTexture>(c0, c1));
+                                             }
+                                         };
+                                         return configFunc(params, context, err);
+                                     }
+                                     else if (procedure == "voronoi") {
+                                         const static Function configFunc{
+                                             0, {
+                                                 {"scale", Type::RealNumber},
+                                             },
+                                             [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
+                                                 float scale = args.at("scale").raw<TypeMap::RealNumber>();
+                                                 return Element(TypeMap::FloatTexture(), createShared<VoronoiFloatTexture>(scale));
+                                             }
+                                         };
+                                         return configFunc(params, context, err);
+                                     }
+                                     *err = ErrorMessage("Specified procedure is invalid.");
+                                     return Element();
                                  }
                              })
                     );

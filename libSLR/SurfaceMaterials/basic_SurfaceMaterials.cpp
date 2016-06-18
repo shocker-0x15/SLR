@@ -7,6 +7,7 @@
 
 #include "basic_SurfaceMaterials.h"
 #include "../BSDFs/basic_BSDFs.h"
+#include "../BSDFs/OrenNayerBRDF.h"
 #include "../Memory/ArenaAllocator.h"
 #include "../Core/textures.h"
 

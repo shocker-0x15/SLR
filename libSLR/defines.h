@@ -73,7 +73,8 @@
 #   define SLRAssert(expr, fmt, ...)
 #endif
 
-#define SLRAssert_NotDefined SLRAssert(false, "Not defined!");
+#define SLRAssert_NotDefined() SLRAssert(false, "Not defined!")
+#define SLRAssert_NotImplemented() SLRAssert(false, "Not implemented!")
 
 #define SLR_Minimum_Machine_Alignment 16
 #define SLR_L1_Cacheline_Size 64
@@ -94,8 +95,8 @@ inline void* SLR_memalign(size_t size, size_t alignment) {
 #   define SLR_freealign(ptr) ::free(ptr)
 #   define SLR_alignof(T) alignof(T)
 #elif defined(SLR_Defs_Linux)
-#   define SLR_memalign(size, alignment) SLRAssert_NotDefined
-#   define SLR_freealign(ptr) SLRAssert_NotDefined
+#   define SLR_memalign(size, alignment) SLRAssert_NotImplemented
+#   define SLR_freealign(ptr) SLRAssert_NotImplemented
 #endif
 
 // For getcwd
