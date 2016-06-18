@@ -151,6 +151,14 @@
 		46BF49871BB7303D0036033F /* spectrum_library.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 46BF49861BB7303D0036033F /* spectrum_library.cpp */; };
 		46BF49891BB731CF0036033F /* spectrum_library.h in Headers */ = {isa = PBXBuildFile; fileRef = 46BF49881BB731CF0036033F /* spectrum_library.h */; };
 		46BF49911BB7E7760036033F /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 46BF49901BB7E7760036033F /* main.cpp */; };
+		46C4A1001D12F8E6003530DA /* voronoi_textures.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 46C4A0FF1D12F8E6003530DA /* voronoi_textures.cpp */; };
+		46C4A1021D12F8FD003530DA /* voronoi_textures.h in Headers */ = {isa = PBXBuildFile; fileRef = 46C4A1011D12F8FD003530DA /* voronoi_textures.h */; };
+		46C4A10D1D1301C9003530DA /* LinearCongruentialRNG.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 46C4A1091D1301C9003530DA /* LinearCongruentialRNG.cpp */; };
+		46C4A10E1D1301C9003530DA /* LinearCongruentialRNG.h in Headers */ = {isa = PBXBuildFile; fileRef = 46C4A10A1D1301C9003530DA /* LinearCongruentialRNG.h */; };
+		46C4A10F1D1301C9003530DA /* XORShiftRNG.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 46C4A10B1D1301C9003530DA /* XORShiftRNG.cpp */; };
+		46C4A1101D1301C9003530DA /* XORShiftRNG.h in Headers */ = {isa = PBXBuildFile; fileRef = 46C4A10C1D1301C9003530DA /* XORShiftRNG.h */; };
+		46C4A1121D130895003530DA /* OrenNayerBRDF.h in Headers */ = {isa = PBXBuildFile; fileRef = 46C4A1111D130895003530DA /* OrenNayerBRDF.h */; };
+		46C4A1141D1308A6003530DA /* OrenNayerBRDF.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 46C4A1131D1308A6003530DA /* OrenNayerBRDF.cpp */; };
 		46F0BB131CD9FA2B00F81BFC /* MicrofacetSurfaceMaterial.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 46F0BB111CD9FA2B00F81BFC /* MicrofacetSurfaceMaterial.cpp */; };
 		46F0BB161CD9FA7100F81BFC /* MicrofacetSurfaceMaterial.h in Headers */ = {isa = PBXBuildFile; fileRef = 46F0BB151CD9FA7100F81BFC /* MicrofacetSurfaceMaterial.h */; };
 /* End PBXBuildFile section */

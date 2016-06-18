@@ -57,7 +57,7 @@ namespace SLR {
         virtual BoundingBox3D bounds() const = 0;
         virtual bool intersect(Ray &ray, Intersection* isect) const = 0;
         virtual Point3D getIntersectionPoint(const Intersection &isect) const { return isect.obj.top()->getIntersectionPoint(isect); }
-        virtual const SurfaceMaterial* getSurfaceMaterial() const { SLRAssert(false, "Not implemented."); return nullptr; }
+        virtual const SurfaceMaterial* getSurfaceMaterial() const { SLRAssert_NotImplemented(); return nullptr; }
         virtual void getSurfacePoint(const Intersection &isect, SurfacePoint* surfPt) const { isect.obj.top()->getSurfacePoint(isect, surfPt); }
         
         virtual bool isEmitting() const = 0;

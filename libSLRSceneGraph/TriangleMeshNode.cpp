@@ -60,7 +60,7 @@ namespace SLRSceneGraph {
         m_numRefinedObjs = 0;
         for (const MaterialGroup &matGroup : m_matGroups)
             m_numRefinedObjs += matGroup.triangles.size();
-
+        
         m_refinedObjs = new SLR::SingleSurfaceObject*[m_numRefinedObjs];
         m_trianglesForRendering = new SLR::Triangle[m_numRefinedObjs];
         uint32_t triIdxBase = 0;

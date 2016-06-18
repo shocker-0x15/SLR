@@ -12,7 +12,7 @@
 
 #include <libSLR/Core/Transform.h>
 #include <libSLR/Core/SurfaceObject.h>
-#include <libSLR/Core/XORShift.h>
+#include <libSLR/Core/XORShiftRNG.h>
 #include <libSLR/Memory/ArenaAllocator.h>
 #include <libSLR/Renderers/DebugRenderer.h>
 #include <libSLR/Renderers/PathTracingRenderer.h>

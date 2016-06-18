@@ -192,8 +192,4 @@ namespace SLRSceneGraph {
                                                                  const InputSpectrumRef &u_sigma_a, const InputSpectrumRef &u_sigma_s, float u_g) {
         return createShared<SubSurfaceScatteringSurfaceMaterial>(etaExt, etaInt, alpha_g, l_sigma_a, l_sigma_s, l_g, u_sigma_a, u_sigma_s, u_g);
     }
-    
-    SurfaceMaterialRef SurfaceMaterial::createEmitterSurfaceMaterial(const SurfaceMaterialRef &mat, const EmitterSurfacePropertyRef &emit) {
-        return createShared<EmitterSurfaceMaterial>(mat, emit);
-    }
 }

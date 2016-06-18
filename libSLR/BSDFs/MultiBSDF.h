@@ -36,7 +36,7 @@ namespace SLR {
         MultiBSDF() : BSDF(DirectionType()), m_numComponents(0) { }
         
         void add(const BSDF* bsdf);
-    };    
+    };
 }
 
 #endif /* defined(__SLR__MultiBSDF__) */

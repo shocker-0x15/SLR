@@ -9,7 +9,7 @@
 #include "../Memory/ArenaAllocator.h"
 #include "../Core/directional_distribution_functions.h"
 #include "../Core/textures.h"
-#include "../Core/XORShift.h"
+#include "../Core/XORShiftRNG.h"
 #include "../Textures/constant_textures.h"
 #include "../SurfaceMaterials/MicrofacetSurfaceMaterial.h"
 
@@ -32,7 +32,7 @@ namespace SLR {
         float* uDir0 = tempMem.alloc<float>(numSamples);
         float* uDir1 = tempMem.alloc<float>(numSamples);
         float* uWl = tempMem.alloc<float>(numSamples);
-        XORShift rng{394891282};
+        XORShiftRNG rng{394891282};
         for (int i = 0; i < numSamples; ++i) {
             new (&bsdfSamples[i]) BSDFSample(rng.getFloat0cTo1o(), rng.getFloat0cTo1o(), rng.getFloat0cTo1o());
             uDir0[i] = rng.getFloat0cTo1o();

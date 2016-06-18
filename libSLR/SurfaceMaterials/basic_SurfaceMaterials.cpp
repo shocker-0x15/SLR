@@ -16,9 +16,7 @@ namespace SLR {
         BSDF* bsdf = nullptr;
         if (m_sigma) {
             float sigma = m_sigma->evaluate(surfPt.texCoord);
-            bsdf = nullptr;
-            SLRAssert(false, "Oren-Nayer BSDF is not implemented.");
-//            bsdf = mem.create<OrenNayerBRDF>(scale * m_reflectance->evaluate(surfPt.texCoord, wls), sigma);
+            bsdf = mem.create<OrenNayerBRDF>(scale * m_reflectance->evaluate(surfPt.texCoord, wls), sigma);
         }
         else {
             bsdf = mem.create<LambertianBRDF>(scale * m_reflectance->evaluate(surfPt.texCoord, wls));
