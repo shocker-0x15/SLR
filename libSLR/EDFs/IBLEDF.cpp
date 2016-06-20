@@ -16,15 +16,15 @@ namespace SLR {
     }
     
     SampledSpectrum IBLEDF::evaluate(const EDFQuery &query, const Vector3D &dir) const {
-        if (!query.flags.matches(m_type))
+        if (!matches(query.flags))
             return SampledSpectrum::Zero;
         return 1.0f / M_PI;
     }
     
     SampledSpectrum IBLEDF::evaluatePDF(const EDFQuery &query, const Vector3D &dir) const {
-        if (!query.flags.matches(m_type))
+        if (!matches(query.flags))
             return 0.0f;
         // The true value is: lim_{l to inf} l^2 / (pi * r_w^2) => inf
         return 1.0f / m_worldDiscArea;
-    }    
+    }
 }

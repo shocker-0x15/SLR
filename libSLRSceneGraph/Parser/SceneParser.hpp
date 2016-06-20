@@ -27,6 +27,8 @@ namespace SLRSceneGraph {
         Transform,
         Spectrum,
         Image2D,
+        Texture2DMapping,
+        Texture3DMapping,
         SpectrumTexture,
         NormalTexture,
         FloatTexture,
@@ -59,6 +61,8 @@ namespace SLRSceneGraph {
         TypeMapDef(Transform, SLR::Transform);
         TypeMapDef(Spectrum, SLR::InputSpectrum);
         TypeMapDef(Image2D, SLR::TiledImage2D);
+        TypeMapDef(Texture2DMapping, SLRSceneGraph::Texture2DMapping);
+        TypeMapDef(Texture3DMapping, SLRSceneGraph::Texture3DMapping);
         TypeMapDef(SpectrumTexture, SLRSceneGraph::SpectrumTexture);
         TypeMapDef(NormalTexture, SLRSceneGraph::Normal3DTexture);
         TypeMapDef(FloatTexture, SLRSceneGraph::FloatTexture);
@@ -72,6 +76,7 @@ namespace SLRSceneGraph {
         TypeMapDef(Function, SLRSceneGraph::Function);
         TypeMapDef(Void, void);
         TypeMapDef(Error, SLRSceneGraph::ErrorMessage);
+#undef TypeMapDef
     }
     
     enum class API : uint32_t {
@@ -247,7 +252,7 @@ namespace SLRSceneGraph {
 		std::vector<Procedure> m_nativeProcs;
 		const std::vector<StatementRef> m_stmts;
 
-		static Element NoOpProcedure(const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) { SLRAssert(false, "Not implemented."); return Element(); };
+		static Element NoOpProcedure(const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) { SLRAssert_NotImplemented(); return Element(); };
 	public:
 		Function(uint32_t depth, const std::vector<ArgInfo> &sig, const StatementRef &stmt = nullptr) :
 			m_depth(depth), m_signatures{ sig }, m_nativeProcs{ NoOpProcedure }, m_stmts{ stmt } { }
@@ -264,7 +269,7 @@ namespace SLRSceneGraph {
         const std::vector<Procedure> m_nativeProcs;
         const std::vector<StatementRef> m_stmts;
         
-        static Element NoOpProcedure(const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) { SLRAssert(false, "Not implemented."); return Element(); };
+        static Element NoOpProcedure(const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) { SLRAssert_NotImplemented(); return Element(); };
     public:
         Function(uint32_t depth, const std::vector<ArgInfo> &sig, const StatementRef &stmt = nullptr) :
         m_depth(depth), m_signatures{sig}, m_nativeProcs{NoOpProcedure}, m_stmts{stmt} { }

@@ -15,10 +15,10 @@
 namespace SLR {
     class SLR_API Triangle : public Surface {
         const Vertex* m_v[3];
-        FloatTexture* m_alphaTex;
+        const FloatTexture* m_alphaTex;
     public:
         Triangle() : m_v{nullptr, nullptr, nullptr}, m_alphaTex(nullptr) { };
-        Triangle(const Vertex* v0, const Vertex* v1, const Vertex* v2, FloatTexture* aTex) :
+        Triangle(const Vertex* v0, const Vertex* v1, const Vertex* v2, const FloatTexture* aTex) :
         m_v{v0, v1, v2}, m_alphaTex(aTex) { };
         
         BoundingBox3D bounds() const override;
@@ -28,7 +28,7 @@ namespace SLR {
         float area() const override;
         void sample(float u0, float u1, SurfacePoint* surfPt, float* areaPDF) const override;
         float evaluateAreaPDF(const SurfacePoint& surfPt) const override;
-    };    
+    };
 }
 
 #endif

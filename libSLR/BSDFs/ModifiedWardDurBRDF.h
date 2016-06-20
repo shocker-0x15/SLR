@@ -5,6 +5,10 @@
 //  Copyright (c) 2015年 渡部 心. All rights reserved.
 //
 
+// References
+// Notes on the Ward BRDF
+// A New Ward BRDF Model with Bounded Albedo
+
 #ifndef __SLR__ModifiedWardDurBRDF__
 #define __SLR__ModifiedWardDurBRDF__
 
@@ -17,7 +21,7 @@ namespace SLR {
         SampledSpectrum m_R;
         float m_anisoX, m_anisoY;
         
-        SampledSpectrum sampleInternal(const BSDFQuery &query, const BSDFSample &smp, BSDFQueryResult* result) const override;
+        SampledSpectrum sampleInternal(const BSDFQuery &query, float uComponent, const float uDir[2], BSDFQueryResult* result) const override;
         SampledSpectrum evaluateInternal(const BSDFQuery &query, const Vector3D &dir, SampledSpectrum* rev_fs) const override;
         SampledSpectrum evaluatePDFInternal(const BSDFQuery &query, const Vector3D &dir, SampledSpectrum* revPDF) const override;
         SampledSpectrum weightInternal(const BSDFQuery &query) const override;
@@ -25,7 +29,7 @@ namespace SLR {
     public:
         ModifiedWardDurBRDF(const SampledSpectrum &R, float ax, float ay) : BSDF(DirectionType::Reflection | DirectionType::HighFreq),
         m_R(R), m_anisoX(ax), m_anisoY(ay) { }
-    };    
+    };
 }
 
 #endif /* defined(__SLR__ModifiedWardDurBRDF__) */

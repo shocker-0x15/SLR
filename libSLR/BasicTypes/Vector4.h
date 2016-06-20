@@ -55,6 +55,8 @@ namespace SLR {
         bool hasNaN() const { using std::isnan; return isnan(x) || isnan(y) || isnan(z) || isnan(w); }
         bool hasInf() const { using std::isinf; return isinf(x) || isinf(y) || isinf(z) || isinf(w); }
         
+        std::string toString() const { char str[256]; sprintf(str, "(%g, %g, %g, %g)", x, y, z, w); return str; }
+        
         static const Vector4Template Zero;
         static const Vector4Template One;
         static const Vector4Template Inf;

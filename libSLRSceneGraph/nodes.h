@@ -33,11 +33,11 @@ namespace SLRSceneGraph {
         virtual bool hasChildren() const { return false; };
         virtual bool isInstanced() const { return false; };
         
-        virtual void applyTransform() { SLRAssert(false, "Not implemented."); };
-        virtual void applyTransform(const SLR::StaticTransform &tf) { SLRAssert(false, "Not implemented."); };
-        virtual void applyTransformToLeaf(const SLR::StaticTransform &tf) { SLRAssert(false, "Not implemented."); };
+        virtual void applyTransform() { SLRAssert_NotImplemented(); };
+        virtual void applyTransform(const SLR::StaticTransform &tf) { SLRAssert_NotImplemented(); };
+        virtual void applyTransformToLeaf(const SLR::StaticTransform &tf) { SLRAssert_NotImplemented(); };
         
-        virtual void getRenderingData(SLR::ArenaAllocator &mem, const SLR::Transform* subTF, RenderingData *data) { SLRAssert(false, "Not implemented."); };
+        virtual void getRenderingData(SLR::ArenaAllocator &mem, const SLR::Transform* subTF, RenderingData *data) { SLRAssert_NotImplemented(); };
     };
     
     class SLR_SCENEGRAPH_API InternalNode : public Node {

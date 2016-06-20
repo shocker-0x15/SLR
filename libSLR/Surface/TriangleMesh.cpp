@@ -9,6 +9,7 @@
 #include "../BasicTypes/CompensatedSum.h"
 #include "../Core/distributions.h"
 #include "../Core/SurfaceObject.h"
+#include "../Core/textures.h"
 
 namespace SLR {
     BoundingBox3D Triangle::bounds() const {
@@ -29,7 +30,7 @@ namespace SLR {
         
         Vector3D p = cross(ray.dir, edge02);
         float det = dot(edge01, p);
-        if (det > -0.000001f && det < 0.000001f)
+        if (det == 0.0f)
             return false;
         float invDet = 1.0f / det;
         
@@ -50,19 +51,20 @@ namespace SLR {
             return false;
         
         float b0 = 1.0f - b1 - b2;
+        TexCoord2D texCoord = b0 * v0.texCoord + b1 * v1.texCoord + b2 * v2.texCoord;
+        // Check if an alpha value at the intersection point is zero or not.
+        // If zero, intersection doesn't occur.
+        if (m_alphaTex) {
+            if (m_alphaTex->evaluate(texCoord) == 0.0f)
+                return false;
+        }
+        
         isect->dist = tt;
         isect->p = ray.org + ray.dir * tt;
         isect->gNormal = normalize(cross(edge01, edge02));
         isect->u = b0;
         isect->v = b1;
-        isect->texCoord = b0 * v0.texCoord + b1 * v1.texCoord + b2 * v2.texCoord;
-        
-        //    // Check if the alpha value at the intersection point is zero or not.
-        //    // If zero, intersection doesn't occur.
-        //    if (alphaTexp) {
-        //        if (evaluateAlphaTexture(scene->texturesData + face->alphaTexPtr, isect->uv) == 0.0f)
-        //            return false;
-        //    }
+        isect->texCoord = texCoord;
         
         return true;
     }
@@ -96,6 +98,11 @@ namespace SLR {
         
         surfPt->shadingFrame.z = normalize(b0 * v0.normal + b1 * v1.normal + b2 * v2.normal);
         surfPt->shadingFrame.x = normalize(b0 * v0.tangent + b1 * v1.tangent + b2 * v2.tangent);
+        // guarantee the orthogonality between the normal and tangent.
+        // Orthogonality break might be caused by barycentric interpolation?
+        float dotNT = dot(surfPt->shadingFrame.z, surfPt->shadingFrame.x);
+        if (std::fabs(dotNT) >= 0.01f)
+            surfPt->shadingFrame.x = SLR::normalize(surfPt->shadingFrame.x - dotNT * surfPt->shadingFrame.z);
         surfPt->shadingFrame.y = cross(surfPt->shadingFrame.z, surfPt->shadingFrame.x);
     }
     

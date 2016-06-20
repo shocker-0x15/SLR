@@ -10,7 +10,7 @@
 
 #include "../Core/RenderSettings.h"
 #include "../Helper/ThreadPool.h"
-#include "../Core/XORShift.h"
+#include "../Core/XORShiftRNG.h"
 #include "../Core/ImageSensor.h"
 #include "../Core/RandomNumberGenerator.h"
 #include "../Memory/ArenaAllocator.h"
@@ -29,12 +29,12 @@ namespace SLR {
 #else
         uint32_t numThreads = std::thread::hardware_concurrency();
 #endif
-        XORShift topRand(settings.getInt(RenderSettingItem::RNGSeed));
+        XORShiftRNG topRand(settings.getInt(RenderSettingItem::RNGSeed));
         std::unique_ptr<ArenaAllocator[]> mems = std::unique_ptr<ArenaAllocator[]>(new ArenaAllocator[numThreads]);
-        std::unique_ptr<XORShift[]> rngs = std::unique_ptr<XORShift[]>(new XORShift[numThreads]);
+        std::unique_ptr<XORShiftRNG[]> rngs = std::unique_ptr<XORShiftRNG[]>(new XORShiftRNG[numThreads]);
         for (int i = 0; i < numThreads; ++i) {
             new (mems.get() + i) ArenaAllocator();
-            new (rngs.get() + i) XORShift(topRand.getUInt());
+            new (rngs.get() + i) XORShiftRNG(topRand.getUInt());
         }
         std::unique_ptr<RandomNumberGenerator*[]> rngRefs = std::unique_ptr<RandomNumberGenerator*[]>(new RandomNumberGenerator*[numThreads]);
         for (int i = 0; i < numThreads; ++i)
@@ -204,27 +204,27 @@ namespace SLR {
                         SampledSpectrum lExtend1stAreaPDF, lExtend1stRRProb, lExtend2ndAreaPDF, lExtend2ndRRProb;
                         {
                             lExtend1stAreaPDF = lExtend1stDirPDF * cosEyeEnd / connectDist2;
-                            lExtend1stRRProb = s > 1 ? min(lDDF * cosLightEnd / lExtend1stDirPDF, SampledSpectrum::One) : SampledSpectrum::One;
+                            lExtend1stRRProb = s > 1 ? min(positiveMask(lDDF * cosLightEnd / lExtend1stDirPDF, lDDF), SampledSpectrum::One) : SampledSpectrum::One;
                             
                             if (t > 1) {
                                 BPTVertex &eVtxNextToEnd = eyeVertices[t - 2];
                                 float dist2;
                                 Vector3D dir2nd = eVtx.surfPt.getDirectionFrom(eVtxNextToEnd.surfPt.p, &dist2);
                                 lExtend2ndAreaPDF = lExtend2ndDirPDF * absDot(eVtxNextToEnd.surfPt.gNormal, dir2nd) / dist2;
-                                lExtend2ndRRProb = min(eRevDDF * absDot(eVtx.gNormal_sn, eVtx.dirIn_sn) / lExtend2ndDirPDF, SampledSpectrum::One);
+                                lExtend2ndRRProb = min(positiveMask(eRevDDF * absDot(eVtx.gNormal_sn, eVtx.dirIn_sn) / lExtend2ndDirPDF, eRevDDF), SampledSpectrum::One);
                             }
                         }
                         SampledSpectrum eExtend1stAreaPDF, eExtend1stRRProb, eExtend2ndAreaPDF, eExtend2ndRRProb;
                         {
                             eExtend1stAreaPDF = eExtend1stDirPDF * cosLightEnd / connectDist2;
-                            eExtend1stRRProb = t > 1 ? min(eDDF * cosEyeEnd / eExtend1stDirPDF, SampledSpectrum::One) : SampledSpectrum::One;
+                            eExtend1stRRProb = t > 1 ? min(positiveMask(eDDF * cosEyeEnd / eExtend1stDirPDF, eDDF), SampledSpectrum::One) : SampledSpectrum::One;
                             
                             if (s > 1) {
                                 BPTVertex &lVtxNextToEnd = lightVertices[s - 2];
                                 float dist2;
                                 Vector3D dir2nd = lVtxNextToEnd.surfPt.getDirectionFrom(lVtx.surfPt.p, &dist2);
                                 eExtend2ndAreaPDF = eExtend2ndDirPDF * absDot(lVtxNextToEnd.surfPt.gNormal, dir2nd) / dist2;
-                                eExtend2ndRRProb = min(lRevDDF * absDot(lVtx.gNormal_sn, lVtx.dirIn_sn) / eExtend2ndDirPDF, SampledSpectrum::One);
+                                eExtend2ndRRProb = min(positiveMask(lRevDDF * absDot(lVtx.gNormal_sn, lVtx.dirIn_sn) / eExtend2ndDirPDF, lRevDDF), SampledSpectrum::One);
                             }
                         }
                         

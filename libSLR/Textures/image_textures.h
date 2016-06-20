@@ -15,30 +15,33 @@
 namespace SLR {
     class SLR_API ImageSpectrumTexture : public SpectrumTexture {
         const TiledImage2D* m_data;
+        const Texture2DMapping* m_mapping;
     public:
-        ImageSpectrumTexture(const TiledImage2D* image) :
-        m_data(image) { };
+        ImageSpectrumTexture(const TiledImage2D* image, const Texture2DMapping* mapping) :
+        m_data(image), m_mapping(mapping) { }
         
-        SampledSpectrum evaluate(const TexCoord2D &tc, const WavelengthSamples &wls) const override;
+        SampledSpectrum evaluate(const SurfacePoint &surfPt, const WavelengthSamples &wls) const override;
         RegularConstantContinuous2D* createIBLImportanceMap() const override;
     };
     
     class SLR_API ImageNormal3DTexture : public Normal3DTexture {
         const TiledImage2D* m_data;
+        const Texture2DMapping* m_mapping;
     public:
-        ImageNormal3DTexture(const TiledImage2D* image) :
-        m_data(image) { };
+        ImageNormal3DTexture(const TiledImage2D* image, const Texture2DMapping* mapping) :
+        m_data(image), m_mapping(mapping) { }
         
-        Normal3D evaluate(const TexCoord2D &tc) const override;
+        Normal3D evaluate(const SurfacePoint &surfPt) const override;
     };
     
     class SLR_API ImageFloatTexture : public FloatTexture {
         const TiledImage2D* m_data;
+        const Texture2DMapping* m_mapping;
     public:
-        ImageFloatTexture(const TiledImage2D* image) :
-        m_data(image) { };
+        ImageFloatTexture(const TiledImage2D* image, const Texture2DMapping* mapping) :
+        m_data(image), m_mapping(mapping) { }
         
-        float evaluate(const TexCoord2D &tc) const override;
+        float evaluate(const SurfacePoint &surfPt) const override;
     };
 }
 

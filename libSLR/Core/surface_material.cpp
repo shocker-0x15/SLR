@@ -11,27 +11,15 @@
 #include "../Core/textures.h"
 
 namespace SLR {
-    Fresnel* SpatialFresnelNoOp::getFresnel(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem) const {
+    Fresnel* SVFresnelNoOp::getFresnel(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem) const {
         return mem.create<FresnelNoOp>();
     }
     
-    Fresnel* SpatialFresnelConductor::getFresnel(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem) const {
-        return mem.create<FresnelConductor>(m_eta->evaluate(surfPt.texCoord, wls), m_k->evaluate(surfPt.texCoord, wls));
+    Fresnel* SVFresnelConductor::getFresnel(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem) const {
+        return mem.create<FresnelConductor>(m_eta->evaluate(surfPt, wls), m_k->evaluate(surfPt, wls));
     }
     
-    Fresnel* SpatialFresnelDielectric::getFresnel(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem) const {
-        return mem.create<FresnelDielectric>(m_etaExt->evaluate(surfPt.texCoord, wls), m_etaInt->evaluate(surfPt.texCoord, wls));
-    }
-    
-    BSDF* EmitterSurfaceMaterial::getBSDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem, float scale) const {
-        return m_mat->getBSDF(surfPt, wls, mem);
-    }
-    
-    SampledSpectrum EmitterSurfaceMaterial::emittance(const SurfacePoint &surfPt, const WavelengthSamples &wls) const {
-        return m_emit->emittance(surfPt, wls);
-    }
-    
-    EDF* EmitterSurfaceMaterial::getEDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem, float scale) const {
-        return m_emit->getEDF(surfPt, wls, mem);
+    Fresnel* SVFresnelDielectric::getFresnel(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem) const {
+        return mem.create<FresnelDielectric>(m_etaExt->evaluate(surfPt, wls), m_etaInt->evaluate(surfPt, wls));
     }
 }

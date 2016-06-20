@@ -24,8 +24,7 @@ lightMesh = createMesh(
     ((-0.25, 0,  0.25), (0, -1, 0), (1, 0, 0), (0, 1))
     ),
     (
-    ((0, 1, 2), surfMat), 
-    ((0, 2, 3), surfMat)
+    (surfMat, ((0, 1, 2), (0, 2, 3))),
     )
     );
 addChild(lightNode, lightMesh);
@@ -54,8 +53,12 @@ for (i = 0; i < 24; ++i) {
     addItem(vertices, transform * createVertex((0.0, 0.0, -1.0), (0, 1, 0), (1, 0, 0), (0, 1)));
     
     idxBase = 4 * i;
-    addItem(indices, ((idxBase + 0, idxBase + 1, idxBase + 2), mats[i]));
-    addItem(indices, ((idxBase + 0, idxBase + 2, idxBase + 3), mats[i]));
+    addItem(indices, 
+            (mats[i], ((idxBase + 0, idxBase + 1, idxBase + 2), 
+                       (idxBase + 0, idxBase + 2, idxBase + 3)
+                      )
+            )
+           );
 }
 colorCheckerMesh = createMesh(vertices, indices);
 addChild(root, colorCheckerMesh);

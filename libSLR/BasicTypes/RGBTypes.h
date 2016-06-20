@@ -89,6 +89,14 @@ namespace SLR {
             return 0.0f;
         }
         
+        // setting "primary" to 1.0 might introduce bias.
+        RealType importance(uint16_t selectedLambda) const {
+            RealType sum = r + g + b;
+            const RealType primary = 0.9f;
+            const RealType marginal = (1 - primary) / 2;
+            return sum * marginal + (*this)[selectedLambda] * (primary - marginal);
+        }
+        
         // TODO: consider which RGB color space should be used for rendering calculation and converting.
         void getRGB(RealType RGB[3], RGBColorSpace space = RGBColorSpace::sRGB) const {
             RGB[0] = r;
@@ -135,32 +143,16 @@ namespace SLR {
     const RGBTemplate<RealType> RGBTemplate<RealType>::NaN = RGBTemplate<RealType>(std::numeric_limits<RealType>::quiet_NaN());
     
     template <typename RealType>
-    inline RGBTemplate<RealType> min(const RGBTemplate<RealType> &smp1, const RGBTemplate<RealType> &smp2) {
-        RGBTemplate<RealType> ret;
-        ret.r = std::fmin(smp1.r, smp2.r);
-        ret.g = std::fmin(smp1.g, smp2.g);
-        ret.b = std::fmin(smp1.b, smp2.b);
-        return ret;
-    }
+    SLR_API RGBTemplate<RealType> min(const RGBTemplate<RealType> &smp1, const RGBTemplate<RealType> &smp2);
     
     template <typename RealType>
-    inline RGBTemplate<RealType> max(const RGBTemplate<RealType> &smp1, const RGBTemplate<RealType> &smp2) {
-        RGBTemplate<RealType> ret;
-        ret.r = std::fmax(smp1.r, smp2.r);
-        ret.g = std::fmax(smp1.g, smp2.g);
-        ret.b = std::fmax(smp1.b, smp2.b);
-        return ret;
-    }
+    SLR_API RGBTemplate<RealType> max(const RGBTemplate<RealType> &smp1, const RGBTemplate<RealType> &smp2);
     
     template <typename RealType>
-    inline RGBTemplate<RealType> positiveMask(const RGBTemplate<RealType> &value, const RGBTemplate<RealType> &mask) {
-        RGBTemplate<RealType> ret;
-        ret.r = mask.r > 0 ? value.r : 0;
-        ret.g = mask.g > 0 ? value.g : 0;
-        ret.b = mask.b > 0 ? value.b : 0;
-        return ret;
-    }
+    SLR_API RGBTemplate<RealType> positiveMask(const RGBTemplate<RealType> &value, const RGBTemplate<RealType> &mask);
     
+    template <typename RealType>
+    SLR_API RGBTemplate<RealType> sqrt(const RGBTemplate<RealType> &value);
     
     template <typename RealType>
     SLR_API RGBTemplate<RealType> pow(const RGBTemplate<RealType> &s, RealType p);

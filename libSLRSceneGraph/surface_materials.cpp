@@ -15,6 +15,8 @@ namespace SLRSceneGraph {
         delete m_rawData;
     }
     
+    
+    
     EmitterSurfaceProperty::~EmitterSurfaceProperty() {
         delete m_rawData;
     }
@@ -24,35 +26,37 @@ namespace SLRSceneGraph {
         m_rawData = new SLR::EmitterSurfaceMaterial(mat->getRaw(), emit->getRaw());
     }
     
-    SpatialFresnel::~SpatialFresnel() {
+    
+    
+    SVFresnel::~SVFresnel() {
         delete m_rawData;
     }
     
-    SpatialFresnelNoOp::SpatialFresnelNoOp() {
-        m_rawData = new SLR::SpatialFresnelNoOp();
+    SVFresnelNoOp::SVFresnelNoOp() {
+        m_rawData = new SLR::SVFresnelNoOp();
     }
     
-    SpatialFresnelConductor::SpatialFresnelConductor(const SpectrumTextureRef &eta, const SpectrumTextureRef &k) : m_eta(eta), m_k(k) {
-        m_rawData = new SLR::SpatialFresnelConductor(eta->getRaw(), k->getRaw());
+    SVFresnelConductor::SVFresnelConductor(const SpectrumTextureRef &eta, const SpectrumTextureRef &k) : m_eta(eta), m_k(k) {
+        m_rawData = new SLR::SVFresnelConductor(eta->getRaw(), k->getRaw());
     }
     
-    SpatialFresnelDielectric::SpatialFresnelDielectric(const SpectrumTextureRef &etaExt, const SpectrumTextureRef &etaInt) : m_etaExt(etaExt), m_etaInt(etaInt) {
-        m_rawData = new SLR::SpatialFresnelDielectric(etaExt->getRaw(), etaInt->getRaw());
+    SVFresnelDielectric::SVFresnelDielectric(const SpectrumTextureRef &etaExt, const SpectrumTextureRef &etaInt) : m_etaExt(etaExt), m_etaInt(etaInt) {
+        m_rawData = new SLR::SVFresnelDielectric(etaExt->getRaw(), etaInt->getRaw());
     }
     
     DiffuseReflection::DiffuseReflection(const SpectrumTextureRef &reflectance, const FloatTextureRef &sigma) :
     m_reflectance(reflectance), m_sigma(sigma) {
-        m_rawData = new SLR::DiffuseReflection(reflectance->getRaw(), m_sigma ? sigma->getRaw() : nullptr);
+        m_rawData = new SLR::DiffuseReflection(reflectance->getRaw(), sigma ? sigma->getRaw() : nullptr);
     }
     
-    SpecularReflection::SpecularReflection(const SpectrumTextureRef &coeffR, const SpatialFresnelRef &fresnel) :
-    m_coeffR(coeffR), m_fresnel(fresnel) {
-        m_rawData = new SLR::SpecularReflection(coeffR->getRaw(), fresnel->getRaw());
+    SpecularReflection::SpecularReflection(const SpectrumTextureRef &coeffR, const SpectrumTextureRef &eta, const SpectrumTextureRef &k) :
+    m_coeffR(coeffR), m_eta(eta), m_k(k) {
+        m_rawData = new SLR::SpecularReflection(coeffR->getRaw(), eta->getRaw(), k->getRaw());
     }
     
-    SpecularTransmission::SpecularTransmission(const SpectrumTextureRef &coeffT, const SpectrumTextureRef &etaExt, const SpectrumTextureRef &etaInt) :
-    m_coeffT(coeffT), m_etaExt(etaExt), m_etaInt(etaInt) {
-        m_rawData = new SLR::SpecularTransmission(coeffT->getRaw(), etaExt->getRaw(), etaInt->getRaw());
+    SpecularScattering::SpecularScattering(const SpectrumTextureRef &coeff, const SpectrumTextureRef &etaExt, const SpectrumTextureRef &etaInt) :
+    m_coeff(coeff), m_etaExt(etaExt), m_etaInt(etaInt) {
+        m_rawData = new SLR::SpecularScattering(coeff->getRaw(), etaExt->getRaw(), etaInt->getRaw());
     }
     
     InverseSurfaceMaterial::InverseSurfaceMaterial(const SurfaceMaterialRef &baseMat) :
@@ -60,14 +64,9 @@ namespace SLRSceneGraph {
         m_rawData = new SLR::InverseSurfaceMaterial(baseMat->getRaw());
     }
     
-    AshikhminSpecularReflection::AshikhminSpecularReflection(const SpectrumTextureRef &Rs, const FloatTextureRef &nu, const FloatTextureRef &nv) :
-    m_Rs(Rs), m_nu(nu), m_nv(nv) {
-        m_rawData = new SLR::AshikhminSpecularReflection(Rs->getRaw(), nu->getRaw(), nv->getRaw());
-    }
-    
-    AshikhminDiffuseReflection::AshikhminDiffuseReflection(const SpectrumTextureRef &Rs, const SpectrumTextureRef &Rd) :
-    m_Rs(Rs), m_Rd(Rd) {
-        m_rawData = new SLR::AshikhminDiffuseReflection(Rs->getRaw(), Rd->getRaw());
+    AshikhminShirleyReflection::AshikhminShirleyReflection(const SpectrumTextureRef &Rs, const SpectrumTextureRef &Rd, const FloatTextureRef &nu, const FloatTextureRef &nv) :
+    m_Rs(Rs), m_Rd(Rd), m_nu(nu), m_nv(nv) {
+        m_rawData = new SLR::AshikhminShirleyReflection(Rs->getRaw(), Rd->getRaw(), nu->getRaw(), nv->getRaw());
     }
     
     ModifiedWardDurReflection::ModifiedWardDurReflection(const SpectrumTextureRef &reflectance, const FloatTextureRef &anisoX, const FloatTextureRef &anisoY) :
@@ -86,6 +85,7 @@ namespace SLRSceneGraph {
     }
     
     
+    
     DiffuseEmission::DiffuseEmission(const SpectrumTextureRef &emittance) :
     m_emittance(emittance) {
         m_rawData = new SLR::DiffuseEmission(emittance->getRaw());
@@ -98,20 +98,17 @@ namespace SLRSceneGraph {
     };
     
     
+    
     SurfaceMaterialRef SurfaceMaterial::createMatte(const SpectrumTextureRef &reflectance, const FloatTextureRef &sigma) {
         return createShared<DiffuseReflection>(reflectance, sigma);
     }
     
     SurfaceMaterialRef SurfaceMaterial::createMetal(const SpectrumTextureRef &coeffR, const SpectrumTextureRef &eta, const SpectrumTextureRef &k) {
-        SpatialFresnelRef fresnel = createShared<SpatialFresnelConductor>(eta, k);
-        return createShared<SpecularReflection>(coeffR, fresnel);
+        return createShared<SpecularReflection>(coeffR, eta, k);
     }
     
-    SurfaceMaterialRef SurfaceMaterial::createGlass(const SpectrumTextureRef &coeffR, const SpectrumTextureRef &coeffT, const SpectrumTextureRef &etaExt, const SpectrumTextureRef &etaInt) {
-        SpatialFresnelRef frDiel = createShared<SpatialFresnelDielectric>(etaExt, etaInt);
-        SurfaceMaterialRef r = createShared<SpecularReflection>(coeffR, frDiel);
-        SurfaceMaterialRef t = createShared<SpecularTransmission>(coeffT, etaExt, etaInt);
-        return createSummedMaterial(r, t);
+    SurfaceMaterialRef SurfaceMaterial::createGlass(const SpectrumTextureRef &coeff, const SpectrumTextureRef &etaExt, const SpectrumTextureRef &etaInt) {
+        return createShared<SpecularScattering>(coeff, etaExt, etaInt);
     }
     
     SurfaceMaterialRef SurfaceMaterial::createModifiedWardDur(const SpectrumTextureRef &reflectance, const FloatTextureRef &anisoX, const FloatTextureRef &anisoY) {
@@ -119,9 +116,7 @@ namespace SLRSceneGraph {
     }
     
     SurfaceMaterialRef SurfaceMaterial::createAshikhminShirley(const SpectrumTextureRef &Rd, const SpectrumTextureRef &Rs, const FloatTextureRef &nu, const FloatTextureRef &nv) {
-        SurfaceMaterialRef specular = createShared<AshikhminSpecularReflection>(Rs, nu, nv);
-        SurfaceMaterialRef diffuse = createShared<AshikhminDiffuseReflection>(Rs, Rd);
-        return createSummedMaterial(specular, diffuse);
+        return createShared<AshikhminShirleyReflection>(Rs, Rd, nu, nv);
     }
     
     SurfaceMaterialRef SurfaceMaterial::createInverseMaterial(const SurfaceMaterialRef &baseMat) {
@@ -136,11 +131,11 @@ namespace SLRSceneGraph {
         return createShared<MixedSurfaceMaterial>(mat0, mat1, factor);
     }
     
-    SurfaceMaterialRef SurfaceMaterial::createEmitterSurfaceMaterial(const SurfaceMaterialRef &mat, const EmitterSurfacePropertyRef &emit) {
-        return createShared<EmitterSurfaceMaterial>(mat, emit);
-    }
-    
     EmitterSurfacePropertyRef SurfaceMaterial::createDiffuseEmitter(const SpectrumTextureRef &emittance) {
         return createShared<DiffuseEmission>(emittance);
+    }
+    
+    SurfaceMaterialRef SurfaceMaterial::createEmitterSurfaceMaterial(const SurfaceMaterialRef &mat, const EmitterSurfacePropertyRef &emit) {
+        return createShared<EmitterSurfaceMaterial>(mat, emit);
     }
 }

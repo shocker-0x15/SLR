@@ -52,11 +52,11 @@ namespace SLR {
     }
     
     void InfiniteSphere::sample(float u0, float u1, SurfacePoint *surfPt, float *areaPDF) const {
-        SLRAssert(false, "Not implemented.");
+        SLRAssert_NotImplemented();
     }
     
     float InfiniteSphere::evaluateAreaPDF(const SurfacePoint &surfPt) const {
-        SLRAssert(false, "Not implemented.");
+        SLRAssert_NotImplemented();
         return 0.0f;
     }    
 }

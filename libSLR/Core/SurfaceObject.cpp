@@ -28,6 +28,7 @@ namespace SLR {
     }
     
     
+    
     bool SurfaceObject::intersect(Ray &ray, SurfacePoint *surfPt) const {
         Intersection isect;
         if (!intersect(ray, &isect))
@@ -43,6 +44,7 @@ namespace SLR {
         Intersection isect;
         return !intersect(ray, &isect);
     }
+    
     
     
     BoundingBox3D SingleSurfaceObject::bounds() const {
@@ -124,15 +126,12 @@ namespace SLR {
     
     void BumpSingleSurfaceObject::getSurfacePoint(const Intersection &isect, SurfacePoint *surfPt) const {
         SingleSurfaceObject::getSurfacePoint(isect, surfPt);
-        Vector3D nLocal = m_normalMap->evaluate(surfPt->texCoord);
-        const Vector3D rawSN = surfPt->shadingFrame.z;
-        const Vector3D tc0Dir = normalize(surfPt->texCoord0Dir - dot(rawSN, surfPt->texCoord0Dir) * rawSN);
-        const Vector3D tc1Dir = cross(rawSN, tc0Dir);
-        Vector3D n = Vector3D(dot(Vector3D(tc0Dir.x, tc1Dir.x, rawSN.x), nLocal),
-                              dot(Vector3D(tc0Dir.y, tc1Dir.y, rawSN.y), nLocal),
-                              dot(Vector3D(tc0Dir.z, tc1Dir.z, rawSN.z), nLocal));
-        Vector3D t = normalize(surfPt->shadingFrame.x - dot(n, surfPt->shadingFrame.x) * n);
-        Vector3D b = cross(n, t);
+        Vector3D nLocal = m_normalMap->evaluate(*surfPt);
+        Vector3D tLocal = Vector3D::Ex - dot(nLocal, Vector3D::Ex) * nLocal;
+        Vector3D bLocal = Vector3D::Ey - dot(nLocal, Vector3D::Ey) * nLocal;
+        Vector3D t = normalize(surfPt->shadingFrame.fromLocal(tLocal));
+        Vector3D b = normalize(surfPt->shadingFrame.fromLocal(bLocal));
+        Vector3D n = normalize(surfPt->shadingFrame.fromLocal(nLocal));
         surfPt->shadingFrame.x = t;
         surfPt->shadingFrame.y = b;
         surfPt->shadingFrame.z = n;
@@ -227,6 +226,7 @@ namespace SLR {
     }
     
     
+    
     SurfaceObjectAggregate::SurfaceObjectAggregate(std::vector<SurfaceObject*> &objs) {
         m_accelerator = new BBVH(objs, BBVH::Partitioning::BinnedSAH);
         
@@ -265,10 +265,6 @@ namespace SLR {
         return m_accelerator->intersect(ray, isect);
     }
     
-    void SurfaceObjectAggregate::getSurfacePoint(const Intersection &isect, SurfacePoint* surfPt) const {
-        isect.obj.top()->getSurfacePoint(isect, surfPt);
-    }
-    
     bool SurfaceObjectAggregate::isEmitting() const {
         return m_revMap.size() > 0;
     }
@@ -299,24 +295,6 @@ namespace SLR {
         return prob * light.top()->evaluateProb(light);
     }
     
-    SampledSpectrum SurfaceObjectAggregate::sample(const Light &light, const LightPosQuery &query, const LightPosSample &smp, LightPosQueryResult* result) const {
-        //    if (light.top() != this) {
-        //        result->areaPDF = 0.0f;
-        //        return SampledSpectrum::Zero;
-        //    }
-        //    light.pop();
-        //    SampledSpectrum M = light.top()->sample(light, query, result);
-        //    light.push(this);
-        //    return M;
-        return light.top()->sample(light, query, smp, result);
-    }
-    
-    Ray SurfaceObjectAggregate::sampleRay(const Light &light,
-                                          const LightPosQuery &lightPosQuery, const LightPosSample &lightPosSample, LightPosQueryResult* lightPosResult, SampledSpectrum* Le0, EDF** edf,
-                                          const EDFQuery &edfQuery, const EDFSample &edfSample, EDFQueryResult* edfResult, SampledSpectrum* Le1,
-                                          ArenaAllocator &mem) const {
-        return light.top()->sampleRay(light, lightPosQuery, lightPosSample, lightPosResult, Le0, edf, edfQuery, edfSample, edfResult, Le1, mem);
-    }
     
     
     BoundingBox3D TransformedSurfaceObject::bounds() const {
@@ -333,6 +311,16 @@ namespace SLR {
         ray.distMax = localRay.distMax;
         isect->obj.push(this);
         return true;
+    }
+    
+    Point3D TransformedSurfaceObject::getIntersectionPoint(const Intersection &isect) const {
+        isect.obj.pop();
+        Point3D ret = isect.obj.top()->getIntersectionPoint(isect);
+        StaticTransform sampledTF;
+        m_transform->sample(isect.time, &sampledTF);
+        ret = sampledTF * ret;
+        isect.obj.push(this);
+        return ret;
     }
     
     void TransformedSurfaceObject::getSurfacePoint(const Intersection &isect, SurfacePoint *surfPt) const {
@@ -459,17 +447,18 @@ namespace SLR {
     }
     
     float Scene::evaluateProb(const Light &light) const {
+        float ret = 0.0f;
         if (m_envSphere) {
             float sumImps = m_aggregate->importance() + m_envSphere->importance();
-            if (light.top() == m_envSphere) {
-                return m_envSphere->importance() / sumImps;
-            }
-            else {
-                return m_aggregate->importance()  / sumImps * m_aggregate->evaluateProb(light);
-            }
+            if (light.top() == m_envSphere)
+                ret = m_envSphere->importance() / sumImps;
+            else
+                ret = m_aggregate->importance()  / sumImps * m_aggregate->evaluateProb(light);
         }
         else {
-            return m_aggregate->evaluateProb(light);
+            ret = m_aggregate->evaluateProb(light);
         }
+        SLRAssert(!std::isnan(ret) && !std::isinf(ret), "%g", ret);
+        return ret;
     }
 }

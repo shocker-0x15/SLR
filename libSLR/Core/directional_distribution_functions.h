@@ -21,18 +21,19 @@ namespace SLR {
             IE_HighFreq = 1 << 1,
             IE_Delta0D = 1 << 2,
             IE_Delta1D = 1 << 3,
-            IE_Dispersive = 1 << 4,
-            IE_NonDelta = IE_LowFreq | IE_HighFreq | IE_Dispersive,
-            IE_Delta = IE_Delta0D | IE_Delta1D | IE_Dispersive,
+            IE_NonDelta = IE_LowFreq | IE_HighFreq,
+            IE_Delta = IE_Delta0D | IE_Delta1D,
             IE_AllFreq = IE_NonDelta | IE_Delta,
             
-            IE_Reflection = 1 << 5,
-            IE_Transmission = 1 << 6,
+            IE_Reflection = 1 << 4,
+            IE_Transmission = 1 << 5,
             IE_Emission = IE_Reflection,
             IE_Acquisition = IE_Reflection,
             IE_WholeSphere = IE_Reflection | IE_Transmission,
             
             IE_All = IE_AllFreq | IE_WholeSphere,
+            
+            IE_Dispersive = 1 << 6,
             
             IE_LowFreqReflection = IE_LowFreq | IE_Reflection,
             IE_LowFreqTransmission = IE_LowFreq | IE_Transmission,
@@ -48,7 +49,6 @@ namespace SLR {
         static const DirectionType HighFreq;
         static const DirectionType Delta0D;
         static const DirectionType Delta1D;
-        static const DirectionType Dispersive;
         static const DirectionType NonDelta;
         static const DirectionType Delta;
         static const DirectionType AllFreq;
@@ -58,6 +58,7 @@ namespace SLR {
         static const DirectionType Acquisition;
         static const DirectionType WholeSphere;
         static const DirectionType All;
+        static const DirectionType Dispersive;
         static const DirectionType LowFreqReflection;
         static const DirectionType LowFreqTransmission;
         static const DirectionType LowFreqScattering;
@@ -75,20 +76,18 @@ namespace SLR {
         DirectionType operator|(const DirectionType &r) const { return (InternalEnum)(value | r.value); }
         DirectionType &operator&=(const DirectionType &r) { value = (InternalEnum)(value & r.value); return *this; }
         DirectionType &operator|=(const DirectionType &r) { value = (InternalEnum)(value | r.value); return *this; }
-        DirectionType flip() const {
-            bool r = value & IE_Reflection;
-            bool t = value & IE_Transmission;
-            return InternalEnum((value & IE_AllFreq) | (r ? IE_Transmission : 0) | (t ? IE_Reflection : 0));
-        }
+        DirectionType flip() const { return InternalEnum(value ^ IE_WholeSphere); }
         operator bool() const { return value; }
         bool operator==(const DirectionType &r) const { return value == r.value; }
         bool operator!=(const DirectionType &r) const { return value != r.value; }
         
-        bool matches(DirectionType t) const { return (value & t.value) == t.value; }
-        bool isDelta() const { return (*this & (Delta | WholeSphere)) == *this; }
-        bool hasNonDelta() const { return *this & NonDelta; }
-        bool hasDelta() const { return *this & Delta; }
-        bool isDispersive() const { return *this & Dispersive; }
+        bool matches(DirectionType t) const { uint32_t res = value & t.value; return (res & IE_WholeSphere) && (res & IE_AllFreq); }
+        bool hasNonDelta() const { return value & IE_NonDelta; }
+        bool hasDelta() const { return value & IE_Delta; }
+        bool isDelta() const { return (value & IE_Delta) && !(value & IE_NonDelta); }
+        bool isReflection() const { return (value & IE_Reflection) && !(value & IE_Transmission); }
+        bool isTransmission() const { return !(value & IE_Reflection) && (value & IE_Transmission); }
+        bool isDispersive() const { return value & IE_Dispersive; }
     };
     
     
@@ -124,7 +123,8 @@ namespace SLR {
     struct SLR_API BSDFSample {
         float uComponent;
         float uDir[2];
-        BSDFSample(float uComp, float uDir0, float uDir1) : uComponent(uComp), uDir{uDir0, uDir1} { }
+        BSDFSample() {}
+        BSDFSample(float uComp, float uDir0, float uDir1) : uComponent(uComp), uDir{uDir0, uDir1} {}
     };
     
     struct SLR_API BSDFReverseInfo {
@@ -151,6 +151,32 @@ namespace SLR {
         DirectionType dirType;
     };
     
+    struct SLR_API BSSRDFQuery {
+        const Scene &scene;
+        const SurfacePoint &surfPt;
+        Vector3D dir;
+        float time;
+        int16_t wlHint;
+        bool adjoint;
+        
+        BSSRDFQuery(const Scene &scn, const SurfacePoint &sp, const Vector3D d, float t, int16_t wl, bool adj = false) :
+        scene(scn), surfPt(sp), dir(d), time(t), wlHint(wl), adjoint(adj) {}
+    };
+    
+    struct SLR_API BSSRDFSample {
+        float uPos[2];
+        float uDir[2];
+        float uAuxiliary;
+        BSSRDFSample(float uPos0, float uPos1, float uDir0, float uDir1, float uAux) : uPos{uPos0, uPos1}, uDir{uDir0, uDir1}, uAuxiliary(uAux) { }
+    };
+    
+    struct SLR_API BSSRDFQueryResult {
+        SurfacePoint surfPt;
+        Vector3D dir;
+        float areaPDF;
+        float dirPDF;
+    };
+    
     
     class SLR_API EDF {
     protected:
@@ -173,13 +199,13 @@ namespace SLR {
         virtual SampledSpectrum evaluatePDF(const EDFQuery &query, const Vector3D &dir) const = 0;
         virtual SampledSpectrum weight(const EDFQuery &query) const = 0;
         
-        virtual bool matches(DirectionType flags) const { return m_type & flags; }
+        virtual bool matches(DirectionType flags) const { return m_type.matches(flags); }
         bool hasNonDelta() const { return matches(DirectionType::WholeSphere | DirectionType::NonDelta); }
     };
     
     class SLR_API BSDF {
     protected:
-        const DirectionType m_type;
+        DirectionType m_type;
         
         DirectionType sideTest(const Normal3D& ng, const Vector3D& d0, const Vector3D &d1) const {
             bool reflect = dot(Vector3D(ng), d0) * dot(Vector3D(ng), d1) > 0;
@@ -192,7 +218,7 @@ namespace SLR {
             result->dirType = DirectionType();
             return false;
         }
-        virtual SampledSpectrum sampleInternal(const BSDFQuery &query, const BSDFSample &smp, BSDFQueryResult* result) const = 0;
+        virtual SampledSpectrum sampleInternal(const BSDFQuery &query, float uComponent, const float uDir[2], BSDFQueryResult* result) const = 0;
         virtual SampledSpectrum evaluateInternal(const BSDFQuery &query, const Vector3D &dir, SampledSpectrum* rev_fs) const = 0;
         virtual SampledSpectrum evaluatePDFInternal(const BSDFQuery &query, const Vector3D &dir, SampledSpectrum* revPDF) const = 0;
         virtual SampledSpectrum weightInternal(const BSDFQuery &query) const = 0;
@@ -206,12 +232,18 @@ namespace SLR {
         SampledSpectrum sample(const BSDFQuery &query, const BSDFSample &smp, BSDFQueryResult* result) const {
             if (!matches(query.flags, result))
                 return SampledSpectrum::Zero;
-            SampledSpectrum fs_sn = sampleInternal(query, smp, result);
+            SampledSpectrum fs_sn = sampleInternal(query, smp.uComponent, smp.uDir, result);
             float snCorrection = (query.adjoint ?
                                   std::fabs(query.dir_sn.z / dot(query.dir_sn, query.gNormal_sn)) :
                                   std::fabs(result->dir_sn.z / dot(result->dir_sn, query.gNormal_sn)));
             if (result->reverse)
                 result->reverse->fs *= snCorrection;
+            SLRAssert(result->dirPDF == SampledSpectrum::Zero ||
+                      (!fs_sn.hasNaN() && !fs_sn.hasInf() && !std::isnan(snCorrection) && !std::isinf(snCorrection) &&
+                       !result->dirPDF.hasNaN() && !result->dirPDF.hasInf()),
+                      "fs_sn: %s, snCorrection: %g, PDF: %s, wlIdx: %u, qDir: %s, sample: (%g, %g, %g), rDir: %s, gNormal: %s",
+                      fs_sn.toString().c_str(), snCorrection, result->dirPDF.toString().c_str(), query.heroIndex,
+                      query.dir_sn.toString().c_str(), smp.uComponent, smp.uDir[0], smp.uDir[1], result->dir_sn.toString().c_str(), query.gNormal_sn.toString().c_str());
             return fs_sn * snCorrection;
         }
         SampledSpectrum evaluate(const BSDFQuery &query, const Vector3D &dir, SampledSpectrum* rev_fs = nullptr) const {
@@ -226,6 +258,11 @@ namespace SLR {
             float snCorrection = (query.adjoint ?
                                   std::fabs(query.dir_sn.z / dot(query.dir_sn, query.gNormal_sn)) :
                                   std::fabs(dir.z / dot(dir, query.gNormal_sn)));
+            SLRAssert(!fs_sn.hasNaN() && !fs_sn.hasInf() && !std::isnan(snCorrection) && !std::isinf(snCorrection),
+                      "fs_sn: %s, snCorrection: %g, wlIdx: %u, qDir: %s, rDir: %s, gNormal: %s",
+                      fs_sn.toString().c_str(), snCorrection, query.heroIndex,
+                      query.dir_sn.toString().c_str(), dir.toString().c_str(), query.gNormal_sn.toString().c_str());
+            
             if (rev_fs)
                 *rev_fs *= snCorrection;
             return fs_sn * snCorrection;
@@ -236,15 +273,24 @@ namespace SLR {
                     *revPDF = SampledSpectrum::Zero;
                 return SampledSpectrum::Zero;
             }
-            return evaluatePDFInternal(query, dir, revPDF);
+            SampledSpectrum ret = evaluatePDFInternal(query, dir, revPDF);
+            SLRAssert(!ret.hasNaN() && !ret.hasInf() && !ret.hasMinus(),
+                      "PDF: %s, wlIdx: %u, qDir: %s, rDir: %s",
+                      ret.toString().c_str(), query.heroIndex, query.dir_sn.toString().c_str(), dir.toString().c_str());
+            return ret;
         }
         SampledSpectrum weight(const BSDFQuery &query) const {
             if (!matches(query.flags))
                 return SampledSpectrum::Zero;
             SampledSpectrum weight_sn = weightInternal(query);
             float snCorrection = query.adjoint ? std::fabs(query.dir_sn.z / dot(query.dir_sn, query.gNormal_sn)) : 1;
+            SLRAssert(!weight_sn.hasNaN() && !weight_sn.hasInf() && !std::isnan(snCorrection) && !std::isinf(snCorrection),
+                      "weight_sn: %s, snCorrection: %g, wlIdx: %u, qDir: %s",
+                      weight_sn.toString().c_str(), snCorrection, query.heroIndex, query.dir_sn.toString().c_str());
             return weight_sn * snCorrection;
         }
+        
+        SampledSpectrum rho(uint32_t numSamples, BSDFSample* samples, float* uDir0, float* uDir1, float* uWl, DirectionType flags = DirectionType::All, bool fromUpper = true) const;
         
         SampledSpectrum getBaseColor(DirectionType flags) const {
             if (!matches(flags))
@@ -252,7 +298,7 @@ namespace SLR {
             return getBaseColorInternal(flags);
         }
         
-        virtual bool matches(DirectionType flags) const { return (m_type & flags) == m_type; };
+        virtual bool matches(DirectionType flags) const { return m_type.matches(flags); };
         bool hasNonDelta() const { return matches(DirectionType::WholeSphere | DirectionType::NonDelta); }
     };
     
@@ -276,7 +322,7 @@ namespace SLR {
         virtual SampledSpectrum evaluatePDF(const Vector3D &dirIn) const = 0;
         virtual void calculatePixel(const Vector3D &dirIn, float* hitPx, float* hitPy) const = 0;
         
-        virtual bool matches(DirectionType flags) const { return m_type & flags; }
+        virtual bool matches(DirectionType flags) const { return m_type.matches(flags); }
         bool hasNonDelta() const { return matches(DirectionType::WholeSphere | DirectionType::NonDelta); }
     };
     
@@ -313,7 +359,7 @@ namespace SLR {
         SampledSpectrum evaluate(float cosEnter) const override;
         
         static float evalF(float etaEnter, float etaExit, float cosEnter, float cosExit);
-    };    
+    };
 }
 
 #endif

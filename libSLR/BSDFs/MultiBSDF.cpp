@@ -13,24 +13,31 @@ namespace SLR {
         if (!bsdf)
             return;
         SLRAssert(m_numComponents < maxNumElems, "Number of MultiBSDF elements exceeds the limit: %u", maxNumElems);
+        m_type |= bsdf->m_type;
         m_BSDFs[m_numComponents++] = bsdf;
     }
     
-    SampledSpectrum MultiBSDF::sampleInternalNoRev(const BSDFQuery &query, const BSDFSample &smp, BSDFQueryResult *result) const {
+    SampledSpectrum MultiBSDF::sampleInternalNoRev(const BSDFQuery &query, float uComponent, const float uDir[2], BSDFQueryResult *result) const {
         SampledSpectrum weights[maxNumElems];
         for (int i = 0; i < m_numComponents; ++i)
             weights[i] = m_BSDFs[i]->weight(query);
         
         SampledSpectrum sumWeights;
-        uint32_t idx = sampleDiscrete(weights, query.heroIndex, &sumWeights, m_numComponents, smp.uComponent);
+        float base;
+        uint32_t idx = sampleDiscrete(weights, query.heroIndex, &sumWeights, &base, m_numComponents, uComponent);
         const BSDF* selectedBSDF = m_BSDFs[idx];
         if (sumWeights[query.heroIndex] == 0.0f) {
             result->dirPDF = 0.0f;
             return SampledSpectrum::Zero;
         }
         
-        SampledSpectrum value = selectedBSDF->sampleInternal(query, smp, result);
+        uComponent = (uComponent * sumWeights[query.heroIndex] - base) / weights[idx][query.heroIndex];
+        SampledSpectrum value = selectedBSDF->sampleInternal(query, uComponent, uDir, result);
         result->dirPDF *= weights[idx];
+        if (result->dirPDF == 0.0f) {
+            result->dirPDF = 0.0f;
+            return SampledSpectrum::Zero;
+        }
         
         if (!result->dirType.isDelta()) {
             for (int i = 0; i < m_numComponents; ++i) {
@@ -52,20 +59,26 @@ namespace SLR {
         return value;
     }
     
-    SampledSpectrum MultiBSDF::sampleInternalWithRev(const BSDFQuery &query, const BSDFSample &smp, BSDFQueryResult *result) const {
+    SampledSpectrum MultiBSDF::sampleInternalWithRev(const BSDFQuery &query, float uComponent, const float uDir[2], BSDFQueryResult *result) const {
         SampledSpectrum weights[maxNumElems];
         for (int i = 0; i < m_numComponents; ++i)
             weights[i] = m_BSDFs[i]->weight(query);
         
         SampledSpectrum sumWeights;
-        uint32_t idx = sampleDiscrete(weights, query.heroIndex, &sumWeights, m_numComponents, smp.uComponent);
+        float base;
+        uint32_t idx = sampleDiscrete(weights, query.heroIndex, &sumWeights, &base, m_numComponents, uComponent);
         const BSDF* selectedBSDF = m_BSDFs[idx];
         if (sumWeights[query.heroIndex] == 0.0f) {
             result->dirPDF = 0.0f;
             return SampledSpectrum::Zero;
         }
         
-        SampledSpectrum value = selectedBSDF->sampleInternal(query, smp, result);
+        uComponent = (uComponent * sumWeights[query.heroIndex] - base) / weights[idx][query.heroIndex];
+        SampledSpectrum value = selectedBSDF->sampleInternal(query, uComponent, uDir, result);
+        if (result->dirPDF == 0.0f) {
+            result->dirPDF = 0.0f;
+            return SampledSpectrum::Zero;
+        }
         
         BSDFQuery revQuery = query;// mQuery?
         Vector3D revDirIn = result->dir_sn;
@@ -201,5 +214,5 @@ namespace SLR {
                 break;
         }
         return baseColor;
-    }    
+    }
 }

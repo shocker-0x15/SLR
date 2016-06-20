@@ -17,7 +17,7 @@ namespace SLR {
     struct SLR_API LightPosQuery {
         float time;
         WavelengthSamples wls;
-        LightPosQuery(float t, const WavelengthSamples &lambdas) : time(t), wls(lambdas) { };
+        LightPosQuery(float t, const WavelengthSamples &lambdas) : time(t), wls(lambdas) { }
     };
     
     struct SLR_API LightPosSample {
@@ -34,12 +34,12 @@ namespace SLR {
     class SLR_API Light {
         mutable std::stack<const SurfaceObject*> m_hierarchy;
     public:
-        Light() { };
-        Light(const std::stack<const SurfaceObject*> &hierarchy) : m_hierarchy(hierarchy) { };
+        Light() { }
+        Light(const std::stack<const SurfaceObject*> &hierarchy) : m_hierarchy(hierarchy) { }
         
-        void push(const SurfaceObject* obj) const { m_hierarchy.push(obj); };
-        void pop() const { m_hierarchy.pop(); };
-        const SurfaceObject* top() const { return m_hierarchy.top(); };
+        void push(const SurfaceObject* obj) const { m_hierarchy.push(obj); }
+        void pop() const { m_hierarchy.pop(); }
+        const SurfaceObject* top() const { return m_hierarchy.top(); }
         
         SampledSpectrum sample(const LightPosQuery &query, const LightPosSample &smp, LightPosQueryResult* result) const;
         Ray sampleRay(const LightPosQuery &lightPosQuery, const LightPosSample &lightPosSample, LightPosQueryResult* lightPosResult, SampledSpectrum* Le0, EDF** edf,
@@ -47,41 +47,53 @@ namespace SLR {
                       ArenaAllocator &mem) const;
     };
     
+    
+    
     class SLR_API SurfaceObject {
     public:
-        SurfaceObject() { };
-        virtual ~SurfaceObject() { };
+        SurfaceObject() { }
+        virtual ~SurfaceObject() { }
         
         virtual BoundingBox3D bounds() const = 0;
         virtual bool intersect(Ray &ray, Intersection* isect) const = 0;
-        virtual void getSurfacePoint(const Intersection &isect, SurfacePoint* surfPt) const = 0;
+        virtual Point3D getIntersectionPoint(const Intersection &isect) const { return isect.obj.top()->getIntersectionPoint(isect); }
+        virtual const SurfaceMaterial* getSurfaceMaterial() const { SLRAssert_NotImplemented(); return nullptr; }
+        virtual void getSurfacePoint(const Intersection &isect, SurfacePoint* surfPt) const { isect.obj.top()->getSurfacePoint(isect, surfPt); }
         
         virtual bool isEmitting() const = 0;
         virtual float importance() const = 0;
         virtual void selectLight(float u, Light* light, float* prob) const = 0;
         virtual float evaluateProb(const Light &light) const = 0;
         
-        virtual SampledSpectrum sample(const Light &light, const LightPosQuery &query, const LightPosSample &smp, LightPosQueryResult* result) const = 0;
+        virtual SampledSpectrum sample(const Light &light, const LightPosQuery &query, const LightPosSample &smp, LightPosQueryResult* result) const {
+            return light.top()->sample(light, query, smp, result);
+        }
         virtual Ray sampleRay(const Light &light,
                               const LightPosQuery &lightPosQuery, const LightPosSample &lightPosSample, LightPosQueryResult* lightPosResult, SampledSpectrum* Le0, EDF** edf,
                               const EDFQuery &edfQuery, const EDFSample &edfSample, EDFQueryResult* edfResult, SampledSpectrum* Le1,
-                              ArenaAllocator &mem) const = 0;
+                              ArenaAllocator &mem) const {
+            return light.top()->sampleRay(light, lightPosQuery, lightPosSample, lightPosResult, Le0, edf, edfQuery, edfSample, edfResult, Le1, mem);
+        }
         
         bool intersect(Ray &ray, SurfacePoint* surfPt) const;
         bool testVisibility(const SurfacePoint &shdP, const SurfacePoint &lightP, float time) const;
     };
+    
+    
     
     class SLR_API SingleSurfaceObject : public SurfaceObject {
     protected:
         const Surface* m_surface;
         const SurfaceMaterial* m_material;
     public:
-        SingleSurfaceObject() { };
-        SingleSurfaceObject(const Surface* surf, const SurfaceMaterial* mat) : m_surface(surf), m_material(mat) { };
-        virtual ~SingleSurfaceObject() { };
+        SingleSurfaceObject() { }
+        SingleSurfaceObject(const Surface* surf, const SurfaceMaterial* mat) : m_surface(surf), m_material(mat) { }
+        virtual ~SingleSurfaceObject() { }
         
         BoundingBox3D bounds() const override;
         bool intersect(Ray &ray, Intersection* isect) const override;
+        Point3D getIntersectionPoint(const Intersection &isect) const override { return isect.p; }
+        const SurfaceMaterial* getSurfaceMaterial() const override { return m_material; }
         void getSurfacePoint(const Intersection &isect, SurfacePoint* surfPt) const override;
         
         bool isEmitting() const override;
@@ -106,7 +118,7 @@ namespace SLR {
         const Normal3DTexture* m_normalMap;
     public:
         BumpSingleSurfaceObject(const Surface* surf, const SurfaceMaterial* mat, const Normal3DTexture* normalMap) :
-        SingleSurfaceObject(surf, mat), m_normalMap(normalMap) { };
+        SingleSurfaceObject(surf, mat), m_normalMap(normalMap) { }
         
         void getSurfacePoint(const Intersection &isect, SurfacePoint* surfPt) const override;
     };
@@ -132,6 +144,8 @@ namespace SLR {
         float evaluateAreaPDF(const SurfacePoint& surfPt) const override;
     };
     
+    
+    
     class SLR_API SurfaceObjectAggregate : public SurfaceObject {
         BBVH* m_accelerator;
         const SurfaceObject** m_lightList;
@@ -143,29 +157,25 @@ namespace SLR {
         
         BoundingBox3D bounds() const override;
         bool intersect(Ray &ray, Intersection* isect) const override;
-        void getSurfacePoint(const Intersection &isect, SurfacePoint* surfPt) const override;
         
         bool isEmitting() const override;
         float importance() const override;
         void selectLight(float u, Light* light, float* prob) const override;
         float evaluateProb(const Light &light) const override;
-        
-        SampledSpectrum sample(const Light &light, const LightPosQuery &query, const LightPosSample &smp, LightPosQueryResult* result) const override;
-        Ray sampleRay(const Light &light,
-                      const LightPosQuery &lightPosQuery, const LightPosSample &lightPosSample, LightPosQueryResult* lightPosResult, SampledSpectrum* Le0, EDF** edf,
-                      const EDFQuery &edfQuery, const EDFSample &edfSample, EDFQueryResult* edfResult, SampledSpectrum* Le1,
-                      ArenaAllocator &mem) const override;
     };
+    
+    
     
     class SLR_API TransformedSurfaceObject : public SurfaceObject {
         const SurfaceObject* m_surfObj;
         const Transform* m_transform;
         friend class Light;
     public:
-        TransformedSurfaceObject(const SurfaceObject* surfObj, const Transform* transform) : m_surfObj(surfObj), m_transform(transform) { };
+        TransformedSurfaceObject(const SurfaceObject* surfObj, const Transform* transform) : m_surfObj(surfObj), m_transform(transform) { }
         
         BoundingBox3D bounds() const override;
         bool intersect(Ray &ray, Intersection* isect) const override;
+        Point3D getIntersectionPoint(const Intersection &isect) const override;
         void getSurfacePoint(const Intersection &isect, SurfacePoint* surfPt) const override;
         
         bool isEmitting() const override;
@@ -179,8 +189,12 @@ namespace SLR {
                       const EDFQuery &edfQuery, const EDFSample &edfSample, EDFQueryResult* edfResult, SampledSpectrum* Le1,
                       ArenaAllocator &mem) const override;
         
-        void setTransform(const Transform* t) { m_transform = t; };
+        const SurfaceMaterial* getSurfaceMaterial() const override { return m_surfObj->getSurfaceMaterial(); }
+        
+        void setTransform(const Transform* t) { m_transform = t; }
     };
+    
+    
     
     class SLR_API Scene {
         const SurfaceObjectAggregate* m_aggregate;
@@ -194,10 +208,10 @@ namespace SLR {
         
         void build(const SurfaceObjectAggregate* aggregate, const InfiniteSphereSurfaceObject* envSphere, const Camera* camera);
         
-        const Camera* getCamera() const { return m_camera; };
-        Point3D getWorldCenter() const { return m_worldCenter; };
-        float getWorldRadius() const { return m_worldRadius; };
-        float getWorldDiscArea() const { return m_worldDiscArea; };
+        const Camera* getCamera() const { return m_camera; }
+        Point3D getWorldCenter() const { return m_worldCenter; }
+        float getWorldRadius() const { return m_worldRadius; }
+        float getWorldDiscArea() const { return m_worldDiscArea; }
         
         bool intersect(Ray &ray, Intersection* isect) const;
         bool testVisibility(const SurfacePoint &shdP, const SurfacePoint &lightP, float time) const;

@@ -74,7 +74,7 @@ namespace SLR {
         bool hasNaN() const { using std::isnan; return isnan(x) || isnan(y) || isnan(z); }
         bool hasInf() const { using std::isinf; return isinf(x) || isinf(y) || isinf(z); }
         
-        void print() const { printf("(%g, %g, %g)\n", x, y, z); }
+        std::string toString() const { char str[256]; sprintf(str, "(%g, %g, %g)", x, y, z); return str; }
         
         static const Normal3Template Zero;
         static const Normal3Template One;
@@ -126,6 +126,11 @@ namespace SLR {
     template <typename RealType>
     inline RealType dot(const Normal3Template<RealType> &norm, const Vector3Template<RealType> &vec) {
         return vec.x * norm.x + vec.y * norm.y + vec.z * norm.z;
+    }
+    
+    template <typename RealType>
+    inline RealType absDot(const Normal3Template<RealType> &norm1, const Normal3Template<RealType> &norm2) {
+        return std::abs(norm1.x * norm2.x + norm1.y * norm2.y + norm1.z * norm2.z);
     }
     
     template <typename RealType>

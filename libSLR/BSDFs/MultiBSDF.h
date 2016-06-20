@@ -18,13 +18,13 @@ namespace SLR {
         uint32_t m_numComponents;
         const BSDF* m_BSDFs[maxNumElems];
         
-        SampledSpectrum sampleInternalNoRev(const BSDFQuery &query, const BSDFSample &smp, BSDFQueryResult *result) const;
-        SampledSpectrum sampleInternalWithRev(const BSDFQuery &query, const BSDFSample &smp, BSDFQueryResult *result) const;
+        SampledSpectrum sampleInternalNoRev(const BSDFQuery &query, float uComponent, const float uDir[2], BSDFQueryResult *result) const;
+        SampledSpectrum sampleInternalWithRev(const BSDFQuery &query, float uComponent, const float uDir[2], BSDFQueryResult *result) const;
         SampledSpectrum evaluatePDFInternalNoRev(const BSDFQuery &query, const Vector3D &dirOut, SampledSpectrum* revPDF) const;
         SampledSpectrum evaluatePDFInternalWithRev(const BSDFQuery &query, const Vector3D &dirOut, SampledSpectrum* revPDF) const;
         
-        SampledSpectrum sampleInternal(const BSDFQuery &query, const BSDFSample &smp, BSDFQueryResult* result) const override {
-            return result->reverse ? sampleInternalWithRev(query, smp, result) : sampleInternalNoRev(query, smp, result);
+        SampledSpectrum sampleInternal(const BSDFQuery &query, float uComponent, const float uDir[2], BSDFQueryResult* result) const override {
+            return result->reverse ? sampleInternalWithRev(query, uComponent, uDir, result) : sampleInternalNoRev(query, uComponent, uDir, result);
         }
         SampledSpectrum evaluateInternal(const BSDFQuery &query, const Vector3D &dirOut, SampledSpectrum* rev_fs) const override;
         SampledSpectrum evaluatePDFInternal(const BSDFQuery &query, const Vector3D &dirOut, SampledSpectrum* revPDF) const override {
@@ -36,14 +36,7 @@ namespace SLR {
         MultiBSDF() : BSDF(DirectionType()), m_numComponents(0) { }
         
         void add(const BSDF* bsdf);
-        
-        bool matches(DirectionType flags) const override {
-            for (int i = 0; i < m_numComponents; ++i)
-                if (m_BSDFs[i]->matches(flags))
-                    return true;
-            return false;
-        }
-    };    
+    };
 }
 
 #endif /* defined(__SLR__MultiBSDF__) */

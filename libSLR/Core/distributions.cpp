@@ -34,7 +34,7 @@ namespace SLR {
     
     
     template <typename RealType>
-    SLR_API uint32_t sampleDiscrete(const SampledSpectrum* importances, uint8_t wlIdx, SampledSpectrum* sumImportances, uint32_t numImportances, RealType u) {
+    SLR_API uint32_t sampleDiscrete(const SampledSpectrum* importances, uint8_t wlIdx, SampledSpectrum* sumImportances, RealType* base, uint32_t numImportances, RealType u) {
         SampledSpectrumSum sum(SampledSpectrum::Zero);
         for (int i = 0; i < numImportances; ++i)
             sum += importances[i];
@@ -43,14 +43,15 @@ namespace SLR {
         RealType su = u * sum.result[wlIdx];
         CompensatedSum<RealType> cum(0);
         for (int i = 0; i < numImportances; ++i) {
+            *base = cum.result;
             cum += importances[i][wlIdx];
             if (su < cum.result)
                 return i;
         }
         return 0;
     }
-    template SLR_API uint32_t sampleDiscrete(const SampledSpectrum* importances, uint8_t wlIdx, SampledSpectrum* sumImportances, uint32_t numImportances, float u);
-    template SLR_API uint32_t sampleDiscrete(const SampledSpectrum* importances, uint8_t wlIdx, SampledSpectrum* sumImportances, uint32_t numImportances, double u);
+    template SLR_API uint32_t sampleDiscrete(const SampledSpectrum* importances, uint8_t wlIdx, SampledSpectrum* sumImportances, float* base, uint32_t numImportances, float u);
+    template SLR_API uint32_t sampleDiscrete(const SampledSpectrum* importances, uint8_t wlIdx, SampledSpectrum* sumImportances, double* base, uint32_t numImportances, double u);
     
     
     // "A Low Distortion Map Between Disk and Square"
@@ -91,6 +92,7 @@ namespace SLR {
     }
     template SLR_API void concentricSampleDisk(float u0, float u1, float* dx, float* dy);
     template SLR_API void concentricSampleDisk(double u0, double u1, double* dx, double* dy);
+    
     
     
     template <typename RealType>
@@ -140,6 +142,7 @@ namespace SLR {
     
     template class SLR_API RegularConstantDiscrete1DTemplate<float>;
     template class SLR_API RegularConstantDiscrete1DTemplate<double>;
+    
     
     
     template <typename RealType>
@@ -204,6 +207,7 @@ namespace SLR {
     
     template class SLR_API RegularConstantContinuous1DTemplate<float>;
     template class SLR_API RegularConstantContinuous1DTemplate<double>;
+    
     
     
     template <typename RealType>

@@ -9,7 +9,7 @@
 
 #include "../Core/RenderSettings.h"
 #include "../Helper/ThreadPool.h"
-#include "../Core/XORShift.h"
+#include "../Core/XORShiftRNG.h"
 #include "../Core/ImageSensor.h"
 #include "../Core/RandomNumberGenerator.h"
 #include "../Memory/ArenaAllocator.h"
@@ -29,12 +29,12 @@ namespace SLR {
 #else
         uint32_t numThreads = std::thread::hardware_concurrency();
 #endif
-        XORShift topRand(settings.getInt(RenderSettingItem::RNGSeed));
+        XORShiftRNG topRand(settings.getInt(RenderSettingItem::RNGSeed));
         std::unique_ptr<ArenaAllocator[]> mems = std::unique_ptr<ArenaAllocator[]>(new ArenaAllocator[numThreads]);
-        std::unique_ptr<XORShift[]> rngs = std::unique_ptr<XORShift[]>(new XORShift[numThreads]);
+        std::unique_ptr<XORShiftRNG[]> rngs = std::unique_ptr<XORShiftRNG[]>(new XORShiftRNG[numThreads]);
         for (int i = 0; i < numThreads; ++i) {
             new (mems.get() + i) ArenaAllocator();
-            new (rngs.get() + i) XORShift(topRand.getUInt());
+            new (rngs.get() + i) XORShiftRNG(topRand.getUInt());
         }
         std::unique_ptr<RandomNumberGenerator*[]> rngRefs = std::unique_ptr<RandomNumberGenerator*[]>(new RandomNumberGenerator*[numThreads]);
         for (int i = 0; i < numThreads; ++i)
@@ -170,6 +170,7 @@ namespace SLR {
                 break;
             Normal3D gNorm_sn = surfPt.shadingFrame.toLocal(surfPt.gNormal);
             BSDF* bsdf = surfPt.createBSDF(wls, mem);
+            BSDFQuery fsQuery(wls.heroIdx, dirOut_sn, gNorm_sn);
             
             // Next Event Estimation (explicit light sampling)
             if (bsdf->hasNonDelta()) {
@@ -195,12 +196,9 @@ namespace SLR {
                     SampledSpectrum lightPDFs = lightProb * lpResult.areaPDF * wlPDFs;
                     SLRAssert(!Le.hasNaN() && !Le.hasInf(), "Le: unexpected value detected: %s", Le.toString().c_str());
                     
-                    BSDFQuery queryBSDF(wls.heroIdx, dirOut_sn, gNorm_sn);
-                    SampledSpectrum fs = bsdf->evaluate(queryBSDF, shadowDir_sn);
+                    SampledSpectrum fs = bsdf->evaluate(fsQuery, shadowDir_sn);
                     float cosLight = absDot(-shadowDir, lpResult.surfPt.gNormal);
-                    SampledSpectrum bsdfPDFs = bsdf->evaluatePDF(queryBSDF, shadowDir_sn) * wlPDFs * (cosLight / dist2);
-                    SLRAssert(!bsdfPDFs.hasNaN() && !bsdfPDFs.hasInf(), "bsdfPDFs: unexpected value detected: %s", bsdfPDFs.toString().c_str());
-                    SLRAssert(!fs.hasNaN() && !fs.hasInf(), "fs: unexpected value detected: %s", fs.toString().c_str());
+                    SampledSpectrum bsdfPDFs = bsdf->evaluatePDF(fsQuery, shadowDir_sn) * wlPDFs * (cosLight / dist2);
                     
                     FloatSum denomMISWeight = 0.0f;
                     for (int i = 0; i < WavelengthSamples::NumComponents; ++i) {
@@ -219,7 +217,7 @@ namespace SLR {
                 }
             }
             
-            BSDFQuery fsQuery(wls.heroIdx, dirOut_sn, gNorm_sn);
+            // get a next direction by sampling BSDF.
             BSDFSample fsSample(rng.getFloat0cTo1o(), rng.getFloat0cTo1o(), rng.getFloat0cTo1o());
             BSDFQueryResult fsResult;
             SampledSpectrum fs = bsdf->sample(fsQuery, fsSample, &fsResult);
@@ -227,8 +225,8 @@ namespace SLR {
                 break;
             alpha *= fs * absDot(fsResult.dir_sn, gNorm_sn) / fsResult.dirPDF[wls.heroIdx];
             SLRAssert(!alpha.hasInf() && !alpha.hasNaN(),
-                      "alpha: unexpected value detected:\nalpha: %s\nfs: %s\nlength: %u, cos: %g, dirPDF: %s",
-                      alpha.toString().c_str(), fs.toString().c_str(), pathLength, std::fabs(fsResult.dir_sn.z), fsResult.dirPDF.toString().c_str());
+                      "alpha: %s\nlength: %u, cos: %g, dirPDF: %s",
+                      alpha.toString().c_str(), pathLength, absDot(fsResult.dir_sn, gNorm_sn), fsResult.dirPDF.toString().c_str());
             
             Vector3D dirIn = surfPt.shadingFrame.fromLocal(fsResult.dir_sn);
             ray = Ray(surfPt.p, dirIn, ray.time, Ray::Epsilon);
@@ -243,7 +241,6 @@ namespace SLR {
             // implicit light sampling
             if (surfPt.isEmitting()) {
                 SampledSpectrum bsdfPDFs = fsResult.dirPDF * wlPDFs;
-                SLRAssert(!bsdfPDFs.hasNaN() && !bsdfPDFs.hasInf(), "bsdfPDFs: unexpected value detected: %s", bsdfPDFs.toString().c_str());
                 
                 EDF* edf = surfPt.createEDF(wls, mem);
                 SampledSpectrum Le = surfPt.emittance(wls) * edf->evaluate(EDFQuery(wls.heroIdx), dirOut_sn);
@@ -251,8 +248,7 @@ namespace SLR {
                 float dist2 = surfPt.getSquaredDistance(ray.org);
                 SampledSpectrum lightPDFs = lightProb * surfPt.evaluateAreaPDF() * wlPDFs * (dist2 / absDot(ray.dir, surfPt.gNormal));
                 SLRAssert(!Le.hasNaN() && !Le.hasInf(), "Le: unexpected value detected: %s", Le.toString().c_str());
-                SLRAssert(!std::isnan(lightProb) && !std::isinf(lightProb), "lightProb: unexpected value detected: %f", lightProb);
-                SLRAssert(!lightPDFs.hasNaN()/* && !std::isinf(lightPDF)*/, "lightPDFs: unexpected value detected: %s", lightPDFs.toString().c_str());
+                SLRAssert(!lightPDFs.hasNaN()/* && !std::isinf(lightPDF)*/, "lightPDFs: %s", lightPDFs.toString().c_str());
                 
                 FloatSum denomMISWeight = 0.0f;
                 for (int i = 0; i < WavelengthSamples::NumComponents; ++i) {

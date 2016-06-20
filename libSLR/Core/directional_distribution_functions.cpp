@@ -6,13 +6,13 @@
 //
 
 #include "directional_distribution_functions.h"
+#include "distributions.h"
 
 namespace SLR {
     SLR_API const DirectionType DirectionType::LowFreq = DirectionType::IE_LowFreq;
     SLR_API const DirectionType DirectionType::HighFreq = DirectionType::IE_HighFreq;
     SLR_API const DirectionType DirectionType::Delta0D = DirectionType::IE_Delta0D;
     SLR_API const DirectionType DirectionType::Delta1D = DirectionType::IE_Delta1D;
-    SLR_API const DirectionType DirectionType::Dispersive = DirectionType::IE_Dispersive;
     SLR_API const DirectionType DirectionType::NonDelta = DirectionType::IE_NonDelta;
     SLR_API const DirectionType DirectionType::Delta = DirectionType::IE_Delta;
     SLR_API const DirectionType DirectionType::AllFreq = DirectionType::IE_AllFreq;
@@ -22,6 +22,7 @@ namespace SLR {
     SLR_API const DirectionType DirectionType::Acquisition = DirectionType::IE_Acquisition;
     SLR_API const DirectionType DirectionType::WholeSphere = DirectionType::IE_WholeSphere;
     SLR_API const DirectionType DirectionType::All = DirectionType::IE_All;
+    SLR_API const DirectionType DirectionType::Dispersive = DirectionType::IE_Dispersive;
     SLR_API const DirectionType DirectionType::LowFreqReflection = DirectionType::IE_LowFreqReflection;
     SLR_API const DirectionType DirectionType::LowFreqTransmission = DirectionType::IE_LowFreqTransmission;
     SLR_API const DirectionType DirectionType::LowFreqScattering = DirectionType::IE_LowFreqScattering;
@@ -31,6 +32,30 @@ namespace SLR {
     SLR_API const DirectionType DirectionType::Delta0DReflection = DirectionType::IE_Delta0DReflection;
     SLR_API const DirectionType DirectionType::Delta0DTransmission = DirectionType::IE_Delta0DTransmission;
     SLR_API const DirectionType DirectionType::Delta0DScattering = DirectionType::IE_Delta0DScattering;
+    
+    
+    SampledSpectrum BSDF::rho(uint32_t numSamples, BSDFSample* samples, float* uDir0, float* uDir1, float* uWl, DirectionType flags, bool fromUpper) const {
+        SampledSpectrumSum ret(SampledSpectrum::Zero);
+        uint32_t numFails = 0;
+        for (int i = 0; i < numSamples; ++i) {
+            Vector3D dir_sn = uniformSampleHemisphere(uDir0[i], uDir1[i]);
+            dir_sn.z *= fromUpper ? 1 : -1;
+            float dirPDF = 1.0f / (2 * M_PI);
+            
+            int16_t wlIdx = std::min(int16_t(SampledSpectrum::NumComponents * uWl[i]), int16_t(SampledSpectrum::NumComponents - 1));
+            BSDFQuery query{(uint8_t)wlIdx, dir_sn, Normal3D(0, 0, 1), flags, false};
+            
+            BSDFQueryResult fsResult;
+            SampledSpectrum fs = sample(query, samples[i], &fsResult);
+            if (fsResult.dirPDF == 0.0f) {
+                ++numFails;
+                continue;
+            }
+            ret += fs * std::fabs(fsResult.dir_sn.z) * std::fabs(dir_sn.z) / (dirPDF * fsResult.dirPDF);
+        }
+        return ret.result / (M_PI * (numSamples - numFails));
+    }
+    
     
     SampledSpectrum FresnelNoOp::evaluate(float cosEnter) const {
         return SampledSpectrum::One;

@@ -16,7 +16,7 @@ namespace SLR {
     SLR_API uint32_t sampleDiscrete(const RealType* importances, RealType* sumImportances, RealType* base, uint32_t numImportances, RealType u);
     
     template <typename RealType>
-    SLR_API uint32_t sampleDiscrete(const SampledSpectrum* importances, uint8_t wlIdx, SampledSpectrum* sumImportances, uint32_t numImportances, RealType u);
+    SLR_API uint32_t sampleDiscrete(const SampledSpectrum* importances, uint8_t wlIdx, SampledSpectrum* sumImportances, RealType* base, uint32_t numImportances, RealType u);
     
     template <typename RealType>
     SLR_API void concentricSampleDisk(RealType u0, RealType u1, RealType* dx, RealType* dy);
@@ -53,11 +53,20 @@ namespace SLR {
     }
     
     template <typename RealType>
+    inline Vector3Template<RealType> uniformSampleCone(RealType u0, RealType u1, RealType cosThetaMax) {
+        RealType phi = 2 * M_PI * u1;
+        RealType theta = std::acos(1 - (1 - cosThetaMax) * u0);
+        return Vector3Template<RealType>(std::cos(phi) * std::sin(theta), std::sin(phi) * std::sin(theta), std::cos(theta));
+    }
+    
+    template <typename RealType>
     inline void uniformSampleTriangle(RealType u0, RealType u1, RealType* b0, RealType* b1) {
         RealType su1 = std::sqrt(u0);
         *b0 = 1.0f - su1;
         *b1 = u1 * su1;
     }
+    
+    
     
     template <typename RealType>
     class SLR_API RegularConstantDiscrete1DTemplate {
@@ -82,6 +91,8 @@ namespace SLR {
         RealType integral() const { return m_integral; };
     };
     
+    
+    
     template <typename RealType>
     class SLR_API RegularConstantContinuous1DTemplate {
         RealType* m_PDF;
@@ -102,6 +113,8 @@ namespace SLR {
         uint32_t numValues() const { return m_numValues; };
         const RealType* PDF() const { return m_PDF; };
     };
+    
+    
     
     template <typename RealType>
     class SLR_API RegularConstantContinuous2DTemplate {

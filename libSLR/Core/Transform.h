@@ -18,10 +18,10 @@ namespace SLR {
         virtual ~Transform() { };
         
         virtual bool isStatic() const = 0;
-        virtual void sample(float time, StaticTransform* tf) const { SLRAssert(false, "Not implemented."); };
+        virtual void sample(float time, StaticTransform* tf) const { SLRAssert_NotImplemented(); };
         virtual bool isChained() const = 0;
         virtual Transform* copy(ArenaAllocator &mem) const = 0;
-        virtual BoundingBox3D motionBounds(const BoundingBox3D &bb) const { SLRAssert(false, "Not implemented."); return BoundingBox3D(); };
+        virtual BoundingBox3D motionBounds(const BoundingBox3D &bb) const { SLRAssert_NotImplemented(); return BoundingBox3D(); };
         
         Ray mul(const Ray &r) const;
         Point3D mul(const Point3D &p, float t) const;

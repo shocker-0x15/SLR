@@ -20,7 +20,8 @@ namespace SLR {
             weights[i] = m_EDFs[i]->weight(query);
         
         SampledSpectrum sumWeights;
-        uint32_t idx = sampleDiscrete(weights, query.heroIndex, &sumWeights, m_numComponents, smp.uComponent);
+        float base;
+        uint32_t idx = sampleDiscrete(weights, query.heroIndex, &sumWeights, &base, m_numComponents, smp.uComponent);
         EDF* selectedEDF = m_EDFs[idx];
         
         SampledSpectrum value = selectedEDF->sample(query, smp, result);

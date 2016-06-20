@@ -31,6 +31,40 @@ namespace SLR {
 
     
     template <typename RealType>
+    SLR_API RGBTemplate<RealType> min(const RGBTemplate<RealType> &smp1, const RGBTemplate<RealType> &smp2) {
+        return RGBTemplate<RealType>(std::min(smp1.r, smp2.r),
+                                     std::min(smp1.g, smp2.g),
+                                     std::min(smp1.b, smp2.b));
+    }
+    template SLR_API RGBTemplate<float> min(const RGBTemplate<float> &smp1, const RGBTemplate<float> &smp2);
+    template SLR_API RGBTemplate<double> min(const RGBTemplate<double> &smp1, const RGBTemplate<double> &smp2);
+    
+    template <typename RealType>
+    SLR_API RGBTemplate<RealType> max(const RGBTemplate<RealType> &smp1, const RGBTemplate<RealType> &smp2) {
+        return RGBTemplate<RealType>(std::max(smp1.r, smp2.r),
+                                     std::max(smp1.g, smp2.g),
+                                     std::max(smp1.b, smp2.b));
+    }
+    template SLR_API RGBTemplate<float> max(const RGBTemplate<float> &smp1, const RGBTemplate<float> &smp2);
+    template SLR_API RGBTemplate<double> max(const RGBTemplate<double> &smp1, const RGBTemplate<double> &smp2);
+    
+    template <typename RealType>
+    SLR_API RGBTemplate<RealType> positiveMask(const RGBTemplate<RealType> &value, const RGBTemplate<RealType> &mask) {
+        return RGBTemplate<RealType>(mask.r > 0 ? value.r : 0,
+                                     mask.g > 0 ? value.g : 0,
+                                     mask.b > 0 ? value.b : 0);
+    }
+    template SLR_API RGBTemplate<float> positiveMask(const RGBTemplate<float> &value, const RGBTemplate<float> &mask);
+    template SLR_API RGBTemplate<double> positiveMask(const RGBTemplate<double> &value, const RGBTemplate<double> &max);
+    
+    template <typename RealType>
+    RGBTemplate<RealType> sqrt(const RGBTemplate<RealType> &value) {
+        return RGBTemplate<RealType>(std::sqrt(value.r), std::sqrt(value.g), std::sqrt(value.b));
+    }
+    template SLR_API RGBTemplate<float> sqrt(const RGBTemplate<float> &value);
+    template SLR_API RGBTemplate<double> sqrt(const RGBTemplate<double> &value);
+    
+    template <typename RealType>
     RGBTemplate<RealType> pow(const RGBTemplate<RealType> &s, RealType p) {
         return RGBTemplate<RealType>(std::pow(s.r, p), std::pow(s.g, p), std::pow(s.b, p));
     }

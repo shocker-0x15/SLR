@@ -44,6 +44,56 @@ namespace SLR {
 //    template SLR_API const SampledSpectrumTemplate<double, NumSpectralSamples> SampledSpectrumTemplate<double, NumSpectralSamples>::One;
 //    template SLR_API const SampledSpectrumTemplate<double, NumSpectralSamples> SampledSpectrumTemplate<double, NumSpectralSamples>::Inf;
 //    template SLR_API const SampledSpectrumTemplate<double, NumSpectralSamples> SampledSpectrumTemplate<double, NumSpectralSamples>::NaN;
+    
+    template <typename RealType, uint32_t N>
+    SampledSpectrumTemplate<RealType, N> min(const SampledSpectrumTemplate<RealType, N> &smp1, const SampledSpectrumTemplate<RealType, N> &smp2) {
+        SampledSpectrumTemplate<RealType, N> ret;
+        for (int i = 0; i < N; ++i)
+            ret[i] = std::fmin(smp1[i], smp2[i]);
+        return ret;
+    }
+    template SLR_API SampledSpectrumTemplate<float, NumSpectralSamples> min(const SampledSpectrumTemplate<float, NumSpectralSamples> &smp1, const SampledSpectrumTemplate<float, NumSpectralSamples> &smp2);
+    template SLR_API SampledSpectrumTemplate<double, NumSpectralSamples> min(const SampledSpectrumTemplate<double, NumSpectralSamples> &smp1, const SampledSpectrumTemplate<double, NumSpectralSamples> &smp2);
+    
+    template <typename RealType, uint32_t N>
+    SampledSpectrumTemplate<RealType, N> max(const SampledSpectrumTemplate<RealType, N> &smp1, const SampledSpectrumTemplate<RealType, N> &smp2) {
+        SampledSpectrumTemplate<RealType, N> ret;
+        for (int i = 0; i < N; ++i)
+            ret[i] = std::fmax(smp1[i], smp2[i]);
+        return ret;
+    }
+    template SLR_API SampledSpectrumTemplate<float, NumSpectralSamples> max(const SampledSpectrumTemplate<float, NumSpectralSamples> &smp1, const SampledSpectrumTemplate<float, NumSpectralSamples> &smp2);
+    template SLR_API SampledSpectrumTemplate<double, NumSpectralSamples> max(const SampledSpectrumTemplate<double, NumSpectralSamples> &smp1, const SampledSpectrumTemplate<double, NumSpectralSamples> &smp2);
+    
+    template <typename RealType, uint32_t N>
+    SampledSpectrumTemplate<RealType, N> positiveMask(const SampledSpectrumTemplate<RealType, N> &value, const SampledSpectrumTemplate<RealType, N> &mask) {
+        SampledSpectrumTemplate<RealType, N> ret;
+        for (int i = 0; i < N; ++i)
+            ret[i] = mask[i] > 0 ? value[i] : 0;
+        return ret;
+    }
+    template SLR_API SampledSpectrumTemplate<float, NumSpectralSamples> positiveMask(const SampledSpectrumTemplate<float, NumSpectralSamples> &value, const SampledSpectrumTemplate<float, NumSpectralSamples> &mask);
+    template SLR_API SampledSpectrumTemplate<double, NumSpectralSamples> positiveMask(const SampledSpectrumTemplate<double, NumSpectralSamples> &value, const SampledSpectrumTemplate<double, NumSpectralSamples> &mask);
+    
+    template <typename RealType, uint32_t N>
+    SampledSpectrumTemplate<RealType, N> sqrt(const SampledSpectrumTemplate<RealType, N> &value) {
+        SampledSpectrumTemplate<RealType, N> ret;
+        for (int i = 0; i < N; ++i)
+            ret[i] = std::sqrt(value[i]);
+        return ret;
+    }
+    template SLR_API SampledSpectrumTemplate<float, NumSpectralSamples> sqrt(const SampledSpectrumTemplate<float, NumSpectralSamples> &value);
+    template SLR_API SampledSpectrumTemplate<double, NumSpectralSamples> sqrt(const SampledSpectrumTemplate<double, NumSpectralSamples> &value);
+    
+    template <typename RealType, uint32_t N>
+    SampledSpectrumTemplate<RealType, N> exp(const SampledSpectrumTemplate<RealType, N> &value) {
+        SampledSpectrumTemplate<RealType, N> ret;
+        for (int i = 0; i < N; ++i)
+            ret[i] = std::exp(value[i]);
+        return ret;
+    }
+    template SLR_API SampledSpectrumTemplate<float, NumSpectralSamples> exp(const SampledSpectrumTemplate<float, NumSpectralSamples> &value);
+    template SLR_API SampledSpectrumTemplate<double, NumSpectralSamples> exp(const SampledSpectrumTemplate<double, NumSpectralSamples> &value);
 
     
     template struct DiscretizedSpectrumTemplate<float, NumStrataForStorage>;
