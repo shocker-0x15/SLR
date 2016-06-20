@@ -10,9 +10,10 @@
 #include "../Core/distributions.h"
 
 namespace SLR {
-    SampledSpectrum ImageSpectrumTexture::evaluate(const TexCoord2D &tc, const WavelengthSamples &wls) const {
-        float u = std::fmod(tc.u, 1.0f);
-        float v = std::fmod(tc.v, 1.0f);
+    SampledSpectrum ImageSpectrumTexture::evaluate(const SurfacePoint &surfPt, const WavelengthSamples &wls) const {
+        Point3D tc = m_mapping->map(surfPt);
+        float u = std::fmod(tc.x, 1.0f);
+        float v = std::fmod(tc.y, 1.0f);
         u += u < 0 ? 1.0f : 0.0f;
         v += v < 0 ? 1.0f : 0.0f;
         uint32_t px = std::min((uint32_t)(m_data->width() * u), m_data->width() - 1);
@@ -134,22 +135,26 @@ namespace SLR {
     
     Normal3D ImageNormal3DTexture::evaluate(const SurfacePoint &surfPt) const {
         Point3D tc = m_mapping->map(surfPt);
-        uint32_t x = std::clamp((uint32_t)std::fmod(m_data->width() * tc.x, m_data->width()), 0u, m_data->width() - 1);
-        uint32_t y = std::clamp((uint32_t)std::fmod(m_data->height() * tc.y, m_data->height()), 0u, m_data->height() - 1);
+        float u = std::fmod(tc.x, 1.0f);
+        float v = std::fmod(tc.y, 1.0f);
+        u += u < 0 ? 1.0f : 0.0f;
+        v += v < 0 ? 1.0f : 0.0f;
+        uint32_t px = std::min((uint32_t)(m_data->width() * u), m_data->width() - 1);
+        uint32_t py = std::min((uint32_t)(m_data->height() * v), m_data->height() - 1);
         Normal3D ret;
         switch (m_data->format()) {
             case ColorFormat::RGB8x3: {
-                const RGB8x3 &data = m_data->get<RGB8x3>(x, y);
+                const RGB8x3 &data = m_data->get<RGB8x3>(px, py);
                 ret = normalize(Normal3D(data.r / 255.0f - 0.5f, data.g / 255.0f - 0.5f, data.b / 255.0f - 0.5f));
                 break;
             }
             case ColorFormat::RGB_8x4: {
-                const RGB_8x4 &data = m_data->get<RGB_8x4>(x, y);
+                const RGB_8x4 &data = m_data->get<RGB_8x4>(px, py);
                 ret = normalize(Normal3D(data.r / 255.0f - 0.5f, data.g / 255.0f - 0.5f, data.b / 255.0f - 0.5f));
                 break;
             }
             case ColorFormat::RGBA8x4: {
-                const RGBA8x4 &data = m_data->get<RGBA8x4>(x, y);
+                const RGBA8x4 &data = m_data->get<RGBA8x4>(px, py);
                 ret = normalize(Normal3D(data.r / 255.0f - 0.5f, data.g / 255.0f - 0.5f, data.b / 255.0f - 0.5f));
                 break;
             }
@@ -167,8 +172,12 @@ namespace SLR {
     
     float ImageFloatTexture::evaluate(const SurfacePoint &surfPt) const {
         Point3D tc = m_mapping->map(surfPt);
-        uint32_t x = std::clamp((uint32_t)std::fmod(m_data->width() * tc.x, m_data->width()), 0u, m_data->width() - 1);
-        uint32_t y = std::clamp((uint32_t)std::fmod(m_data->height() * tc.y, m_data->height()), 0u, m_data->height() - 1);
+        float u = std::fmod(tc.x, 1.0f);
+        float v = std::fmod(tc.y, 1.0f);
+        u += u < 0 ? 1.0f : 0.0f;
+        v += v < 0 ? 1.0f : 0.0f;
+        uint32_t px = std::min((uint32_t)(m_data->width() * u), m_data->width() - 1);
+        uint32_t py = std::min((uint32_t)(m_data->height() * v), m_data->height() - 1);
         float ret;
         switch (m_data->format()) {
             case ColorFormat::RGB8x3: {
@@ -184,7 +193,7 @@ namespace SLR {
                 break;
             }
             case ColorFormat::Gray8: {
-                const Gray8 &data = m_data->get<Gray8>(x, y);
+                const Gray8 &data = m_data->get<Gray8>(px, py);
                 ret = data.v / 255.0f;
                 break;
             }

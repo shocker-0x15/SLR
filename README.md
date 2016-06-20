@@ -17,17 +17,21 @@ SLR consists of the following components.
   (For RGB resources, RGB->Spectrum conversion is performed using Meng-Simon's method \[Meng2015\].)
 * RGB Rendering
 * Various BSDF Types
-    * Ideal Diffuse BRDF (Lambert)
+    * Ideal Diffuse (Lambert) BRDF
     * Ideal Specular BRDF and BSDF
+    * Oren-Nayer BRDF \[Oren1994\]
     * Improved Ward-Dür BRDF \[Moroder2010\]
     * Ashikhmin-Shirley BRDF \[Ashikhmin2000\]
     * Microfacet BRDF and BSDF \[Walter2007\] with visible normal sampling \[Heitz2014\]
     * Mixed BSDF
     * ~~Layered BSDF~~ (TODO)
 * BSSRDF for Sub-Surface Scattering
-    * Dipole Diffusion without pre-pass \[Jensen2001\]
+    * Diffusion Dipole without pre-pass \[Jensen2001\]
     * generalized to rough surfaces \[Donner2006\]
     * Axis MIS \[King2013\]
+* Procedural Textures
+    * Checkerboard (color & normal & float)
+    * Cell Noise \[Worley1996\] like Voronoi diagram (color & normal & float)
 * Bump Mapping (Normal Map)
 * Correct handling of non-symmetric scattering due to shading normals \[Veach1996, 1997\]
 * ~~Volume Rendering~~ (TODO)
@@ -35,6 +39,7 @@ SLR consists of the following components.
 * Camera
     * Perspective Camera with Depth of Field (thin-lens model)
     * Environment Camera
+* Motion Blur
     * Camera Motion Blur
     * Object Motion Blur
     * ~~Deformation Blur~~ (TODO)
@@ -55,11 +60,13 @@ SLR consists of the following components.
 [Kajiya1986] "THE RENDERING EQUATION"  
 [King2013] "BSSRDF Importance Sampling"  
 [Meng2015] "Physically Meaningful Rendering using Tristimulus Colours"  
-[Moroder2010] "A New Ward BRDF Model with Bounded Albedo"  
+[Moroder2010] "A New Ward BRDF Model with Bounded Albedo"
+[Oren1994] "Generalization of Lambert’s Reflectance Model"  
 [Veach1994] "Bidirectional Estimators for Light Transport"  
 [Veach1996] "Non-symmetric Scattering in Light Transport Algorithms"  
 [Veach1997] "ROBUST MONTE CARLO METHODS FOR LIGHT TRANSPORT SIMULATION"  
 [Walter2007] "Microfacet Models for Refraction through Rough Surfaces"  
+[Worley1996] "A Cellular Texture Basis Function"  
 
 ##動作環境 / Confirmed Environment
 現状以下の環境で動作を確認しています。  
