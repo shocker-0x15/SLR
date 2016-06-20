@@ -12,6 +12,57 @@
 #include "references.h"
 
 namespace SLRSceneGraph {
+    class SLR_SCENEGRAPH_API Texture2DMapping {
+    protected:
+        SLR::Texture2DMapping* m_rawData;
+    public:
+        Texture2DMapping();
+        virtual ~Texture2DMapping();
+        const SLR::Texture2DMapping* getRaw() const {
+            return m_rawData;
+        };
+        
+        static Texture2DMappingRef &sharedInstanceRef() {
+            static Texture2DMappingRef s_sharedInstanceRef = createShared<Texture2DMapping>();
+            return s_sharedInstanceRef;
+        };
+    };
+    
+    class SLR_SCENEGRAPH_API Texture3DMapping {
+    protected:
+        SLR::Texture3DMapping* m_rawData;
+    public:
+        Texture3DMapping();
+        virtual ~Texture3DMapping();
+        const SLR::Texture3DMapping* getRaw() const {
+            return m_rawData;
+        };
+        
+        static Texture3DMappingRef &sharedInstanceRef() {
+            static Texture3DMappingRef s_sharedInstanceRef = createShared<Texture3DMapping>();
+            return s_sharedInstanceRef;
+        };
+    };
+    
+    class SLR_SCENEGRAPH_API OffsetAndScale2DMapping : public Texture2DMapping {
+        float m_offsetX, m_offsetY;
+        float m_scaleX, m_scaleY;
+    public:
+        OffsetAndScale2DMapping(float ox, float oy, float sx, float sy);
+    };
+    
+    class SLR_SCENEGRAPH_API WorldPosition3DMapping : public Texture3DMapping {
+    public:
+        WorldPosition3DMapping();
+        
+        static Texture3DMappingRef &sharedInstanceRef() {
+            static Texture3DMappingRef s_sharedInstanceRef = createShared<WorldPosition3DMapping>();
+            return s_sharedInstanceRef;
+        };
+    };
+    
+    
+    
     class SLR_SCENEGRAPH_API SpectrumTexture {
     protected:
         SLR::SpectrumTexture* m_rawData;
@@ -57,60 +108,73 @@ namespace SLRSceneGraph {
     
     
     class SLR_SCENEGRAPH_API ImageSpectrumTexture : public SpectrumTexture {
+        Texture2DMappingRef m_mapping;
         TiledImage2DRef m_data;
     public:
-        ImageSpectrumTexture(const TiledImage2DRef &image);
+        ImageSpectrumTexture(const Texture2DMappingRef &mapping, const TiledImage2DRef &image);
     };
     
     class SLR_SCENEGRAPH_API ImageNormal3DTexture : public Normal3DTexture {
+        Texture2DMappingRef m_mapping;
         TiledImage2DRef m_data;
     public:
-        ImageNormal3DTexture(const TiledImage2DRef &image);
+        ImageNormal3DTexture(const Texture2DMappingRef &mapping, const TiledImage2DRef &image);
     };
     
     class SLR_SCENEGRAPH_API ImageFloatTexture : public FloatTexture {
+        Texture2DMappingRef m_mapping;
         TiledImage2DRef m_data;
     public:
-        ImageFloatTexture(const TiledImage2DRef &image);
+        ImageFloatTexture(const Texture2DMappingRef &mapping, const TiledImage2DRef &image);
     };
     
     
     class SLR_SCENEGRAPH_API CheckerBoardSpectrumTexture : public SpectrumTexture {
+        Texture2DMappingRef m_mapping;
         InputSpectrumRef m_values[2];
     public:
-        CheckerBoardSpectrumTexture(const InputSpectrumRef &v0, const InputSpectrumRef &v1);
+        CheckerBoardSpectrumTexture(const Texture2DMappingRef &mapping, const InputSpectrumRef &v0, const InputSpectrumRef &v1);
     };
     
     class SLR_SCENEGRAPH_API CheckerBoardNormal3DTexture : public Normal3DTexture {
+        Texture2DMappingRef m_mapping;
         float m_stepWidth;
         bool m_reverse;
     public:
-        CheckerBoardNormal3DTexture(float stepWidth, bool reverse);
+        CheckerBoardNormal3DTexture(const Texture2DMappingRef &mapping, float stepWidth, bool reverse);
     };
     
     class SLR_SCENEGRAPH_API CheckerBoardFloatTexture : public FloatTexture {
+        Texture2DMappingRef m_mapping;
         float m_values[2];
     public:
-        CheckerBoardFloatTexture(float v0, float v1);
+        CheckerBoardFloatTexture(const Texture2DMappingRef &mapping, float v0, float v1);
     };
     
     
     class SLR_SCENEGRAPH_API VoronoiSpectrumTexture : public SpectrumTexture {
+        Texture3DMappingRef m_mapping;
         float m_scale;
+        float m_brightness;
     public:
-        VoronoiSpectrumTexture(float scale);
+        VoronoiSpectrumTexture(const Texture3DMappingRef &mapping, float scale, float brightness);
     };
     
     class SLR_SCENEGRAPH_API VoronoiNormal3DTexture : public Normal3DTexture {
+        Texture3DMappingRef m_mapping;
         float m_scale;
+        float m_thetaMax;
     public:
-        VoronoiNormal3DTexture(float scale);
+        VoronoiNormal3DTexture(const Texture3DMappingRef &mapping, float scale, float thetaMax);
     };
     
     class SLR_SCENEGRAPH_API VoronoiFloatTexture : public FloatTexture {
+        Texture3DMappingRef m_mapping;
         float m_scale;
+        float m_valueScale;
+        bool m_flat;
     public:
-        VoronoiFloatTexture(float scale);
+        VoronoiFloatTexture(const Texture3DMappingRef &mapping, float scale, float valueScale, bool flat);
     };
 }
 

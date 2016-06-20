@@ -28,10 +28,14 @@ namespace SLRSceneGraph {
     typedef std::shared_ptr<SLR::Image2D> Image2DRef;
     typedef std::shared_ptr<SLR::TiledImage2D> TiledImage2DRef;
     
+    class Texture2DMapping;
+    class Texture3DMapping;
     class SpectrumTexture;
     class Normal3DTexture;
     class FloatTexture;
     
+    typedef std::shared_ptr<Texture2DMapping> Texture2DMappingRef;
+    typedef std::shared_ptr<Texture3DMapping> Texture3DMappingRef;
     typedef std::shared_ptr<SpectrumTexture> SpectrumTextureRef;
     typedef std::shared_ptr<Normal3DTexture> Normal3DTextureRef;
     typedef std::shared_ptr<FloatTexture> FloatTextureRef;

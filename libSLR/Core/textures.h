@@ -10,33 +10,78 @@
 
 #include "../defines.h"
 #include "../references.h"
-#include "../BasicTypes/TexCoord2.h"
-#include "../BasicTypes/RGBTypes.h"
-#include "../BasicTypes/SpectrumTypes.h"
-#include "../BasicTypes/Normal3.h"
+#include "geometry.h"
 
 namespace SLR {
+    class SLR_API Texture2DMapping {
+    public:
+        virtual ~Texture2DMapping() {}
+        virtual Point3D map(const SurfacePoint &surfPt) const {
+            return Point3D(surfPt.texCoord.u, surfPt.texCoord.v, 0.0f);
+        }
+    };
+    
+    class SLR_API Texture3DMapping {
+    public:
+        virtual ~Texture3DMapping() {}
+        virtual Point3D map(const SurfacePoint &surfPt) const {
+            return Point3D(surfPt.texCoord.u, surfPt.texCoord.v, 0.0f);
+        }
+    };
+    
+    class SLR_API OffsetAndScale2DMapping : public Texture2DMapping {
+        float m_offsetX, m_offsetY;
+        float m_scaleX, m_scaleY;
+    public:
+        OffsetAndScale2DMapping(float ox, float oy, float sx, float sy) : m_offsetX(ox), m_offsetY(oy), m_scaleX(sx), m_scaleY(sy) {}
+        Point3D map(const SurfacePoint &surfPt) const override {
+            return Point3D((surfPt.texCoord.u + m_offsetX) * m_scaleX,
+                           (surfPt.texCoord.v + m_offsetY) * m_scaleY,
+                           0.0f);
+        }
+    };
+    
+    class SLR_API WorldPosition3DMapping : public Texture3DMapping {
+    public:
+        WorldPosition3DMapping() {}
+        Point3D map(const SurfacePoint &surfPt) const override {
+            return surfPt.p;
+        }
+    };
+    
+    
+    
     class SLR_API SpectrumTexture {
     public:
-        virtual ~SpectrumTexture() { };
+        virtual ~SpectrumTexture() { }
         
-        virtual SampledSpectrum evaluate(const TexCoord2D &tc, const WavelengthSamples &wls) const = 0;
+        virtual SampledSpectrum evaluate(const SurfacePoint &surfPt, const WavelengthSamples &wls) const = 0;
         virtual RegularConstantContinuous2D* createIBLImportanceMap() const = 0;
     };
     
     class SLR_API Normal3DTexture {
     public:
-        virtual ~Normal3DTexture() { };
+        virtual ~Normal3DTexture() { }
         
-        virtual Normal3D evaluate(const TexCoord2D &tc) const = 0;
+        virtual Normal3D evaluate(const SurfacePoint &surfPt) const = 0;
+        Normal3D evaluate(const TexCoord2D &tc) const {
+            SurfacePoint surfPt;
+            surfPt.texCoord = tc;
+            return evaluate(surfPt);
+        }
     };
     
     class SLR_API FloatTexture {
     public:
-        virtual ~FloatTexture() { };
+        virtual ~FloatTexture() { }
         
-        virtual float evaluate(const TexCoord2D &tc) const = 0;
-    };    
+        virtual float evaluate(const SurfacePoint &surfPt) const = 0;
+        float evaluate(const TexCoord2D &tc) const {
+            SurfacePoint surfPt;
+            surfPt.texCoord = tc;
+            return evaluate(surfPt);
+        }
+    };
 }
 
 #endif

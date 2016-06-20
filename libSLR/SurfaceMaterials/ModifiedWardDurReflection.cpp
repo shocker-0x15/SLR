@@ -12,9 +12,9 @@
 
 namespace SLR {
     BSDF* ModifiedWardDurReflection::getBSDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem, float scale) const {
-        SampledSpectrum R = m_reflectance->evaluate(surfPt.texCoord, wls);
-        float anisoX = m_anisoX->evaluate(surfPt.texCoord);
-        float anisoY = m_anisoY->evaluate(surfPt.texCoord);
+        SampledSpectrum R = m_reflectance->evaluate(surfPt, wls);
+        float anisoX = m_anisoX->evaluate(surfPt);
+        float anisoY = m_anisoY->evaluate(surfPt);
         return mem.create<ModifiedWardDurBRDF>(scale * R, anisoX, anisoY);
     }
 }

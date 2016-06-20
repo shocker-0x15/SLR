@@ -102,7 +102,7 @@ namespace SLRSceneGraph {
         }
     }
     
-    SLR_SCENEGRAPH_API SurfaceMaterialRef createMaterialDefaultFunction(const aiMaterial* aiMat, const std::string &pathPrefix, SLR::Allocator* mem) {
+    SLR_SCENEGRAPH_API SurfaceAttributeTuple createMaterialDefaultFunction(const aiMaterial* aiMat, const std::string &pathPrefix, SLR::Allocator* mem) {
         using namespace SLR;
         aiReturn ret;
         aiString strValue;
@@ -110,10 +110,12 @@ namespace SLRSceneGraph {
         
         aiMat->Get(AI_MATKEY_NAME, strValue);
         
+        const Texture2DMappingRef &mapping = Texture2DMapping::sharedInstanceRef();
+        
         SpectrumTextureRef diffuseTex;
         if (aiMat->Get(AI_MATKEY_TEXTURE_DIFFUSE(0), strValue) == aiReturn_SUCCESS) {
             TiledImage2DRef image = Image::createTiledImage((pathPrefix + strValue.C_Str()).c_str(), mem, ImageStoreMode::AsIs, SpectrumType::Reflectance);
-            diffuseTex = createShared<ImageSpectrumTexture>(image);
+            diffuseTex = createShared<ImageSpectrumTexture>(mapping, image);
         }
         else if (aiMat->Get(AI_MATKEY_COLOR_DIFFUSE, color, nullptr) == aiReturn_SUCCESS) {
             InputSpectrumRef sp = Spectrum::create(SpectrumType::Reflectance, ColorSpace::sRGB_NonLinear, color[0], color[1], color[2]);
@@ -124,8 +126,22 @@ namespace SLRSceneGraph {
             diffuseTex = createShared<ConstantSpectrumTexture>(sp);
         }
         
-        return SurfaceMaterial::createMatte(diffuseTex, nullptr);
-    };
+        SurfaceMaterialRef mat = SurfaceMaterial::createMatte(diffuseTex, nullptr);
+        
+        Normal3DTextureRef normalTex;
+        if (aiMat->Get(AI_MATKEY_TEXTURE_DISPLACEMENT(0), strValue) == aiReturn_SUCCESS) {
+            TiledImage2DRef image = Image::createTiledImage((pathPrefix + strValue.C_Str()).c_str(), mem, ImageStoreMode::NormalTexture, SpectrumType::Reflectance);
+            normalTex = createShared<ImageNormal3DTexture>(mapping, image);
+        }
+        
+        FloatTextureRef alphaTex;
+        if (aiMat->Get(AI_MATKEY_TEXTURE_OPACITY(0), strValue) == aiReturn_SUCCESS) {
+            TiledImage2DRef image = Image::createTiledImage((pathPrefix + strValue.C_Str()).c_str(), mem, ImageStoreMode::AlphaTexture, SpectrumType::Reflectance);
+            alphaTex = createShared<ImageFloatTexture>(mapping, image);
+        }
+        
+        return SurfaceAttributeTuple(mat, normalTex, alphaTex);
+    }
     
     SLR_SCENEGRAPH_API void construct(const std::string &filePath, InternalNodeRef &nodeOut, const CreateMaterialFunction &materialFunc) {
         using namespace SLR;
@@ -147,24 +163,11 @@ namespace SLRSceneGraph {
         std::vector<FloatTextureRef> alphaMaps;
         for (int m = 0; m < scene->mNumMaterials; ++m) {
             const aiMaterial* aiMat = scene->mMaterials[m];
-            SurfaceMaterialRef surfMat = materialFunc(aiMat, pathPrefix, &defMem);
-            materials.push_back(surfMat);
             
-            aiString strValue;
-            
-            Normal3DTextureRef normalTex;
-            if (aiMat->Get(AI_MATKEY_TEXTURE_DISPLACEMENT(0), strValue) == aiReturn_SUCCESS) {
-                TiledImage2DRef image = Image::createTiledImage((pathPrefix + strValue.C_Str()).c_str(), &defMem, ImageStoreMode::NormalTexture, SpectrumType::Reflectance);
-                normalTex = createShared<ImageNormal3DTexture>(image);
-            }
-            normalMaps.push_back(normalTex);
-            
-            FloatTextureRef alphaTex;
-            if (aiMat->Get(AI_MATKEY_TEXTURE_OPACITY(0), strValue) == aiReturn_SUCCESS) {
-                TiledImage2DRef image = Image::createTiledImage((pathPrefix + strValue.C_Str()).c_str(), &defMem, ImageStoreMode::AlphaTexture, SpectrumType::Reflectance);
-                alphaTex = createShared<ImageFloatTexture>(image);
-            }
-            alphaMaps.push_back(alphaTex);
+            SurfaceAttributeTuple surfAttr = materialFunc(aiMat, pathPrefix, &defMem);
+            materials.push_back(surfAttr.material);
+            normalMaps.push_back(surfAttr.normalMap);
+            alphaMaps.push_back(surfAttr.alphaMap);
         }
         
         recursiveConstruct(scene, scene->mRootNode, materials, normalMaps, alphaMaps, nodeOut);

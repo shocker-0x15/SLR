@@ -196,8 +196,6 @@ namespace SLR {
         friend SurfacePoint operator*(const StaticTransform &transform, const SurfacePoint &surfPt);
     };
     
-    
-    
     inline float squaredDistance(const SurfacePoint &p0, const SurfacePoint &p1) {
         return (p0.atInfinity || p1.atInfinity) ? 1.0f : sqDistance(p0.p, p1.p);
     }

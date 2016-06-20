@@ -124,15 +124,12 @@ namespace SLR {
     
     void BumpSingleSurfaceObject::getSurfacePoint(const Intersection &isect, SurfacePoint *surfPt) const {
         SingleSurfaceObject::getSurfacePoint(isect, surfPt);
-        Vector3D nLocal = m_normalMap->evaluate(surfPt->texCoord);
-        const Vector3D rawSN = surfPt->shadingFrame.z;
-        const Vector3D tc0Dir = normalize(surfPt->texCoord0Dir - dot(rawSN, surfPt->texCoord0Dir) * rawSN);
-        const Vector3D tc1Dir = cross(rawSN, tc0Dir);
-        Vector3D n = Vector3D(dot(Vector3D(tc0Dir.x, tc1Dir.x, rawSN.x), nLocal),
-                              dot(Vector3D(tc0Dir.y, tc1Dir.y, rawSN.y), nLocal),
-                              dot(Vector3D(tc0Dir.z, tc1Dir.z, rawSN.z), nLocal));
-        Vector3D t = normalize(surfPt->shadingFrame.x - dot(n, surfPt->shadingFrame.x) * n);
-        Vector3D b = cross(n, t);
+        Vector3D nLocal = m_normalMap->evaluate(*surfPt);
+        Vector3D tLocal = Vector3D::Ex - dot(nLocal, Vector3D::Ex) * nLocal;
+        Vector3D bLocal = Vector3D::Ey - dot(nLocal, Vector3D::Ey) * nLocal;
+        Vector3D t = normalize(surfPt->shadingFrame.fromLocal(tLocal));
+        Vector3D b = normalize(surfPt->shadingFrame.fromLocal(bLocal));
+        Vector3D n = normalize(surfPt->shadingFrame.fromLocal(nLocal));
         surfPt->shadingFrame.x = t;
         surfPt->shadingFrame.y = b;
         surfPt->shadingFrame.z = n;

@@ -634,12 +634,47 @@ namespace SLRSceneGraph {
                                  return Element(TypeMap::Image2D(), image);
                              })
                     );
+            stack["Texture2DMapping"] =
+            Element(TypeMap::Function(),
+                    Function(1,
+                             {
+                                 {"type", Type::String, Element("texcoord 2D")}, {"params", Type::Tuple, Element(TypeMap::Tuple(), ParameterList())}
+                             },
+                             [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
+                                 std::string type = args.at("type").raw<TypeMap::String>();
+                                 const ParameterList &params = args.at("params").raw<TypeMap::Tuple>();
+                                 if (type == "texcoord 2D") {
+                                     return Element(TypeMap::Texture2DMapping(), Texture2DMapping::sharedInstanceRef());
+                                 }
+                                 *err = ErrorMessage("Specified type is invalid.");
+                                 return Element();
+                             })
+                    );
+            stack["Texture3DMapping"] =
+            Element(TypeMap::Function(),
+                    Function(1,
+                             {
+                                 {"type", Type::String, Element("texcoord 2D")}, {"params", Type::Tuple, Element(TypeMap::Tuple(), ParameterList())}
+                             },
+                             [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
+                                 std::string type = args.at("type").raw<TypeMap::String>();
+                                 const ParameterList &params = args.at("params").raw<TypeMap::Tuple>();
+                                 if (type == "texcoord 2D") {
+                                     return Element(TypeMap::Texture3DMapping(), Texture3DMapping::sharedInstanceRef());
+                                 }
+                                 else if (type == "world pos") {
+                                     return Element(TypeMap::Texture3DMapping(), WorldPosition3DMapping::sharedInstanceRef());
+                                 }
+                                 *err = ErrorMessage("Specified type is invalid.");
+                                 return Element();
+                             })
+                    );
             stack["SpectrumTexture"] =
             Element(TypeMap::Function(),
                     Function(1,
                              {
                                  {{"spectrum", Type::Spectrum}},
-                                 {{"image", Type::Image2D}},
+                                 {{"image", Type::Image2D}, {"mapping", Type::Texture2DMapping, Element(TypeMap::Texture2DMapping(), Texture2DMapping::sharedInstanceRef())}},
                                  {{"procedure", Type::String}, {"params", Type::Tuple}}
                              },
                              {
@@ -649,7 +684,8 @@ namespace SLRSceneGraph {
                                  },
                                  [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
                                      const auto &image = args.at("image").rawRef<TypeMap::Image2D>();
-                                     return Element(TypeMap::SpectrumTexture(), createShared<ImageSpectrumTexture>(image));
+                                     const auto &mapping = args.at("mapping").rawRef<TypeMap::Texture2DMapping>();
+                                     return Element(TypeMap::SpectrumTexture(), createShared<ImageSpectrumTexture>(mapping, image));
                                  },
                                  [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
                                      std::string procedure = args.at("procedure").raw<TypeMap::String>();
@@ -657,12 +693,64 @@ namespace SLRSceneGraph {
                                      if (procedure == "checker board") {
                                          const static Function configFunc{
                                              0, {
-                                                 {"c0", Type::Spectrum}, {"c1", Type::Spectrum},
+                                                 {"c0", Type::Spectrum}, {"c1", Type::Spectrum}, {"mapping", Type::Texture2DMapping, Element(TypeMap::Texture2DMapping(), Texture2DMapping::sharedInstanceRef())}
                                              },
                                              [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
                                                  const InputSpectrumRef c0 = args.at("c0").rawRef<TypeMap::Spectrum>();
                                                  const InputSpectrumRef c1 = args.at("c1").rawRef<TypeMap::Spectrum>();
-                                                 return Element(TypeMap::SpectrumTexture(), createShared<CheckerBoardSpectrumTexture>(c0, c1));
+                                                 const auto &mapping = args.at("mapping").rawRef<TypeMap::Texture2DMapping>();
+                                                 return Element(TypeMap::SpectrumTexture(), createShared<CheckerBoardSpectrumTexture>(mapping, c0, c1));
+                                             }
+                                         };
+                                         return configFunc(params, context, err);
+                                     }
+                                     else if (procedure == "voronoi") {
+                                         const static Function configFunc{
+                                             0, {
+                                                 {"scale", Type::RealNumber}, {"brightness", Type::RealNumber, Element(TypeMap::RealNumber(), 0.8f)}, {"mapping", Type::Texture3DMapping, Element(TypeMap::Texture3DMapping(), WorldPosition3DMapping::sharedInstanceRef())}
+                                             },
+                                             [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
+                                                 float scale = args.at("scale").raw<TypeMap::RealNumber>();
+                                                 float brightness = args.at("brightness").raw<TypeMap::RealNumber>();
+                                                 const auto &mapping = args.at("mapping").rawRef<TypeMap::Texture3DMapping>();
+                                                 return Element(TypeMap::SpectrumTexture(), createShared<VoronoiSpectrumTexture>(mapping, scale, brightness));
+                                             }
+                                         };
+                                         return configFunc(params, context, err);
+                                     }
+                                     *err = ErrorMessage("Specified procedure is invalid.");
+                                     return Element();
+                                 }
+                             })
+                    );
+            stack["NormalTexture"] =
+            Element(TypeMap::Function(),
+                    Function(1,
+                             {
+                                 {{"image", Type::Image2D}, {"mapping", Type::Texture2DMapping, Element(TypeMap::Texture2DMapping(), Texture2DMapping::sharedInstanceRef())}},
+                                 {{"procedure", Type::String}, {"params", Type::Tuple}}
+                             },
+                             {
+                                 [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
+                                     const auto &image = args.at("image").rawRef<TypeMap::Image2D>();
+                                     const auto &mapping = args.at("mapping").rawRef<TypeMap::Texture2DMapping>();
+                                     return Element(TypeMap::NormalTexture(), createShared<ImageNormal3DTexture>(mapping, image));
+                                 },
+                                 [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
+                                     std::string procedure = args.at("procedure").raw<TypeMap::String>();
+                                     const ParameterList &params = args.at("params").raw<TypeMap::Tuple>();
+                                     if (procedure == "checker board") {
+                                         const static Function configFunc{
+                                             0, {
+                                                 {"stepWidth", Type::RealNumber, Element(0.05)},
+                                                 {"reverse", Type::Bool, Element(false)},
+                                                 {"mapping", Type::Texture2DMapping, Element(TypeMap::Texture2DMapping(), Texture2DMapping::sharedInstanceRef())}
+                                             },
+                                             [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
+                                                 float stepWidth = args.at("stepWidth").raw<TypeMap::RealNumber>();
+                                                 bool reverse = args.at("reverse").raw<TypeMap::Bool>();
+                                                 const auto &mapping = args.at("mapping").rawRef<TypeMap::Texture2DMapping>();
+                                                 return Element(TypeMap::NormalTexture(), createShared<CheckerBoardNormal3DTexture>(mapping, stepWidth, reverse));
                                              }
                                          };
                                          return configFunc(params, context, err);
@@ -671,10 +759,14 @@ namespace SLRSceneGraph {
                                          const static Function configFunc{
                                              0, {
                                                  {"scale", Type::RealNumber},
+                                                 {"thetaMax", Type::RealNumber, Element(M_PI / 6)},
+                                                 {"mapping", Type::Texture3DMapping, Element(TypeMap::Texture3DMapping(), WorldPosition3DMapping::sharedInstanceRef())}
                                              },
                                              [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
                                                  float scale = args.at("scale").raw<TypeMap::RealNumber>();
-                                                 return Element(TypeMap::SpectrumTexture(), createShared<VoronoiSpectrumTexture>(scale));
+                                                 float thetaMax = args.at("thetaMax").raw<TypeMap::RealNumber>();
+                                                 const auto &mapping = args.at("mapping").rawRef<TypeMap::Texture3DMapping>();
+                                                 return Element(TypeMap::NormalTexture(), createShared<VoronoiNormal3DTexture>(mapping, scale, thetaMax));
                                              }
                                          };
                                          return configFunc(params, context, err);
@@ -689,7 +781,7 @@ namespace SLRSceneGraph {
                     Function(1,
                              {
                                  {{"value", Type::RealNumber}},
-                                 {{"image", Type::Image2D}},
+                                 {{"image", Type::Image2D}, {"mapping", Type::Texture2DMapping, Element(TypeMap::Texture2DMapping(), Texture2DMapping::sharedInstanceRef())}},
                                  {{"procedure", Type::String}, {"params", Type::Tuple}}
                              },
                              {
@@ -699,7 +791,8 @@ namespace SLRSceneGraph {
                                  },
                                  [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
                                      const auto &image = args.at("image").rawRef<TypeMap::Image2D>();
-                                     return Element(TypeMap::FloatTexture(), createShared<ImageFloatTexture>(image));
+                                     const auto &mapping = args.at("mapping").rawRef<TypeMap::Texture2DMapping>();
+                                     return Element(TypeMap::FloatTexture(), createShared<ImageFloatTexture>(mapping, image));
                                  },
                                  [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
                                      std::string procedure = args.at("procedure").raw<TypeMap::String>();
@@ -707,12 +800,13 @@ namespace SLRSceneGraph {
                                      if (procedure == "checker board") {
                                          const static Function configFunc{
                                              0, {
-                                                 {"c0", Type::RealNumber}, {"c1", Type::RealNumber},
+                                                 {"c0", Type::RealNumber}, {"c1", Type::RealNumber}, {"mapping", Type::Texture2DMapping, Element(TypeMap::Texture2DMapping(), Texture2DMapping::sharedInstanceRef())}
                                              },
                                              [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
                                                  float c0 = args.at("c0").raw<TypeMap::RealNumber>();
                                                  float c1 = args.at("c1").raw<TypeMap::RealNumber>();
-                                                 return Element(TypeMap::FloatTexture(), createShared<CheckerBoardFloatTexture>(c0, c1));
+                                                 const auto &mapping = args.at("mapping").rawRef<TypeMap::Texture2DMapping>();
+                                                 return Element(TypeMap::FloatTexture(), createShared<CheckerBoardFloatTexture>(mapping, c0, c1));
                                              }
                                          };
                                          return configFunc(params, context, err);
@@ -721,10 +815,16 @@ namespace SLRSceneGraph {
                                          const static Function configFunc{
                                              0, {
                                                  {"scale", Type::RealNumber},
+                                                 {"valueScale", Type::RealNumber, Element(1.0)},
+                                                 {"flat", Type::Bool, Element(true)},
+                                                 {"mapping", Type::Texture3DMapping, Element(TypeMap::Texture3DMapping(), WorldPosition3DMapping::sharedInstanceRef())}
                                              },
                                              [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
                                                  float scale = args.at("scale").raw<TypeMap::RealNumber>();
-                                                 return Element(TypeMap::FloatTexture(), createShared<VoronoiFloatTexture>(scale));
+                                                 float valueScale = args.at("valueScale").raw<TypeMap::RealNumber>();
+                                                 bool flat = args.at("flat").raw<TypeMap::Bool>();
+                                                 const auto &mapping = args.at("mapping").rawRef<TypeMap::Texture3DMapping>();
+                                                 return Element(TypeMap::FloatTexture(), createShared<VoronoiFloatTexture>(mapping, scale, valueScale, flat));
                                              }
                                          };
                                          return configFunc(params, context, err);
@@ -1112,9 +1212,29 @@ namespace SLRSceneGraph {
                                          params.add("", matName);
                                          params.add("", matAttrs);
                                          Element result = userMatProc(params, context, err);
-                                         if (result.type != Type::SurfaceMaterial)
-                                             return createMaterialDefaultFunction(aiMat, pathPrefix, mem);
-                                         return result.rawRef<TypeMap::SurfaceMaterial>();
+                                         if (result.type == Type::Tuple) {
+                                             const ParameterList &tuple = result.raw<TypeMap::Tuple>();
+                                             const Element &eMat = tuple(0);
+                                             const Element &eNormalMap = tuple(1);
+                                             const Element &eAlphaMap = tuple(2);
+                                             if (eMat.type == Type::SurfaceMaterial) {
+                                                 SurfaceMaterialRef mat = eMat.rawRef<TypeMap::SurfaceMaterial>();
+                                                 Normal3DTextureRef normalMap;
+                                                 if (eNormalMap.type == Type::NormalTexture)
+                                                     normalMap = eNormalMap.rawRef<TypeMap::NormalTexture>();
+                                                 FloatTextureRef alphaMap;
+                                                 if (eAlphaMap.type == Type::FloatTexture)
+                                                     alphaMap = eAlphaMap.rawRef<TypeMap::FloatTexture>();
+                                                 
+                                                 return SurfaceAttributeTuple(mat, normalMap, alphaMap);
+                                             }
+                                         }
+                                         else if (result.type == Type::SurfaceMaterial) {
+                                             return SurfaceAttributeTuple(result.rawRef<TypeMap::SurfaceMaterial>(), nullptr, nullptr);
+                                         }
+                                         
+                                         printf("User defined material function is invalid, fall back to the default function.\n");
+                                         return createMaterialDefaultFunction(aiMat, pathPrefix, mem);
                                      };
                                  }
                                  
@@ -1301,7 +1421,8 @@ namespace SLRSceneGraph {
                                  
                                  // TODO: make memory allocator selectable.
                                  TiledImage2DRef img = Image::createTiledImage(path, &defMem, SLR::ImageStoreMode::AsIs, SLR::SpectrumType::Illuminant);
-                                 SpectrumTextureRef IBLTex = createShared<ImageSpectrumTexture>(img);
+                                 const Texture2DMappingRef &mapping = Texture2DMapping::sharedInstanceRef();
+                                 SpectrumTextureRef IBLTex = createShared<ImageSpectrumTexture>(mapping, img);
                                  std::weak_ptr<Scene> sceneWRef = context.scene;
                                  InfiniteSphereNodeRef infSphere = createShared<InfiniteSphereNode>(sceneWRef, IBLTex, scale);
                                  

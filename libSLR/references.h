@@ -148,7 +148,11 @@ namespace SLR {
     // Accelerators
     class BBVH;
     
-    // Textures
+    // Textures & Mapping
+    class Texture2DMapping;
+    class Texture3DMapping;
+    class OffsetAndScale2DMapping;
+    class WorldPosition3DMapping;
     class SpectrumTexture;
     class Normal3DTexture;
     class FloatTexture;

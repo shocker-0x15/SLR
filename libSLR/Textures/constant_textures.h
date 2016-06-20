@@ -16,18 +16,18 @@ namespace SLR {
     class SLR_API ConstantSpectrumTexture : public SpectrumTexture {
         const InputSpectrum* m_value;
     public:
-        ConstantSpectrumTexture(const InputSpectrum* value) : m_value(value) { };
+        ConstantSpectrumTexture(const InputSpectrum* value) : m_value(value) { }
         
-        SampledSpectrum evaluate(const TexCoord2D &tc, const WavelengthSamples &wls) const override;
+        SampledSpectrum evaluate(const SurfacePoint &surfPt, const WavelengthSamples &wls) const override { return m_value->evaluate(wls); }
         RegularConstantContinuous2D* createIBLImportanceMap() const override;
     };
     
     class SLR_API ConstantFloatTexture : public FloatTexture {
         float m_value;
     public:
-        ConstantFloatTexture(float value) : m_value(value) { };
+        ConstantFloatTexture(float value) : m_value(value) { }
         
-        float evaluate(const TexCoord2D &tc) const override { return m_value; };
+        float evaluate(const SurfacePoint &surfPt) const override { return m_value; }
     };    
 }
 

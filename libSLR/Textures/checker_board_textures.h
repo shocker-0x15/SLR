@@ -14,32 +14,41 @@
 
 namespace SLR {
     class SLR_API CheckerBoardSpectrumTexture : public SpectrumTexture {
+        const Texture2DMapping* m_mapping;
         const InputSpectrum* m_values[2];
     public:
-        CheckerBoardSpectrumTexture(const InputSpectrum* v0, const InputSpectrum* v1) : m_values{v0, v1} { };
+        CheckerBoardSpectrumTexture(const Texture2DMapping* mapping, const InputSpectrum* v0, const InputSpectrum* v1) : m_mapping(mapping), m_values{v0, v1} { }
         
-        SampledSpectrum evaluate(const TexCoord2D &tc, const WavelengthSamples &wls) const override { return m_values[((int)(tc.u * 2) + (int)(tc.v * 2)) % 2]->evaluate(wls); };
+        SampledSpectrum evaluate(const SurfacePoint &surfPt, const WavelengthSamples &wls) const override {
+            Point3D tc = m_mapping->map(surfPt);
+            return m_values[((int)(tc.x * 2) + (int)(tc.y * 2)) % 2]->evaluate(wls);
+        }
         RegularConstantContinuous2D* createIBLImportanceMap() const override;
     };
     
     class SLR_API CheckerBoardNormal3DTexture : public Normal3DTexture {
+        const Texture2DMapping* m_mapping;
         float m_stepWidth;
         bool m_reverse;
     public:
-        CheckerBoardNormal3DTexture(float stepWidth, bool reverse) :
-        m_stepWidth(stepWidth), m_reverse(reverse) {
+        CheckerBoardNormal3DTexture(const Texture2DMapping* mapping, float stepWidth, bool reverse) :
+        m_mapping(mapping), m_stepWidth(stepWidth), m_reverse(reverse) {
             SLRAssert(stepWidth > 0 && stepWidth <= 1.0f, "stepWidth must be in the range (0, 1].");
-        };
+        }
         
-        Normal3D evaluate(const TexCoord2D &tc) const override;
+        Normal3D evaluate(const SurfacePoint &surfPt) const override;
     };
     
     class SLR_API CheckerBoardFloatTexture : public FloatTexture {
+        const Texture2DMapping* m_mapping;
         float m_values[2];
     public:
-        CheckerBoardFloatTexture(float v0, float v1) : m_values{v0, v1} { };
+        CheckerBoardFloatTexture(const Texture2DMapping* mapping, float v0, float v1) : m_mapping(mapping), m_values{v0, v1} { }
         
-        float evaluate(const TexCoord2D &tc) const override { return m_values[((int)(tc.u * 2) + (int)(tc.v * 2)) % 2]; };
+        float evaluate(const SurfacePoint &surfPt) const override {
+            Point3D tc = m_mapping->map(surfPt);
+            return m_values[((int)(tc.x * 2) + (int)(tc.y * 2)) % 2];
+        }
     };
 }
 

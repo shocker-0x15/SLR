@@ -15,11 +15,11 @@ namespace SLR {
     BSDF* DiffuseReflection::getBSDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem, float scale) const {
         BSDF* bsdf = nullptr;
         if (m_sigma) {
-            float sigma = m_sigma->evaluate(surfPt.texCoord);
-            bsdf = mem.create<OrenNayerBRDF>(scale * m_reflectance->evaluate(surfPt.texCoord, wls), sigma);
+            float sigma = m_sigma->evaluate(surfPt);
+            bsdf = mem.create<OrenNayerBRDF>(scale * m_reflectance->evaluate(surfPt, wls), sigma);
         }
         else {
-            bsdf = mem.create<LambertianBRDF>(scale * m_reflectance->evaluate(surfPt.texCoord, wls));
+            bsdf = mem.create<LambertianBRDF>(scale * m_reflectance->evaluate(surfPt, wls));
         }
         return bsdf;
     }
@@ -27,18 +27,18 @@ namespace SLR {
     
     
     BSDF* SpecularReflection::getBSDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem, float scale) const {
-        SampledSpectrum coeffR = m_coeffR->evaluate(surfPt.texCoord, wls);
-        SampledSpectrum eta = m_eta->evaluate(surfPt.texCoord, wls);
-        SampledSpectrum k = m_k->evaluate(surfPt.texCoord, wls);
+        SampledSpectrum coeffR = m_coeffR->evaluate(surfPt, wls);
+        SampledSpectrum eta = m_eta->evaluate(surfPt, wls);
+        SampledSpectrum k = m_k->evaluate(surfPt, wls);
         return mem.create<SpecularBRDF>(scale * coeffR, eta, k);
     }
     
     
     
     BSDF* SpecularScattering::getBSDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem, float scale) const {
-        SampledSpectrum coeff = m_coeff->evaluate(surfPt.texCoord, wls);
-        SampledSpectrum etaExt = m_etaExt->evaluate(surfPt.texCoord, wls);
-        SampledSpectrum etaInt = m_etaInt->evaluate(surfPt.texCoord, wls);
+        SampledSpectrum coeff = m_coeff->evaluate(surfPt, wls);
+        SampledSpectrum etaExt = m_etaExt->evaluate(surfPt, wls);
+        SampledSpectrum etaInt = m_etaInt->evaluate(surfPt, wls);
         return mem.create<SpecularBSDF>(scale * coeff, etaExt, etaInt, !wls.lambdaSelected());
     }
     

@@ -15,28 +15,38 @@
 
 namespace SLR {
     class SLR_API VoronoiSpectrumTexture : public SpectrumTexture {
+        const Texture3DMapping* m_mapping;
         float m_scale;
+        float m_brightness;
     public:
-        VoronoiSpectrumTexture(float scale) : m_scale(scale) { }
+        VoronoiSpectrumTexture(const Texture3DMapping* mapping, float scale, float brightness) :
+        m_mapping(mapping), m_scale(scale), m_brightness(brightness) { }
         
-        SampledSpectrum evaluate(const TexCoord2D &tc, const WavelengthSamples &wls) const override;
+        SampledSpectrum evaluate(const SurfacePoint &surfPt, const WavelengthSamples &wls) const override;
         RegularConstantContinuous2D* createIBLImportanceMap() const override;
     };
     
     class SLR_API VoronoiNormal3DTexture : public Normal3DTexture {
+        const Texture3DMapping* m_mapping;
         float m_scale;
+        float m_cosThetaMax;
     public:
-        VoronoiNormal3DTexture(float scale) : m_scale(scale) { }
+        VoronoiNormal3DTexture(const Texture3DMapping* mapping, float scale, float thetaMax) :
+        m_mapping(mapping), m_scale(scale), m_cosThetaMax(std::cos(thetaMax)) { }
         
-        Normal3D evaluate(const TexCoord2D &tc) const override;
+        Normal3D evaluate(const SurfacePoint &surfPt) const override;
     };
     
     class SLR_API VoronoiFloatTexture : public FloatTexture {
+        const Texture3DMapping* m_mapping;
         float m_scale;
+        float m_valueScale;
+        bool m_flat;
     public:
-        VoronoiFloatTexture(float scale) : m_scale(scale) { }
+        VoronoiFloatTexture(const Texture3DMapping* mapping, float scale, float valueScale, bool flat) :
+        m_mapping(mapping), m_scale(scale), m_valueScale(valueScale), m_flat(flat) { }
         
-        float evaluate(const TexCoord2D &tc) const override;
+        float evaluate(const SurfacePoint &surfPt) const override;
     };
 }
 

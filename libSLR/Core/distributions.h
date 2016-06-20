@@ -50,6 +50,13 @@ namespace SLR {
     }
     
     template <typename RealType>
+    inline Vector3Template<RealType> uniformSampleCone(RealType u0, RealType u1, RealType cosThetaMax) {
+        RealType phi = 2 * M_PI * u1;
+        RealType theta = std::acos(1 - (1 - cosThetaMax) * u0);
+        return Vector3Template<RealType>(std::cos(phi) * std::sin(theta), std::sin(phi) * std::sin(theta), std::cos(theta));
+    }
+    
+    template <typename RealType>
     inline void uniformSampleTriangle(RealType u0, RealType u1, RealType* b0, RealType* b1) {
         RealType su1 = std::sqrt(u0);
         *b0 = 1.0f - su1;
