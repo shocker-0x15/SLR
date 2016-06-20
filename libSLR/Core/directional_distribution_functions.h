@@ -239,9 +239,9 @@ namespace SLR {
                 result->reverse->fs *= snCorrection;
             SLRAssert(result->dirPDF == 0 || (!fs_sn.hasNaN() && !fs_sn.hasInf() && !std::isnan(snCorrection) && !std::isinf(snCorrection) &&
                                               !std::isnan(result->dirPDF) && !std::isinf(result->dirPDF)),
-                      "fs_sn: %s, snCorrection: %g, PDF: %g, wlIdx: %u, qDir: %s, rDir: %s, gNormal: %s",
+                      "fs_sn: %s, snCorrection: %g, PDF: %g, wlIdx: %u, qDir: %s, sample: (%g, %g, %g), rDir: %s, gNormal: %s",
                       fs_sn.toString().c_str(), snCorrection, result->dirPDF, query.wlHint,
-                      query.dir_sn.toString().c_str(), result->dir_sn.toString().c_str(), query.gNormal_sn.toString().c_str());
+                      query.dir_sn.toString().c_str(), smp.uComponent, smp.uDir[0], smp.uDir[1], result->dir_sn.toString().c_str(), query.gNormal_sn.toString().c_str());
             return fs_sn * snCorrection;
         }
         SampledSpectrum evaluate(const BSDFQuery &query, const Vector3D &dir, SampledSpectrum* rev_fs = nullptr) const {

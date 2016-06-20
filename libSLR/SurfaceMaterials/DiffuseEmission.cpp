@@ -12,7 +12,7 @@
 
 namespace SLR {
     SampledSpectrum DiffuseEmission::emittance(const SurfacePoint &surfPt, const WavelengthSamples &wls) const {
-        return m_emittance->evaluate(surfPt.texCoord, wls);
+        return m_emittance->evaluate(surfPt, wls);
     }
     
     EDF* DiffuseEmission::getEDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem, float scale) const {

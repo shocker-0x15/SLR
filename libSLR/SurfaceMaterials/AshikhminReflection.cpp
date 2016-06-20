@@ -12,10 +12,10 @@
 
 namespace SLR {
     BSDF* AshikhminShirleyReflection::getBSDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem, float scale) const {
-        SampledSpectrum Rs = m_Rs->evaluate(surfPt.texCoord, wls);
-        SampledSpectrum Rd = m_Rd->evaluate(surfPt.texCoord, wls);
-        float nu = m_nu->evaluate(surfPt.texCoord);
-        float nv = m_nv->evaluate(surfPt.texCoord);
+        SampledSpectrum Rs = m_Rs->evaluate(surfPt, wls);
+        SampledSpectrum Rd = m_Rd->evaluate(surfPt, wls);
+        float nu = m_nu->evaluate(surfPt);
+        float nv = m_nv->evaluate(surfPt);
         return mem.create<AshikhminShirleyBRDF>(scale * Rs, scale * Rd, nu, nv);
     }
 }

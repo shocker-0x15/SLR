@@ -132,9 +132,10 @@ namespace SLR {
         return new RegularConstantContinuous2D(mapWidth, mapHeight, pickFunc);
     }
     
-    Normal3D ImageNormal3DTexture::evaluate(const TexCoord2D &tc) const {
-        uint32_t x = std::clamp((uint32_t)std::fmod(m_data->width() * tc.u, m_data->width()), 0u, m_data->width() - 1);
-        uint32_t y = std::clamp((uint32_t)std::fmod(m_data->height() * tc.v, m_data->height()), 0u, m_data->height() - 1);
+    Normal3D ImageNormal3DTexture::evaluate(const SurfacePoint &surfPt) const {
+        Point3D tc = m_mapping->map(surfPt);
+        uint32_t x = std::clamp((uint32_t)std::fmod(m_data->width() * tc.x, m_data->width()), 0u, m_data->width() - 1);
+        uint32_t y = std::clamp((uint32_t)std::fmod(m_data->height() * tc.y, m_data->height()), 0u, m_data->height() - 1);
         Normal3D ret;
         switch (m_data->format()) {
             case ColorFormat::RGB8x3: {
@@ -164,9 +165,10 @@ namespace SLR {
         return ret;
     }
     
-    float ImageFloatTexture::evaluate(const TexCoord2D &tc) const {
-        uint32_t x = std::clamp((uint32_t)std::fmod(m_data->width() * tc.u, m_data->width()), 0u, m_data->width() - 1);
-        uint32_t y = std::clamp((uint32_t)std::fmod(m_data->height() * tc.v, m_data->height()), 0u, m_data->height() - 1);
+    float ImageFloatTexture::evaluate(const SurfacePoint &surfPt) const {
+        Point3D tc = m_mapping->map(surfPt);
+        uint32_t x = std::clamp((uint32_t)std::fmod(m_data->width() * tc.x, m_data->width()), 0u, m_data->width() - 1);
+        uint32_t y = std::clamp((uint32_t)std::fmod(m_data->height() * tc.y, m_data->height()), 0u, m_data->height() - 1);
         float ret;
         switch (m_data->format()) {
             case ColorFormat::RGB8x3: {

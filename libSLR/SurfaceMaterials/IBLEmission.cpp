@@ -13,7 +13,7 @@
 
 namespace SLR {
     SampledSpectrum IBLEmission::emittance(const SurfacePoint &surfPt, const WavelengthSamples &wls) const {
-        return M_PI * m_coeffM->evaluate(surfPt.texCoord, wls) * m_scale;
+        return M_PI * m_coeffM->evaluate(surfPt, wls) * m_scale;
     }
     
     EDF* IBLEmission::getEDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem, float scale) const {

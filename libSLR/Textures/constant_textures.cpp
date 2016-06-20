@@ -6,13 +6,8 @@
 //
 
 #include "constant_textures.h"
-#include "../BasicTypes/Spectrum.h"
 
-namespace SLR {
-    SampledSpectrum ConstantSpectrumTexture::evaluate(const TexCoord2D &tc, const WavelengthSamples &wls) const {
-        return m_value->evaluate(wls);
-    };
-    
+namespace SLR {    
     RegularConstantContinuous2D* ConstantSpectrumTexture::createIBLImportanceMap() const {
         return nullptr;
     }    

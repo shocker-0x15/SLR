@@ -15,6 +15,8 @@ namespace SLR {
         result->dirType = m_type;
         result->dir_sn.z *= dot(query.dir_sn, query.gNormal_sn) > 0 ? 1 : -1;
         SampledSpectrum fs = m_R / M_PI;
+//        if (dot(result->dir_sn, query.gNormal_sn) < 0)
+//            fs = SampledSpectrum::Zero;
         if (result->reverse) {
             result->reverse->fs = fs;
             result->reverse->dirPDF = std::fabs(query.dir_sn.z) / M_PI;

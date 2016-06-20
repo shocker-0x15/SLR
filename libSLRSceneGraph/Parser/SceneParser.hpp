@@ -27,6 +27,8 @@ namespace SLRSceneGraph {
         Transform,
         Spectrum,
         Image2D,
+        Texture2DMapping,
+        Texture3DMapping,
         SpectrumTexture,
         NormalTexture,
         FloatTexture,
@@ -59,6 +61,8 @@ namespace SLRSceneGraph {
         TypeMapDef(Transform, SLR::Transform);
         TypeMapDef(Spectrum, SLR::InputSpectrum);
         TypeMapDef(Image2D, SLR::TiledImage2D);
+        TypeMapDef(Texture2DMapping, SLRSceneGraph::Texture2DMapping);
+        TypeMapDef(Texture3DMapping, SLRSceneGraph::Texture3DMapping);
         TypeMapDef(SpectrumTexture, SLRSceneGraph::SpectrumTexture);
         TypeMapDef(NormalTexture, SLRSceneGraph::Normal3DTexture);
         TypeMapDef(FloatTexture, SLRSceneGraph::FloatTexture);
@@ -72,6 +76,7 @@ namespace SLRSceneGraph {
         TypeMapDef(Function, SLRSceneGraph::Function);
         TypeMapDef(Void, void);
         TypeMapDef(Error, SLRSceneGraph::ErrorMessage);
+#undef TypeMapDef
     }
     
     enum class API : uint32_t {
