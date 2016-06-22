@@ -75,11 +75,7 @@ namespace SLR {
     
     
     class SLR_API SubSurfaceScatteringSurfaceMaterial : public SurfaceMaterial {
-        SpectrumTexture* m_etaExtTex;
-        SpectrumTexture* m_etaIntTex;
-        FloatTexture* m_alpha_g;
-        SVMicrofacetDistribution* m_D;
-        SurfaceMaterial* m_surfMat;
+        const SurfaceMaterial* m_surfMat;
         const InputSpectrum* m_l_sigma_a;
         const InputSpectrum* m_l_sigma_s;
         float m_l_g;
@@ -89,7 +85,7 @@ namespace SLR {
         float m_u_g;
         InputSpectrum* m_outerHHReflectance;
     public:
-        SubSurfaceScatteringSurfaceMaterial(const InputSpectrum* etaExt, const InputSpectrum* etaInt, float alpha_g,
+        SubSurfaceScatteringSurfaceMaterial(const SurfaceMaterial* surfMat,
                                             const InputSpectrum* l_sigma_a, const InputSpectrum* l_sigma_s, float l_g,
                                             const InputSpectrum* u_sigma_a, const InputSpectrum* u_sigma_s, float u_g);
         ~SubSurfaceScatteringSurfaceMaterial();

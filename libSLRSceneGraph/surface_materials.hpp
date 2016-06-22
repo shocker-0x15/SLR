@@ -33,7 +33,7 @@ namespace SLRSceneGraph {
         static SurfaceMaterialRef createMixedMaterial(const SurfaceMaterialRef &mat0, const SurfaceMaterialRef &mat1, const FloatTextureRef &factor);
         static EmitterSurfacePropertyRef createDiffuseEmitter(const SpectrumTextureRef &emittance);
         static SurfaceMaterialRef createEmitterSurfaceMaterial(const SurfaceMaterialRef &mat, const EmitterSurfacePropertyRef &emit);
-        static SurfaceMaterialRef createSSSSurfaceMaterial(const InputSpectrumRef &etaExt, const InputSpectrumRef &etaInt, float alpha_g,
+        static SurfaceMaterialRef createSSSSurfaceMaterial(const SurfaceMaterialRef &surfMat,
                                                            const InputSpectrumRef &l_sigma_a, const InputSpectrumRef &l_sigma_s, float l_g,
                                                            const InputSpectrumRef &u_sigma_a, const InputSpectrumRef &u_sigma_s, float u_g);
     };
@@ -70,7 +70,7 @@ namespace SLRSceneGraph {
         const InputSpectrumRef m_u_sigma_s;
         float m_u_g;
     public:
-        SubSurfaceScatteringSurfaceMaterial(const InputSpectrumRef &etaExt, const InputSpectrumRef &etaInt, float alpha_g,
+        SubSurfaceScatteringSurfaceMaterial(const SurfaceMaterialRef &surfMat,
                                             const InputSpectrumRef &l_sigma_a, const InputSpectrumRef &l_sigma_s, float l_g,
                                             const InputSpectrumRef &u_sigma_a, const InputSpectrumRef &u_sigma_s, float u_g);
     };

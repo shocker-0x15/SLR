@@ -14,18 +14,13 @@
 #include "../SurfaceMaterials/MicrofacetSurfaceMaterial.h"
 
 namespace SLR {
-    SubSurfaceScatteringSurfaceMaterial::SubSurfaceScatteringSurfaceMaterial(const InputSpectrum* etaExt, const InputSpectrum* etaInt, float alpha_g,
+    SubSurfaceScatteringSurfaceMaterial::SubSurfaceScatteringSurfaceMaterial(const SurfaceMaterial* surfMat,
                                                                              const InputSpectrum* l_sigma_a, const InputSpectrum* l_sigma_s, float l_g,
                                                                              const InputSpectrum* u_sigma_a, const InputSpectrum* u_sigma_s, float u_g) :
+    m_surfMat(surfMat),
     m_l_sigma_a(l_sigma_a), m_l_sigma_s(l_sigma_s), m_l_g(l_g),
     m_u_sigma_a(u_sigma_a), m_u_sigma_s(u_sigma_s), m_u_g(u_g) {
         ArenaAllocator tempMem;
-        
-        m_etaExtTex = new ConstantSpectrumTexture(etaExt);
-        m_etaIntTex = new ConstantSpectrumTexture(etaInt);
-        m_alpha_g = new ConstantFloatTexture(alpha_g);
-        m_D = new SVGGX(m_alpha_g);
-        m_surfMat = new MicrofacetScattering(m_etaExtTex, m_etaIntTex, m_D);
         
         const uint32_t numSamples = 128;
         BSDFSample* bsdfSamples = tempMem.alloc<BSDFSample>(numSamples);
@@ -50,6 +45,8 @@ namespace SLR {
             lambdas[i] = WavelengthLowBound + (WavelengthHighBound - WavelengthLowBound) / (numPrecomputeWavelengths - 1) * i;
         
         SurfacePoint surfPt;
+        surfPt.p = Point3D(0);
+        surfPt.gNormal = Normal3D(0, 0, 1);
         surfPt.texCoord = TexCoord2D(0, 0);
         
         for (int i = 0; i < numPrecomputeWavelengths; i += WavelengthSamples::NumComponents) {
@@ -82,11 +79,6 @@ namespace SLR {
             delete m_innerHHReflectance;
         if (m_outerHHReflectance)
             delete m_outerHHReflectance;
-        delete m_surfMat;
-        delete m_D;
-        delete m_alpha_g;
-        delete m_etaIntTex;
-        delete m_etaExtTex;
     }
     
     BSSRDF* SubSurfaceScatteringSurfaceMaterial::getBSSRDF(bool lowerHemisphere, const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem) const {

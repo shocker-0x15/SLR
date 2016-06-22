@@ -60,7 +60,7 @@ SLR consists of the following components.
 [Kajiya1986] "THE RENDERING EQUATION"  
 [King2013] "BSSRDF Importance Sampling"  
 [Meng2015] "Physically Meaningful Rendering using Tristimulus Colours"  
-[Moroder2010] "A New Ward BRDF Model with Bounded Albedo"
+[Moroder2010] "A New Ward BRDF Model with Bounded Albedo"  
 [Oren1994] "Generalization of Lambert’s Reflectance Model"  
 [Veach1994] "Bidirectional Estimators for Light Transport"  
 [Veach1996] "Non-symmetric Scattering in Light Transport Algorithms"  
