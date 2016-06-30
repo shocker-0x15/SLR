@@ -18,6 +18,7 @@ namespace SLR {
         InfiniteSphere() { };
         ~InfiniteSphere() { };
         
+        float costForIntersect() const override { return 1.0f; }
         BoundingBox3D bounds() const override;
         bool preTransformed() const override;
         bool intersect(const Ray &ray, Intersection* isect) const override;

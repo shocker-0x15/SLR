@@ -130,6 +130,7 @@ namespace SLR {
     public:
         virtual ~Surface() { }
         
+        virtual float costForIntersect() const = 0;
         virtual BoundingBox3D bounds() const = 0;
         virtual bool preTransformed() const = 0;
         virtual bool intersect(const Ray &ray, Intersection* isect) const = 0;
