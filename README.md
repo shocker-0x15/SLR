@@ -22,7 +22,7 @@ SLR consists of the following components.
     * Oren-Nayer BRDF \[Oren1994\]
     * Improved Ward-Dür BRDF \[Moroder2010\]
     * Ashikhmin-Shirley BRDF \[Ashikhmin2000\]
-    * Microfacet BRDF and BSDF \[Walter2007\] with visible normal sampling \[Heitz2014\]
+    * GGX Microfacet BRDF and BSDF \[Walter2007\] with visible normal sampling \[Heitz2014\]
     * Mixed BSDF
     * ~~Layered BSDF~~ (TODO)
 * BSSRDF for Sub-Surface Scattering
