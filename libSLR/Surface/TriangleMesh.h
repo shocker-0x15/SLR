@@ -21,6 +21,8 @@ namespace SLR {
         Triangle(const Vertex* v0, const Vertex* v1, const Vertex* v2, const FloatTexture* aTex) :
         m_v{v0, v1, v2}, m_alphaTex(aTex) { };
         
+        // TODO: consider a better cost value.
+        float costForIntersect() const override { return 1.0f; }
         BoundingBox3D bounds() const override;
         bool preTransformed() const override;
         bool intersect(const Ray &ray, Intersection* isect) const override;

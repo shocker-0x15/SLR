@@ -54,6 +54,7 @@ namespace SLR {
         SurfaceObject() { }
         virtual ~SurfaceObject() { }
         
+        virtual float costForIntersect() const = 0;
         virtual BoundingBox3D bounds() const = 0;
         virtual bool intersect(Ray &ray, Intersection* isect) const = 0;
         virtual Point3D getIntersectionPoint(const Intersection &isect) const { return isect.obj.top()->getIntersectionPoint(isect); }
@@ -90,6 +91,7 @@ namespace SLR {
         SingleSurfaceObject(const Surface* surf, const SurfaceMaterial* mat) : m_surface(surf), m_material(mat) { }
         virtual ~SingleSurfaceObject() { }
         
+        float costForIntersect() const override { return m_surface->costForIntersect(); }
         BoundingBox3D bounds() const override;
         bool intersect(Ray &ray, Intersection* isect) const override;
         Point3D getIntersectionPoint(const Intersection &isect) const override { return isect.p; }
@@ -155,6 +157,7 @@ namespace SLR {
         SurfaceObjectAggregate(std::vector<SurfaceObject*> &objs);
         ~SurfaceObjectAggregate();
         
+        float costForIntersect() const override;
         BoundingBox3D bounds() const override;
         bool intersect(Ray &ray, Intersection* isect) const override;
         
@@ -173,6 +176,7 @@ namespace SLR {
     public:
         TransformedSurfaceObject(const SurfaceObject* surfObj, const Transform* transform) : m_surfObj(surfObj), m_transform(transform) { }
         
+        float costForIntersect() const override { return m_surfObj->costForIntersect(); }
         BoundingBox3D bounds() const override;
         bool intersect(Ray &ray, Intersection* isect) const override;
         Point3D getIntersectionPoint(const Intersection &isect) const override;

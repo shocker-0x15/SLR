@@ -255,6 +255,10 @@ namespace SLR {
         delete m_lightDist1D;
     };
     
+    float SurfaceObjectAggregate::costForIntersect() const {
+        return m_accelerator->costForIntersect();
+    }
+    
     BoundingBox3D SurfaceObjectAggregate::bounds() const {
         return m_accelerator->bounds();
     }
