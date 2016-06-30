@@ -60,6 +60,7 @@ namespace SLRSceneGraph {
         void applyTransform() override;
         void applyTransform(const SLR::StaticTransform &tf) override;
         void applyTransformToLeaf(const SLR::StaticTransform &tf) override;
+
         void getRenderingData(SLR::ArenaAllocator &mem, const SLR::Transform* subTF, RenderingData *data) override;
     };
     
@@ -72,6 +73,7 @@ namespace SLRSceneGraph {
         SurfaceObjectNode() : m_ready(false) { };
         virtual ~SurfaceObjectNode();
         
+        virtual void applyTransformForRendering(const SLR::StaticTransform &tf) = 0;
         virtual void createSurfaceObjects() = 0;
         void getRenderingData(SLR::ArenaAllocator &mem, const SLR::Transform* subTF, RenderingData *data) final;
     };

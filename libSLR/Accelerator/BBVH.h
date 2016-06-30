@@ -55,6 +55,7 @@ namespace SLR {
         
         Partitioning m_method;
         uint32_t m_depth;
+        float m_cost;
         BoundingBox3D m_bounds;
         std::vector<Node> m_nodes;
         std::vector<SurfaceObject*> m_objLists;
@@ -89,14 +90,16 @@ namespace SLR {
             
             uint32_t splitIdx;
             switch (m_method) {
-                case Partitioning::Median: { // 子の数が同じになるように分割する。
+                case Partitioning::Median: {
+                    // partitions so that the numbers of children of both side become the same.
                     splitIdx = (start + end) / 2;
                     std::nth_element(indices.begin() + start, indices.begin() + splitIdx, indices.begin() + end, [&centroids, &widestAxis](uint32_t idx0, uint32_t idx1) {
                         return centroids[idx0][widestAxis] < centroids[idx1][widestAxis];
                     });
                     break;
                 }
-                case Partitioning::Midpoint: { // 重心点の範囲中で分布が広い次元の中点で分割する。
+                case Partitioning::Midpoint: {
+                    // partitions at the midpoint of a dimension in which primitives' centroid distribution is the widest.
                     float pivot = centroidBB.centerOfAxis(widestAxis);
                     auto firstOf2ndGroup = std::partition(indices.begin() + start, indices.begin() + end, [&centroids, &widestAxis, &pivot](uint32_t idx) {
                         return centroids[idx][widestAxis] < pivot;
@@ -104,42 +107,46 @@ namespace SLR {
                     splitIdx = std::max((uint32_t)std::distance(indices.begin() + start, firstOf2ndGroup), 1u) + start;
                     break;
                 }
-                case Partitioning::BinnedSAH: { // SAH(の近似)
+                case Partitioning::BinnedSAH: {
                     struct BinInfo {
                         BoundingBox3D bbox;
                         uint32_t numObjs;
-                        BinInfo() : numObjs(0) { };
+                        float sumCost;
+                        BinInfo() : numObjs(0), sumCost(0.0f) { };
                     };
                     
-                    const float travCost = 0.125f;
-                    const float isectCost = 1.0f;
+                    const float travCost = 1.2f;
                     const uint32_t numBins = 16;
                     BinInfo binInfos[numBins];
                     
+                    // Binning
                     for (uint32_t i = start; i < end; ++i) {
                         uint32_t idx = indices[i];
                         uint32_t bin = numBins * ((centroids[idx][widestAxis] - centroidBB.minP[widestAxis]) / (centroidBB.maxP[widestAxis] - centroidBB.minP[widestAxis]));
                         bin = std::min(bin, numBins - 1);
                         ++binInfos[bin].numObjs;
+                        binInfos[bin].sumCost += infos.objs->at(idx)->costForIntersect();
                         binInfos[bin].bbox.unify(infos.bboxes[idx]);
                     }
                     
+                    // evaluate SAH cost for every pair of child partitions
                     float surfaceAreaParent = bbox.surfaceArea();
                     float costs[numBins - 1];
                     for (uint32_t i = 0; i < numBins - 1; ++i) {
                         BoundingBox3D b0, b1;
-                        uint32_t count0 = 0, count1 = 0;
+                        float cost0 = 0.0f, cost1 = 0.0f;
                         for (int j = 0; j <= i; ++j) {
                             b0.unify(binInfos[j].bbox);
-                            count0 += binInfos[j].numObjs;
+                            cost0 += binInfos[j].sumCost;
                         }
                         for (int j = i + 1; j < numBins; ++j) {
                             b1.unify(binInfos[j].bbox);
-                            count1 += binInfos[j].numObjs;
+                            cost1 += binInfos[j].sumCost;
                         }
-                        costs[i] = travCost + (b0.surfaceArea() * isectCost * count0 + b1.surfaceArea() * isectCost * count1) / surfaceAreaParent;
+                        costs[i] = travCost + (b0.surfaceArea() * cost0 + b1.surfaceArea() * cost1) / surfaceAreaParent;
                     }
                     
+                    // determine a plane with the minimum cost.
                     float minCost = costs[0];
                     uint32_t splitPlane = 0;
                     for (int i = 1; i < numBins - 1; ++i) {
@@ -149,7 +156,13 @@ namespace SLR {
                         }
                     }
                     
-                    if (minCost < numObjs * isectCost) {
+                    // calculate cost of leaf node from all the primitives.
+                    float leafNodeCost = 0.0f;
+                    for (int i = 0; i < numBins; ++i)
+                        leafNodeCost += binInfos[i].sumCost;
+                    
+                    // perform object partitioning if the cost is less than the leaf node cost. 
+                    if (minCost < leafNodeCost) {
                         float pivot = centroidBB.minP[widestAxis] + (centroidBB.maxP[widestAxis] - centroidBB.minP[widestAxis]) / numBins * (splitPlane + 1);
                         auto firstOf2ndGroup = std::partition(indices.begin() + start, indices.begin() + end, [&centroids, &widestAxis, &pivot](uint32_t idx) {
                             return centroids[idx][widestAxis] < pivot;
@@ -175,9 +188,8 @@ namespace SLR {
         }
         
         float calcSAHCost() const {
-            const float Ci = 0.125f;
+            const float Ci = 1.2f;
             const float Cl = 0.0f;
-            const float Ct = 1.0f;
             float costInt = 0.0f;
             float costLeaf = 0.0f;
             float costObj = 0.0f;
@@ -189,16 +201,19 @@ namespace SLR {
                 }
                 else {
                     costLeaf += surfaceArea;
-                    costObj += surfaceArea * node.numLeaves;
+                    float costPrims = 0.0f;
+                    for (uint32_t j = 0; j < node.numLeaves; ++j)
+                        costPrims += m_objLists[node.offsetFirstLeaf + j]->costForIntersect();
+                    costObj += surfaceArea * costPrims;
                 }
             }
             float rootSA = m_nodes[0].bbox.surfaceArea();
             costInt *= Ci / rootSA;
             costLeaf *= Cl / rootSA;
-            costObj *= Ct / rootSA;
+            costObj /= rootSA;
             
             return costInt + costLeaf + costObj;
-        };
+        }
         
     public:
         BBVH(std::vector<SurfaceObject*> &objs, Partitioning method = Partitioning::BinnedSAH) {
@@ -216,14 +231,19 @@ namespace SLR {
             
             m_depth = 0;
             buildRecursive(infos, 0, (uint32_t)objs.size(), 0);
+            m_cost = calcSAHCost();
 #ifdef DEBUG
-            printf("depth: %u, cost: %g\n", m_depth, calcSAHCost());
+            printf("depth: %u, cost: %g\n", m_depth, m_cost);
 #endif
-        };
+        }
+        
+        float costForIntersect() const {
+            return m_cost;
+        }
         
         BoundingBox3D bounds() const {
             return m_bounds;
-        };
+        }
         
         bool intersect(Ray &ray, Intersection* isect) const {
             uint32_t objDepth = (uint32_t)isect->obj.size();

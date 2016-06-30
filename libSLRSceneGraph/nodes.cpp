@@ -151,18 +151,11 @@ namespace SLRSceneGraph {
             SLRAssert(subTF->isStatic(), "Transformation given to SurfaceObjectNode must be static.");
             subTF->sample(0.0f, &transform);
         }
-        if (transform.isIdentity()) {
-            for (int i = 0; i < m_numRefinedObjs; ++i) {
-                SLR::SingleSurfaceObject* obj = m_refinedObjs[i];
-                data->surfObjs[curSize + i] = obj;
-            }
-        }
-        else {
-            for (int i = 0; i < m_numRefinedObjs; ++i) {
-                SLR::SingleSurfaceObject* obj = m_refinedObjs[i];
-                SLR::TransformedSurfaceObject* tfObj = mem.create<SLR::TransformedSurfaceObject>(obj, subTF);
-                data->surfObjs[curSize + i] = tfObj;
-            }
+        // TODO: consider SingleSurfaceObject for which analytic transform is NOT applicable.
+        applyTransformForRendering(transform);
+        for (int i = 0; i < m_numRefinedObjs; ++i) {
+            SLR::SingleSurfaceObject* obj = m_refinedObjs[i];
+            data->surfObjs[curSize + i] = obj;
         }
     }
     
