@@ -82,8 +82,8 @@ namespace SLR {
             
             tpEnd = std::chrono::system_clock::now();
             elapsed = std::chrono::duration_cast<std::chrono::microseconds>(tpEnd - tpStart).count();
-            if (depth == 1)
-                printf("calculate parent BBox: %g[ms]\n", elapsed * 0.001f);
+//            if (depth == 1)
+//                printf("calculate parent BBox: %g[ms]\n", elapsed * 0.001f);
             
             if (numObjs == 1) {
                 m_nodes[nodeIdx].initAsLeaf(parentBB, (uint32_t)m_objLists.size(), 1);
@@ -151,8 +151,8 @@ namespace SLR {
                 
                 tpEnd = std::chrono::system_clock::now();
                 elapsed = std::chrono::duration_cast<std::chrono::microseconds>(tpEnd - tpStart).count();
-                if (depth == 1)
-                    printf("Object Binning: %g[ms]\n", elapsed * 0.001f);
+//                if (depth == 1)
+//                    printf("Object Binning: %g[ms]\n", elapsed * 0.001f);
             }
             
             // calculate surface area of intersection of two bounding boxes resulted from object partitioning.
@@ -162,7 +162,10 @@ namespace SLR {
                 bbLeftOP.unify(objBinInfos[j].bbox);
             for (int j = splitPlaneOP + 1; j < numObjBins; ++j)
                 bbRightOP.unify(objBinInfos[j].bbox);
-            float overlappedSA = intersection(bbLeftOP, bbRightOP).surfaceArea();
+            BoundingBox3D overlappedBB = intersection(bbLeftOP, bbRightOP);
+            float overlappedSA = 0;
+            if (overlappedBB.isValid())
+                overlappedSA = overlappedBB.surfaceArea();
             
             const uint32_t numSBins = 256;
             const float spatialBinWidth = parentBB.width(widestAxisSP) / numSBins;
@@ -220,8 +223,8 @@ namespace SLR {
                 
                 tpEnd = std::chrono::system_clock::now();
                 elapsed = std::chrono::duration_cast<std::chrono::microseconds>(tpEnd - tpStart).count();
-                if (depth == 1)
-                    printf("Spatial Binning: %g[ms]\n", elapsed * 0.001f);
+//                if (depth == 1)
+//                    printf("Spatial Binning: %g[ms]\n", elapsed * 0.001f);
             }
             
             if (leafNodeCost < minCostByOP && leafNodeCost < minCostBySP) {
@@ -242,8 +245,8 @@ namespace SLR {
                 
                 tpEnd = std::chrono::system_clock::now();
                 elapsed = std::chrono::duration_cast<std::chrono::microseconds>(tpEnd - tpStart).count();
-                if (depth == 1)
-                    printf("Object Partitioning: %g[ms]\n", elapsed * 0.001f);
+//                if (depth == 1)
+//                    printf("Object Partitioning: %g[ms]\n", elapsed * 0.001f);
                 
                 uint32_t numLeftAdded, numRightAdded;
                 uint32_t c0 = buildRecursive(fragments, currentSize, maximumBudget, start, splitIdx, depth, &numLeftAdded);
@@ -305,12 +308,12 @@ namespace SLR {
                 std::copy(rightFragments, rightFragments + numRightIndices, fragments + start + numLeftIndices);
                 delete[] newFragments;
                 uint32_t splitIdx = start + numLeftIndices;
-                SLRAssert(splitIdx > start && splitIdx < end, "Invalid partitioning.");
+                SLRAssert(splitIdx > start && splitIdx < end + *numAdded, "Invalid partitioning.");
                 
                 tpEnd = std::chrono::system_clock::now();
                 elapsed = std::chrono::duration_cast<std::chrono::microseconds>(tpEnd - tpStart).count();
-                if (depth == 1)
-                    printf("Spatial Partitioning: %g[ms]\n", elapsed * 0.001f);
+//                if (depth == 1)
+//                    printf("Spatial Partitioning: %g[ms]\n", elapsed * 0.001f);
                 
                 uint32_t numLeftAdded, numRightAdded;
                 uint32_t c0 = buildRecursive(fragments, currentSize + *numAdded, maximumBudget, start, splitIdx, depth, &numLeftAdded);
