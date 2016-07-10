@@ -16,6 +16,7 @@ namespace SLR {
         return BoundingBox3D(m_v[0]->position).unify(m_v[1]->position).unify(m_v[2]->position);
     }
     
+    // TODO: improve the logic.
     BoundingBox3D Triangle::choppedBounds(BoundingBox3D::Axis chopAxis, float minChopPos, float maxChopPos) const {
         const Point3D &p0 = m_v[0]->position;
         const Point3D &p1 = m_v[1]->position;
@@ -35,29 +36,32 @@ namespace SLR {
             float p0P0 = minChopPos - p0[chopAxis], p1P0 = minChopPos - p1[chopAxis], p2P0 = minChopPos - p2[chopAxis];
             float p0P1 = maxChopPos - p0[chopAxis], p1P1 = maxChopPos - p1[chopAxis], p2P1 = maxChopPos - p2[chopAxis];
             
-            bool isectE01P0 = p0P0 * p1P0 < 0, isectE02P0 = p0P0 * p2P0 < 0, isectE12P0 = p1P0 * p2P0 < 0;
-            bool isectE01P1 = p0P1 * p1P1 < 0, isectE02P1 = p0P1 * p2P1 < 0, isectE12P1 = p1P1 * p2P1 < 0;
+            bool isectP0[3] = {p0P0 * p1P0 <= 0, p0P0 * p2P0 <= 0, p1P0 * p2P0 <= 0}; // 01, 02, 12
+            bool isectP1[3] = {p0P1 * p1P1 <= 0, p0P1 * p2P1 <= 0, p1P1 * p2P1 <= 0}; // 01, 02, 12
+
+            Point3D iP0[3];
+            Point3D iP1[3];
+            if (isectP0[0])
+                iP0[0] = p0 + (p1 - p0) * (p0P0 / (p1[chopAxis] - p0[chopAxis]));
+            if (isectP0[1])
+                iP0[1] = p0 + (p2 - p0) * (p0P0 / (p2[chopAxis] - p0[chopAxis]));
+            if (isectP0[2])
+                iP0[2] = p1 + (p2 - p1) * (p1P0 / (p2[chopAxis] - p1[chopAxis]));
             
-            uint32_t numIP0 = 0;
-            uint32_t numIP1 = 0;
-            Point3D iP0[2];
-            Point3D iP1[2];
-            if (isectE01P0)
-                iP0[numIP0++] = p0 + (p1 - p0) * (p0P0 / (p1[chopAxis] - p0[chopAxis]));
-            if (isectE02P0)
-                iP0[numIP0++] = p0 + (p2 - p0) * (p0P0 / (p2[chopAxis] - p0[chopAxis]));
-            if (isectE12P0)
-                iP0[numIP0++] = p1 + (p2 - p1) * (p1P0 / (p2[chopAxis] - p1[chopAxis]));
-            
-            if (isectE01P1)
-                iP1[numIP1++] = p0 + (p1 - p0) * (p0P1 / (p1[chopAxis] - p0[chopAxis]));
-            if (isectE02P1)
-                iP1[numIP1++] = p0 + (p2 - p0) * (p0P1 / (p2[chopAxis] - p0[chopAxis]));
-            if (isectE12P1)
-                iP1[numIP1++] = p1 + (p2 - p1) * (p1P1 / (p2[chopAxis] - p1[chopAxis]));
+            if (isectP1[0])
+                iP1[0] = p0 + (p1 - p0) * (p0P1 / (p1[chopAxis] - p0[chopAxis]));
+            if (isectP1[1])
+                iP1[1] = p0 + (p2 - p0) * (p0P1 / (p2[chopAxis] - p0[chopAxis]));
+            if (isectP1[2])
+                iP1[2] = p1 + (p2 - p1) * (p1P1 / (p2[chopAxis] - p1[chopAxis]));
             
             BoundingBox3D ret;
-            ret.unify(iP0[0]).unify(iP0[1]).unify(iP1[0]).unify(iP1[1]);
+            for (int i = 0; i < 3; ++i) {
+                if (isectP0[i])
+                    ret.unify(iP0[i]);
+                if (isectP1[i])
+                    ret.unify(iP1[i]);
+            }
             
             if (p0[chopAxis] >= minChopPos && p0[chopAxis] <= maxChopPos)
                 ret.unify(p0);
