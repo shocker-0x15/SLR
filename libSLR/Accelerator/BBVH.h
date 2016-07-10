@@ -47,7 +47,7 @@ namespace SLR {
         };
         
         struct ObjInfos {
-            std::vector<SurfaceObject*>* objs;
+            const std::vector<SurfaceObject*>* objs;
             std::vector<BoundingBox3D> bboxes;
             std::vector<Point3D> centroids;
             std::vector<uint32_t> indices;
@@ -58,10 +58,11 @@ namespace SLR {
         float m_cost;
         BoundingBox3D m_bounds;
         std::vector<Node> m_nodes;
-        std::vector<SurfaceObject*> m_objLists;
+        std::vector<const SurfaceObject*> m_objLists;
         
         uint32_t buildRecursive(ObjInfos &infos, uint32_t start, uint32_t end, uint32_t depth) {
             auto &indices = infos.indices;
+            auto &bboxes = infos.bboxes;
             auto &centroids = infos.centroids;
             
             uint32_t nodeIdx = (uint32_t)m_nodes.size();
@@ -119,13 +120,17 @@ namespace SLR {
                     const uint32_t numBins = 16;
                     BinInfo binInfos[numBins];
                     
-                    // Binning
+                    // Binning and calculate cost of leaf node from all the primitives.
+                    float leafNodeCost = 0.0f;
                     for (uint32_t i = start; i < end; ++i) {
                         uint32_t idx = indices[i];
+                        float isectCost = infos.objs->at(idx)->costForIntersect();
+                        leafNodeCost += isectCost;
+                        
                         uint32_t bin = numBins * ((centroids[idx][widestAxis] - centroidBB.minP[widestAxis]) / (centroidBB.maxP[widestAxis] - centroidBB.minP[widestAxis]));
                         bin = std::min(bin, numBins - 1);
                         ++binInfos[bin].numObjs;
-                        binInfos[bin].sumCost += infos.objs->at(idx)->costForIntersect();
+                        binInfos[bin].sumCost += isectCost;
                         binInfos[bin].bbox.unify(infos.bboxes[idx]);
                     }
                     
@@ -155,11 +160,7 @@ namespace SLR {
                             splitPlane = i;
                         }
                     }
-                    
-                    // calculate cost of leaf node from all the primitives.
-                    float leafNodeCost = 0.0f;
-                    for (int i = 0; i < numBins; ++i)
-                        leafNodeCost += binInfos[i].sumCost;
+                    SLRAssert(!std::isnan(minCost) && !std::isinf(minCost), "invalid cost value: %g", minCost);
                     
                     // perform object partitioning if the cost is less than the leaf node cost. 
                     if (minCost < leafNodeCost) {
@@ -216,17 +217,20 @@ namespace SLR {
         }
         
     public:
-        BBVH(std::vector<SurfaceObject*> &objs, Partitioning method = Partitioning::BinnedSAH) {
+        BBVH(const std::vector<SurfaceObject*> &objs, Partitioning method = Partitioning::BinnedSAH) {
             m_method = method;
             
             ObjInfos infos;
             infos.objs = &objs;
+            infos.bboxes.resize(objs.size());
+            infos.centroids.resize(objs.size());
+            infos.indices.resize(objs.size());
             for (int i = 0; i < objs.size(); ++i) {
                 BoundingBox3D bb = objs[i]->bounds();
                 m_bounds.unify(bb);
-                infos.bboxes.push_back(bb);
-                infos.centroids.push_back(bb.centroid());
-                infos.indices.push_back(i);
+                infos.bboxes[i] = bb;
+                infos.centroids[i] = bb.centroid();
+                infos.indices[i] = i;
             }
             
             m_depth = 0;
@@ -293,7 +297,6 @@ namespace SLR {
             return true;
         }
     };
-    
 }
 
 #endif

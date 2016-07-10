@@ -16,6 +16,138 @@ namespace SLR {
         return BoundingBox3D(m_v[0]->position).unify(m_v[1]->position).unify(m_v[2]->position);
     }
     
+    BoundingBox3D Triangle::choppedBounds(BoundingBox3D::Axis chopAxis, float minChopPos, float maxChopPos) const {
+        const Point3D &p0 = m_v[0]->position;
+        const Point3D &p1 = m_v[1]->position;
+        const Point3D &p2 = m_v[2]->position;
+        float minPos = std::min(p0[chopAxis], std::min(p1[chopAxis], p2[chopAxis]));
+        float maxPos = std::max(p0[chopAxis], std::max(p1[chopAxis], p2[chopAxis]));
+        
+        BoundingBox3D baseBBox = bounds();
+        if (maxChopPos < minPos)
+            return BoundingBox3D();
+        if (minChopPos > maxPos)
+            return BoundingBox3D();
+        if (minChopPos < minPos && maxChopPos > maxPos)
+            return baseBBox;
+        
+        if (minChopPos >= minPos && maxChopPos <= maxPos) {
+            float p0P0 = minChopPos - p0[chopAxis], p1P0 = minChopPos - p1[chopAxis], p2P0 = minChopPos - p2[chopAxis];
+            float p0P1 = maxChopPos - p0[chopAxis], p1P1 = maxChopPos - p1[chopAxis], p2P1 = maxChopPos - p2[chopAxis];
+            
+            bool isectE01P0 = p0P0 * p1P0 < 0, isectE02P0 = p0P0 * p2P0 < 0, isectE12P0 = p1P0 * p2P0 < 0;
+            bool isectE01P1 = p0P1 * p1P1 < 0, isectE02P1 = p0P1 * p2P1 < 0, isectE12P1 = p1P1 * p2P1 < 0;
+            
+            uint32_t numIP0 = 0;
+            uint32_t numIP1 = 0;
+            Point3D iP0[2];
+            Point3D iP1[2];
+            if (isectE01P0)
+                iP0[numIP0++] = p0 + (p1 - p0) * (p0P0 / (p1[chopAxis] - p0[chopAxis]));
+            if (isectE02P0)
+                iP0[numIP0++] = p0 + (p2 - p0) * (p0P0 / (p2[chopAxis] - p0[chopAxis]));
+            if (isectE12P0)
+                iP0[numIP0++] = p1 + (p2 - p1) * (p1P0 / (p2[chopAxis] - p1[chopAxis]));
+            
+            if (isectE01P1)
+                iP1[numIP1++] = p0 + (p1 - p0) * (p0P1 / (p1[chopAxis] - p0[chopAxis]));
+            if (isectE02P1)
+                iP1[numIP1++] = p0 + (p2 - p0) * (p0P1 / (p2[chopAxis] - p0[chopAxis]));
+            if (isectE12P1)
+                iP1[numIP1++] = p1 + (p2 - p1) * (p1P1 / (p2[chopAxis] - p1[chopAxis]));
+            
+            BoundingBox3D ret;
+            ret.unify(iP0[0]).unify(iP0[1]).unify(iP1[0]).unify(iP1[1]);
+            
+            if (p0[chopAxis] >= minChopPos && p0[chopAxis] <= maxChopPos)
+                ret.unify(p0);
+            else if (p1[chopAxis] >= minChopPos && p1[chopAxis] <= maxChopPos)
+                ret.unify(p1);
+            else if (p2[chopAxis] >= minChopPos && p2[chopAxis] <= maxChopPos)
+                ret.unify(p2);
+            SLRAssert(!ret.hasNaN() && !ret.hasInf(), "Invalid chopped bounding box.");
+            
+            return ret;
+        }
+        else {
+            float splitPos = maxPos < maxChopPos ? minChopPos : maxChopPos;
+            
+            float p0PlaneDist = splitPos - p0[chopAxis];
+            float p1PlaneDist = splitPos - p1[chopAxis];
+            float p2PlaneDist = splitPos - p2[chopAxis];
+            BoundingBox3D bboxA, bboxB;
+            if (p0PlaneDist * p1PlaneDist < 0 && p0PlaneDist * p2PlaneDist < 0) { // p0 is alone
+                Point3D p01 = p0 + (p1 - p0) * (p0PlaneDist / (p1[chopAxis] - p0[chopAxis]));
+                Point3D p02 = p0 + (p2 - p0) * (p0PlaneDist / (p2[chopAxis] - p0[chopAxis]));
+                bboxA.unify(p0).unify(p01).unify(p02);
+                bboxB.unify(p1).unify(p2).unify(p01).unify(p02);
+            }
+            else if (p0PlaneDist * p1PlaneDist >= 0) { // p2 is alone
+                Point3D p02 = p0 + (p2 - p0) * (p0PlaneDist / (p2[chopAxis] - p0[chopAxis]));
+                Point3D p12 = p1 + (p2 - p1) * (p1PlaneDist / (p2[chopAxis] - p1[chopAxis]));
+                bboxA.unify(p0).unify(p1).unify(p02).unify(p12);
+                bboxB.unify(p2).unify(p02).unify(p12);
+            }
+            else { // p1 is alone
+                Point3D p01 = p0 + (p1 - p0) * (p0PlaneDist / (p1[chopAxis] - p0[chopAxis]));
+                Point3D p21 = p2 + (p1 - p2) * (p2PlaneDist / (p1[chopAxis] - p2[chopAxis]));
+                bboxA.unify(p0).unify(p2).unify(p01).unify(p21);
+                bboxB.unify(p1).unify(p01).unify(p21);
+            }
+            
+            if (maxPos < maxChopPos)
+                return p0PlaneDist > 0 ? bboxB : bboxA;
+            else
+                return p0PlaneDist > 0 ? bboxA : bboxB;
+        }
+    }
+    
+    void Triangle::splitBounds(BoundingBox3D::Axis splitAxis, float splitPos, BoundingBox3D* bbox0, BoundingBox3D* bbox1) const {
+        const Point3D &p0 = m_v[0]->position;
+        const Point3D &p1 = m_v[1]->position;
+        const Point3D &p2 = m_v[2]->position;
+        float minPos = std::min(p0[splitAxis], std::min(p1[splitAxis], p2[splitAxis]));
+        float maxPos = std::max(p0[splitAxis], std::max(p1[splitAxis], p2[splitAxis]));
+        
+        BoundingBox3D baseBBox = bounds();
+        if (splitPos < minPos) {
+            *bbox0 = BoundingBox3D();
+            *bbox1 = baseBBox;
+            return;
+        }
+        if (splitPos > maxPos) {
+            *bbox0 = baseBBox;
+            *bbox1 = BoundingBox3D();
+            return;
+        }
+        
+        float p0PlaneDist = splitPos - p0[splitAxis];
+        float p1PlaneDist = splitPos - p1[splitAxis];
+        float p2PlaneDist = splitPos - p2[splitAxis];
+        BoundingBox3D bboxA, bboxB;
+        if (p0PlaneDist * p1PlaneDist < 0 && p0PlaneDist * p2PlaneDist < 0) {
+            Point3D p01 = p0 + (p1 - p0) * (p0PlaneDist / (p1[splitAxis] - p0[splitAxis]));
+            Point3D p02 = p0 + (p2 - p0) * (p0PlaneDist / (p2[splitAxis] - p0[splitAxis]));
+            bboxA.unify(p0).unify(p01).unify(p02);
+            bboxB.unify(p1).unify(p2).unify(p01).unify(p02);
+        }
+        else if (p0PlaneDist * p1PlaneDist >= 0) {
+            Point3D p02 = p0 + (p2 - p0) * (p0PlaneDist / (p2[splitAxis] - p0[splitAxis]));
+            Point3D p12 = p1 + (p2 - p1) * (p1PlaneDist / (p2[splitAxis] - p1[splitAxis]));
+            bboxA.unify(p0).unify(p1).unify(p02).unify(p12);
+            bboxB.unify(p2).unify(p02).unify(p12);
+        }
+        else {
+            Point3D p01 = p0 + (p1 - p0) * (p0PlaneDist / (p1[splitAxis] - p0[splitAxis]));
+            Point3D p21 = p2 + (p1 - p2) * (p2PlaneDist / (p1[splitAxis] - p2[splitAxis]));
+            bboxA.unify(p0).unify(p2).unify(p01).unify(p21);
+            bboxB.unify(p1).unify(p01).unify(p21);
+        }
+        
+        *bbox0 = p0PlaneDist > 0 ? bboxA : bboxB;
+        *bbox1 = p0PlaneDist > 0 ? bboxB : bboxA;
+    }
+    
     bool Triangle::preTransformed() const {
         return true;
     }

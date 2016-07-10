@@ -1,0 +1,439 @@
+//
+//  SBVH.h
+//
+//  Created by 渡部 心 on 2016/07/03.
+//  Copyright © 2016年 渡部 心. All rights reserved.
+//
+
+#ifndef SBVH_h
+#define SBVH_h
+
+#include "../defines.h"
+#include "../references.h"
+#include "../Core/geometry.h"
+#include "../Core/SurfaceObject.h"
+
+namespace SLR {
+    class SLR_API SBVH {
+        struct Node {
+            BoundingBox3D bbox;
+            uint32_t c0, c1;
+            uint32_t offsetFirstLeaf;
+            uint32_t numLeaves;
+            BoundingBox3D::Axis axis;
+            
+            Node() : c0(0), c1(0), offsetFirstLeaf(0), numLeaves(0) { };
+            
+            void initAsLeaf(const BoundingBox3D &bb, uint32_t offset, uint32_t numLs) {
+                bbox = bb;
+                c0 = c1 = 0;
+                offsetFirstLeaf = offset;
+                numLeaves = numLs;
+            };
+            void initAsInternal(const BoundingBox3D &bb, uint32_t cIdx0, uint32_t cIdx1, BoundingBox3D::Axis ax) {
+                bbox = bb;
+                c0 = cIdx0;
+                c1 = cIdx1;
+                axis = ax;
+                offsetFirstLeaf = numLeaves = 0;
+            };
+        };
+        
+        struct Fragment {
+            const SurfaceObject* obj;
+            BoundingBox3D bbox;
+        };
+        
+        uint32_t m_depth;
+        float m_cost;
+        BoundingBox3D m_bounds;
+        std::vector<Node> m_nodes;
+        std::vector<const SurfaceObject*> m_objLists;
+        
+        uint32_t buildRecursive(Fragment* fragments, uint32_t currentSize, uint32_t maximumBudget, uint32_t start, uint32_t end, uint32_t depth, uint32_t* numAdded) {
+            *numAdded = 0;
+            uint32_t nodeIdx = (uint32_t)m_nodes.size();
+            m_nodes.emplace_back();
+            
+            if (++depth > m_depth)
+                m_depth = depth;
+            
+            std::chrono::system_clock::time_point tpStart, tpEnd;
+            double elapsed;
+            
+            tpStart = std::chrono::system_clock::now();
+            
+            // calculate AABBs and a cost of leaf node from all the primitives.
+            BoundingBox3D parentBB;
+            BoundingBox3D parentCentroidBB;
+            float leafNodeCost = 0.0f;
+            for (uint32_t i = start; i < end; ++i) {
+                parentBB.unify(fragments[i].bbox);
+                parentCentroidBB.unify(fragments[i].bbox.centroid());
+                float isectCost = fragments[i].obj->costForIntersect();
+                leafNodeCost += isectCost;
+            }
+            const BoundingBox3D::Axis widestAxisOP = parentCentroidBB.widestAxis();
+            const BoundingBox3D::Axis widestAxisSP = parentBB.widestAxis();
+            const float surfaceAreaParent = parentBB.surfaceArea();
+            
+            uint32_t numObjs = end - start;
+            SLRAssert(numObjs >= 1, "Number of objects is zero.");
+            
+            tpEnd = std::chrono::system_clock::now();
+            elapsed = std::chrono::duration_cast<std::chrono::microseconds>(tpEnd - tpStart).count();
+            if (depth == 1)
+                printf("calculate parent BBox: %g[ms]\n", elapsed * 0.001f);
+            
+            if (numObjs == 1) {
+                m_nodes[nodeIdx].initAsLeaf(parentBB, (uint32_t)m_objLists.size(), 1);
+                m_objLists.push_back(fragments[start].obj);
+                return nodeIdx;
+            }
+            
+            const float travCost = 1.2f;
+            
+            struct ObjectBinInfo {
+                BoundingBox3D bbox;
+                uint32_t numObjs;
+                float sumCost;
+                ObjectBinInfo() : numObjs(0), sumCost(0.0f) {}
+            };
+            
+            struct SpatialBinInfo {
+                BoundingBox3D bbox;
+                uint32_t numEntries;
+                uint32_t numExits;
+                float sumCostEntries;
+                float sumCostExits;
+                SpatialBinInfo() : numEntries(0), numExits(0), sumCostEntries(0.0f), sumCostExits(0.0f) {}
+            };
+            
+            const uint32_t numObjBins = 16;
+            ObjectBinInfo objBinInfos[numObjBins];
+            uint32_t splitPlaneOP = 0;
+            float minCostByOP = INFINITY;
+            
+            if (parentCentroidBB.surfaceArea() > 0) {
+                tpStart = std::chrono::system_clock::now();
+                
+                // Object Binning
+                for (uint32_t i = start; i < end; ++i) {
+                    const Fragment &fragment = fragments[i];
+                    
+                    uint32_t binIdx = numObjBins * ((fragment.bbox.centerOfAxis(widestAxisOP) - parentCentroidBB.minP[widestAxisOP]) /
+                                                    (parentCentroidBB.maxP[widestAxisOP] - parentCentroidBB.minP[widestAxisOP]));
+                    binIdx = std::min(binIdx, numObjBins - 1);
+                    
+                    ++objBinInfos[binIdx].numObjs;
+                    objBinInfos[binIdx].sumCost += fragment.obj->costForIntersect();
+                    objBinInfos[binIdx].bbox.unify(fragment.bbox);
+                }
+                
+                // evaluate SAH cost for every pair of child partitions and determine a plane with the minimum cost.
+                for (uint32_t i = 0; i < numObjBins - 1; ++i) {
+                    BoundingBox3D b0, b1;
+                    float cost0 = 0.0f, cost1 = 0.0f;
+                    for (int j = 0; j <= i; ++j) {
+                        b0.unify(objBinInfos[j].bbox);
+                        cost0 += objBinInfos[j].sumCost;
+                    }
+                    for (int j = i + 1; j < numObjBins; ++j) {
+                        b1.unify(objBinInfos[j].bbox);
+                        cost1 += objBinInfos[j].sumCost;
+                    }
+                    float cost = travCost + (b0.surfaceArea() * cost0 + b1.surfaceArea() * cost1) / surfaceAreaParent;
+                    if (cost < minCostByOP) {
+                        minCostByOP = cost;
+                        splitPlaneOP = i;
+                    }
+                }
+                
+                tpEnd = std::chrono::system_clock::now();
+                elapsed = std::chrono::duration_cast<std::chrono::microseconds>(tpEnd - tpStart).count();
+                if (depth == 1)
+                    printf("Object Binning: %g[ms]\n", elapsed * 0.001f);
+            }
+            
+            // calculate surface area of intersection of two bounding boxes resulted from object partitioning.
+            // This becomes a criteria for determining whether it performs spatial splitting.
+            BoundingBox3D bbLeftOP, bbRightOP;
+            for (int j = 0; j <= splitPlaneOP; ++j)
+                bbLeftOP.unify(objBinInfos[j].bbox);
+            for (int j = splitPlaneOP + 1; j < numObjBins; ++j)
+                bbRightOP.unify(objBinInfos[j].bbox);
+            float overlappedSA = intersection(bbLeftOP, bbRightOP).surfaceArea();
+            
+            const uint32_t numSBins = 256;
+            const float spatialBinWidth = parentBB.width(widestAxisSP) / numSBins;
+            SpatialBinInfo sBinInfos[numSBins];
+            uint32_t splitPlaneSP = 0;
+            float minCostBySP = INFINITY;
+            
+            float alpha = 1e-5;
+            if (overlappedSA / m_bounds.surfaceArea() > alpha) {
+                tpStart = std::chrono::system_clock::now();
+                
+                // Spatial Binning
+                for (int i = start; i < end; ++i) {
+                    const Fragment &fragment = fragments[i];
+                    
+                    const BoundingBox3D &bbox = fragment.bbox;
+                    uint32_t entryBin = numSBins * ((bbox.minP[widestAxisSP] - parentBB.minP[widestAxisSP]) / (parentBB.maxP[widestAxisSP] - parentBB.minP[widestAxisSP]));
+                    uint32_t exitBin = numSBins * ((bbox.maxP[widestAxisSP] - parentBB.minP[widestAxisSP]) / (parentBB.maxP[widestAxisSP] - parentBB.minP[widestAxisSP]));
+                    entryBin = std::min(entryBin, numSBins - 1);
+                    exitBin = std::min(exitBin, numSBins - 1);
+                    
+                    ++sBinInfos[entryBin].numEntries;
+                    ++sBinInfos[exitBin].numExits;
+                    
+                    float isectCost = fragment.obj->costForIntersect();
+                    sBinInfos[entryBin].sumCostEntries += isectCost;
+                    sBinInfos[exitBin].sumCostExits += isectCost;
+                    
+                    for (int binIdx = entryBin; binIdx <= exitBin; ++binIdx) {
+                        float splitPosMin = binIdx * spatialBinWidth + parentBB.minP[widestAxisSP];
+                        float splitPosMax = (binIdx + 1) * spatialBinWidth + parentBB.minP[widestAxisSP];
+                        BoundingBox3D choppedBB = fragment.obj->choppedBounds(widestAxisSP, splitPosMin, splitPosMax);
+                        sBinInfos[binIdx].bbox.unify(intersection(choppedBB, bbox));
+                    }
+                }
+                
+                // evaluate SAH cost for every pair of child partitions and determine a plane with the minimum cost.
+                for (uint32_t i = 0; i < numSBins - 1; ++i) {
+                    BoundingBox3D b0, b1;
+                    float cost0 = 0.0f, cost1 = 0.0f;
+                    for (int j = 0; j <= i; ++j) {
+                        b0.unify(sBinInfos[j].bbox);
+                        cost0 += sBinInfos[j].sumCostEntries;
+                    }
+                    for (int j = i + 1; j < numSBins; ++j) {
+                        b1.unify(sBinInfos[j].bbox);
+                        cost1 += sBinInfos[j].sumCostExits;
+                    }
+                    float cost = travCost + (b0.surfaceArea() * cost0 + b1.surfaceArea() * cost1) / surfaceAreaParent;
+                    if (cost < minCostBySP) {
+                        minCostBySP = cost;
+                        splitPlaneSP = i;
+                    }
+                }
+                
+                tpEnd = std::chrono::system_clock::now();
+                elapsed = std::chrono::duration_cast<std::chrono::microseconds>(tpEnd - tpStart).count();
+                if (depth == 1)
+                    printf("Spatial Binning: %g[ms]\n", elapsed * 0.001f);
+            }
+            
+            if (leafNodeCost < minCostByOP && leafNodeCost < minCostBySP) {
+                m_nodes[nodeIdx].initAsLeaf(parentBB, (uint32_t)m_objLists.size(), numObjs);
+                for (uint32_t i = start; i < end; ++i)
+                    m_objLists.push_back(fragments[i].obj);
+                return nodeIdx;
+            }
+            else if (minCostByOP < minCostBySP) {
+                tpStart = std::chrono::system_clock::now();
+                
+                float pivot = parentCentroidBB.minP[widestAxisOP] + (parentCentroidBB.maxP[widestAxisOP] - parentCentroidBB.minP[widestAxisOP]) / numObjBins * (splitPlaneOP + 1);
+                auto firstOf2ndGroup = std::partition(fragments + start, fragments + end, [&widestAxisOP, &pivot](const Fragment &fragment) {
+                    return fragment.bbox.centerOfAxis(widestAxisOP) < pivot;
+                });
+                uint32_t splitIdx = std::max((uint32_t)std::distance(fragments + start, firstOf2ndGroup), 1u) + start;
+                SLRAssert(splitIdx > start && splitIdx < end, "Invalid partitioning.");
+                
+                tpEnd = std::chrono::system_clock::now();
+                elapsed = std::chrono::duration_cast<std::chrono::microseconds>(tpEnd - tpStart).count();
+                if (depth == 1)
+                    printf("Object Partitioning: %g[ms]\n", elapsed * 0.001f);
+                
+                uint32_t numLeftAdded, numRightAdded;
+                uint32_t c0 = buildRecursive(fragments, currentSize, maximumBudget, start, splitIdx, depth, &numLeftAdded);
+                uint32_t c1 = buildRecursive(fragments, currentSize + numLeftAdded, maximumBudget, splitIdx + numLeftAdded, end + numLeftAdded, depth, &numRightAdded);
+                m_nodes[nodeIdx].initAsInternal(parentBB, c0, c1, widestAxisOP);
+                *numAdded += numLeftAdded + numRightAdded;
+                return nodeIdx;
+            }
+            else {
+                tpStart = std::chrono::system_clock::now();
+                
+                uint32_t numLeftsBySplit = 0;
+                uint32_t numRightsBySplit = 0;
+                for (int j = 0; j <= splitPlaneSP; ++j)
+                    numLeftsBySplit += sBinInfos[j].numEntries;
+                for (int j = splitPlaneSP + 1; j < numSBins; ++j)
+                    numRightsBySplit += sBinInfos[j].numExits;
+                
+                uint32_t numLeftIndices = 0, numRightIndices = 0;
+                Fragment* newFragments = new Fragment[numLeftsBySplit + numRightsBySplit];
+                Fragment* leftFragments = newFragments + 0;
+                Fragment* rightFragments = newFragments + numLeftsBySplit;
+                for (int i = start; i < end; ++i) {
+                    BoundingBox3D &bbox = fragments[i].bbox;
+                    uint32_t entryBin = numSBins * ((bbox.minP[widestAxisSP] - parentBB.minP[widestAxisSP]) / (parentBB.maxP[widestAxisSP] - parentBB.minP[widestAxisSP]));
+                    uint32_t exitBin = numSBins * ((bbox.maxP[widestAxisSP] - parentBB.minP[widestAxisSP]) / (parentBB.maxP[widestAxisSP] - parentBB.minP[widestAxisSP]));
+                    entryBin = std::min(entryBin, numSBins - 1);
+                    exitBin = std::min(exitBin, numSBins - 1);
+                    
+//                    // consider unsplitting
+//                    float isectCost = fragments[i].obj->costForIntersect();
+//                    float splitCost = splitPlane.leftBBox.surfaceArea() * splitPlane.leftCost + splitPlane.rightBBox.surfaceArea() * splitPlane.rightCost;
+//                    float leftAlignCost = calcUnion(splitPlane.leftBBox, bbox).surfaceArea() * splitPlane.leftCost + splitPlane.rightBBox.surfaceArea() * (splitPlane.rightCost - isectCost);
+//                    float rightAlignCost = splitPlane.leftBBox.surfaceArea() * (splitPlane.leftCost - isectCost) + calcUnion(splitPlane.rightBBox, bbox).surfaceArea() * splitPlane.rightCost;
+//                    int32_t cheapest = cheapest = splitCost < leftAlignCost ? (splitCost < rightAlignCost ? 0 : 1) : (leftAlignCost < rightAlignCost ? -1 : 1);
+                    
+                    if (exitBin <= splitPlaneSP) {
+                        leftFragments[numLeftIndices++] = fragments[i];
+                    }
+                    else if (entryBin > splitPlaneSP) {
+                        rightFragments[numRightIndices++] = fragments[i];
+                    }
+                    else {
+                        Fragment &dstLeft = leftFragments[numLeftIndices++];
+                        Fragment &dstRight = rightFragments[numRightIndices++];
+                        
+                        float splitPos = (splitPlaneSP + 1) * spatialBinWidth + parentBB.minP[widestAxisSP];
+                        BoundingBox3D splitLeftBBox, splitRightBBox;
+                        fragments[i].obj->splitBounds(widestAxisSP, splitPos, &splitLeftBBox, &splitRightBBox);
+                        
+                        dstLeft.obj = dstRight.obj = fragments[i].obj;
+                        dstLeft.bbox = intersection(splitLeftBBox, bbox);
+                        dstRight.bbox = intersection(splitRightBBox, bbox);
+                    }
+                }
+                *numAdded = (numLeftIndices + numRightIndices) - numObjs;
+                std::copy_backward(fragments + end, fragments + currentSize, fragments + currentSize + *numAdded);
+                std::copy(leftFragments, leftFragments + numLeftIndices, fragments + start);
+                std::copy(rightFragments, rightFragments + numRightIndices, fragments + start + numLeftIndices);
+                delete[] newFragments;
+                uint32_t splitIdx = start + numLeftIndices;
+                SLRAssert(splitIdx > start && splitIdx < end, "Invalid partitioning.");
+                
+                tpEnd = std::chrono::system_clock::now();
+                elapsed = std::chrono::duration_cast<std::chrono::microseconds>(tpEnd - tpStart).count();
+                if (depth == 1)
+                    printf("Spatial Partitioning: %g[ms]\n", elapsed * 0.001f);
+                
+                uint32_t numLeftAdded, numRightAdded;
+                uint32_t c0 = buildRecursive(fragments, currentSize + *numAdded, maximumBudget, start, splitIdx, depth, &numLeftAdded);
+                uint32_t c1 = buildRecursive(fragments, currentSize + *numAdded + numLeftAdded, maximumBudget, splitIdx + numLeftAdded, end + *numAdded + numLeftAdded, depth, &numRightAdded);
+                m_nodes[nodeIdx].initAsInternal(parentBB, c0, c1, widestAxisSP);
+                *numAdded += numLeftAdded + numRightAdded;
+                return nodeIdx;
+            }
+        }
+        
+        float calcSAHCost() const {
+            const float Ci = 1.2f;
+            const float Cl = 0.0f;
+            float costInt = 0.0f;
+            float costLeaf = 0.0f;
+            float costObj = 0.0f;
+            for (int i = 0; i < m_nodes.size(); ++i) {
+                const Node &node = m_nodes[i];
+                float surfaceArea = node.bbox.surfaceArea();
+                if (node.numLeaves == 0) {
+                    costInt += surfaceArea;
+                }
+                else {
+                    costLeaf += surfaceArea;
+                    float costPrims = 0.0f;
+                    for (uint32_t j = 0; j < node.numLeaves; ++j)
+                        costPrims += m_objLists[node.offsetFirstLeaf + j]->costForIntersect();
+                    costObj += surfaceArea * costPrims;
+                }
+            }
+            float rootSA = m_nodes[0].bbox.surfaceArea();
+            costInt *= Ci / rootSA;
+            costLeaf *= Cl / rootSA;
+            costObj /= rootSA;
+            
+            return costInt + costLeaf + costObj;
+        }
+        
+    public:
+        SBVH(const std::vector<SurfaceObject*> &objs) {
+            std::chrono::system_clock::time_point tpStart, tpEnd;
+            double elapsed;
+            
+            tpStart = std::chrono::system_clock::now();
+            
+            const uint32_t MemoryBudget = 5;
+            Fragment* fragments = new Fragment[MemoryBudget * objs.size()];
+            for (int i = 0; i < objs.size(); ++i) {
+                BoundingBox3D bb = objs[i]->bounds();
+                m_bounds.unify(bb);
+                fragments[i].obj = objs[i];
+                fragments[i].bbox = bb;
+            }
+            
+            m_depth = 0;
+            uint32_t numAdded;
+            buildRecursive(fragments, (uint32_t)objs.size(), MemoryBudget * (uint32_t)objs.size(), 0, (uint32_t)objs.size(), 0, &numAdded);
+            
+            tpEnd = std::chrono::system_clock::now();
+            elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(tpEnd - tpStart).count();
+            
+            m_cost = calcSAHCost();
+//#ifdef DEBUG
+            printf("num fragments: %u => %u, depth: %u, cost: %g, time: %g[s]\n", (uint32_t)objs.size(), (uint32_t)(objs.size() + numAdded), m_depth, m_cost, elapsed * 0.001f);
+//#endif
+        }
+        
+        float costForIntersect() const {
+            return m_cost;
+        }
+        
+        BoundingBox3D bounds() const {
+            return m_bounds;
+        }
+        
+        bool intersect(Ray &ray, Intersection* isect) const {
+            uint32_t objDepth = (uint32_t)isect->obj.size();
+            Vector3D invRayDir = ray.dir.reciprocal();
+            bool dirSigns[] = {ray.dir.x > 0, ray.dir.y > 0, ray.dir.z > 0};
+            auto intersectAABB = [&ray, &invRayDir](const BoundingBox3D bb) {
+                float dist0 = ray.distMin, dist1 = ray.distMax;
+                Vector3D tNear = (bb.minP - ray.org) * invRayDir;
+                Vector3D tFar = (bb.maxP - ray.org) * invRayDir;
+                for (int i = 0; i < 3; ++i) {
+                    if (tNear[i] > tFar[i])
+                        std::swap(tNear[i], tFar[i]);
+                    dist0 = tNear[i] > dist0 ? tNear[i] : dist0;
+                    dist1 = tFar[i] < dist1 ? tFar[i]  : dist1;
+                    if (dist0 > dist1)
+                        return false;
+                }
+                return true;
+            };
+            
+            uint32_t idxStack[64];
+            uint32_t depth = 0;
+            idxStack[depth++] = 0;
+            while (depth > 0) {
+                const Node &node = m_nodes[idxStack[--depth]];
+                if (!intersectAABB(node.bbox))
+                    continue;
+                if (node.numLeaves == 0) {
+                    bool positiveDir = dirSigns[node.axis];
+                    idxStack[depth++] = positiveDir ? node.c1 : node.c0;
+                    idxStack[depth++] = positiveDir ? node.c0 : node.c1;
+                }
+                else {
+                    for (uint32_t i = 0; i < node.numLeaves; ++i)
+                        if (m_objLists[node.offsetFirstLeaf + i]->intersect(ray, isect))
+                            ray.distMax = isect->dist;
+                }
+            }
+            return isect->obj.size() > objDepth;
+        }
+        
+        bool intersect(Ray &ray, SurfacePoint* surfPt) const {
+            Intersection isect;
+            if (!intersect(ray, &isect))
+                return false;
+            isect.obj.top()->getSurfacePoint(isect, surfPt);
+            return true;
+        }
+    };
+}
+
+#endif /* SBVH_h */
