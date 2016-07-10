@@ -147,6 +147,7 @@ namespace SLR {
     
     // Accelerators
     class BBVH;
+    class SBVH;
     
     // Textures & Mapping
     class Texture2DMapping;

@@ -10,6 +10,7 @@
 #include "Transform.h"
 #include "distributions.h"
 #include "../Accelerator/BBVH.h"
+#include "../Accelerator/SBVH.h"
 #include "textures.h"
 #include "../Surface/InfiniteSphere.h"
 #include "../SurfaceMaterials/IBLEmission.h"
@@ -46,10 +47,6 @@ namespace SLR {
     }
     
     
-    
-    BoundingBox3D SingleSurfaceObject::bounds() const {
-        return m_surface->bounds();
-    }
     
     bool SingleSurfaceObject::intersect(Ray &ray, Intersection* isect) const {
         if (!m_surface->intersect(ray, isect))
@@ -228,7 +225,8 @@ namespace SLR {
     
     
     SurfaceObjectAggregate::SurfaceObjectAggregate(std::vector<SurfaceObject*> &objs) {
-        m_accelerator = new BBVH(objs, BBVH::Partitioning::BinnedSAH);
+        m_accelerator = new SBVH(objs);
+//        m_accelerator = new BBVH(objs, BBVH::Partitioning::BinnedSAH);
         
         std::vector<const SurfaceObject*> lights;
         std::vector<float> lightImportances;

@@ -40,11 +40,13 @@ int main(int argc, const char * argv[]) {
         printf("Failed to read a scene file.\n");
         exit(-1);
     }
-    printf("build: %g [s]\n", stopwatch.stop() * 1e-3f);
+    printf("read scene: %g [s]\n", stopwatch.stop() * 1e-3f);
     
+    stopwatch.start();
     const SLR::Scene* rawScene;
     SLR::ArenaAllocator mem;
     scene->build(&rawScene, mem);
+    printf("build scene: %g [s]\n", stopwatch.stop() * 1e-3f);
     
     SLR::RenderSettings settings;
     settings.addItem(SLR::RenderSettingItem::ImageWidth, context.width);

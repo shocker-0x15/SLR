@@ -56,6 +56,36 @@ namespace SLR {
         
         virtual float costForIntersect() const = 0;
         virtual BoundingBox3D bounds() const = 0;
+        virtual BoundingBox3D choppedBounds(BoundingBox3D::Axis chopAxis, float minChopPos, float maxChopPos) const {
+            BoundingBox3D baseBBox = bounds();
+            if (maxChopPos < baseBBox.minP[chopAxis])
+                return BoundingBox3D();
+            if (minChopPos > baseBBox.maxP[chopAxis])
+                return BoundingBox3D();
+            if (minChopPos < baseBBox.minP[chopAxis] && maxChopPos > baseBBox.maxP[chopAxis])
+                return baseBBox;
+            BoundingBox3D ret = baseBBox;
+            ret.minP[chopAxis] = std::max(minChopPos, ret.minP[chopAxis]);
+            ret.maxP[chopAxis] = std::min(maxChopPos, ret.maxP[chopAxis]);
+            return ret;
+        }
+        virtual void splitBounds(BoundingBox3D::Axis splitAxis, float splitPos, BoundingBox3D* bbox0, BoundingBox3D* bbox1) const {
+            BoundingBox3D baseBBox = bounds();
+            if (splitPos < baseBBox.minP[splitAxis]) {
+                *bbox0 = BoundingBox3D();
+                *bbox1 = baseBBox;
+                return;
+            }
+            if (splitPos > baseBBox.maxP[splitAxis]) {
+                *bbox0 = baseBBox;
+                *bbox1 = BoundingBox3D();
+                return;
+            }
+            *bbox0 = baseBBox;
+            bbox0->maxP[splitAxis] = std::min(bbox0->maxP[splitAxis], splitPos);
+            *bbox1 = baseBBox;
+            bbox1->minP[splitAxis] = std::max(bbox1->minP[splitAxis], splitPos);
+        }
         virtual bool intersect(Ray &ray, Intersection* isect) const = 0;
         virtual Point3D getIntersectionPoint(const Intersection &isect) const { return isect.obj.top()->getIntersectionPoint(isect); }
         virtual const SurfaceMaterial* getSurfaceMaterial() const { SLRAssert_NotImplemented(); return nullptr; }
@@ -92,7 +122,13 @@ namespace SLR {
         virtual ~SingleSurfaceObject() { }
         
         float costForIntersect() const override { return m_surface->costForIntersect(); }
-        BoundingBox3D bounds() const override;
+        BoundingBox3D bounds() const override { return m_surface->bounds(); }
+        BoundingBox3D choppedBounds(BoundingBox3D::Axis chopAxis, float minChopPos, float maxChopPos) const override {
+            return m_surface->choppedBounds(chopAxis, minChopPos, maxChopPos);
+        }
+        void splitBounds(BoundingBox3D::Axis chopAxis, float splitPos, BoundingBox3D* bbox0, BoundingBox3D* bbox1) const override {
+            m_surface->splitBounds(chopAxis, splitPos, bbox0, bbox1);
+        }
         bool intersect(Ray &ray, Intersection* isect) const override;
         Point3D getIntersectionPoint(const Intersection &isect) const override { return isect.p; }
         const SurfaceMaterial* getSurfaceMaterial() const override { return m_material; }
@@ -149,7 +185,7 @@ namespace SLR {
     
     
     class SLR_API SurfaceObjectAggregate : public SurfaceObject {
-        BBVH* m_accelerator;
+        SBVH* m_accelerator;
         const SurfaceObject** m_lightList;
         RegularConstantDiscrete1D* m_lightDist1D;
         std::map<const SurfaceObject*, uint32_t> m_revMap;
