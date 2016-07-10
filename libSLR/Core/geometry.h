@@ -61,6 +61,11 @@ namespace SLR {
             return 2 * (d.x * d.y + d.y * d.z + d.z * d.x);
         }
         
+        float volume() const {
+            Vector3D d = maxP - minP;
+            return d.x * d.y * d.z;
+        }
+        
         Point3D corner(uint32_t c) const {
             SLRAssert(c >= 0 && c < 8, "\"c\" is out of range [0, 8]");
             const size_t offset = sizeof(Point3D);
@@ -69,8 +74,12 @@ namespace SLR {
                            *(&minP.z + offset * (c & 0x04)));
         }
         
-        float centerOfAxis(uint8_t axis) const {
+        float centerOfAxis(Axis axis) const {
             return (minP[axis] + maxP[axis]) * 0.5f;
+        }
+        
+        float width(Axis axis) const {
+            return maxP[axis] - minP[axis];
         }
         
         Axis widestAxis() const {
@@ -81,6 +90,11 @@ namespace SLR {
                 return Axis_Y;
             else
                 return Axis_Z;
+        }
+        
+        bool isValid() const {
+            Vector3D d = maxP - minP;
+            return d.x >= 0 && d.y >= 0 && d.z >= 0;
         }
         
         BoundingBox3D &unify(const Point3D &p) {
@@ -110,7 +124,23 @@ namespace SLR {
             }
             return true;
         }
+        
+        bool hasNaN() const {
+            return minP.hasNaN() || maxP.hasNaN();
+        }
+        
+        bool hasInf() const {
+            return minP.hasInf() || maxP.hasInf();
+        }
     };
+    
+    inline BoundingBox3D calcUnion(const BoundingBox3D &b0, const BoundingBox3D &b1) {
+        return BoundingBox3D(min(b0.minP, b1.minP), max(b0.maxP, b1.maxP));
+    }
+    
+    inline BoundingBox3D intersection(const BoundingBox3D &b0, const BoundingBox3D &b1) {
+        return BoundingBox3D(max(b0.minP, b1.minP), min(b0.maxP, b1.maxP));
+    }
     
     
     
@@ -132,6 +162,8 @@ namespace SLR {
         
         virtual float costForIntersect() const = 0;
         virtual BoundingBox3D bounds() const = 0;
+        virtual BoundingBox3D choppedBounds(BoundingBox3D::Axis chopAxis, float minChopPos, float maxChopPos) const = 0;
+        virtual void splitBounds(BoundingBox3D::Axis chopAxis, float splitPos, BoundingBox3D* bbox0, BoundingBox3D* bbox1) const = 0;
         virtual bool preTransformed() const = 0;
         virtual bool intersect(const Ray &ray, Intersection* isect) const = 0;
         virtual void getSurfacePoint(const Intersection &isect, SurfacePoint* surfPt) const = 0;

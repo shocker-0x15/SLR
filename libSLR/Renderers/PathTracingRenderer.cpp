@@ -65,7 +65,7 @@ namespace SLR {
         
         sensor->init(job.imageWidth, job.imageHeight);
         
-        std::chrono::system_clock::time_point  start, end;
+        std::chrono::system_clock::time_point start, end;
         start = std::chrono::system_clock::now();
         
         for (int s = 0; s < m_samplesPerPixel; ++s) {
@@ -83,7 +83,7 @@ namespace SLR {
                 char filename[256];
                 sprintf(filename, "%03u.bmp", imgIdx);
                 end = std::chrono::system_clock::now();
-                double elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count();
+                double elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
                 sensor->saveImage(filename, settings.getFloat(RenderSettingItem::Brightness) / (s + 1));
                 printf("%u samples: %s, %g[s]\n", exportPass, filename, elapsed * 0.001f);
                 ++imgIdx;

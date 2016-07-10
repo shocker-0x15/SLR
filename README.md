@@ -44,7 +44,9 @@ SLR consists of the following components.
     * Object Motion Blur
     * ~~Deformation Blur~~ (TODO)
 * Geometry Instancing
-* Binned SAH BVH
+* Acceleration Structure
+    * Binned SAH BVH
+    * Split BVH \[Stich2009\]
 * Light Transport Algorithms
     * Unidirectional Path Tracing \[Kajiya1986\] with MIS
     * Bidirectional Path Tracing \[Veach1994, 1997\]
@@ -62,6 +64,7 @@ SLR consists of the following components.
 [Meng2015] "Physically Meaningful Rendering using Tristimulus Colours"  
 [Moroder2010] "A New Ward BRDF Model with Bounded Albedo"  
 [Oren1994] "Generalization of Lambert’s Reflectance Model"  
+[Stich2009] "Spatial Splits in Bounding Volume Hierarchies"  
 [Veach1994] "Bidirectional Estimators for Light Transport"  
 [Veach1996] "Non-symmetric Scattering in Light Transport Algorithms"  
 [Veach1997] "ROBUST MONTE CARLO METHODS FOR LIGHT TRANSPORT SIMULATION"  
