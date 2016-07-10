@@ -16,6 +16,17 @@ namespace SLR {
         return BoundingBox3D(-Point3D::Inf, Point3D::Inf);
     }
     
+    BoundingBox3D InfiniteSphere::choppedBounds(BoundingBox3D::Axis chopAxis, float minChopPos, float maxChopPos) const {
+        SLRAssert(false, "InfiniteSphere::choppedBounds() should not be called.");
+        return BoundingBox3D(-Point3D::Inf, Point3D::Inf);
+    }
+    
+    void InfiniteSphere::splitBounds(BoundingBox3D::Axis chopAxis, float splitPos, BoundingBox3D* bbox0, BoundingBox3D* bbox1) const {
+        SLRAssert(false, "InfiniteSphere::splitBounds() should not be called.");
+        *bbox0 = BoundingBox3D(-Point3D::Inf, Point3D::Inf);
+        *bbox1 = BoundingBox3D(-Point3D::Inf, Point3D::Inf);
+    }
+    
     bool InfiniteSphere::preTransformed() const {
         return true;
     }

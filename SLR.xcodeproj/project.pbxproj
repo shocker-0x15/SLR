@@ -157,6 +157,7 @@
 		46C4A1101D1301C9003530DA /* XORShiftRNG.h in Headers */ = {isa = PBXBuildFile; fileRef = 46C4A10C1D1301C9003530DA /* XORShiftRNG.h */; };
 		46C4A1121D130895003530DA /* OrenNayerBRDF.h in Headers */ = {isa = PBXBuildFile; fileRef = 46C4A1111D130895003530DA /* OrenNayerBRDF.h */; };
 		46C4A1141D1308A6003530DA /* OrenNayerBRDF.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 46C4A1131D1308A6003530DA /* OrenNayerBRDF.cpp */; };
+		46D16E6C1D283E36009C241C /* SBVH.h in Headers */ = {isa = PBXBuildFile; fileRef = 46D16E6B1D283E36009C241C /* SBVH.h */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -352,6 +353,7 @@
 		46C4A10C1D1301C9003530DA /* XORShiftRNG.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XORShiftRNG.h; path = libSLR/Core/XORShiftRNG.h; sourceTree = SOURCE_ROOT; };
 		46C4A1111D130895003530DA /* OrenNayerBRDF.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = OrenNayerBRDF.h; path = libSLR/BSDFs/OrenNayerBRDF.h; sourceTree = SOURCE_ROOT; };
 		46C4A1131D1308A6003530DA /* OrenNayerBRDF.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = OrenNayerBRDF.cpp; path = libSLR/BSDFs/OrenNayerBRDF.cpp; sourceTree = SOURCE_ROOT; };
+		46D16E6B1D283E36009C241C /* SBVH.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SBVH.h; path = libSLR/Accelerator/SBVH.h; sourceTree = SOURCE_ROOT; };
 		46D7E0841BC8F58900AFF96F /* Makefile */ = {isa = PBXFileReference; explicitFileType = text; fileEncoding = 4; name = Makefile; path = libSLRSceneGraph/Parser/Makefile; sourceTree = "<group>"; usesTabs = 1; };
 		46FFDDFD1B9B258400E47537 /* HostProgram */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = HostProgram; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -385,6 +387,7 @@
 			isa = PBXGroup;
 			children = (
 				466F6C081BB6B2660056F2FA /* BBVH.h */,
+				46D16E6B1D283E36009C241C /* SBVH.h */,
 			);
 			path = Accelerator;
 			sourceTree = "<group>";
@@ -696,6 +699,7 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				46D16E6C1D283E36009C241C /* SBVH.h in Headers */,
 				466F6CE91BB6CA420056F2FA /* cameras.h in Headers */,
 				466F6D391BB6DC200056F2FA /* Allocator.h in Headers */,
 				466F6CD91BB6CA070056F2FA /* TexCoord2.h in Headers */,
