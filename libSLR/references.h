@@ -146,8 +146,10 @@ namespace SLR {
     class InfiniteSphere;
     
     // Accelerators
+    class Accelerator;
     class BBVH;
     class SBVH;
+    class QBVH;
     
     // Textures & Mapping
     class Texture2DMapping;
