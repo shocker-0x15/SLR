@@ -132,6 +132,8 @@
 		466F6D581BB715660056F2FA /* defines.h in Headers */ = {isa = PBXBuildFile; fileRef = 466F6CAF1BB6B34E0056F2FA /* defines.h */; };
 		466F6D591BB715660056F2FA /* references.h in Headers */ = {isa = PBXBuildFile; fileRef = 466F6CB11BB6B34E0056F2FA /* references.h */; };
 		46AE85291BB718C400C70BF3 /* references.h in Headers */ = {isa = PBXBuildFile; fileRef = 466F6D491BB7134E0056F2FA /* references.h */; };
+		46B36DE61D33E7CF00D7C56B /* Accelerator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 46B36DE41D33E7CF00D7C56B /* Accelerator.cpp */; };
+		46B36DE71D33E7CF00D7C56B /* Accelerator.h in Headers */ = {isa = PBXBuildFile; fileRef = 46B36DE51D33E7CF00D7C56B /* Accelerator.h */; };
 		46B9589B1BDCD2B300A915DE /* location.hh in Headers */ = {isa = PBXBuildFile; fileRef = 46B958921BDCD2B300A915DE /* location.hh */; };
 		46B9589C1BDCD2B300A915DE /* position.hh in Headers */ = {isa = PBXBuildFile; fileRef = 46B958931BDCD2B300A915DE /* position.hh */; };
 		46B9589F1BDCD2B300A915DE /* SceneParser.tab.cc in Sources */ = {isa = PBXBuildFile; fileRef = 46B958961BDCD2B300A915DE /* SceneParser.tab.cc */; };
@@ -323,6 +325,8 @@
 		466F6D321BB6D7A00056F2FA /* image_loader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = image_loader.cpp; path = libSLRSceneGraph/Helper/image_loader.cpp; sourceTree = "<group>"; };
 		466F6D331BB6D7A00056F2FA /* image_loader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = image_loader.h; path = libSLRSceneGraph/Helper/image_loader.h; sourceTree = "<group>"; };
 		466F6D491BB7134E0056F2FA /* references.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = references.h; path = libSLRSceneGraph/references.h; sourceTree = "<group>"; };
+		46B36DE41D33E7CF00D7C56B /* Accelerator.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Accelerator.cpp; path = libSLR/Core/Accelerator.cpp; sourceTree = SOURCE_ROOT; };
+		46B36DE51D33E7CF00D7C56B /* Accelerator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Accelerator.h; path = libSLR/Core/Accelerator.h; sourceTree = SOURCE_ROOT; };
 		46B958921BDCD2B300A915DE /* location.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = location.hh; path = libSLRSceneGraph/Parser/location.hh; sourceTree = "<group>"; };
 		46B958931BDCD2B300A915DE /* position.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = position.hh; path = libSLRSceneGraph/Parser/position.hh; sourceTree = "<group>"; };
 		46B958941BDCD2B300A915DE /* SceneLexer.l */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.lex; name = SceneLexer.l; path = libSLRSceneGraph/Parser/SceneLexer.l; sourceTree = "<group>"; };
@@ -476,6 +480,8 @@
 				466F6C3F1BB6B2AA0056F2FA /* textures.cpp */,
 				466F6C421BB6B2AA0056F2FA /* Transform.h */,
 				466F6C411BB6B2AA0056F2FA /* Transform.cpp */,
+				46B36DE51D33E7CF00D7C56B /* Accelerator.h */,
+				46B36DE41D33E7CF00D7C56B /* Accelerator.cpp */,
 				46C4A10A1D1301C9003530DA /* LinearCongruentialRNG.h */,
 				46C4A1091D1301C9003530DA /* LinearCongruentialRNG.cpp */,
 				46C4A10C1D1301C9003530DA /* XORShiftRNG.h */,
@@ -737,6 +743,7 @@
 				466F6D571BB715600056F2FA /* image_textures.h in Headers */,
 				466F6CDB1BB6CA070056F2FA /* Vector4.h in Headers */,
 				466F6CE51BB6CA2D0056F2FA /* EquirectangularCamera.h in Headers */,
+				46B36DE71D33E7CF00D7C56B /* Accelerator.h in Headers */,
 				466F6CD21BB6CA070056F2FA /* Point3.h in Headers */,
 				466F6D3E1BB6DC840056F2FA /* AshikhminReflection.h in Headers */,
 				466F6CD41BB6CA070056F2FA /* RGBTypes.h in Headers */,
@@ -911,6 +918,7 @@
 				4651F3281C56705B0026B8A5 /* Point3.cpp in Sources */,
 				4651F33A1C57AAFD0026B8A5 /* distributions.cpp in Sources */,
 				466F6D3F1BB6DC840056F2FA /* basic_SurfaceMaterials.cpp in Sources */,
+				46B36DE61D33E7CF00D7C56B /* Accelerator.cpp in Sources */,
 				46BF49871BB7303D0036033F /* spectrum_library.cpp in Sources */,
 				466F6CDC1BB6CA260056F2FA /* AshikhminBRDF.cpp in Sources */,
 				466F6D061BB6CA510056F2FA /* MultiEDF.cpp in Sources */,

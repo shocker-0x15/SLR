@@ -16,140 +16,112 @@ namespace SLR {
         return BoundingBox3D(m_v[0]->position).unify(m_v[1]->position).unify(m_v[2]->position);
     }
     
-    // TODO: improve the logic.
     BoundingBox3D Triangle::choppedBounds(BoundingBox3D::Axis chopAxis, float minChopPos, float maxChopPos) const {
-        const Point3D &p0 = m_v[0]->position;
-        const Point3D &p1 = m_v[1]->position;
-        const Point3D &p2 = m_v[2]->position;
-        float minPos = std::min(p0[chopAxis], std::min(p1[chopAxis], p2[chopAxis]));
-        float maxPos = std::max(p0[chopAxis], std::max(p1[chopAxis], p2[chopAxis]));
+        const float chopPos[2] = {minChopPos, maxChopPos};
         
+        Point3D p[3] = {m_v[0]->position, m_v[1]->position, m_v[2]->position};
+        std::sort(p, p + 3, [chopAxis](const Point3D &pa, const Point3D &pb) { return pa[chopAxis] < pb[chopAxis]; });
+        float minPos = p[0][chopAxis];
+        float maxPos = p[2][chopAxis];
+        
+        // early exits for the following 3 patterns:
+        // -- |    |
+        //    |    | --
+        //    | -- |
         BoundingBox3D baseBBox = bounds();
-        if (maxChopPos < minPos)
+        if (minPos >= maxChopPos || maxPos <= minChopPos)
             return BoundingBox3D();
-        if (minChopPos > maxPos)
-            return BoundingBox3D();
-        if (minChopPos < minPos && maxChopPos > maxPos)
+        if (minPos >= minChopPos && maxPos <= maxChopPos)
             return baseBBox;
         
-        if (minChopPos >= minPos && maxChopPos <= maxPos) {
-            float p0P0 = minChopPos - p0[chopAxis], p1P0 = minChopPos - p1[chopAxis], p2P0 = minChopPos - p2[chopAxis];
-            float p0P1 = maxChopPos - p0[chopAxis], p1P1 = maxChopPos - p1[chopAxis], p2P1 = maxChopPos - p2[chopAxis];
-            
-            bool isectP0[3] = {p0P0 * p1P0 <= 0, p0P0 * p2P0 <= 0, p1P0 * p2P0 <= 0}; // 01, 02, 12
-            bool isectP1[3] = {p0P1 * p1P1 <= 0, p0P1 * p2P1 <= 0, p1P1 * p2P1 <= 0}; // 01, 02, 12
-
-            Point3D iP0[3];
-            Point3D iP1[3];
-            if (isectP0[0])
-                iP0[0] = p0 + (p1 - p0) * (p0P0 / (p1[chopAxis] - p0[chopAxis]));
-            if (isectP0[1])
-                iP0[1] = p0 + (p2 - p0) * (p0P0 / (p2[chopAxis] - p0[chopAxis]));
-            if (isectP0[2])
-                iP0[2] = p1 + (p2 - p1) * (p1P0 / (p2[chopAxis] - p1[chopAxis]));
-            
-            if (isectP1[0])
-                iP1[0] = p0 + (p1 - p0) * (p0P1 / (p1[chopAxis] - p0[chopAxis]));
-            if (isectP1[1])
-                iP1[1] = p0 + (p2 - p0) * (p0P1 / (p2[chopAxis] - p0[chopAxis]));
-            if (isectP1[2])
-                iP1[2] = p1 + (p2 - p1) * (p1P1 / (p2[chopAxis] - p1[chopAxis]));
-            
-            BoundingBox3D ret;
-            for (int i = 0; i < 3; ++i) {
-                if (isectP0[i])
-                    ret.unify(iP0[i]);
-                if (isectP1[i])
-                    ret.unify(iP1[i]);
+        // A point P is in left of an ordinate O: P < O
+        //                 right                : P >= O
+        // remaining 3 patterns:
+        //  --|----|--
+        //  --|--  |
+        //    |  --|--
+        uint32_t idxIsect = 0;
+        Point3D isectPs[4];
+        for (int from = 0; from < 3 - 1; ++from) {
+            const Point3D &pa = p[from];
+            for (int to = from + 1; to < 3; ++to) {
+                const Point3D &pb = p[to];
+                float deltaAB = pb[chopAxis] - pa[chopAxis];
+                for (int cp = 0; cp < 2; ++cp) {
+                    float deltaAP = chopPos[cp] - pa[chopAxis];
+                    float deltaPB = chopPos[cp] - pb[chopAxis];
+                    float t = deltaAP / deltaAB;
+                    if (deltaAP > 0 && deltaPB <= 0) // pa[chopAxis] < chopPos[cp] && pb[chopAxis] >= chopPos[cp]
+                        isectPs[idxIsect++] = (1 - t) * pa + t * pb;// pa + (pb - pa) * t = (1 - t) * pa + pb // This form is preferrable for precision?
+                }
             }
-            
-            if (p0[chopAxis] >= minChopPos && p0[chopAxis] <= maxChopPos)
-                ret.unify(p0);
-            else if (p1[chopAxis] >= minChopPos && p1[chopAxis] <= maxChopPos)
-                ret.unify(p1);
-            else if (p2[chopAxis] >= minChopPos && p2[chopAxis] <= maxChopPos)
-                ret.unify(p2);
-            SLRAssert(!ret.hasNaN() && !ret.hasInf(), "Invalid chopped bounding box.");
-            
-            return ret;
         }
-        else {
-            float splitPos = maxPos < maxChopPos ? minChopPos : maxChopPos;
-            
-            float p0PlaneDist = splitPos - p0[chopAxis];
-            float p1PlaneDist = splitPos - p1[chopAxis];
-            float p2PlaneDist = splitPos - p2[chopAxis];
-            BoundingBox3D bboxA, bboxB;
-            if (p0PlaneDist * p1PlaneDist < 0 && p0PlaneDist * p2PlaneDist < 0) { // p0 is alone
-                Point3D p01 = p0 + (p1 - p0) * (p0PlaneDist / (p1[chopAxis] - p0[chopAxis]));
-                Point3D p02 = p0 + (p2 - p0) * (p0PlaneDist / (p2[chopAxis] - p0[chopAxis]));
-                bboxA.unify(p0).unify(p01).unify(p02);
-                bboxB.unify(p1).unify(p2).unify(p01).unify(p02);
-            }
-            else if (p0PlaneDist * p1PlaneDist >= 0) { // p2 is alone
-                Point3D p02 = p0 + (p2 - p0) * (p0PlaneDist / (p2[chopAxis] - p0[chopAxis]));
-                Point3D p12 = p1 + (p2 - p1) * (p1PlaneDist / (p2[chopAxis] - p1[chopAxis]));
-                bboxA.unify(p0).unify(p1).unify(p02).unify(p12);
-                bboxB.unify(p2).unify(p02).unify(p12);
-            }
-            else { // p1 is alone
-                Point3D p01 = p0 + (p1 - p0) * (p0PlaneDist / (p1[chopAxis] - p0[chopAxis]));
-                Point3D p21 = p2 + (p1 - p2) * (p2PlaneDist / (p1[chopAxis] - p2[chopAxis]));
-                bboxA.unify(p0).unify(p2).unify(p01).unify(p21);
-                bboxB.unify(p1).unify(p01).unify(p21);
-            }
-            
-            if (maxPos < maxChopPos)
-                return p0PlaneDist > 0 ? bboxB : bboxA;
-            else
-                return p0PlaneDist > 0 ? bboxA : bboxB;
-        }
+        SLRAssert(idxIsect == 2 || idxIsect == 4, "The number of intersection should be 2 or 4.");
+        
+        BoundingBox3D ret;
+        if (p[1][chopAxis] >= minChopPos && p[1][chopAxis] < maxChopPos)
+            ret.unify(p[1]);
+        for (int i = 0; i < idxIsect; ++i)
+            ret.unify(isectPs[i]);
+        if (idxIsect == 2)
+            ret.unify(maxPos < maxChopPos ? p[2] : p[0]);
+        
+        SLRAssert(realGE(ret.minP[chopAxis], minChopPos, 1e-6f) && realLE(ret.maxP[chopAxis], maxChopPos, 1e-6f) &&
+                  ret.surfaceArea() <= baseBBox.surfaceArea(), "invalid chopped bounds.");
+        
+        return ret;
     }
     
     void Triangle::splitBounds(BoundingBox3D::Axis splitAxis, float splitPos, BoundingBox3D* bbox0, BoundingBox3D* bbox1) const {
-        const Point3D &p0 = m_v[0]->position;
-        const Point3D &p1 = m_v[1]->position;
-        const Point3D &p2 = m_v[2]->position;
-        float minPos = std::min(p0[splitAxis], std::min(p1[splitAxis], p2[splitAxis]));
-        float maxPos = std::max(p0[splitAxis], std::max(p1[splitAxis], p2[splitAxis]));
+        Point3D p[3] = {m_v[0]->position, m_v[1]->position, m_v[2]->position};
+        std::sort(p, p + 3, [splitAxis](const Point3D &pa, const Point3D &pb) { return pa[splitAxis] < pb[splitAxis]; });
+        float minPos = p[0][splitAxis];
+        float maxPos = p[2][splitAxis];
         
+        // early exits for the following 2 patterns:
+        // -- |
+        //    | --
         BoundingBox3D baseBBox = bounds();
-        if (splitPos < minPos) {
+        if (splitPos <= minPos) {
             *bbox0 = BoundingBox3D();
             *bbox1 = baseBBox;
             return;
         }
-        if (splitPos > maxPos) {
+        if (splitPos >= maxPos) {
             *bbox0 = baseBBox;
             *bbox1 = BoundingBox3D();
             return;
         }
         
-        float p0PlaneDist = splitPos - p0[splitAxis];
-        float p1PlaneDist = splitPos - p1[splitAxis];
-        float p2PlaneDist = splitPos - p2[splitAxis];
-        BoundingBox3D bboxA, bboxB;
-        if (p0PlaneDist * p1PlaneDist < 0 && p0PlaneDist * p2PlaneDist < 0) {
-            Point3D p01 = p0 + (p1 - p0) * (p0PlaneDist / (p1[splitAxis] - p0[splitAxis]));
-            Point3D p02 = p0 + (p2 - p0) * (p0PlaneDist / (p2[splitAxis] - p0[splitAxis]));
-            bboxA.unify(p0).unify(p01).unify(p02);
-            bboxB.unify(p1).unify(p2).unify(p01).unify(p02);
+        // A point P is in left of an ordinate O: P < O
+        //                 right                : P >= O
+        uint32_t idxIsect = 0;
+        Point3D isectPs[2];
+        for (int from = 0; from < 3 - 1; ++from) {
+            const Point3D &pa = p[from];
+            for (int to = from + 1; to < 3; ++to) {
+                const Point3D &pb = p[to];
+                float deltaAB = pb[splitAxis] - pa[splitAxis];
+                float deltaAP = splitPos - pa[splitAxis];
+                float deltaPB = splitPos - pb[splitAxis];
+                float t = deltaAP / deltaAB;
+                if (deltaAP > 0 && deltaPB <= 0) // pa[chopAxis] < chopPos[cp] && pb[chopAxis] >= chopPos[cp]
+                    isectPs[idxIsect++] = (1 - t) * pa + t * pb;// pa + (pb - pa) * t = (1 - t) * pa + pb // This form is preferrable for precision?
+            }
         }
-        else if (p0PlaneDist * p1PlaneDist >= 0) {
-            Point3D p02 = p0 + (p2 - p0) * (p0PlaneDist / (p2[splitAxis] - p0[splitAxis]));
-            Point3D p12 = p1 + (p2 - p1) * (p1PlaneDist / (p2[splitAxis] - p1[splitAxis]));
-            bboxA.unify(p0).unify(p1).unify(p02).unify(p12);
-            bboxB.unify(p2).unify(p02).unify(p12);
-        }
-        else {
-            Point3D p01 = p0 + (p1 - p0) * (p0PlaneDist / (p1[splitAxis] - p0[splitAxis]));
-            Point3D p21 = p2 + (p1 - p2) * (p2PlaneDist / (p1[splitAxis] - p2[splitAxis]));
-            bboxA.unify(p0).unify(p2).unify(p01).unify(p21);
-            bboxB.unify(p1).unify(p01).unify(p21);
-        }
+        SLRAssert(idxIsect == 2, "The number of intersection should be 2.");
         
-        *bbox0 = p0PlaneDist > 0 ? bboxA : bboxB;
-        *bbox1 = p0PlaneDist > 0 ? bboxB : bboxA;
+        *bbox0 = BoundingBox3D(p[0]);
+        *bbox1 = BoundingBox3D(p[2]);
+        if (p[1][splitAxis] < splitPos)
+            bbox0->unify(p[1]);
+        else
+            bbox1->unify(p[1]);
+        for (int i = 0; i < idxIsect; ++i) {
+            bbox0->unify(isectPs[i]);
+            bbox1->unify(isectPs[i]);
+        }
+        SLRAssert(realLE(bbox0->maxP[splitAxis], splitPos, 1e-6f) && realGE(bbox1->minP[splitAxis], splitPos, 1e-6f), "invalid split bounds.");
     }
     
     bool Triangle::preTransformed() const {
@@ -285,5 +257,5 @@ namespace SLR {
     float Triangle::evaluateAreaPDF(const SurfacePoint& surfPt) const {
         SLRAssert(surfPt.u + surfPt.v <= 1.0f, "Invalid parameters for a triangle.");
         return 1.0f / area();
-    }    
+    }
 }

@@ -162,8 +162,36 @@ namespace SLR {
         
         virtual float costForIntersect() const = 0;
         virtual BoundingBox3D bounds() const = 0;
-        virtual BoundingBox3D choppedBounds(BoundingBox3D::Axis chopAxis, float minChopPos, float maxChopPos) const = 0;
-        virtual void splitBounds(BoundingBox3D::Axis chopAxis, float splitPos, BoundingBox3D* bbox0, BoundingBox3D* bbox1) const = 0;
+        virtual BoundingBox3D choppedBounds(BoundingBox3D::Axis chopAxis, float minChopPos, float maxChopPos) const {
+            BoundingBox3D baseBBox = bounds();
+            if (maxChopPos < baseBBox.minP[chopAxis])
+                return BoundingBox3D();
+            if (minChopPos > baseBBox.maxP[chopAxis])
+                return BoundingBox3D();
+            if (minChopPos < baseBBox.minP[chopAxis] && maxChopPos > baseBBox.maxP[chopAxis])
+                return baseBBox;
+            BoundingBox3D ret = baseBBox;
+            ret.minP[chopAxis] = std::max(minChopPos, ret.minP[chopAxis]);
+            ret.maxP[chopAxis] = std::min(maxChopPos, ret.maxP[chopAxis]);
+            return ret;
+        }
+        virtual void splitBounds(BoundingBox3D::Axis splitAxis, float splitPos, BoundingBox3D* bbox0, BoundingBox3D* bbox1) const {
+            BoundingBox3D baseBBox = bounds();
+            if (splitPos < baseBBox.minP[splitAxis]) {
+                *bbox0 = BoundingBox3D();
+                *bbox1 = baseBBox;
+                return;
+            }
+            if (splitPos > baseBBox.maxP[splitAxis]) {
+                *bbox0 = baseBBox;
+                *bbox1 = BoundingBox3D();
+                return;
+            }
+            *bbox0 = baseBBox;
+            bbox0->maxP[splitAxis] = std::min(bbox0->maxP[splitAxis], splitPos);
+            *bbox1 = baseBBox;
+            bbox1->minP[splitAxis] = std::max(bbox1->minP[splitAxis], splitPos);
+        }
         virtual bool preTransformed() const = 0;
         virtual bool intersect(const Ray &ray, Intersection* isect) const = 0;
         virtual void getSurfacePoint(const Intersection &isect, SurfacePoint* surfPt) const = 0;

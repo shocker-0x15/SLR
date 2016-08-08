@@ -10,11 +10,12 @@
 
 #include "../defines.h"
 #include "../references.h"
-#include "../Core/geometry.h"
-#include "../Core/SurfaceObject.h"
+#include "../Core/Accelerator.h"
 
 namespace SLR {
-    class SLR_API SBVH {
+    class SLR_API SBVH : public Accelerator {
+        friend class QBVH;
+        
         struct Node {
             BoundingBox3D bbox;
             uint32_t c0, c1;
@@ -42,6 +43,7 @@ namespace SLR {
         struct Fragment {
             const SurfaceObject* obj;
             BoundingBox3D bbox;
+            float costForIntersect;
         };
         
         uint32_t m_depth;
@@ -51,6 +53,7 @@ namespace SLR {
         std::vector<const SurfaceObject*> m_objLists;
         
         uint32_t buildRecursive(Fragment* fragments, uint32_t currentSize, uint32_t maximumBudget, uint32_t start, uint32_t end, uint32_t depth, uint32_t* numAdded) {
+//#define PRINT_PROCESSING_TIME
             *numAdded = 0;
             uint32_t nodeIdx = (uint32_t)m_nodes.size();
             m_nodes.emplace_back();
@@ -70,20 +73,26 @@ namespace SLR {
             for (uint32_t i = start; i < end; ++i) {
                 parentBB.unify(fragments[i].bbox);
                 parentCentroidBB.unify(fragments[i].bbox.centroid());
-                float isectCost = fragments[i].obj->costForIntersect();
+                float isectCost = fragments[i].costForIntersect;
                 leafNodeCost += isectCost;
             }
             const BoundingBox3D::Axis widestAxisOP = parentCentroidBB.widestAxis();
             const BoundingBox3D::Axis widestAxisSP = parentBB.widestAxis();
             const float surfaceAreaParent = parentBB.surfaceArea();
+            const float pcBBMin = parentCentroidBB.minP[widestAxisOP];
+            const float pcBBMax = parentCentroidBB.maxP[widestAxisOP];
+            const float pBBMin = parentBB.minP[widestAxisSP];
+            const float pBBMax = parentBB.maxP[widestAxisSP];
             
             uint32_t numObjs = end - start;
             SLRAssert(numObjs >= 1, "Number of objects is zero.");
             
             tpEnd = std::chrono::system_clock::now();
             elapsed = std::chrono::duration_cast<std::chrono::microseconds>(tpEnd - tpStart).count();
-//            if (depth == 1)
-//                printf("calculate parent BBox: %g[ms]\n", elapsed * 0.001f);
+#ifdef PRINT_PROCESSING_TIME
+            if (depth == 1 || depth == 2)
+                printf("calculate parent BBox (%u-%u): %g[ms]\n", start, end, elapsed * 0.001f);
+#endif
             
             if (numObjs == 1) {
                 m_nodes[nodeIdx].initAsLeaf(parentBB, (uint32_t)m_objLists.size(), 1);
@@ -109,7 +118,7 @@ namespace SLR {
                 SpatialBinInfo() : numEntries(0), numExits(0), sumCostEntries(0.0f), sumCostExits(0.0f) {}
             };
             
-            const uint32_t numObjBins = 16;
+            const uint32_t numObjBins = 32;
             ObjectBinInfo objBinInfos[numObjBins];
             uint32_t splitPlaneOP = 0;
             float minCostByOP = INFINITY;
@@ -121,12 +130,11 @@ namespace SLR {
                 for (uint32_t i = start; i < end; ++i) {
                     const Fragment &fragment = fragments[i];
                     
-                    uint32_t binIdx = numObjBins * ((fragment.bbox.centerOfAxis(widestAxisOP) - parentCentroidBB.minP[widestAxisOP]) /
-                                                    (parentCentroidBB.maxP[widestAxisOP] - parentCentroidBB.minP[widestAxisOP]));
+                    uint32_t binIdx = numObjBins * ((fragment.bbox.centerOfAxis(widestAxisOP) - pcBBMin) / (pcBBMax - pcBBMin));
                     binIdx = std::min(binIdx, numObjBins - 1);
                     
                     ++objBinInfos[binIdx].numObjs;
-                    objBinInfos[binIdx].sumCost += fragment.obj->costForIntersect();
+                    objBinInfos[binIdx].sumCost += fragment.costForIntersect;
                     objBinInfos[binIdx].bbox.unify(fragment.bbox);
                 }
                 
@@ -151,8 +159,10 @@ namespace SLR {
                 
                 tpEnd = std::chrono::system_clock::now();
                 elapsed = std::chrono::duration_cast<std::chrono::microseconds>(tpEnd - tpStart).count();
-//                if (depth == 1)
-//                    printf("Object Binning: %g[ms]\n", elapsed * 0.001f);
+#ifdef PRINT_PROCESSING_TIME
+                if (depth == 1 || depth == 2)
+                    printf("Object Binning: %g[ms]\n", elapsed * 0.001f);
+#endif
             }
             
             // calculate surface area of intersection of two bounding boxes resulted from object partitioning.
@@ -167,7 +177,7 @@ namespace SLR {
             if (overlappedBB.isValid())
                 overlappedSA = overlappedBB.surfaceArea();
             
-            const uint32_t numSBins = 256;
+            const uint32_t numSBins = 16;
             const float spatialBinWidth = parentBB.width(widestAxisSP) / numSBins;
             SpatialBinInfo sBinInfos[numSBins];
             uint32_t splitPlaneSP = 0;
@@ -182,22 +192,21 @@ namespace SLR {
                     const Fragment &fragment = fragments[i];
                     
                     const BoundingBox3D &bbox = fragment.bbox;
-                    uint32_t entryBin = numSBins * ((bbox.minP[widestAxisSP] - parentBB.minP[widestAxisSP]) / (parentBB.maxP[widestAxisSP] - parentBB.minP[widestAxisSP]));
-                    uint32_t exitBin = numSBins * ((bbox.maxP[widestAxisSP] - parentBB.minP[widestAxisSP]) / (parentBB.maxP[widestAxisSP] - parentBB.minP[widestAxisSP]));
+                    uint32_t entryBin = numSBins * ((bbox.minP[widestAxisSP] - pBBMin) / (pBBMax - pBBMin));
+                    uint32_t exitBin = numSBins * ((bbox.maxP[widestAxisSP] - pBBMin) / (pBBMax - pBBMin));
                     entryBin = std::min(entryBin, numSBins - 1);
                     exitBin = std::min(exitBin, numSBins - 1);
                     
                     ++sBinInfos[entryBin].numEntries;
                     ++sBinInfos[exitBin].numExits;
                     
-                    float isectCost = fragment.obj->costForIntersect();
+                    float isectCost = fragment.costForIntersect;
                     sBinInfos[entryBin].sumCostEntries += isectCost;
                     sBinInfos[exitBin].sumCostExits += isectCost;
                     
                     for (int binIdx = entryBin; binIdx <= exitBin; ++binIdx) {
-                        float splitPosMin = binIdx * spatialBinWidth + parentBB.minP[widestAxisSP];
-                        float splitPosMax = (binIdx + 1) * spatialBinWidth + parentBB.minP[widestAxisSP];
-                        BoundingBox3D choppedBB = fragment.obj->choppedBounds(widestAxisSP, splitPosMin, splitPosMax);
+                        float splitPosMin = binIdx * spatialBinWidth + pBBMin;
+                        BoundingBox3D choppedBB = fragment.obj->choppedBounds(widestAxisSP, splitPosMin, splitPosMin + spatialBinWidth);
                         sBinInfos[binIdx].bbox.unify(intersection(choppedBB, bbox));
                     }
                 }
@@ -223,8 +232,10 @@ namespace SLR {
                 
                 tpEnd = std::chrono::system_clock::now();
                 elapsed = std::chrono::duration_cast<std::chrono::microseconds>(tpEnd - tpStart).count();
-//                if (depth == 1)
-//                    printf("Spatial Binning: %g[ms]\n", elapsed * 0.001f);
+#ifdef PRINT_PROCESSING_TIME
+                if (depth == 1 || depth == 2)
+                    printf("Spatial Binning: %g[ms]\n", elapsed * 0.001f);
+#endif
             }
             
             if (leafNodeCost < minCostByOP && leafNodeCost < minCostBySP) {
@@ -236,7 +247,7 @@ namespace SLR {
             else if (minCostByOP < minCostBySP) {
                 tpStart = std::chrono::system_clock::now();
                 
-                float pivot = parentCentroidBB.minP[widestAxisOP] + (parentCentroidBB.maxP[widestAxisOP] - parentCentroidBB.minP[widestAxisOP]) / numObjBins * (splitPlaneOP + 1);
+                float pivot = pcBBMin + (pcBBMax - pcBBMin) / numObjBins * (splitPlaneOP + 1);
                 auto firstOf2ndGroup = std::partition(fragments + start, fragments + end, [&widestAxisOP, &pivot](const Fragment &fragment) {
                     return fragment.bbox.centerOfAxis(widestAxisOP) < pivot;
                 });
@@ -245,8 +256,10 @@ namespace SLR {
                 
                 tpEnd = std::chrono::system_clock::now();
                 elapsed = std::chrono::duration_cast<std::chrono::microseconds>(tpEnd - tpStart).count();
-//                if (depth == 1)
-//                    printf("Object Partitioning: %g[ms]\n", elapsed * 0.001f);
+#ifdef PRINT_PROCESSING_TIME
+                if (depth == 1 || depth == 2)
+                    printf("Object Partitioning: %g[ms]\n", elapsed * 0.001f);
+#endif
                 
                 uint32_t numLeftAdded, numRightAdded;
                 uint32_t c0 = buildRecursive(fragments, currentSize, maximumBudget, start, splitIdx, depth, &numLeftAdded);
@@ -271,8 +284,8 @@ namespace SLR {
                 Fragment* rightFragments = newFragments + numLeftsBySplit;
                 for (int i = start; i < end; ++i) {
                     BoundingBox3D &bbox = fragments[i].bbox;
-                    uint32_t entryBin = numSBins * ((bbox.minP[widestAxisSP] - parentBB.minP[widestAxisSP]) / (parentBB.maxP[widestAxisSP] - parentBB.minP[widestAxisSP]));
-                    uint32_t exitBin = numSBins * ((bbox.maxP[widestAxisSP] - parentBB.minP[widestAxisSP]) / (parentBB.maxP[widestAxisSP] - parentBB.minP[widestAxisSP]));
+                    uint32_t entryBin = numSBins * ((bbox.minP[widestAxisSP] - pBBMin) / (pBBMax - pBBMin));
+                    uint32_t exitBin = numSBins * ((bbox.maxP[widestAxisSP] - pBBMin) / (pBBMax - pBBMin));
                     entryBin = std::min(entryBin, numSBins - 1);
                     exitBin = std::min(exitBin, numSBins - 1);
                     
@@ -293,11 +306,12 @@ namespace SLR {
                         Fragment &dstLeft = leftFragments[numLeftIndices++];
                         Fragment &dstRight = rightFragments[numRightIndices++];
                         
-                        float splitPos = (splitPlaneSP + 1) * spatialBinWidth + parentBB.minP[widestAxisSP];
+                        float splitPos = (splitPlaneSP + 1) * spatialBinWidth + pBBMin;
                         BoundingBox3D splitLeftBBox, splitRightBBox;
                         fragments[i].obj->splitBounds(widestAxisSP, splitPos, &splitLeftBBox, &splitRightBBox);
                         
                         dstLeft.obj = dstRight.obj = fragments[i].obj;
+                        dstLeft.costForIntersect = dstRight.costForIntersect = fragments[i].costForIntersect;
                         dstLeft.bbox = intersection(splitLeftBBox, bbox);
                         dstRight.bbox = intersection(splitRightBBox, bbox);
                     }
@@ -312,8 +326,10 @@ namespace SLR {
                 
                 tpEnd = std::chrono::system_clock::now();
                 elapsed = std::chrono::duration_cast<std::chrono::microseconds>(tpEnd - tpStart).count();
-//                if (depth == 1)
-//                    printf("Spatial Partitioning: %g[ms]\n", elapsed * 0.001f);
+#ifdef PRINT_PROCESSING_TIME
+                if (depth == 1 || depth == 2)
+                    printf("Spatial Partitioning: %g[ms]\n", elapsed * 0.001f);
+#endif
                 
                 uint32_t numLeftAdded, numRightAdded;
                 uint32_t c0 = buildRecursive(fragments, currentSize + *numAdded, maximumBudget, start, splitIdx, depth, &numLeftAdded);
@@ -322,6 +338,7 @@ namespace SLR {
                 *numAdded += numLeftAdded + numRightAdded;
                 return nodeIdx;
             }
+#undef PRINT_PROCESSING_TIME
         }
         
         float calcSAHCost() const {
@@ -366,11 +383,13 @@ namespace SLR {
                 m_bounds.unify(bb);
                 fragments[i].obj = objs[i];
                 fragments[i].bbox = bb;
+                fragments[i].costForIntersect = objs[i]->costForIntersect();
             }
             
             m_depth = 0;
             uint32_t numAdded;
             buildRecursive(fragments, (uint32_t)objs.size(), MemoryBudget * (uint32_t)objs.size(), 0, (uint32_t)objs.size(), 0, &numAdded);
+            delete[] fragments;
             
             tpEnd = std::chrono::system_clock::now();
             elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(tpEnd - tpStart).count();
@@ -381,15 +400,15 @@ namespace SLR {
 //#endif
         }
         
-        float costForIntersect() const {
+        float costForIntersect() const override {
             return m_cost;
         }
         
-        BoundingBox3D bounds() const {
+        BoundingBox3D bounds() const override {
             return m_bounds;
         }
         
-        bool intersect(Ray &ray, Intersection* isect) const {
+        bool intersect(Ray &ray, Intersection* isect) const override {
             uint32_t objDepth = (uint32_t)isect->obj.size();
             Vector3D invRayDir = ray.dir.reciprocal();
             bool dirSigns[] = {ray.dir.x > 0, ray.dir.y > 0, ray.dir.z > 0};
@@ -428,12 +447,26 @@ namespace SLR {
             }
             return isect->obj.size() > objDepth;
         }
+    };
+    
+    class QBVH : public Accelerator {
+        float m_cost;
+        BoundingBox3D m_bounds;
+    public:
+        QBVH(SBVH &baseBVH) {
+            SLRAssert_NotImplemented();
+        }
         
-        bool intersect(Ray &ray, SurfacePoint* surfPt) const {
-            Intersection isect;
-            if (!intersect(ray, &isect))
-                return false;
-            isect.obj.top()->getSurfacePoint(isect, surfPt);
+        float costForIntersect() const override {
+            return m_cost;
+        }
+        
+        BoundingBox3D bounds() const override {
+            return m_bounds;
+        }
+        
+        bool intersect(Ray &ray, Intersection* isect) const override {
+            SLRAssert_NotImplemented();
             return true;
         }
     };
