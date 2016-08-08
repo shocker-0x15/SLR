@@ -120,6 +120,17 @@ namespace std {
     }
 }
 
+template <typename T>
+bool realEq(T a, T b, T epsilon) {
+    bool forAbsolute = std::fabs(a - b) < epsilon;
+    bool forRelative = std::fabs(a - b) < epsilon * std::fmax(std::fabs(a), std::fabs(b));
+    return forAbsolute || forRelative;
+}
+template <typename T>
+bool realGE(T a, T b, T epsilon) { return a > b || realEq(a - b, (T)0, epsilon); }
+template <typename T>
+bool realLE(T a, T b, T epsilon) { return a < b || realEq(a - b, (T)0, epsilon); }
+
 inline uint32_t prevPowerOf2(uint32_t x) {
     x = x | (x >> 1);
     x = x | (x >> 2);

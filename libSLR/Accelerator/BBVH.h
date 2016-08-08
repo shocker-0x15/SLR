@@ -10,11 +10,10 @@
 
 #include "../defines.h"
 #include "../references.h"
-#include "../Core/geometry.h"
-#include "../Core/SurfaceObject.h"
+#include "../Core/Accelerator.h"
 
 namespace SLR {
-    class SLR_API BBVH {
+    class SLR_API BBVH : public Accelerator {
     public:
         enum class Partitioning {
             Median = 0,
@@ -241,15 +240,15 @@ namespace SLR {
 #endif
         }
         
-        float costForIntersect() const {
+        float costForIntersect() const override {
             return m_cost;
         }
         
-        BoundingBox3D bounds() const {
+        BoundingBox3D bounds() const override {
             return m_bounds;
         }
         
-        bool intersect(Ray &ray, Intersection* isect) const {
+        bool intersect(Ray &ray, Intersection* isect) const override {
             uint32_t objDepth = (uint32_t)isect->obj.size();
             Vector3D invRayDir = ray.dir.reciprocal();
             bool dirSigns[] = {ray.dir.x > 0, ray.dir.y > 0, ray.dir.z > 0};
@@ -287,14 +286,6 @@ namespace SLR {
                 }
             }
             return isect->obj.size() > objDepth;
-        }
-        
-        bool intersect(Ray &ray, SurfacePoint* surfPt) const {
-            Intersection isect;
-            if (!intersect(ray, &isect))
-                return false;
-            isect.obj.top()->getSurfacePoint(isect, surfPt);
-            return true;
         }
     };
 }
