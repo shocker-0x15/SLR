@@ -1,9 +1,8 @@
 //
 //  BidirectionalPathTracingRenderer.cpp
-//  SLR
 //
 //  Created by 渡部 心 on 2016/01/31.
-//  Copyright © 2016年 渡部 心. All rights reserved.
+//  Copyright (c) 2016年 渡部 心. All rights reserved.
 //
 
 #include "BidirectionalPathTracingRenderer.h"
@@ -242,7 +241,7 @@ namespace SLR {
                             continue;
                         SLRAssert(MISWeight >= 0 && MISWeight <= 1.0f, "invalid MIS weight: %g", MISWeight);
                         SampledSpectrum contribution = MISWeight * lVtx.alpha * connectionTerm * eVtx.alpha;
-                        SLRAssert(contribution.hasNaN() == false && contribution.hasInf() == false && contribution.hasMinus() == false,
+                        SLRAssert(!contribution.hasNaN() && !contribution.hasInf() && !contribution.hasMinus(),
                                   "Unexpected value detected: %s\n"
                                   "pix: (%f, %f)", contribution.toString().c_str(), px, py);
                         if (t > 1) {
@@ -300,14 +299,14 @@ namespace SLR {
                 float MISWeight = calculateMISWeight(extend1stAreaPDF, 1.0f, extend2ndAreaPDF, 1.0f,
                                                      0.0f, 0.0f, 0.0f, 0.0f,
                                                      0, (uint32_t)vertices.size());
-                SampledSpectrum contribution = MISWeight * alpha * Le0 * Le1;
-                SLRAssert(contribution.hasNaN() == false && contribution.hasInf() == false && contribution.hasMinus() == false,
-                          "Unexpected value detected: %s\n"
-                          "pix: (%f, %f)", contribution.toString().c_str(), curPx, curPy);
-                if (wls.flags & WavelengthSamples::LambdaIsSelected)
-                    contribution *= WavelengthSamples::NumComponents;
                 if (!std::isinf(MISWeight) && !std::isnan(MISWeight)) {
+                    SampledSpectrum contribution = MISWeight * alpha * Le0 * Le1;
                     SLRAssert(MISWeight >= 0 && MISWeight <= 1.0f, "invalid MIS weight: %g", MISWeight);
+                    SLRAssert(!contribution.hasNaN() && !contribution.hasInf() && !contribution.hasMinus(),
+                              "Unexpected value detected: %s\n"
+                              "pix: (%f, %f)", contribution.toString().c_str(), curPx, curPy);
+                    if (wls.flags & WavelengthSamples::LambdaIsSelected)
+                        contribution *= WavelengthSamples::NumComponents;
                     sensor->add(curPx, curPy, wls, contribution);
                 }
             }

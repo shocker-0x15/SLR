@@ -164,6 +164,7 @@
 		46F0BB131CD9FA2B00F81BFC /* MicrofacetSurfaceMaterial.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 46F0BB111CD9FA2B00F81BFC /* MicrofacetSurfaceMaterial.cpp */; };
 		46F0BB161CD9FA7100F81BFC /* MicrofacetSurfaceMaterial.h in Headers */ = {isa = PBXBuildFile; fileRef = 46F0BB151CD9FA7100F81BFC /* MicrofacetSurfaceMaterial.h */; };
 		46D16E6C1D283E36009C241C /* SBVH.h in Headers */ = {isa = PBXBuildFile; fileRef = 46D16E6B1D283E36009C241C /* SBVH.h */; };
+		46EA72A91D59F22B00738511 /* debugPrintf.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 46EA72A81D59F22B00738511 /* debugPrintf.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -367,6 +368,7 @@
 		46D7E0841BC8F58900AFF96F /* Makefile */ = {isa = PBXFileReference; explicitFileType = text; fileEncoding = 4; name = Makefile; path = libSLRSceneGraph/Parser/Makefile; sourceTree = "<group>"; usesTabs = 1; };
 		46F0BB111CD9FA2B00F81BFC /* MicrofacetSurfaceMaterial.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MicrofacetSurfaceMaterial.cpp; path = libSLR/SurfaceMaterials/MicrofacetSurfaceMaterial.cpp; sourceTree = SOURCE_ROOT; };
 		46F0BB151CD9FA7100F81BFC /* MicrofacetSurfaceMaterial.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MicrofacetSurfaceMaterial.h; path = libSLR/SurfaceMaterials/MicrofacetSurfaceMaterial.h; sourceTree = SOURCE_ROOT; };
+		46EA72A81D59F22B00738511 /* debugPrintf.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = debugPrintf.cpp; path = libSLR/debugPrintf.cpp; sourceTree = SOURCE_ROOT; };
 		46FFDDFD1B9B258400E47537 /* HostProgram */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = HostProgram; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -694,6 +696,7 @@
 			children = (
 				466F6CAF1BB6B34E0056F2FA /* defines.h */,
 				466F6CB11BB6B34E0056F2FA /* references.h */,
+				46EA72A81D59F22B00738511 /* debugPrintf.cpp */,
 				4634EB8E1B9B529B0047AE54 /* Accelerator */,
 				4634EB901B9B529B0047AE54 /* BasicTypes */,
 				4634EB9A1B9B529B0047AE54 /* BSDFs */,
@@ -928,6 +931,7 @@
 				466F6D521BB715600056F2FA /* checker_board_textures.cpp in Sources */,
 				466F6D4E1BB715490056F2FA /* AMCMCPPMRenderer.cpp in Sources */,
 				466F6D381BB6DC170056F2FA /* ArenaAllocator.cpp in Sources */,
+				46EA72A91D59F22B00738511 /* debugPrintf.cpp in Sources */,
 				4651F3381C567CA30026B8A5 /* SpectrumType.cpp in Sources */,
 				466F6CFA1BB6CA420056F2FA /* SurfaceObject.cpp in Sources */,
 				462018CE1CD7D05800A5CAF1 /* MicrofacetBSDF.cpp in Sources */,

@@ -2,7 +2,7 @@
 //  Matrix4x4.cpp
 //
 //  Created by 渡部 心 on 2016/01/26.
-//  Copyright c 2016年 渡部 心. All rights reserved.
+//  Copyright (c) 2016年 渡部 心. All rights reserved.
 //
 
 #include "Matrix4x4.h"

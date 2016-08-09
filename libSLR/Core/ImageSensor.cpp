@@ -124,12 +124,14 @@ namespace SLR {
     void ImageSensor::add(float px, float py, const WavelengthSamples &wls, const SampledSpectrum &contribution) {
         uint32_t ipx = std::min((uint32_t)px, m_width - 1);
         uint32_t ipy = std::min((uint32_t)py, m_height - 1);
+		SLRAssert(!contribution.hasInf() && !contribution.hasNaN(), "invalid value: (%u, %u), %s", ipx, ipy, contribution.toString().c_str());
         pixel(ipx, ipy).add(wls, contribution);
     }
     
     void ImageSensor::add(uint32_t idx, float px, float py, const WavelengthSamples &wls, const SampledSpectrum &contribution) {
         uint32_t ipx = std::min((uint32_t)px, m_width - 1);
         uint32_t ipy = std::min((uint32_t)py, m_height - 1);
+		SLRAssert(!contribution.hasInf() && !contribution.hasNaN(), "invalid value: idx: %u, (%u, %u), %s", idx, ipx, ipy, contribution.toString().c_str());
         pixel(idx, ipx, ipy).add(wls, contribution);
     }
     
@@ -153,11 +155,11 @@ namespace SLR {
                     pixSum += pixel(b, j, i) * scales[b];
                 DiscretizedSpectrum pix = pixSum.result;
                 if (pix.hasInf())
-                    printf("(%u, %u): has an infinite value!\n", j, i);
+                    printf("(%u, %u): has an infinite value!\n%s\n", j, i, pix.toString().c_str());
                 if (pix.hasNaN())
-                    printf("(%u, %u): has NaN!\n", j, i);
+                    printf("(%u, %u): has NaN!\n%s\n", j, i, pix.toString().c_str());
                 if (pix.hasMinus())
-                    printf("(%u, %u): has a minus value!\n", j, i);
+                    printf("(%u, %u): has a minus value!\n%s\n", j, i, pix.toString().c_str());
                 
                 float RGB[3];
                 pix.getRGB(RGB);
