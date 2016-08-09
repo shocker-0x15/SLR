@@ -1,9 +1,8 @@
 //
 //  voronoi_textures.cpp
-//  SLR
 //
 //  Created by 渡部 心 on 2016/06/17.
-//  Copyright © 2016年 渡部 心. All rights reserved.
+//  Copyright (c) 2016年 渡部 心. All rights reserved.
 //
 
 #include "voronoi_textures.h"
