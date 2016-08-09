@@ -24,7 +24,7 @@
 #   define SLR_Defs_OpenBSD
 #endif
 
-#ifdef SLR_Defs_Windows
+#ifdef SLR_Defs_MSVC
 #   define NOMINMAX
 #   define _USE_MATH_DEFINES
 #   ifdef SLR_API_EXPORTS
@@ -34,6 +34,7 @@
 #   endif
 // MSVC 19.0 (Visual Studio 2015 Update 1) seems to have a problem related to a constexpr constructor.
 #   define CONSTEXPR_CONSTRUCTOR
+#   include <Windows.h>
 #else
 #   define SLR_API
 #   define CONSTEXPR_CONSTRUCTOR constexpr
@@ -58,6 +59,7 @@
 #include <set>
 #include <stack>
 
+#include <chrono>
 #include <limits>
 #include <algorithm>
 #include <memory>
@@ -67,8 +69,14 @@
 #define ENABLE_ASSERT
 #endif
 
+#ifdef SLR_Defs_MSVC
+SLR_API void debugPrintf(const char* fmt, ...);
+#else
+#   define debugPrintf(fmt, ...) printf(fmt, ##__VA_ARGS__);
+#endif
+
 #ifdef ENABLE_ASSERT
-#   define SLRAssert(expr, fmt, ...) if (!(expr)) { printf("%s @%s: %u:\n", #expr, __FILE__, __LINE__); printf(fmt"\n", ##__VA_ARGS__); abort(); } 0
+#   define SLRAssert(expr, fmt, ...) if (!(expr)) { debugPrintf("%s @%s: %u:\n", #expr, __FILE__, __LINE__); debugPrintf(fmt"\n", ##__VA_ARGS__); abort(); } 0
 #else
 #   define SLRAssert(expr, fmt, ...)
 #endif
@@ -80,7 +88,7 @@
 #define SLR_L1_Cacheline_Size 64
 
 // For memalign, free, alignof
-#if defined(SLR_Defs_Windows)
+#if defined(SLR_Defs_MSVC)
 #   include <malloc.h>
 #   define SLR_memalign(size, alignment) _aligned_malloc(size, alignment)
 #   define SLR_freealign(ptr) _aligned_free(ptr)
@@ -100,8 +108,7 @@ inline void* SLR_memalign(size_t size, size_t alignment) {
 #endif
 
 // For getcwd
-#if defined(SLR_Defs_Windows)
-#   include <Windows.h>
+#if defined(SLR_Defs_MSVC)
 #   define SLR_getcwd(size, buf) GetCurrentDirectory(size, buf)
 #elif defined(SLR_Defs_OS_X) || defined(SLR_Defs_OpenBSD) || defined(SLR_Defs_Linux)
 #   include <unistd.h>

@@ -7,7 +7,7 @@
 //
 
 #include "voronoi_textures.h"
-#include "geometry.h"
+#include "../Core/geometry.h"
 #include "../Core/LinearCongruentialRNG.h"
 #include "../Core/distributions.h"
 
