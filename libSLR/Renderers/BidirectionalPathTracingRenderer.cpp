@@ -1,9 +1,8 @@
 //
 //  BidirectionalPathTracingRenderer.cpp
-//  SLR
 //
 //  Created by 渡部 心 on 2016/01/31.
-//  Copyright © 2016年 渡部 心. All rights reserved.
+//  Copyright (c) 2016年 渡部 心. All rights reserved.
 //
 
 #include "BidirectionalPathTracingRenderer.h"
@@ -240,7 +239,7 @@ namespace SLR {
                             continue;
                         SLRAssert(MISWeight >= 0 && MISWeight <= 1.0f, "invalid MIS weight: %g", MISWeight);
                         SampledSpectrum contribution = MISWeight * lVtx.alpha * connectionTerm * eVtx.alpha / wlPDFs[heroIndex];
-                        SLRAssert(contribution.hasNaN() == false && contribution.hasInf() == false && contribution.hasMinus() == false,
+                        SLRAssert(!contribution.hasNaN() && !contribution.hasInf() && !contribution.hasMinus(),
                                   "Unexpected value detected: %s\n"
                                   "pix: (%f, %f)", contribution.toString().c_str(), px, py);
                         if (t > 1) {
@@ -303,9 +302,9 @@ namespace SLR {
                                                      SampledSpectrum::Zero, SampledSpectrum::Zero, SampledSpectrum::Zero, SampledSpectrum::Zero,
                                                      0, (uint32_t)vertices.size());
                 if (!std::isinf(MISWeight) && !std::isnan(MISWeight)) {
-                    SLRAssert(MISWeight >= 0 && MISWeight <= 1.0f, "invalid MIS weight: %g", MISWeight);
                     SampledSpectrum contribution = MISWeight * alpha * Le0 * Le1 / wlPDFs[heroIndex];
-                    SLRAssert(contribution.hasNaN() == false && contribution.hasInf() == false && contribution.hasMinus() == false,
+                    SLRAssert(MISWeight >= 0 && MISWeight <= 1.0f, "invalid MIS weight: %g", MISWeight);
+                    SLRAssert(!contribution.hasNaN() && !contribution.hasInf() && !contribution.hasMinus(),
                               "Unexpected value detected: %s\n"
                               "pix: (%f, %f)", contribution.toString().c_str(), curPx, curPy);
                     sensor->add(curPx, curPy, wls, contribution);

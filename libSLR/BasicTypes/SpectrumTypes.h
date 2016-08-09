@@ -283,7 +283,8 @@ namespace SLR {
                     const float v = vv / area;
                     float w = 1.0f - u - v;
                     // outside spectral locus (quantized version at least) or outside grid
-                    if (u < 0.0 || v < 0.0 || w < 0.0) {
+                    //if (u < 0.0 || v < 0.0 || w < 0.0) {
+                    if (u < -1e-6 || v < -1e-6 || w < -1e-6) {
                         uu = -vv;
                         e0x = e1x;
                         e0y = e1y;
@@ -299,6 +300,7 @@ namespace SLR {
                     break;
                 }
             }
+            SLRAssert(usedIndices[0] != UINT8_MAX, "Adjacent points must be selected at this point.");
             
             SampledSpectrumTemplate<RealType, N> ret(0.0);
             for (int i = 0; i < WavelengthSamplesTemplate<RealType, N>::NumComponents; ++i) {
@@ -572,129 +574,129 @@ namespace SLR {
     struct SLR_API DiscretizedSpectrumTemplate {
         RealType values[numStrata];
         
-        DiscretizedSpectrumTemplate(RealType v = 0.0f) { for (int i = 0; i < numStrata; ++i) values[i] = v; };
-        DiscretizedSpectrumTemplate(const RealType* vals) { for (int i = 0; i < numStrata; ++i) values[i] = vals[i]; };
+        DiscretizedSpectrumTemplate(RealType v = 0.0f) { for (int i = 0; i < numStrata; ++i) values[i] = v; }
+        DiscretizedSpectrumTemplate(const RealType* vals) { for (int i = 0; i < numStrata; ++i) values[i] = vals[i]; }
         
-        DiscretizedSpectrumTemplate operator+() const { return *this; };
+        DiscretizedSpectrumTemplate operator+() const { return *this; }
         DiscretizedSpectrumTemplate operator-() const {
             RealType vals[numStrata];
             for (int i = 0; i < numStrata; ++i)
                 vals[i] = -values[i];
             return DiscretizedSpectrumTemplate(vals);
-        };
+        }
         
         DiscretizedSpectrumTemplate operator+(const DiscretizedSpectrumTemplate &c) const {
             RealType vals[numStrata];
             for (int i = 0; i < numStrata; ++i)
                 vals[i] = values[i] + c.values[i];
             return DiscretizedSpectrumTemplate(vals);
-        };
+        }
         DiscretizedSpectrumTemplate operator-(const DiscretizedSpectrumTemplate &c) const {
             RealType vals[numStrata];
             for (int i = 0; i < numStrata; ++i)
                 vals[i] = values[i] - c.values[i];
             return DiscretizedSpectrumTemplate(vals);
-        };
+        }
         DiscretizedSpectrumTemplate operator*(const DiscretizedSpectrumTemplate &c) const {
             RealType vals[numStrata];
             for (int i = 0; i < numStrata; ++i)
                 vals[i] = values[i] * c.values[i];
             return DiscretizedSpectrumTemplate(vals);
-        };
+        }
         DiscretizedSpectrumTemplate operator*(RealType s) const {
             RealType vals[numStrata];
             for (int i = 0; i < numStrata; ++i)
                 vals[i] = values[i] * s;
             return DiscretizedSpectrumTemplate(vals);
-        };
+        }
         friend inline DiscretizedSpectrumTemplate operator*(RealType s, const DiscretizedSpectrumTemplate &c) {
             RealType vals[numStrata];
             for (int i = 0; i < numStrata; ++i)
                 vals[i] = c.values[i] * s;
             return DiscretizedSpectrumTemplate(vals);
-        };
+        }
         
         DiscretizedSpectrumTemplate &operator+=(const DiscretizedSpectrumTemplate &c) {
             for (int i = 0; i < numStrata; ++i)
                 values[i] += c.values[i];
             return *this;
-        };
+        }
         DiscretizedSpectrumTemplate &operator*=(const DiscretizedSpectrumTemplate &c) {
             for (int i = 0; i < numStrata; ++i)
                 values[i] *= c.values[i];
             return *this;
-        };
+        }
         DiscretizedSpectrumTemplate &operator*=(RealType s) {
             for (int i = 0; i < numStrata; ++i)
                 values[i] *= s;
             return *this;
-        };
+        }
         
         bool operator==(const DiscretizedSpectrumTemplate &c) const {
             for (int i = 0; i < numStrata; ++i)
                 if (values[i] != c.values[i])
                     return false;
             return true;
-        };
+        }
         bool operator!=(const DiscretizedSpectrumTemplate &c) const {
             for (int i = 0; i < numStrata; ++i)
                 if (values[i] != c.values[i])
                     return true;
             return false;
-        };
+        }
         
         RealType &operator[](unsigned int index) {
             SLRAssert(index < numStrata, "\"index\" is out of range [0, %u].", numStrata - 1);
             return values[index];
-        };
+        }
         RealType operator[](unsigned int index) const {
             SLRAssert(index < numStrata, "\"index\" is out of range [0, %u].", numStrata - 1);
             return values[index];
-        };
+        }
         
         RealType maxValue() const {
             RealType maxVal = values[0];
             for (int i = 1; i < numStrata; ++i)
                 maxVal = std::fmax(values[i], maxVal);
             return maxVal;
-        };
+        }
         RealType minValue() const {
             RealType minVal = values[0];
             for (int i = 1; i < numStrata; ++i)
                 minVal = std::fmin(values[i], minVal);
             return minVal;
-        };
+        }
         bool hasNonZero() const {
             for (int i = 0; i < numStrata; ++i)
                 if (values[i] != 0)
                     return true;
             return false;
-        };
+        }
         bool hasNaN() const {
             for (int i = 0; i < numStrata; ++i)
                 if (std::isnan(values[i]))
                     return true;
             return false;
-        };
+        }
         bool hasInf() const {
             for (int i = 0; i < numStrata; ++i)
                 if (std::isinf(values[i]))
                     return true;
             return false;
-        };
+        }
         bool hasMinus() const {
             for (int i = 0; i < numStrata; ++i)
                 if (values[i] < 0)
                     return true;
             return false;
-        };
+        }
         
         RealType luminance(RGBColorSpace space = RGBColorSpace::sRGB) const {
             RealType sum = 0;
             for (int i = 0; i < numStrata; ++i)
                 sum += ybar[i] * values[i];
             return sum / integralCMF;
-        };
+        }
         
         void getRGB(RealType RGB[3], RGBColorSpace space = RGBColorSpace::sRGB) const {
             RealType XYZ[3] = {0, 0, 0};
@@ -715,7 +717,7 @@ namespace SLR {
                     SLRAssert(false, "Invalid RGB color space is specified.");
                     break;
             }
-        };
+        }
         
         std::string toString() const {
             std::string ret = "(";
@@ -726,8 +728,8 @@ namespace SLR {
             }
             sprintf(str, "%g)", values[numStrata - 1]);
             ret += str;
-            return str;
-        };
+            return ret;
+        }
         
         static const DiscretizedSpectrumTemplate Zero;
         static const DiscretizedSpectrumTemplate One;
@@ -789,7 +791,7 @@ namespace SLR {
             integralCMF = 0.0f;
             for (int i = 0; i < numStrata; ++i)
                 integralCMF += ybar[i];
-        };
+        }
     };
     template <typename RealType, uint32_t numStrata>
     const uint32_t DiscretizedSpectrumTemplate<RealType, numStrata>::NumStrata = numStrata;
@@ -817,7 +819,7 @@ namespace SLR {
         CompensatedSum<ValueType> value;
         
         SpectrumStorageTemplate(const ValueType &v = ValueType::Zero) :
-        value(v) {};
+        value(v) {}
         
         template <uint32_t N>
         SpectrumStorageTemplate &add(const WavelengthSamplesTemplate<RealType, N> &wls, const SampledSpectrumTemplate<RealType, N> &val) {
@@ -829,7 +831,7 @@ namespace SLR {
             }
             value += addend;
             return *this;
-        };
+        }
     };
 }
 

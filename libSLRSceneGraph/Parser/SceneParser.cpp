@@ -1,9 +1,8 @@
 //
 //  SceneParser.cpp
-//  SLR
 //
 //  Created by 渡部 心 on 2015/12/16.
-//  Copyright c 2015年 渡部 心. All rights reserved.
+//  Copyright (c) 2015年 渡部 心. All rights reserved.
 //
 
 #include "SceneParser.hpp"

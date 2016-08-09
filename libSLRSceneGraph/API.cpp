@@ -1,9 +1,8 @@
-
 //
 //  API.cpp
 //
 //  Created by 渡部 心 on 2015/10/06.
-//  Copyright c 2015年 渡部 心. All rights reserved.
+//  Copyright (c) 2015年 渡部 心. All rights reserved.
 //
 
 #include "API.hpp"
@@ -68,7 +67,7 @@ namespace SLRSceneGraph {
         return true;
     }
 
-#ifdef SLR_Defs_Windows
+#ifdef SLR_Defs_MSVC
     class FuncGetPathElement {
         std::string pathPrefix;
     public:
@@ -1144,7 +1143,7 @@ namespace SLRSceneGraph {
                                          Element matAttrs = Element(TypeMap::Tuple(), ParameterList());
                                          
                                          auto &attrs = matAttrs.raw<TypeMap::Tuple>();
-#ifdef SLR_Defs_Windows
+#ifdef SLR_Defs_MSVC
                                          FuncGetPathElement getPathElement{ pathPrefix };
 #else
                                          auto getPathElement = [&pathPrefix](const aiString &str) {

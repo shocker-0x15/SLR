@@ -2,7 +2,7 @@
 //  SceneParser.hpp
 //
 //  Created by 渡部 心 on 2015/12/16.
-//  Copyright c 2015年 渡部 心. All rights reserved.
+//  Copyright (c) 2015年 渡部 心. All rights reserved.
 //
 
 #ifndef SceneParser_hpp
@@ -246,7 +246,7 @@ namespace SLRSceneGraph {
         typedef std::function<Element(const std::map<std::string, Element> &, ExecuteContext &, ErrorMessage*)> Procedure;
         
 		// workaround: MSVC(VS2015 Update1) fails to compile the 3rd constructor.
-#ifdef SLR_Defs_Windows
+#ifdef SLR_Defs_MSVC
 		const uint32_t m_depth;
 		const std::vector<std::vector<ArgInfo>> m_signatures;
 		std::vector<Procedure> m_nativeProcs;
