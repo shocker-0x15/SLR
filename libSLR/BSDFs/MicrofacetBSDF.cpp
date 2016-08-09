@@ -1,9 +1,8 @@
 //
 //  MicrofacetBSDF.cpp
-//  SLR
 //
 //  Created by 渡部 心 on 2016/05/03.
-//  Copyright © 2016年 渡部 心. All rights reserved.
+//  Copyright (c) 2016年 渡部 心. All rights reserved.
 //
 
 #include "MicrofacetBSDF.h"

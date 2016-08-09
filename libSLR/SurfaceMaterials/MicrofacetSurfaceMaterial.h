@@ -1,9 +1,8 @@
 //
 //  MicrofacetSurfaceMaterial.h
-//  SLR
 //
 //  Created by 渡部 心 on 2016/05/04.
-//  Copyright © 2016年 渡部 心. All rights reserved.
+//  Copyright (c) 2016年 渡部 心. All rights reserved.
 //
 
 #ifndef MicrofacetSurfaceMaterial_h
