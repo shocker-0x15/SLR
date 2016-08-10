@@ -16,7 +16,7 @@ leftWall = createMesh(
     ((-1.5, 2.5,  2.55), (1, 0, 0), (0, 0, -1), (0, 1))
   ), 
   (
-    (surfMat, ((0, 1, 2), (0, 2, 3))),
+    (surfMat, ((0, 1, 2), (0, 2, 3))), 
   )
 );
 addChild(CBNode, leftWall);
@@ -32,7 +32,7 @@ rightWall = createMesh(
     ((1.5, 2.5, -2.55), (-1, 0, 0), (0, 0, 1), (0, 1))
   ), 
   (
-    (surfMat, ((0, 1, 2), (0, 2, 3))),
+    (surfMat, ((0, 1, 2), (0, 2, 3))), 
   )
 );
 addChild(CBNode, rightWall);
@@ -48,7 +48,7 @@ floor = createMesh(
     ((-1.5, 0, -2.55), (0, 1, 0), (1, 0, 0), (0, 1))
   ), 
   (
-    (surfMat, ((0, 1, 2), (0, 2, 3))),
+    (surfMat, ((0, 1, 2), (0, 2, 3))), 
   )
 );
 addChild(CBNode, floor);
@@ -64,7 +64,7 @@ innerWall = createMesh(
     ((-1.5, 2.5, -2.55), (0, 0, 1), (1, 0, 0), (0, 1))
   ), 
   (
-    (surfMat, ((0, 1, 2), (0, 2, 3))),
+    (surfMat, ((0, 1, 2), (0, 2, 3))), 
   )
 );
 addChild(CBNode, innerWall);
@@ -80,7 +80,7 @@ ceiling = createMesh(
     ((-1.5, 2.5,  2.55), (0, -1, 0), (1, 0, 0), (0, 1))
   ), 
   (
-    (surfMat, ((0, 1, 2), (0, 2, 3))),
+    (surfMat, ((0, 1, 2), (0, 2, 3))), 
   )
 );
 addChild(CBNode, ceiling);
@@ -99,7 +99,7 @@ lightMesh = createMesh(
     ((-0.5, 2.499,  0.5), (0, -1, 0), (1, 0, 0), (0, 1))
   ),
   (
-    (surfMat, ((0, 1, 2), (0, 2, 3))),
+    (surfMat, ((0, 1, 2), (0, 2, 3))), 
   )
 );
 addChild(CBNode, lightMesh);
@@ -119,9 +119,8 @@ addChild(CBNode, leftSphereNode);
 function rightSphereMat(name, attrs) {
     etaExt = SpectrumTexture(Spectrum("ID": "Air", 0));
     etaInt = SpectrumTexture(Spectrum("ID": "Glass_BK7", 0));
-    R = SpectrumTexture(Spectrum("Reflectance", 0.999));
-    T = SpectrumTexture(Spectrum("Reflectance", 0.999));
-    return createSurfaceMaterial("glass", (R, T, etaExt, etaInt));
+    coeff = SpectrumTexture(Spectrum("Reflectance", 0.999));
+    return createSurfaceMaterial("glass", (coeff, etaExt, etaInt));
 }
 rightSphereNode = load3DModel("models/sphere.assbin", rightSphereMat);
 setTransform(rightSphereNode, translate(0.7, 0, 0) * 

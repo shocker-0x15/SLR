@@ -1,4 +1,4 @@
-set(include_dirs "${CMAKE_SOURCE_DIR}")
+set(include_dirs "${EXTLIBS_OpenEXR22_include};${CMAKE_SOURCE_DIR}")
 set(lib_dirs "")
 set(libs "SLR;SLRSceneGraph")
 
