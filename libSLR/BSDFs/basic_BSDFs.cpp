@@ -132,6 +132,7 @@ namespace SLR {
             result->dirPDF = SampledSpectrum::Zero;
             result->dirPDF[query.heroIndex] = 1.0f - reflectProb;
             result->dirType = DirectionType::Transmission | DirectionType::Delta0D | (m_type.isDispersive() ? DirectionType::Dispersive : DirectionType());
+            cosExit = std::fabs(cosExit);
             SampledSpectrum ret = SampledSpectrum::Zero;
             ret[query.heroIndex] = m_coeff[query.heroIndex] * (1.0f - F[query.heroIndex]) * std::pow(query.adjoint ? (eExit / eEnter) : (eEnter / eExit), 2);
             if (result->reverse) {
