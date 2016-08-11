@@ -100,6 +100,10 @@ namespace SLR {
         if (query.flags.isTransmission())
             reflectProb = 0.0f;
         if (uComponent < reflectProb) {
+            if (query.dir_sn.z == 0.0f) {
+                result->dirPDF = 0.0f;
+                return SampledSpectrum::Zero;
+            }
             result->dir_sn = Vector3D(-query.dir_sn.x, -query.dir_sn.y, query.dir_sn.z);
             result->dirPDF = SampledSpectrum::Zero;
             result->dirPDF[query.heroIndex] = reflectProb;
@@ -121,10 +125,10 @@ namespace SLR {
             float rrEta = eEnter / eExit;// reciprocal of relative IOR.
             float sinExit2 = rrEta * rrEta * sinEnter2;
             
-//            if (sinExit2 >= 1.0f) {
-//                result->dirPDF = 0.0f;
-//                return SampledSpectrum::Zero;
-//            }
+            if (sinExit2 >= 1.0f) {
+                result->dirPDF = 0.0f;
+                return SampledSpectrum::Zero;
+            }
             float cosExit = std::sqrt(std::fmax(0.0f, 1.0f - sinExit2));
             if (entering)
                 cosExit = -cosExit;
