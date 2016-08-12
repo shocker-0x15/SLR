@@ -133,14 +133,15 @@ namespace SLR {
             result->dir_sn = Vector3D(rrEta * -query.dir_sn.x, rrEta * -query.dir_sn.y, cosExit);
             result->dirPDF = 1.0f - reflectProb;
             result->dirType = DirectionType::Transmission | DirectionType::Delta0D | (m_type.isDispersive() ? DirectionType::Dispersive : DirectionType());
-            cosExit = std::fabs(cosExit);
             SampledSpectrum ret = SampledSpectrum::Zero;
-            ret[query.wlHint] = m_coeff[query.wlHint] * (1.0f - F[query.wlHint]) * std::pow(query.adjoint ? (eExit / eEnter) : (eEnter / eExit), 2);
+            ret[query.wlHint] = m_coeff[query.wlHint] * (1.0f - F[query.wlHint]);
+            if (!query.adjoint)
+                ret[query.wlHint] *= (eEnter * eEnter) / (eExit * eExit);
             if (result->reverse) {
                 result->reverse->fs = ret / std::fabs(query.dir_sn.z);
                 result->reverse->dirPDF = reflectProb;
             }
-            SampledSpectrum fs = ret / cosExit;
+            SampledSpectrum fs = ret / std::fabs(cosExit);
             return fs;
         }
     }
