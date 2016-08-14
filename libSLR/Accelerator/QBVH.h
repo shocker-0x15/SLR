@@ -21,6 +21,8 @@ namespace SLR {
         return _mm_xor_ps(f, _mm_and_ps(mask, _mm_xor_ps(t, f)));
     }
     
+    // References
+    // Shallow Bounding Volume Hierarchies for Fast SIMD Ray Tracing of Incoherent Rays
     class QBVH : public Accelerator {
         struct Children {
             union {

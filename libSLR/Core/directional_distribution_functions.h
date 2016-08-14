@@ -325,6 +325,9 @@ namespace SLR {
     };
     
     
+    // References
+    // A Practical Model for Subsurface Light Transport
+    // Towards Realistic Image Synthesis of Scattering Materials
     class SLR_API BSSRDF {
         SampledSpectrum m_sigma_tr;
         SampledSpectrum m_z_r;

@@ -5,10 +5,6 @@
 //  Copyright (c) 2016年 渡部 心. All rights reserved.
 //
 
-// References
-// Microfacet Models for Refraction through Rough Surfaces
-// Importance Sampling Microfacet-Based BSDFs using the Distribution of Visible Normals
-
 #ifndef MicrofacetBSDF_h
 #define MicrofacetBSDF_h
 
@@ -16,7 +12,10 @@
 #include "../references.h"
 #include "../Core/directional_distribution_functions.h"
 
-namespace SLR {    
+namespace SLR {
+    // References
+    // Microfacet Models for Refraction through Rough Surfaces
+    
     class SLR_API MicrofacetBRDF : public BSDF {
         FresnelConductor m_F;
         const MicrofacetDistribution* m_D;

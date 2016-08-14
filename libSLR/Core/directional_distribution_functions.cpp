@@ -429,6 +429,8 @@ namespace SLR {
         return evaluate(m) * m.z;
     }
     
+    // References
+    // Importance Sampling Microfacet-Based BSDFs using the Distribution of Visible Normals
     float GGX::sample(const Vector3D &v, float u0, float u1, Normal3D* m, float* normalPDF) const {
         float alpha_gx = m_alpha_g;
         float alpha_gy = m_alpha_g;
