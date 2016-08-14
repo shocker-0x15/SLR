@@ -12,6 +12,8 @@
 #include "../references.h"
 #include "../Core/Accelerator.h"
 
+#include <nmmintrin.h>
+
 namespace SLR {
     // References
     // Spatial Splits in Bounding Volume Hierarchies
