@@ -9,8 +9,9 @@
 #include "surface_material.h"
 #include "Transform.h"
 #include "distributions.h"
-#include "../Accelerator/BBVH.h"
+#include "../Accelerator/StandardBVH.h"
 #include "../Accelerator/SBVH.h"
+#include "../Accelerator/QBVH.h"
 #include "textures.h"
 #include "../Surface/InfiniteSphere.h"
 #include "../SurfaceMaterials/IBLEmission.h"
@@ -225,7 +226,9 @@ namespace SLR {
     
     
     SurfaceObjectAggregate::SurfaceObjectAggregate(std::vector<SurfaceObject*> &objs) {
-        m_accelerator = new SBVH(objs);
+        SBVH sbvh(objs);
+        m_accelerator = new QBVH(sbvh);
+//        m_accelerator = new SBVH(objs);
 //        m_accelerator = new BBVH(objs, BBVH::Partitioning::BinnedSAH);
         
         std::vector<const SurfaceObject*> lights;

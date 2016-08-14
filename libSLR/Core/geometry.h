@@ -118,7 +118,7 @@ namespace SLR {
                 if (tNear[i] > tFar[i])
                     std::swap(tNear[i], tFar[i]);
                 dist0 = tNear[i] > dist0 ? tNear[i] : dist0;
-                dist1 = tFar[i] < dist1 ? tFar[i]  : dist1;
+                dist1 = tFar[i] < dist1 ? tFar[i] : dist1;
                 if (dist0 > dist1)
                     return false;
             }

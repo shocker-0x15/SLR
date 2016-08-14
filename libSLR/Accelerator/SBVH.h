@@ -12,6 +12,8 @@
 #include "../references.h"
 #include "../Core/Accelerator.h"
 
+#include <nmmintrin.h>
+
 namespace SLR {
     class SLR_API SBVH : public Accelerator {
         friend class QBVH;
@@ -410,32 +412,19 @@ namespace SLR {
         
         bool intersect(Ray &ray, Intersection* isect) const override {
             uint32_t objDepth = (uint32_t)isect->obj.size();
-            Vector3D invRayDir = ray.dir.reciprocal();
-            bool dirSigns[] = {ray.dir.x > 0, ray.dir.y > 0, ray.dir.z > 0};
-            auto intersectAABB = [&ray, &invRayDir](const BoundingBox3D bb) {
-                float dist0 = ray.distMin, dist1 = ray.distMax;
-                Vector3D tNear = (bb.minP - ray.org) * invRayDir;
-                Vector3D tFar = (bb.maxP - ray.org) * invRayDir;
-                for (int i = 0; i < 3; ++i) {
-                    if (tNear[i] > tFar[i])
-                        std::swap(tNear[i], tFar[i]);
-                    dist0 = tNear[i] > dist0 ? tNear[i] : dist0;
-                    dist1 = tFar[i] < dist1 ? tFar[i]  : dist1;
-                    if (dist0 > dist1)
-                        return false;
-                }
-                return true;
-            };
+            bool dirIsPositive[] = {ray.dir.x >= 0, ray.dir.y >= 0, ray.dir.z >= 0};
             
-            uint32_t idxStack[64];
+            const uint32_t StackSize = 64;
+            uint32_t idxStack[StackSize];
             uint32_t depth = 0;
             idxStack[depth++] = 0;
             while (depth > 0) {
                 const Node &node = m_nodes[idxStack[--depth]];
-                if (!intersectAABB(node.bbox))
+                if (!node.bbox.intersect(ray))
                     continue;
                 if (node.numLeaves == 0) {
-                    bool positiveDir = dirSigns[node.axis];
+                    SLRAssert(depth < StackSize, "SBVH::intersect: stack overflow");
+                    bool positiveDir = dirIsPositive[node.axis];
                     idxStack[depth++] = positiveDir ? node.c1 : node.c0;
                     idxStack[depth++] = positiveDir ? node.c0 : node.c1;
                 }
@@ -447,29 +436,7 @@ namespace SLR {
             }
             return isect->obj.size() > objDepth;
         }
-    };
-    
-    class QBVH : public Accelerator {
-        float m_cost;
-        BoundingBox3D m_bounds;
-    public:
-        QBVH(SBVH &baseBVH) {
-            SLRAssert_NotImplemented();
-        }
-        
-        float costForIntersect() const override {
-            return m_cost;
-        }
-        
-        BoundingBox3D bounds() const override {
-            return m_bounds;
-        }
-        
-        bool intersect(Ray &ray, Intersection* isect) const override {
-            SLRAssert_NotImplemented();
-            return true;
-        }
-    };
+    };    
 }
 
 #endif /* SBVH_h */

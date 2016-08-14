@@ -1,19 +1,19 @@
 //
-//  BBVH.h
+//  StandardBVH.h
 //
 //  Created by 渡部 心 on 2014/05/04.
 //  Copyright (c) 2014年 渡部 心. All rights reserved.
 //
 
-#ifndef SLR_BBVH_h
-#define SLR_BBVH_h
+#ifndef SLR_StandardBVH_h
+#define SLR_StandardBVH_h
 
 #include "../defines.h"
 #include "../references.h"
 #include "../Core/Accelerator.h"
 
 namespace SLR {
-    class SLR_API BBVH : public Accelerator {
+    class SLR_API StandardBVH : public Accelerator {
     public:
         enum class Partitioning {
             Median = 0,
@@ -216,7 +216,7 @@ namespace SLR {
         }
         
     public:
-        BBVH(const std::vector<SurfaceObject*> &objs, Partitioning method = Partitioning::BinnedSAH) {
+        StandardBVH(const std::vector<SurfaceObject*> &objs, Partitioning method = Partitioning::BinnedSAH) {
             m_method = method;
             
             ObjInfos infos;
@@ -250,32 +250,19 @@ namespace SLR {
         
         bool intersect(Ray &ray, Intersection* isect) const override {
             uint32_t objDepth = (uint32_t)isect->obj.size();
-            Vector3D invRayDir = ray.dir.reciprocal();
-            bool dirSigns[] = {ray.dir.x > 0, ray.dir.y > 0, ray.dir.z > 0};
-            auto intersectAABB = [&ray, &invRayDir](const BoundingBox3D bb) {
-                float dist0 = ray.distMin, dist1 = ray.distMax;
-                Vector3D tNear = (bb.minP - ray.org) * invRayDir;
-                Vector3D tFar = (bb.maxP - ray.org) * invRayDir;
-                for (int i = 0; i < 3; ++i) {
-                    if (tNear[i] > tFar[i])
-                        std::swap(tNear[i], tFar[i]);
-                    dist0 = tNear[i] > dist0 ? tNear[i] : dist0;
-                    dist1 = tFar[i] < dist1 ? tFar[i]  : dist1;
-                    if (dist0 > dist1)
-                        return false;
-                }
-                return true;
-            };
+            bool dirIsPositive[] = {ray.dir.x >= 0, ray.dir.y >= 0, ray.dir.z >= 0};
             
-            uint32_t idxStack[64];
+            const uint32_t StackSize = 64;
+            uint32_t idxStack[StackSize];
             uint32_t depth = 0;
             idxStack[depth++] = 0;
             while (depth > 0) {
                 const Node &node = m_nodes[idxStack[--depth]];
-                if (!intersectAABB(node.bbox))
+                if (!node.bbox.intersect(ray))
                     continue;
                 if (node.numLeaves == 0) {
-                    bool positiveDir = dirSigns[node.axis];
+                    SLRAssert(depth >= StackSize, "StandardBVH::intersect: stack overflow");
+                    bool positiveDir = dirIsPositive[node.axis];
                     idxStack[depth++] = positiveDir ? node.c1 : node.c0;
                     idxStack[depth++] = positiveDir ? node.c0 : node.c1;
                 }
