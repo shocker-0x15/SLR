@@ -101,18 +101,16 @@ namespace SLR {
             reflectProb = 0.0f;
         if (uComponent < reflectProb) {
             if (query.dir_sn.z == 0.0f) {
-                result->dirPDF = 0.0f;
+                result->dirPDF = SampledSpectrum::Zero;
                 return SampledSpectrum::Zero;
             }
             result->dir_sn = Vector3D(-query.dir_sn.x, -query.dir_sn.y, query.dir_sn.z);
-            result->dirPDF = SampledSpectrum::Zero;
-            result->dirPDF[query.heroIndex] = reflectProb;
+            result->dirPDF = reflectProb;
             result->dirType = DirectionType::Reflection | DirectionType::Delta0D;
             SampledSpectrum fs = m_coeff * F / std::fabs(query.dir_sn.z);
             if (result->reverse) {
                 result->reverse->fs = fs;
-                result->reverse->dirPDF = SampledSpectrum::Zero;
-                result->reverse->dirPDF[query.heroIndex] = reflectProb;
+                result->reverse->dirPDF = reflectProb;
             }
             return fs;
         }
@@ -126,7 +124,7 @@ namespace SLR {
             float sinExit2 = rrEta * rrEta * sinEnter2;
             
             if (sinExit2 >= 1.0f) {
-                result->dirPDF = 0.0f;
+                result->dirPDF = SampledSpectrum::Zero;
                 return SampledSpectrum::Zero;
             }
             float cosExit = std::sqrt(std::fmax(0.0f, 1.0f - sinExit2));
