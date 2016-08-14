@@ -47,6 +47,7 @@ SLR consists of the following components.
 * Acceleration Structure
     * Binned SAH BVH
     * Split BVH \[Stich2009\]
+    * QBVH \[Dammertz2008\] constructed by collapsing SBVH
 * Light Transport Algorithms
     * Unidirectional Path Tracing \[Kajiya1986\] with MIS
     * Bidirectional Path Tracing \[Veach1994, 1997\]
@@ -54,7 +55,8 @@ SLR consists of the following components.
 (has been dropped from current SLR implementation.)
 * SLR Custom Language (C/Python-like syntax) for flexible scene description
 
-[Ashikhmin2000] "An Anisotropic Phong BRDF Model"  
+[Ashikhmin2000] "An Anisotropic Phong BRDF Model"
+[Dammertz2008] "Shallow Bounding Volume Hierarchies for Fast SIMD Ray Tracing of Incoherent Rays"  
 [Donner2006] "Towards Realistic Image Synthesis of Scattering Materials"  
 [Hachisuka2011] "Robust Adaptive Photon Tracing Using Photon Path Visibility"  
 [Heitz2014] "Importance Sampling Microfacet-Based BSDFs using the Distribution of Visible Normals"  

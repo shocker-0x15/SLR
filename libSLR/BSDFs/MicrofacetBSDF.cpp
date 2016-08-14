@@ -184,7 +184,7 @@ namespace SLR {
                           ret[wlIdx], F_wl, G_wl, D_wl, query.wlHint, query.dir_sn.toString().c_str());
             }
             ret /= std::fabs(query.dir_sn.z * result->dir_sn.z);
-            ret *= query.adjoint ? (eExit * eExit) : (eEnter * eEnter);// !adjoint: eExit^2 * (eEnter / eExit)^2
+            ret *= query.adjoint ? (eExit * eExit) : (eEnter * eEnter);// adjoint: need to cancel eEnter^2 / eExit^2 => eEnter^2 * (eExit^2 / eEnter^2)
             
             SLRAssert(!ret.hasInf() && !ret.hasNaN(), "fs: %s, wlIdx: %u, qDir: %s, rDir: %s",
                       ret.toString().c_str(), query.wlHint, query.dir_sn.toString().c_str(), result->dir_sn.toString().c_str());
