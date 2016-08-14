@@ -37,6 +37,7 @@ file(GLOB libSLR_Sources_excluded
      Memory/StackAllocator.*
      Memory/MSpaceAllocator.*
      Memory/dlmalloc.*
+     Renderers/AMCMCPPMRenderer.*
     )
 list(REMOVE_ITEM libSLR_Sources ${libSLR_Sources_excluded})
 

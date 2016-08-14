@@ -5,8 +5,8 @@
 //  Copyright (c) 2015年 渡部 心. All rights reserved.
 //
 
-#include "AshikhminReflection.h"
-#include "../BSDFs/AshikhminBRDF.h"
+#include "AshikhminShirleyReflection.h"
+#include "../BSDFs/AshikhminShirleyBRDF.h"
 #include "../Memory/ArenaAllocator.h"
 #include "../Core/textures.h"
 
