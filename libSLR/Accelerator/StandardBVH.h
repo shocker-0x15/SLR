@@ -1,19 +1,19 @@
 //
-//  BBVH.h
+//  StandardBVH.h
 //
 //  Created by 渡部 心 on 2014/05/04.
 //  Copyright (c) 2014年 渡部 心. All rights reserved.
 //
 
-#ifndef SLR_BBVH_h
-#define SLR_BBVH_h
+#ifndef SLR_StandardBVH_h
+#define SLR_StandardBVH_h
 
 #include "../defines.h"
 #include "../references.h"
 #include "../Core/Accelerator.h"
 
 namespace SLR {
-    class SLR_API BBVH : public Accelerator {
+    class SLR_API StandardBVH : public Accelerator {
     public:
         enum class Partitioning {
             Median = 0,
@@ -216,7 +216,7 @@ namespace SLR {
         }
         
     public:
-        BBVH(const std::vector<SurfaceObject*> &objs, Partitioning method = Partitioning::BinnedSAH) {
+        StandardBVH(const std::vector<SurfaceObject*> &objs, Partitioning method = Partitioning::BinnedSAH) {
             m_method = method;
             
             ObjInfos infos;
@@ -261,7 +261,7 @@ namespace SLR {
                 if (!node.bbox.intersect(ray))
                     continue;
                 if (node.numLeaves == 0) {
-                    SLRAssert(depth >= StackSize, "SBVH::intersect: stack overflow");
+                    SLRAssert(depth >= StackSize, "StandardBVH::intersect: stack overflow");
                     bool positiveDir = dirIsPositive[node.axis];
                     idxStack[depth++] = positiveDir ? node.c1 : node.c0;
                     idxStack[depth++] = positiveDir ? node.c0 : node.c1;

@@ -1,12 +1,12 @@
 //
-//  AshikhminReflection.h
+//  AshikhminShirleyReflection.h
 //
 //  Created by 渡部 心 on 2015/09/06.
 //  Copyright (c) 2015年 渡部 心. All rights reserved.
 //
 
-#ifndef __SLR__AshikhminReflection__
-#define __SLR__AshikhminReflection__
+#ifndef __SLR__AshikhminShirleyReflection__
+#define __SLR__AshikhminShirleyReflection__
 
 #include "../defines.h"
 #include "../references.h"
