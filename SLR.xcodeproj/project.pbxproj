@@ -29,6 +29,12 @@
 		462982D31C65FF980052228B /* DebugRenderer.h in Headers */ = {isa = PBXBuildFile; fileRef = 462982D21C65FF980052228B /* DebugRenderer.h */; };
 		4638105B1C21AD0E00211293 /* SceneParser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 463810591C21AD0E00211293 /* SceneParser.cpp */; };
 		4638105C1C21AD0E00211293 /* SceneParser.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 4638105A1C21AD0E00211293 /* SceneParser.hpp */; };
+		464EAAFD1D683DA0000E1C65 /* builtin_math.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 464EAAFB1D683DA0000E1C65 /* builtin_math.cpp */; };
+		464EAAFE1D683DA0000E1C65 /* builtin_math.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 464EAAFC1D683DA0000E1C65 /* builtin_math.hpp */; };
+		464EAB011D6843E6000E1C65 /* builtin_transform.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 464EAAFF1D6843E6000E1C65 /* builtin_transform.cpp */; };
+		464EAB021D6843E6000E1C65 /* builtin_transform.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 464EAB001D6843E6000E1C65 /* builtin_transform.hpp */; };
+		464EAB051D68471C000E1C65 /* builtin_texture.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 464EAB031D68471C000E1C65 /* builtin_texture.cpp */; };
+		464EAB061D68471C000E1C65 /* builtin_texture.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 464EAB041D68471C000E1C65 /* builtin_texture.hpp */; };
 		4651F3281C56705B0026B8A5 /* Point3.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4651F3271C56705B0026B8A5 /* Point3.cpp */; };
 		4651F32A1C5670C70026B8A5 /* Vector3.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4651F3291C5670C70026B8A5 /* Vector3.cpp */; };
 		4651F32C1C5672460026B8A5 /* Vector4.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4651F32B1C5672460026B8A5 /* Vector4.cpp */; };
@@ -224,6 +230,12 @@
 		4634EC3E1B9B60400047AE54 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		463810591C21AD0E00211293 /* SceneParser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SceneParser.cpp; path = libSLRSceneGraph/Parser/SceneParser.cpp; sourceTree = "<group>"; };
 		4638105A1C21AD0E00211293 /* SceneParser.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = SceneParser.hpp; path = libSLRSceneGraph/Parser/SceneParser.hpp; sourceTree = "<group>"; };
+		464EAAFB1D683DA0000E1C65 /* builtin_math.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = builtin_math.cpp; path = libSLRSceneGraph/Parser/BuiltinFunctions/builtin_math.cpp; sourceTree = "<group>"; };
+		464EAAFC1D683DA0000E1C65 /* builtin_math.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = builtin_math.hpp; path = libSLRSceneGraph/Parser/BuiltinFunctions/builtin_math.hpp; sourceTree = "<group>"; };
+		464EAAFF1D6843E6000E1C65 /* builtin_transform.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = builtin_transform.cpp; path = libSLRSceneGraph/Parser/BuiltinFunctions/builtin_transform.cpp; sourceTree = "<group>"; };
+		464EAB001D6843E6000E1C65 /* builtin_transform.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = builtin_transform.hpp; path = libSLRSceneGraph/Parser/BuiltinFunctions/builtin_transform.hpp; sourceTree = "<group>"; };
+		464EAB031D68471C000E1C65 /* builtin_texture.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = builtin_texture.cpp; path = libSLRSceneGraph/Parser/BuiltinFunctions/builtin_texture.cpp; sourceTree = "<group>"; };
+		464EAB041D68471C000E1C65 /* builtin_texture.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = builtin_texture.hpp; path = libSLRSceneGraph/Parser/BuiltinFunctions/builtin_texture.hpp; sourceTree = "<group>"; };
 		4651F3271C56705B0026B8A5 /* Point3.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Point3.cpp; path = libSLR/BasicTypes/Point3.cpp; sourceTree = SOURCE_ROOT; };
 		4651F3291C5670C70026B8A5 /* Vector3.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Vector3.cpp; path = libSLR/BasicTypes/Vector3.cpp; sourceTree = SOURCE_ROOT; };
 		4651F32B1C5672460026B8A5 /* Vector4.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Vector4.cpp; path = libSLR/BasicTypes/Vector4.cpp; sourceTree = SOURCE_ROOT; };
@@ -596,6 +608,19 @@
 			path = Textures;
 			sourceTree = "<group>";
 		};
+		464EAAFA1D683D59000E1C65 /* Builtin Functions */ = {
+			isa = PBXGroup;
+			children = (
+				464EAAFB1D683DA0000E1C65 /* builtin_math.cpp */,
+				464EAAFC1D683DA0000E1C65 /* builtin_math.hpp */,
+				464EAAFF1D6843E6000E1C65 /* builtin_transform.cpp */,
+				464EAB001D6843E6000E1C65 /* builtin_transform.hpp */,
+				464EAB031D68471C000E1C65 /* builtin_texture.cpp */,
+				464EAB041D68471C000E1C65 /* builtin_texture.hpp */,
+			);
+			name = "Builtin Functions";
+			sourceTree = "<group>";
+		};
 		466F6C061BB6B0920056F2FA /* SLR Scene Graph */ = {
 			isa = PBXGroup;
 			children = (
@@ -645,6 +670,7 @@
 		46D7E0831BC8F57A00AFF96F /* Parser */ = {
 			isa = PBXGroup;
 			children = (
+				464EAAFA1D683D59000E1C65 /* Builtin Functions */,
 				46D7E0841BC8F58900AFF96F /* Makefile */,
 				4638105A1C21AD0E00211293 /* SceneParser.hpp */,
 				463810591C21AD0E00211293 /* SceneParser.cpp */,
@@ -789,8 +815,11 @@
 				4602E8B11BC40E8700EC16FA /* surface_materials.hpp in Headers */,
 				466F6D211BB6CB4E0056F2FA /* InfiniteSphereNode.h in Headers */,
 				46B9589C1BDCD2B300A915DE /* position.hh in Headers */,
+				464EAB061D68471C000E1C65 /* builtin_texture.hpp in Headers */,
+				464EAB021D6843E6000E1C65 /* builtin_transform.hpp in Headers */,
 				46B958A11BDCD2B300A915DE /* SceneParsingDriver.h in Headers */,
 				46B958A01BDCD2B300A915DE /* SceneParser.tab.hh in Headers */,
+				464EAAFE1D683DA0000E1C65 /* builtin_math.hpp in Headers */,
 				466F6D251BB6CB4E0056F2FA /* nodes.h in Headers */,
 				466F6D231BB6CB4E0056F2FA /* node_constructor.h in Headers */,
 				4602E8B31BC40E8700EC16FA /* textures.hpp in Headers */,
@@ -972,6 +1001,7 @@
 			files = (
 				466F6D201BB6CB4E0056F2FA /* InfiniteSphereNode.cpp in Sources */,
 				466F6D221BB6CB4E0056F2FA /* node_constructor.cpp in Sources */,
+				464EAB011D6843E6000E1C65 /* builtin_transform.cpp in Sources */,
 				4602E8B01BC40E8700EC16FA /* surface_materials.cpp in Sources */,
 				4602E8B21BC40E8700EC16FA /* textures.cpp in Sources */,
 				4638105B1C21AD0E00211293 /* SceneParser.cpp in Sources */,
@@ -980,7 +1010,9 @@
 				466F6D341BB6D7A00056F2FA /* image_loader.cpp in Sources */,
 				466F6D1E1BB6CB4E0056F2FA /* camera_nodes.cpp in Sources */,
 				466F6D261BB6CB4E0056F2FA /* Scene.cpp in Sources */,
+				464EAB051D68471C000E1C65 /* builtin_texture.cpp in Sources */,
 				466F6D281BB6CB4E0056F2FA /* TriangleMeshNode.cpp in Sources */,
+				464EAAFD1D683DA0000E1C65 /* builtin_math.cpp in Sources */,
 				46B9589F1BDCD2B300A915DE /* SceneParser.tab.cc in Sources */,
 				466F6D241BB6CB4E0056F2FA /* nodes.cpp in Sources */,
 			);

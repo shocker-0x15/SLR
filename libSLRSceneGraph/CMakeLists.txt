@@ -13,6 +13,8 @@ file(GLOB libSLRSceneGraph_Sources
      Parser/*.hpp
      Parser/*.cpp
      Parser/*.cc
+     Parser/BuiltinFunctions/*.hpp
+     Parser/BuiltinFunctions/*.cpp
     )
 file(GLOB libSLRSceneGraph_Sources_excluded
      Parser/main.cpp
@@ -24,6 +26,7 @@ list(REMOVE_ITEM libSLRSceneGraph_Sources ${libSLRSceneGraph_Sources_excluded})
 source_group("SLR Scene Graph" REGULAR_EXPRESSION ".*\.(h|c|hpp|cpp)")
 source_group("SLR Scene Graph\\Helper" REGULAR_EXPRESSION "Helper/.*\.(h|c|hpp|cpp)")
 source_group("SLR Scene Graph\\Parser" REGULAR_EXPRESSION "Parser/.*\.(h|c|hh|cc|hpp|cpp)")
+source_group("SLR Scene Graph\\Parser\\Builtin Functions" REGULAR_EXPRESSION "Parser/BuiltinFunctions/.*\.(h|c|hpp|cpp)")
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
