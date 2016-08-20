@@ -10,13 +10,16 @@
 #include "Parser/SceneParsingDriver.h"
 
 #include <libSLR/Core/Image.h>
-#include <libSLR/Core/Transform.h>
 #include <libSLR/Core/SurfaceObject.h>
 #include <libSLR/Core/XORShiftRNG.h>
 #include <libSLR/Memory/ArenaAllocator.h>
 #include <libSLR/Renderers/DebugRenderer.h>
 #include <libSLR/Renderers/PathTracingRenderer.h>
 #include <libSLR/Renderers/BidirectionalPathTracingRenderer.h>
+
+#include "Parser/BuiltinFunctions/builtin_math.hpp"
+#include "Parser/BuiltinFunctions/builtin_transform.hpp"
+#include "Parser/BuiltinFunctions/builtin_texture.hpp"
 
 #include "nodes.h"
 #include "node_constructor.h"
@@ -203,128 +206,7 @@ namespace SLRSceneGraph {
                                      return Element(normal.z);
                                  }})
                     );
-            stack["min"] =
-            Element(TypeMap::Function(),
-                    Function(1, {{"x0", Type::RealNumber}, {"x1", Type::RealNumber}},
-                             [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
-                                 float x0 = args.at("x0").raw<TypeMap::RealNumber>();
-                                 float x1 = args.at("x1").raw<TypeMap::RealNumber>();
-                                 return Element(std::min(x0, x1));
-                             })
-                    );
-            stack["max"] =
-            Element(TypeMap::Function(),
-                    Function(1, {{"x0", Type::RealNumber}, {"x1", Type::RealNumber}},
-                             [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
-                                 float x0 = args.at("x0").raw<TypeMap::RealNumber>();
-                                 float x1 = args.at("x1").raw<TypeMap::RealNumber>();
-                                 return Element(std::max(x0, x1));
-                             })
-                    );
-            stack["clamp"] =
-            Element(TypeMap::Function(),
-                    Function(1, {{"x", Type::RealNumber}, {"min", Type::RealNumber}, {"max", Type::RealNumber}},
-                             [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
-                                 float x = args.at("x").raw<TypeMap::RealNumber>();
-                                 float min = args.at("min").raw<TypeMap::RealNumber>();
-                                 float max = args.at("max").raw<TypeMap::RealNumber>();
-                                 return Element(std::clamp(x, min, max));
-                             })
-                    );
-            stack["sqrt"] =
-            Element(TypeMap::Function(),
-                    Function(1, {{"x", Type::RealNumber}},
-                             [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
-                                 float x = args.at("x").raw<TypeMap::RealNumber>();
-                                 return Element(std::sqrt(x));
-                             })
-                    );
-            stack["pow"] =
-            Element(TypeMap::Function(),
-                    Function(1, {{"x", Type::RealNumber}, {"e", Type::RealNumber}},
-                             [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
-                                 float x = args.at("x").raw<TypeMap::RealNumber>();
-                                 float e = args.at("e").raw<TypeMap::RealNumber>();
-                                 return Element(std::pow(x, e));
-                             })
-                    );
-            stack["sin"] =
-            Element(TypeMap::Function(),
-                    Function(1, {{"x", Type::RealNumber}},
-                             [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
-                                 float x = args.at("x").raw<TypeMap::RealNumber>();
-                                 return Element(std::sin(x));
-                             })
-                    );
-            stack["cos"] =
-            Element(TypeMap::Function(),
-                    Function(1, {{"x", Type::RealNumber}},
-                             [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
-                                 float x = args.at("x").raw<TypeMap::RealNumber>();
-                                 return Element(std::cos(x));
-                             })
-                    );
-            stack["tan"] =
-            Element(TypeMap::Function(),
-                    Function(1, {{"x", Type::RealNumber}},
-                             [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
-                                 float x = args.at("x").raw<TypeMap::RealNumber>();
-                                 return Element(std::tan(x));
-                             })
-                    );
-            stack["asin"] =
-            Element(TypeMap::Function(),
-                    Function(1, {{"x", Type::RealNumber}},
-                             [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
-                                 float x = args.at("x").raw<TypeMap::RealNumber>();
-                                 return Element(std::asin(x));
-                             })
-                    );
-            stack["acos"] =
-            Element(TypeMap::Function(),
-                    Function(1, {{"x", Type::RealNumber}},
-                             [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
-                                 float x = args.at("x").raw<TypeMap::RealNumber>();
-                                 return Element(std::acos(x));
-                             })
-                    );
-            stack["atan"] =
-            Element(TypeMap::Function(),
-                    Function(1,
-                             {
-                                 {{"x", Type::RealNumber}},
-                                 {{"y", Type::RealNumber}, {"x", Type::RealNumber}}
-                             },
-                             {
-                                 [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
-                                     float x = args.at("x").raw<TypeMap::RealNumber>();
-                                     return Element(std::atan(x));
-                                 },
-                                 [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
-                                     float y = args.at("y").raw<TypeMap::RealNumber>();
-                                     float x = args.at("x").raw<TypeMap::RealNumber>();
-                                     return Element(std::atan2(y, x));
-                                 }
-                             })
-                    );
-            stack["dot"] =
-            Element(TypeMap::Function(),
-                    Function(1, {{"v0", Type::Vector}, {"v1", Type::Vector}},
-                             [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
-                                 const SLR::Vector3D v0 = args.at("v0").raw<TypeMap::Vector>();
-                                 const SLR::Vector3D v1 = args.at("v1").raw<TypeMap::Vector>();
-                                 return Element(SLR::dot(v0, v1));
-                             })
-                    );
-            stack["cross"] =
-            Element(TypeMap::Function(),
-                    Function(1, {{"v0", Type::Vector}, {"v1", Type::Vector}},
-                             [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
-                                 const SLR::Vector3D v0 = args.at("v0").raw<TypeMap::Vector>();
-                                 const SLR::Vector3D v1 = args.at("v1").raw<TypeMap::Vector>();
-                                 return Element(SLR::cross(v0, v1));
-                             })
-                    );
+            
             stack["random"] =
             Element(TypeMap::Function(),
                     Function(1, {},
@@ -333,106 +215,35 @@ namespace SLRSceneGraph {
                                  return Element(rng.getFloat0cTo1o());
                              })
                     );
-            stack["translate"] =
-            Element(TypeMap::Function(),
-                    Function(1,
-                             {{"x", Type::RealNumber}, {"y", Type::RealNumber}, {"z", Type::RealNumber}},
-                             [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
-                                 float tx = args.at("x").raw<TypeMap::RealNumber>();
-                                 float ty = args.at("y").raw<TypeMap::RealNumber>();
-                                 float tz = args.at("z").raw<TypeMap::RealNumber>();
-                                 
-                                 return Element(TypeMap::Matrix(), SLR::translate(tx, ty, tz));
-                             })
-                    );
-            stack["rotate"] =
-            Element(TypeMap::Function(),
-                    Function(1, {{"angle", Type::RealNumber}, {"axis", Type::Vector}},
-                             [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
-                                 float angle = args.at("angle").raw<TypeMap::RealNumber>();
-                                 SLR::Vector3D axis = args.at("axis").raw<TypeMap::Vector>();
-                                 return Element(TypeMap::Matrix(), SLR::rotate(angle, axis));
-                             })
-                    );
-            stack["rotateX"] =
-            Element(TypeMap::Function(),
-                    Function(1, {{"angle", Type::RealNumber}},
-                             [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
-                                 float angle = args.at("angle").raw<TypeMap::RealNumber>();
-                                 return Element(TypeMap::Matrix(), SLR::rotateX(angle));
-                             })
-                    );
-            stack["rotateY"] =
-            Element(TypeMap::Function(),
-                    Function(1, {{"angle", Type::RealNumber}},
-                             [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
-                                 float angle = args.at("angle").raw<TypeMap::RealNumber>();
-                                 return Element(TypeMap::Matrix(), SLR::rotateY(angle));
-                             })
-                    );
-            stack["rotateZ"] =
-            Element(TypeMap::Function(),
-                    Function(1, {{"angle", Type::RealNumber}},
-                             [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
-                                 float angle = args.at("angle").raw<TypeMap::RealNumber>();
-                                 return Element(TypeMap::Matrix(), SLR::rotateZ(angle));
-                             })
-                    );
-            stack["scale"] =
-            Element(TypeMap::Function(),
-                    Function(1,
-                             {
-                                 {{"s", Type::RealNumber}},
-                                 {{"x", Type::RealNumber}, {"y", Type::RealNumber}, {"z", Type::RealNumber}}
-                             },
-                             {
-                                 [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
-                                     float s = args.at("s").raw<TypeMap::RealNumber>();
-                                     return Element(TypeMap::Matrix(), SLR::scale(s));
-                                 },
-                                 [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
-                                     float sx = args.at("x").raw<TypeMap::RealNumber>();
-                                     float sy = args.at("y").raw<TypeMap::RealNumber>();
-                                     float sz = args.at("z").raw<TypeMap::RealNumber>();
-                                     return Element(TypeMap::Matrix(), SLR::scale(sx, sy, sz));
-                                 }
-                             })
-                    );
-            stack["lookAt"] =
-            Element(TypeMap::Function(),
-                    Function(1, {{"eye", Type::Tuple}, {"target", Type::Tuple}, {"up", Type::Tuple}},
-                             [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
-                                 static const Function sigEye = Function(1, {{"x", Type::RealNumber}, {"y", Type::RealNumber}, {"z", Type::RealNumber}});
-                                 static const Function sigTarget = Function(1, {{"x", Type::RealNumber}, {"y", Type::RealNumber}, {"z", Type::RealNumber}});
-                                 static const Function sigUp = Function(1, {{"x", Type::RealNumber}, {"y", Type::RealNumber}, {"z", Type::RealNumber}});
-                                 static const auto procEye = [](const std::map<std::string, Element> &arg) {
-                                     return SLR::Point3D(arg.at("x").raw<TypeMap::RealNumber>(), arg.at("y").raw<TypeMap::RealNumber>(), arg.at("z").raw<TypeMap::RealNumber>());
-                                 };
-                                 static const auto procTarget = [](const std::map<std::string, Element> &arg) {
-                                     return SLR::Point3D(arg.at("x").raw<TypeMap::RealNumber>(), arg.at("y").raw<TypeMap::RealNumber>(), arg.at("z").raw<TypeMap::RealNumber>());
-                                 };
-                                 static const auto procUp = [](const std::map<std::string, Element> &arg) {
-                                     return SLR::Vector3D(arg.at("x").raw<TypeMap::RealNumber>(), arg.at("y").raw<TypeMap::RealNumber>(), arg.at("z").raw<TypeMap::RealNumber>());
-                                 };
-                                 SLR::Matrix4x4 matRawLookAt = SLR::lookAt(sigEye.perform<SLR::Point3D>(procEye, args.at("eye").raw<TypeMap::Tuple>()),
-                                                                           sigTarget.perform<SLR::Point3D>(procTarget, args.at("target").raw<TypeMap::Tuple>()),
-                                                                           sigUp.perform<SLR::Vector3D>(procUp, args.at("up").raw<TypeMap::Tuple>()));
-                                 SLR::Matrix4x4 mat = SLR::invert(matRawLookAt) * SLR::rotateY((float)M_PI);
-                                 return Element(TypeMap::Matrix(), mat);
-                             })
-                    );
-            stack["AnimatedTransform"] =
-            Element(TypeMap::Function(),
-                    Function(1, {{"tfStart", Type::Matrix}, {"tfEnd", Type::Matrix}, {"tBegin", Type::RealNumber}, {"tEnd", Type::RealNumber}},
-                             [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
-                                 const SLR::Matrix4x4 &tfStart = args.at("tfStart").raw<TypeMap::Matrix>();
-                                 const SLR::Matrix4x4 &tfEnd = args.at("tfEnd").raw<TypeMap::Matrix>();
-                                 float tBegin = args.at("tBegin").raw<TypeMap::RealNumber>();
-                                 float tEnd = args.at("tEnd").raw<TypeMap::RealNumber>();
-                                 TransformRef tf = createShared<SLR::AnimatedTransform>(tfStart, tfEnd, tBegin, tEnd);
-                                 return Element(TypeMap::Transform(), tf);
-                             })
-                    );
+            
+            stack["min"] = Element(TypeMap::Function(), BuiltinFunctions::Math::min);
+            stack["clamp"] = Element(TypeMap::Function(), BuiltinFunctions::Math::clamp);
+            stack["sqrt"] = Element(TypeMap::Function(), BuiltinFunctions::Math::sqrt);
+            stack["pow"] = Element(TypeMap::Function(), BuiltinFunctions::Math::pow);
+            stack["sin"] = Element(TypeMap::Function(), BuiltinFunctions::Math::sin);
+            stack["cos"] = Element(TypeMap::Function(), BuiltinFunctions::Math::cos);
+            stack["tan"] = Element(TypeMap::Function(), BuiltinFunctions::Math::tan);
+            stack["asin"] = Element(TypeMap::Function(), BuiltinFunctions::Math::asin);
+            stack["acos"] = Element(TypeMap::Function(), BuiltinFunctions::Math::acos);
+            stack["atan"] = Element(TypeMap::Function(), BuiltinFunctions::Math::atan);
+            stack["dot"] = Element(TypeMap::Function(), BuiltinFunctions::Math::dot);
+            stack["cross"] = Element(TypeMap::Function(), BuiltinFunctions::Math::cross);
+            
+            stack["translate"] = Element(TypeMap::Function(), BuiltinFunctions::Transform::translate);
+            stack["rotate"] = Element(TypeMap::Function(), BuiltinFunctions::Transform::rotate);
+            stack["rotateX"] = Element(TypeMap::Function(), BuiltinFunctions::Transform::rotateX);
+            stack["rotateY"] = Element(TypeMap::Function(), BuiltinFunctions::Transform::rotateY);
+            stack["rotateZ"] = Element(TypeMap::Function(), BuiltinFunctions::Transform::rotateZ);
+            stack["scale"] = Element(TypeMap::Function(), BuiltinFunctions::Transform::scale);
+            stack["lookAt"] = Element(TypeMap::Function(), BuiltinFunctions::Transform::lookAt);
+            stack["AnimatedTransform"] = Element(TypeMap::Function(), BuiltinFunctions::Transform::AnimatedTransform);
+            
+            stack["Texture2DMapping"] = Element(TypeMap::Function(), BuiltinFunctions::Texture::Texture2DMapping);
+            stack["Texture3DMapping"] = Element(TypeMap::Function(), BuiltinFunctions::Texture::Texture3DMapping);
+            stack["SpectrumTexture"] = Element(TypeMap::Function(), BuiltinFunctions::Texture::SpectrumTexture);
+            stack["NormalTexture"] = Element(TypeMap::Function(), BuiltinFunctions::Texture::NormalTexture);
+            stack["FloatTexture"] = Element(TypeMap::Function(), BuiltinFunctions::Texture::FloatTexture);
+
             stack["createVertex"] =
             Element(TypeMap::Function(),
                     Function(1, {{"position", Type::Tuple}, {"normal", Type::Tuple}, {"tangent", Type::Tuple}, {"texCoord", Type::Tuple}},
@@ -645,206 +456,7 @@ namespace SLRSceneGraph {
                                  return Element(TypeMap::Image2D(), image);
                              })
                     );
-            stack["Texture2DMapping"] =
-            Element(TypeMap::Function(),
-                    Function(1,
-                             {
-                                 {"type", Type::String, Element("texcoord 2D")}, {"params", Type::Tuple, Element(TypeMap::Tuple(), ParameterList())}
-                             },
-                             [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
-                                 std::string type = args.at("type").raw<TypeMap::String>();
-                                 const ParameterList &params = args.at("params").raw<TypeMap::Tuple>();
-                                 if (type == "texcoord 2D") {
-                                     return Element(TypeMap::Texture2DMapping(), Texture2DMapping::sharedInstanceRef());
-                                 }
-                                 *err = ErrorMessage("Specified type is invalid.");
-                                 return Element();
-                             })
-                    );
-            stack["Texture3DMapping"] =
-            Element(TypeMap::Function(),
-                    Function(1,
-                             {
-                                 {"type", Type::String, Element("texcoord 2D")}, {"params", Type::Tuple, Element(TypeMap::Tuple(), ParameterList())}
-                             },
-                             [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
-                                 std::string type = args.at("type").raw<TypeMap::String>();
-                                 const ParameterList &params = args.at("params").raw<TypeMap::Tuple>();
-                                 if (type == "texcoord 2D") {
-                                     return Element(TypeMap::Texture3DMapping(), Texture3DMapping::sharedInstanceRef());
-                                 }
-                                 else if (type == "world pos") {
-                                     return Element(TypeMap::Texture3DMapping(), WorldPosition3DMapping::sharedInstanceRef());
-                                 }
-                                 *err = ErrorMessage("Specified type is invalid.");
-                                 return Element();
-                             })
-                    );
-            stack["SpectrumTexture"] =
-            Element(TypeMap::Function(),
-                    Function(1,
-                             {
-                                 {{"spectrum", Type::Spectrum}},
-                                 {{"image", Type::Image2D}, {"mapping", Type::Texture2DMapping, Element(TypeMap::Texture2DMapping(), Texture2DMapping::sharedInstanceRef())}},
-                                 {{"procedure", Type::String}, {"params", Type::Tuple}}
-                             },
-                             {
-                                 [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
-                                     InputSpectrumRef spectrum = args.at("spectrum").rawRef<TypeMap::Spectrum>();
-                                     return Element(TypeMap::SpectrumTexture(), createShared<ConstantSpectrumTexture>(spectrum));
-                                 },
-                                 [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
-                                     const auto &image = args.at("image").rawRef<TypeMap::Image2D>();
-                                     const auto &mapping = args.at("mapping").rawRef<TypeMap::Texture2DMapping>();
-                                     return Element(TypeMap::SpectrumTexture(), createShared<ImageSpectrumTexture>(mapping, image));
-                                 },
-                                 [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
-                                     std::string procedure = args.at("procedure").raw<TypeMap::String>();
-                                     const ParameterList &params = args.at("params").raw<TypeMap::Tuple>();
-                                     if (procedure == "checker board") {
-                                         const static Function configFunc{
-                                             0, {
-                                                 {"c0", Type::Spectrum}, {"c1", Type::Spectrum}, {"mapping", Type::Texture2DMapping, Element(TypeMap::Texture2DMapping(), Texture2DMapping::sharedInstanceRef())}
-                                             },
-                                             [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
-                                                 const InputSpectrumRef c0 = args.at("c0").rawRef<TypeMap::Spectrum>();
-                                                 const InputSpectrumRef c1 = args.at("c1").rawRef<TypeMap::Spectrum>();
-                                                 const auto &mapping = args.at("mapping").rawRef<TypeMap::Texture2DMapping>();
-                                                 return Element(TypeMap::SpectrumTexture(), createShared<CheckerBoardSpectrumTexture>(mapping, c0, c1));
-                                             }
-                                         };
-                                         return configFunc(params, context, err);
-                                     }
-                                     else if (procedure == "voronoi") {
-                                         const static Function configFunc{
-                                             0, {
-                                                 {"scale", Type::RealNumber}, {"brightness", Type::RealNumber, Element(TypeMap::RealNumber(), 0.8f)}, {"mapping", Type::Texture3DMapping, Element(TypeMap::Texture3DMapping(), WorldPosition3DMapping::sharedInstanceRef())}
-                                             },
-                                             [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
-                                                 float scale = args.at("scale").raw<TypeMap::RealNumber>();
-                                                 float brightness = args.at("brightness").raw<TypeMap::RealNumber>();
-                                                 const auto &mapping = args.at("mapping").rawRef<TypeMap::Texture3DMapping>();
-                                                 return Element(TypeMap::SpectrumTexture(), createShared<VoronoiSpectrumTexture>(mapping, scale, brightness));
-                                             }
-                                         };
-                                         return configFunc(params, context, err);
-                                     }
-                                     *err = ErrorMessage("Specified procedure is invalid.");
-                                     return Element();
-                                 }
-                             })
-                    );
-            stack["NormalTexture"] =
-            Element(TypeMap::Function(),
-                    Function(1,
-                             {
-                                 {{"image", Type::Image2D}, {"mapping", Type::Texture2DMapping, Element(TypeMap::Texture2DMapping(), Texture2DMapping::sharedInstanceRef())}},
-                                 {{"procedure", Type::String}, {"params", Type::Tuple}}
-                             },
-                             {
-                                 [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
-                                     const auto &image = args.at("image").rawRef<TypeMap::Image2D>();
-                                     const auto &mapping = args.at("mapping").rawRef<TypeMap::Texture2DMapping>();
-                                     return Element(TypeMap::NormalTexture(), createShared<ImageNormal3DTexture>(mapping, image));
-                                 },
-                                 [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
-                                     std::string procedure = args.at("procedure").raw<TypeMap::String>();
-                                     const ParameterList &params = args.at("params").raw<TypeMap::Tuple>();
-                                     if (procedure == "checker board") {
-                                         const static Function configFunc{
-                                             0, {
-                                                 {"stepWidth", Type::RealNumber, Element(0.05)},
-                                                 {"reverse", Type::Bool, Element(false)},
-                                                 {"mapping", Type::Texture2DMapping, Element(TypeMap::Texture2DMapping(), Texture2DMapping::sharedInstanceRef())}
-                                             },
-                                             [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
-                                                 float stepWidth = args.at("stepWidth").raw<TypeMap::RealNumber>();
-                                                 bool reverse = args.at("reverse").raw<TypeMap::Bool>();
-                                                 const auto &mapping = args.at("mapping").rawRef<TypeMap::Texture2DMapping>();
-                                                 return Element(TypeMap::NormalTexture(), createShared<CheckerBoardNormal3DTexture>(mapping, stepWidth, reverse));
-                                             }
-                                         };
-                                         return configFunc(params, context, err);
-                                     }
-                                     else if (procedure == "voronoi") {
-                                         const static Function configFunc{
-                                             0, {
-                                                 {"scale", Type::RealNumber},
-                                                 {"thetaMax", Type::RealNumber, Element(M_PI / 6)},
-                                                 {"mapping", Type::Texture3DMapping, Element(TypeMap::Texture3DMapping(), WorldPosition3DMapping::sharedInstanceRef())}
-                                             },
-                                             [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
-                                                 float scale = args.at("scale").raw<TypeMap::RealNumber>();
-                                                 float thetaMax = args.at("thetaMax").raw<TypeMap::RealNumber>();
-                                                 const auto &mapping = args.at("mapping").rawRef<TypeMap::Texture3DMapping>();
-                                                 return Element(TypeMap::NormalTexture(), createShared<VoronoiNormal3DTexture>(mapping, scale, thetaMax));
-                                             }
-                                         };
-                                         return configFunc(params, context, err);
-                                     }
-                                     *err = ErrorMessage("Specified procedure is invalid.");
-                                     return Element();
-                                 }
-                             })
-                    );
-            stack["FloatTexture"] =
-            Element(TypeMap::Function(),
-                    Function(1,
-                             {
-                                 {{"value", Type::RealNumber}},
-                                 {{"image", Type::Image2D}, {"mapping", Type::Texture2DMapping, Element(TypeMap::Texture2DMapping(), Texture2DMapping::sharedInstanceRef())}},
-                                 {{"procedure", Type::String}, {"params", Type::Tuple}}
-                             },
-                             {
-                                 [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
-                                     auto value = args.at("value").raw<TypeMap::RealNumber>();
-                                     return Element(TypeMap::FloatTexture(), createShared<ConstantFloatTexture>(value));
-                                 },
-                                 [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
-                                     const auto &image = args.at("image").rawRef<TypeMap::Image2D>();
-                                     const auto &mapping = args.at("mapping").rawRef<TypeMap::Texture2DMapping>();
-                                     return Element(TypeMap::FloatTexture(), createShared<ImageFloatTexture>(mapping, image));
-                                 },
-                                 [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
-                                     std::string procedure = args.at("procedure").raw<TypeMap::String>();
-                                     const ParameterList &params = args.at("params").raw<TypeMap::Tuple>();
-                                     if (procedure == "checker board") {
-                                         const static Function configFunc{
-                                             0, {
-                                                 {"c0", Type::RealNumber}, {"c1", Type::RealNumber}, {"mapping", Type::Texture2DMapping, Element(TypeMap::Texture2DMapping(), Texture2DMapping::sharedInstanceRef())}
-                                             },
-                                             [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
-                                                 float c0 = args.at("c0").raw<TypeMap::RealNumber>();
-                                                 float c1 = args.at("c1").raw<TypeMap::RealNumber>();
-                                                 const auto &mapping = args.at("mapping").rawRef<TypeMap::Texture2DMapping>();
-                                                 return Element(TypeMap::FloatTexture(), createShared<CheckerBoardFloatTexture>(mapping, c0, c1));
-                                             }
-                                         };
-                                         return configFunc(params, context, err);
-                                     }
-                                     else if (procedure == "voronoi") {
-                                         const static Function configFunc{
-                                             0, {
-                                                 {"scale", Type::RealNumber},
-                                                 {"valueScale", Type::RealNumber, Element(1.0)},
-                                                 {"flat", Type::Bool, Element(true)},
-                                                 {"mapping", Type::Texture3DMapping, Element(TypeMap::Texture3DMapping(), WorldPosition3DMapping::sharedInstanceRef())}
-                                             },
-                                             [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
-                                                 float scale = args.at("scale").raw<TypeMap::RealNumber>();
-                                                 float valueScale = args.at("valueScale").raw<TypeMap::RealNumber>();
-                                                 bool flat = args.at("flat").raw<TypeMap::Bool>();
-                                                 const auto &mapping = args.at("mapping").rawRef<TypeMap::Texture3DMapping>();
-                                                 return Element(TypeMap::FloatTexture(), createShared<VoronoiFloatTexture>(mapping, scale, valueScale, flat));
-                                             }
-                                         };
-                                         return configFunc(params, context, err);
-                                     }
-                                     *err = ErrorMessage("Specified procedure is invalid.");
-                                     return Element();
-                                 }
-                             })
-                    );
+
             stack["createSurfaceMaterial"] =
             Element(TypeMap::Function(),
                     Function(1, {{"type", Type::String}, {"params", Type::Tuple}},

@@ -79,31 +79,6 @@ namespace SLRSceneGraph {
 #undef TypeMapDef
     }
     
-    enum class API : uint32_t {
-        AddItem,
-        Translate,
-        RotateX,
-        RotateY,
-        RotateZ,
-        Scale,
-        CreateVertex,
-        Spectrum,
-        SpectrumTexture,
-        CreateMatte,
-        CreateDiffuseEmitter,
-        CreateEmitterSurfaceMaterial,
-        CreateMesh,
-        CreateNode,
-        SetTransform,
-        AddChild,
-        CreatePerspectiveCamera,
-        SetRenderer,
-        SetRenderSettings,
-        SetEnvironment,
-        LoadImage,
-        Load3DModel,
-    };
-    
     struct ErrorMessage {
         bool error;
         std::string message;
