@@ -49,6 +49,13 @@ namespace SLRSceneGraph {
         }
     }
     
+    NodeRef TriangleMeshNode::copy() const {
+        TriangleMeshNodeRef ret = createShared<TriangleMeshNode>();
+        ret->m_vertices = m_vertices;
+        ret->m_matGroups = m_matGroups;
+        return ret;
+    }
+    
     void TriangleMeshNode::applyTransform(const SLR::StaticTransform &t) {
         for (int i = 0; i < m_vertices.size(); ++i) {
             Vertex &v = m_vertices[i];

@@ -421,6 +421,18 @@ namespace SLRSceneGraph {
                                  return Element(TypeMap::Matrix(), mat);
                              })
                     );
+            stack["AnimatedTransform"] =
+            Element(TypeMap::Function(),
+                    Function(1, {{"tfStart", Type::Matrix}, {"tfEnd", Type::Matrix}, {"tBegin", Type::RealNumber}, {"tEnd", Type::RealNumber}},
+                             [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
+                                 const SLR::Matrix4x4 &tfStart = args.at("tfStart").raw<TypeMap::Matrix>();
+                                 const SLR::Matrix4x4 &tfEnd = args.at("tfEnd").raw<TypeMap::Matrix>();
+                                 float tBegin = args.at("tBegin").raw<TypeMap::RealNumber>();
+                                 float tEnd = args.at("tEnd").raw<TypeMap::RealNumber>();
+                                 TransformRef tf = createShared<SLR::AnimatedTransform>(tfStart, tfEnd, tBegin, tEnd);
+                                 return Element(TypeMap::Transform(), tf);
+                             })
+                    );
             stack["createVertex"] =
             Element(TypeMap::Function(),
                     Function(1, {{"position", Type::Tuple}, {"normal", Type::Tuple}, {"tangent", Type::Tuple}, {"texCoord", Type::Tuple}},
@@ -1067,6 +1079,15 @@ namespace SLRSceneGraph {
                                  return Element(TypeMap::Node(), InternalNode());
                              })
                     );
+            stack["copyNode"] =
+            Element(TypeMap::Function(),
+                    Function(1, {{"src", Type::Node}},
+                             [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
+                                 NodeRef node = args.at("src").rawRef<TypeMap::Node>();
+                                 InternalNodeRef copied = std::dynamic_pointer_cast<InternalNode>(node->copy());
+                                 return Element(TypeMap::Node(), copied);
+                             })
+                    );
             stack["createReferenceNode"] =
             Element(TypeMap::Function(),
                     Function(1, {{"node", Type::Node}},
@@ -1255,6 +1276,7 @@ namespace SLRSceneGraph {
                                  {"node", Type::Node},
                                  {"numX", Type::Integer},
                                  {"numY", Type::Integer},
+                                 {"randomness", Type::RealNumber, 0.0f},
                                  {"callback", Type::Function}
                              },
                              [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
@@ -1262,7 +1284,10 @@ namespace SLRSceneGraph {
                                  InternalNodeRef node = args.at("node").rawRef<TypeMap::Node>();
                                  uint32_t numX = args.at("numX").raw<TypeMap::Integer>();
                                  uint32_t numY = args.at("numY").raw<TypeMap::Integer>();
+                                 float randomness = args.at("randomness").raw<TypeMap::RealNumber>();
                                  const Function &callback = args.at("callback").raw<TypeMap::Function>();
+                                 
+                                 SLR::XORShiftRNG rng(50287412);
                                  
                                  RenderingData buildData;
                                  SLR::ArenaAllocator mem;
@@ -1272,12 +1297,15 @@ namespace SLRSceneGraph {
                                  SLR::BoundingBox3D bounds = aggregate->bounds();
                                  for (int i = 0; i < numY; ++i) {
                                      for (int j = 0; j < numX; ++j) {
-                                         Ray ray(Point3D(bounds.minP.x + (bounds.maxP.x - bounds.minP.x) * (j + 0.5f) / numX,
+                                         float purturbX = randomness * (rng.getFloat0cTo1o() - 0.5f);
+                                         float purturbZ = randomness * (rng.getFloat0cTo1o() - 0.5f);
+                                         Ray ray(Point3D(bounds.minP.x + (bounds.maxP.x - bounds.minP.x) * (j + 0.5f + purturbX) / numX,
                                                          bounds.maxP.y * 1.5f,
-                                                         bounds.minP.z + (bounds.maxP.z - bounds.minP.z) * (i + 0.5f) / numY),
+                                                         bounds.minP.z + (bounds.maxP.z - bounds.minP.z) * (i + 0.5f + purturbZ) / numY),
                                                  Vector3D(0, -1, 0), 0.0f);
                                          Intersection isect;
-                                         aggregate->intersect(ray, &isect);
+                                         if (!aggregate->intersect(ray, &isect))
+                                             continue;
                                          SurfacePoint surfPt;
                                          isect.getSurfacePoint(&surfPt);
                                          

@@ -66,6 +66,16 @@ namespace SLRSceneGraph {
         return m_childNodes.size() > 0;
     }
     
+    NodeRef InternalNode::copy() const {
+        InternalNodeRef ret = createShared<InternalNode>();
+        ret->m_localToWorld = TransformRef(m_localToWorld->copy());
+        for (int i = 0; i < m_childNodes.size(); ++i) {
+            NodeRef c = m_childNodes[i]->copy();
+            ret->m_childNodes.push_back(c);
+        }
+        return ret;
+    }
+    
     
     void InternalNode::applyTransform() {
         TransformRef tf = getTransform();
@@ -114,6 +124,7 @@ namespace SLRSceneGraph {
                 m_childNodes[i]->getRenderingData(mem, nullptr, &subData);
             if (subData.surfObjs.size() > 1) {
                 SLR::SurfaceObjectAggregate* aggr = mem.create<SLR::SurfaceObjectAggregate>(subData.surfObjs);
+                reduced = SLR::ChainedTransform(subTF, m_localToWorld.get()).reduce(mem);// &m_localToWorld or m_localToWorld.copy(tfMem)?
                 SLR::TransformedSurfaceObject* tfobj = mem.create<SLR::TransformedSurfaceObject>(aggr, reduced);
                 data->surfObjs.push_back(tfobj);
             }

@@ -82,7 +82,7 @@ namespace SLR {
         
         Children collapseBBVH(const SBVH &baseBBVH, uint32_t grandparent, uint32_t depth) {
             Children ret;
-            Children invalidChild = {UINT32_MAX};
+            const Children invalidChild = {UINT32_MAX};
             
             const SBVH::Node* root = &baseBBVH.m_nodes[grandparent];
             if (root->numLeaves > 0) {
@@ -256,7 +256,24 @@ namespace SLR {
             
             m_depth = 0;
             m_bounds = baseBBVH.bounds();
-            collapseBBVH(baseBBVH, 0, 0);
+            Children rootResult = collapseBBVH(baseBBVH, 0, 0);
+            if (rootResult.isLeafNode) {
+                const Children invalidChild = {UINT32_MAX};
+                
+                m_nodes.emplace_back();
+                Node &node = m_nodes.back();
+                
+                const SBVH::Node* orgRoot = &baseBBVH.m_nodes[0];
+                node.min_x = _mm_setr_ps(orgRoot->bbox.minP.x, INFINITY, INFINITY, INFINITY);
+                node.min_y = _mm_setr_ps(orgRoot->bbox.minP.y, INFINITY, INFINITY, INFINITY);
+                node.min_z = _mm_setr_ps(orgRoot->bbox.minP.z, INFINITY, INFINITY, INFINITY);
+                node.max_x = _mm_setr_ps(orgRoot->bbox.maxP.x, -INFINITY, -INFINITY, -INFINITY);
+                node.max_y = _mm_setr_ps(orgRoot->bbox.maxP.y, -INFINITY, -INFINITY, -INFINITY);
+                node.max_z = _mm_setr_ps(orgRoot->bbox.maxP.z, -INFINITY, -INFINITY, -INFINITY);
+                
+                node.children[1] = node.children[2] = node.children[3] = invalidChild;
+                node.children[0] = rootResult;
+            }
             
             tpEnd = std::chrono::system_clock::now();
             elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(tpEnd - tpStart).count();
