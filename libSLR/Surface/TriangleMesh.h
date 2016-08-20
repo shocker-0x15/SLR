@@ -17,9 +17,9 @@ namespace SLR {
         const Vertex* m_v[3];
         const FloatTexture* m_alphaTex;
     public:
-        Triangle() : m_v{nullptr, nullptr, nullptr}, m_alphaTex(nullptr) { };
+        Triangle() : m_v{nullptr, nullptr, nullptr}, m_alphaTex(nullptr) { }
         Triangle(const Vertex* v0, const Vertex* v1, const Vertex* v2, const FloatTexture* aTex) :
-        m_v{v0, v1, v2}, m_alphaTex(aTex) { };
+        m_v{v0, v1, v2}, m_alphaTex(aTex) { }
         
         // TODO: consider a better cost value.
         float costForIntersect() const override { return 1.0f; }

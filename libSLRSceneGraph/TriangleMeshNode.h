@@ -39,11 +39,13 @@ namespace SLRSceneGraph {
         std::vector<Vertex> m_vertices;
         std::vector<MaterialGroup> m_matGroups;
     public:
-        TriangleMeshNode() : SurfaceObjectNode(), m_trianglesForRendering(nullptr), m_verticesForRendering(nullptr) { };
+        TriangleMeshNode() : SurfaceObjectNode(), m_trianglesForRendering(nullptr), m_verticesForRendering(nullptr) { }
         ~TriangleMeshNode();
         
         uint64_t addVertex(const SLR::Vertex &v);
         void addTriangles(const SurfaceMaterialRef &mat, const Normal3DTextureRef &normalMap, const FloatTextureRef &alphaMap, const std::vector<Triangle> &&triangles);
+        
+        NodeRef copy() const override;
         
         void applyTransform(const SLR::StaticTransform &t) final;
         

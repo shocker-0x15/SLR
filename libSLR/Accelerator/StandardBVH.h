@@ -77,10 +77,12 @@ namespace SLR {
                 bbox.unify(infos.bboxes[idx]);
                 centroidBB.unify(centroids[idx]);
             }
+            BoundingBox3D::Axis widestAxis = centroidBB.widestAxis();
+            const float pcBBMin = centroidBB.minP[widestAxis];
+            const float pcBBMax = centroidBB.maxP[widestAxis];
             
             uint32_t numObjs = end - start;
             SLRAssert(numObjs >= 1, "Number of objects is zero.");
-            BoundingBox3D::Axis widestAxis = centroidBB.widestAxis();
             
             if (numObjs == 1) {
                 m_nodes[nodeIdx].initAsLeaf(bbox, (uint32_t)m_objLists.size(), 1);
@@ -108,6 +110,15 @@ namespace SLR {
                     break;
                 }
                 case Partitioning::BinnedSAH: {
+                    if ((pcBBMax - pcBBMin) <= 0) {
+                        // partitions so that the numbers of children of both side become the same.
+                        splitIdx = (start + end) / 2;
+                        std::nth_element(indices.begin() + start, indices.begin() + splitIdx, indices.begin() + end, [&centroids, &widestAxis](uint32_t idx0, uint32_t idx1) {
+                            return centroids[idx0][widestAxis] < centroids[idx1][widestAxis];
+                        });
+                        break;
+                    }
+                    
                     struct BinInfo {
                         BoundingBox3D bbox;
                         uint32_t numObjs;
@@ -126,16 +137,17 @@ namespace SLR {
                         float isectCost = infos.objs->at(idx)->costForIntersect();
                         leafNodeCost += isectCost;
                         
-                        uint32_t bin = numBins * ((centroids[idx][widestAxis] - centroidBB.minP[widestAxis]) / (centroidBB.maxP[widestAxis] - centroidBB.minP[widestAxis]));
+                        uint32_t bin = numBins * ((centroids[idx][widestAxis] - pcBBMin) / (pcBBMax - pcBBMin));
                         bin = std::min(bin, numBins - 1);
                         ++binInfos[bin].numObjs;
                         binInfos[bin].sumCost += isectCost;
                         binInfos[bin].bbox.unify(infos.bboxes[idx]);
                     }
                     
-                    // evaluate SAH cost for every pair of child partitions
+                    // evaluate SAH cost for every pair of child partitions and determine a plane with the minimum cost.
+                    uint32_t splitPlane = 0;
+                    float minCost = INFINITY;
                     float surfaceAreaParent = bbox.surfaceArea();
-                    float costs[numBins - 1];
                     for (uint32_t i = 0; i < numBins - 1; ++i) {
                         BoundingBox3D b0, b1;
                         float cost0 = 0.0f, cost1 = 0.0f;
@@ -147,15 +159,9 @@ namespace SLR {
                             b1.unify(binInfos[j].bbox);
                             cost1 += binInfos[j].sumCost;
                         }
-                        costs[i] = travCost + (b0.surfaceArea() * cost0 + b1.surfaceArea() * cost1) / surfaceAreaParent;
-                    }
-                    
-                    // determine a plane with the minimum cost.
-                    float minCost = costs[0];
-                    uint32_t splitPlane = 0;
-                    for (int i = 1; i < numBins - 1; ++i) {
-                        if (costs[i] < minCost) {
-                            minCost = costs[i];
+                        float cost = travCost + (b0.surfaceArea() * cost0 + b1.surfaceArea() * cost1) / surfaceAreaParent;
+                        if (cost < minCost) {
+                            minCost = cost;
                             splitPlane = i;
                         }
                     }
@@ -163,7 +169,7 @@ namespace SLR {
                     
                     // perform object partitioning if the cost is less than the leaf node cost. 
                     if (minCost < leafNodeCost) {
-                        float pivot = centroidBB.minP[widestAxis] + (centroidBB.maxP[widestAxis] - centroidBB.minP[widestAxis]) / numBins * (splitPlane + 1);
+                        float pivot = centroidBB.minP[widestAxis] + (pcBBMax - pcBBMin) / numBins * (splitPlane + 1);
                         auto firstOf2ndGroup = std::partition(indices.begin() + start, indices.begin() + end, [&centroids, &widestAxis, &pivot](uint32_t idx) {
                             return centroids[idx][widestAxis] < pivot;
                         });
@@ -261,7 +267,7 @@ namespace SLR {
                 if (!node.bbox.intersect(ray))
                     continue;
                 if (node.numLeaves == 0) {
-                    SLRAssert(depth >= StackSize, "StandardBVH::intersect: stack overflow");
+                    SLRAssert(depth < StackSize, "StandardBVH::intersect: stack overflow");
                     bool positiveDir = dirIsPositive[node.axis];
                     idxStack[depth++] = positiveDir ? node.c1 : node.c0;
                     idxStack[depth++] = positiveDir ? node.c0 : node.c1;

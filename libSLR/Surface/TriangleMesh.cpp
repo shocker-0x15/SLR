@@ -67,7 +67,7 @@ namespace SLR {
             ret.unify(maxPos < maxChopPos ? p[2] : p[0]);
         
         SLRAssert(realGE(ret.minP[chopAxis], minChopPos, 1e-6f) && realLE(ret.maxP[chopAxis], maxChopPos, 1e-6f) &&
-                  ret.surfaceArea() <= baseBBox.surfaceArea(), "invalid chopped bounds.");
+                  realLE(ret.surfaceArea(), baseBBox.surfaceArea(), 1e-6f), "invalid chopped bounds.");
         
         return ret;
     }

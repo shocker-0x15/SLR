@@ -12,8 +12,6 @@
 #include "../references.h"
 #include "../Core/Accelerator.h"
 
-#include <nmmintrin.h>
-
 namespace SLR {
     // References
     // Spatial Splits in Bounding Volume Hierarchies
@@ -127,7 +125,7 @@ namespace SLR {
             uint32_t splitPlaneOP = 0;
             float minCostByOP = INFINITY;
             
-            if (parentCentroidBB.surfaceArea() > 0) {
+            if ((pcBBMax - pcBBMin) > 0) {
                 tpStart = std::chrono::system_clock::now();
                 
                 // Object Binning
@@ -318,6 +316,10 @@ namespace SLR {
                         dstLeft.costForIntersect = dstRight.costForIntersect = fragments[i].costForIntersect;
                         dstLeft.bbox = intersection(splitLeftBBox, bbox);
                         dstRight.bbox = intersection(splitRightBBox, bbox);
+                        if (!splitLeftBBox.isValid())
+                            --numLeftIndices;
+                        if (!splitRightBBox.isValid())
+                            --numRightIndices;
                     }
                 }
                 *numAdded = (numLeftIndices + numRightIndices) - numObjs;
