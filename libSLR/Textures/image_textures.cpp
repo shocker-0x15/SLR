@@ -185,6 +185,11 @@ namespace SLR {
                 ret = data.v / 255.0f;
                 break;
             }
+            case ColorFormat::uvsA16Fx4: {
+                const uvsA16Fx4 &data = m_data->get<uvsA16Fx4>(px, py);
+                ret = data.a;
+                break;
+            }
             default:
                 break;
         }

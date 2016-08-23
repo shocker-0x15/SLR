@@ -29,6 +29,7 @@ namespace SLRSceneGraph {
             extern const Function atan;
             extern const Function dot;
             extern const Function cross;
+            extern const Function distance;
         }
     }
 }

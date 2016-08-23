@@ -514,11 +514,11 @@ namespace SLRSceneGraph {
                 info.greaterOperator = nullptr;
                 info.lessEqOperator = [](const Element &v0, const Element &v1) {
                     const TypeInfo &info = TypeInfo::infos[(uint32_t)v0.type];
-                    return Element(info.eqOperator(v0, v1).raw<TypeMap::Bool>() && info.lessOperator(v0, v1).raw<TypeMap::Bool>());
+                    return Element(info.eqOperator(v0, v1).raw<TypeMap::Bool>() || info.lessOperator(v0, v1).raw<TypeMap::Bool>());
                 };
                 info.greaterEqOperator = [](const Element &v0, const Element &v1) {
                     const TypeInfo &info = TypeInfo::infos[(uint32_t)v0.type];
-                    return Element(info.eqOperator(v0, v1).raw<TypeMap::Bool>() && info.greaterOperator(v0, v1).raw<TypeMap::Bool>());
+                    return Element(info.eqOperator(v0, v1).raw<TypeMap::Bool>() || info.greaterOperator(v0, v1).raw<TypeMap::Bool>());
                 };
                 info.eqOperator = nullptr;
                 info.neqOperator = [](const Element &v0, const Element &v1) {
