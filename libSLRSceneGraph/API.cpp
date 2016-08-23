@@ -129,6 +129,17 @@ namespace SLRSceneGraph {
                                  return Element((TypeMap::Integer::InternalType)tuple->numParams());
                              })
                     );
+            stack["Point"] =
+            Element(TypeMap::Function(),
+                    Function(1,
+                             {{"x", Type::RealNumber}, {"y", Type::RealNumber}, {"z", Type::RealNumber}},
+                             [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
+                                 auto x = args.at("x").raw<TypeMap::RealNumber>();
+                                 auto y = args.at("y").raw<TypeMap::RealNumber>();
+                                 auto z = args.at("z").raw<TypeMap::RealNumber>();
+                                 return Element(SLR::Point3D(x, y, z));
+                             })
+                    );
             stack["Vector"] =
             Element(TypeMap::Function(),
                     Function(1,
@@ -228,6 +239,7 @@ namespace SLRSceneGraph {
             stack["atan"] = Element(TypeMap::Function(), BuiltinFunctions::Math::atan);
             stack["dot"] = Element(TypeMap::Function(), BuiltinFunctions::Math::dot);
             stack["cross"] = Element(TypeMap::Function(), BuiltinFunctions::Math::cross);
+            stack["distance"] = Element(TypeMap::Function(), BuiltinFunctions::Math::distance);
             
             stack["translate"] = Element(TypeMap::Function(), BuiltinFunctions::Transform::translate);
             stack["rotate"] = Element(TypeMap::Function(), BuiltinFunctions::Transform::rotate);

@@ -229,7 +229,8 @@ namespace SLR {
                                 SLRAssert(!std::isnan((float)storedVal.u) && !std::isinf((float)storedVal.u) &&
                                           !std::isnan((float)storedVal.v) && !std::isinf((float)storedVal.v) &&
                                           !std::isnan((float)storedVal.s) && !std::isinf((float)storedVal.s) &&
-                                          !std::isnan((float)storedVal.a) && !std::isinf((float)storedVal.a) && (float)storedVal.a > 0, "Invalid value.");
+                                          !std::isnan((float)storedVal.a) && !std::isinf((float)storedVal.a) && (float)storedVal.a >= 0,
+                                          "Invalid value: %g, %g, %g, %g", (float)storedVal.u, (float)storedVal.v, (float)storedVal.s, (float)storedVal.a);
                                 setInternal(x, y, &storedVal, m_stride);
                             };
 #else
@@ -279,7 +280,8 @@ namespace SLR {
                                 SLRAssert(!std::isnan((float)storedVal.u) && !std::isinf((float)storedVal.u) &&
                                           !std::isnan((float)storedVal.v) && !std::isinf((float)storedVal.v) &&
                                           !std::isnan((float)storedVal.s) && !std::isinf((float)storedVal.s) &&
-                                          !std::isnan((float)storedVal.a) && !std::isinf((float)storedVal.a) && (float)storedVal.a > 0, "Invalid value.");
+                                          !std::isnan((float)storedVal.a) && !std::isinf((float)storedVal.a) && (float)storedVal.a >= 0,
+                                          "Invalid value: %g, %g, %g, %g", (float)storedVal.u, (float)storedVal.v, (float)storedVal.s, (float)storedVal.a);
                                 setInternal(x, y, &storedVal, m_stride);
                             };
 #else

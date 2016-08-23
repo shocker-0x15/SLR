@@ -6,6 +6,7 @@
 //
 
 #include "builtin_math.hpp"
+#include <libSLR/BasicTypes/Point3.h>
 #include <libSLR/BasicTypes/Vector3.h>
 
 namespace SLRSceneGraph {
@@ -84,16 +85,22 @@ namespace SLRSceneGraph {
                                            });
             const Function dot = Function(1, {{"v0", Type::Vector}, {"v1", Type::Vector}},
                                           [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
-                                              const SLR::Vector3D v0 = args.at("v0").raw<TypeMap::Vector>();
-                                              const SLR::Vector3D v1 = args.at("v1").raw<TypeMap::Vector>();
+                                              const SLR::Vector3D &v0 = args.at("v0").raw<TypeMap::Vector>();
+                                              const SLR::Vector3D &v1 = args.at("v1").raw<TypeMap::Vector>();
                                               return Element(SLR::dot(v0, v1));
                                           });
             const Function cross = Function(1, {{"v0", Type::Vector}, {"v1", Type::Vector}},
                                             [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
-                                                const SLR::Vector3D v0 = args.at("v0").raw<TypeMap::Vector>();
-                                                const SLR::Vector3D v1 = args.at("v1").raw<TypeMap::Vector>();
+                                                const SLR::Vector3D &v0 = args.at("v0").raw<TypeMap::Vector>();
+                                                const SLR::Vector3D &v1 = args.at("v1").raw<TypeMap::Vector>();
                                                 return Element(SLR::cross(v0, v1));
                                             });
+            const Function distance = Function(1, {{"p0", Type::Point}, {"p1", Type::Point}},
+                                               [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
+                                                   const SLR::Point3D &p0 = args.at("p0").raw<TypeMap::Point>();
+                                                   const SLR::Point3D &p1 = args.at("p1").raw<TypeMap::Point>();
+                                                   return Element(SLR::distance(p0, p1));
+                                               });
         }
     }
 }
