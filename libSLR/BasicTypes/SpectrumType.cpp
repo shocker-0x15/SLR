@@ -86,6 +86,26 @@ namespace SLR {
     template SLR_API SampledSpectrumTemplate<double, NumSpectralSamples> sqrt(const SampledSpectrumTemplate<double, NumSpectralSamples> &value);
     
     template <typename RealType, uint32_t N>
+    SampledSpectrumTemplate<RealType, N> pow(const SampledSpectrumTemplate<RealType, N> &value, RealType p) {
+        SampledSpectrumTemplate<RealType, N> ret;
+        for (int i = 0; i < N; ++i)
+            ret[i] = std::pow(value[i], p);
+        return ret;
+    }
+    template SLR_API SampledSpectrumTemplate<float, NumSpectralSamples> pow(const SampledSpectrumTemplate<float, NumSpectralSamples> &value, float p);
+    template SLR_API SampledSpectrumTemplate<double, NumSpectralSamples> pow(const SampledSpectrumTemplate<double, NumSpectralSamples> &value, double p);
+    
+    template <typename RealType, uint32_t N>
+    SampledSpectrumTemplate<RealType, N> pow(const SampledSpectrumTemplate<RealType, N> &value, uint32_t p) {
+        SampledSpectrumTemplate<RealType, N> ret;
+        for (int i = 0; i < N; ++i)
+            ret[i] = std::pow(value[i], p);
+        return ret;
+    }
+    template SLR_API SampledSpectrumTemplate<float, NumSpectralSamples> pow(const SampledSpectrumTemplate<float, NumSpectralSamples> &value, uint32_t p);
+    template SLR_API SampledSpectrumTemplate<double, NumSpectralSamples> pow(const SampledSpectrumTemplate<double, NumSpectralSamples> &value, uint32_t p);
+    
+    template <typename RealType, uint32_t N>
     SampledSpectrumTemplate<RealType, N> exp(const SampledSpectrumTemplate<RealType, N> &value) {
         SampledSpectrumTemplate<RealType, N> ret;
         for (int i = 0; i < N; ++i)

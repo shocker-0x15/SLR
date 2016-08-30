@@ -569,6 +569,12 @@ namespace SLR {
     SLR_API SampledSpectrumTemplate<RealType, N> sqrt(const SampledSpectrumTemplate<RealType, N> &value);
     
     template <typename RealType, uint32_t N>
+    SLR_API SampledSpectrumTemplate<RealType, N> pow(const SampledSpectrumTemplate<RealType, N> &value, RealType p);
+    
+    template <typename RealType, uint32_t N>
+    SLR_API SampledSpectrumTemplate<RealType, N> pow(const SampledSpectrumTemplate<RealType, N> &value, uint32_t p);
+    
+    template <typename RealType, uint32_t N>
     SLR_API SampledSpectrumTemplate<RealType, N> exp(const SampledSpectrumTemplate<RealType, N> &value);
 
 

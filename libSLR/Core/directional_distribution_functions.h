@@ -331,11 +331,13 @@ namespace SLR {
     public:
         virtual ~Fresnel() { };
         virtual SampledSpectrum evaluate(float cosEnter) const = 0;
+        virtual float evaluate(float cosEnter, uint32_t wlIdx) const = 0;
     };
     
     class SLR_API FresnelNoOp : public Fresnel {
     public:
         SampledSpectrum evaluate(float cosEnter) const override;
+        float evaluate(float cosEnter, uint32_t wlIdx) const override;
     };
     
     class SLR_API FresnelConductor : public Fresnel {
@@ -345,6 +347,7 @@ namespace SLR {
         FresnelConductor(const SampledSpectrum &eta, const SampledSpectrum &k) : m_eta(eta), m_k(k) { }
         
         SampledSpectrum evaluate(float cosEnter) const override;
+        float evaluate(float cosEnter, uint32_t wlIdx) const override;
     };
     
     class SLR_API FresnelDielectric : public Fresnel {
@@ -357,6 +360,7 @@ namespace SLR {
         SampledSpectrum etaInt() const { return m_etaInt; }
         
         SampledSpectrum evaluate(float cosEnter) const override;
+        float evaluate(float cosEnter, uint32_t wlIdx) const override;
         
         static float evalF(float etaEnter, float etaExit, float cosEnter, float cosExit);
     };

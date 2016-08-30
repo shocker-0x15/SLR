@@ -61,6 +61,10 @@ namespace SLR {
         return SampledSpectrum::One;
     }
     
+    float FresnelNoOp::evaluate(float cosEnter, uint32_t wlIdx) const {
+        return 1.0f;
+    }
+    
     SampledSpectrum FresnelConductor::evaluate(float cosEnter) const {
         cosEnter = std::fabs(cosEnter);
         float cosEnter2 = cosEnter * cosEnter;
@@ -69,6 +73,17 @@ namespace SLR {
         SampledSpectrum tmp = tmp_f * cosEnter2;
         SampledSpectrum Rparl2 = (tmp - _2EtaCosEnter + 1) / (tmp + _2EtaCosEnter + 1);
         SampledSpectrum Rperp2 = (tmp_f - _2EtaCosEnter + cosEnter2) / (tmp_f + _2EtaCosEnter + cosEnter2);
+        return (Rparl2 + Rperp2) / 2.0f;
+    }
+    
+    float FresnelConductor::evaluate(float cosEnter, uint32_t wlIdx) const {
+        cosEnter = std::fabs(cosEnter);
+        float cosEnter2 = cosEnter * cosEnter;
+        float _2EtaCosEnter = 2.0f * m_eta[wlIdx] * cosEnter;
+        float tmp_f = m_eta[wlIdx] * m_eta[wlIdx] + m_k[wlIdx] * m_k[wlIdx];
+        float tmp = tmp_f * cosEnter2;
+        float Rparl2 = (tmp - _2EtaCosEnter + 1) / (tmp + _2EtaCosEnter + 1);
+        float Rperp2 = (tmp_f - _2EtaCosEnter + cosEnter2) / (tmp_f + _2EtaCosEnter + cosEnter2);
         return (Rparl2 + Rperp2) / 2.0f;
     }
     
@@ -117,6 +132,24 @@ namespace SLR {
 //            }
 //        }
 //        return ret;
+    }
+    
+    float FresnelDielectric::evaluate(float cosEnter, uint32_t wlIdx) const {
+        cosEnter = std::clamp(cosEnter, -1.0f, 1.0f);
+        
+        bool entering = cosEnter > 0.0f;
+        const float &eEnter = entering ? m_etaExt[wlIdx] : m_etaInt[wlIdx];
+        const float &eExit = entering ? m_etaInt[wlIdx] : m_etaExt[wlIdx];
+        
+        float sinExit = eEnter / eExit * std::sqrt(std::fmax(0.0f, 1.0f - cosEnter * cosEnter));
+        cosEnter = std::fabs(cosEnter);
+        if (sinExit >= 1.0f) {
+            return 1.0f;
+        }
+        else {
+            float cosExit = std::sqrt(std::fmax(0.0f, 1.0f - sinExit * sinExit));
+            return evalF(eEnter, eExit, cosEnter, cosExit);
+        }
     }
     
     float FresnelDielectric::evalF(float etaEnter, float etaExit, float cosEnter, float cosExit) {

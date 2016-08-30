@@ -22,8 +22,8 @@ namespace SLR {
         
         SampledSpectrum sampleInternal(const BSDFQuery &query, float uComponent, const float uDir[2], BSDFQueryResult* result) const override;
         SampledSpectrum evaluateInternal(const BSDFQuery &query, const Vector3D &dir, SampledSpectrum* rev_fs) const override;
-        float evaluatePDFInternal(const BSDFQuery &query, const Vector3D &dir, float* revPDF) const override;
-        float weightInternal(const BSDFQuery &query) const override;
+        SampledSpectrum evaluatePDFInternal(const BSDFQuery &query, const Vector3D &dir, SampledSpectrum* revPDF) const override;
+        SampledSpectrum weightInternal(const BSDFQuery &query) const override;
         SampledSpectrum getBaseColorInternal(DirectionType flags) const override;
     public:
         MicrofacetBRDF(const SampledSpectrum &eta, const SampledSpectrum &k, const MicrofacetDistribution* D) :
@@ -38,11 +38,11 @@ namespace SLR {
         
         SampledSpectrum sampleInternal(const BSDFQuery &query, float uComponent, const float uDir[2], BSDFQueryResult* result) const override;
         SampledSpectrum evaluateInternal(const BSDFQuery &query, const Vector3D &dir, SampledSpectrum* rev_fs) const override;
-        float evaluatePDFInternal(const BSDFQuery &query, const Vector3D &dir, float* revPDF) const override;
-        float weightInternal(const BSDFQuery &query) const override;
+        SampledSpectrum evaluatePDFInternal(const BSDFQuery &query, const Vector3D &dir, SampledSpectrum* revPDF) const override;
+        SampledSpectrum weightInternal(const BSDFQuery &query) const override;
         SampledSpectrum getBaseColorInternal(DirectionType flags) const override;
     public:
-        MicrofacetBSDF(const SampledSpectrum &etaExt, const SampledSpectrum &etaInt, bool dispersive, const MicrofacetDistribution* D) :
+        MicrofacetBSDF(const SampledSpectrum &etaExt, const SampledSpectrum &etaInt, const MicrofacetDistribution* D) :
         BSDF(DirectionType::Reflection | DirectionType::Transmission | DirectionType::HighFreq),
         m_F(etaExt, etaInt), m_D(D) { }
     };

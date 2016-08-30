@@ -24,6 +24,6 @@ namespace SLR {
         SampledSpectrum etaExt = m_etaExt->evaluate(surfPt, wls);
         SampledSpectrum etaInt = m_etaInt->evaluate(surfPt, wls);
         MicrofacetDistribution* dist = m_D->getMicrofacetDistribution(surfPt, mem);
-        return mem.create<MicrofacetBSDF>(etaExt, etaInt, !wls.lambdaSelected(), dist);
+        return mem.create<MicrofacetBSDF>(etaExt, etaInt, dist);
     }
 }
