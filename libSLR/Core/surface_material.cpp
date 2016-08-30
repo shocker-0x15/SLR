@@ -22,4 +22,10 @@ namespace SLR {
     Fresnel* SVFresnelDielectric::getFresnel(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem) const {
         return mem.create<FresnelDielectric>(m_etaExt->evaluate(surfPt, wls), m_etaInt->evaluate(surfPt, wls));
     }
+    
+    
+    
+    MicrofacetDistribution* SVGGX::getMicrofacetDistribution(const SLR::SurfacePoint &surfPt, SLR::ArenaAllocator &mem) const {
+        return mem.create<GGX>(m_alpha_g->evaluate(surfPt.texCoord));
+    }
 }

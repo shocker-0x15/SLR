@@ -360,6 +360,34 @@ namespace SLR {
         
         static float evalF(float etaEnter, float etaExit, float cosEnter, float cosExit);
     };
+    
+    
+    class SLR_API MicrofacetDistribution {
+    public:
+        virtual float sample(float u0, float u1, Normal3D* m, float* normalPDF) const = 0;
+        virtual float evaluate(const Normal3D &m) const = 0;
+        virtual float evaluatePDF(const Normal3D &m) const = 0;
+        
+        virtual float sample(const Vector3D &v, float u0, float u1, Normal3D* m, float* normalPDF) const = 0;
+        virtual float evaluatePDF(const Vector3D &v, const Normal3D &m) const = 0;
+        
+        virtual float evaluateSmithG1(const Vector3D &v, const Normal3D &m) const = 0;
+    };
+    
+    class SLR_API GGX : public MicrofacetDistribution {
+        float m_alpha_g;
+    public:
+        GGX(float alpha_g) : m_alpha_g(alpha_g) {}
+        
+        float sample(float u0, float u1, Normal3D* m, float* normalPDF) const override;
+        float evaluate(const Normal3D &m) const override;
+        float evaluatePDF(const Normal3D &m) const override;
+        
+        float sample(const Vector3D &v, float u0, float u1, Normal3D* m, float* normalPDF) const override;
+        float evaluatePDF(const Vector3D &v, const Normal3D &m) const override;
+        
+        float evaluateSmithG1(const Vector3D &v, const Normal3D &m) const override;
+    };
 }
 
 #endif

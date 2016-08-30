@@ -129,6 +129,17 @@ namespace SLRSceneGraph {
                                  return Element((TypeMap::Integer::InternalType)tuple->numParams());
                              })
                     );
+            stack["Point"] =
+            Element(TypeMap::Function(),
+                    Function(1,
+                             {{"x", Type::RealNumber}, {"y", Type::RealNumber}, {"z", Type::RealNumber}},
+                             [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
+                                 auto x = args.at("x").raw<TypeMap::RealNumber>();
+                                 auto y = args.at("y").raw<TypeMap::RealNumber>();
+                                 auto z = args.at("z").raw<TypeMap::RealNumber>();
+                                 return Element(SLR::Point3D(x, y, z));
+                             })
+                    );
             stack["Vector"] =
             Element(TypeMap::Function(),
                     Function(1,
@@ -228,6 +239,7 @@ namespace SLRSceneGraph {
             stack["atan"] = Element(TypeMap::Function(), BuiltinFunctions::Math::atan);
             stack["dot"] = Element(TypeMap::Function(), BuiltinFunctions::Math::dot);
             stack["cross"] = Element(TypeMap::Function(), BuiltinFunctions::Math::cross);
+            stack["distance"] = Element(TypeMap::Function(), BuiltinFunctions::Math::distance);
             
             stack["translate"] = Element(TypeMap::Function(), BuiltinFunctions::Transform::translate);
             stack["rotate"] = Element(TypeMap::Function(), BuiltinFunctions::Transform::rotate);
@@ -534,6 +546,36 @@ namespace SLRSceneGraph {
                                              FloatTextureRef nx = args.at("nx").rawRef<TypeMap::FloatTexture>();
                                              FloatTextureRef ny = args.at("ny").rawRef<TypeMap::FloatTexture>();
                                              return Element(TypeMap::SurfaceMaterial(), SurfaceMaterial::createAshikhminShirley(Rd, Rs, nx, ny));
+                                         }
+                                     };
+                                     return configFunc(params, context, err);
+                                 }
+                                 else if (type == "microfacet metal") {
+                                     const static Function configFunc{
+                                         0, {
+                                             {"eta", Type::SpectrumTexture}, {"k", Type::SpectrumTexture},
+                                             {"alpha_g", Type::FloatTexture}
+                                         },
+                                         [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
+                                             SpectrumTextureRef eta = args.at("eta").rawRef<TypeMap::SpectrumTexture>();
+                                             SpectrumTextureRef k = args.at("k").rawRef<TypeMap::SpectrumTexture>();
+                                             FloatTextureRef alpha_g = args.at("alpha_g").rawRef<TypeMap::FloatTexture>();
+                                             return Element(TypeMap::SurfaceMaterial(), SurfaceMaterial::createMicrofacetMetal(eta, k, alpha_g));
+                                         }
+                                     };
+                                     return configFunc(params, context, err);
+                                 }
+                                 else if (type == "microfacet glass") {
+                                     const static Function configFunc{
+                                         0, {
+                                             {"etaExt", Type::SpectrumTexture}, {"etaInt", Type::SpectrumTexture},
+                                             {"alpha_g", Type::FloatTexture}
+                                         },
+                                         [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
+                                             SpectrumTextureRef etaExt = args.at("etaExt").rawRef<TypeMap::SpectrumTexture>();
+                                             SpectrumTextureRef etaInt = args.at("etaInt").rawRef<TypeMap::SpectrumTexture>();
+                                             FloatTextureRef alpha_g = args.at("alpha_g").rawRef<TypeMap::FloatTexture>();
+                                             return Element(TypeMap::SurfaceMaterial(), SurfaceMaterial::createMicrofacetGlass(etaExt, etaInt, alpha_g));
                                          }
                                      };
                                      return configFunc(params, context, err);
@@ -1076,7 +1118,7 @@ namespace SLRSceneGraph {
 //        parser.traceParsing = true;
         StatementsRef statements = parser.parse(filePath);
         if (!statements) {
-            printf("Failed to parse scene file: %s", filePath.c_str());
+            printf("Failed to parse scene file: %s\n", filePath.c_str());
             return false;
         }
         

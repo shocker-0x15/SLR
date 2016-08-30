@@ -162,6 +162,8 @@ namespace SLR {
         }
     };
 
+    // References
+    // Physically Meaningful Rendering using Tristimulus Colours
     template <typename RealType, uint32_t N>
     struct SLR_API UpsampledContinuousSpectrumTemplate : public ContinuousSpectrumTemplate<RealType, N> {
         RealType u, v, scale;

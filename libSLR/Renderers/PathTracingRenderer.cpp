@@ -168,7 +168,7 @@ namespace SLR {
         }
         if (surfPt.atInfinity)
             return sp;
-        
+
         while (true) {
             ++pathLength;
             if (pathLength >= 100)
@@ -236,6 +236,7 @@ namespace SLR {
             Vector3D dirIn = surfPt.shadingFrame.fromLocal(fsResult.dir_sn);
             ray = Ray(surfPt.p, dirIn, ray.time, Ray::Epsilon);
             
+            // find a next intersection point.
             isect = Intersection();
             if (!scene.intersect(ray, &isect))
                 break;

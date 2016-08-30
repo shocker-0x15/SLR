@@ -13,6 +13,8 @@
 #include "../Core/Accelerator.h"
 
 namespace SLR {
+    // References
+    // Spatial Splits in Bounding Volume Hierarchies
     class SLR_API SBVH : public Accelerator {
         friend class QBVH;
         

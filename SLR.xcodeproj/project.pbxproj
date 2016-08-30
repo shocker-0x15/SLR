@@ -17,6 +17,8 @@
 		4602E8B71BC4152D00EC16FA /* surface_material_headers.h in Headers */ = {isa = PBXBuildFile; fileRef = 4602E8B61BC4152D00EC16FA /* surface_material_headers.h */; };
 		4602E8BE1BC418FA00EC16FA /* SummedSurfaceMaterial.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4602E8BC1BC418FA00EC16FA /* SummedSurfaceMaterial.cpp */; };
 		4602E8BF1BC418FA00EC16FA /* SummedSurfaceMaterial.h in Headers */ = {isa = PBXBuildFile; fileRef = 4602E8BD1BC418FA00EC16FA /* SummedSurfaceMaterial.h */; };
+		462018CE1CD7D05800A5CAF1 /* MicrofacetBSDF.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 462018CC1CD7D05800A5CAF1 /* MicrofacetBSDF.cpp */; };
+		462018D11CD7D09E00A5CAF1 /* MicrofacetBSDF.h in Headers */ = {isa = PBXBuildFile; fileRef = 462018D01CD7D09E00A5CAF1 /* MicrofacetBSDF.h */; };
 		460A201C1D6029C700870E0F /* StandardBVH.h in Headers */ = {isa = PBXBuildFile; fileRef = 460A201B1D6029C700870E0F /* StandardBVH.h */; };
 		460A201E1D6029EC00870E0F /* QBVH.h in Headers */ = {isa = PBXBuildFile; fileRef = 460A201D1D6029EC00870E0F /* QBVH.h */; };
 		460A20211D602C5700870E0F /* AshikhminShirleyReflection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 460A201F1D602C5700870E0F /* AshikhminShirleyReflection.cpp */; };
@@ -164,6 +166,8 @@
 		46C4A1101D1301C9003530DA /* XORShiftRNG.h in Headers */ = {isa = PBXBuildFile; fileRef = 46C4A10C1D1301C9003530DA /* XORShiftRNG.h */; };
 		46C4A1121D130895003530DA /* OrenNayerBRDF.h in Headers */ = {isa = PBXBuildFile; fileRef = 46C4A1111D130895003530DA /* OrenNayerBRDF.h */; };
 		46C4A1141D1308A6003530DA /* OrenNayerBRDF.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 46C4A1131D1308A6003530DA /* OrenNayerBRDF.cpp */; };
+		46F0BB131CD9FA2B00F81BFC /* MicrofacetSurfaceMaterial.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 46F0BB111CD9FA2B00F81BFC /* MicrofacetSurfaceMaterial.cpp */; };
+		46F0BB161CD9FA7100F81BFC /* MicrofacetSurfaceMaterial.h in Headers */ = {isa = PBXBuildFile; fileRef = 46F0BB151CD9FA7100F81BFC /* MicrofacetSurfaceMaterial.h */; };
 		46D16E6C1D283E36009C241C /* SBVH.h in Headers */ = {isa = PBXBuildFile; fileRef = 46D16E6B1D283E36009C241C /* SBVH.h */; };
 		46EA72A91D59F22B00738511 /* debugPrintf.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 46EA72A81D59F22B00738511 /* debugPrintf.cpp */; };
 /* End PBXBuildFile section */
@@ -215,6 +219,8 @@
 		4602E8B61BC4152D00EC16FA /* surface_material_headers.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = surface_material_headers.h; path = libSLR/SurfaceMaterials/surface_material_headers.h; sourceTree = SOURCE_ROOT; };
 		4602E8BC1BC418FA00EC16FA /* SummedSurfaceMaterial.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SummedSurfaceMaterial.cpp; path = libSLR/SurfaceMaterials/SummedSurfaceMaterial.cpp; sourceTree = SOURCE_ROOT; };
 		4602E8BD1BC418FA00EC16FA /* SummedSurfaceMaterial.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SummedSurfaceMaterial.h; path = libSLR/SurfaceMaterials/SummedSurfaceMaterial.h; sourceTree = SOURCE_ROOT; };
+		462018CC1CD7D05800A5CAF1 /* MicrofacetBSDF.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MicrofacetBSDF.cpp; path = libSLR/BSDFs/MicrofacetBSDF.cpp; sourceTree = SOURCE_ROOT; };
+		462018D01CD7D09E00A5CAF1 /* MicrofacetBSDF.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MicrofacetBSDF.h; path = libSLR/BSDFs/MicrofacetBSDF.h; sourceTree = SOURCE_ROOT; };
 		460A201B1D6029C700870E0F /* StandardBVH.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = StandardBVH.h; path = libSLR/Accelerator/StandardBVH.h; sourceTree = SOURCE_ROOT; };
 		460A201D1D6029EC00870E0F /* QBVH.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = QBVH.h; path = libSLR/Accelerator/QBVH.h; sourceTree = SOURCE_ROOT; };
 		460A201F1D602C5700870E0F /* AshikhminShirleyReflection.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AshikhminShirleyReflection.cpp; path = libSLR/SurfaceMaterials/AshikhminShirleyReflection.cpp; sourceTree = SOURCE_ROOT; };
@@ -370,6 +376,8 @@
 		46C4A1131D1308A6003530DA /* OrenNayerBRDF.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = OrenNayerBRDF.cpp; path = libSLR/BSDFs/OrenNayerBRDF.cpp; sourceTree = SOURCE_ROOT; };
 		46D16E6B1D283E36009C241C /* SBVH.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SBVH.h; path = libSLR/Accelerator/SBVH.h; sourceTree = SOURCE_ROOT; };
 		46D7E0841BC8F58900AFF96F /* Makefile */ = {isa = PBXFileReference; explicitFileType = text; fileEncoding = 4; name = Makefile; path = libSLRSceneGraph/Parser/Makefile; sourceTree = "<group>"; usesTabs = 1; };
+		46F0BB111CD9FA2B00F81BFC /* MicrofacetSurfaceMaterial.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MicrofacetSurfaceMaterial.cpp; path = libSLR/SurfaceMaterials/MicrofacetSurfaceMaterial.cpp; sourceTree = SOURCE_ROOT; };
+		46F0BB151CD9FA7100F81BFC /* MicrofacetSurfaceMaterial.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MicrofacetSurfaceMaterial.h; path = libSLR/SurfaceMaterials/MicrofacetSurfaceMaterial.h; sourceTree = SOURCE_ROOT; };
 		46EA72A81D59F22B00738511 /* debugPrintf.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = debugPrintf.cpp; path = libSLR/debugPrintf.cpp; sourceTree = SOURCE_ROOT; };
 		46FFDDFD1B9B258400E47537 /* HostProgram */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = HostProgram; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -452,6 +460,8 @@
 				466F6C1E1BB6B2900056F2FA /* ModifiedWardDurBRDF.h */,
 				460A20231D602CB800870E0F /* AshikhminShirleyBRDF.cpp */,
 				460A20241D602CB800870E0F /* AshikhminShirleyBRDF.h */,
+				462018CC1CD7D05800A5CAF1 /* MicrofacetBSDF.cpp */,
+				462018D01CD7D09E00A5CAF1 /* MicrofacetBSDF.h */,
 				466F6C1F1BB6B2900056F2FA /* MultiBSDF.cpp */,
 				466F6C201BB6B2900056F2FA /* MultiBSDF.h */,
 			);
@@ -581,6 +591,8 @@
 				466F6C9A1BB6B3090056F2FA /* ModifiedWardDurReflection.h */,
 				460A201F1D602C5700870E0F /* AshikhminShirleyReflection.cpp */,
 				460A20201D602C5700870E0F /* AshikhminShirleyReflection.h */,
+				46F0BB111CD9FA2B00F81BFC /* MicrofacetSurfaceMaterial.cpp */,
+				46F0BB151CD9FA7100F81BFC /* MicrofacetSurfaceMaterial.h */,
 				4602E8B61BC4152D00EC16FA /* surface_material_headers.h */,
 			);
 			path = SurfaceMaterials;
@@ -751,6 +763,7 @@
 				466F6D4B1BB7153E0056F2FA /* InfiniteSphere.h in Headers */,
 				46C4A10E1D1301C9003530DA /* LinearCongruentialRNG.h in Headers */,
 				4602E8BF1BC418FA00EC16FA /* SummedSurfaceMaterial.h in Headers */,
+				462018D11CD7D09E00A5CAF1 /* MicrofacetBSDF.h in Headers */,
 				466F6D051BB6CA510056F2FA /* IBLEDF.h in Headers */,
 				466F6CF71BB6CA420056F2FA /* RenderSettings.h in Headers */,
 				4602E8B51BC414C000EC16FA /* texture_headers.h in Headers */,
@@ -765,6 +778,7 @@
 				466F6CF51BB6CA420056F2FA /* Renderer.h in Headers */,
 				466F6D481BB6DC840056F2FA /* ModifiedWardDurReflection.h in Headers */,
 				466F6D531BB715600056F2FA /* checker_board_textures.h in Headers */,
+				46F0BB161CD9FA7100F81BFC /* MicrofacetSurfaceMaterial.h in Headers */,
 				466F6CEB1BB6CA420056F2FA /* directional_distribution_functions.h in Headers */,
 				466F6CDA1BB6CA070056F2FA /* Vector3.h in Headers */,
 				466F6CCD1BB6CA070056F2FA /* common_spectra.h in Headers */,
@@ -947,6 +961,7 @@
 				46EA72A91D59F22B00738511 /* debugPrintf.cpp in Sources */,
 				4651F3381C567CA30026B8A5 /* SpectrumType.cpp in Sources */,
 				466F6CFA1BB6CA420056F2FA /* SurfaceObject.cpp in Sources */,
+				462018CE1CD7D05800A5CAF1 /* MicrofacetBSDF.cpp in Sources */,
 				466F6CE01BB6CA260056F2FA /* ModifiedWardDurBRDF.cpp in Sources */,
 				466F6CEA1BB6CA420056F2FA /* directional_distribution_functions.cpp in Sources */,
 				466F6CED1BB6CA420056F2FA /* geometry.cpp in Sources */,
@@ -961,6 +976,7 @@
 				46BF49871BB7303D0036033F /* spectrum_library.cpp in Sources */,
 				460A20211D602C5700870E0F /* AshikhminShirleyReflection.cpp in Sources */,
 				466F6D061BB6CA510056F2FA /* MultiEDF.cpp in Sources */,
+				46F0BB131CD9FA2B00F81BFC /* MicrofacetSurfaceMaterial.cpp in Sources */,
 				466F6D411BB6DC840056F2FA /* DiffuseEmission.cpp in Sources */,
 				46CCC79E1C8DBC350094E8D9 /* BidirectionalPathTracingRenderer.cpp in Sources */,
 				466F6D361BB6DC080056F2FA /* bmp_exporter.cpp in Sources */,

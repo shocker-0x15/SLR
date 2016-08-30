@@ -119,6 +119,8 @@ addChild(CBNode, leftSphereNode);
 function rightSphereMat(name, attrs) {
     etaExt = SpectrumTexture(Spectrum("ID": "Air", 0));
     etaInt = SpectrumTexture(Spectrum("ID": "Glass_BK7", 0));
+    //alpha_g = 0.01;
+    //return createSurfaceMaterial("microfacet glass", (etaExt, etaInt, FloatTexture(alpha_g)));
     coeff = SpectrumTexture(Spectrum("Reflectance", 0.999));
     return createSurfaceMaterial("glass", (coeff, etaExt, etaInt));
 }

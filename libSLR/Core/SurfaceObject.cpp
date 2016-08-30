@@ -226,9 +226,9 @@ namespace SLR {
     
     
     SurfaceObjectAggregate::SurfaceObjectAggregate(std::vector<SurfaceObject*> &objs) {
-        SBVH sbvh(objs);
-        m_accelerator = new QBVH(sbvh);
-//        m_accelerator = new SBVH(objs);
+//        SBVH sbvh(objs);
+//        m_accelerator = new QBVH(sbvh);
+        m_accelerator = new SBVH(objs);
 //        m_accelerator = new StandardBVH(objs, StandardBVH::Partitioning::BinnedSAH);
         
         std::vector<const SurfaceObject*> lights;

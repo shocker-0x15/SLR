@@ -13,6 +13,8 @@
 #include "../Core/directional_distribution_functions.h"
 
 namespace SLR {
+    // References
+    // Generalization of Lambert’s Reflectance Model
     class SLR_API OrenNayerBRDF : public BSDF {
         SampledSpectrum m_R;
         float m_A, m_B;
