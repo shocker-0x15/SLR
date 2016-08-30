@@ -22,6 +22,7 @@ SLR consists of the following components.
     * Oren-Nayer BRDF \[Oren1994\]
     * Improved Ward-Dür BRDF \[Moroder2010\]
     * Ashikhmin-Shirley BRDF \[Ashikhmin2000\]
+    * GGX Microfacet BRDF and BSDF \[Walter2007\] with visible normal sampling \[Heitz2014\]
     * Mixed BSDF
     * ~~Layered BSDF~~ (TODO)
 * Procedural Textures
@@ -74,8 +75,8 @@ There are some scene files loading a model data and textures, but those assets a
 [Ashikhmin2000] "An Anisotropic Phong BRDF Model"  
 [Dammertz2008] "Shallow Bounding Volume Hierarchies for Fast SIMD Ray Tracing of Incoherent Rays"  
 [Hachisuka2011] "Robust Adaptive Photon Tracing Using Photon Path Visibility"  
+[Heitz2014] "Importance Sampling Microfacet-Based BSDFs using the Distribution of Visible Normals"    
 [Kajiya1986] "THE RENDERING EQUATION"  
-[King2013] "BSSRDF Importance Sampling"  
 [Meng2015] "Physically Meaningful Rendering using Tristimulus Colours"  
 [Moroder2010] "A New Ward BRDF Model with Bounded Albedo"  
 [Oren1994] "Generalization of Lambert’s Reflectance Model"  
@@ -83,6 +84,7 @@ There are some scene files loading a model data and textures, but those assets a
 [Veach1994] "Bidirectional Estimators for Light Transport"  
 [Veach1996] "Non-symmetric Scattering in Light Transport Algorithms"  
 [Veach1997] "ROBUST MONTE CARLO METHODS FOR LIGHT TRANSPORT SIMULATION"  
+[Walter2007] "Microfacet Models for Refraction through Rough Surfaces"  
 [Worley1996] "A Cellular Texture Basis Function"  
 
 ----

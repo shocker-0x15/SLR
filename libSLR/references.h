@@ -176,6 +176,8 @@ namespace SLR {
     class SVFresnelNoOp;
     class SVFresnelConductor;
     class SVFresnelDielectric;
+    class SVMicrofacetDistribution;
+    class SVGGX;
     class SurfaceMaterial;
     class EmitterSurfaceProperty;
     class DiffuseReflection;
@@ -183,6 +185,8 @@ namespace SLR {
     class SpecularScattering;
     class ModifiedWardDurReflection;
     class AshikhminShirleyReflection;
+    class MicrofacetReflection;
+    class MicrofacetScattering;
     class SummedSurfaceMaterial;
     class MixedSurfaceMaterial;
     class EmitterSurfaceMaterial;
@@ -211,6 +215,8 @@ namespace SLR {
     class FresnelNoOp;
     class FresnelConductor;
     class FresnelDielectric;
+    class MicrofacetDistribution;
+    class GGX;
     class LambertianBRDF;
     class SpecularBRDF;
     class SpecularBSDF;
@@ -219,6 +225,8 @@ namespace SLR {
     class OrenNayerBRDF;
     class ModifiedWardDurBRDF;
     class AshikhminShirleyBRDF;
+    class MicrofacetBRDF;
+    class MicrofacetBSDF;
     class MultiBSDF;
     class PerspectiveIDF;
     class EquirectangularIDF;

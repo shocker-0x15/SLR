@@ -1,5 +1,5 @@
-setRenderer("method": "PT", ("samples": 16384,));
-//setRenderer("method": "BPT", ("samples": 16384,));
+//setRenderer("method": "PT", ("samples": 16384,));
+setRenderer("method": "BPT", ("samples": 16384,));
 //setRenderer("method": "debug", (("geometric normal", "shading normal", "shading tangent"),));
 setRenderSettings("width": 1024, "height": 1024, "brightness": 4.0);
 
@@ -24,8 +24,7 @@ lightMesh = createMesh(
     ((-0.25, 0,  0.25), (0, -1, 0), (1, 0, 0), (0, 1))
     ),
     (
-    ((0, 1, 2), surfMat), 
-    ((0, 2, 3), surfMat)
+    (surfMat, ((0, 1, 2), (0, 2, 3))), 
     )
     );
 addChild(lightNode, lightMesh);
@@ -43,7 +42,7 @@ for (i = 0; i < 24; ++i) {
 
 // Create Color Checker
 vertices = (,);
-indices = (,);
+matGroups = (,);
 for (i = 0; i < 24; ++i) {
     transform = translate(0, -1, 0) * scale(0.9 / 3.0) * 
                 translate(-3.0 + (i % 6), 0.0, (i / 6) - 1.0);
@@ -54,10 +53,9 @@ for (i = 0; i < 24; ++i) {
     addItem(vertices, transform * createVertex((0.0, 0.0, -1.0), (0, 1, 0), (1, 0, 0), (0, 1)));
     
     idxBase = 4 * i;
-    addItem(indices, ((idxBase + 0, idxBase + 1, idxBase + 2), mats[i]));
-    addItem(indices, ((idxBase + 0, idxBase + 2, idxBase + 3), mats[i]));
+    addItem(matGroups, (mats[i], ((idxBase + 0, idxBase + 1, idxBase + 2), (idxBase + 0, idxBase + 2, idxBase + 3))));
 }
-colorCheckerMesh = createMesh(vertices, indices);
+colorCheckerMesh = createMesh(vertices, matGroups);
 addChild(root, colorCheckerMesh);
 
 function sphereMaterial(name, attrs) {

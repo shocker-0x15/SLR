@@ -13,6 +13,9 @@
 #include "../Core/textures.h"
 
 namespace SLR {
+    // References
+    // A Cellular Texture Basis Function
+    
     class SLR_API VoronoiSpectrumTexture : public SpectrumTexture {
         const Texture3DMapping* m_mapping;
         float m_scale;

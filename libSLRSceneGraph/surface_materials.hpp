@@ -26,6 +26,8 @@ namespace SLRSceneGraph {
         static SurfaceMaterialRef createGlass(const SpectrumTextureRef &coeff, const SpectrumTextureRef &etaExt, const SpectrumTextureRef &etaInt);
         static SurfaceMaterialRef createModifiedWardDur(const SpectrumTextureRef &reflectance, const FloatTextureRef &anisoX, const FloatTextureRef &anisoY);
         static SurfaceMaterialRef createAshikhminShirley(const SpectrumTextureRef &Rd, const SpectrumTextureRef &Rs, const FloatTextureRef &nx, const FloatTextureRef &ny);
+        static SurfaceMaterialRef createMicrofacetMetal(const SpectrumTextureRef &eta, const SpectrumTextureRef &k, const FloatTextureRef &alpha_g);
+        static SurfaceMaterialRef createMicrofacetGlass(const SpectrumTextureRef &etaExt, const SpectrumTextureRef &etaInt, const FloatTextureRef &alpha_g);
         static SurfaceMaterialRef createInverseMaterial(const SurfaceMaterialRef &baseMat);
         static SurfaceMaterialRef createSummedMaterial(const SurfaceMaterialRef &mat0, const SurfaceMaterialRef &mat1);
         static SurfaceMaterialRef createMixedMaterial(const SurfaceMaterialRef &mat0, const SurfaceMaterialRef &mat1, const FloatTextureRef &factor);
@@ -55,6 +57,7 @@ namespace SLRSceneGraph {
     };
     
     
+    
     class SLR_SCENEGRAPH_API SVFresnel {
     protected:
         SLR::SVFresnel* m_rawData;
@@ -82,6 +85,24 @@ namespace SLRSceneGraph {
         SpectrumTextureRef m_etaInt;
     public:
         SVFresnelDielectric(const SpectrumTextureRef &etaExt, const SpectrumTextureRef &etaInt);
+    };
+    
+    
+    
+    class SLR_SCENEGRAPH_API SVMicrofacetDistribution {
+    protected:
+        SLR::SVMicrofacetDistribution* m_rawData;
+    public:
+        virtual ~SVMicrofacetDistribution();
+        const SLR::SVMicrofacetDistribution* getRaw() const {
+            return m_rawData;
+        };
+    };
+    
+    class SLR_SCENEGRAPH_API SVGGX : public SVMicrofacetDistribution {
+        FloatTextureRef m_alpha_g;
+    public:
+        SVGGX(const FloatTextureRef &alpha_g);
     };
     
     
@@ -130,6 +151,22 @@ namespace SLRSceneGraph {
         FloatTextureRef m_anisoY;
     public:
         ModifiedWardDurReflection(const SpectrumTextureRef &reflectance, const FloatTextureRef &anisoX, const FloatTextureRef &anisoY);
+    };
+    
+    class SLR_SCENEGRAPH_API MicrofacetReflection : public SurfaceMaterial {
+        SpectrumTextureRef m_eta;
+        SpectrumTextureRef m_k;
+        const SVMicrofacetDistributionRef m_D;
+    public:
+        MicrofacetReflection(const SpectrumTextureRef &eta, const SpectrumTextureRef &k, const SVMicrofacetDistributionRef &D);
+    };
+    
+    class SLR_SCENEGRAPH_API MicrofacetScattering : public SurfaceMaterial {
+        SpectrumTextureRef m_etaExt;
+        SpectrumTextureRef m_etaInt;
+        SVMicrofacetDistributionRef m_D;
+    public:
+        MicrofacetScattering(const SpectrumTextureRef &etaExt, const SpectrumTextureRef &etaInt, const SVMicrofacetDistributionRef &D);
     };
     
     class SLR_SCENEGRAPH_API SummedSurfaceMaterial : public SurfaceMaterial {

@@ -22,8 +22,25 @@ namespace SLR {
         virtual BSDF* getBSDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem, float scale = 1.0f) const = 0;
         virtual SampledSpectrum emittance(const SurfacePoint &surfPt, const WavelengthSamples &wls) const { return SampledSpectrum::Zero; }
         virtual bool isEmitting() const { return false; }
-        virtual EDF* getEDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem, float scale = 1.0f) const { SLRAssert_NotImplemented(); return nullptr; }
+        virtual EDF* getEDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem, float scale = 1.0f) const { SLRAssert(false, "Not implemented."); return nullptr; }
     };
+    
+    
+    
+//    class SLR_API AlphaMaskedSurfaceMaterial : public SurfaceMaterial {
+//        const FloatTexture* m_alpha;
+//    public:
+//        AlphaMaskedSurfaceMaterial() { }
+//        virtual ~AlphaMaskedSurfaceMaterial() { }
+//        
+//        virtual BSDF* getBSDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem, float scale = 1.0f) const = 0;
+//        virtual SampledSpectrum emittance(const SurfacePoint &surfPt, const WavelengthSamples &wls) const { return SampledSpectrum::Zero; }
+//        virtual bool isEmitting() const { return false; }
+//        virtual EDF* getEDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem, float scale = 1.0f) const { SLRAssert(false, "Not implemented."); return nullptr; }
+//        virtual BSSRDF* getBSSRDF(bool lowerHemisphere, const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem) const { return nullptr; }
+//    };
+    
+    
     
     class SLR_API EmitterSurfaceProperty {
     public:
@@ -50,6 +67,7 @@ namespace SLR {
         bool isEmitting() const override { return true; }
         EDF* getEDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem, float scale) const override { return m_emit->getEDF(surfPt, wls, mem); }
     };
+    
     
     
     class SLR_API SVFresnel {
@@ -86,6 +104,24 @@ namespace SLR {
         const SpectrumTexture* etaInt() const { return m_etaInt; }
         
         Fresnel* getFresnel(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem) const override;
+    };
+    
+    
+    
+    class SLR_API SVMicrofacetDistribution {
+    public:
+        SVMicrofacetDistribution() { }
+        virtual ~SVMicrofacetDistribution() { }
+        
+        virtual MicrofacetDistribution* getMicrofacetDistribution(const SurfacePoint &surfPt, ArenaAllocator &mem) const = 0;
+    };
+    
+    class SLR_API SVGGX : public SVMicrofacetDistribution {
+        const FloatTexture* m_alpha_g;
+    public:
+        SVGGX(const FloatTexture* alpha_g) : m_alpha_g(alpha_g) { }
+        
+        MicrofacetDistribution* getMicrofacetDistribution(const SurfacePoint &surfPt, ArenaAllocator &mem) const override;
     };
 }
 

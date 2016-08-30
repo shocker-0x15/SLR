@@ -44,6 +44,17 @@ namespace SLRSceneGraph {
         m_rawData = new SLR::SVFresnelDielectric(etaExt->getRaw(), etaInt->getRaw());
     }
     
+    
+    SVMicrofacetDistribution::~SVMicrofacetDistribution() {
+        delete m_rawData;
+    }
+    
+    SVGGX::SVGGX(const FloatTextureRef &alpha_g) : m_alpha_g(alpha_g) {
+        m_rawData = new SLR::SVGGX(alpha_g->getRaw());
+    }
+    
+    
+    
     DiffuseReflection::DiffuseReflection(const SpectrumTextureRef &reflectance, const FloatTextureRef &sigma) :
     m_reflectance(reflectance), m_sigma(sigma) {
         m_rawData = new SLR::DiffuseReflection(reflectance->getRaw(), sigma ? sigma->getRaw() : nullptr);
@@ -72,6 +83,16 @@ namespace SLRSceneGraph {
     ModifiedWardDurReflection::ModifiedWardDurReflection(const SpectrumTextureRef &reflectance, const FloatTextureRef &anisoX, const FloatTextureRef &anisoY) :
     m_reflectance(reflectance), m_anisoX(anisoX), m_anisoY(anisoY) {
         m_rawData = new SLR::ModifiedWardDurReflection(reflectance->getRaw(), anisoX->getRaw(), anisoY->getRaw());
+    }
+    
+    MicrofacetReflection::MicrofacetReflection(const SpectrumTextureRef &eta, const SpectrumTextureRef &k, const SVMicrofacetDistributionRef &D) :
+    m_eta(eta), m_k(k), m_D(D) {
+        m_rawData = new SLR::MicrofacetReflection(eta->getRaw(), k->getRaw(), D->getRaw());
+    }
+    
+    MicrofacetScattering::MicrofacetScattering(const SpectrumTextureRef &etaExt, const SpectrumTextureRef &etaInt, const SVMicrofacetDistributionRef &D) :
+    m_etaExt(etaExt), m_etaInt(etaInt), m_D(D) {
+        m_rawData = new SLR::MicrofacetScattering(etaExt->getRaw(), etaInt->getRaw(), D->getRaw());
     }
     
     SummedSurfaceMaterial::SummedSurfaceMaterial(const SurfaceMaterialRef &m0, const SurfaceMaterialRef &m1) :
@@ -117,6 +138,16 @@ namespace SLRSceneGraph {
     
     SurfaceMaterialRef SurfaceMaterial::createAshikhminShirley(const SpectrumTextureRef &Rd, const SpectrumTextureRef &Rs, const FloatTextureRef &nu, const FloatTextureRef &nv) {
         return createShared<AshikhminShirleyReflection>(Rs, Rd, nu, nv);
+    }
+    
+    SurfaceMaterialRef SurfaceMaterial::createMicrofacetMetal(const SpectrumTextureRef &eta, const SpectrumTextureRef &k, const FloatTextureRef &alpha_g) {
+        SVMicrofacetDistributionRef dist = createShared<SVGGX>(alpha_g);
+        return createShared<MicrofacetReflection>(eta, k, dist);
+    }
+    
+    SurfaceMaterialRef SurfaceMaterial::createMicrofacetGlass(const SpectrumTextureRef &etaExt, const SpectrumTextureRef &etaInt, const FloatTextureRef &alpha_g) {
+        SVMicrofacetDistributionRef dist = createShared<SVGGX>(alpha_g);
+        return createShared<MicrofacetScattering>(etaExt, etaInt, dist);
     }
     
     SurfaceMaterialRef SurfaceMaterial::createInverseMaterial(const SurfaceMaterialRef &baseMat) {

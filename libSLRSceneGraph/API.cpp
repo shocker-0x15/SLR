@@ -550,6 +550,36 @@ namespace SLRSceneGraph {
                                      };
                                      return configFunc(params, context, err);
                                  }
+                                 else if (type == "microfacet metal") {
+                                     const static Function configFunc{
+                                         0, {
+                                             {"eta", Type::SpectrumTexture}, {"k", Type::SpectrumTexture},
+                                             {"alpha_g", Type::FloatTexture}
+                                         },
+                                         [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
+                                             SpectrumTextureRef eta = args.at("eta").rawRef<TypeMap::SpectrumTexture>();
+                                             SpectrumTextureRef k = args.at("k").rawRef<TypeMap::SpectrumTexture>();
+                                             FloatTextureRef alpha_g = args.at("alpha_g").rawRef<TypeMap::FloatTexture>();
+                                             return Element(TypeMap::SurfaceMaterial(), SurfaceMaterial::createMicrofacetMetal(eta, k, alpha_g));
+                                         }
+                                     };
+                                     return configFunc(params, context, err);
+                                 }
+                                 else if (type == "microfacet glass") {
+                                     const static Function configFunc{
+                                         0, {
+                                             {"etaExt", Type::SpectrumTexture}, {"etaInt", Type::SpectrumTexture},
+                                             {"alpha_g", Type::FloatTexture}
+                                         },
+                                         [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
+                                             SpectrumTextureRef etaExt = args.at("etaExt").rawRef<TypeMap::SpectrumTexture>();
+                                             SpectrumTextureRef etaInt = args.at("etaInt").rawRef<TypeMap::SpectrumTexture>();
+                                             FloatTextureRef alpha_g = args.at("alpha_g").rawRef<TypeMap::FloatTexture>();
+                                             return Element(TypeMap::SurfaceMaterial(), SurfaceMaterial::createMicrofacetGlass(etaExt, etaInt, alpha_g));
+                                         }
+                                     };
+                                     return configFunc(params, context, err);
+                                 }
                                  else if (type == "inverse") {
                                      const static Function configFunc{
                                          0, {
@@ -1088,7 +1118,7 @@ namespace SLRSceneGraph {
 //        parser.traceParsing = true;
         StatementsRef statements = parser.parse(filePath);
         if (!statements) {
-            printf("Failed to parse scene file: %s", filePath.c_str());
+            printf("Failed to parse scene file: %s\n", filePath.c_str());
             return false;
         }
         

@@ -5,9 +5,6 @@
 //  Copyright (c) 2015年 渡部 心. All rights reserved.
 //
 
-// References
-// An Anisotropic Phong BRDF Model
-
 #ifndef __SLR__AshikhminShirleyBRDF__
 #define __SLR__AshikhminShirleyBRDF__
 
@@ -16,6 +13,8 @@
 #include "../Core/directional_distribution_functions.h"
 
 namespace SLR {
+    // References
+    // An Anisotropic Phong BRDF Model
     class SLR_API AshikhminShirleyBRDF : public BSDF {
         SampledSpectrum m_Rs;
         SampledSpectrum m_Rd;

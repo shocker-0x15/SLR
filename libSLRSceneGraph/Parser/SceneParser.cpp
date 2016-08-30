@@ -974,6 +974,7 @@ namespace SLRSceneGraph {
     bool ReturnStatement::perform(SLRSceneGraph::ExecuteContext &context, SLRSceneGraph::ErrorMessage *errMsg) const {
         if (!m_expr) {
             context.returnValue = Element();
+            context.returnFlag = true;
             return true;
         }
         if (!m_expr->perform(context, errMsg))
