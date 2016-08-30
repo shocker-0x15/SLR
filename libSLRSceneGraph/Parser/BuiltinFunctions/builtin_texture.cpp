@@ -6,7 +6,7 @@
 //
 
 #include "builtin_texture.hpp"
-#include "textures.hpp"
+#include "../../textures.hpp"
 
 namespace SLRSceneGraph {
     namespace BuiltinFunctions {
