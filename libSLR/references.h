@@ -205,6 +205,8 @@ namespace SLR {
     struct IDFQuery;
     struct IDFSample;
     struct IDFQueryResult;
+    struct PFSample;
+    struct PFQueryResult;
     class EDF;
     class BSDF;
     class IDF;
@@ -228,6 +230,9 @@ namespace SLR {
     class MicrofacetBRDF;
     class MicrofacetBSDF;
     class MultiBSDF;
+    class IsotropicPhaseFunction;
+    class HenyeyGreensteinPhaseFunction;
+    class SchlickPhaseFunction;
     class PerspectiveIDF;
     class EquirectangularIDF;
     

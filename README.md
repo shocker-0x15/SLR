@@ -16,32 +16,42 @@ SLR consists of the following components.
 * Full Spectral Rendering (Monte Carlo Spectral Sampling)  
   (For RGB resources, RGB->Spectrum conversion is performed using Meng-Simon's method \[Meng2015\].)
 * RGB Rendering
-* Various BSDF Types
+* BSDFs
     * Ideal Diffuse (Lambert) BRDF
-    * Ideal Specular BRDF and BSDF
+    * Ideal Specular BRDF/BSDF
     * Oren-Nayer BRDF \[Oren1994\]
     * Improved Ward-Dür BRDF \[Moroder2010\]
     * Ashikhmin-Shirley BRDF \[Ashikhmin2000\]
-    * GGX Microfacet BRDF and BSDF \[Walter2007\] with visible normal sampling \[Heitz2014\]
+    * GGX Microfacet BRDF/BSDF \[Walter2007\] with visible normal sampling \[Heitz2014\]
     * Mixed BSDF
     * ~~Layered BSDF~~ (TODO)
-* Procedural Textures
-    * Checkerboard (color & normal & float)
-    * Cell Noise \[Worley1996\] like Voronoi diagram (color & normal & float)
+* Volume Rendering
+    * Phase Functions
+        * Isotropic
+        * Henyey-Greenstein
+        * Schlick
+    * Homogeneous Media
+    * Heterogeneous Media (trilinear-interpolated grid)
+* Texture Types
+    * Constant
+    * Image
+    * Procedural
+        * Checkerboard (color & normal & float)
+        * Cell Noise \[Worley1996\] like Voronoi diagram (color & normal & float)
 * Bump Mapping (Normal Map)
-* Correct handling of non-symmetric scattering due to shading normals \[Veach1996, 1997\]
-* ~~Volume Rendering~~ (TODO)
-* Image Based Environmental Light
-* Camera
+* Light Types
+    * Area (Polygonal) Light
+    * Image Based Environmental Light
+* Camera Types
     * Perspective Camera with Depth of Field (thin-lens model)
-    * Environment Camera
-* Motion Blur
+    * Environment (Equirectangular) Camera
+* Motion Blur Types
     * Camera Motion Blur
     * Object Motion Blur
     * ~~Deformation Blur~~ (TODO)
 * Geometry Instancing
-* Acceleration Structure
-    * Binned SAH BVH
+* Acceleration Structure Types
+    * Standard BVH (median, mid-point, binned SAH)
     * Split BVH \[Stich2009\]
     * QBVH \[Dammertz2008\] constructed by collapsing SBVH
 * Light Transport Algorithms
@@ -49,6 +59,7 @@ SLR consists of the following components.
     * Bidirectional Path Tracing \[Veach1994, 1997\]
     * ~~Adaptive MCMC Progressive Photon Mapping~~ \[Hachisuka2011\]  
 (has been dropped from current SLR implementation.)
+* Correct handling of non-symmetric scattering due to shading normals \[Veach1996, 1997\]
 * SLR Custom Language (C/Python-like syntax) for flexible scene description
 
 ##動作環境 / Confirmed Environment

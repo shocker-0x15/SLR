@@ -150,29 +150,13 @@ namespace SLR {
         DirectionType dirType;
     };
     
-    struct SLR_API BSSRDFQuery {
-        const Scene &scene;
-        const SurfacePoint &surfPt;
-        Vector3D dir;
-        float time;
-        int16_t wlHint;
-        bool adjoint;
-        
-        BSSRDFQuery(const Scene &scn, const SurfacePoint &sp, const Vector3D d, float t, int16_t wl, bool adj = false) :
-        scene(scn), surfPt(sp), dir(d), time(t), wlHint(wl), adjoint(adj) {}
-    };
-    
-    struct SLR_API BSSRDFSample {
-        float uPos[2];
+    struct SLR_API PFSample {
         float uDir[2];
-        float uAuxiliary;
-        BSSRDFSample(float uPos0, float uPos1, float uDir0, float uDir1, float uAux) : uPos{uPos0, uPos1}, uDir{uDir0, uDir1}, uAuxiliary(uAux) { }
+        PFSample(float uDir0, float uDir1) : uDir{uDir0, uDir1} { }
     };
     
-    struct SLR_API BSSRDFQueryResult {
-        SurfacePoint surfPt;
-        Vector3D dir;
-        float areaPDF;
+    struct SLR_API PFQueryResult {
+        Vector3D dirLocal;
         float dirPDF;
     };
     
@@ -322,6 +306,16 @@ namespace SLR {
         
         virtual bool matches(DirectionType flags) const { return m_type.matches(flags); }
         bool hasNonDelta() const { return matches(DirectionType::WholeSphere | DirectionType::NonDelta); }
+    };
+    
+    class SLR_API PhaseFunction {
+    public:
+        PhaseFunction() {}
+        virtual ~PhaseFunction() {}
+        
+        virtual SampledSpectrum sample(const Vector3D &dirOut, const PFSample &smp, PFQueryResult* result) const = 0;
+        virtual SampledSpectrum evaluate(const Vector3D &dirOut, const Vector3D &dirIn) const = 0;
+        virtual float evaluatePDF(const Vector3D &dirOut, const Vector3D &dirIn) const = 0;
     };
     
     
