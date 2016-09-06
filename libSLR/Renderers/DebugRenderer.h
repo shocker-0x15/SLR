@@ -35,7 +35,7 @@ namespace SLR {
             const Scene* scene;
             
             ArenaAllocator* mems;
-            RandomNumberGenerator** rngs;
+            IndependentLightPathSampler** pathSamplers;
             
             const Camera* camera;
             float timeStart;
@@ -50,7 +50,8 @@ namespace SLR {
             uint32_t basePixelY;
             
             void kernel(uint32_t threadID);
-            DebugInfo contribution(const Scene &scene, const WavelengthSamples &initWLs, const Ray &initRay, RandomNumberGenerator &rng, ArenaAllocator &mem) const;
+            DebugInfo contribution(const Scene &scene, const WavelengthSamples &initWLs, const Ray &initRay,
+                                   IndependentLightPathSampler &pathSampler, ArenaAllocator &mem) const;
         };
         std::array<bool, (int)ExtraChannel::NumChannels> m_channels;
 

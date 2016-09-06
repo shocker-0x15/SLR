@@ -9,13 +9,13 @@
 
 #include "../Core/RenderSettings.h"
 #include "../Helper/ThreadPool.h"
-#include "../Core/XORShiftRNG.h"
+#include "../RNGs/XORShiftRNG.h"
+#include "../Memory/ArenaAllocator.h"
 #include "../Core/ImageSensor.h"
 #include "../Core/RandomNumberGenerator.h"
-#include "../Memory/ArenaAllocator.h"
 #include "../Core/cameras.h"
 #include "../Core/SurfaceObject.h"
-
+#include "../Core/light_path_samplers.h"
 #include "../Core/distributions.h"
 
 namespace SLR {
@@ -30,14 +30,14 @@ namespace SLR {
 #endif
         XORShiftRNG topRand(settings.getInt(RenderSettingItem::RNGSeed));
         std::unique_ptr<ArenaAllocator[]> mems = std::unique_ptr<ArenaAllocator[]>(new ArenaAllocator[numThreads]);
-        std::unique_ptr<XORShiftRNG[]> rngs = std::unique_ptr<XORShiftRNG[]>(new XORShiftRNG[numThreads]);
+        std::unique_ptr<IndependentLightPathSampler[]> samplers = std::unique_ptr<IndependentLightPathSampler[]>(new IndependentLightPathSampler[numThreads]);
         for (int i = 0; i < numThreads; ++i) {
             new (mems.get() + i) ArenaAllocator();
-            new (rngs.get() + i) XORShiftRNG(topRand.getUInt());
+            new (samplers.get() + i) IndependentLightPathSampler(topRand.getUInt());
         }
-        std::unique_ptr<RandomNumberGenerator*[]> rngRefs = std::unique_ptr<RandomNumberGenerator*[]>(new RandomNumberGenerator*[numThreads]);
+        std::unique_ptr<IndependentLightPathSampler*[]> samplerRefs = std::unique_ptr<IndependentLightPathSampler*[]>(new IndependentLightPathSampler*[numThreads]);
         for (int i = 0; i < numThreads; ++i)
-            rngRefs[i] = &rngs[i];
+            samplerRefs[i] = &samplers[i];
         
         const Camera* camera = scene.getCamera();
         ImageSensor* sensor = camera->getSensor();
@@ -46,7 +46,7 @@ namespace SLR {
         job.scene = &scene;
         
         job.mems = mems.get();
-        job.rngs = rngRefs.get();
+        job.pathSamplers = samplerRefs.get();
         
         job.camera = camera;
         job.timeStart = settings.getFloat(RenderSettingItem::TimeStart);
@@ -98,19 +98,18 @@ namespace SLR {
     
     void BidirectionalPathTracingRenderer::Job::kernel(uint32_t threadID) {
         ArenaAllocator &mem = mems[threadID];
-        RandomNumberGenerator &rng = *rngs[threadID];
+        IndependentLightPathSampler &pathSampler = *pathSamplers[threadID];
         for (int ly = 0; ly < numPixelY; ++ly) {
             for (int lx = 0; lx < numPixelX; ++lx) {
-                float time = timeStart + rng.getFloat0cTo1o() * (timeEnd - timeStart);
-                float px = basePixelX + lx + rng.getFloat0cTo1o();
-                float py = basePixelY + ly + rng.getFloat0cTo1o();
+                float time = pathSampler.getTimeSample(timeStart, timeEnd);
+                PixelPosition p = pathSampler.getPixelPositionSample(basePixelX + lx, basePixelY + ly);
                 
                 float selectWLPDF;
-                WavelengthSamples wls = WavelengthSamples::createWithEqualOffsets(rng.getFloat0cTo1o(), rng.getFloat0cTo1o(), &selectWLPDF);
+                WavelengthSamples wls = WavelengthSamples::createWithEqualOffsets(pathSampler.getWavelengthSample(), pathSampler.getWLSelectionSample(), &selectWLPDF);
                 
                 // initialize working area for the current pixel.
-                curPx = px;
-                curPy = py;
+                curPx = p.x;
+                curPy = p.y;
                 wlHint = wls.selectedLambda;
                 eyeVertices.clear();
                 lightVertices.clear();
@@ -120,19 +119,18 @@ namespace SLR {
                     // select one light from all the lights in the scene.
                     float lightProb;
                     Light light;
-                    scene->selectLight(rng.getFloat0cTo1o(), &light, &lightProb);
+                    scene->selectLight(pathSampler.getLightSelectionSample(), &light, &lightProb);
                     SLRAssert(!std::isnan(lightProb) && !std::isinf(lightProb), "lightProb: unexpected value detected: %f", lightProb);
                     
                     // sample a ray with its radiance (emittance, EDF value) from the selected light.
                     LightPosQuery lightPosQuery(time, wls);
-                    LightPosSample lightPosSample(rng.getFloat0cTo1o(), rng.getFloat0cTo1o());
                     LightPosQueryResult lightPosResult;
                     EDFQuery edfQuery;
-                    EDFSample edfSample(rng.getFloat0cTo1o(), rng.getFloat0cTo1o(), rng.getFloat0cTo1o());
                     EDFQueryResult edfResult;
                     EDF* edf;
                     SampledSpectrum Le0, Le1;
-                    Ray ray = light.sampleRay(lightPosQuery, lightPosSample, &lightPosResult, &Le0, &edf, edfQuery, edfSample, &edfResult, &Le1, mem);
+                    Ray ray = light.sampleRay(lightPosQuery, pathSampler.getLightPosSample(), &lightPosResult, &Le0, &edf,
+                                              edfQuery, pathSampler.getEDFSample(), &edfResult, &Le1, mem);
                     
                     // register the first light vertex.
                     float lightAreaPDF = lightProb * lightPosResult.areaPDF;
@@ -141,20 +139,19 @@ namespace SLR {
                     
                     // create subsequent light subpath vertices by tracing in the scene.
                     SampledSpectrum alpha = lightVertices.back().alpha * Le1 * (absDot(ray.dir, lightPosResult.surfPt.gNormal) / edfResult.dirPDF);
-                    generateSubPath(wls, alpha, ray, edfResult.dirPDF, edfResult.dirType, edfResult.dir_sn.z, true, rng, mem);
+                    generateSubPath(wls, alpha, ray, edfResult.dirPDF, edfResult.dirType, edfResult.dir_sn.z, true, pathSampler, mem);
                 }
                 
                 // eye subpath generation
                 {
                     // sample a ray with its importances (spatial, directional) from the lens and its IDF.
                     LensPosQuery lensQuery(time, wls);
-                    LensPosSample lensSample(rng.getFloat0cTo1o(), rng.getFloat0cTo1o());
                     LensPosQueryResult lensResult;
-                    IDFSample WeSample(px / imageWidth, py / imageHeight);
+                    IDFSample WeSample(p.x / imageWidth, p.y / imageHeight);
                     IDFQueryResult WeResult;
                     IDF* idf;
                     SampledSpectrum We0, We1;
-                    Ray ray = camera->sampleRay(lensQuery, lensSample, &lensResult, &We0, &idf, WeSample, &WeResult, &We1, mem);
+                    Ray ray = camera->sampleRay(lensQuery, pathSampler.getLensPosSample(), &lensResult, &We0, &idf, WeSample, &WeResult, &We1, mem);
                     
                     // register the first eye vertex.
                     eyeVertices.emplace_back(lensResult.surfPt, Vector3D::Zero, Normal3D(0, 0, 1), mem.create<IDFProxy>(idf),
@@ -162,7 +159,7 @@ namespace SLR {
                     
                     // create subsequent eye subpath vertices by tracing in the scene.
                     SampledSpectrum alpha = eyeVertices.back().alpha * We1 * (absDot(ray.dir, lensResult.surfPt.gNormal) / WeResult.dirPDF);
-                    generateSubPath(wls, alpha, ray, WeResult.dirPDF, WeResult.dirType, WeResult.dirLocal.z, false, rng, mem);
+                    generateSubPath(wls, alpha, ray, WeResult.dirPDF, WeResult.dirType, WeResult.dirLocal.z, false, pathSampler, mem);
                 }
                 
                 // connection
@@ -245,7 +242,7 @@ namespace SLR {
                                   "Unexpected value detected: %s\n"
                                   "pix: (%f, %f)", contribution.toString().c_str(), px, py);
                         if (t > 1) {
-                            sensor->add(px, py, wls, contribution);
+                            sensor->add(p.x, p.y, wls, contribution);
                         }
                         else {
                             const IDF* idf = (const IDF*)eVtx.ddf->getDDF();
@@ -262,7 +259,7 @@ namespace SLR {
     }
     
     void BidirectionalPathTracingRenderer::Job::generateSubPath(const WavelengthSamples &initWLs, const SampledSpectrum &initAlpha, const SLR::Ray &initRay, float dirPDF, DirectionType sampledType,
-                                                                float cosLast, bool adjoint, RandomNumberGenerator &rng, SLR::ArenaAllocator &mem) {
+                                                                float cosLast, bool adjoint, IndependentLightPathSampler &pathSampler, SLR::ArenaAllocator &mem) {
         std::vector<BPTVertex> &vertices = adjoint ? lightVertices : eyeVertices;
         
         // reject invalid values.
@@ -317,11 +314,10 @@ namespace SLR {
             }
             
             BSDFQuery fsQuery(dirOut_sn, gNorm_sn, wls.selectedLambda, DirectionType::All, adjoint);
-            BSDFSample fsSample(rng.getFloat0cTo1o(), rng.getFloat0cTo1o(), rng.getFloat0cTo1o());
             BSDFQueryResult fsResult;
             BSDFReverseInfo revInfo;
             fsResult.reverse = &revInfo;
-            SampledSpectrum fs = bsdf->sample(fsQuery, fsSample, &fsResult);
+            SampledSpectrum fs = bsdf->sample(fsQuery, pathSampler.getBSDFSample(), &fsResult);
             if (fs == SampledSpectrum::Zero || fsResult.dirPDF == 0.0f)
                 break;
             if (fsResult.dirType.isDispersive())
@@ -331,7 +327,7 @@ namespace SLR {
             
             // Russian roulette
             RRProb = std::min(weight.importance(wlHint), 1.0f);
-            if (rng.getFloat0cTo1o() < RRProb)
+            if (pathSampler.getPathTerminationSample() < RRProb)
                 weight /= RRProb;
             else
                 break;
