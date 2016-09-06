@@ -11,7 +11,7 @@
 
 #include <libSLR/Core/Image.h>
 #include <libSLR/Core/SurfaceObject.h>
-#include <libSLR/Core/XORShiftRNG.h>
+#include <libSLR/RNGs/XORShiftRNG.h>
 #include <libSLR/Memory/ArenaAllocator.h>
 #include <libSLR/Renderers/DebugRenderer.h>
 #include <libSLR/Renderers/PathTracingRenderer.h>
@@ -602,22 +602,6 @@ namespace SLRSceneGraph {
                                              SurfaceMaterialRef scatter = args.at("scatter").rawRef<TypeMap::SurfaceMaterial>();
                                              EmitterSurfacePropertyRef emitter = args.at("emitter").rawRef<TypeMap::EmitterSurfaceProperty>();
                                              return Element(TypeMap::SurfaceMaterial(), SurfaceMaterial::createEmitterSurfaceMaterial(scatter, emitter));
-                                         }
-                                     };
-                                     return configFunc(params, context, err);
-                                 }
-                                 else if (type == "SSS") {
-                                     const static Function configFunc{
-                                         0, {
-                                             {"surfMat", Type::SurfaceMaterial},
-                                             {"sigma_a", Type::Spectrum}, {"sigma_s", Type::Spectrum}, {"g", Type::RealNumber}
-                                         },
-                                         [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
-                                             SurfaceMaterialRef surfMat = args.at("surfMat").rawRef<TypeMap::SurfaceMaterial>();
-                                             InputSpectrumRef sigma_a = args.at("sigma_a").rawRef<TypeMap::Spectrum>();
-                                             InputSpectrumRef sigma_s = args.at("sigma_s").rawRef<TypeMap::Spectrum>();
-                                             float g = args.at("g").raw<TypeMap::RealNumber>();
-                                             return Element(TypeMap::SurfaceMaterial(), SurfaceMaterial::createSSSSurfaceMaterial(surfMat, sigma_a, sigma_s, g, nullptr, nullptr, 0));
                                          }
                                      };
                                      return configFunc(params, context, err);

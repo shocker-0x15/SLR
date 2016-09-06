@@ -150,8 +150,6 @@ namespace SLR {
         virtual float evaluateAreaPDF(const SurfacePoint& surfPt) const;
         virtual SampledSpectrum emittance(const SurfacePoint& surfPt, const WavelengthSamples &wls) const;
         virtual EDF* createEDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem) const;
-        
-        virtual BSSRDF* createBSSRDF(bool lowerHemisphere, const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem) const;
     };
     
     class SLR_API BumpSingleSurfaceObject : public SingleSurfaceObject {

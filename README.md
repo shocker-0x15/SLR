@@ -25,10 +25,6 @@ SLR consists of the following components.
     * GGX Microfacet BRDF and BSDF \[Walter2007\] with visible normal sampling \[Heitz2014\]
     * Mixed BSDF
     * ~~Layered BSDF~~ (TODO)
-* BSSRDF for Sub-Surface Scattering
-    * Diffusion Dipole without pre-pass \[Jensen2001\]
-    * generalized to rough surfaces \[Donner2006\]
-    * Axis MIS \[King2013\]
 * Procedural Textures
     * Checkerboard (color & normal & float)
     * Cell Noise \[Worley1996\] like Voronoi diagram (color & normal & float)
@@ -60,7 +56,7 @@ SLR consists of the following components.
 I've confirmed that the program runs correctly on the following environment.
 
 * OS X 10.11
-* Windows 8.1
+* Windows 8.1 (character-encoding conversion required)
 * MacBook Pro Retina Late 2013
 
 動作させるにあたっては以下のライブラリが必要です。  
@@ -78,12 +74,9 @@ There are some scene files loading a model data and textures, but those assets a
 ##参考文献 / References
 [Ashikhmin2000] "An Anisotropic Phong BRDF Model"  
 [Dammertz2008] "Shallow Bounding Volume Hierarchies for Fast SIMD Ray Tracing of Incoherent Rays"  
-[Donner2006] "Towards Realistic Image Synthesis of Scattering Materials"  
 [Hachisuka2011] "Robust Adaptive Photon Tracing Using Photon Path Visibility"  
-[Heitz2014] "Importance Sampling Microfacet-Based BSDFs using the Distribution of Visible Normals"  
-[Jensen2001] "A Practical Model for Subsurface Light Transport"  
+[Heitz2014] "Importance Sampling Microfacet-Based BSDFs using the Distribution of Visible Normals"    
 [Kajiya1986] "THE RENDERING EQUATION"  
-[King2013] "BSSRDF Importance Sampling"  
 [Meng2015] "Physically Meaningful Rendering using Tristimulus Colours"  
 [Moroder2010] "A New Ward BRDF Model with Bounded Albedo"  
 [Oren1994] "Generalization of Lambert’s Reflectance Model"  

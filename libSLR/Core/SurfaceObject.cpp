@@ -119,10 +119,6 @@ namespace SLR {
         return m_material->getEDF(surfPt, wls, mem);
     }
     
-    BSSRDF* SingleSurfaceObject::createBSSRDF(bool lowerHemisphere, const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem) const {
-        return m_material->getBSSRDF(lowerHemisphere, surfPt, wls, mem);
-    }
-    
     
     void BumpSingleSurfaceObject::getSurfacePoint(const Intersection &isect, SurfacePoint *surfPt) const {
         SingleSurfaceObject::getSurfacePoint(isect, surfPt);
@@ -228,9 +224,9 @@ namespace SLR {
     
     
     SurfaceObjectAggregate::SurfaceObjectAggregate(std::vector<SurfaceObject*> &objs) {
-        SBVH sbvh(objs);
-        m_accelerator = new QBVH(sbvh);
-//        m_accelerator = new SBVH(objs);
+//        SBVH sbvh(objs);
+//        m_accelerator = new QBVH(sbvh);
+        m_accelerator = new SBVH(objs);
 //        m_accelerator = new StandardBVH(objs, StandardBVH::Partitioning::BinnedSAH);
         
         std::vector<const SurfaceObject*> lights;

@@ -55,17 +55,6 @@ namespace SLRSceneGraph {
     
     
     
-    SubSurfaceScatteringSurfaceMaterial::SubSurfaceScatteringSurfaceMaterial(const SurfaceMaterialRef &surfMat,
-                                                                             const InputSpectrumRef &l_sigma_a, const InputSpectrumRef &l_sigma_s, float l_g,
-                                                                             const InputSpectrumRef &u_sigma_a, const InputSpectrumRef &u_sigma_s, float u_g) :
-    m_surfMat(surfMat),
-    m_l_sigma_a(l_sigma_a), m_l_sigma_s(l_sigma_s), m_l_g(l_g),
-    m_u_sigma_a(u_sigma_a), m_u_sigma_s(u_sigma_s), m_u_g(u_g) {
-        m_rawData = new SLR::SubSurfaceScatteringSurfaceMaterial(surfMat->getRaw(), l_sigma_a.get(), l_sigma_s.get(), l_g, u_sigma_a.get(), u_sigma_s.get(), u_g);
-    }
-    
-    
-    
     DiffuseReflection::DiffuseReflection(const SpectrumTextureRef &reflectance, const FloatTextureRef &sigma) :
     m_reflectance(reflectance), m_sigma(sigma) {
         m_rawData = new SLR::DiffuseReflection(reflectance->getRaw(), sigma ? sigma->getRaw() : nullptr);
@@ -179,11 +168,5 @@ namespace SLRSceneGraph {
     
     SurfaceMaterialRef SurfaceMaterial::createEmitterSurfaceMaterial(const SurfaceMaterialRef &mat, const EmitterSurfacePropertyRef &emit) {
         return createShared<EmitterSurfaceMaterial>(mat, emit);
-    }
-    
-    SurfaceMaterialRef SurfaceMaterial::createSSSSurfaceMaterial(const SurfaceMaterialRef &surfMat,
-                                                                 const InputSpectrumRef &l_sigma_a, const InputSpectrumRef &l_sigma_s, float l_g,
-                                                                 const InputSpectrumRef &u_sigma_a, const InputSpectrumRef &u_sigma_s, float u_g) {
-        return createShared<SubSurfaceScatteringSurfaceMaterial>(surfMat, l_sigma_a, l_sigma_s, l_g, u_sigma_a, u_sigma_s, u_g);
     }
 }
