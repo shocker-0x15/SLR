@@ -146,6 +146,12 @@
 		466F6D591BB715660056F2FA /* references.h in Headers */ = {isa = PBXBuildFile; fileRef = 466F6CB11BB6B34E0056F2FA /* references.h */; };
 		468F9DC31D7C383F00DD02BD /* basic_phase_functions.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 468F9DC11D7C383F00DD02BD /* basic_phase_functions.cpp */; };
 		468F9DC41D7C383F00DD02BD /* basic_phase_functions.h in Headers */ = {isa = PBXBuildFile; fileRef = 468F9DC21D7C383F00DD02BD /* basic_phase_functions.h */; };
+		468F9DCA1D7DC7EB00DD02BD /* LinearCongruentialRNG.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 468F9DC61D7DC7EB00DD02BD /* LinearCongruentialRNG.cpp */; };
+		468F9DCB1D7DC7EB00DD02BD /* LinearCongruentialRNG.h in Headers */ = {isa = PBXBuildFile; fileRef = 468F9DC71D7DC7EB00DD02BD /* LinearCongruentialRNG.h */; };
+		468F9DCC1D7DC7EB00DD02BD /* XORShiftRNG.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 468F9DC81D7DC7EB00DD02BD /* XORShiftRNG.cpp */; };
+		468F9DCD1D7DC7EB00DD02BD /* XORShiftRNG.h in Headers */ = {isa = PBXBuildFile; fileRef = 468F9DC91D7DC7EB00DD02BD /* XORShiftRNG.h */; };
+		468F9DD01D7DE05400DD02BD /* light_path_samplers.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 468F9DCE1D7DE05400DD02BD /* light_path_samplers.cpp */; };
+		468F9DD11D7DE05400DD02BD /* light_path_samplers.h in Headers */ = {isa = PBXBuildFile; fileRef = 468F9DCF1D7DE05400DD02BD /* light_path_samplers.h */; };
 		46AE85291BB718C400C70BF3 /* references.h in Headers */ = {isa = PBXBuildFile; fileRef = 466F6D491BB7134E0056F2FA /* references.h */; };
 		46B36DE61D33E7CF00D7C56B /* Accelerator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 46B36DE41D33E7CF00D7C56B /* Accelerator.cpp */; };
 		46B36DE71D33E7CF00D7C56B /* Accelerator.h in Headers */ = {isa = PBXBuildFile; fileRef = 46B36DE51D33E7CF00D7C56B /* Accelerator.h */; };
@@ -162,10 +168,6 @@
 		46BF49911BB7E7760036033F /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 46BF49901BB7E7760036033F /* main.cpp */; };
 		46C4A1001D12F8E6003530DA /* voronoi_textures.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 46C4A0FF1D12F8E6003530DA /* voronoi_textures.cpp */; };
 		46C4A1021D12F8FD003530DA /* voronoi_textures.h in Headers */ = {isa = PBXBuildFile; fileRef = 46C4A1011D12F8FD003530DA /* voronoi_textures.h */; };
-		46C4A10D1D1301C9003530DA /* LinearCongruentialRNG.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 46C4A1091D1301C9003530DA /* LinearCongruentialRNG.cpp */; };
-		46C4A10E1D1301C9003530DA /* LinearCongruentialRNG.h in Headers */ = {isa = PBXBuildFile; fileRef = 46C4A10A1D1301C9003530DA /* LinearCongruentialRNG.h */; };
-		46C4A10F1D1301C9003530DA /* XORShiftRNG.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 46C4A10B1D1301C9003530DA /* XORShiftRNG.cpp */; };
-		46C4A1101D1301C9003530DA /* XORShiftRNG.h in Headers */ = {isa = PBXBuildFile; fileRef = 46C4A10C1D1301C9003530DA /* XORShiftRNG.h */; };
 		46C4A1121D130895003530DA /* OrenNayerBRDF.h in Headers */ = {isa = PBXBuildFile; fileRef = 46C4A1111D130895003530DA /* OrenNayerBRDF.h */; };
 		46C4A1141D1308A6003530DA /* OrenNayerBRDF.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 46C4A1131D1308A6003530DA /* OrenNayerBRDF.cpp */; };
 		46D16E6C1D283E36009C241C /* SBVH.h in Headers */ = {isa = PBXBuildFile; fileRef = 46D16E6B1D283E36009C241C /* SBVH.h */; };
@@ -354,6 +356,12 @@
 		466F6D491BB7134E0056F2FA /* references.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = references.h; path = libSLRSceneGraph/references.h; sourceTree = "<group>"; };
 		468F9DC11D7C383F00DD02BD /* basic_phase_functions.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = basic_phase_functions.cpp; path = libSLR/PhaseFunctions/basic_phase_functions.cpp; sourceTree = SOURCE_ROOT; };
 		468F9DC21D7C383F00DD02BD /* basic_phase_functions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = basic_phase_functions.h; path = libSLR/PhaseFunctions/basic_phase_functions.h; sourceTree = SOURCE_ROOT; };
+		468F9DC61D7DC7EB00DD02BD /* LinearCongruentialRNG.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LinearCongruentialRNG.cpp; path = libSLR/RNGs/LinearCongruentialRNG.cpp; sourceTree = SOURCE_ROOT; };
+		468F9DC71D7DC7EB00DD02BD /* LinearCongruentialRNG.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LinearCongruentialRNG.h; path = libSLR/RNGs/LinearCongruentialRNG.h; sourceTree = SOURCE_ROOT; };
+		468F9DC81D7DC7EB00DD02BD /* XORShiftRNG.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = XORShiftRNG.cpp; path = libSLR/RNGs/XORShiftRNG.cpp; sourceTree = SOURCE_ROOT; };
+		468F9DC91D7DC7EB00DD02BD /* XORShiftRNG.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XORShiftRNG.h; path = libSLR/RNGs/XORShiftRNG.h; sourceTree = SOURCE_ROOT; };
+		468F9DCE1D7DE05400DD02BD /* light_path_samplers.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = light_path_samplers.cpp; path = libSLR/Core/light_path_samplers.cpp; sourceTree = SOURCE_ROOT; };
+		468F9DCF1D7DE05400DD02BD /* light_path_samplers.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = light_path_samplers.h; path = libSLR/Core/light_path_samplers.h; sourceTree = SOURCE_ROOT; };
 		46B36DE41D33E7CF00D7C56B /* Accelerator.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Accelerator.cpp; path = libSLR/Core/Accelerator.cpp; sourceTree = SOURCE_ROOT; };
 		46B36DE51D33E7CF00D7C56B /* Accelerator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Accelerator.h; path = libSLR/Core/Accelerator.h; sourceTree = SOURCE_ROOT; };
 		46B958921BDCD2B300A915DE /* location.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = location.hh; path = libSLRSceneGraph/Parser/location.hh; sourceTree = "<group>"; };
@@ -372,10 +380,6 @@
 		46BF49921BB7EB860036033F /* StopWatch.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = StopWatch.h; path = HostProgram/StopWatch.h; sourceTree = "<group>"; };
 		46C4A0FF1D12F8E6003530DA /* voronoi_textures.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = voronoi_textures.cpp; path = libSLR/Textures/voronoi_textures.cpp; sourceTree = SOURCE_ROOT; };
 		46C4A1011D12F8FD003530DA /* voronoi_textures.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = voronoi_textures.h; path = libSLR/Textures/voronoi_textures.h; sourceTree = SOURCE_ROOT; };
-		46C4A1091D1301C9003530DA /* LinearCongruentialRNG.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LinearCongruentialRNG.cpp; path = libSLR/Core/LinearCongruentialRNG.cpp; sourceTree = SOURCE_ROOT; };
-		46C4A10A1D1301C9003530DA /* LinearCongruentialRNG.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LinearCongruentialRNG.h; path = libSLR/Core/LinearCongruentialRNG.h; sourceTree = SOURCE_ROOT; };
-		46C4A10B1D1301C9003530DA /* XORShiftRNG.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = XORShiftRNG.cpp; path = libSLR/Core/XORShiftRNG.cpp; sourceTree = SOURCE_ROOT; };
-		46C4A10C1D1301C9003530DA /* XORShiftRNG.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XORShiftRNG.h; path = libSLR/Core/XORShiftRNG.h; sourceTree = SOURCE_ROOT; };
 		46C4A1111D130895003530DA /* OrenNayerBRDF.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = OrenNayerBRDF.h; path = libSLR/BSDFs/OrenNayerBRDF.h; sourceTree = SOURCE_ROOT; };
 		46C4A1131D1308A6003530DA /* OrenNayerBRDF.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = OrenNayerBRDF.cpp; path = libSLR/BSDFs/OrenNayerBRDF.cpp; sourceTree = SOURCE_ROOT; };
 		46D16E6B1D283E36009C241C /* SBVH.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SBVH.h; path = libSLR/Accelerator/SBVH.h; sourceTree = SOURCE_ROOT; };
@@ -486,37 +490,35 @@
 		4634EBA81B9B529B0047AE54 /* Core */ = {
 			isa = PBXGroup;
 			children = (
+				466F6C371BB6B2AA0056F2FA /* RandomNumberGenerator.h */,
+				466F6C361BB6B2AA0056F2FA /* RandomNumberGenerator.cpp */,
+				466F6C2F1BB6B2AA0056F2FA /* distributions.h */,
+				4651F3391C57AAFD0026B8A5 /* distributions.cpp */,
+				466F6C421BB6B2AA0056F2FA /* Transform.h */,
+				466F6C411BB6B2AA0056F2FA /* Transform.cpp */,
+				466F6C311BB6B2AA0056F2FA /* geometry.h */,
+				466F6C301BB6B2AA0056F2FA /* geometry.cpp */,
 				466F6C2C1BB6B2AA0056F2FA /* cameras.h */,
 				466F6C2B1BB6B2AA0056F2FA /* cameras.cpp */,
 				466F6C2E1BB6B2AA0056F2FA /* directional_distribution_functions.h */,
 				466F6C2D1BB6B2AA0056F2FA /* directional_distribution_functions.cpp */,
-				466F6C2F1BB6B2AA0056F2FA /* distributions.h */,
-				4651F3391C57AAFD0026B8A5 /* distributions.cpp */,
-				466F6C311BB6B2AA0056F2FA /* geometry.h */,
-				466F6C301BB6B2AA0056F2FA /* geometry.cpp */,
+				466F6C3E1BB6B2AA0056F2FA /* SurfaceObject.h */,
+				466F6C3D1BB6B2AA0056F2FA /* SurfaceObject.cpp */,
+				468F9DCF1D7DE05400DD02BD /* light_path_samplers.h */,
+				468F9DCE1D7DE05400DD02BD /* light_path_samplers.cpp */,
+				46B36DE51D33E7CF00D7C56B /* Accelerator.h */,
+				46B36DE41D33E7CF00D7C56B /* Accelerator.cpp */,
+				466F6C401BB6B2AA0056F2FA /* textures.h */,
+				466F6C3F1BB6B2AA0056F2FA /* textures.cpp */,
+				466F6C3C1BB6B2AA0056F2FA /* surface_material.h */,
+				466F6C3B1BB6B2AA0056F2FA /* surface_material.cpp */,
 				466F6C331BB6B2AA0056F2FA /* Image.h */,
 				466F6C321BB6B2AA0056F2FA /* Image.cpp */,
 				466F6C351BB6B2AA0056F2FA /* ImageSensor.h */,
 				466F6C341BB6B2AA0056F2FA /* ImageSensor.cpp */,
-				466F6C371BB6B2AA0056F2FA /* RandomNumberGenerator.h */,
-				466F6C361BB6B2AA0056F2FA /* RandomNumberGenerator.cpp */,
 				466F6C381BB6B2AA0056F2FA /* Renderer.h */,
 				466F6C3A1BB6B2AA0056F2FA /* RenderSettings.h */,
 				466F6C391BB6B2AA0056F2FA /* RenderSettings.cpp */,
-				466F6C3C1BB6B2AA0056F2FA /* surface_material.h */,
-				466F6C3B1BB6B2AA0056F2FA /* surface_material.cpp */,
-				466F6C3E1BB6B2AA0056F2FA /* SurfaceObject.h */,
-				466F6C3D1BB6B2AA0056F2FA /* SurfaceObject.cpp */,
-				466F6C401BB6B2AA0056F2FA /* textures.h */,
-				466F6C3F1BB6B2AA0056F2FA /* textures.cpp */,
-				466F6C421BB6B2AA0056F2FA /* Transform.h */,
-				466F6C411BB6B2AA0056F2FA /* Transform.cpp */,
-				46B36DE51D33E7CF00D7C56B /* Accelerator.h */,
-				46B36DE41D33E7CF00D7C56B /* Accelerator.cpp */,
-				46C4A10A1D1301C9003530DA /* LinearCongruentialRNG.h */,
-				46C4A1091D1301C9003530DA /* LinearCongruentialRNG.cpp */,
-				46C4A10C1D1301C9003530DA /* XORShiftRNG.h */,
-				46C4A10B1D1301C9003530DA /* XORShiftRNG.cpp */,
 			);
 			path = Core;
 			sourceTree = "<group>";
@@ -686,6 +688,17 @@
 			name = PhaseFunctions;
 			sourceTree = "<group>";
 		};
+		468F9DC51D7DC7D200DD02BD /* RNGs */ = {
+			isa = PBXGroup;
+			children = (
+				468F9DC61D7DC7EB00DD02BD /* LinearCongruentialRNG.cpp */,
+				468F9DC71D7DC7EB00DD02BD /* LinearCongruentialRNG.h */,
+				468F9DC81D7DC7EB00DD02BD /* XORShiftRNG.cpp */,
+				468F9DC91D7DC7EB00DD02BD /* XORShiftRNG.h */,
+			);
+			name = RNGs;
+			sourceTree = "<group>";
+		};
 		46D7E0831BC8F57A00AFF96F /* Parser */ = {
 			isa = PBXGroup;
 			children = (
@@ -735,6 +748,7 @@
 				46EA72A81D59F22B00738511 /* debugPrintf.cpp */,
 				4634EB8E1B9B529B0047AE54 /* Accelerator */,
 				4634EB901B9B529B0047AE54 /* BasicTypes */,
+				468F9DC51D7DC7D200DD02BD /* RNGs */,
 				4634EB9A1B9B529B0047AE54 /* BSDFs */,
 				468F9DC01D7C380D00DD02BD /* PhaseFunctions */,
 				4634EBA31B9B529B0047AE54 /* Cameras */,
@@ -784,6 +798,7 @@
 				4602E8B51BC414C000EC16FA /* texture_headers.h in Headers */,
 				466F6D461BB6DC840056F2FA /* MixedSurfaceMaterial.h in Headers */,
 				46C4A1121D130895003530DA /* OrenNayerBRDF.h in Headers */,
+				468F9DCD1D7DC7EB00DD02BD /* XORShiftRNG.h in Headers */,
 				466F6D581BB715660056F2FA /* defines.h in Headers */,
 				466F6CE11BB6CA260056F2FA /* ModifiedWardDurBRDF.h in Headers */,
 				462982D31C65FF980052228B /* DebugRenderer.h in Headers */,
@@ -812,13 +827,13 @@
 				466F6CD41BB6CA070056F2FA /* RGBTypes.h in Headers */,
 				466F6D511BB715490056F2FA /* PathTracingRenderer.h in Headers */,
 				466F6CEE1BB6CA420056F2FA /* geometry.h in Headers */,
+				468F9DD11D7DE05400DD02BD /* light_path_samplers.h in Headers */,
 				466F6D081BB6CA740056F2FA /* ThreadPool.h in Headers */,
 				466F6D591BB715660056F2FA /* references.h in Headers */,
 				466F6D441BB6DC840056F2FA /* IBLEmission.h in Headers */,
 				466F6CF91BB6CA420056F2FA /* surface_material.h in Headers */,
 				46BF49891BB731CF0036033F /* spectrum_library.h in Headers */,
 				466F6CDF1BB6CA260056F2FA /* basic_BSDFs.h in Headers */,
-				46C4A1101D1301C9003530DA /* XORShiftRNG.h in Headers */,
 				460A20221D602C5700870E0F /* AshikhminShirleyReflection.h in Headers */,
 				466F6CF01BB6CA420056F2FA /* Image.h in Headers */,
 				466F6CF21BB6CA420056F2FA /* ImageSensor.h in Headers */,
@@ -965,12 +980,12 @@
 				460A20251D602CB800870E0F /* AshikhminShirleyBRDF.cpp in Sources */,
 				4651F3301C5673BC0026B8A5 /* Matrix4x4.cpp in Sources */,
 				466F6D451BB6DC840056F2FA /* MixedSurfaceMaterial.cpp in Sources */,
-				46C4A10D1D1301C9003530DA /* LinearCongruentialRNG.cpp in Sources */,
 				4602E8BE1BC418FA00EC16FA /* SummedSurfaceMaterial.cpp in Sources */,
 				46C4A1141D1308A6003530DA /* OrenNayerBRDF.cpp in Sources */,
 				46C4A1001D12F8E6003530DA /* voronoi_textures.cpp in Sources */,
 				466F6CF11BB6CA420056F2FA /* ImageSensor.cpp in Sources */,
 				466F6D521BB715600056F2FA /* checker_board_textures.cpp in Sources */,
+				468F9DCC1D7DC7EB00DD02BD /* XORShiftRNG.cpp in Sources */,
 				466F6D381BB6DC170056F2FA /* ArenaAllocator.cpp in Sources */,
 				46EA72A91D59F22B00738511 /* debugPrintf.cpp in Sources */,
 				4651F3381C567CA30026B8A5 /* SpectrumType.cpp in Sources */,
@@ -994,6 +1009,7 @@
 				460A20211D602C5700870E0F /* AshikhminShirleyReflection.cpp in Sources */,
 				466F6D061BB6CA510056F2FA /* MultiEDF.cpp in Sources */,
 				46F0BB131CD9FA2B00F81BFC /* MicrofacetSurfaceMaterial.cpp in Sources */,
+				468F9DD01D7DE05400DD02BD /* light_path_samplers.cpp in Sources */,
 				466F6D411BB6DC840056F2FA /* DiffuseEmission.cpp in Sources */,
 				466F6D361BB6DC080056F2FA /* bmp_exporter.cpp in Sources */,
 				466F6D431BB6DC840056F2FA /* IBLEmission.cpp in Sources */,
@@ -1001,13 +1017,13 @@
 				466F6D561BB715600056F2FA /* image_textures.cpp in Sources */,
 				466F6CDE1BB6CA260056F2FA /* basic_BSDFs.cpp in Sources */,
 				46BF49851BB72F600036033F /* common_spectra.cpp in Sources */,
-				46C4A10F1D1301C9003530DA /* XORShiftRNG.cpp in Sources */,
 				4651F3341C5678AB0026B8A5 /* TexCoord2.cpp in Sources */,
 				466F6CEF1BB6CA420056F2FA /* Image.cpp in Sources */,
 				466F6CF61BB6CA420056F2FA /* RenderSettings.cpp in Sources */,
 				466F6CD51BB6CA070056F2FA /* Spectrum.cpp in Sources */,
 				4651F32C1C5672460026B8A5 /* Vector4.cpp in Sources */,
 				4651F32E1C5672E10026B8A5 /* Normal3.cpp in Sources */,
+				468F9DCA1D7DC7EB00DD02BD /* LinearCongruentialRNG.cpp in Sources */,
 				466F6CE21BB6CA260056F2FA /* MultiBSDF.cpp in Sources */,
 				466F6D501BB715490056F2FA /* PathTracingRenderer.cpp in Sources */,
 				466F6D021BB6CA510056F2FA /* basic_EDFs.cpp in Sources */,

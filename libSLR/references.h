@@ -140,6 +140,10 @@ namespace SLR {
     class PerspectiveCamera;
     class EquirectangularCamera;
     
+    // Path Samplers
+    class LightPathSampler;
+    class IndependentLightPathSampler;
+    
     // Surfaces
     class Surface;
     class Triangle;

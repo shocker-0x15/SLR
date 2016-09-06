@@ -10,7 +10,7 @@
 
 #include "../defines.h"
 #include "../references.h"
-#include "RandomNumberGenerator.h"
+#include "../Core/RandomNumberGenerator.h"
 
 namespace SLR {
     template <typename TypeSet>

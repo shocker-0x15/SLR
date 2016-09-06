@@ -13,10 +13,10 @@ file(GLOB libSLR_Sources
      BasicTypes/*.cpp
      BSDFs/*.h
      BSDFs/*.cpp
-     EDFs/*.h
-     EDFs/*.cpp
      Cameras/*.h
      Cameras/*.cpp
+     EDFs/*.h
+     EDFs/*.cpp
      Helper/*.h
      Helper/*.cpp
      Memory/*.h
@@ -24,6 +24,8 @@ file(GLOB libSLR_Sources
      Memory/*.cpp
      Renderers/*.h
      Renderers/*.cpp
+     RNGs/*.h
+     RNGs/*.cpp
      SceneGraph/*.h
      SceneGraph/*.cpp
      Surface/*.h
@@ -45,6 +47,7 @@ source_group("SLR" REGULAR_EXPRESSION ".*\.(h|c|hpp|cpp)")
 source_group("SLR\\Core" REGULAR_EXPRESSION "Core/.*\.(h|c|hpp|cpp)")
 source_group("SLR\\Accelerator" REGULAR_EXPRESSION "Accelerator/.*\.(h|c|hpp|cpp)")
 source_group("SLR\\BasicTypes" REGULAR_EXPRESSION "BasicTypes/.*\.(h|c|hpp|cpp)")
+source_group("SLR\\RNGs" REGULAR_EXPRESSION "RNGs/.*\.(h|c|hpp|cpp)")
 source_group("SLR\\BSDFs" REGULAR_EXPRESSION "BSDFs/.*\.(h|c|hpp|cpp)")
 source_group("SLR\\EDFs" REGULAR_EXPRESSION "EDFs/.*\.(h|c|hpp|cpp)")
 source_group("SLR\\Cameras" REGULAR_EXPRESSION "Cameras/.*\.(h|c|hpp|cpp)")

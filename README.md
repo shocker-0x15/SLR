@@ -67,7 +67,7 @@ SLR consists of the following components.
 I've confirmed that the program runs correctly on the following environment.
 
 * OS X 10.11
-* Windows 8.1
+* Windows 8.1 (character-encoding conversion required)
 * MacBook Pro Retina Late 2013
 
 動作させるにあたっては以下のライブラリが必要です。  
