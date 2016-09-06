@@ -11,7 +11,7 @@
 
 #include <libSLR/Core/Image.h>
 #include <libSLR/Core/SurfaceObject.h>
-#include <libSLR/Core/XORShiftRNG.h>
+#include <libSLR/RNGs/XORShiftRNG.h>
 #include <libSLR/Memory/ArenaAllocator.h>
 #include <libSLR/Renderers/DebugRenderer.h>
 #include <libSLR/Renderers/PathTracingRenderer.h>

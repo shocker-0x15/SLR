@@ -89,7 +89,7 @@ namespace SLR {
             const Scene* scene;
             
             ArenaAllocator* mems;
-            RandomNumberGenerator** rngs;
+            IndependentLightPathSampler** pathSamplers;
             
             const Camera* camera;
             float timeStart;
@@ -113,7 +113,7 @@ namespace SLR {
             void kernel(uint32_t threadID);
             void generateSubPath(const WavelengthSamples &initWLs, const SampledSpectrum &initWLPDFs,
                                  const SampledSpectrum &initAlpha, const SLR::Ray &initRay, const SampledSpectrum &initDirPDF, DirectionType sampledType,
-                                 float cosLast, bool adjoint, RandomNumberGenerator &rng, SLR::ArenaAllocator &mem);
+                                 float cosLast, bool adjoint, IndependentLightPathSampler &pathSampler, SLR::ArenaAllocator &mem);
             float calculateMISWeight(const SampledSpectrum &lExtend1stAreaPDF, const SampledSpectrum &lExtend1stRRProb,
                                      const SampledSpectrum &lExtend2ndAreaPDF, const SampledSpectrum &lExtend2ndRRProb,
                                      const SampledSpectrum &eExtend1stAreaPDF, const SampledSpectrum &eExtend1stRRProb,

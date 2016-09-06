@@ -9,15 +9,16 @@
 
 #include "../Core/RenderSettings.h"
 #include "../Helper/ThreadPool.h"
-#include "../Core/XORShiftRNG.h"
+#include "../Memory/ArenaAllocator.h"
+#include "../RNGs/XORShiftRNG.h"
 #include "../Core/Image.h"
 #include "../Core/ImageSensor.h"
 #include "../Core/RandomNumberGenerator.h"
-#include "../Memory/ArenaAllocator.h"
 #include "../Core/cameras.h"
 #include "../Core/geometry.h"
 #include "../Core/SurfaceObject.h"
 #include "../Core/directional_distribution_functions.h"
+#include "../Core/light_path_samplers.h"
 
 namespace SLR {
     DebugRenderer::DebugRenderer(bool channelFlags[(int)ExtraChannel::NumChannels]) {
@@ -33,14 +34,14 @@ namespace SLR {
 #endif
         XORShiftRNG topRand(settings.getInt(RenderSettingItem::RNGSeed));
         std::unique_ptr<ArenaAllocator[]> mems = std::unique_ptr<ArenaAllocator[]>(new ArenaAllocator[numThreads]);
-        std::unique_ptr<XORShiftRNG[]> rngs = std::unique_ptr<XORShiftRNG[]>(new XORShiftRNG[numThreads]);
+        std::unique_ptr<IndependentLightPathSampler[]> samplers = std::unique_ptr<IndependentLightPathSampler[]>(new IndependentLightPathSampler[numThreads]);
         for (int i = 0; i < numThreads; ++i) {
             new (mems.get() + i) ArenaAllocator();
-            new (rngs.get() + i) XORShiftRNG(topRand.getUInt());
+            new (samplers.get() + i) IndependentLightPathSampler(topRand.getUInt());
         }
-        std::unique_ptr<RandomNumberGenerator*[]> rngRefs = std::unique_ptr<RandomNumberGenerator*[]>(new RandomNumberGenerator*[numThreads]);
+        std::unique_ptr<IndependentLightPathSampler*[]> samplerRefs = std::unique_ptr<IndependentLightPathSampler*[]>(new IndependentLightPathSampler*[numThreads]);
         for (int i = 0; i < numThreads; ++i)
-            rngRefs[i] = &rngs[i];
+            samplerRefs[i] = &samplers[i];
         
         const Camera* camera = scene.getCamera();
         ImageSensor* sensor = camera->getSensor();
@@ -50,7 +51,7 @@ namespace SLR {
         job.scene = &scene;
         
         job.mems = mems.get();
-        job.rngs = rngRefs.get();
+        job.pathSamplers = samplerRefs.get();
         
         job.camera = camera;
         job.timeStart = settings.getFloat(RenderSettingItem::TimeStart);
@@ -130,30 +131,28 @@ namespace SLR {
     
     void DebugRenderer::Job::kernel(uint32_t threadID) {
         ArenaAllocator &mem = mems[threadID];
-        RandomNumberGenerator &rng = *rngs[threadID];
+        IndependentLightPathSampler &pathSampler = *pathSamplers[threadID];
         for (int ly = 0; ly < numPixelY; ++ly) {
             for (int lx = 0; lx < numPixelX; ++lx) {
-                float time = timeStart + rng.getFloat0cTo1o() * (timeEnd - timeStart);
-                float px = basePixelX + lx + rng.getFloat0cTo1o();
-                float py = basePixelY + ly + rng.getFloat0cTo1o();
+                float time = pathSampler.getTimeSample(timeStart, timeEnd);
+                PixelPosition p = pathSampler.getPixelPositionSample(basePixelX + lx, basePixelY + ly);
                 
                 float selectWLPDF;
-                WavelengthSamples wls = WavelengthSamples::sampleUniform(rng.getFloat0cTo1o(), &selectWLPDF);
+                WavelengthSamples wls = WavelengthSamples::sampleUniform(pathSampler.getWavelengthSample(), &selectWLPDF);
                 
                 LensPosQuery lensQuery(time, wls);
-                LensPosSample lensSample(rng.getFloat0cTo1o(), rng.getFloat0cTo1o());
                 LensPosQueryResult lensResult;
-                SampledSpectrum We0 = camera->sample(lensQuery, lensSample, &lensResult);
+                SampledSpectrum We0 = camera->sample(lensQuery, pathSampler.getLensPosSample(), &lensResult);
                 (void)We0;
                 
-                IDFSample WeSample(px / imageWidth, py / imageHeight);
+                IDFSample WeSample(p.x / imageWidth, p.y / imageHeight);
                 IDFQueryResult WeResult;
                 IDF* idf = camera->createIDF(lensResult.surfPt, wls, mem);
                 SampledSpectrum We1 = idf->sample(WeSample, &WeResult);
                 (void)We1;
                 
                 Ray ray(lensResult.surfPt.p, lensResult.surfPt.shadingFrame.fromLocal(WeResult.dirLocal), time);
-                DebugInfo info = contribution(*scene, wls, ray, rng, mem);
+                DebugInfo info = contribution(*scene, wls, ray, pathSampler, mem);
                 
                 for (int i = 0; i < renderer->m_channels.size(); ++i) {
                     if (!renderer->m_channels[i])
@@ -165,7 +164,7 @@ namespace SLR {
                             val.r = (uint8_t)std::clamp((0.5f * info.surfPt.gNormal.x + 0.5f) * 255, 0.0f, 255.0f);
                             val.g = (uint8_t)std::clamp((0.5f * info.surfPt.gNormal.y + 0.5f) * 255, 0.0f, 255.0f);
                             val.b = (uint8_t)std::clamp((0.5f * info.surfPt.gNormal.z + 0.5f) * 255, 0.0f, 255.0f);
-                            chImg->set((int)px, (int)py, val);
+                            chImg->set((int)p.x, (int)p.y, val);
                             break;
                         }
                         case ExtraChannel::ShadingNormal: {
@@ -173,7 +172,7 @@ namespace SLR {
                             val.r = (uint8_t)std::clamp((0.5f * info.surfPt.shadingFrame.z.x + 0.5f) * 255, 0.0f, 255.0f);
                             val.g = (uint8_t)std::clamp((0.5f * info.surfPt.shadingFrame.z.y + 0.5f) * 255, 0.0f, 255.0f);
                             val.b = (uint8_t)std::clamp((0.5f * info.surfPt.shadingFrame.z.z + 0.5f) * 255, 0.0f, 255.0f);
-                            chImg->set((int)px, (int)py, val);
+                            chImg->set((int)p.x, (int)p.y, val);
                             break;
                         }
                         case ExtraChannel::ShadingTangent: {
@@ -181,13 +180,13 @@ namespace SLR {
                             val.r = (uint8_t)std::clamp((0.5f * info.surfPt.shadingFrame.x.x + 0.5f) * 255, 0.0f, 255.0f);
                             val.g = (uint8_t)std::clamp((0.5f * info.surfPt.shadingFrame.x.y + 0.5f) * 255, 0.0f, 255.0f);
                             val.b = (uint8_t)std::clamp((0.5f * info.surfPt.shadingFrame.x.z + 0.5f) * 255, 0.0f, 255.0f);
-                            chImg->set((int)px, (int)py, val);
+                            chImg->set((int)p.x, (int)p.y, val);
                             break;
                         }
                         case ExtraChannel::Distance: {
                             Gray8 val;
                             SLRAssert_NotImplemented();
-                            chImg->set((int)px, (int)py, val);
+                            chImg->set((int)p.x, (int)p.y, val);
                             break;
                         }
                         default:
@@ -200,7 +199,8 @@ namespace SLR {
         }
     }
     
-    DebugRenderer::Job::DebugInfo DebugRenderer::Job::contribution(const Scene &scene, const WavelengthSamples &initWLs, const Ray &initRay, RandomNumberGenerator &rng, ArenaAllocator &mem) const {
+    DebugRenderer::Job::DebugInfo DebugRenderer::Job::contribution(const Scene &scene, const WavelengthSamples &initWLs, const Ray &initRay,
+                                                                   IndependentLightPathSampler &pathSampler, ArenaAllocator &mem) const {
         Ray ray = initRay;
         SurfacePoint surfPt;
         

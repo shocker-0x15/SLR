@@ -9,14 +9,15 @@
 
 #include "../Core/RenderSettings.h"
 #include "../Helper/ThreadPool.h"
-#include "../Core/XORShiftRNG.h"
+#include "../RNGs/XORShiftRNG.h"
+#include "../Memory/ArenaAllocator.h"
 #include "../Core/ImageSensor.h"
 #include "../Core/RandomNumberGenerator.h"
-#include "../Memory/ArenaAllocator.h"
 #include "../Core/cameras.h"
 #include "../Core/geometry.h"
 #include "../Core/SurfaceObject.h"
 #include "../Core/directional_distribution_functions.h"
+#include "../Core/light_path_samplers.h"
 
 namespace SLR {
     PathTracingRenderer::PathTracingRenderer(uint32_t spp) : m_samplesPerPixel(spp) {
@@ -31,14 +32,14 @@ namespace SLR {
 #endif
         XORShiftRNG topRand(settings.getInt(RenderSettingItem::RNGSeed));
         std::unique_ptr<ArenaAllocator[]> mems = std::unique_ptr<ArenaAllocator[]>(new ArenaAllocator[numThreads]);
-        std::unique_ptr<XORShiftRNG[]> rngs = std::unique_ptr<XORShiftRNG[]>(new XORShiftRNG[numThreads]);
+        std::unique_ptr<IndependentLightPathSampler[]> samplers = std::unique_ptr<IndependentLightPathSampler[]>(new IndependentLightPathSampler[numThreads]);
         for (int i = 0; i < numThreads; ++i) {
             new (mems.get() + i) ArenaAllocator();
-            new (rngs.get() + i) XORShiftRNG(topRand.getUInt());
+            new (samplers.get() + i) IndependentLightPathSampler(topRand.getUInt());
         }
-        std::unique_ptr<RandomNumberGenerator*[]> rngRefs = std::unique_ptr<RandomNumberGenerator*[]>(new RandomNumberGenerator*[numThreads]);
+        std::unique_ptr<IndependentLightPathSampler*[]> samplerRefs = std::unique_ptr<IndependentLightPathSampler*[]>(new IndependentLightPathSampler*[numThreads]);
         for (int i = 0; i < numThreads; ++i)
-            rngRefs[i] = &rngs[i];
+            samplerRefs[i] = &samplers[i];
         
         const Camera* camera = scene.getCamera();
         ImageSensor* sensor = camera->getSensor();
@@ -47,7 +48,7 @@ namespace SLR {
         job.scene = &scene;
         
         job.mems = mems.get();
-        job.rngs = rngRefs.get();
+        job.pathSamplers = samplerRefs.get();
         
         job.camera = camera;
         job.timeStart = settings.getFloat(RenderSettingItem::TimeStart);
@@ -98,34 +99,32 @@ namespace SLR {
     
     void PathTracingRenderer::Job::kernel(uint32_t threadID) {
         ArenaAllocator &mem = mems[threadID];
-        RandomNumberGenerator &rng = *rngs[threadID];
+        IndependentLightPathSampler &pathSampler = *pathSamplers[threadID];
         for (int ly = 0; ly < numPixelY; ++ly) {
             for (int lx = 0; lx < numPixelX; ++lx) {
-                float time = timeStart + rng.getFloat0cTo1o() * (timeEnd - timeStart);
-                float px = basePixelX + lx + rng.getFloat0cTo1o();
-                float py = basePixelY + ly + rng.getFloat0cTo1o();
+                float time = pathSampler.getTimeSample(timeStart, timeEnd);
+                PixelPosition p = pathSampler.getPixelPositionSample(basePixelX + lx, basePixelY + ly);
                 
                 float selectWLPDF;
-                WavelengthSamples wls = WavelengthSamples::sampleUniform(rng.getFloat0cTo1o(), &selectWLPDF);
+                WavelengthSamples wls = WavelengthSamples::sampleUniform(pathSampler.getWavelengthSample(), &selectWLPDF);
                 // Each component of wlPDFs is a probability density composed of
                 // the probability density to sample each wavelength and the probability to select the wavelength as the hero wavelength,
                 // the probability density to sample a path based on the hero wavelength.
                 SampledSpectrum wlPDFs = selectWLPDF / WavelengthSamples::NumComponents;
                 
                 LensPosQuery lensQuery(time, wls);
-                LensPosSample lensSample(rng.getFloat0cTo1o(), rng.getFloat0cTo1o());
                 LensPosQueryResult lensResult;
-                SampledSpectrum We0 = camera->sample(lensQuery, lensSample, &lensResult);
+                SampledSpectrum We0 = camera->sample(lensQuery, pathSampler.getLensPosSample(), &lensResult);
                 wlPDFs *= lensResult.areaPDF;
                 
-                IDFSample WeSample(px / imageWidth, py / imageHeight);
+                IDFSample WeSample(p.x / imageWidth, p.y / imageHeight);
                 IDFQueryResult WeResult;
                 IDF* idf = camera->createIDF(lensResult.surfPt, wls, mem);
                 SampledSpectrum We1 = idf->sample(WeSample, &WeResult);
                 wlPDFs *= WeResult.dirPDF;
                 
                 Ray ray(lensResult.surfPt.p, lensResult.surfPt.shadingFrame.fromLocal(WeResult.dirLocal), time);
-                SampledSpectrum C = contribution(*scene, wls, wlPDFs, ray, rng, mem);
+                SampledSpectrum C = contribution(*scene, wls, wlPDFs, ray, pathSampler, mem);
                 SLRAssert(C.hasNaN() == false && C.hasInf() == false && C.hasMinus() == false,
                           "Unexpected value detected: %s\n"
                           "pix: (%f, %f)", C.toString().c_str(), px, py);
@@ -134,7 +133,7 @@ namespace SLR {
                 SLRAssert(weight.hasNaN() == false && weight.hasInf() == false && weight.hasMinus() == false,
                           "Unexpected value detected: %s\n"
                           "pix: (%f, %f)", weight.toString().c_str(), px, py);
-                sensor->add(px, py, wls, weight * C);
+                sensor->add(p.x, p.y, wls, weight * C);
                 
                 mem.reset();
             }
@@ -142,7 +141,7 @@ namespace SLR {
     }
     
     SampledSpectrum PathTracingRenderer::Job::contribution(const Scene &scene, const WavelengthSamples &wls, const SampledSpectrum &initWLPDFs,
-                                                           const Ray &initRay, RandomNumberGenerator &rng, ArenaAllocator &mem) const {
+                                                           const Ray &initRay, IndependentLightPathSampler &pathSampler, ArenaAllocator &mem) const {
         Ray ray = initRay;
         SurfacePoint surfPt;
         SampledSpectrum alpha = SampledSpectrum::One;
@@ -181,13 +180,12 @@ namespace SLR {
             if (bsdf->hasNonDelta()) {
                 float lightProb;
                 Light light;
-                scene.selectLight(rng.getFloat0cTo1o(), &light, &lightProb);
+                scene.selectLight(pathSampler.getLightSelectionSample(), &light, &lightProb);
                 SLRAssert(!std::isnan(lightProb) && !std::isinf(lightProb), "lightProb: unexpected value detected: %f", lightProb);
                 
                 LightPosQuery lpQuery(ray.time, wls);
-                LightPosSample lpSample(rng.getFloat0cTo1o(), rng.getFloat0cTo1o());
                 LightPosQueryResult lpResult;
-                SampledSpectrum M = light.sample(lpQuery, lpSample, &lpResult);
+                SampledSpectrum M = light.sample(lpQuery, pathSampler.getLightPosSample(), &lpResult);
                 SLRAssert(!lpResult.areaPDF.hasNaN()/* && !std::isinf(xpResult.areaPDF)*/, "areaPDF: unexpected value detected: %s", lpResult.areaPDF.toString().c_str());
                 
                 if (scene.testVisibility(surfPt, lpResult.surfPt, ray.time)) {
@@ -223,9 +221,8 @@ namespace SLR {
             }
             
             // get a next direction by sampling BSDF.
-            BSDFSample fsSample(rng.getFloat0cTo1o(), rng.getFloat0cTo1o(), rng.getFloat0cTo1o());
             BSDFQueryResult fsResult;
-            SampledSpectrum fs = bsdf->sample(fsQuery, fsSample, &fsResult);
+            SampledSpectrum fs = bsdf->sample(fsQuery, pathSampler.getBSDFSample(), &fsResult);
             if (fs == SampledSpectrum::Zero || fsResult.dirPDF[wls.heroIdx] == 0.0f)
                 break;
             alpha *= fs * absDot(fsResult.dir_sn, gNorm_sn) / fsResult.dirPDF[wls.heroIdx];
@@ -274,7 +271,7 @@ namespace SLR {
             // Russian roulette
             // FIXME: ?? alpha at this point is wavelength-dependent value. Does this cause bias?
             SampledSpectrum continueProbs = min(alpha / initY, SampledSpectrum::One);
-            if (rng.getFloat0cTo1o() >= continueProbs[wls.heroIdx])
+            if (pathSampler.getPathTerminationSample() >= continueProbs[wls.heroIdx])
                 break;
             alpha /= continueProbs[wls.heroIdx];
             wlPDFs *= fsResult.dirPDF * continueProbs;

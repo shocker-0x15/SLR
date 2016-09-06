@@ -18,7 +18,7 @@ namespace SLR {
             const Scene* scene;
             
             ArenaAllocator* mems;
-            RandomNumberGenerator** rngs;
+            IndependentLightPathSampler** pathSamplers;
             
             const Camera* camera;
             float timeStart;
@@ -34,7 +34,7 @@ namespace SLR {
             
             void kernel(uint32_t threadID);
             SampledSpectrum contribution(const Scene &scene, const WavelengthSamples &wls, const SampledSpectrum &initWLPDFs,
-                                         const Ray &initRay, RandomNumberGenerator &rng, ArenaAllocator &mem) const;
+                                         const Ray &initRay, IndependentLightPathSampler &pathSampler, ArenaAllocator &mem) const;
         };
         
         uint32_t m_samplesPerPixel;

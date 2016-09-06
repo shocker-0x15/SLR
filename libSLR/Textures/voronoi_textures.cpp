@@ -7,8 +7,8 @@
 
 #include "voronoi_textures.h"
 #include "../Core/geometry.h"
-#include "../Core/LinearCongruentialRNG.h"
 #include "../Core/distributions.h"
+#include "../RNGs/LinearCongruentialRNG.h"
 
 namespace SLR {
     static const uint32_t FNV_OFFSET_BASIS_32 = 2166136261U;
