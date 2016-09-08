@@ -64,6 +64,7 @@ namespace SLR {
     template <typename RealType> struct Vector4Template;
     template <typename RealType> struct Normal3Template;
     template <typename RealType> struct Point3Template;
+    template <typename RealType> struct Matrix3x3Template;
     template <typename RealType> struct Matrix4x4Template;
     template <typename RealType> struct QuaternionTemplate;
     template <typename RealType> struct TexCoord2Template;
@@ -73,6 +74,7 @@ namespace SLR {
     typedef Vector4Template<float> Vector4D;
     typedef Normal3Template<float> Normal3D;
     typedef Point3Template<float> Point3D;
+    typedef Matrix3x3Template<float> Matrix3x3;
     typedef Matrix4x4Template<float> Matrix4x4;
     typedef QuaternionTemplate<float> Quaternion;
     typedef TexCoord2Template<float> TexCoord2D;

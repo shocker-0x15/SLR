@@ -121,12 +121,12 @@ namespace SLR {
                 SampledSpectrum C = contribution(*scene, wls, ray, pathSampler, mem);
                 SLRAssert(C.hasNaN() == false && C.hasInf() == false && C.hasMinus() == false,
                           "Unexpected value detected: %s\n"
-                          "pix: (%f, %f)", C.toString().c_str(), px, py);
+                          "pix: (%f, %f)", C.toString().c_str(), p.x, p.y);
                 
                 SampledSpectrum weight = (We0 * We1) * (absDot(ray.dir, lensResult.surfPt.gNormal) / (lensResult.areaPDF * WeResult.dirPDF * selectWLPDF));
                 SLRAssert(weight.hasNaN() == false && weight.hasInf() == false && weight.hasMinus() == false,
                           "Unexpected value detected: %s\n"
-                          "pix: (%f, %f)", weight.toString().c_str(), px, py);
+                          "pix: (%f, %f)", weight.toString().c_str(), p.x, p.y);
                 sensor->add(p.x, p.y, wls, weight * C);
                 
                 mem.reset();

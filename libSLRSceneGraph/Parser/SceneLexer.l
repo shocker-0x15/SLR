@@ -1,7 +1,7 @@
 %{
 #include "SceneParsingDriver.h"
 #include "SceneParser.tab.hh"
-#ifdef SLR_Defs_Windows
+#ifdef SLR_Platform_Windows
 #include <io.h>
 #else
 #include <unistd.h>

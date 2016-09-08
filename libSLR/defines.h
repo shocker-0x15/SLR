@@ -10,21 +10,21 @@
 
 // Platform defines
 #if defined(_WIN32) || defined(_WIN64)
-#   define SLR_Defs_Windows
+#   define SLR_Platform_Windows
 #   if defined(__MINGW32__) // Defined for both 32 bit/64 bit MinGW
-#       define SLR_Defs_MinGW
+#       define SLR_Platform_MinGW
 #   elif defined(_MSC_VER)
-#       define SLR_Defs_MSVC
+#       define SLR_Platform_MSVC
 #   endif
 #elif defined(__linux__)
-#   define SLR_Defs_Linux
+#   define SLR_Platform_Linux
 #elif defined(__APPLE__)
-#   define SLR_Defs_OS_X
+#   define SLR_Platform_OS_X
 #elif defined(__OpenBSD__)
-#   define SLR_Defs_OpenBSD
+#   define SLR_Platform_OpenBSD
 #endif
 
-#ifdef SLR_Defs_MSVC
+#ifdef SLR_Platform_MSVC
 #   define NOMINMAX
 #   define _USE_MATH_DEFINES
 #   ifdef SLR_API_EXPORTS
@@ -35,6 +35,8 @@
 // MSVC 19.0 (Visual Studio 2015 Update 1) seems to have a problem related to a constexpr constructor.
 #   define CONSTEXPR_CONSTRUCTOR
 #   include <Windows.h>
+#   undef near
+#   undef far
 #else
 #   define SLR_API
 #   define CONSTEXPR_CONSTRUCTOR constexpr
@@ -66,10 +68,10 @@
 #include <functional>
 
 #ifdef DEBUG
-#define ENABLE_ASSERT
+#   define ENABLE_ASSERT
 #endif
 
-#ifdef SLR_Defs_MSVC
+#ifdef SLR_Platform_MSVC
 SLR_API void debugPrintf(const char* fmt, ...);
 #else
 #   define debugPrintf(fmt, ...) printf(fmt, ##__VA_ARGS__);
@@ -81,19 +83,18 @@ SLR_API void debugPrintf(const char* fmt, ...);
 #   define SLRAssert(expr, fmt, ...)
 #endif
 
-#define SLRAssert_NotDefined() SLRAssert(false, "Not defined!")
 #define SLRAssert_NotImplemented() SLRAssert(false, "Not implemented!")
 
 #define SLR_Minimum_Machine_Alignment 16
 #define SLR_L1_Cacheline_Size 64
 
 // For memalign, free, alignof
-#if defined(SLR_Defs_MSVC)
+#if defined(SLR_Platform_MSVC)
 #   include <malloc.h>
 #   define SLR_memalign(size, alignment) _aligned_malloc(size, alignment)
 #   define SLR_freealign(ptr) _aligned_free(ptr)
 #   define SLR_alignof(T) __alignof(T)
-#elif defined(SLR_Defs_OS_X) || defined(SLR_Defs_OpenBSD)
+#elif defined(SLR_Platform_OS_X) || defined(SLR_Platform_OpenBSD)
 inline void* SLR_memalign(size_t size, size_t alignment) {
     void* ptr;
     if (posix_memalign(&ptr, alignment, size))
@@ -102,15 +103,15 @@ inline void* SLR_memalign(size_t size, size_t alignment) {
 }
 #   define SLR_freealign(ptr) ::free(ptr)
 #   define SLR_alignof(T) alignof(T)
-#elif defined(SLR_Defs_Linux)
+#elif defined(SLR_Platform_Linux)
 #   define SLR_memalign(size, alignment) SLRAssert_NotImplemented
 #   define SLR_freealign(ptr) SLRAssert_NotImplemented
 #endif
 
 // For getcwd
-#if defined(SLR_Defs_MSVC)
+#if defined(SLR_Platform_MSVC)
 #   define SLR_getcwd(size, buf) GetCurrentDirectory(size, buf)
-#elif defined(SLR_Defs_OS_X) || defined(SLR_Defs_OpenBSD) || defined(SLR_Defs_Linux)
+#elif defined(SLR_Platform_OS_X) || defined(SLR_Platform_OpenBSD) || defined(SLR_Platform_Linux)
 #   include <unistd.h>
 #   define SLR_getcwd(size, buf) getcwd(buf, size)
 #endif

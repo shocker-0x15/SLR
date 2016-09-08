@@ -70,7 +70,7 @@ namespace SLRSceneGraph {
         return true;
     }
 
-#ifdef SLR_Defs_MSVC
+#ifdef SLR_Platform_MSVC
     class FuncGetPathElement {
         std::string pathPrefix;
     public:
@@ -818,7 +818,7 @@ namespace SLRSceneGraph {
                                          Element matAttrs = Element(TypeMap::Tuple(), ParameterList());
                                          
                                          auto &attrs = matAttrs.raw<TypeMap::Tuple>();
-#ifdef SLR_Defs_MSVC
+#ifdef SLR_Platform_MSVC
                                          FuncGetPathElement getPathElement{ pathPrefix };
 #else
                                          auto getPathElement = [&pathPrefix](const aiString &str) {

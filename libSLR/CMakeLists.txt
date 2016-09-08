@@ -26,6 +26,8 @@ file(GLOB libSLR_Sources
      Renderers/*.cpp
      RNGs/*.h
      RNGs/*.cpp
+     PhaseFunctions/*.h
+     PhaseFunctions/*.cpp
      SceneGraph/*.h
      SceneGraph/*.cpp
      Surface/*.h
@@ -51,6 +53,7 @@ source_group("SLR\\RNGs" REGULAR_EXPRESSION "RNGs/.*\.(h|c|hpp|cpp)")
 source_group("SLR\\BSDFs" REGULAR_EXPRESSION "BSDFs/.*\.(h|c|hpp|cpp)")
 source_group("SLR\\EDFs" REGULAR_EXPRESSION "EDFs/.*\.(h|c|hpp|cpp)")
 source_group("SLR\\Cameras" REGULAR_EXPRESSION "Cameras/.*\.(h|c|hpp|cpp)")
+source_group("SLR\\PhaseFunctions" REGULAR_EXPRESSION "PhaseFunctions/.*\.(h|c|hpp|cpp)")
 source_group("SLR\\Helper" REGULAR_EXPRESSION "Helper/.*\.(h|c|hpp|cpp)")
 source_group("SLR\\Memory" REGULAR_EXPRESSION "Memory/.*\.(h|c|hpp|cpp)")
 source_group("SLR\\Renderers" REGULAR_EXPRESSION "Renderers/.*\.(h|c|hpp|cpp)")

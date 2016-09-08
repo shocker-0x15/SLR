@@ -221,7 +221,7 @@ namespace SLRSceneGraph {
         typedef std::function<Element(const std::map<std::string, Element> &, ExecuteContext &, ErrorMessage*)> Procedure;
         
 		// workaround: MSVC(VS2015 Update1) fails to compile the 3rd constructor.
-#ifdef SLR_Defs_MSVC
+#ifdef SLR_Platform_MSVC
 		const uint32_t m_depth;
 		const std::vector<std::vector<ArgInfo>> m_signatures;
 		std::vector<Procedure> m_nativeProcs;

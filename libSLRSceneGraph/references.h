@@ -10,7 +10,7 @@
 
 #include <libSLR/references.h>
 
-#ifdef SLR_Defs_MSVC
+#ifdef SLR_Platform_MSVC
 #   ifdef SLR_SCENEGRAPH_API_EXPORTS
 #       define SLR_SCENEGRAPH_API __declspec(dllexport)
 #   else

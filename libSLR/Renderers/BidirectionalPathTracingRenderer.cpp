@@ -240,7 +240,7 @@ namespace SLR {
                         SampledSpectrum contribution = MISWeight * lVtx.alpha * connectionTerm * eVtx.alpha;
                         SLRAssert(!contribution.hasNaN() && !contribution.hasInf() && !contribution.hasMinus(),
                                   "Unexpected value detected: %s\n"
-                                  "pix: (%f, %f)", contribution.toString().c_str(), px, py);
+                                  "pix: (%f, %f)", contribution.toString().c_str(), p.x, p.y);
                         if (t > 1) {
                             sensor->add(p.x, p.y, wls, contribution);
                         }

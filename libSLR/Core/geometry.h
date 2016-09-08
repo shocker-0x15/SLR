@@ -14,6 +14,7 @@
 #include "../BasicTypes/Vector4.h"
 #include "../BasicTypes/Normal3.h"
 #include "../BasicTypes/Point3.h"
+#include "../BasicTypes/Matrix3x3.h"
 #include "../BasicTypes/Matrix4x4.h"
 #include "../BasicTypes/Quaternion.h"
 #include "../BasicTypes/TexCoord2.h"

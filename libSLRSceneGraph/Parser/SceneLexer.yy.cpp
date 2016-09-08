@@ -625,7 +625,7 @@ char *yytext;
 #line 2 "SceneLexer.l"
 #include "SceneParsingDriver.h"
 #include "SceneParser.tab.hh"
-#ifdef SLR_Defs_MSVC
+#ifdef SLR_Platform_MSVC
 #include <io.h>
 #else
 #include <unistd.h>

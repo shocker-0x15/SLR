@@ -55,8 +55,8 @@ SLR consists of the following components.
     * Split BVH \[Stich2009\]
     * QBVH \[Dammertz2008\] constructed by collapsing SBVH
 * Light Transport Algorithms
-    * Unidirectional Path Tracing \[Kajiya1986\] with MIS
-    * Bidirectional Path Tracing \[Veach1994, 1997\]
+    * Path Tracing \[Kajiya1986\] with MIS (+ volumetric variant)
+    * Bidirectional Path Tracing \[Veach1994, 1997\] (+ volumetric variant)
     * ~~Adaptive MCMC Progressive Photon Mapping~~ \[Hachisuka2011\]  
 (has been dropped from current SLR implementation.)
 * Correct handling of non-symmetric scattering due to shading normals \[Veach1996, 1997\]
@@ -66,8 +66,8 @@ SLR consists of the following components.
 現状以下の環境で動作を確認しています。  
 I've confirmed that the program runs correctly on the following environment.
 
-* OS X 10.11
-* Windows 8.1 (character-encoding conversion required)
+* OS X 10.11.6 & Xcode 7.3.1 (Apple LLVM-Clang 7.3.0)
+* Windows 8.1 & Visual Studio 2015 (MSVC 14.0, character-encoding conversion required)
 * MacBook Pro Retina Late 2013
 
 動作させるにあたっては以下のライブラリが必要です。  
