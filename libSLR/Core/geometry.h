@@ -253,6 +253,7 @@ namespace SLR {
         float evaluateAreaPDF() const;
         BSDF* createBSDF(const WavelengthSamples &wls, ArenaAllocator &mem) const;
         EDF* createEDF(const WavelengthSamples &wls, ArenaAllocator &mem) const;
+        BSSRDF* createBSSRDF(bool lowerHemisphere, const WavelengthSamples &wls, ArenaAllocator &mem) const;
         
         friend SurfacePoint operator*(const StaticTransform &transform, const SurfacePoint &surfPt);
     };

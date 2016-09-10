@@ -7,6 +7,7 @@
 
 #include "directional_distribution_functions.h"
 #include "distributions.h"
+#include "SurfaceObject.h"
 
 namespace SLR {
     SLR_API const DirectionType DirectionType::LowFreq = DirectionType::IE_LowFreq;
@@ -54,6 +55,248 @@ namespace SLR {
             ret += fs * std::fabs(fsResult.dir_sn.z) * std::fabs(dir_sn.z) / (dirPDF * fsResult.dirPDF);
         }
         return ret.result / (M_PI * (numSamples - numFails));
+    }
+    
+    
+    float BSSRDF::sample_distance(float rMax, int16_t wlIdx, float u, float* distPDF) const {
+        const float sigma_tr = m_sigma_tr[wlIdx];
+        const float z_r = m_z_r[wlIdx];
+        const float z_v = m_z_v[wlIdx];
+        const float d_r_max = std::sqrt(rMax * rMax + z_r * z_r);
+        const float d_v_max = std::sqrt(rMax * rMax + z_v * z_v);
+        const float k_d_r_max = z_r / d_r_max * std::exp(-sigma_tr * d_r_max);
+        const float k_d_v_max = z_v / d_v_max * std::exp(-sigma_tr * d_v_max);
+        const float k = 1.0f / (std::exp(-sigma_tr * z_r) + std::exp(-sigma_tr * z_v) - k_d_r_max - k_d_v_max);
+        
+        float searchLowBound = 0;
+        float searchHighBound = rMax;
+        
+        float r = 10 * z_r;
+        uint32_t count = 0;
+        while (true) {
+            ++count;
+            if (r < searchLowBound || r > searchHighBound)
+                r = (searchLowBound + searchHighBound) * 0.5f;
+            
+            float d_r = std::sqrt(r * r + z_r * z_r);
+            float d_v = std::sqrt(r * r + z_v * z_v);
+            float term_d_r = z_r / d_r * std::exp(-sigma_tr * d_r);
+            float term_d_v = z_v / d_v * std::exp(-sigma_tr * d_v);
+            float value = 1 - k * (term_d_r - k_d_r_max + term_d_v - k_d_v_max) - u;
+            
+            float deriv = k * r * (term_d_r * (1 + sigma_tr * d_r) / (d_r * d_r) + term_d_v * (1 + sigma_tr * d_v) / (d_v * d_v));
+            if (std::fabs(value) < 1e-5) {
+                *distPDF = deriv;
+//                printf("%u, ", count);
+                break;
+            }
+            if (count == 100) {
+                *distPDF = 0.0f;
+                break;
+            }
+            
+            if (value > 0)
+                searchHighBound = r;
+            else
+                searchLowBound = r;
+            
+            r -= value / deriv;
+        }
+        return r;
+    }
+    
+    float BSSRDF::evaludateDistancePDF(float rMax, int16_t wlIdx, float r) const {
+        if (r > rMax)
+            return 0.0f;
+        const float sigma_tr = m_sigma_tr[wlIdx];
+        const float z_r = m_z_r[wlIdx];
+        const float z_v = m_z_v[wlIdx];
+        const float d_r_max = std::sqrt(rMax * rMax + z_r * z_r);
+        const float d_v_max = std::sqrt(rMax * rMax + z_v * z_v);
+        const float k_d_r_max = z_r / d_r_max * std::exp(-sigma_tr * d_r_max);
+        const float k_d_v_max = z_v / d_v_max * std::exp(-sigma_tr * d_v_max);
+        const float k = 1.0f / (std::exp(-sigma_tr * z_r) + std::exp(-sigma_tr * z_v) - k_d_r_max - k_d_v_max);
+        
+        float d_r = std::sqrt(r * r + z_r * z_r);
+        float d_v = std::sqrt(r * r + z_v * z_v);
+        float term_d_r = z_r / d_r * std::exp(-sigma_tr * d_r);
+        float term_d_v = z_v / d_v * std::exp(-sigma_tr * d_v);
+        return k * r * (term_d_r * (1 + sigma_tr * d_r) / (d_r * d_r) + term_d_v * (1 + sigma_tr * d_v) / (d_v * d_v));
+    }
+    
+    SampledSpectrum BSSRDF::Rd(float r) const {
+        SampledSpectrum d_r = sqrt(m_z_r * m_z_r + r * r);
+        SampledSpectrum d_v = sqrt(m_z_v * m_z_v + r * r);
+        SampledSpectrum sigma_tr_d_r = m_sigma_tr * d_r;
+        SampledSpectrum sigma_tr_d_v = m_sigma_tr * d_v;
+        
+        SampledSpectrum realTerm = m_z_r * (SampledSpectrum::One + sigma_tr_d_r) * exp(-sigma_tr_d_r) / (d_r * d_r * d_r);
+        SampledSpectrum virtualTerm = m_z_v * (SampledSpectrum::One + sigma_tr_d_v) * exp(-sigma_tr_d_v) / (d_v * d_v * d_v);
+        
+        return 1.0f / (4 * M_PI) * (realTerm + virtualTerm);
+    }
+    
+    SampledSpectrum BSSRDF::sample(const SLR::BSSRDFQuery &query, const SLR::BSSRDFSample &smp, SLR::BSSRDFQueryResult *result) const {
+        if (smp.uAuxiliary < 0.25f)  {
+            float so = -std::log(smp.uPos[0]) / m_sigma_e[query.wlHint];
+            float distPDF = m_sigma_e[query.wlHint] * std::exp(-m_sigma_e[query.wlHint] * so);
+            Ray ray{query.surfPt.p, query.dir, query.time, Ray::Epsilon, so};
+            Intersection isect;
+            if (query.scene.intersect(ray, &isect)) {
+                isect.getSurfacePoint(&result->surfPt);
+                result->dir = -ray.dir;
+                float distProb = std::exp(-m_sigma_e[query.wlHint] * isect.dist);
+                result->areaPDF = 1.0f * 0.25f * distProb;
+                result->dirPDF = 1.0f;
+                return exp(-m_sigma_e * isect.dist);
+            }
+            auto sampleHenyeyGreenstein = [](float g, float u, float* theta) {
+                float cosTheta;
+                if (g == 0)
+                    cosTheta = 1 - 2 * u;
+                else
+                    cosTheta = 1 / (2 * g) * (1 + g * g - std::pow((1 - g * g) / (1 - g + 2 * g * u), 2));
+                cosTheta = std::clamp(cosTheta, -1.0f, 1.0f);
+                *theta = std::acos(cosTheta);
+                return (1 - g * g) / (4 * M_PI * std::pow(1 + g * g - 2 * g * cosTheta, 1.5));
+            };
+            float theta;
+            float fp = sampleHenyeyGreenstein(m_g, smp.uDir[0], &theta);
+            float phi = 2 * M_PI * smp.uDir[1];
+            
+            ReferenceFrame scatterFrame;
+            scatterFrame.z = ray.dir;
+            scatterFrame.z.makeCoordinateSystem(&scatterFrame.x, &scatterFrame.y);
+            float sinTheta = std::sin(theta);
+            Vector3D scatterDir = scatterFrame.fromLocal(Vector3D(std::cos(phi) * sinTheta, std::sin(phi) * sinTheta, std::cos(theta)));
+            
+            ray = Ray(ray.org + ray.dir * so, scatterDir, ray.time, 0.0f, INFINITY);
+            isect = Intersection();
+            if (!query.scene.intersect(ray, &isect)) {
+                result->areaPDF = 0.0f;
+                result->dirPDF = 0.0f;
+                return SampledSpectrum::Zero;
+            }
+            isect.getSurfacePoint(&result->surfPt);
+            result->dir = -ray.dir;
+            result->areaPDF = 1.0f * 0.25f * fp;
+            result->dirPDF = 1.0f * distPDF;
+            
+            return m_sigma_s * fp * exp(-m_sigma_e * (so + isect.dist));
+        }
+        
+        float uAxis = (smp.uAuxiliary - 0.25f) / 0.75f;
+        
+        Vector3D s, t, u;
+        float uSelect;
+        Vector3D bases[3];
+        bases[2] = query.surfPt.gNormal;
+        bases[2].makeCoordinateSystem(&bases[0], &bases[1]);
+        const float axisProbs[] = {0.5f, 0.25f, 0.25f};
+        int8_t selectedAxis = 0;
+        // Should it use shading frame for this?
+        if (uAxis < 0.5f) {
+            selectedAxis = 0;
+            uSelect = uAxis / 0.5f;
+            s = bases[0];//query.surfPt.shadingFrame.x;
+            t = bases[1];//query.surfPt.shadingFrame.y;
+            u = bases[2];//query.surfPt.shadingFrame.z;
+        }
+        else if (smp.uAuxiliary < 0.75f) {
+            selectedAxis = 1;
+            uSelect = (uAxis - 0.5f) / 0.25f;
+            s = bases[1];//query.surfPt.shadingFrame.y;
+            t = bases[2];//query.surfPt.shadingFrame.z;
+            u = bases[0];//query.surfPt.shadingFrame.x;
+        }
+        else {
+            selectedAxis = 2;
+            uSelect = (uAxis - 0.75f) / 0.25f;
+            s = bases[2];//query.surfPt.shadingFrame.z;
+            t = bases[0];//query.surfPt.shadingFrame.x;
+            u = bases[1];//query.surfPt.shadingFrame.y;
+        }
+        
+        float distPDF;
+        float rMax = sample_distance(1e+6 * m_z_r[query.wlHint], query.wlHint, 0.999f, &distPDF);
+        float dist = sample_distance(rMax, query.wlHint, smp.uPos[0], &distPDF);
+        SLRAssert(!std::isnan(dist) && !std::isinf(dist) && !std::isnan(distPDF) && !std::isinf(distPDF),
+                  "dist: %g, distPDF: %g, rMax: %g, u: %g, wlIdx: %u", dist, distPDF, rMax, smp.uPos[0], query.wlHint);
+        if (distPDF == 0.0f) {
+            result->areaPDF = 0.0f;
+            result->dirPDF = 0.0f;
+            return SampledSpectrum::Zero;
+        }
+        float theta = 2 * M_PI * smp.uPos[1];
+        float areaPDF = distPDF / (2 * M_PI * dist);
+        
+        float probeLength = 2 * std::sqrt(rMax * rMax - dist * dist);
+        // is it safer to spawn a probe ray from beneath the surface?
+        Point3D probeOrg = query.surfPt.p + dist * (s * std::cos(theta) + t * std::sin(theta)) - 0.5f * probeLength * u;
+        Ray probeRay{probeOrg, u, query.time, 0.0f, probeLength};
+        
+        std::vector<Intersection> isects;
+        while (true) {
+            Intersection isect;
+            if (!query.scene.intersect(probeRay, &isect))
+                break;
+            if (isect.getSurfaceMaterial() == query.surfPt.obj->getSurfaceMaterial())
+                isects.push_back(isect);
+            probeRay.distMin = isect.dist + Ray::Epsilon;
+            probeRay.distMax = probeLength;
+        }
+        if (isects.empty()) {
+            result->areaPDF = 0.0f;
+            result->dirPDF = 0.0f;
+            return SampledSpectrum::Zero;
+        }
+        
+//        uint32_t idxIsect = std::min(uint32_t(uSelect * isects.size()), uint32_t(isects.size()) - 1);
+        uint32_t idxIsect = 0;
+        float minDiff = INFINITY;
+        for (int i = 0; i < isects.size(); ++i) {
+            float diff = std::fabs(0.5f * probeLength - isects[i].dist);
+            if (diff < minDiff) {
+                idxIsect = i;
+                minDiff = diff;
+            }
+        }
+        isects[idxIsect].getSurfacePoint(&result->surfPt);
+        areaPDF *= axisProbs[selectedAxis] * absDot(u, result->surfPt.gNormal);
+        
+        Vector3D distVec = result->surfPt.p - query.surfPt.p;
+        for (int axis = 0; axis < 3; ++axis) {
+            if (axis == selectedAxis)
+                continue;
+            Vector3D probeAxis = bases[(axis + 2) % 3];
+            Vector3D projectedDistVec = distVec - dot(distVec, probeAxis) * probeAxis;
+            float otherDist = projectedDistVec.length();
+            float otherAxisPDF = evaludateDistancePDF(rMax, query.wlHint, otherDist) / (2 * M_PI * otherDist);
+            otherAxisPDF *= axisProbs[axis] * absDot(probeAxis, result->surfPt.gNormal) / 1;// TODO: consider multiple hits.
+            SLRAssert(!std::isnan(otherAxisPDF) && !std::isinf(otherAxisPDF),
+                      "otherDist: %g, otherAxisPDF: %g, rMax: %g, wlIdx: %u", otherDist, otherAxisPDF, rMax, query.wlHint);
+            areaPDF += otherAxisPDF;
+        }
+        result->areaPDF = 0.75f * areaPDF;
+        
+        // it might be good to sample this direction by sampling BSDF with randomly sampled the opposite side direction.
+        Vector3D dirLocal = cosineSampleHemisphere(smp.uDir[0], smp.uDir[1]);
+        result->dirPDF = dirLocal.z / M_PI;
+        dirLocal.z *= -1;
+        
+        ReferenceFrame geometricFrame;
+        geometricFrame.z = result->surfPt.gNormal;
+        geometricFrame.z.makeCoordinateSystem(&geometricFrame.x, &geometricFrame.y);
+        result->dir = geometricFrame.fromLocal(dirLocal);
+        
+//        float z = dot(distVec, query.surfPt.gNormal);
+        SampledSpectrum ret = Rd(distVec.length()) * (absDot(result->surfPt.gNormal, result->dir) / M_PI);
+        SLRAssert(!ret.hasInf() && !ret.hasNaN(),
+                  "R: %s, u(%g, %g, %g, %g, %g), p: %s, gNormal: %s",
+                  ret.toString().c_str(), smp.uPos[0], smp.uPos[1], smp.uDir[0], smp.uDir[1], smp.uAuxiliary,
+                  query.surfPt.p.toString().c_str(), query.surfPt.gNormal.toString().c_str());
+        
+        return ret;
     }
     
     

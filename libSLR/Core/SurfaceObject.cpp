@@ -119,6 +119,10 @@ namespace SLR {
         return m_material->getEDF(surfPt, wls, mem);
     }
     
+    BSSRDF* SingleSurfaceObject::createBSSRDF(bool lowerHemisphere, const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem) const {
+        return m_material->getBSSRDF(lowerHemisphere, surfPt, wls, mem);
+    }
+    
     
     void BumpSingleSurfaceObject::getSurfacePoint(const Intersection &isect, SurfacePoint *surfPt) const {
         SingleSurfaceObject::getSurfacePoint(isect, surfPt);

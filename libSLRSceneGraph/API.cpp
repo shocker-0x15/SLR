@@ -606,6 +606,22 @@ namespace SLRSceneGraph {
                                      };
                                      return configFunc(params, context, err);
                                  }
+                                 else if (type == "SSS") {
+                                     const static Function configFunc{
+                                         0, {
+                                             {"surfMat", Type::SurfaceMaterial} ,
+                                             {"sigma_a", Type::Spectrum}, {"sigma_s", Type::Spectrum}, {"g", Type::RealNumber}
+                                         },
+                                         [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
+                                             SurfaceMaterialRef surfMat = args.at("surfMat").rawRef<TypeMap::SurfaceMaterial>();
+                                             InputSpectrumRef sigma_a = args.at("sigma_a").rawRef<TypeMap::Spectrum>();
+                                             InputSpectrumRef sigma_s = args.at("sigma_s").rawRef<TypeMap::Spectrum>();
+                                             float g = args.at("g").raw<TypeMap::RealNumber>();
+                                             return Element(TypeMap::SurfaceMaterial(), SurfaceMaterial::createSSSSurfaceMaterial(surfMat, sigma_a, sigma_s, g, nullptr, nullptr, 0));
+                                         }
+                                     };
+                                     return configFunc(params, context, err);
+                                 }
                                  else if (type == "mix") {
                                      const static Function configFunc{
                                          0, {

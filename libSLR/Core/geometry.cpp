@@ -60,6 +60,10 @@ namespace SLR {
         return obj->createEDF(*this, wls, mem);
     }
     
+    BSSRDF* SurfacePoint::createBSSRDF(bool lowerHemisphere, const WavelengthSamples &wls, ArenaAllocator &mem) const {
+        return obj->createBSSRDF(lowerHemisphere, *this, wls, mem);
+    }
+    
     SurfacePoint operator*(const StaticTransform &transform, const SurfacePoint &surfPt) {
         SurfacePoint ret;
         ret.p = transform * surfPt.p;

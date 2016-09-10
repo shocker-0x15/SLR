@@ -184,6 +184,7 @@ namespace SLR {
     class SVGGX;
     class SurfaceMaterial;
     class EmitterSurfaceProperty;
+    class SubSurfaceScatteringSurfaceMaterial;
     class DiffuseReflection;
     class SpecularReflection;
     class SpecularScattering;
@@ -209,9 +210,13 @@ namespace SLR {
     struct IDFQuery;
     struct IDFSample;
     struct IDFQueryResult;
+    struct BSSRDFQuery;
+    struct BSSRDFSample;
+    struct BSSRDFQueryResult;
     class EDF;
     class BSDF;
     class IDF;
+    class BSSRDF;
     class DiffuseEDF;
     class IBLEDF;
     class MultiEDF;

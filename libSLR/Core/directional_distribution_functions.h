@@ -325,6 +325,35 @@ namespace SLR {
     };
     
     
+    // References
+    // A Practical Model for Subsurface Light Transport
+    // Towards Realistic Image Synthesis of Scattering Materials
+    class SLR_API BSSRDF {
+        SampledSpectrum m_sigma_tr;
+        SampledSpectrum m_z_r;
+        SampledSpectrum m_z_v;
+        SampledSpectrum m_sigma_s;
+        SampledSpectrum m_sigma_e;
+        float m_g;
+        
+        float sample_distance(float rMax, int16_t wlIdx, float u, float* radPDF) const;
+        float evaludateDistancePDF(float rMax, int16_t wlIdx, float r) const;
+        SampledSpectrum Rd(float r) const;
+    public:
+        BSSRDF(const SampledSpectrum &sigma_a, const SampledSpectrum &sigma_s, float g, const SampledSpectrum &internalHHReflectance) :
+        m_sigma_s(sigma_s), m_sigma_e(sigma_s + sigma_a), m_g(g) {
+            SampledSpectrum sigma_e_p = sigma_s * (1 - g) + sigma_a;
+            SampledSpectrum A = (SampledSpectrum::One + internalHHReflectance) / (SampledSpectrum::One - internalHHReflectance);
+            
+            m_sigma_tr = sqrt(3 * sigma_a * sigma_e_p);
+            m_z_r = SampledSpectrum::One / sigma_e_p;
+            m_z_v = (SampledSpectrum::One + 4.0f / 3.0f * A) / sigma_e_p;
+        }
+        
+        SampledSpectrum sample(const BSSRDFQuery &query, const BSSRDFSample &smp, BSSRDFQueryResult* result) const;
+    };
+    
+    
     class SLR_API Fresnel {
     public:
         virtual ~Fresnel() { };

@@ -121,12 +121,12 @@ namespace SLR {
                 SampledSpectrum C = contribution(*scene, wls, ray, pathSampler, mem);
                 SLRAssert(C.hasNaN() == false && C.hasInf() == false && C.hasMinus() == false,
                           "Unexpected value detected: %s\n"
-                          "pix: (%f, %f)", C.toString().c_str(), px, py);
+                          "pix: (%f, %f)", C.toString().c_str(), p.x, p.y);
                 
                 SampledSpectrum weight = (We0 * We1) * (absDot(ray.dir, lensResult.surfPt.gNormal) / (lensResult.areaPDF * WeResult.dirPDF * selectWLPDF));
                 SLRAssert(weight.hasNaN() == false && weight.hasInf() == false && weight.hasMinus() == false,
                           "Unexpected value detected: %s\n"
-                          "pix: (%f, %f)", weight.toString().c_str(), px, py);
+                          "pix: (%f, %f)", weight.toString().c_str(), p.x, p.y);
                 sensor->add(p.x, p.y, wls, weight * C);
                 
                 mem.reset();
@@ -157,13 +157,14 @@ namespace SLR {
         if (surfPt.atInfinity)
             return sp;
 
+        DirectionType fsType = DirectionType::All;
         while (true) {
             ++pathLength;
             if (pathLength >= 100)
                 break;
             Normal3D gNorm_sn = surfPt.shadingFrame.toLocal(surfPt.gNormal);
             BSDF* bsdf = surfPt.createBSDF(wls, mem);
-            BSDFQuery fsQuery(dirOut_sn, gNorm_sn, wls.selectedLambda);
+            BSDFQuery fsQuery(dirOut_sn, gNorm_sn, wls.selectedLambda, fsType);
             
             // Next Event Estimation (explicit light sampling)
             if (bsdf->hasNonDelta()) {
@@ -222,14 +223,29 @@ namespace SLR {
             
             // find a next intersection point.
             isect = Intersection();
-            if (!scene.intersect(ray, &isect))
-                break;
-            isect.getSurfacePoint(&surfPt);
+            BSSRDF* bssrdf = surfPt.createBSSRDF(fsResult.dir_sn.z < 0, wls, mem);
+            if (bssrdf) {
+                BSSRDFQuery sssQuery(scene, surfPt, dirIn, ray.time, wls.selectedLambda);
+                BSSRDFQueryResult sssResult;
+                SampledSpectrum T = bssrdf->sample(sssQuery, pathSampler.getBSSRDFSample(), &sssResult);
+                if (sssResult.areaPDF == 0.0f || sssResult.dirPDF == 0.0f)
+                    break;
+                surfPt = std::move(sssResult.surfPt);
+                ray = Ray(surfPt.p, -sssResult.dir, ray.time, 0, 0);
+                alpha *= T / (sssResult.areaPDF * sssResult.dirPDF);
+                fsType = DirectionType::Transmission | DirectionType::AllFreq;
+            }
+            else {
+                if (!scene.intersect(ray, &isect))
+                    break;
+                isect.getSurfacePoint(&surfPt);
+                fsType = DirectionType::All;
+            }
             
             dirOut_sn = surfPt.shadingFrame.toLocal(-ray.dir);
             
             // implicit light sampling
-            if (surfPt.isEmitting()) {
+            if (surfPt.isEmitting() && bssrdf == nullptr) {
                 float bsdfPDF = fsResult.dirPDF;
                 
                 EDF* edf = surfPt.createEDF(wls, mem);
