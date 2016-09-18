@@ -14,10 +14,9 @@
 #include "../Core/ImageSensor.h"
 #include "../Core/RandomNumberGenerator.h"
 #include "../Core/cameras.h"
-#include "../Core/geometry.h"
 #include "../Core/SurfaceObject.h"
-#include "../Core/directional_distribution_functions.h"
 #include "../Core/light_path_samplers.h"
+#include "../Core/ProgressReporter.h"
 
 namespace SLR {
     PathTracingRenderer::PathTracingRenderer(uint32_t spp) : m_samplesPerPixel(spp) {
@@ -25,21 +24,14 @@ namespace SLR {
     }
     
     void PathTracingRenderer::render(const Scene &scene, const RenderSettings &settings) const {
-#ifdef DEBUG
-        uint32_t numThreads = 1;
-#else
-        uint32_t numThreads = std::thread::hardware_concurrency();
-#endif
+        uint32_t numThreads = settings.getInt(RenderSettingItem::NumThreads);
         XORShiftRNG topRand(settings.getInt(RenderSettingItem::RNGSeed));
-        std::unique_ptr<ArenaAllocator[]> mems = std::unique_ptr<ArenaAllocator[]>(new ArenaAllocator[numThreads]);
-        std::unique_ptr<IndependentLightPathSampler[]> samplers = std::unique_ptr<IndependentLightPathSampler[]>(new IndependentLightPathSampler[numThreads]);
+        ArenaAllocator* mems = new ArenaAllocator[numThreads];
+        IndependentLightPathSampler* samplers = new IndependentLightPathSampler[numThreads];
         for (int i = 0; i < numThreads; ++i) {
-            new (mems.get() + i) ArenaAllocator();
-            new (samplers.get() + i) IndependentLightPathSampler(topRand.getUInt());
+            new (mems + i) ArenaAllocator();
+            new (samplers + i) IndependentLightPathSampler(topRand.getUInt());
         }
-        std::unique_ptr<IndependentLightPathSampler*[]> samplerRefs = std::unique_ptr<IndependentLightPathSampler*[]>(new IndependentLightPathSampler*[numThreads]);
-        for (int i = 0; i < numThreads; ++i)
-            samplerRefs[i] = &samplers[i];
         
         const Camera* camera = scene.getCamera();
         ImageSensor* sensor = camera->getSensor();
@@ -47,28 +39,30 @@ namespace SLR {
         Job job;
         job.scene = &scene;
         
-        job.mems = mems.get();
-        job.pathSamplers = samplerRefs.get();
+        job.mems = mems;
+        job.pathSamplers = samplers;
         
         job.camera = camera;
+        job.sensor = sensor;
         job.timeStart = settings.getFloat(RenderSettingItem::TimeStart);
         job.timeEnd = settings.getFloat(RenderSettingItem::TimeEnd);
-        
-        job.sensor = sensor;
         job.imageWidth = settings.getInt(RenderSettingItem::ImageWidth);
         job.imageHeight = settings.getInt(RenderSettingItem::ImageHeight);
         job.numPixelX = sensor->tileWidth();
         job.numPixelY = sensor->tileHeight();
         
-        uint32_t exportPass = 1;
-        uint32_t imgIdx = 0;
-        uint32_t endIdx = 16;
-        
         sensor->init(job.imageWidth, job.imageHeight);
         
-        std::chrono::system_clock::time_point start, end;
-        start = std::chrono::system_clock::now();
+        printf("Path Tracing: %u[spp]\n", m_samplesPerPixel);
+        ProgressReporter reporter;
+        job.reporter = &reporter;
         
+        reporter.pushJob("Rendering", m_samplesPerPixel * sensor->numTileX() * sensor->numTileY());
+        char nextTitle[32];
+        snprintf(nextTitle, sizeof(nextTitle), "To %5uspp", 1);
+        reporter.pushJob(nextTitle, 1 * sensor->numTileX() * sensor->numTileY());
+        uint32_t imgIdx = 0;
+        uint32_t exportPass = 1;
         for (int s = 0; s < m_samplesPerPixel; ++s) {
             ThreadPool threadPool(numThreads);
             for (int ty = 0; ty < sensor->numTileY(); ++ty) {
@@ -81,25 +75,34 @@ namespace SLR {
             threadPool.wait();
             
             if ((s + 1) == exportPass) {
+                reporter.popJob();
+                
+                reporter.beginOtherThreadPrint();
                 char filename[256];
                 sprintf(filename, "%03u.bmp", imgIdx);
-                end = std::chrono::system_clock::now();
-                double elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+                double elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(reporter.elapsed()).count();
                 sensor->saveImage(filename, settings.getFloat(RenderSettingItem::Brightness) / (s + 1));
                 printf("%u samples: %s, %g[s]\n", exportPass, filename, elapsed * 0.001f);
+                reporter.endOtherThreadPrint();
+                
                 ++imgIdx;
-                if (imgIdx == endIdx)
+                if ((s + 1) == m_samplesPerPixel)
                     break;
                 exportPass += exportPass;
+                snprintf(nextTitle, sizeof(nextTitle), "To %5uspp", exportPass);
+                reporter.pushJob(nextTitle, (exportPass >> 1) * sensor->numTileX() * sensor->numTileY());
             }
         }
+        reporter.popJob();
+        reporter.finish();
         
-        //    sensor.saveImage("output.png", settings.getFloat(RenderSettingItem::SensorResponse) / numSamples);
+        delete[] samplers;
+        delete[] mems;
     }
     
     void PathTracingRenderer::Job::kernel(uint32_t threadID) {
         ArenaAllocator &mem = mems[threadID];
-        IndependentLightPathSampler &pathSampler = *pathSamplers[threadID];
+        IndependentLightPathSampler &pathSampler = pathSamplers[threadID];
         for (int ly = 0; ly < numPixelY; ++ly) {
             for (int lx = 0; lx < numPixelX; ++lx) {
                 float time = pathSampler.getTimeSample(timeStart, timeEnd);
@@ -132,6 +135,7 @@ namespace SLR {
                 mem.reset();
             }
         }
+        reporter->update();
     }
     
     SampledSpectrum PathTracingRenderer::Job::contribution(const Scene &scene, const WavelengthSamples &initWLs, const Ray &initRay, IndependentLightPathSampler &pathSampler, ArenaAllocator &mem) const {

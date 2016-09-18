@@ -5,6 +5,7 @@
 //
 
 #include <cstdio>
+#include <thread>
 
 #include <libSLR/defines.h>
 #include <libSLRSceneGraph/references.h>
@@ -49,6 +50,11 @@ int main(int argc, const char * argv[]) {
     printf("build scene: %g [s]\n", stopwatch.stop() * 1e-3f);
     
     SLR::RenderSettings settings;
+#ifdef DEBUG
+    settings.addItem(SLR::RenderSettingItem::NumThreads, 1);
+#else
+    settings.addItem(SLR::RenderSettingItem::NumThreads, (int32_t)std::thread::hardware_concurrency());
+#endif
     settings.addItem(SLR::RenderSettingItem::ImageWidth, context.width);
     settings.addItem(SLR::RenderSettingItem::ImageHeight, context.height);
     settings.addItem(SLR::RenderSettingItem::TimeStart, context.timeStart);

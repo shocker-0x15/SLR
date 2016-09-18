@@ -9,16 +9,15 @@
 
 #include "../Core/RenderSettings.h"
 #include "../Helper/ThreadPool.h"
-#include "../Memory/ArenaAllocator.h"
 #include "../RNGs/XORShiftRNG.h"
+#include "../Memory/ArenaAllocator.h"
 #include "../Core/Image.h"
 #include "../Core/ImageSensor.h"
 #include "../Core/RandomNumberGenerator.h"
 #include "../Core/cameras.h"
-#include "../Core/geometry.h"
 #include "../Core/SurfaceObject.h"
-#include "../Core/directional_distribution_functions.h"
 #include "../Core/light_path_samplers.h"
+#include "../Core/ProgressReporter.h"
 
 namespace SLR {
     DebugRenderer::DebugRenderer(bool channelFlags[(int)ExtraChannel::NumChannels]) {
@@ -27,21 +26,14 @@ namespace SLR {
     }
     
     void DebugRenderer::render(const Scene &scene, const RenderSettings &settings) const {
-#ifdef DEBUG
-        uint32_t numThreads = 1;
-#else
-        uint32_t numThreads = std::thread::hardware_concurrency();
-#endif
+        uint32_t numThreads = settings.getInt(RenderSettingItem::NumThreads);
         XORShiftRNG topRand(settings.getInt(RenderSettingItem::RNGSeed));
-        std::unique_ptr<ArenaAllocator[]> mems = std::unique_ptr<ArenaAllocator[]>(new ArenaAllocator[numThreads]);
-        std::unique_ptr<IndependentLightPathSampler[]> samplers = std::unique_ptr<IndependentLightPathSampler[]>(new IndependentLightPathSampler[numThreads]);
+        ArenaAllocator* mems = new ArenaAllocator[numThreads];
+        IndependentLightPathSampler* samplers = new IndependentLightPathSampler[numThreads];
         for (int i = 0; i < numThreads; ++i) {
-            new (mems.get() + i) ArenaAllocator();
-            new (samplers.get() + i) IndependentLightPathSampler(topRand.getUInt());
+            new (mems + i) ArenaAllocator();
+            new (samplers + i) IndependentLightPathSampler(topRand.getUInt());
         }
-        std::unique_ptr<IndependentLightPathSampler*[]> samplerRefs = std::unique_ptr<IndependentLightPathSampler*[]>(new IndependentLightPathSampler*[numThreads]);
-        for (int i = 0; i < numThreads; ++i)
-            samplerRefs[i] = &samplers[i];
         
         const Camera* camera = scene.getCamera();
         ImageSensor* sensor = camera->getSensor();
@@ -50,20 +42,22 @@ namespace SLR {
         job.renderer = this;
         job.scene = &scene;
         
-        job.mems = mems.get();
-        job.pathSamplers = samplerRefs.get();
+        job.mems = mems;
+        job.pathSamplers = samplers;
         
         job.camera = camera;
+        job.sensor = sensor;
         job.timeStart = settings.getFloat(RenderSettingItem::TimeStart);
         job.timeEnd = settings.getFloat(RenderSettingItem::TimeEnd);
-        
-        job.sensor = sensor;
         job.imageWidth = settings.getInt(RenderSettingItem::ImageWidth);
         job.imageHeight = settings.getInt(RenderSettingItem::ImageHeight);
         job.numPixelX = sensor->tileWidth();
         job.numPixelY = sensor->tileHeight();
         
         sensor->init(job.imageWidth, job.imageHeight);
+        
+        printf("Debug Renderer\n");
+//        ProgressReporter reporter("Rendering", 1);
         
         DefaultAllocator &defMem = DefaultAllocator::instance();
         std::array<std::unique_ptr<Image2D, Allocator::DeleterType>, (int)ExtraChannel::NumChannels> chImages;
@@ -101,10 +95,6 @@ namespace SLR {
         }
         threadPool.wait();
         
-//        char filename[256];
-//        sprintf(filename, "output.bmp");
-//        sensor->saveImage(filename, 1);
-        
         for (int i = 0; i < chImages.size(); ++i) {
             if (!chImages[i])
                 continue;
@@ -127,11 +117,14 @@ namespace SLR {
             }
             chImages[i]->saveImage(filename, false);
         }
+        
+        delete[] samplers;
+        delete[] mems;
     }
     
     void DebugRenderer::Job::kernel(uint32_t threadID) {
         ArenaAllocator &mem = mems[threadID];
-        IndependentLightPathSampler &pathSampler = *pathSamplers[threadID];
+        IndependentLightPathSampler &pathSampler = pathSamplers[threadID];
         for (int ly = 0; ly < numPixelY; ++ly) {
             for (int lx = 0; lx < numPixelX; ++lx) {
                 float time = pathSampler.getTimeSample(timeStart, timeEnd);

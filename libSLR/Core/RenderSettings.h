@@ -13,11 +13,12 @@
 
 namespace SLR {
     enum class RenderSettingItem {
+        NumThreads,
         ImageWidth,
         ImageHeight,
         TimeStart,
         TimeEnd,
-        Brightness, 
+        Brightness,
         RNGSeed,
     };
     

@@ -13,7 +13,7 @@
 #include "Vector4.h"
 #include "Point3.h"
 
-#ifdef SLR_Platform_MSVC
+#ifdef SLR_Platform_Windows_MSVC
 #   undef near
 #   undef far
 #endif
@@ -47,7 +47,7 @@ namespace SLR {
         Matrix4x4Template(const Vector3Template<RealType> &col0, const Vector3Template<RealType> &col1, const Vector3Template<RealType> &col2) : c0(col0, 0.0f), c1(col1, 0.0f), c2(col2, 0.0f), c3(Vector4Template<RealType>::Ew) { }
         CONSTEXPR_CONSTRUCTOR Matrix4x4Template(const Vector4Template<RealType> &col0, const Vector4Template<RealType> &col1, const Vector4Template<RealType> &col2, const Vector4Template<RealType> &col3) :
         c0(col0), c1(col1), c2(col2), c3(col3)
-#ifdef SLR_Platform_MSVC
+#ifdef SLR_Platform_Windows_MSVC
         ,// without these extra initialization, an error occurs at least with VS2015.
         m00(col0.x), m10(col0.y), m20(col0.z), m30(col0.w),
         m01(col1.x), m11(col1.y), m21(col1.z), m31(col1.w),

@@ -18,19 +18,20 @@ namespace SLR {
             const Scene* scene;
             
             ArenaAllocator* mems;
-            IndependentLightPathSampler** pathSamplers;
+            IndependentLightPathSampler* pathSamplers;
             
             const Camera* camera;
+            ImageSensor* sensor;
             float timeStart;
             float timeEnd;
-            
-            ImageSensor* sensor;
             uint32_t imageWidth;
             uint32_t imageHeight;
             uint32_t numPixelX;
             uint32_t numPixelY;
             uint32_t basePixelX;
             uint32_t basePixelY;
+            
+            ProgressReporter* reporter;
             
             void kernel(uint32_t threadID);
             SampledSpectrum contribution(const Scene &scene, const WavelengthSamples &initWLs, const Ray &initRay, IndependentLightPathSampler &pathSampler, ArenaAllocator &mem) const;

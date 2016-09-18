@@ -89,13 +89,12 @@ namespace SLR {
             const Scene* scene;
             
             ArenaAllocator* mems;
-            IndependentLightPathSampler** pathSamplers;
+            IndependentLightPathSampler* pathSamplers;
             
             const Camera* camera;
+            ImageSensor* sensor;
             float timeStart;
             float timeEnd;
-            
-            ImageSensor* sensor;
             uint32_t imageWidth;
             uint32_t imageHeight;
             uint32_t numPixelX;
@@ -108,6 +107,8 @@ namespace SLR {
             int16_t wlHint;
             std::vector<BPTVertex> lightVertices;
             std::vector<BPTVertex> eyeVertices;
+            
+            ProgressReporter* reporter;
             
             void kernel(uint32_t threadID);
             void generateSubPath(const WavelengthSamples &initWLs, const SampledSpectrum &initAlpha, const SLR::Ray &initRay, float dirPDF, DirectionType sampledType,

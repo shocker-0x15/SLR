@@ -12,9 +12,9 @@
 #if defined(_WIN32) || defined(_WIN64)
 #   define SLR_Platform_Windows
 #   if defined(__MINGW32__) // Defined for both 32 bit/64 bit MinGW
-#       define SLR_Platform_MinGW
+#       define SLR_Platform_Windows_MinGW
 #   elif defined(_MSC_VER)
-#       define SLR_Platform_MSVC
+#       define SLR_Platform_Windows_MSVC
 #   endif
 #elif defined(__linux__)
 #   define SLR_Platform_Linux
@@ -24,7 +24,7 @@
 #   define SLR_Platform_OpenBSD
 #endif
 
-#ifdef SLR_Platform_MSVC
+#ifdef SLR_Platform_Windows_MSVC
 #   define NOMINMAX
 #   define _USE_MATH_DEFINES
 #   ifdef SLR_API_EXPORTS
@@ -71,7 +71,7 @@
 #   define ENABLE_ASSERT
 #endif
 
-#ifdef SLR_Platform_MSVC
+#ifdef SLR_Platform_Windows_MSVC
 SLR_API void debugPrintf(const char* fmt, ...);
 #else
 #   define debugPrintf(fmt, ...) printf(fmt, ##__VA_ARGS__);
@@ -89,7 +89,7 @@ SLR_API void debugPrintf(const char* fmt, ...);
 #define SLR_L1_Cacheline_Size 64
 
 // For memalign, free, alignof
-#if defined(SLR_Platform_MSVC)
+#if defined(SLR_Platform_Windows_MSVC)
 #   include <malloc.h>
 #   define SLR_memalign(size, alignment) _aligned_malloc(size, alignment)
 #   define SLR_freealign(ptr) _aligned_free(ptr)
@@ -109,7 +109,7 @@ inline void* SLR_memalign(size_t size, size_t alignment) {
 #endif
 
 // For getcwd
-#if defined(SLR_Platform_MSVC)
+#if defined(SLR_Platform_Windows_MSVC)
 #   define SLR_getcwd(size, buf) GetCurrentDirectory(size, buf)
 #elif defined(SLR_Platform_OS_X) || defined(SLR_Platform_OpenBSD) || defined(SLR_Platform_Linux)
 #   include <unistd.h>

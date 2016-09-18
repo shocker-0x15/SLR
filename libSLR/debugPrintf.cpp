@@ -6,7 +6,7 @@
 
 #include "defines.h"
 
-#ifdef SLR_Platform_MSVC
+#ifdef SLR_Platform_Windows_MSVC
 SLR_API void debugPrintf(const char* fmt, ...) {
 	va_list args;
 	va_start(args, fmt);

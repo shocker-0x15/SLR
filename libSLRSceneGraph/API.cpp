@@ -7,6 +7,8 @@
 
 #include "API.hpp"
 
+#include <thread>
+
 #include "Parser/SceneParsingDriver.h"
 
 #include <libSLR/Core/Image.h>
@@ -70,7 +72,7 @@ namespace SLRSceneGraph {
         return true;
     }
 
-#ifdef SLR_Platform_MSVC
+#ifdef SLR_Platform_Windows_MSVC
     class FuncGetPathElement {
         std::string pathPrefix;
     public:
@@ -818,7 +820,7 @@ namespace SLRSceneGraph {
                                          Element matAttrs = Element(TypeMap::Tuple(), ParameterList());
                                          
                                          auto &attrs = matAttrs.raw<TypeMap::Tuple>();
-#ifdef SLR_Platform_MSVC
+#ifdef SLR_Platform_Windows_MSVC
                                          FuncGetPathElement getPathElement{ pathPrefix };
 #else
                                          auto getPathElement = [&pathPrefix](const aiString &str) {
@@ -1072,6 +1074,7 @@ namespace SLRSceneGraph {
             Element(TypeMap::Function(),
                     Function(1,
                              {
+                                 {"numThreads", Type::Integer, Element((int32_t)std::thread::hardware_concurrency())},
                                  {"width", Type::Integer, Element(1024)},
                                  {"height", Type::Integer, Element(1024)},
                                  {"timeStart", Type::RealNumber, Element(0.0)},

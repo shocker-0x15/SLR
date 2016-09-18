@@ -5,8 +5,8 @@
 //  Copyright (c) 2016年 渡部 心. All rights reserved.
 //
 
-#ifndef light_path_samplers_h
-#define light_path_samplers_h
+#ifndef __SLR_light_path_samplers_h__
+#define __SLR_light_path_samplers_h__
 
 #include "../defines.h"
 #include "../references.h"

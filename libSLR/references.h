@@ -249,6 +249,8 @@ namespace SLR {
     class PathTracingRenderer;
     class BidirectionalPathTracingRenderer;
     class AMCMCPPMRenderer;
+    
+    class ProgressReporter;
 }
 
 #endif

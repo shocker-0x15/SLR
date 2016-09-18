@@ -147,11 +147,14 @@
 		468F9DC31D7C383F00DD02BD /* basic_phase_functions.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 468F9DC11D7C383F00DD02BD /* basic_phase_functions.cpp */; };
 		468F9DC41D7C383F00DD02BD /* basic_phase_functions.h in Headers */ = {isa = PBXBuildFile; fileRef = 468F9DC21D7C383F00DD02BD /* basic_phase_functions.h */; };
 		468F9DCA1D7DC7EB00DD02BD /* LinearCongruentialRNG.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 468F9DC61D7DC7EB00DD02BD /* LinearCongruentialRNG.cpp */; };
-		468F9DCB1D7DC7EB00DD02BD /* LinearCongruentialRNG.h in Headers */ = {isa = PBXBuildFile; fileRef = 468F9DC71D7DC7EB00DD02BD /* LinearCongruentialRNG.h */; };
 		468F9DCC1D7DC7EB00DD02BD /* XORShiftRNG.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 468F9DC81D7DC7EB00DD02BD /* XORShiftRNG.cpp */; };
 		468F9DCD1D7DC7EB00DD02BD /* XORShiftRNG.h in Headers */ = {isa = PBXBuildFile; fileRef = 468F9DC91D7DC7EB00DD02BD /* XORShiftRNG.h */; };
 		468F9DD01D7DE05400DD02BD /* light_path_samplers.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 468F9DCE1D7DE05400DD02BD /* light_path_samplers.cpp */; };
 		468F9DD11D7DE05400DD02BD /* light_path_samplers.h in Headers */ = {isa = PBXBuildFile; fileRef = 468F9DCF1D7DE05400DD02BD /* light_path_samplers.h */; };
+		468F9DDC1D8063DA00DD02BD /* Matrix3x3.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 468F9DDA1D8063DA00DD02BD /* Matrix3x3.cpp */; };
+		468F9DDD1D8063DA00DD02BD /* Matrix3x3.h in Headers */ = {isa = PBXBuildFile; fileRef = 468F9DDB1D8063DA00DD02BD /* Matrix3x3.h */; };
+		468F9DE01D81D98200DD02BD /* ProgressReporter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 468F9DDE1D81D98200DD02BD /* ProgressReporter.cpp */; };
+		468F9DE11D81D98200DD02BD /* ProgressReporter.h in Headers */ = {isa = PBXBuildFile; fileRef = 468F9DDF1D81D98200DD02BD /* ProgressReporter.h */; };
 		46AE85291BB718C400C70BF3 /* references.h in Headers */ = {isa = PBXBuildFile; fileRef = 466F6D491BB7134E0056F2FA /* references.h */; };
 		46B36DE61D33E7CF00D7C56B /* Accelerator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 46B36DE41D33E7CF00D7C56B /* Accelerator.cpp */; };
 		46B36DE71D33E7CF00D7C56B /* Accelerator.h in Headers */ = {isa = PBXBuildFile; fileRef = 46B36DE51D33E7CF00D7C56B /* Accelerator.h */; };
@@ -362,6 +365,10 @@
 		468F9DC91D7DC7EB00DD02BD /* XORShiftRNG.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XORShiftRNG.h; path = libSLR/RNGs/XORShiftRNG.h; sourceTree = SOURCE_ROOT; };
 		468F9DCE1D7DE05400DD02BD /* light_path_samplers.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = light_path_samplers.cpp; path = libSLR/Core/light_path_samplers.cpp; sourceTree = SOURCE_ROOT; };
 		468F9DCF1D7DE05400DD02BD /* light_path_samplers.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = light_path_samplers.h; path = libSLR/Core/light_path_samplers.h; sourceTree = SOURCE_ROOT; };
+		468F9DDA1D8063DA00DD02BD /* Matrix3x3.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Matrix3x3.cpp; path = libSLR/BasicTypes/Matrix3x3.cpp; sourceTree = SOURCE_ROOT; };
+		468F9DDB1D8063DA00DD02BD /* Matrix3x3.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Matrix3x3.h; path = libSLR/BasicTypes/Matrix3x3.h; sourceTree = SOURCE_ROOT; };
+		468F9DDE1D81D98200DD02BD /* ProgressReporter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ProgressReporter.cpp; path = libSLR/Core/ProgressReporter.cpp; sourceTree = SOURCE_ROOT; };
+		468F9DDF1D81D98200DD02BD /* ProgressReporter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ProgressReporter.h; path = libSLR/Core/ProgressReporter.h; sourceTree = SOURCE_ROOT; };
 		46B36DE41D33E7CF00D7C56B /* Accelerator.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Accelerator.cpp; path = libSLR/Core/Accelerator.cpp; sourceTree = SOURCE_ROOT; };
 		46B36DE51D33E7CF00D7C56B /* Accelerator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Accelerator.h; path = libSLR/Core/Accelerator.h; sourceTree = SOURCE_ROOT; };
 		46B958921BDCD2B300A915DE /* location.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = location.hh; path = libSLRSceneGraph/Parser/location.hh; sourceTree = "<group>"; };
@@ -447,6 +454,8 @@
 				4651F3291C5670C70026B8A5 /* Vector3.cpp */,
 				466F6C171BB6B2830056F2FA /* Vector4.h */,
 				4651F32B1C5672460026B8A5 /* Vector4.cpp */,
+				468F9DDB1D8063DA00DD02BD /* Matrix3x3.h */,
+				468F9DDA1D8063DA00DD02BD /* Matrix3x3.cpp */,
 				466F6C0C1BB6B2830056F2FA /* Matrix4x4.h */,
 				4651F32F1C5673BC0026B8A5 /* Matrix4x4.cpp */,
 				466F6C0F1BB6B2830056F2FA /* Quaternion.h */,
@@ -519,6 +528,8 @@
 				466F6C381BB6B2AA0056F2FA /* Renderer.h */,
 				466F6C3A1BB6B2AA0056F2FA /* RenderSettings.h */,
 				466F6C391BB6B2AA0056F2FA /* RenderSettings.cpp */,
+				468F9DDF1D81D98200DD02BD /* ProgressReporter.h */,
+				468F9DDE1D81D98200DD02BD /* ProgressReporter.cpp */,
 			);
 			path = Core;
 			sourceTree = "<group>";
@@ -790,7 +801,6 @@
 				466F6D371BB6DC080056F2FA /* bmp_exporter.h in Headers */,
 				466F6D4B1BB7153E0056F2FA /* InfiniteSphere.h in Headers */,
 				468F9DC41D7C383F00DD02BD /* basic_phase_functions.h in Headers */,
-				46C4A10E1D1301C9003530DA /* LinearCongruentialRNG.h in Headers */,
 				4602E8BF1BC418FA00EC16FA /* SummedSurfaceMaterial.h in Headers */,
 				462018D11CD7D09E00A5CAF1 /* MicrofacetBSDF.h in Headers */,
 				466F6D051BB6CA510056F2FA /* IBLEDF.h in Headers */,
@@ -804,6 +814,7 @@
 				462982D31C65FF980052228B /* DebugRenderer.h in Headers */,
 				460A20261D602CB800870E0F /* AshikhminShirleyBRDF.h in Headers */,
 				460A201E1D6029EC00870E0F /* QBVH.h in Headers */,
+				468F9DDD1D8063DA00DD02BD /* Matrix3x3.h in Headers */,
 				466F6D3A1BB6DC200056F2FA /* ArenaAllocator.h in Headers */,
 				466F6CF51BB6CA420056F2FA /* Renderer.h in Headers */,
 				466F6D481BB6DC840056F2FA /* ModifiedWardDurReflection.h in Headers */,
@@ -833,6 +844,7 @@
 				466F6D441BB6DC840056F2FA /* IBLEmission.h in Headers */,
 				466F6CF91BB6CA420056F2FA /* surface_material.h in Headers */,
 				46BF49891BB731CF0036033F /* spectrum_library.h in Headers */,
+				468F9DE11D81D98200DD02BD /* ProgressReporter.h in Headers */,
 				466F6CDF1BB6CA260056F2FA /* basic_BSDFs.h in Headers */,
 				460A20221D602C5700870E0F /* AshikhminShirleyReflection.h in Headers */,
 				466F6CF01BB6CA420056F2FA /* Image.h in Headers */,
@@ -989,6 +1001,7 @@
 				466F6D381BB6DC170056F2FA /* ArenaAllocator.cpp in Sources */,
 				46EA72A91D59F22B00738511 /* debugPrintf.cpp in Sources */,
 				4651F3381C567CA30026B8A5 /* SpectrumType.cpp in Sources */,
+				468F9DDC1D8063DA00DD02BD /* Matrix3x3.cpp in Sources */,
 				466F6CFA1BB6CA420056F2FA /* SurfaceObject.cpp in Sources */,
 				462018CE1CD7D05800A5CAF1 /* MicrofacetBSDF.cpp in Sources */,
 				466F6CE01BB6CA260056F2FA /* ModifiedWardDurBRDF.cpp in Sources */,
@@ -998,6 +1011,7 @@
 				466F6CE61BB6CA2D0056F2FA /* PerspectiveCamera.cpp in Sources */,
 				462982D01C65FF670052228B /* DebugRenderer.cpp in Sources */,
 				466F6CF81BB6CA420056F2FA /* surface_material.cpp in Sources */,
+				468F9DE01D81D98200DD02BD /* ProgressReporter.cpp in Sources */,
 				466F6CFC1BB6CA420056F2FA /* textures.cpp in Sources */,
 				466F6CE41BB6CA2D0056F2FA /* EquirectangularCamera.cpp in Sources */,
 				4651F3281C56705B0026B8A5 /* Point3.cpp in Sources */,
@@ -1101,6 +1115,7 @@
 					"$(inherited)",
 					/usr/local/include/OpenEXR,
 				);
+				INSTALL_PATH = "@rpath";
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				OTHER_LDFLAGS = "-lHalf";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1120,6 +1135,7 @@
 					"$(inherited)",
 					/usr/local/include/OpenEXR,
 				);
+				INSTALL_PATH = "@rpath";
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				OTHER_LDFLAGS = "-lHalf";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1139,6 +1155,7 @@
 					"$(inherited)",
 					/usr/local/include/OpenEXR,
 				);
+				INSTALL_PATH = "@rpath";
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				OTHER_LDFLAGS = "-lHalf";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1161,6 +1178,8 @@
 					/usr/local/include,
 					/usr/local/include/OpenEXR,
 				);
+				INSTALL_PATH = "@rpath";
+				LD_RUNPATH_SEARCH_PATHS = "@executable_path";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(SRCROOT)/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)",
@@ -1191,6 +1210,8 @@
 					/usr/local/include,
 					/usr/local/include/OpenEXR,
 				);
+				INSTALL_PATH = "@rpath";
+				LD_RUNPATH_SEARCH_PATHS = "@executable_path";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(SRCROOT)/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)",
@@ -1221,6 +1242,8 @@
 					/usr/local/include,
 					/usr/local/include/OpenEXR,
 				);
+				INSTALL_PATH = "@rpath";
+				LD_RUNPATH_SEARCH_PATHS = "@executable_path";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(SRCROOT)/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)",
@@ -1285,6 +1308,7 @@
 					"$(SRCROOT)",
 					/usr/local/include/OpenEXR,
 				);
+				LD_RUNPATH_SEARCH_PATHS = "@executable_path";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(SRCROOT)/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)",
@@ -1390,6 +1414,7 @@
 					"$(SRCROOT)",
 					/usr/local/include/OpenEXR,
 				);
+				LD_RUNPATH_SEARCH_PATHS = "@executable_path";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(SRCROOT)/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)",
@@ -1411,6 +1436,7 @@
 					"$(SRCROOT)",
 					/usr/local/include/OpenEXR,
 				);
+				LD_RUNPATH_SEARCH_PATHS = "@executable_path";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(SRCROOT)/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)",

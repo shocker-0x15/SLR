@@ -35,13 +35,12 @@ namespace SLR {
             const Scene* scene;
             
             ArenaAllocator* mems;
-            IndependentLightPathSampler** pathSamplers;
+            IndependentLightPathSampler* pathSamplers;
             
             const Camera* camera;
+            ImageSensor* sensor;
             float timeStart;
             float timeEnd;
-            
-            ImageSensor* sensor;
             uint32_t imageWidth;
             uint32_t imageHeight;
             uint32_t numPixelX;
