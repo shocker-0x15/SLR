@@ -195,7 +195,9 @@ bool loadPNG(const std::string &filePath, uint8_t* storage, bool gammaCorrection
     png_get_IHDR(pngStructures.pngStruct, pngStructures.pngInfo, &width, &height, &bitDepth, &colorType, &interlaceMethod, &compressionMethod, &filterMethod);
     assert(colorType != PNG_COLOR_TYPE_GA);
     size_t channels = png_get_channels(pngStructures.pngStruct, pngStructures.pngInfo);
+    (void)channels;
     size_t rowBytes = png_get_rowbytes(pngStructures.pngStruct, pngStructures.pngInfo);
+    (void)rowBytes;
     
     if (bitDepth == 16)
         png_set_strip_16(pngStructures.pngStruct);// 16ビットの深度を8ビットに変換する。

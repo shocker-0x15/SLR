@@ -8,15 +8,15 @@
 #include "BidirectionalPathTracingRenderer.h"
 
 #include "../Core/RenderSettings.h"
-#include "../Helper/ThreadPool.h"
-#include "../RNGs/XORShiftRNG.h"
-#include "../Memory/ArenaAllocator.h"
 #include "../Core/ImageSensor.h"
 #include "../Core/RandomNumberGenerator.h"
 #include "../Core/cameras.h"
-#include "../Core/SurfaceObject.h"
 #include "../Core/light_path_samplers.h"
+#include "../Core/Scene.h"
 #include "../Core/ProgressReporter.h"
+#include "../Memory/ArenaAllocator.h"
+#include "../Helper/ThreadPool.h"
+#include "../RNGs/XORShiftRNG.h"
 
 namespace SLR {
     BidirectionalPathTracingRenderer::BidirectionalPathTracingRenderer(uint32_t spp) : m_samplesPerPixel(spp) {

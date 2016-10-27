@@ -9,28 +9,17 @@
 #include "surface_material.h"
 #include "Transform.h"
 #include "distributions.h"
+#include "Scene.h"
+#include "textures.h"
+#include "../Memory/ArenaAllocator.h"
 #include "../Accelerator/StandardBVH.h"
 #include "../Accelerator/SBVH.h"
 #include "../Accelerator/QBVH.h"
-#include "textures.h"
 #include "../Surface/InfiniteSphere.h"
 #include "../SurfaceMaterials/IBLEmission.h"
-#include "../Memory/ArenaAllocator.h"
 #include "../BSDFs/basic_BSDFs.h"
 
-namespace SLR {
-    SampledSpectrum Light::sample(const LightPosQuery &query, const LightPosSample &smp, LightPosQueryResult* result) const {
-        return m_hierarchy.top()->sample(*this, query, smp, result);
-    }
-    
-    Ray Light::sampleRay(const LightPosQuery &lightPosQuery, const LightPosSample &lightPosSample, LightPosQueryResult* lightPosResult, SampledSpectrum* Le0, EDF** edf,
-                         const EDFQuery &edfQuery, const EDFSample &edfSample, EDFQueryResult* edfResult, SampledSpectrum* Le1,
-                         ArenaAllocator &mem) const {
-        return m_hierarchy.top()->sampleRay(*this, lightPosQuery, lightPosSample, lightPosResult, Le0, edf, edfQuery, edfSample, edfResult, Le1, mem);
-    }
-    
-    
-    
+namespace SLR {    
     bool SurfaceObject::intersect(Ray &ray, SurfacePoint *surfPt) const {
         Intersection isect;
         if (!intersect(ray, &isect))
@@ -53,7 +42,7 @@ namespace SLR {
         if (!m_surface->intersect(ray, isect))
             return false;
         isect->time = ray.time;
-        isect->obj.push(this);
+        isect->obj.push_back(this);
         return true;
     }
     
@@ -80,7 +69,7 @@ namespace SLR {
     }
     
     SampledSpectrum SingleSurfaceObject::sample(const Light &light, const LightPosQuery &query, const LightPosSample &smp, LightPosQueryResult* result) const {
-        if (light.top()!= this) {
+        if (light.top() != this) {
             result->areaPDF = 0.0f;
             return SampledSpectrum::Zero;
         }
@@ -239,7 +228,7 @@ namespace SLR {
             }
         }
         
-        m_lightList = new const SurfaceObject*[lightImportances.size()];
+        m_lightList = new const Object*[lightImportances.size()];
         m_lightDist1D = new RegularConstantDiscrete1D(lightImportances);
         
         for (int i = 0; i < lights.size(); ++i) {
@@ -278,7 +267,7 @@ namespace SLR {
     
     void SurfaceObjectAggregate::selectLight(float u, Light* light, float* prob) const {
         uint32_t lIdx = m_lightDist1D->sample(u, prob, &u);
-        const SurfaceObject* obj = m_lightList[lIdx];
+        const Object* obj = m_lightList[lIdx];
         float cProb;
         obj->selectLight(u, light, &cProb);
         *prob *= cProb;
@@ -312,27 +301,27 @@ namespace SLR {
         if (!m_surfObj->intersect(localRay, isect))
             return false;
         ray.distMax = localRay.distMax;
-        isect->obj.push(this);
+        isect->obj.push_back(this);
         return true;
     }
     
     Point3D TransformedSurfaceObject::getIntersectionPoint(const Intersection &isect) const {
-        isect.obj.pop();
-        Point3D ret = isect.obj.top()->getIntersectionPoint(isect);
+        isect.obj.pop_back();
+        Point3D ret = isect.obj.back()->getIntersectionPoint(isect);
         StaticTransform sampledTF;
         m_transform->sample(isect.time, &sampledTF);
         ret = sampledTF * ret;
-        isect.obj.push(this);
+        isect.obj.push_back(this);
         return ret;
     }
     
     void TransformedSurfaceObject::getSurfacePoint(const Intersection &isect, SurfacePoint *surfPt) const {
-        isect.obj.pop();
-        isect.obj.top()->getSurfacePoint(isect, surfPt);
+        isect.obj.pop_back();
+        isect.obj.back()->getSurfacePoint(isect, surfPt);
         StaticTransform sampledTF;
         m_transform->sample(isect.time, &sampledTF);
         *surfPt = sampledTF * *surfPt;
-        isect.obj.push(this);
+        isect.obj.push_back(this);
     }
     
     bool TransformedSurfaceObject::isEmitting() const {
@@ -389,79 +378,5 @@ namespace SLR {
         lightPosResult->surfPt = sampledTF * lightPosResult->surfPt;
         light.push(this);
         return sampledTF * ray;
-    }
-    
-    
-    
-    void Scene::build(const SurfaceObjectAggregate* aggregate, const InfiniteSphereSurfaceObject* envSphere, const Camera* camera) {
-        m_aggregate = aggregate;
-        m_envSphere = envSphere;
-        m_camera = camera;
-        
-        // calculate world bounding sphere and store its radius and disc area.
-        BoundingBox3D worldBounds = m_aggregate->bounds();
-        m_worldCenter = worldBounds.centroid();
-        m_worldRadius = (worldBounds.maxP - m_worldCenter).length();
-        m_worldDiscArea = M_PI * m_worldRadius * m_worldRadius;
-    };
-    
-    bool Scene::intersect(Ray &ray, Intersection *isect) const {
-        if (m_aggregate->intersect(ray, isect))
-            return true;
-        if (m_envSphere) {
-            if (m_envSphere->intersect(ray, isect))
-                return true;
-        }
-        return false;
-    }
-    
-    bool Scene::testVisibility(const SurfacePoint &shdP, const SurfacePoint &lightP, float time) const {
-        SLRAssert(shdP.atInfinity == false, "Shading point must be in finite region.");
-        Ray ray;
-        if (lightP.atInfinity) {
-            ray = Ray(shdP.p, normalize(lightP.p - Point3D::Zero), time, Ray::Epsilon, FLT_MAX);
-        }
-        else {
-            float dist = distance(lightP.p, shdP.p);
-            ray = Ray(shdP.p, (lightP.p - shdP.p) / dist, time, Ray::Epsilon, dist * (1 - Ray::Epsilon));
-        }
-        Intersection isect;
-        return !intersect(ray, &isect);
-    }
-    
-    void Scene::selectLight(float u, Light* light, float* prob) const {
-        if (m_envSphere) {
-            float sumImps = m_aggregate->importance() + m_envSphere->importance();
-            float su = sumImps * u;
-            if (su < m_aggregate->importance()) {
-                u = u / (m_aggregate->importance() / sumImps);
-                m_aggregate->selectLight(u, light, prob);
-                *prob *= m_aggregate->importance() / sumImps;
-            }
-            else {
-                u = (u - m_aggregate->importance()) / (m_envSphere->importance() / sumImps);
-                m_envSphere->selectLight(u, light, prob);
-                *prob *= m_envSphere->importance() / sumImps;
-            }
-        }
-        else {
-            m_aggregate->selectLight(u, light, prob);
-        }
-    }
-    
-    float Scene::evaluateProb(const Light &light) const {
-        float ret = 0.0f;
-        if (m_envSphere) {
-            float sumImps = m_aggregate->importance() + m_envSphere->importance();
-            if (light.top() == m_envSphere)
-                ret = m_envSphere->importance() / sumImps;
-            else
-                ret = m_aggregate->importance()  / sumImps * m_aggregate->evaluateProb(light);
-        }
-        else {
-            ret = m_aggregate->evaluateProb(light);
-        }
-        SLRAssert(!std::isnan(ret) && !std::isinf(ret), "%g", ret);
-        return ret;
     }
 }

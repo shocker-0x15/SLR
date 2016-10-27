@@ -211,7 +211,7 @@ namespace SLR {
         Normal3D gNormal;
         float u, v;
         TexCoord2D texCoord;
-        mutable std::stack<const SurfaceObject*> obj;
+        mutable std::vector<const SurfaceObject*> obj;
         //    const SurfaceObject* obj;
         
         Intersection() : dist(INFINITY) { }

@@ -8,16 +8,16 @@
 #include "DebugRenderer.h"
 
 #include "../Core/RenderSettings.h"
-#include "../Helper/ThreadPool.h"
-#include "../RNGs/XORShiftRNG.h"
-#include "../Memory/ArenaAllocator.h"
 #include "../Core/Image.h"
 #include "../Core/ImageSensor.h"
 #include "../Core/RandomNumberGenerator.h"
 #include "../Core/cameras.h"
-#include "../Core/SurfaceObject.h"
 #include "../Core/light_path_samplers.h"
+#include "../Core/Scene.h"
 #include "../Core/ProgressReporter.h"
+#include "../Memory/ArenaAllocator.h"
+#include "../Helper/ThreadPool.h"
+#include "../RNGs/XORShiftRNG.h"
 
 namespace SLR {
     DebugRenderer::DebugRenderer(bool channelFlags[(int)ExtraChannel::NumChannels]) {

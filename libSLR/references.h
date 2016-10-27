@@ -122,20 +122,27 @@ namespace SLR {
     struct Intersection;
     struct SurfacePoint;
     
+    class Object;
+    
     // Surface Objects
     class SurfaceObject;
     class SingleSurfaceObject;
     class InfiniteSphereSurfaceObject;
     class SurfaceObjectAggregate;
     class TransformedSurfaceObject;
+    
+    // Medium Objects
+    class MediumObject;
+    class HomogeneousMediumObject;
+    class SpectrallyUniformExtinctionGridMediumObject;
+    class GridMediumObject;
+    
     class Scene;
     
     struct LightPosQuery;
+    struct LightPosSample;
     struct LightPosQueryResult;
     class Light;
-    
-    struct LensPosQuery;
-    struct LensPosQueryResult;
     
     // Cameras
     class Camera;
@@ -249,6 +256,7 @@ namespace SLR {
     class PathTracingRenderer;
     class BidirectionalPathTracingRenderer;
     class AMCMCPPMRenderer;
+    class VolumetricPathTracingRenderer;
     
     class ProgressReporter;
 }

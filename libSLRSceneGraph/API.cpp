@@ -12,12 +12,13 @@
 #include "Parser/SceneParsingDriver.h"
 
 #include <libSLR/Core/Image.h>
-#include <libSLR/Core/SurfaceObject.h>
+#include <libSLR/Core/Scene.h>
 #include <libSLR/RNGs/XORShiftRNG.h>
 #include <libSLR/Memory/ArenaAllocator.h>
 #include <libSLR/Renderers/DebugRenderer.h>
 #include <libSLR/Renderers/PathTracingRenderer.h>
 #include <libSLR/Renderers/BidirectionalPathTracingRenderer.h>
+#include <libSLR/Renderers/VolumetricPathTracingRenderer.h>
 
 #include "Parser/BuiltinFunctions/builtin_math.hpp"
 #include "Parser/BuiltinFunctions/builtin_transform.hpp"
@@ -1035,6 +1036,17 @@ namespace SLRSceneGraph {
                                          }
                                      };
                                      return configBPT(config, context, err);
+                                 }
+                                 else if (method == "Volumetric PT") {
+                                     const static Function configVolumetricPT{
+                                         0, {{"samples", Type::Integer, Element(8)}},
+                                         [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
+                                             uint32_t spp = args.at("samples").raw<TypeMap::Integer>();
+                                             context.renderingContext->renderer = createUnique<SLR::VolumetricPathTracingRenderer>(spp);
+                                             return Element();
+                                         }
+                                     };
+                                     return configVolumetricPT(config, context, err);
                                  }
                                  else if (method == "debug") {
                                      const static Function configDebug{

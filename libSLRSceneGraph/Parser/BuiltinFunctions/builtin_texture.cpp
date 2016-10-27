@@ -18,6 +18,7 @@ namespace SLRSceneGraph {
                                                        [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
                                                            std::string type = args.at("type").raw<TypeMap::String>();
                                                            const ParameterList &params = args.at("params").raw<TypeMap::Tuple>();
+                                                           (void)params;
                                                            if (type == "texcoord 2D") {
                                                                return Element(TypeMap::Texture2DMapping(), Texture2DMapping::sharedInstanceRef());
                                                            }
@@ -31,6 +32,7 @@ namespace SLRSceneGraph {
                                                        [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
                                                            std::string type = args.at("type").raw<TypeMap::String>();
                                                            const ParameterList &params = args.at("params").raw<TypeMap::Tuple>();
+                                                           (void)params;
                                                            if (type == "texcoord 2D") {
                                                                return Element(TypeMap::Texture3DMapping(), Texture3DMapping::sharedInstanceRef());
                                                            }

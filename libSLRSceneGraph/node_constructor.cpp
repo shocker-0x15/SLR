@@ -105,6 +105,7 @@ namespace SLRSceneGraph {
     SLR_SCENEGRAPH_API SurfaceAttributeTuple createMaterialDefaultFunction(const aiMaterial* aiMat, const std::string &pathPrefix, SLR::Allocator* mem) {
         using namespace SLR;
         aiReturn ret;
+        (void)ret;
         aiString strValue;
         float color[3];
         

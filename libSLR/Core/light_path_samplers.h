@@ -33,6 +33,7 @@ namespace SLR {
         virtual LensPosSample getLensPosSample() = 0;
         virtual IDFSample getIDFSample() = 0;
         virtual BSDFSample getBSDFSample() = 0;
+        virtual PFSample getPFSample() = 0;
         virtual float getPathTerminationSample() = 0;
         virtual float getLightSelectionSample() = 0;
         virtual LightPosSample getLightPosSample() = 0;
@@ -54,6 +55,7 @@ namespace SLR {
         LensPosSample getLensPosSample() override { return LensPosSample(m_rng.getFloat0cTo1o(), m_rng.getFloat0cTo1o()); }
         IDFSample getIDFSample() override { return IDFSample(m_rng.getFloat0cTo1o(), m_rng.getFloat0cTo1o()); }
         BSDFSample getBSDFSample() override { return BSDFSample(m_rng.getFloat0cTo1o(), m_rng.getFloat0cTo1o(), m_rng.getFloat0cTo1o()); }
+        PFSample getPFSample() override { return PFSample(m_rng.getFloat0cTo1o(), m_rng.getFloat0cTo1o()); }
         float getPathTerminationSample() override { return m_rng.getFloat0cTo1o(); }
         float getLightSelectionSample() override { return m_rng.getFloat0cTo1o(); }
         LightPosSample getLightPosSample() override { return LightPosSample(m_rng.getFloat0cTo1o(), m_rng.getFloat0cTo1o()); }
