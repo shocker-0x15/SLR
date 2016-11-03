@@ -1,12 +1,30 @@
-.DS_Store
+### https://raw.github.com/github/gitignore/88a3eb412c07fc09f52168f65ab962bb3119071a/Global/Xcode.gitignore
 
-DerivedData/*
+# Xcode
+#
+# gitignore contributors: remember to update Global/Xcode.gitignore, Objective-C.gitignore & Swift.gitignore
 
-*.xcodeproj/*
-!*.xcodeproj/project.pbxproj
-**/*.xcodeproj/*
-!**/*.xcodeproj/project.pbxproj
-!*.xcodeproj/default.*
-!**/*.xcodeproj/default.*
-*.xcworkspace/*
-!*.xcworkspace/contents.xcworkspacedata
+## Build generated
+build/
+DerivedData/
+Debug/
+RelWithAssert/
+Release/
+
+## Various settings
+*.pbxuser
+!default.pbxuser
+*.mode1v3
+!default.mode1v3
+*.mode2v3
+!default.mode2v3
+*.perspectivev3
+!default.perspectivev3
+xcuserdata/
+
+## Other
+*.moved-aside
+*.xccheckout
+*.xcscmblueprint
+
+
