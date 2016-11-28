@@ -28,7 +28,7 @@ namespace SLR {
             Intersection isect;
             if (!intersect(ray, &isect))
                 return false;
-            isect.obj.back()->getSurfacePoint(isect, surfPt);
+            isect.top()->getSurfacePoint(isect, surfPt);
             return true;
         }
     };

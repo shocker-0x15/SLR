@@ -14,16 +14,12 @@
 namespace SLR {
     const float Ray::Epsilon = 0.0001f;
     
-    Point3D Intersection::getIntersectionPoint() const {
-        return obj.back()->getIntersectionPoint(*this);
-    }
-    
     const SurfaceMaterial* Intersection::getSurfaceMaterial() const {
-        return obj.back()->getSurfaceMaterial();
+        return top()->getSurfaceMaterial();
     }
     
     void Intersection::getSurfacePoint(SurfacePoint* surfPt) const {
-        obj.back()->getSurfacePoint(*this, surfPt);
+        top()->getSurfacePoint(*this, surfPt);
     }
     
     

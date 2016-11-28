@@ -139,6 +139,16 @@ namespace SLR {
         BSDFQueryResult() : reverse(nullptr) { }
     };
     
+    struct SLR_API PFSample {
+        float uDir[2];
+        PFSample(float uDir0, float uDir1) : uDir{uDir0, uDir1} { }
+    };
+    
+    struct SLR_API PFQueryResult {
+        Vector3D dirLocal;
+        float dirPDF;
+    };
+    
     struct SLR_API IDFSample {
         float uDir[2];
         IDFSample(float uDir0, float uDir1) : uDir{uDir0, uDir1} { }
@@ -148,16 +158,6 @@ namespace SLR {
         Vector3D dirLocal;
         float dirPDF;
         DirectionType dirType;
-    };
-    
-    struct SLR_API PFSample {
-        float uDir[2];
-        PFSample(float uDir0, float uDir1) : uDir{uDir0, uDir1} { }
-    };
-    
-    struct SLR_API PFQueryResult {
-        Vector3D dirLocal;
-        float dirPDF;
     };
     
     
@@ -284,6 +284,16 @@ namespace SLR {
         bool hasNonDelta() const { return matches(DirectionType::WholeSphere | DirectionType::NonDelta); }
     };
     
+    class SLR_API PhaseFunction {
+    public:
+        PhaseFunction() {}
+        virtual ~PhaseFunction() {}
+        
+        virtual SampledSpectrum sample(const Vector3D &dirOut, const PFSample &smp, PFQueryResult* result) const = 0;
+        virtual SampledSpectrum evaluate(const Vector3D &dirOut, const Vector3D &dirIn) const = 0;
+        virtual float evaluatePDF(const Vector3D &dirOut, const Vector3D &dirIn) const = 0;
+    };
+    
     class SLR_API IDF {
     protected:
         const DirectionType m_type;
@@ -306,16 +316,6 @@ namespace SLR {
         
         virtual bool matches(DirectionType flags) const { return m_type.matches(flags); }
         bool hasNonDelta() const { return matches(DirectionType::WholeSphere | DirectionType::NonDelta); }
-    };
-    
-    class SLR_API PhaseFunction {
-    public:
-        PhaseFunction() {}
-        virtual ~PhaseFunction() {}
-        
-        virtual SampledSpectrum sample(const Vector3D &dirOut, const PFSample &smp, PFQueryResult* result) const = 0;
-        virtual SampledSpectrum evaluate(const Vector3D &dirOut, const Vector3D &dirIn) const = 0;
-        virtual float evaluatePDF(const Vector3D &dirOut, const Vector3D &dirIn) const = 0;
     };
     
     

@@ -18,42 +18,27 @@ namespace SLR {
         SurfaceObject() { }
         virtual ~SurfaceObject() { }
         
+        //----------------------------------------------------------------
+        // Object's methods
+        SampledSpectrum sample(const Light &light, const LightPosQuery &query, const LightPosSample &smp, LightPosQueryResult* result) const override {
+            SLRAssert(light.top() == this, "Object stored in Intersection does not match this object.");
+            ScopedPop<const Object*> sp = light.scopedPop();
+            return light.top()->sample(light, query, smp, result);
+        }
+        Ray sampleRay(const Light &light,
+                      const LightPosQuery &lightPosQuery, const LightPosSample &lightPosSample, LightPosQueryResult* lightPosResult, SampledSpectrum* Le0, EDF** edf,
+                      const EDFQuery &edfQuery, const EDFSample &edfSample, EDFQueryResult* edfResult, SampledSpectrum* Le1,
+                      ArenaAllocator &mem) const override {
+            SLRAssert(light.top() == this, "Object stored in Intersection does not match this object.");
+            ScopedPop<const Object*> sp = light.scopedPop();
+            return light.top()->sampleRay(light, lightPosQuery, lightPosSample, lightPosResult, Le0, edf, edfQuery, edfSample, edfResult, Le1, mem);
+        }
+        //----------------------------------------------------------------
+        
         virtual float costForIntersect() const = 0;
-        virtual BoundingBox3D bounds() const = 0;
-        virtual BoundingBox3D choppedBounds(BoundingBox3D::Axis chopAxis, float minChopPos, float maxChopPos) const {
-            BoundingBox3D baseBBox = bounds();
-            if (maxChopPos < baseBBox.minP[chopAxis])
-                return BoundingBox3D();
-            if (minChopPos > baseBBox.maxP[chopAxis])
-                return BoundingBox3D();
-            if (minChopPos < baseBBox.minP[chopAxis] && maxChopPos > baseBBox.maxP[chopAxis])
-                return baseBBox;
-            BoundingBox3D ret = baseBBox;
-            ret.minP[chopAxis] = std::max(minChopPos, ret.minP[chopAxis]);
-            ret.maxP[chopAxis] = std::min(maxChopPos, ret.maxP[chopAxis]);
-            return ret;
-        }
-        virtual void splitBounds(BoundingBox3D::Axis splitAxis, float splitPos, BoundingBox3D* bbox0, BoundingBox3D* bbox1) const {
-            BoundingBox3D baseBBox = bounds();
-            if (splitPos < baseBBox.minP[splitAxis]) {
-                *bbox0 = BoundingBox3D();
-                *bbox1 = baseBBox;
-                return;
-            }
-            if (splitPos > baseBBox.maxP[splitAxis]) {
-                *bbox0 = baseBBox;
-                *bbox1 = BoundingBox3D();
-                return;
-            }
-            *bbox0 = baseBBox;
-            bbox0->maxP[splitAxis] = std::min(bbox0->maxP[splitAxis], splitPos);
-            *bbox1 = baseBBox;
-            bbox1->minP[splitAxis] = std::max(bbox1->minP[splitAxis], splitPos);
-        }
         virtual bool intersect(Ray &ray, Intersection* isect) const = 0;
-        virtual Point3D getIntersectionPoint(const Intersection &isect) const { return isect.obj.back()->getIntersectionPoint(isect); }
         virtual const SurfaceMaterial* getSurfaceMaterial() const { SLRAssert_NotImplemented(); return nullptr; }
-        virtual void getSurfacePoint(const Intersection &isect, SurfacePoint* surfPt) const { isect.obj.back()->getSurfacePoint(isect, surfPt); }
+        virtual void getSurfacePoint(const Intersection &isect, SurfacePoint* surfPt) const { SLRAssert_NotImplemented(); }
         
         bool intersect(Ray &ray, SurfacePoint* surfPt) const;
         bool testVisibility(const SurfacePoint &shdP, const SurfacePoint &lightP, float time) const;
@@ -70,7 +55,8 @@ namespace SLR {
         SingleSurfaceObject(const Surface* surf, const SurfaceMaterial* mat) : m_surface(surf), m_material(mat) { }
         virtual ~SingleSurfaceObject() { }
         
-        float costForIntersect() const override { return m_surface->costForIntersect(); }
+        //----------------------------------------------------------------
+        // Object's methods
         BoundingBox3D bounds() const override { return m_surface->bounds(); }
         BoundingBox3D choppedBounds(BoundingBox3D::Axis chopAxis, float minChopPos, float maxChopPos) const override {
             return m_surface->choppedBounds(chopAxis, minChopPos, maxChopPos);
@@ -78,10 +64,6 @@ namespace SLR {
         void splitBounds(BoundingBox3D::Axis chopAxis, float splitPos, BoundingBox3D* bbox0, BoundingBox3D* bbox1) const override {
             m_surface->splitBounds(chopAxis, splitPos, bbox0, bbox1);
         }
-        bool intersect(Ray &ray, Intersection* isect) const override;
-        Point3D getIntersectionPoint(const Intersection &isect) const override { return isect.p; }
-        const SurfaceMaterial* getSurfaceMaterial() const override { return m_material; }
-        void getSurfacePoint(const Intersection &isect, SurfacePoint* surfPt) const override;
         
         bool isEmitting() const override;
         float importance() const override;
@@ -93,6 +75,15 @@ namespace SLR {
                       const LightPosQuery &lightPosQuery, const LightPosSample &lightPosSample, LightPosQueryResult* lightPosResult, SampledSpectrum* Le0, EDF** edf,
                       const EDFQuery &edfQuery, const EDFSample &edfSample, EDFQueryResult* edfResult, SampledSpectrum* Le1,
                       ArenaAllocator &mem) const override;
+        //----------------------------------------------------------------
+        
+        //----------------------------------------------------------------
+        // SurfaceObject's methods
+        float costForIntersect() const override { return m_surface->costForIntersect(); }
+        bool intersect(Ray &ray, Intersection* isect) const override;
+        const SurfaceMaterial* getSurfaceMaterial() const override { return m_material; }
+        void getSurfacePoint(const Intersection &isect, SurfacePoint* surfPt) const override;
+        //----------------------------------------------------------------
         
         virtual BSDF* createBSDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem) const;
         
@@ -107,7 +98,10 @@ namespace SLR {
         BumpSingleSurfaceObject(const Surface* surf, const SurfaceMaterial* mat, const Normal3DTexture* normalMap) :
         SingleSurfaceObject(surf, mat), m_normalMap(normalMap) { }
         
+        //----------------------------------------------------------------
+        // SurfaceObject's methods
         void getSurfacePoint(const Intersection &isect, SurfacePoint* surfPt) const override;
+        //----------------------------------------------------------------
     };
     
     class SLR_API InfiniteSphereSurfaceObject : public SingleSurfaceObject {
@@ -117,6 +111,8 @@ namespace SLR {
         InfiniteSphereSurfaceObject(const Scene* scene, const IBLEmission* emitter);
         ~InfiniteSphereSurfaceObject();
         
+        //----------------------------------------------------------------
+        // Object's methods
         bool isEmitting() const override;
         float importance() const override;
         
@@ -125,10 +121,14 @@ namespace SLR {
                       const LightPosQuery &lightPosQuery, const LightPosSample &lightPosSample, LightPosQueryResult* lightPosResult, SampledSpectrum* Le0, EDF** edf,
                       const EDFQuery &edfQuery, const EDFSample &edfSample, EDFQueryResult* edfResult, SampledSpectrum* Le1,
                       ArenaAllocator &mem) const override;
+        //----------------------------------------------------------------
         
+        //----------------------------------------------------------------
+        // SingleSurfaceObject's methods
         BSDF* createBSDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem) const override;
         
         float evaluateAreaPDF(const SurfacePoint& surfPt) const override;
+        //----------------------------------------------------------------
     };
     
     
@@ -142,26 +142,26 @@ namespace SLR {
         SurfaceObjectAggregate(std::vector<SurfaceObject*> &objs);
         ~SurfaceObjectAggregate();
         
-        float costForIntersect() const override;
+        //----------------------------------------------------------------
+        // Object's methods
         BoundingBox3D bounds() const override;
-        bool intersect(Ray &ray, Intersection* isect) const override;
         
         bool isEmitting() const override;
         float importance() const override;
         void selectLight(float u, Light* light, float* prob) const override;
         float evaluateProb(const Light &light) const override;
+        //----------------------------------------------------------------
         
-        SampledSpectrum sample(const Light &light, const LightPosQuery &query, const LightPosSample &smp, LightPosQueryResult* result) const override {
-            SLRAssert(false, "SurfaceObjectAggregate::sample() should not be called.");
-            return SampledSpectrum::Zero;
+        //----------------------------------------------------------------
+        // SurfaceObject's methods
+        float costForIntersect() const override;
+        bool intersect(Ray &ray, Intersection* isect) const override;
+        void getSurfacePoint(const Intersection &isect, SurfacePoint* surfPt) const override {
+            SLRAssert(isect.top() == this, "Object stored in Intersection does not match this object.");
+            ScopedPop<const SurfaceObject*> sp = isect.scopedPop();
+            isect.top()->getSurfacePoint(isect, surfPt);
         }
-        Ray sampleRay(const Light &light,
-                      const LightPosQuery &lightPosQuery, const LightPosSample &lightPosSample, LightPosQueryResult* lightPosResult, SampledSpectrum* Le0, EDF** edf,
-                      const EDFQuery &edfQuery, const EDFSample &edfSample, EDFQueryResult* edfResult, SampledSpectrum* Le1,
-                      ArenaAllocator &mem) const override {
-            SLRAssert(false, "SurfaceObjectAggregate::sampleRay() should not be called.");
-            return Ray();
-        }
+        //----------------------------------------------------------------
     };
     
     
@@ -173,11 +173,9 @@ namespace SLR {
     public:
         TransformedSurfaceObject(const SurfaceObject* surfObj, const Transform* transform) : m_surfObj(surfObj), m_transform(transform) { }
         
-        float costForIntersect() const override { return m_surfObj->costForIntersect(); }
+        //----------------------------------------------------------------
+        // Object's methods
         BoundingBox3D bounds() const override;
-        bool intersect(Ray &ray, Intersection* isect) const override;
-        Point3D getIntersectionPoint(const Intersection &isect) const override;
-        void getSurfacePoint(const Intersection &isect, SurfacePoint* surfPt) const override;
         
         bool isEmitting() const override;
         float importance() const override;
@@ -189,8 +187,15 @@ namespace SLR {
                       const LightPosQuery &lightPosQuery, const LightPosSample &lightPosSample, LightPosQueryResult* lightPosResult, SampledSpectrum* Le0, EDF** edf,
                       const EDFQuery &edfQuery, const EDFSample &edfSample, EDFQueryResult* edfResult, SampledSpectrum* Le1,
                       ArenaAllocator &mem) const override;
+        //----------------------------------------------------------------
         
+        //----------------------------------------------------------------
+        // SurfaceObject's methods
+        float costForIntersect() const override { return m_surfObj->costForIntersect(); }
+        bool intersect(Ray &ray, Intersection* isect) const override;
         const SurfaceMaterial* getSurfaceMaterial() const override { return m_surfObj->getSurfaceMaterial(); }
+        void getSurfacePoint(const Intersection &isect, SurfacePoint* surfPt) const override;
+        //----------------------------------------------------------------
         
         void setTransform(const Transform* t) { m_transform = t; }
     };

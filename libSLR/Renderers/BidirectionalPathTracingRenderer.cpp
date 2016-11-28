@@ -294,7 +294,7 @@ namespace SLR {
                 SampledSpectrum Le0 = surfPt.emittance(wls);
                 SampledSpectrum Le1 = edf->evaluate(EDFQuery(), dirOut_sn);
                 
-                float lightProb = scene->evaluateProb(Light(isect.obj));
+                float lightProb = scene->evaluateProb(Light(isect));
                 float extend1stAreaPDF = lightProb * surfPt.evaluateAreaPDF();
                 float extend2ndAreaPDF = edf->evaluatePDF(EDFQuery(), dirOut_sn) * cosLast / dist2;
                 
@@ -358,61 +358,47 @@ namespace SLR {
     float BidirectionalPathTracingRenderer::Job::calculateMISWeight(float lExtend1stAreaPDF, float lExtend1stRRProb, float lExtend2ndAreaPDF, float lExtend2ndRRProb,
                                                                     float eExtend1stAreaPDF, float eExtend1stRRProb, float eExtend2ndAreaPDF, float eExtend2ndRRProb,
                                                                     uint32_t numLVtx, uint32_t numEVtx) const {
-        const uint32_t minEyeVertices = 1;
-        const uint32_t minLightVertices = 0;
+        const auto extendAndShorten = [](float extend1stAreaPDF, float extend1stRRProb, float extend2ndAreaPDF, float extend2ndRRProb,
+                                         const std::vector<BPTVertex> &subPathToShorten, uint32_t numVertices, uint32_t minNumVertices,
+                                         FloatSum* recMISWeight) {
+            if (numVertices > minNumVertices) {
+                const BPTVertex &endVtx = subPathToShorten[numVertices - 1];
+                float PDFRatio = extend1stAreaPDF * extend1stRRProb / (endVtx.areaPDF * endVtx.RRProb);
+                bool shortenIsDeltaSampled = endVtx.sampledType.isDelta();
+                if (!shortenIsDeltaSampled)
+                    *recMISWeight += PDFRatio * PDFRatio;
+                bool prevIsDeltaSampled = shortenIsDeltaSampled;
+                if (numVertices - 1 > minNumVertices) {
+                    const BPTVertex &newVtx = subPathToShorten[numVertices - 2];
+                    PDFRatio *= extend2ndAreaPDF * extend2ndRRProb / (newVtx.areaPDF * newVtx.RRProb);
+                    shortenIsDeltaSampled = newVtx.sampledType.isDelta();
+                    if (!shortenIsDeltaSampled && !prevIsDeltaSampled)
+                        *recMISWeight += PDFRatio * PDFRatio;
+                    prevIsDeltaSampled = shortenIsDeltaSampled;
+                    for (int i = numVertices - 2; i > minNumVertices; --i) {
+                        const BPTVertex &newVtx = subPathToShorten[i - 1];
+                        PDFRatio *= newVtx.revAreaPDF * newVtx.revRRProb / (newVtx.areaPDF * newVtx.RRProb);
+                        shortenIsDeltaSampled = newVtx.sampledType.isDelta();
+                        if (!shortenIsDeltaSampled && !prevIsDeltaSampled)
+                            *recMISWeight += PDFRatio * PDFRatio;
+                        prevIsDeltaSampled = shortenIsDeltaSampled;
+                    }
+                }
+            }
+        };
+        
+        // initialize the reciprocal of MISWeight by 1. This corresponds to the current strategy (numLVtx, numEVtx).
         FloatSum recMISWeight = 1;
         
         // extend/shorten light/eye subpath, not consider implicit light subpath reaching a lens.
-        if (numEVtx > minEyeVertices) {
-            const BPTVertex &eyeEndVtx = eyeVertices[numEVtx - 1];
-            float PDFRatio = lExtend1stAreaPDF * lExtend1stRRProb / (eyeEndVtx.areaPDF * eyeEndVtx.RRProb);
-            bool shortenIsDeltaSampled = eyeEndVtx.sampledType.isDelta();
-            if (!shortenIsDeltaSampled)
-                recMISWeight += PDFRatio * PDFRatio;
-            bool prevIsDeltaSampled = shortenIsDeltaSampled;
-            if (numEVtx - 1 > minEyeVertices) {
-                const BPTVertex &newLightVtx = eyeVertices[numEVtx - 2];
-                PDFRatio *= lExtend2ndAreaPDF * lExtend2ndRRProb / (newLightVtx.areaPDF * newLightVtx.RRProb);
-                shortenIsDeltaSampled = newLightVtx.sampledType.isDelta();
-                if (!shortenIsDeltaSampled && !prevIsDeltaSampled)
-                    recMISWeight += PDFRatio * PDFRatio;
-                prevIsDeltaSampled = shortenIsDeltaSampled;
-                for (int t = numEVtx - 2; t > minEyeVertices; --t) {
-                    const BPTVertex &newLightVtx = eyeVertices[t - 1];
-                    PDFRatio *= newLightVtx.revAreaPDF * newLightVtx.revRRProb / (newLightVtx.areaPDF * newLightVtx.RRProb);
-                    shortenIsDeltaSampled = newLightVtx.sampledType.isDelta();
-                    if (!shortenIsDeltaSampled && !prevIsDeltaSampled)
-                        recMISWeight += PDFRatio * PDFRatio;
-                    prevIsDeltaSampled = shortenIsDeltaSampled;
-                }
-            }
-        }
+        const uint32_t minEyeVertices = 1;
+        extendAndShorten(lExtend1stAreaPDF, lExtend1stRRProb, lExtend2ndAreaPDF, lExtend2ndRRProb,
+                         eyeVertices, numEVtx, minEyeVertices, &recMISWeight);
         
         // extend/shorten eye/light subpath, consider implicit eye subpath reaching a light.
-        if (numLVtx > minLightVertices) {
-            const BPTVertex &lightEndVtx = lightVertices[numLVtx - 1];
-            float PDFRatio = eExtend1stAreaPDF * eExtend1stRRProb / (lightEndVtx.areaPDF * lightEndVtx.RRProb);
-            bool shortenIsDeltaSampled = lightEndVtx.sampledType.isDelta();
-            if (!shortenIsDeltaSampled)
-                recMISWeight += PDFRatio * PDFRatio;
-            bool prevIsDeltaSampled = shortenIsDeltaSampled;
-            if (numLVtx - 1 > minLightVertices) {
-                const BPTVertex &newEyeVtx = lightVertices[numLVtx - 2];
-                PDFRatio *= eExtend2ndAreaPDF * eExtend2ndRRProb / (newEyeVtx.areaPDF * newEyeVtx.RRProb);
-                shortenIsDeltaSampled = newEyeVtx.sampledType.isDelta();
-                if (!shortenIsDeltaSampled && !prevIsDeltaSampled)
-                    recMISWeight += PDFRatio * PDFRatio;
-                prevIsDeltaSampled = shortenIsDeltaSampled;
-                for (int s = numLVtx - 2; s > minLightVertices; --s) {
-                    const BPTVertex &newEyeVtx = lightVertices[s - 1];
-                    PDFRatio *= newEyeVtx.revAreaPDF * newEyeVtx.revRRProb / (newEyeVtx.areaPDF * newEyeVtx.RRProb);
-                    shortenIsDeltaSampled = newEyeVtx.sampledType.isDelta();
-                    if (!shortenIsDeltaSampled && !prevIsDeltaSampled)
-                        recMISWeight += PDFRatio * PDFRatio;
-                    prevIsDeltaSampled = shortenIsDeltaSampled;
-                }
-            }
-        }
+        const uint32_t minLightVertices = 0;
+        extendAndShorten(eExtend1stAreaPDF, eExtend1stRRProb, eExtend2ndAreaPDF, eExtend2ndRRProb,
+                         lightVertices, numLVtx, minLightVertices, &recMISWeight);
         
         return 1.0f / recMISWeight;
     }

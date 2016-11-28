@@ -9,7 +9,9 @@
 #include "SurfaceObject.h"
 
 namespace SLR {
-    Light::Light(const std::vector<const SurfaceObject*> &hierarchy) {
+    Light::Light(const Intersection &isect) {
+        const std::vector<const SurfaceObject*> hierarchy = isect.getHierarchy();
+        SLRAssert(hierarchy.front()->isEmitting(), "This is not a light.");
         m_hierarchy.resize(hierarchy.size());
         std::copy(hierarchy.begin(), hierarchy.end(), m_hierarchy.begin());
     }

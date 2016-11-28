@@ -415,7 +415,7 @@ namespace SLR {
         }
         
         bool intersect(Ray &ray, Intersection* isect) const override {
-            uint32_t objDepth = (uint32_t)isect->obj.size();
+            uint32_t objDepth = (uint32_t)isect->getObjectDepth();
             bool dirIsPositive[] = {ray.dir.x >= 0, ray.dir.y >= 0, ray.dir.z >= 0};
             
             const uint32_t StackSize = 64;
@@ -438,7 +438,7 @@ namespace SLR {
                             ray.distMax = isect->dist;
                 }
             }
-            return isect->obj.size() > objDepth;
+            return isect->getObjectDepth() > objDepth;
         }
     };    
 }

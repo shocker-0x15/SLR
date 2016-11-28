@@ -119,10 +119,22 @@ namespace SLR {
     struct BoundingBox3D;
     struct Vertex;
     struct ReferenceFrame;
+    template <typename T> class ScopedPop;
     struct Intersection;
     struct SurfacePoint;
+    struct MediumPoint;
+    
+    // Surfaces
+    class Surface;
+    class Triangle;
+    class InfiniteSphere;
     
     class Object;
+    
+    struct LightPosQuery;
+    struct LightPosSample;
+    struct LightPosQueryResult;
+    class Light;
     
     // Surface Objects
     class SurfaceObject;
@@ -134,15 +146,12 @@ namespace SLR {
     // Medium Objects
     class MediumObject;
     class HomogeneousMediumObject;
-    class SpectrallyUniformExtinctionGridMediumObject;
+    class EnclosedHomogeneousMediumObject;
+    class AchromaticExtinctionGridMediumObject;
     class GridMediumObject;
+    class MediumObjectAggregate;
     
     class Scene;
-    
-    struct LightPosQuery;
-    struct LightPosSample;
-    struct LightPosQueryResult;
-    class Light;
     
     // Cameras
     class Camera;
@@ -153,18 +162,57 @@ namespace SLR {
     class LightPathSampler;
     class IndependentLightPathSampler;
     
-    // Surfaces
-    class Surface;
-    class Triangle;
-    class InfiniteSphere;
-    
     // Accelerators
     class Accelerator;
-    class BBVH;
+    class StandardBVH;
     class SBVH;
     class QBVH;
     
-    // Textures & Mapping
+    // Directional Distribution Functions
+    struct DirectionType;
+    struct EDFQuery;
+    struct EDFSample;
+    struct EDFQueryResult;
+    struct BSDFQuery;
+    struct BSDFSample;
+    struct BSDFReverseInfo;
+    struct BSDFQueryResult;
+    struct IDFQuery;
+    struct IDFSample;
+    struct IDFQueryResult;
+    struct PFSample;
+    struct PFQueryResult;
+    class EDF;
+    class BSDF;
+    class PhaseFunction;
+    class IDF;
+    class DiffuseEDF;
+    class IBLEDF;
+    class MultiEDF;
+    class Fresnel;
+    class FresnelNoOp;
+    class FresnelConductor;
+    class FresnelDielectric;
+    class MicrofacetDistribution;
+    class GGX;
+    class LambertianBRDF;
+    class SpecularBRDF;
+    class SpecularBSDF;
+    class InverseBSDF;
+    class NullBSDF;
+    class OrenNayerBRDF;
+    class ModifiedWardDurBRDF;
+    class AshikhminShirleyBRDF;
+    class MicrofacetBRDF;
+    class MicrofacetBSDF;
+    class MultiBSDF;
+    class IsotropicPhaseFunction;
+    class HenyeyGreensteinPhaseFunction;
+    class SchlickPhaseFunction;
+    class PerspectiveIDF;
+    class EquirectangularIDF;
+    
+    // Textures & Mappings
     class Texture2DMapping;
     class Texture3DMapping;
     class OffsetAndScale2DMapping;
@@ -206,49 +254,6 @@ namespace SLR {
     class DiffuseEmission;
     class IBLEmission;
     
-    // Directional Distribution Functions
-    struct DirectionType;
-    struct EDFQuery;
-    struct EDFSample;
-    struct EDFQueryResult;
-    struct BSDFQuery;
-    struct BSDFSample;
-    struct BSDFReverseInfo;
-    struct BSDFQueryResult;
-    struct IDFQuery;
-    struct IDFSample;
-    struct IDFQueryResult;
-    struct PFSample;
-    struct PFQueryResult;
-    class EDF;
-    class BSDF;
-    class IDF;
-    class DiffuseEDF;
-    class IBLEDF;
-    class MultiEDF;
-    class Fresnel;
-    class FresnelNoOp;
-    class FresnelConductor;
-    class FresnelDielectric;
-    class MicrofacetDistribution;
-    class GGX;
-    class LambertianBRDF;
-    class SpecularBRDF;
-    class SpecularBSDF;
-    class InverseBSDF;
-    class NullBSDF;
-    class OrenNayerBRDF;
-    class ModifiedWardDurBRDF;
-    class AshikhminShirleyBRDF;
-    class MicrofacetBRDF;
-    class MicrofacetBSDF;
-    class MultiBSDF;
-    class IsotropicPhaseFunction;
-    class HenyeyGreensteinPhaseFunction;
-    class SchlickPhaseFunction;
-    class PerspectiveIDF;
-    class EquirectangularIDF;
-    
     class RenderSettings;
     class Renderer;
     
@@ -257,6 +262,7 @@ namespace SLR {
     class BidirectionalPathTracingRenderer;
     class AMCMCPPMRenderer;
     class VolumetricPathTracingRenderer;
+    class VolumetricBidirectionalPathTracingRenderer;
     
     class ProgressReporter;
 }

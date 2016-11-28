@@ -21,7 +21,11 @@ namespace SLR {
         
     };
     
-    class SLR_API SpectrallyUniformExtinctionGridMediumObject : public MediumObject {
+    class SLR_API EnclosedHomogeneousMediumObject : public MediumObject {
+        
+    };
+    
+    class SLR_API AchromaticExtinctionGridMediumObject : public MediumObject {
         
     };
     

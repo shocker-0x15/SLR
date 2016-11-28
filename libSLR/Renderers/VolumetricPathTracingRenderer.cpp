@@ -143,11 +143,126 @@ namespace SLR {
         WavelengthSamples wls = initWLs;
         Ray ray = initRay;
         SurfacePoint surfPt;
-        //MediumPoint medPt;
+        MediumPoint medPt;
         SampledSpectrum alpha = SampledSpectrum::One;
         float initY = alpha.importance(wls.selectedLambda);
         SampledSpectrumSum sp(SampledSpectrum::Zero);
-
+        uint32_t pathLength = 0;
+        
+        Intersection isect;
+        if (!scene.intersect(ray, &isect))
+            return SampledSpectrum::Zero;
+        isect.getSurfacePoint(&surfPt);
+        
+        Vector3D dirOut_sn = surfPt.shadingFrame.toLocal(-ray.dir);
+        if (surfPt.isEmitting()) {
+            EDF* edf = surfPt.createEDF(wls, mem);
+            SampledSpectrum Le = surfPt.emittance(wls) * edf->evaluate(EDFQuery(), dirOut_sn);
+            sp += alpha * Le;
+        }
+        if (surfPt.atInfinity)
+            return sp;
+        
+        while (true) {
+            ++pathLength;
+            if (pathLength >= 100)
+                break;
+            Normal3D gNorm_sn = surfPt.shadingFrame.toLocal(surfPt.gNormal);
+            BSDF* bsdf = surfPt.createBSDF(wls, mem);
+            BSDFQuery fsQuery(dirOut_sn, gNorm_sn, wls.selectedLambda);
+            
+            // Next Event Estimation (explicit light sampling)
+            if (bsdf->hasNonDelta()) {
+                float lightProb;
+                Light light;
+                scene.selectLight(pathSampler.getLightSelectionSample(), &light, &lightProb);
+                SLRAssert(!std::isnan(lightProb) && !std::isinf(lightProb), "lightProb: unexpected value detected: %f", lightProb);
+                
+                LightPosQuery lpQuery(ray.time, wls);
+                LightPosQueryResult lpResult;
+                SampledSpectrum M = light.sample(lpQuery, pathSampler.getLightPosSample(), &lpResult);
+                SLRAssert(!std::isnan(lpResult.areaPDF)/* && !std::isinf(xpResult.areaPDF)*/, "areaPDF: unexpected value detected: %f", lpResult.areaPDF);
+                
+                if (scene.testVisibility(surfPt, lpResult.surfPt, ray.time)) {
+                    float dist2;
+                    Vector3D shadowDir = lpResult.surfPt.getDirectionFrom(surfPt.p, &dist2);
+                    Vector3D shadowDir_l = lpResult.surfPt.shadingFrame.toLocal(-shadowDir);
+                    Vector3D shadowDir_sn = surfPt.shadingFrame.toLocal(shadowDir);
+                    
+                    EDF* edf = lpResult.surfPt.createEDF(wls, mem);
+                    SampledSpectrum Le = M * edf->evaluate(EDFQuery(), shadowDir_l);
+                    float lightPDF = lightProb * lpResult.areaPDF;
+                    SLRAssert(!Le.hasNaN() && !Le.hasInf(), "Le: unexpected value detected: %s", Le.toString().c_str());
+                    
+                    SampledSpectrum fs = bsdf->evaluate(fsQuery, shadowDir_sn);
+                    float cosLight = absDot(-shadowDir, lpResult.surfPt.gNormal);
+                    float bsdfPDF = bsdf->evaluatePDF(fsQuery, shadowDir_sn) * cosLight / dist2;
+                    
+                    float MISWeight = 1.0f;
+                    if (!lpResult.posType.isDelta() && !std::isinf(lpResult.areaPDF))
+                        MISWeight = (lightPDF * lightPDF) / (lightPDF * lightPDF + bsdfPDF * bsdfPDF);
+                    SLRAssert(MISWeight <= 1.0f, "Invalid MIS weight: %g", MISWeight);
+                    
+                    float G = absDot(shadowDir_sn, gNorm_sn) * cosLight / dist2;
+                    sp += alpha * Le * fs * (G * MISWeight / lightPDF);
+                    SLRAssert(!std::isnan(G) && !std::isinf(G), "G: unexpected value detected: %f", G);
+                }
+            }
+            
+            // get a next direction by sampling BSDF.
+            BSDFQueryResult fsResult;
+            SampledSpectrum fs = bsdf->sample(fsQuery, pathSampler.getBSDFSample(), &fsResult);
+            if (fs == SampledSpectrum::Zero || fsResult.dirPDF == 0.0f)
+                break;
+            if (fsResult.dirType.isDispersive()) {
+                fsResult.dirPDF /= WavelengthSamples::NumComponents;
+                wls.flags |= WavelengthSamples::LambdaIsSelected;
+            }
+            alpha *= fs * absDot(fsResult.dir_sn, gNorm_sn) / fsResult.dirPDF;
+            SLRAssert(!alpha.hasInf() && !alpha.hasNaN(),
+                      "alpha: %s\nlength: %u, cos: %g, dirPDF: %g",
+                      alpha.toString().c_str(), pathLength, absDot(fsResult.dir_sn, gNorm_sn), fsResult.dirPDF);
+            
+            Vector3D dirIn = surfPt.shadingFrame.fromLocal(fsResult.dir_sn);
+            ray = Ray(surfPt.p, dirIn, ray.time, Ray::Epsilon);
+            
+            // find a next intersection point.
+            isect = Intersection();
+            if (!scene.intersect(ray, &isect))
+                break;
+            isect.getSurfacePoint(&surfPt);
+            
+            dirOut_sn = surfPt.shadingFrame.toLocal(-ray.dir);
+            
+            // implicit light sampling
+            if (surfPt.isEmitting()) {
+                float bsdfPDF = fsResult.dirPDF;
+                
+                EDF* edf = surfPt.createEDF(wls, mem);
+                SampledSpectrum Le = surfPt.emittance(wls) * edf->evaluate(EDFQuery(), dirOut_sn);
+                float lightProb = scene.evaluateProb(Light(isect));
+                float dist2 = surfPt.getSquaredDistance(ray.org);
+                float lightPDF = lightProb * surfPt.evaluateAreaPDF() * dist2 / absDot(ray.dir, surfPt.gNormal);
+                SLRAssert(!Le.hasNaN() && !Le.hasInf(), "Le: unexpected value detected: %s", Le.toString().c_str());
+                SLRAssert(!std::isnan(lightPDF)/* && !std::isinf(lightPDF)*/, "lightPDF: unexpected value detected: %f", lightPDF);
+                
+                float MISWeight = 1.0f;
+                if (!fsResult.dirType.isDelta())
+                    MISWeight = (bsdfPDF * bsdfPDF) / (lightPDF * lightPDF + bsdfPDF * bsdfPDF);
+                SLRAssert(MISWeight <= 1.0f, "Invalid MIS weight: %g", MISWeight);
+                
+                sp += alpha * Le * MISWeight;
+            }
+            if (surfPt.atInfinity)
+                break;
+            
+            // Russian roulette
+            float continueProb = std::min(alpha.importance(wls.selectedLambda) / initY, 1.0f);
+            if (pathSampler.getPathTerminationSample() < continueProb)
+                alpha /= continueProb;
+            else
+                break;
+        }
         
         return sp;
     }

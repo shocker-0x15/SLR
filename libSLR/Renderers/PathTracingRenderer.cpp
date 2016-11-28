@@ -238,7 +238,7 @@ namespace SLR {
                 
                 EDF* edf = surfPt.createEDF(wls, mem);
                 SampledSpectrum Le = surfPt.emittance(wls) * edf->evaluate(EDFQuery(), dirOut_sn);
-                float lightProb = scene.evaluateProb(Light(isect.obj));
+                float lightProb = scene.evaluateProb(Light(isect));
                 float dist2 = surfPt.getSquaredDistance(ray.org);
                 float lightPDF = lightProb * surfPt.evaluateAreaPDF() * dist2 / absDot(ray.dir, surfPt.gNormal);
                 SLRAssert(!Le.hasNaN() && !Le.hasInf(), "Le: unexpected value detected: %s", Le.toString().c_str());

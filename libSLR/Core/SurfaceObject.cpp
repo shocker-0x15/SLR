@@ -38,19 +38,6 @@ namespace SLR {
     
     
     
-    bool SingleSurfaceObject::intersect(Ray &ray, Intersection* isect) const {
-        if (!m_surface->intersect(ray, isect))
-            return false;
-        isect->time = ray.time;
-        isect->obj.push_back(this);
-        return true;
-    }
-    
-    void SingleSurfaceObject::getSurfacePoint(const Intersection &isect, SurfacePoint* surfPt) const {
-        m_surface->getSurfacePoint(isect, surfPt);
-        surfPt->obj = this;
-    }
-    
     bool SingleSurfaceObject::isEmitting() const {
         return m_material->isEmitting();
     }
@@ -65,14 +52,13 @@ namespace SLR {
     }
     
     float SingleSurfaceObject::evaluateProb(const Light &light) const {
-        return light.top() == this ? 1.0f : 0.0f;
+        SLRAssert(light.top() == this, "Object stored in Intersection does not match this object.");
+        return 1.0f;
     }
     
     SampledSpectrum SingleSurfaceObject::sample(const Light &light, const LightPosQuery &query, const LightPosSample &smp, LightPosQueryResult* result) const {
-        if (light.top() != this) {
-            result->areaPDF = 0.0f;
-            return SampledSpectrum::Zero;
-        }
+        SLRAssert(light.top() == this, "Object stored in Intersection does not match this object.");
+        
         m_surface->sample(smp.uPos[0], smp.uPos[1], &result->surfPt, &result->areaPDF);
         result->posType = DirectionType::LowFreq;// TODO: consider sampling delta function. and dedicated enum?
         result->surfPt.obj = this;
@@ -83,6 +69,8 @@ namespace SLR {
                                        const LightPosQuery &lightPosQuery, const LightPosSample &lightPosSample, LightPosQueryResult* lightPosResult, SampledSpectrum* Le0, EDF** edf,
                                        const EDFQuery &edfQuery, const EDFSample &edfSample, EDFQueryResult* edfResult, SampledSpectrum* Le1,
                                        ArenaAllocator &mem) const {
+        SLRAssert(light.top() == this, "Object stored in Intersection does not match this object.");
+        
         // sample a position with emittance on the selected light's surface.
         *Le0 = sample(light, lightPosQuery, lightPosSample, lightPosResult);
         *edf = lightPosResult->surfPt.createEDF(lightPosQuery.wls, mem);
@@ -90,6 +78,19 @@ namespace SLR {
         // sample a direction from EDF.
         *Le1 = (*edf)->sample(edfQuery, edfSample, edfResult);
         return Ray(lightPosResult->surfPt.p, lightPosResult->surfPt.shadingFrame.fromLocal(edfResult->dir_sn), lightPosQuery.time, Ray::Epsilon);
+    }
+    
+    bool SingleSurfaceObject::intersect(Ray &ray, Intersection* isect) const {
+        if (!m_surface->intersect(ray, isect))
+            return false;
+        isect->time = ray.time;
+        isect->push(this);
+        return true;
+    }
+    
+    void SingleSurfaceObject::getSurfacePoint(const Intersection &isect, SurfacePoint* surfPt) const {
+        m_surface->getSurfacePoint(isect, surfPt);
+        surfPt->obj = this;
     }
     
     BSDF* SingleSurfaceObject::createBSDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem) const {
@@ -145,10 +146,8 @@ namespace SLR {
     }
     
     SampledSpectrum InfiniteSphereSurfaceObject::sample(const Light &light, const LightPosQuery &query, const LightPosSample &smp, LightPosQueryResult* result) const {
-        if (light.top()!= this) {
-            result->areaPDF = 0.0f;
-            return SampledSpectrum::Zero;
-        }
+        SLRAssert(light.top() == this, "Object stored in Intersection does not match this object.");
+        
         float uvPDF;
         float theta, phi;
         m_dist->sample(smp.uPos[0], smp.uPos[1], &phi, &theta, &uvPDF);
@@ -177,8 +176,10 @@ namespace SLR {
                                                const LightPosQuery &lightPosQuery, const LightPosSample &lightPosSample, LightPosQueryResult* lightPosResult, SampledSpectrum* Le0, EDF** edf,
                                                const EDFQuery &edfQuery, const EDFSample &edfSample, EDFQueryResult* edfResult, SampledSpectrum* Le1,
                                                ArenaAllocator &mem) const {
+        SLRAssert(light.top() == this, "Object stored in Intersection does not match this object.");
+        
         // sample a position with emittance on the selected light's surface.
-        *Le0 = light.sample(lightPosQuery, lightPosSample, lightPosResult);
+        *Le0 = sample(light, lightPosQuery, lightPosSample, lightPosResult);
         *edf = lightPosResult->surfPt.createEDF(lightPosQuery.wls, mem);
         SLRAssert(!std::isnan(lightPosResult->areaPDF)/* && !std::isinf(lightResult)*/, "areaPDF: unexpected value detected: %f", lightPosResult->areaPDF);
         
@@ -245,16 +246,8 @@ namespace SLR {
         delete m_lightDist1D;
     };
     
-    float SurfaceObjectAggregate::costForIntersect() const {
-        return m_accelerator->costForIntersect();
-    }
-    
     BoundingBox3D SurfaceObjectAggregate::bounds() const {
         return m_accelerator->bounds();
-    }
-    
-    bool SurfaceObjectAggregate::intersect(Ray &ray, Intersection* isect) const {
-        return m_accelerator->intersect(ray, isect);
     }
     
     bool SurfaceObjectAggregate::isEmitting() const {
@@ -271,57 +264,33 @@ namespace SLR {
         float cProb;
         obj->selectLight(u, light, &cProb);
         *prob *= cProb;
-        //    light->push(this);
+        light->push(this);
     }
     
     float SurfaceObjectAggregate::evaluateProb(const Light &light) const {
-        // if (light.top() != this)
-        //     return 0.0f;
-        // light.pop();
-        // float prob = calcProb(light.top()) * light.top()->evaluateProb(light);
-        // light.push(this);
-        // return prob;
-        if (m_revMap.count(light.top()) == 0)
-            return 0.0f;
+        SLRAssert(light.top() == this, "Object stored in Intersection does not match this object.");
+        
+        ScopedPop<const Object*> sp = light.scopedPop();
+        SLRAssert(m_revMap.count(light.top()) > 0, "Specified light is not found.");
         float prob = m_lightDist1D->evaluatePMF(m_revMap.at(light.top()));
         return prob * light.top()->evaluateProb(light);
+    }
+    
+    float SurfaceObjectAggregate::costForIntersect() const {
+        return m_accelerator->costForIntersect();
+    }
+    
+    bool SurfaceObjectAggregate::intersect(Ray &ray, Intersection* isect) const {
+        if (!m_accelerator->intersect(ray, isect))
+            return false;
+        isect->push(this);
+        return true;
     }
     
     
     
     BoundingBox3D TransformedSurfaceObject::bounds() const {
         return m_transform->motionBounds(m_surfObj->bounds());
-    }
-    
-    bool TransformedSurfaceObject::intersect(Ray &ray, Intersection *isect) const {
-        Ray localRay;
-        StaticTransform sampledTF;
-        m_transform->sample(ray.time, &sampledTF);
-        localRay = invert(sampledTF) * ray;
-        if (!m_surfObj->intersect(localRay, isect))
-            return false;
-        ray.distMax = localRay.distMax;
-        isect->obj.push_back(this);
-        return true;
-    }
-    
-    Point3D TransformedSurfaceObject::getIntersectionPoint(const Intersection &isect) const {
-        isect.obj.pop_back();
-        Point3D ret = isect.obj.back()->getIntersectionPoint(isect);
-        StaticTransform sampledTF;
-        m_transform->sample(isect.time, &sampledTF);
-        ret = sampledTF * ret;
-        isect.obj.push_back(this);
-        return ret;
-    }
-    
-    void TransformedSurfaceObject::getSurfacePoint(const Intersection &isect, SurfacePoint *surfPt) const {
-        isect.obj.pop_back();
-        isect.obj.back()->getSurfacePoint(isect, surfPt);
-        StaticTransform sampledTF;
-        m_transform->sample(isect.time, &sampledTF);
-        *surfPt = sampledTF * *surfPt;
-        isect.obj.push_back(this);
     }
     
     bool TransformedSurfaceObject::isEmitting() const {
@@ -338,25 +307,20 @@ namespace SLR {
     }
     
     float TransformedSurfaceObject::evaluateProb(const Light &light) const {
-        if (light.top() != this)
-            return 0.0f;
-        light.pop();
-        float prob = m_surfObj->evaluateProb(light);
-        light.push(this);
-        return prob;
+        SLRAssert(light.top() == this, "Object stored in Intersection does not match this object.");
+        
+        light.scopedPop();
+        return m_surfObj->evaluateProb(light);
     }
     
     SampledSpectrum TransformedSurfaceObject::sample(const Light &light, const LightPosQuery &query, const LightPosSample &smp, LightPosQueryResult* result) const {
-        if (light.top() != this) {
-            result->areaPDF = 0.0f;
-            return SampledSpectrum::Zero;
-        }
-        light.pop();
+        SLRAssert(light.top() == this, "Object stored in Intersection does not match this object.");
+        
+        light.scopedPop();
         SampledSpectrum M = light.top()->sample(light, query, smp, result);
         StaticTransform sampledTF;
         m_transform->sample(query.time, &sampledTF);
         result->surfPt = sampledTF * result->surfPt;
-        light.push(this);
         return M;
     }
     
@@ -364,19 +328,35 @@ namespace SLR {
                                             const LightPosQuery &lightPosQuery, const LightPosSample &lightPosSample, LightPosQueryResult* lightPosResult, SampledSpectrum* Le0, EDF** edf,
                                             const EDFQuery &edfQuery, const EDFSample &edfSample, EDFQueryResult* edfResult, SampledSpectrum* Le1,
                                             ArenaAllocator &mem) const {
-        if (light.top() != this) {
-            lightPosResult->areaPDF = 0.0f;
-            *Le0 = SampledSpectrum::Zero;
-            edfResult->dirPDF = 0.0f;
-            *Le1 = SampledSpectrum::Zero;
-            return Ray();
-        }
-        light.pop();
+        SLRAssert(light.top() == this, "Object stored in Intersection does not match this object.");
+        
+        ScopedPop<const Object*> sp = light.scopedPop();
         Ray ray = light.top()->sampleRay(light, lightPosQuery, lightPosSample, lightPosResult, Le0, edf, edfQuery, edfSample, edfResult, Le1, mem);
         StaticTransform sampledTF;
         m_transform->sample(lightPosQuery.time, &sampledTF);
         lightPosResult->surfPt = sampledTF * lightPosResult->surfPt;
-        light.push(this);
         return sampledTF * ray;
+    }
+    
+    bool TransformedSurfaceObject::intersect(Ray &ray, Intersection *isect) const {
+        Ray localRay;
+        StaticTransform sampledTF;
+        m_transform->sample(ray.time, &sampledTF);
+        localRay = invert(sampledTF) * ray;
+        if (!m_surfObj->intersect(localRay, isect))
+            return false;
+        ray.distMax = localRay.distMax;
+        isect->push(this);
+        return true;
+    }
+    
+    void TransformedSurfaceObject::getSurfacePoint(const Intersection &isect, SurfacePoint *surfPt) const {
+        SLRAssert(isect.top() == this, "Object stored in Intersection does not match this object.");
+        
+        ScopedPop<const SurfaceObject*> sp = isect.scopedPop();
+        isect.top()->getSurfacePoint(isect, surfPt);
+        StaticTransform sampledTF;
+        m_transform->sample(isect.time, &sampledTF);
+        *surfPt = sampledTF * *surfPt;
     }
 }

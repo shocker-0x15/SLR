@@ -157,66 +157,40 @@ namespace SLR {
     
     
     
-    class SLR_API Surface {
+    template <typename T>
+    class ScopedPop {
+        std::vector<T> &m_stack;
+        T m_item;
     public:
-        virtual ~Surface() { }
-        
-        virtual float costForIntersect() const = 0;
-        virtual BoundingBox3D bounds() const = 0;
-        virtual BoundingBox3D choppedBounds(BoundingBox3D::Axis chopAxis, float minChopPos, float maxChopPos) const {
-            BoundingBox3D baseBBox = bounds();
-            if (maxChopPos < baseBBox.minP[chopAxis])
-                return BoundingBox3D();
-            if (minChopPos > baseBBox.maxP[chopAxis])
-                return BoundingBox3D();
-            if (minChopPos < baseBBox.minP[chopAxis] && maxChopPos > baseBBox.maxP[chopAxis])
-                return baseBBox;
-            BoundingBox3D ret = baseBBox;
-            ret.minP[chopAxis] = std::max(minChopPos, ret.minP[chopAxis]);
-            ret.maxP[chopAxis] = std::min(maxChopPos, ret.maxP[chopAxis]);
-            return ret;
+        ScopedPop(std::vector<T> &stack) : m_stack(stack) {
+            m_item = m_stack.back();
+            m_stack.pop_back();
         }
-        virtual void splitBounds(BoundingBox3D::Axis splitAxis, float splitPos, BoundingBox3D* bbox0, BoundingBox3D* bbox1) const {
-            BoundingBox3D baseBBox = bounds();
-            if (splitPos < baseBBox.minP[splitAxis]) {
-                *bbox0 = BoundingBox3D();
-                *bbox1 = baseBBox;
-                return;
-            }
-            if (splitPos > baseBBox.maxP[splitAxis]) {
-                *bbox0 = baseBBox;
-                *bbox1 = BoundingBox3D();
-                return;
-            }
-            *bbox0 = baseBBox;
-            bbox0->maxP[splitAxis] = std::min(bbox0->maxP[splitAxis], splitPos);
-            *bbox1 = baseBBox;
-            bbox1->minP[splitAxis] = std::max(bbox1->minP[splitAxis], splitPos);
+        ~ScopedPop() {
+            m_stack.push_back(m_item);
         }
-        virtual bool preTransformed() const = 0;
-        virtual bool intersect(const Ray &ray, Intersection* isect) const = 0;
-        virtual void getSurfacePoint(const Intersection &isect, SurfacePoint* surfPt) const = 0;
-        virtual float area() const = 0;
-        virtual void sample(float u0, float u1, SurfacePoint* surfPt, float* areaPDF) const = 0;
-        virtual float evaluateAreaPDF(const SurfacePoint& surfPt) const = 0;
     };
-    
-    
     
     // It is not safe to directly use the point and normal because they need to be applied several transforms.
     struct SLR_API Intersection {
+    private:
+        mutable std::vector<const SurfaceObject*> m_hierarchy;
+    public:
         float time;
         float dist;
         Point3D p;
         Normal3D gNormal;
         float u, v;
         TexCoord2D texCoord;
-        mutable std::vector<const SurfaceObject*> obj;
-        //    const SurfaceObject* obj;
         
         Intersection() : dist(INFINITY) { }
         
-        Point3D getIntersectionPoint() const;
+        void push(const SurfaceObject* obj) { m_hierarchy.push_back(obj); }
+        ScopedPop<const SurfaceObject*> scopedPop() const { return ScopedPop<const SurfaceObject*>(m_hierarchy); }
+        const SurfaceObject* top() const { return m_hierarchy.back(); }
+        const std::vector<const SurfaceObject*> getHierarchy() const { return m_hierarchy; }
+        size_t getObjectDepth() const { return m_hierarchy.size(); }
+        
         const SurfaceMaterial* getSurfaceMaterial() const;
         void getSurfacePoint(SurfacePoint* surfPt) const;
     };
@@ -261,6 +235,65 @@ namespace SLR {
     inline float squaredDistance(const SurfacePoint &p0, const SurfacePoint &p1) {
         return (p0.atInfinity || p1.atInfinity) ? 1.0f : sqDistance(p0.p, p1.p);
     }
+    
+    struct SLR_API MediumPoint {
+        Point3D p;
+        const MediumObject* obj;
+        
+        float getSquaredDistance(const Point3D &shadingPoint) const { return sqDistance(p, shadingPoint); }
+        Vector3D getDirectionFrom(const Point3D &shadingPoint, float* dist2) const;
+        bool isEmitting() const;
+        SampledSpectrum fluxDensity(const WavelengthSamples &wls) const;
+        float evaluateVolumePDF() const;
+        BSDF* createPhaseFunction(const WavelengthSamples &wls, ArenaAllocator &mem) const;
+        EDF* createEDF(const WavelengthSamples &wls, ArenaAllocator &mem) const;
+    };
+    
+    
+    
+    class SLR_API Surface {
+    public:
+        virtual ~Surface() { }
+        
+        virtual float costForIntersect() const = 0;
+        virtual BoundingBox3D bounds() const = 0;
+        virtual BoundingBox3D choppedBounds(BoundingBox3D::Axis chopAxis, float minChopPos, float maxChopPos) const {
+            BoundingBox3D baseBBox = bounds();
+            if (maxChopPos < baseBBox.minP[chopAxis])
+                return BoundingBox3D();
+            if (minChopPos > baseBBox.maxP[chopAxis])
+                return BoundingBox3D();
+            if (minChopPos < baseBBox.minP[chopAxis] && maxChopPos > baseBBox.maxP[chopAxis])
+                return baseBBox;
+            BoundingBox3D ret = baseBBox;
+            ret.minP[chopAxis] = std::max(minChopPos, ret.minP[chopAxis]);
+            ret.maxP[chopAxis] = std::min(maxChopPos, ret.maxP[chopAxis]);
+            return ret;
+        }
+        virtual void splitBounds(BoundingBox3D::Axis splitAxis, float splitPos, BoundingBox3D* bbox0, BoundingBox3D* bbox1) const {
+            BoundingBox3D baseBBox = bounds();
+            if (splitPos < baseBBox.minP[splitAxis]) {
+                *bbox0 = BoundingBox3D();
+                *bbox1 = baseBBox;
+                return;
+            }
+            if (splitPos > baseBBox.maxP[splitAxis]) {
+                *bbox0 = baseBBox;
+                *bbox1 = BoundingBox3D();
+                return;
+            }
+            *bbox0 = baseBBox;
+            bbox0->maxP[splitAxis] = std::min(bbox0->maxP[splitAxis], splitPos);
+            *bbox1 = baseBBox;
+            bbox1->minP[splitAxis] = std::max(bbox1->minP[splitAxis], splitPos);
+        }
+        virtual bool preTransformed() const = 0;
+        virtual bool intersect(const Ray &ray, Intersection* isect) const = 0;
+        virtual void getSurfacePoint(const Intersection &isect, SurfacePoint* surfPt) const = 0;
+        virtual float area() const = 0;
+        virtual void sample(float u0, float u1, SurfacePoint* surfPt, float* areaPDF) const = 0;
+        virtual float evaluateAreaPDF(const SurfacePoint& surfPt) const = 0;
+    };
 }
 
 #endif
