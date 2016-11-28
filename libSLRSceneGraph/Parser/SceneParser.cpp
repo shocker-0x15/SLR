@@ -897,7 +897,7 @@ namespace SLRSceneGraph {
         }
     }
     
-    bool BlockStatement::perform(SLRSceneGraph::ExecuteContext &context, SLRSceneGraph::ErrorMessage *errMsg) const {
+    bool BlockStatement::perform(SLRSceneGraph::ExecuteContext &context, SLRSceneGraph::ErrorMessage *errMsg) {
         context.stackVariables.current().pushDepth();
         for (int i = 0; i < m_statements.size(); ++i) {
             if (!m_statements[i]->perform(context, errMsg))
@@ -910,7 +910,7 @@ namespace SLRSceneGraph {
         return true;
     }
     
-    bool IfElseStatement::perform(SLRSceneGraph::ExecuteContext &context, SLRSceneGraph::ErrorMessage *errMsg) const {
+    bool IfElseStatement::perform(SLRSceneGraph::ExecuteContext &context, SLRSceneGraph::ErrorMessage *errMsg) {
         if (!m_condExpr->perform(context, errMsg))
             return false;
         if (!m_condExpr->result().isConvertibleTo<TypeMap::Bool>()) {
@@ -930,7 +930,7 @@ namespace SLRSceneGraph {
         return true;
     }
     
-    bool ForStatement::perform(ExecuteContext &context, ErrorMessage* errMsg) const {
+    bool ForStatement::perform(ExecuteContext &context, ErrorMessage* errMsg) {
         if (!m_preExpr->perform(context, errMsg))
             return false;
         
@@ -956,7 +956,7 @@ namespace SLRSceneGraph {
         return true;
     }
     
-    bool FunctionDefinitionStatement::perform(SLRSceneGraph::ExecuteContext &context, SLRSceneGraph::ErrorMessage *errMsg) const {
+    bool FunctionDefinitionStatement::perform(SLRSceneGraph::ExecuteContext &context, SLRSceneGraph::ErrorMessage *errMsg) {
         std::vector<ArgInfo> args;
         for (int i = 0; i < m_argDefs->size(); ++i) {
             args.emplace_back();
@@ -971,7 +971,7 @@ namespace SLRSceneGraph {
         return true;
     }
     
-    bool ReturnStatement::perform(SLRSceneGraph::ExecuteContext &context, SLRSceneGraph::ErrorMessage *errMsg) const {
+    bool ReturnStatement::perform(SLRSceneGraph::ExecuteContext &context, SLRSceneGraph::ErrorMessage *errMsg) {
         if (!m_expr) {
             context.returnValue = Element();
             context.returnFlag = true;
@@ -984,7 +984,7 @@ namespace SLRSceneGraph {
         return true;
     }
     
-    bool BinaryExpression::perform(ExecuteContext &context, ErrorMessage *errMsg) const {
+    bool BinaryExpression::perform(ExecuteContext &context, ErrorMessage *errMsg) {
         if (!m_left->perform(context, errMsg))
             return false;
         if (!m_right->perform(context, errMsg))
@@ -1018,7 +1018,7 @@ namespace SLRSceneGraph {
         return true;
     }
 
-    bool SubstitutionExpression::perform(ExecuteContext &context, ErrorMessage *errMsg) const {
+    bool SubstitutionExpression::perform(ExecuteContext &context, ErrorMessage *errMsg) {
         if (!m_right->perform(context, errMsg))
             return false;
         if (m_op != "=" && context.stackVariables.exists(m_varName) == false) {
@@ -1049,7 +1049,7 @@ namespace SLRSceneGraph {
         return true;
     }
     
-    bool UnaryTerm::perform(ExecuteContext &context, ErrorMessage *errMsg) const {
+    bool UnaryTerm::perform(ExecuteContext &context, ErrorMessage *errMsg) {
         if (!m_term->perform(context, errMsg))
             return false;
         if (m_op == "+")
@@ -1061,7 +1061,7 @@ namespace SLRSceneGraph {
         return true;
     }
     
-    bool UnarySubstitutionTerm::perform(SLRSceneGraph::ExecuteContext &context, SLRSceneGraph::ErrorMessage *errMsg) const {
+    bool UnarySubstitutionTerm::perform(SLRSceneGraph::ExecuteContext &context, SLRSceneGraph::ErrorMessage *errMsg) {
         if (context.stackVariables.exists(m_varName) == false) {
             *errMsg = ErrorMessage("Undefined variable: %s", m_varName.c_str());
             return false;
@@ -1079,7 +1079,7 @@ namespace SLRSceneGraph {
         return true;
     }
     
-    bool BinaryTerm::perform(ExecuteContext &context, ErrorMessage *errMsg) const {
+    bool BinaryTerm::perform(ExecuteContext &context, ErrorMessage *errMsg) {
         if (!m_left->perform(context, errMsg))
             return false;
         if (!m_right->perform(context, errMsg))
@@ -1098,7 +1098,7 @@ namespace SLRSceneGraph {
         return true;
     }
     
-    bool FunctionCallSingleTerm::perform(ExecuteContext &context, ErrorMessage* errMsg) const {
+    bool FunctionCallSingleTerm::perform(ExecuteContext &context, ErrorMessage* errMsg) {
         if (context.stackVariables.exists(m_funcID)) {
             const Element &funcElem = context.stackVariables.at(m_funcID);
             if (funcElem.type == Type::Function) {
@@ -1128,14 +1128,14 @@ namespace SLRSceneGraph {
         return false;
     }
     
-    bool EnclosedSingleTerm::perform(ExecuteContext &context, ErrorMessage *errMsg) const {
+    bool EnclosedSingleTerm::perform(ExecuteContext &context, ErrorMessage *errMsg) {
         if (!m_expr->perform(context, errMsg))
             return false;
         m_result = m_expr->result();
         return true;
     }
     
-    bool TupleElementSingleTerm::perform(SLRSceneGraph::ExecuteContext &context, SLRSceneGraph::ErrorMessage *errMsg) const {
+    bool TupleElementSingleTerm::perform(SLRSceneGraph::ExecuteContext &context, SLRSceneGraph::ErrorMessage *errMsg) {
         if (!m_tuple->perform(context, errMsg))
             return false;
         if (!m_idxExpr->perform(context, errMsg))
@@ -1168,7 +1168,7 @@ namespace SLRSceneGraph {
         return false;
     }
     
-    bool TupleValue::perform(ExecuteContext &context, ErrorMessage *errMsg) const {
+    bool TupleValue::perform(ExecuteContext &context, ErrorMessage *errMsg) {
         ParameterListRef params = createShared<ParameterList>();
         for (int i = 0; i < m_elements->size(); ++i) {
             ParameterRef arg = m_elements->at(i);
@@ -1186,7 +1186,7 @@ namespace SLRSceneGraph {
         return true;
     }
     
-    bool VariableValue::perform(ExecuteContext &context, ErrorMessage *errMsg) const {
+    bool VariableValue::perform(ExecuteContext &context, ErrorMessage *errMsg) {
         if (!context.stackVariables.exists(m_varName)) {
             *errMsg = ErrorMessage("Undefined variable is used.");
             return false;
@@ -1195,7 +1195,7 @@ namespace SLRSceneGraph {
         return true;
     }
     
-    bool ArgumentDefinition::perform(SLRSceneGraph::ExecuteContext &context, SLRSceneGraph::ErrorMessage *errMsg) const {
+    bool ArgumentDefinition::perform(SLRSceneGraph::ExecuteContext &context, SLRSceneGraph::ErrorMessage *errMsg) {
         if (m_defaultValueExpr && !m_defaultValueExpr->perform(context, errMsg))
             return false;
         return true;
@@ -1207,7 +1207,7 @@ namespace SLRSceneGraph {
         info->expectedType = Type::Any;
     }
     
-    bool Parameter::perform(ExecuteContext &context, ErrorMessage *errMsg) const {
+    bool Parameter::perform(ExecuteContext &context, ErrorMessage *errMsg) {
         if (m_keyExpr && !m_keyExpr->perform(context, errMsg))
             return false;
         if (!m_valueExpr->perform(context, errMsg))

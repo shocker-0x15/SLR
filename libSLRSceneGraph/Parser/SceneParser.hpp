@@ -429,12 +429,12 @@ namespace SLRSceneGraph {
     
     class Statement {
     public:
-        virtual bool perform(ExecuteContext &context, ErrorMessage* errMsg) const = 0;
+        virtual bool perform(ExecuteContext &context, ErrorMessage* errMsg) = 0;
     };
     
     class Expression : public Statement {
     protected:
-        mutable Element m_result;
+        Element m_result;
     public:
         const Element &result() const { return m_result; };
     };
@@ -453,7 +453,7 @@ namespace SLRSceneGraph {
     public:
         BlockStatement(const StatementsRef &statements);
         
-        bool perform(ExecuteContext &context, ErrorMessage* errMsg) const override;
+        bool perform(ExecuteContext &context, ErrorMessage* errMsg) override;
     };
     
     class IfElseStatement : public Statement {
@@ -464,7 +464,7 @@ namespace SLRSceneGraph {
         IfElseStatement(const ExpressionRef &condExpr, const StatementRef &trueBlockStmt, const StatementRef &falseBlockStmt = nullptr) :
         m_condExpr(condExpr), m_trueBlockStmt(trueBlockStmt), m_falseBlockStmt(falseBlockStmt) { }
         
-        bool perform(ExecuteContext &context, ErrorMessage* errMsg) const override;
+        bool perform(ExecuteContext &context, ErrorMessage* errMsg) override;
     };
     
     class ForStatement : public Statement {
@@ -476,7 +476,7 @@ namespace SLRSceneGraph {
         ForStatement(const ExpressionRef &preExpr, const ExpressionRef &condExpr, const ExpressionRef &postExpr, const StatementRef &blockStmt) :
         m_preExpr(preExpr), m_condExpr(condExpr), m_postExpr(postExpr), m_blockStmt(blockStmt) { }
         
-        bool perform(ExecuteContext &context, ErrorMessage* errMsg) const override;
+        bool perform(ExecuteContext &context, ErrorMessage* errMsg) override;
     };
     
     class FunctionDefinitionStatement : public Statement {
@@ -487,7 +487,7 @@ namespace SLRSceneGraph {
         FunctionDefinitionStatement(const std::string &funcName, const ArgumentDefinitionVecRef &argDefs, const StatementRef &blockStmt) :
         m_funcName(funcName), m_argDefs(argDefs), m_blockStmt(blockStmt) { }
         
-        bool perform(ExecuteContext &context, ErrorMessage* errMsg) const override;
+        bool perform(ExecuteContext &context, ErrorMessage* errMsg) override;
     };
     
     class ReturnStatement : public Statement {
@@ -495,7 +495,7 @@ namespace SLRSceneGraph {
     public:
         ReturnStatement(const ExpressionRef &expr = nullptr) : m_expr(expr) { }
         
-        bool perform(ExecuteContext &context, ErrorMessage* errMsg) const override;
+        bool perform(ExecuteContext &context, ErrorMessage* errMsg) override;
     };
     
     class BinaryExpression : public Expression {
@@ -505,7 +505,7 @@ namespace SLRSceneGraph {
     public:
         BinaryExpression(const ExpressionRef &left, const std::string &op, const ExpressionRef &right) : m_left(left), m_op(op), m_right(right) { }
         
-        bool perform(ExecuteContext &context, ErrorMessage* errMsg) const override;
+        bool perform(ExecuteContext &context, ErrorMessage* errMsg) override;
     };
     
     class SubstitutionExpression : public Expression {
@@ -516,7 +516,7 @@ namespace SLRSceneGraph {
         SubstitutionExpression(const std::string &varName, const std::string &op, const ExpressionRef &right) :
         m_varName(varName), m_op(op), m_right(right) { }
         
-        bool perform(ExecuteContext &context, ErrorMessage* errMsg) const override;
+        bool perform(ExecuteContext &context, ErrorMessage* errMsg) override;
     };
     
     class UnaryTerm : public Term {
@@ -525,7 +525,7 @@ namespace SLRSceneGraph {
     public:
         UnaryTerm(const std::string &op, const TermRef &term) : m_op(op), m_term(term) { }
         
-        bool perform(ExecuteContext &context, ErrorMessage* errMsg) const override;
+        bool perform(ExecuteContext &context, ErrorMessage* errMsg) override;
     };
     
     class UnarySubstitutionTerm : public Term {
@@ -534,7 +534,7 @@ namespace SLRSceneGraph {
     public:
         UnarySubstitutionTerm(const std::string &op, const std::string &varName) : m_op(op), m_varName(varName) { }
         
-        bool perform(ExecuteContext &context, ErrorMessage* errMsg) const override;
+        bool perform(ExecuteContext &context, ErrorMessage* errMsg) override;
     };
     
     class BinaryTerm : public Term {
@@ -544,7 +544,7 @@ namespace SLRSceneGraph {
     public:
         BinaryTerm(const TermRef &left, const std::string &op, const TermRef &right) : m_left(left), m_op(op), m_right(right) { }
         
-        bool perform(ExecuteContext &context, ErrorMessage* errMsg) const override;
+        bool perform(ExecuteContext &context, ErrorMessage* errMsg) override;
     };
     
     class FunctionCallSingleTerm : public SingleTerm {
@@ -553,7 +553,7 @@ namespace SLRSceneGraph {
     public:
         FunctionCallSingleTerm(const std::string &funcID, const ParameterVecRef &args) : m_funcID(funcID), m_args(args) { }
         
-        bool perform(ExecuteContext &context, ErrorMessage* errMsg) const override;
+        bool perform(ExecuteContext &context, ErrorMessage* errMsg) override;
     };
     
     class EnclosedSingleTerm : public SingleTerm {
@@ -561,7 +561,7 @@ namespace SLRSceneGraph {
     public:
         EnclosedSingleTerm(const ExpressionRef &expr) : m_expr(expr) { }
         
-        bool perform(ExecuteContext &context, ErrorMessage* errMsg) const override;
+        bool perform(ExecuteContext &context, ErrorMessage* errMsg) override;
     };
     
     class TupleElementSingleTerm : public SingleTerm {
@@ -570,14 +570,14 @@ namespace SLRSceneGraph {
     public:
         TupleElementSingleTerm(const SingleTermRef &tuple, const ExpressionRef &idxExpr) : m_tuple(tuple), m_idxExpr(idxExpr) { }
         
-        bool perform(ExecuteContext &context, ErrorMessage* errMsg) const override;
+        bool perform(ExecuteContext &context, ErrorMessage* errMsg) override;
     };
     
     class ImmediateValue : public Value {
     public:
         ImmediateValue(const Element &value) { m_result = value; }
         
-        bool perform(ExecuteContext &context, ErrorMessage* errMsg) const override { return true; }
+        bool perform(ExecuteContext &context, ErrorMessage* errMsg) override { return true; }
     };
     
     class TupleValue : public Value {
@@ -585,7 +585,7 @@ namespace SLRSceneGraph {
     public:
         TupleValue(const ParameterVecRef &elements) : m_elements(elements) { }
         
-        bool perform(ExecuteContext &context, ErrorMessage* errMsg) const override;
+        bool perform(ExecuteContext &context, ErrorMessage* errMsg) override;
     };
     
     class VariableValue : public Value {
@@ -593,7 +593,7 @@ namespace SLRSceneGraph {
     public:
         VariableValue(const std::string &varName) : m_varName(varName) { }
         
-        bool perform(ExecuteContext &context, ErrorMessage* errMsg) const override;
+        bool perform(ExecuteContext &context, ErrorMessage* errMsg) override;
     };
     
     class ArgumentDefinition {
@@ -602,7 +602,7 @@ namespace SLRSceneGraph {
     public:
         ArgumentDefinition(const std::string &name, const ExpressionRef &defaultValueExpr = nullptr) : m_name(name), m_defaultValueExpr(defaultValueExpr) { }
         
-        bool perform(ExecuteContext &context, ErrorMessage* errMsg) const;
+        bool perform(ExecuteContext &context, ErrorMessage* errMsg);
         void getArgInfo(ArgInfo* info) const;
     };
     
@@ -612,7 +612,7 @@ namespace SLRSceneGraph {
     public:
         Parameter(const ExpressionRef &keyExpr, const ExpressionRef &valueExpr) : m_keyExpr(keyExpr), m_valueExpr(valueExpr) { }
         
-        bool perform(ExecuteContext &context, ErrorMessage* errMsg) const;
+        bool perform(ExecuteContext &context, ErrorMessage* errMsg);
         void getKeyAndValue(Element* key, Element* value) const;
     };
 }
