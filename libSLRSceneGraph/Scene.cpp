@@ -7,38 +7,35 @@
 
 #include "Scene.h"
 #include "nodes.h"
-#include <libSLR/Memory/ArenaAllocator.h>
 #include <libSLR/Core/Transform.h>
-#include <libSLR/Core/cameras.h>
-#include <libSLR/Core/Scene.h>
+#include <libSLR/Scene/Scene.h>
 #include "InfiniteSphereNode.h"
 
 #include <libSLR/Core/Renderer.h>
 
 namespace SLRSceneGraph {
     Scene::Scene() : m_envNode(nullptr) {
-        m_raw = createUnique<SLR::Scene>();
-        m_rootNode = createShared<InternalNode>();
+        m_rootNode = createShared<InternalNode>(createShared<SLR::StaticTransform>());
         m_rootNode->setName("root");
-        m_rootNode->setTransform(createShared<SLR::StaticTransform>());
+        m_raw = new SLR::Scene(m_rootNode->getRaw());
     };
     
-    Scene::~Scene() {}
-    
-    void Scene::build(const SLR::Scene** scene, SLR::ArenaAllocator &mem) {
-        RenderingData renderingData;
-        m_rootNode->getRenderingData(mem, nullptr, &renderingData);
-        SLRAssert(renderingData.camera != nullptr, "Camera is not set.");
-        
-        SLR::SurfaceObjectAggregate* aggregate = mem.create<SLR::SurfaceObjectAggregate>(renderingData.surfObjs);
-        SLR::InfiniteSphereSurfaceObject* envSphere = m_envNode ? m_envNode->getSurfaceObject() : nullptr;
-        
-        SLR::Camera* camera = renderingData.camera;
-        camera->setTransform(renderingData.camTransform);
-        m_raw->build(aggregate, envSphere, camera);
-        
-        *scene = m_raw.get();
+    Scene::~Scene() {
+        delete m_raw;
     }
+    
+    void Scene::setEnvironmentNode(const InfiniteSphereNodeRef &node) {
+        m_envNode = node;
+        m_raw->setEnvironmentNode((SLR::InfiniteSphereNode*)node->getRaw());
+    }
+    
+    void Scene::prepareForRendering() {
+        m_rootNode->prepareForRendering();
+        if (m_envNode)
+            m_envNode->prepareForRendering();
+    }
+    
+    
     
     RenderingContext::RenderingContext() {
         

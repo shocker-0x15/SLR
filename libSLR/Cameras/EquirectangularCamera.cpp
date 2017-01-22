@@ -30,17 +30,22 @@ namespace SLR {
         if (m_transform)
             m_transform->sample(query.time, &staticTF);
         
-        SurfacePoint &surfPt = result->surfPt;
-        surfPt.p = staticTF * Point3D::Zero;
-        surfPt.gNormal = staticTF * Normal3D(0, 0, 1);
-        surfPt.u = 0;
-        surfPt.v = 0;
-        surfPt.texCoord = TexCoord2D::Zero;
-        surfPt.texCoord0Dir = Vector3D::Zero;
-        surfPt.shadingFrame.z = (Vector3D)surfPt.gNormal;
-        surfPt.shadingFrame.x = staticTF * Vector3D(1, 0, 0);// assume the transform doesn't include scaling.
-        surfPt.shadingFrame.y = cross(surfPt.shadingFrame.z, surfPt.shadingFrame.x);
-        surfPt.obj = nullptr;
+        Normal3D geometricNormal = staticTF * Normal3D(0, 0, 1);
+        
+        ReferenceFrame shadingFrame;
+        shadingFrame.z = (Vector3D)geometricNormal;
+        shadingFrame.x = staticTF * Vector3D(1, 0, 0);// assume the transform doesn't include scaling.
+        shadingFrame.y = cross(shadingFrame.z, shadingFrame.x);
+        
+        result->surfPt = SurfacePoint(staticTF * Point3D::Zero, // - position in world coordinate
+                                      false, // -------------------- atInifnity
+                                      shadingFrame, // ------------- shading frame
+                                      geometricNormal, // ---------- geometric normal in world coordinate
+                                      0, 0, // --------------------- surface parameter
+                                      TexCoord2D::Zero, // --------- texture coordinate
+                                      Vector3D::Zero // ------------ direction of texture coordinate 0
+                                      );
+        result->surfPt.setObject(nullptr);
         result->posType = DirectionType::Delta0D;
         result->areaPDF = 1.0f;
         

@@ -12,8 +12,8 @@
 #include "../Core/RandomNumberGenerator.h"
 #include "../Core/cameras.h"
 #include "../Core/light_path_samplers.h"
-#include "../Core/Scene.h"
 #include "../Core/ProgressReporter.h"
+#include "../Scene/Scene.h"
 #include "../Memory/ArenaAllocator.h"
 #include "../Helper/ThreadPool.h"
 #include "../RNGs/XORShiftRNG.h"
@@ -122,19 +122,19 @@ namespace SLR {
                 {
                     // select one light from all the lights in the scene.
                     float lightProb;
-                    Light light;
-                    scene->selectLight(pathSampler.getLightSelectionSample(), &light, &lightProb);
-                    SLRAssert(!std::isnan(lightProb) && !std::isinf(lightProb), "lightProb: unexpected value detected: %f", lightProb);
+                    SurfaceLight light;
+                    scene->selectSurfaceLight(pathSampler.getLightSelectionSample(), &light, &lightProb);
+                    SLRAssert(std::isfinite(lightProb), "lightProb: unexpected value detected: %f", lightProb);
                     
                     // sample a ray with its radiance (emittance, EDF value) from the selected light.
                     LightPosQuery lightPosQuery(time, wls);
-                    LightPosQueryResult lightPosResult;
+                    SurfaceLightPosQueryResult lightPosResult;
                     EDFQuery edfQuery;
                     EDFQueryResult edfResult;
                     EDF* edf;
                     SampledSpectrum Le0, Le1;
-                    Ray ray = light.sampleRay(lightPosQuery, pathSampler.getLightPosSample(), &lightPosResult, &Le0, &edf,
-                                              edfQuery, pathSampler.getEDFSample(), &edfResult, &Le1, mem);
+                    Ray ray = light.sampleRay(lightPosQuery, pathSampler.getSurfaceLightPosSample(), edfQuery, pathSampler.getEDFSample(), mem,
+                                              &lightPosResult, &Le0, &edf, &edfResult, &Le1);
                     
                     // register the first light vertex.
                     float lightAreaPDF = lightProb * lightPosResult.areaPDF;
@@ -142,7 +142,7 @@ namespace SLR {
                                                Le0 / lightAreaPDF, lightAreaPDF, 1.0f, lightPosResult.posType, WavelengthSamples::Flag(0));
                     
                     // create subsequent light subpath vertices by tracing in the scene.
-                    SampledSpectrum alpha = lightVertices.back().alpha * Le1 * (absDot(ray.dir, lightPosResult.surfPt.gNormal) / edfResult.dirPDF);
+                    SampledSpectrum alpha = lightVertices.back().alpha * Le1 * (lightPosResult.surfPt.calcCosTerm(ray.dir) / edfResult.dirPDF);
                     generateSubPath(wls, alpha, ray, edfResult.dirPDF, edfResult.dirType, edfResult.dir_sn.z, true, pathSampler, mem);
                 }
                 
@@ -162,7 +162,7 @@ namespace SLR {
                                              We0 / (lensResult.areaPDF * selectWLPDF), lensResult.areaPDF, 1.0f, lensResult.posType, WavelengthSamples::Flag(0));
                     
                     // create subsequent eye subpath vertices by tracing in the scene.
-                    SampledSpectrum alpha = eyeVertices.back().alpha * We1 * (absDot(ray.dir, lensResult.surfPt.gNormal) / WeResult.dirPDF);
+                    SampledSpectrum alpha = eyeVertices.back().alpha * We1 * (lensResult.surfPt.calcCosTerm(ray.dir) / WeResult.dirPDF);
                     generateSubPath(wls, alpha, ray, WeResult.dirPDF, WeResult.dirType, WeResult.dirLocal.z, false, pathSampler, mem);
                 }
                 
@@ -176,19 +176,19 @@ namespace SLR {
                         // that are not included in the precomputed weights.
                         // ----------------------------------------------------------------
                         float connectDist2;
-                        Vector3D connectionVector = lVtx.surfPt.getDirectionFrom(eVtx.surfPt.p, &connectDist2);
-                        float cosLightEnd = absDot(connectionVector, lVtx.surfPt.gNormal);
-                        float cosEyeEnd = absDot(connectionVector, eVtx.surfPt.gNormal);
+                        Vector3D connectionVector = lVtx.surfPt.getDirectionFrom(eVtx.surfPt.getPosition(), &connectDist2);
+                        float cosLightEnd = lVtx.surfPt.calcCosTerm(connectionVector);
+                        float cosEyeEnd = eVtx.surfPt.calcCosTerm(connectionVector);
                         float G = cosEyeEnd * cosLightEnd / connectDist2;
                         
-                        Vector3D lConnectVector = lVtx.surfPt.shadingFrame.toLocal(-connectionVector);
+                        Vector3D lConnectVector = lVtx.surfPt.toLocal(-connectionVector);
                         DDFQuery queryLightEnd{lVtx.dirIn_sn, lVtx.gNormal_sn, wlHint, true};
                         SampledSpectrum lRevDDF;
                         SampledSpectrum lDDF = lVtx.ddf->evaluate(queryLightEnd, lConnectVector, &lRevDDF);
                         float eExtend2ndDirPDF;
                         float lExtend1stDirPDF = lVtx.ddf->evaluatePDF(queryLightEnd, lConnectVector, &eExtend2ndDirPDF);
                         
-                        Vector3D eConnectVector = eVtx.surfPt.shadingFrame.toLocal(connectionVector);
+                        Vector3D eConnectVector = eVtx.surfPt.toLocal(connectionVector);
                         DDFQuery queryEyeEnd{eVtx.dirIn_sn, eVtx.gNormal_sn, wlHint, false};
                         SampledSpectrum eRevDDF;
                         SampledSpectrum eDDF = eVtx.ddf->evaluate(queryEyeEnd, eConnectVector, &eRevDDF);
@@ -216,8 +216,8 @@ namespace SLR {
                             if (t > 1) {
                                 BPTVertex &eVtxNextToEnd = eyeVertices[t - 2];
                                 float dist2;
-                                Vector3D dir2nd = eVtx.surfPt.getDirectionFrom(eVtxNextToEnd.surfPt.p, &dist2);
-                                lExtend2ndAreaPDF = lExtend2ndDirPDF * absDot(eVtxNextToEnd.surfPt.gNormal, dir2nd) / dist2;
+                                Vector3D dir2nd = eVtx.surfPt.getDirectionFrom(eVtxNextToEnd.surfPt.getPosition(), &dist2);
+                                lExtend2ndAreaPDF = lExtend2ndDirPDF * eVtxNextToEnd.surfPt.calcCosTerm(dir2nd) / dist2;
                                 lExtend2ndRRProb = std::min((eRevDDF * absDot(eVtx.gNormal_sn, eVtx.dirIn_sn) / lExtend2ndDirPDF).importance(wlHint), 1.0f);
                             }
                         }
@@ -229,8 +229,8 @@ namespace SLR {
                             if (s > 1) {
                                 BPTVertex &lVtxNextToEnd = lightVertices[s - 2];
                                 float dist2;
-                                Vector3D dir2nd = lVtxNextToEnd.surfPt.getDirectionFrom(lVtx.surfPt.p, &dist2);
-                                eExtend2ndAreaPDF = eExtend2ndDirPDF * absDot(lVtxNextToEnd.surfPt.gNormal, dir2nd) / dist2;
+                                Vector3D dir2nd = lVtxNextToEnd.surfPt.getDirectionFrom(lVtx.surfPt.getPosition(), &dist2);
+                                eExtend2ndAreaPDF = eExtend2ndDirPDF * lVtxNextToEnd.surfPt.calcCosTerm(dir2nd) / dist2;
                                 eExtend2ndRRProb = std::min((lRevDDF * absDot(lVtx.gNormal_sn, lVtx.dirIn_sn) / eExtend2ndDirPDF).importance(wlHint), 1.0f);
                             }
                         }
@@ -242,7 +242,7 @@ namespace SLR {
                             continue;
                         SLRAssert(MISWeight >= 0 && MISWeight <= 1.0f, "invalid MIS weight: %g", MISWeight);
                         SampledSpectrum contribution = MISWeight * lVtx.alpha * connectionTerm * eVtx.alpha;
-                        SLRAssert(!contribution.hasNaN() && !contribution.hasInf() && !contribution.hasMinus(),
+                        SLRAssert(contribution.allFinite() && !contribution.hasMinus(),
                                   "Unexpected value detected: %s\n"
                                   "pix: (%f, %f)", contribution.toString().c_str(), p.x, p.y);
                         if (t > 1) {
@@ -263,8 +263,8 @@ namespace SLR {
         reporter->update();
     }
     
-    void BidirectionalPathTracingRenderer::Job::generateSubPath(const WavelengthSamples &initWLs, const SampledSpectrum &initAlpha, const SLR::Ray &initRay, float dirPDF, DirectionType sampledType,
-                                                                float cosLast, bool adjoint, IndependentLightPathSampler &pathSampler, SLR::ArenaAllocator &mem) {
+    void BidirectionalPathTracingRenderer::Job::generateSubPath(const WavelengthSamples &initWLs, const SampledSpectrum &initAlpha, const Ray &initRay, float dirPDF, DirectionType sampledType,
+                                                                float cosLast, bool adjoint, IndependentLightPathSampler &pathSampler, ArenaAllocator &mem) {
         std::vector<BPTVertex> &vertices = adjoint ? lightVertices : eyeVertices;
         
         // reject invalid values.
@@ -275,14 +275,14 @@ namespace SLR {
         Ray ray = initRay;
         SampledSpectrum alpha = initAlpha;
         
-        Intersection isect;
+        SurfaceInteraction si;
         SurfacePoint surfPt;
         float RRProb = 1.0f;
-        while (scene->intersect(ray, &isect)) {
-            isect.getSurfacePoint(&surfPt);
+        while (scene->intersect(ray, &si)) {
+            si.getSurfacePoint(&surfPt);
             float dist2 = squaredDistance(vertices.back().surfPt, surfPt);
-            Vector3D dirOut_sn = surfPt.shadingFrame.toLocal(-ray.dir);
-            Normal3D gNorm_sn = surfPt.shadingFrame.toLocal(surfPt.gNormal);
+            Vector3D dirOut_sn = surfPt.toLocal(-ray.dir);
+            Normal3D gNorm_sn = surfPt.getLocalGeometricNormal();
             BSDF* bsdf = surfPt.createBSDF(wls, mem);
             
             float areaPDF = dirPDF * absDot(dirOut_sn, gNorm_sn) / dist2;
@@ -294,7 +294,7 @@ namespace SLR {
                 SampledSpectrum Le0 = surfPt.emittance(wls);
                 SampledSpectrum Le1 = edf->evaluate(EDFQuery(), dirOut_sn);
                 
-                float lightProb = scene->evaluateProb(Light(isect));
+                float lightProb = scene->evaluateSurfaceLightProb(SurfaceLight(si));
                 float extend1stAreaPDF = lightProb * surfPt.evaluateAreaPDF();
                 float extend2ndAreaPDF = edf->evaluatePDF(EDFQuery(), dirOut_sn) * cosLast / dist2;
                 
@@ -304,7 +304,7 @@ namespace SLR {
                 if (!std::isinf(MISWeight) && !std::isnan(MISWeight)) {
                     SampledSpectrum contribution = MISWeight * alpha * Le0 * Le1;
                     SLRAssert(MISWeight >= 0 && MISWeight <= 1.0f, "invalid MIS weight: %g", MISWeight);
-                    SLRAssert(!contribution.hasNaN() && !contribution.hasInf() && !contribution.hasMinus(),
+                    SLRAssert(contribution.allFinite() && !contribution.hasMinus(),
                               "Unexpected value detected: %s\n"
                               "pix: (%f, %f)", contribution.toString().c_str(), curPx, curPy);
                     if (wls.flags & WavelengthSamples::LambdaIsSelected)
@@ -313,7 +313,7 @@ namespace SLR {
                 }
             }
             
-            if (surfPt.atInfinity) {
+            if (surfPt.atInfinity()) {
                 vertices.pop_back();
                 break;
             }
@@ -325,9 +325,9 @@ namespace SLR {
             SampledSpectrum fs = bsdf->sample(fsQuery, pathSampler.getBSDFSample(), &fsResult);
             if (fs == SampledSpectrum::Zero || fsResult.dirPDF == 0.0f)
                 break;
-            if (fsResult.dirType.isDispersive())
+            if (fsResult.sampledType.isDispersive())
                 wls.flags |= WavelengthSamples::LambdaIsSelected;
-            float cosIn = absDot(fsResult.dir_sn, gNorm_sn);
+            float cosIn = absDot(fsResult.dirLocal, gNorm_sn);
             SampledSpectrum weight = fs * (cosIn / fsResult.dirPDF);
             
             // Russian roulette
@@ -338,8 +338,8 @@ namespace SLR {
                 break;
             
             alpha *= weight;
-            ray = Ray(surfPt.p, surfPt.shadingFrame.fromLocal(fsResult.dir_sn), ray.time, Ray::Epsilon);
-            SLRAssert(!weight.hasInf() && !weight.hasNaN(),
+            ray = Ray(surfPt.getPosition(), surfPt.fromLocal(fsResult.dirLocal), ray.time, Ray::Epsilon);
+            SLRAssert(weight.allFinite(),
                       "weight: unexpected value detected:\nweight: %s\nfs: %s\nlength: %u, cos: %g, dirPDF: %g",
                       weight.toString().c_str(), fs.toString().c_str(), uint32_t(vertices.size()) - 1, cosIn, fsResult.dirPDF);
             
@@ -349,8 +349,8 @@ namespace SLR {
             
             cosLast = cosIn;
             dirPDF = fsResult.dirPDF;
-            sampledType = fsResult.dirType;
-            isect = Intersection();
+            sampledType = fsResult.sampledType;
+            si = SurfaceInteraction();
         }
     }
     

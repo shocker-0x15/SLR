@@ -16,11 +16,11 @@
 namespace SLRSceneGraph {
     namespace BuiltinFunctions {
         namespace Texture {
-            extern const Function Texture2DMapping;
-            extern const Function Texture3DMapping;
-            extern const Function SpectrumTexture;
-            extern const Function NormalTexture;
-            extern const Function FloatTexture;
+            extern const Element Texture2DMapping;
+            extern const Element Texture3DMapping;
+            extern const Element SpectrumTexture;
+            extern const Element NormalTexture;
+            extern const Element FloatTexture;
         }
     }
 }

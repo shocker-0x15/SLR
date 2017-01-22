@@ -6,25 +6,24 @@
 //
 
 #include "InfiniteSphereNode.h"
-#include "surface_materials.hpp"
-#include <libSLR/Core/SurfaceObject.h>
+#include "textures.hpp"
+#include <libSLR/Scene/nodes.h>
 #include "Scene.h"
 
 namespace SLRSceneGraph {
-    InfiniteSphereNode::InfiniteSphereNode(const SceneWRef &scene, const SpectrumTextureRef &IBLTex, float scale) : m_scene(scene), m_ready(false) {
-        m_emitter = createShared<IBLEmission>(m_scene, IBLTex, scale);
+    void InfiniteSphereNode::setupRawData() {
+        SceneRef scene = m_scene.lock();
+        m_rawData = new SLR::InfiniteSphereNode(scene->getRaw(), m_IBLTex->getRaw(), m_scale);
     }
     
-    InfiniteSphereNode::~InfiniteSphereNode() {
-        delete m_surfObj;
+    InfiniteSphereNode::InfiniteSphereNode(const SceneWRef &scene, const SpectrumTextureRef &IBLTex, float scale) :
+    m_scene(scene), m_IBLTex(IBLTex), m_scale(scale) {
+        setupRawData();
     }
     
-    SLR::InfiniteSphereSurfaceObject* InfiniteSphereNode::getSurfaceObject() {
-        if (!m_ready) {
-            SceneRef sceneRef = m_scene.lock();
-            m_surfObj = new SLR::InfiniteSphereSurfaceObject(sceneRef->raw(), (SLR::IBLEmission*)m_emitter->getRaw());
-            m_ready = true;
-        }
-        return m_surfObj;
-    }    
+    void InfiniteSphereNode::prepareForRendering() {
+        SLR::InfiniteSphereNode &raw = *(SLR::InfiniteSphereNode*)m_rawData;
+        SceneRef scene = m_scene.lock();
+        new (&raw) SLR::InfiniteSphereNode(scene->getRaw(), m_IBLTex->getRaw(), m_scale);
+    }
 }

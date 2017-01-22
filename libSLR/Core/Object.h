@@ -14,8 +14,31 @@
 #include "directional_distribution_functions.h"
 
 namespace SLR {
+    struct SLR_API LightPosQuery {
+        float time;
+        WavelengthSamples wls;
+        LightPosQuery(float t, const WavelengthSamples &lambdas) : time(t), wls(lambdas) { }
+    };
+    
+    struct SLR_API LightPosQueryResult {
+        DirectionType posType;
+        
+        virtual InteractionPoint* getInteractionPoint() = 0;
+        virtual float spatialPDF() const = 0;
+        DirectionType sampledPositionType() const { return posType; }
+    };
+    
+    class SLR_API Light {
+    public:        
+        virtual SampledSpectrum sample(const LightPosQuery &query, LightPathSampler &pathSampler, ArenaAllocator &mem, LightPosQueryResult** lpResult) const = 0;
+    };
+    
+    
+    
     class SLR_API Object {
     public:
+        virtual ~Object() { }
+        
         virtual BoundingBox3D bounds() const = 0;
         virtual BoundingBox3D choppedBounds(BoundingBox3D::Axis chopAxis, float minChopPos, float maxChopPos) const {
             BoundingBox3D baseBBox = bounds();
@@ -48,51 +71,8 @@ namespace SLR {
             bbox1->minP[splitAxis] = std::max(bbox1->minP[splitAxis], splitPos);
         }
         
-        virtual bool isEmitting() const = 0;
-        virtual float importance() const = 0;
-        virtual void selectLight(float u, Light* light, float* prob) const = 0;
-        virtual float evaluateProb(const Light &light) const = 0;
-        
-        virtual SampledSpectrum sample(const Light &light, const LightPosQuery &query, const LightPosSample &smp, LightPosQueryResult* result) const = 0;
-        virtual Ray sampleRay(const Light &light,
-                              const LightPosQuery &lightPosQuery, const LightPosSample &lightPosSample, LightPosQueryResult* lightPosResult, SampledSpectrum* Le0, EDF** edf,
-                              const EDFQuery &edfQuery, const EDFSample &edfSample, EDFQueryResult* edfResult, SampledSpectrum* Le1,
-                              ArenaAllocator &mem) const = 0;
-    };
-    
-    
-    struct SLR_API LightPosQuery {
-        float time;
-        WavelengthSamples wls;
-        LightPosQuery(float t, const WavelengthSamples &lambdas) : time(t), wls(lambdas) { }
-    };
-    
-    struct SLR_API LightPosSample {
-        float uPos[2];
-        LightPosSample(float up0, float up1) : uPos{up0, up1} { }
-    };
-    
-    struct SLR_API LightPosQueryResult {
-        SurfacePoint surfPt;
-        float areaPDF;
-        DirectionType posType;
-    };
-    
-    class SLR_API Light {
-        mutable std::vector<const Object*> m_hierarchy;
-    public:
-        Light() { }
-        Light(const std::vector<const Object*> &hierarchy) : m_hierarchy(hierarchy) { }
-        Light(const Intersection &isect);
-        
-        void push(const Object* obj) const { m_hierarchy.push_back(obj); }
-        ScopedPop<const Object*> scopedPop() const { return ScopedPop<const Object*>(m_hierarchy); }
-        const Object* top() const { return m_hierarchy.back(); }
-        
-        SampledSpectrum sample(const LightPosQuery &query, const LightPosSample &smp, LightPosQueryResult* result) const;
-        Ray sampleRay(const LightPosQuery &lightPosQuery, const LightPosSample &lightPosSample, LightPosQueryResult* lightPosResult, SampledSpectrum* Le0, EDF** edf,
-                      const EDFQuery &edfQuery, const EDFSample &edfSample, EDFQueryResult* edfResult, SampledSpectrum* Le1,
-                      ArenaAllocator &mem) const;
+        virtual bool contains(const Light* light) const = 0;
+        virtual float evaluateProbability(const Light* light) const = 0;
     };
 }
 

@@ -165,7 +165,7 @@ namespace SLR {
                             splitPlane = i;
                         }
                     }
-                    SLRAssert(!std::isnan(minCost) && !std::isinf(minCost), "invalid cost value: %g", minCost);
+                    SLRAssert(std::isfinite(minCost), "invalid cost value: %g", minCost);
                     
                     // perform object partitioning if the cost is less than the leaf node cost. 
                     if (minCost < leafNodeCost) {
@@ -254,8 +254,8 @@ namespace SLR {
             return m_bounds;
         }
         
-        bool intersect(Ray &ray, Intersection* isect) const override {
-            uint32_t objDepth = (uint32_t)isect->getObjectDepth();
+        bool intersect(Ray &ray, SurfaceInteraction* si) const override {
+            bool found = false;
             bool dirIsPositive[] = {ray.dir.x >= 0, ray.dir.y >= 0, ray.dir.z >= 0};
             
             const uint32_t StackSize = 64;
@@ -274,11 +274,13 @@ namespace SLR {
                 }
                 else {
                     for (uint32_t i = 0; i < node.numLeaves; ++i)
-                        if (m_objLists[node.offsetFirstLeaf + i]->intersect(ray, isect))
-                            ray.distMax = isect->dist;
+                        if (m_objLists[node.offsetFirstLeaf + i]->intersect(ray, si)) {
+                            found = true;
+                            ray.distMax = si->getDistance();
+                        }
                 }
             }
-            return isect->getObjectDepth() > objDepth;
+            return found;
         }
     };
 }

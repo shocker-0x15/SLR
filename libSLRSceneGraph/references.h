@@ -58,14 +58,17 @@ namespace SLRSceneGraph {
     class InternalNode;
     class SurfaceObjectNode;
     class ReferenceNode;
-    class CameraNode;
+    class PerspectiveCameraNode;
+    class EquirectangularCameraNode;
     class TriangleMeshNode;
     class InfiniteSphereNode;
+    class HomogeneousMediumNode;
+    class GridMediumNode;
     typedef std::shared_ptr<Node> NodeRef;
     typedef std::shared_ptr<InternalNode> InternalNodeRef;
-    typedef std::shared_ptr<SurfaceObjectNode> SurfaceObjectNodeRef;
     typedef std::shared_ptr<ReferenceNode> ReferenceNodeRef;
-    typedef std::shared_ptr<CameraNode> CameraNodeRef;
+    typedef std::shared_ptr<PerspectiveCameraNode> PerspectiveCameraNodeRef;
+    typedef std::shared_ptr<EquirectangularCameraNode> EquirectangularCameraNodeRef;
     typedef std::shared_ptr<TriangleMeshNode> TriangleMeshNodeRef;
     typedef std::shared_ptr<InfiniteSphereNode> InfiniteSphereNodeRef;
     

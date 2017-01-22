@@ -14,7 +14,7 @@ namespace SLR {
             deallocateBlock(block.second);
         for (auto &block : m_availableBlocks)
             deallocateBlock(block.second);
-    };
+    }
     
     void* ArenaAllocator::alloc(uintptr_t size, uintptr_t align) {
         SLRAssert(size > 0, "Size \"size\" is zero.");
@@ -22,9 +22,9 @@ namespace SLR {
         uintptr_t mask = align - 1;
         uint8_t* curPos = m_currentBlock + m_currentBlockPos;
         uint8_t* head = (uint8_t*)(((uintptr_t)curPos + mask) & ~mask);
-        size_t offset = head - curPos;
+        m_currentBlockPos += head - curPos;
         
-        if (offset + size > m_currentAllocSize) {
+        if (m_currentBlockPos + size > m_currentAllocSize) {
             if (m_currentBlock) {
                 m_usedBlocks.push_back(std::make_pair(m_currentAllocSize, m_currentBlock));
                 m_currentBlock = nullptr;
@@ -44,47 +44,16 @@ namespace SLR {
                 m_currentBlock = allocateNewBlock<uint8_t>(m_currentAllocSize, align);
             }
             m_currentBlockPos = 0;
+            head = m_currentBlock;
         }
         m_currentBlockPos += size;
         return head;
-    };
-    
-    void ArenaAllocator::free(void* ptr) {
-        // ArenaAllocator assumes a user should not use free().
-    };
-    
-    void* ArenaAllocator::alloc(size_t numBytes) {
-        numBytes = ((numBytes + SLR_Minimum_Machine_Alignment) & (~(SLR_Minimum_Machine_Alignment)));
-        if (m_currentBlockPos + numBytes > m_currentAllocSize) {
-            if (m_currentBlock) {
-                m_usedBlocks.push_back(std::make_pair(m_currentAllocSize, m_currentBlock));
-                m_currentBlock = nullptr;
-                m_currentAllocSize = 0;
-            }
-            
-            for (auto iter = m_availableBlocks.begin(); iter != m_availableBlocks.end(); ++iter) {
-                if (iter->first >= numBytes) {
-                    m_currentAllocSize = iter->first;
-                    m_currentBlock = iter->second;
-                    m_availableBlocks.erase(iter);
-                    break;
-                }
-            }
-            if (!m_currentBlock) {
-                m_currentAllocSize = std::max(numBytes, m_blockSize);
-                m_currentBlock = allocateNewBlock<uint8_t>(m_currentAllocSize);
-            }
-            m_currentBlockPos = 0;
-        }
-        void* ret = m_currentBlock + m_currentBlockPos;
-        m_currentBlockPos += numBytes;
-        return ret;
-    };
+    }
     
     void ArenaAllocator::reset() {
         m_currentBlockPos = 0;
         m_availableBlocks.splice(m_availableBlocks.begin(), m_usedBlocks);
-    };
+    }
     
     size_t ArenaAllocator::totalAllocated() const {
         size_t total = m_currentAllocSize;
@@ -93,5 +62,5 @@ namespace SLR {
         for (const auto &alloc : m_availableBlocks)
             total += alloc.first;
         return total;
-    };    
+    }
 }

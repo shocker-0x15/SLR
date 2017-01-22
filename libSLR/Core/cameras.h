@@ -52,7 +52,7 @@ namespace SLR {
 
             // sample a direction (directional importance) from IDF, then create subsequent eye subpath vertices by tracing in the scene.
             *We1 = (*idf)->sample(WeSample, WeResult);
-            return Ray(lensResult->surfPt.p, lensResult->surfPt.shadingFrame.fromLocal(WeResult->dirLocal), lensQuery.time);
+            return Ray(lensResult->surfPt.getPosition(), lensResult->surfPt.fromLocal(WeResult->dirLocal), lensQuery.time);
         }
     };    
 }

@@ -115,7 +115,7 @@ namespace SLRSceneGraph {
     IBLEmission::IBLEmission(const SceneWRef &scene, const SpectrumTextureRef &coeffM, float scale) :
     m_scene(scene), m_coeffM(coeffM), m_scale(scale) {
         SceneRef sceneRef = m_scene.lock();
-        m_rawData = new SLR::IBLEmission(sceneRef->raw(), coeffM->getRaw(), scale);
+        m_rawData = new SLR::IBLEmission(sceneRef->getRaw(), coeffM->getRaw(), scale);
     };
     
     

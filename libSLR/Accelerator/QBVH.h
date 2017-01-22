@@ -292,8 +292,8 @@ namespace SLR {
             return m_bounds;
         }
         
-        bool intersect(Ray &ray, Intersection* isect) const override {
-            uint32_t objDepth = (uint32_t)isect->getObjectDepth();
+        bool intersect(Ray &ray, SurfaceInteraction* si) const override {
+            bool found = false;
             bool dirIsPositive[] = {ray.dir.x >= 0, ray.dir.y >= 0, ray.dir.z >= 0};
             
             const uint32_t StackSize = 64;
@@ -331,11 +331,13 @@ namespace SLR {
                     if (!child.isValid() || !child.isLeafNode)
                         continue;
                     for (uint32_t j = 0; j < child.numLeaves; ++j)
-                        if (m_objLists[child.idx + j]->intersect(ray, isect))
-                            ray.distMax = isect->dist;
+                        if (m_objLists[child.idx + j]->intersect(ray, si)) {
+                            found = true;
+                            ray.distMax = si->getDistance();
+                        }
                 }
             }
-            return isect->getObjectDepth() > objDepth;
+            return found;
         }
     };
 }

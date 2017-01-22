@@ -12,8 +12,8 @@
 #include "../Core/RandomNumberGenerator.h"
 #include "../Core/cameras.h"
 #include "../Core/light_path_samplers.h"
-#include "../Core/Scene.h"
 #include "../Core/ProgressReporter.h"
+#include "../Scene/Scene.h"
 #include "../Memory/ArenaAllocator.h"
 #include "../Helper/ThreadPool.h"
 #include "../RNGs/XORShiftRNG.h"
@@ -120,13 +120,13 @@ namespace SLR {
                 IDF* idf = camera->createIDF(lensResult.surfPt, wls, mem);
                 SampledSpectrum We1 = idf->sample(WeSample, &WeResult);
                 
-                Ray ray(lensResult.surfPt.p, lensResult.surfPt.shadingFrame.fromLocal(WeResult.dirLocal), time);
+                Ray ray(lensResult.surfPt.getPosition(), lensResult.surfPt.fromLocal(WeResult.dirLocal), time);
                 SampledSpectrum C = contribution(*scene, wls, ray, pathSampler, mem);
                 SLRAssert(C.hasNaN() == false && C.hasInf() == false && C.hasMinus() == false,
                           "Unexpected value detected: %s\n"
                           "pix: (%f, %f)", C.toString().c_str(), p.x, p.y);
                 
-                SampledSpectrum weight = (We0 * We1) * (absDot(ray.dir, lensResult.surfPt.gNormal) / (lensResult.areaPDF * WeResult.dirPDF * selectWLPDF));
+                SampledSpectrum weight = (We0 * We1) * (lensResult.surfPt.calcCosTerm(ray.dir) / (lensResult.areaPDF * WeResult.dirPDF * selectWLPDF));
                 SLRAssert(weight.hasNaN() == false && weight.hasInf() == false && weight.hasMinus() == false,
                           "Unexpected value detected: %s\n"
                           "pix: (%f, %f)", weight.toString().c_str(), p.x, p.y);
@@ -149,111 +149,138 @@ namespace SLR {
         SampledSpectrumSum sp(SampledSpectrum::Zero);
         uint32_t pathLength = 0;
         
-        Intersection isect;
-        if (!scene.intersect(ray, &isect))
-            return SampledSpectrum::Zero;
-        isect.getSurfacePoint(&surfPt);
+        Interaction* interact;
+        SampledSpectrum medThroughput;
+        bool singleWavelength;
+        InteractionPoint* interPt;
         
-        Vector3D dirOut_sn = surfPt.shadingFrame.toLocal(-ray.dir);
-        if (surfPt.isEmitting()) {
-            EDF* edf = surfPt.createEDF(wls, mem);
-            SampledSpectrum Le = surfPt.emittance(wls) * edf->evaluate(EDFQuery(), dirOut_sn);
+        if (!scene.interact(ray, wls, pathSampler, mem, &interact, &medThroughput, &singleWavelength))
+            return SampledSpectrum::Zero;
+        
+        if (singleWavelength && !wls.lambdaSelected()) {
+            medThroughput[wls.selectedLambda] *= WavelengthSamples::NumComponents;
+            wls.flags |= WavelengthSamples::LambdaIsSelected;
+        }
+        alpha *= medThroughput;
+        
+        interPt = interact->createInteractionPoint(mem);
+        
+        Vector3D dirOut_local = interPt->toLocal(-ray.dir);
+        if (interPt->isEmitting()) {
+            EDF* edf = interPt->createEDF(wls, mem);
+            SampledSpectrum Le = interPt->fluxDensity(wls) * edf->evaluate(EDFQuery(), dirOut_local);
             sp += alpha * Le;
         }
-        if (surfPt.atInfinity)
+        if (interPt->atInfinity())
             return sp;
         
         while (true) {
             ++pathLength;
             if (pathLength >= 100)
                 break;
-            Normal3D gNorm_sn = surfPt.shadingFrame.toLocal(surfPt.gNormal);
-            BSDF* bsdf = surfPt.createBSDF(wls, mem);
-            BSDFQuery fsQuery(dirOut_sn, gNorm_sn, wls.selectedLambda);
+            
+            AbstractBDF* abdf = interPt->createAbstractBDF(wls, mem);
+            ABDFQuery* abdfQuery = interPt->createABDFQuery(dirOut_local, wls.selectedLambda, DirectionType::All, false, mem);
+            
+            // on Surface: probability: 1.0 or probability density delta function
+            // in Medium: probability density: extinction coefficient
+            alpha *= interPt->evaluateInteractance(wls);
             
             // Next Event Estimation (explicit light sampling)
-            if (bsdf->hasNonDelta()) {
+            if (abdf->hasNonDelta()) {
+                Light* light;
                 float lightProb;
-                Light light;
-                scene.selectLight(pathSampler.getLightSelectionSample(), &light, &lightProb);
-                SLRAssert(!std::isnan(lightProb) && !std::isinf(lightProb), "lightProb: unexpected value detected: %f", lightProb);
+                scene.selectLight(pathSampler.getLightSelectionSample(), mem, &light, &lightProb);
+                SLRAssert(std::isfinite(lightProb), "lightProb: unexpected value detected: %f", lightProb);
                 
                 LightPosQuery lpQuery(ray.time, wls);
-                LightPosQueryResult lpResult;
-                SampledSpectrum M = light.sample(lpQuery, pathSampler.getLightPosSample(), &lpResult);
-                SLRAssert(!std::isnan(lpResult.areaPDF)/* && !std::isinf(xpResult.areaPDF)*/, "areaPDF: unexpected value detected: %f", lpResult.areaPDF);
+                LightPosQueryResult* lpResult;
+                SampledSpectrum emittance = light->sample(lpQuery, pathSampler, mem, &lpResult);
+                SLRAssert(!std::isnan(lpResult->spatialPDF())/* && !std::isinf(xpResult.spatialPDF)*/,
+                          "spatialPDF: unexpected value detected: %f", lpResult->spatialPDF());
                 
-                if (scene.testVisibility(surfPt, lpResult.surfPt, ray.time)) {
+                InteractionPoint* lightPt = lpResult->getInteractionPoint();
+                SampledSpectrum visibility;
+                if (scene.testVisibility(interPt, lightPt, ray.time, wls, pathSampler, &visibility, &singleWavelength)) {
+                    if (singleWavelength && !wls.lambdaSelected())
+                        visibility[wls.selectedLambda] *= WavelengthSamples::NumComponents;
+                    
                     float dist2;
-                    Vector3D shadowDir = lpResult.surfPt.getDirectionFrom(surfPt.p, &dist2);
-                    Vector3D shadowDir_l = lpResult.surfPt.shadingFrame.toLocal(-shadowDir);
-                    Vector3D shadowDir_sn = surfPt.shadingFrame.toLocal(shadowDir);
+                    Vector3D shadowDir = lightPt->getDirectionFrom(interPt->getPosition(), &dist2);
+                    Vector3D shadowDir_l = lightPt->toLocal(-shadowDir);
+                    Vector3D shadowDir_sn = interPt->toLocal(shadowDir);
                     
-                    EDF* edf = lpResult.surfPt.createEDF(wls, mem);
-                    SampledSpectrum Le = M * edf->evaluate(EDFQuery(), shadowDir_l);
-                    float lightPDF = lightProb * lpResult.areaPDF;
-                    SLRAssert(!Le.hasNaN() && !Le.hasInf(), "Le: unexpected value detected: %s", Le.toString().c_str());
+                    EDF* edf = lightPt->createEDF(wls, mem);
+                    SampledSpectrum Le = emittance * edf->evaluate(EDFQuery(), shadowDir_l);
+                    float lightPDF = lightProb * lpResult->spatialPDF();
+                    SLRAssert(Le.allFinite(), "Le: unexpected value detected: %s", Le.toString().c_str());
                     
-                    SampledSpectrum fs = bsdf->evaluate(fsQuery, shadowDir_sn);
-                    float cosLight = absDot(-shadowDir, lpResult.surfPt.gNormal);
-                    float bsdfPDF = bsdf->evaluatePDF(fsQuery, shadowDir_sn) * cosLight / dist2;
+                    SampledSpectrum abdfValue = abdf->evaluate(abdfQuery, shadowDir_sn);
+                    float cosLight = lightPt->calcCosTerm(-shadowDir);
+                    float abdfPDF = abdf->evaluatePDF(abdfQuery, shadowDir_sn) * cosLight / dist2;
                     
                     float MISWeight = 1.0f;
-                    if (!lpResult.posType.isDelta() && !std::isinf(lpResult.areaPDF))
-                        MISWeight = (lightPDF * lightPDF) / (lightPDF * lightPDF + bsdfPDF * bsdfPDF);
+                    if (!lpResult->sampledPositionType().isDelta() && !std::isinf(lpResult->spatialPDF()))
+                        MISWeight = (lightPDF * lightPDF) / (lightPDF * lightPDF + abdfPDF * abdfPDF);
                     SLRAssert(MISWeight <= 1.0f, "Invalid MIS weight: %g", MISWeight);
                     
-                    float G = absDot(shadowDir_sn, gNorm_sn) * cosLight / dist2;
-                    sp += alpha * Le * fs * (G * MISWeight / lightPDF);
-                    SLRAssert(!std::isnan(G) && !std::isinf(G), "G: unexpected value detected: %f", G);
+                    float G = interPt->calcCosTerm(shadowDir) * cosLight / dist2;
+                    sp += alpha * visibility * Le * abdfValue * (G * MISWeight / lightPDF);
+                    SLRAssert(std::isfinite(G), "G: unexpected value detected: %f", G);
                 }
             }
             
-            // get a next direction by sampling BSDF.
-            BSDFQueryResult fsResult;
-            SampledSpectrum fs = bsdf->sample(fsQuery, pathSampler.getBSDFSample(), &fsResult);
-            if (fs == SampledSpectrum::Zero || fsResult.dirPDF == 0.0f)
+            // get a next direction by sampling AbstractBDF.
+            ABDFQueryResult* abdfResult;
+            SampledSpectrum abdfValue = abdf->sample(abdfQuery, pathSampler, mem, &abdfResult);
+            if (abdfValue == SampledSpectrum::Zero || abdfResult->dirPDF == 0.0f)
                 break;
-            if (fsResult.dirType.isDispersive()) {
-                fsResult.dirPDF /= WavelengthSamples::NumComponents;
+            if (abdfResult->sampledType.isDispersive()) {
+                abdfResult->dirPDF /= WavelengthSamples::NumComponents;
                 wls.flags |= WavelengthSamples::LambdaIsSelected;
             }
-            alpha *= fs * absDot(fsResult.dir_sn, gNorm_sn) / fsResult.dirPDF;
-            SLRAssert(!alpha.hasInf() && !alpha.hasNaN(),
+            Vector3D dirIn = interPt->fromLocal(abdfResult->dirLocal);
+            alpha *= abdfValue * interPt->calcCosTerm(dirIn) / abdfResult->dirPDF;
+            SLRAssert(alpha.allFinite(),
                       "alpha: %s\nlength: %u, cos: %g, dirPDF: %g",
-                      alpha.toString().c_str(), pathLength, absDot(fsResult.dir_sn, gNorm_sn), fsResult.dirPDF);
+                      alpha.toString().c_str(), pathLength, interPt->calcCosTerm(dirIn), abdfResult->dirPDF);
             
-            Vector3D dirIn = surfPt.shadingFrame.fromLocal(fsResult.dir_sn);
-            ray = Ray(surfPt.p, dirIn, ray.time, Ray::Epsilon);
+            ray = Ray(interPt->getPosition(), dirIn, ray.time, Ray::Epsilon); // No need to adding the epsilon for medium.
             
             // find a next intersection point.
-            isect = Intersection();
-            if (!scene.intersect(ray, &isect))
+            if (!scene.interact(ray, wls, pathSampler, mem, &interact, &medThroughput, &singleWavelength))
                 break;
-            isect.getSurfacePoint(&surfPt);
             
-            dirOut_sn = surfPt.shadingFrame.toLocal(-ray.dir);
+            if (singleWavelength && !wls.lambdaSelected()) {
+                medThroughput[wls.selectedLambda] *= WavelengthSamples::NumComponents;
+                wls.flags |= WavelengthSamples::LambdaIsSelected;
+            }
+            alpha *= medThroughput;
+            
+            interPt = interact->createInteractionPoint(mem);
+            dirOut_local = interPt->toLocal(-ray.dir);
             
             // implicit light sampling
-            if (surfPt.isEmitting()) {
-                float bsdfPDF = fsResult.dirPDF;
+            if (interPt->isEmitting()) {
+                float abdfPDF = abdfResult->dirPDF;
                 
-                EDF* edf = surfPt.createEDF(wls, mem);
-                SampledSpectrum Le = surfPt.emittance(wls) * edf->evaluate(EDFQuery(), dirOut_sn);
-                float lightProb = scene.evaluateProb(Light(isect));
-                float dist2 = surfPt.getSquaredDistance(ray.org);
-                float lightPDF = lightProb * surfPt.evaluateAreaPDF() * dist2 / absDot(ray.dir, surfPt.gNormal);
-                SLRAssert(!Le.hasNaN() && !Le.hasInf(), "Le: unexpected value detected: %s", Le.toString().c_str());
+                EDF* edf = interPt->createEDF(wls, mem);
+                SampledSpectrum Le = interPt->fluxDensity(wls) * edf->evaluate(EDFQuery(), dirOut_local);
+                Light* light = interact->createLight(mem);
+                float lightProb = scene.evaluateLightProb(light);
+                float dist2 = interPt->getSquaredDistance(ray.org);
+                float lightPDF = lightProb * interPt->evaluateSpatialPDF() * dist2 / interPt->calcCosTerm(ray.dir);
+                SLRAssert(Le.allFinite(), "Le: unexpected value detected: %s", Le.toString().c_str());
                 SLRAssert(!std::isnan(lightPDF)/* && !std::isinf(lightPDF)*/, "lightPDF: unexpected value detected: %f", lightPDF);
                 
                 float MISWeight = 1.0f;
-                if (!fsResult.dirType.isDelta())
-                    MISWeight = (bsdfPDF * bsdfPDF) / (lightPDF * lightPDF + bsdfPDF * bsdfPDF);
+                if (!abdfResult->sampledType.isDelta())
+                    MISWeight = (abdfPDF * abdfPDF) / (lightPDF * lightPDF + abdfPDF * abdfPDF);
                 SLRAssert(MISWeight <= 1.0f, "Invalid MIS weight: %g", MISWeight);
                 
                 sp += alpha * Le * MISWeight;
             }
-            if (surfPt.atInfinity)
+            if (interPt->atInfinity())
                 break;
             
             // Russian roulette

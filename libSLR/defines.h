@@ -83,6 +83,7 @@ SLR_API void debugPrintf(const char* fmt, ...);
 #   define SLRAssert(expr, fmt, ...)
 #endif
 
+#define SLRAssert_ShouldNotBeCalled() SLRAssert(false, "Should not be called!")
 #define SLRAssert_NotImplemented() SLRAssert(false, "Not implemented!")
 
 #define SLR_Minimum_Machine_Alignment 16

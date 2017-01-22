@@ -13,31 +13,35 @@
 #include "nodes.h"
 
 namespace SLRSceneGraph {
-    class SLR_SCENEGRAPH_API PerspectiveCameraNode : public CameraNode {
+    class SLR_SCENEGRAPH_API PerspectiveCameraNode : public Node {
         float m_sensitivity;
         float m_aspect;
         float m_fovY;
         float m_lensRadius;
         float m_imgPlaneDistance;
         float m_objPlaneDistance;
-    public:
-        PerspectiveCameraNode(float sensitivity, float aspect, float fovY, float lensRadius, float imgPDist, float objPDist) :
-        m_sensitivity(sensitivity), m_aspect(aspect), m_fovY(fovY), m_lensRadius(lensRadius), m_imgPlaneDistance(imgPDist), m_objPlaneDistance(objPDist) { };
         
-        void applyTransform(const SLR::StaticTransform &t) final { };
-        void createCamera() final;
+        void setupRawData() override;
+    public:
+        PerspectiveCameraNode(float sensitivity, float aspect, float fovY, float lensRadius, float imgPDist, float objPDist);
+        
+        NodeRef copy() const override;
+        
+        void prepareForRendering() override;
     };
     
-    class SLR_SCENEGRAPH_API EquirectangularCameraNode : public CameraNode {
+    class SLR_SCENEGRAPH_API EquirectangularCameraNode : public Node {
         float m_sensitivity;
         float m_phiAngle;
         float m_thetaAngle;
-    public:
-        EquirectangularCameraNode(float sensitivity, float phiAngle, float thetaAngle) :
-        m_sensitivity(sensitivity), m_phiAngle(phiAngle), m_thetaAngle(thetaAngle) { };
         
-        void applyTransform(const SLR::StaticTransform &t) final { };
-        void createCamera() final;
+        void setupRawData() override;
+    public:
+        EquirectangularCameraNode(float sensitivity, float phiAngle, float thetaAngle);
+        
+        NodeRef copy() const override;
+        
+        void prepareForRendering() override;
     };    
 }
 

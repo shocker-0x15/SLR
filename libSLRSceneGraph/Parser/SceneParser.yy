@@ -189,10 +189,10 @@ ID { $$ = createShared<VariableValue>($1); }
 ;
 
 ImmValue:
-BOOL { $$ = createShared<ImmediateValue>(Element($1)); } |
-INTEGER { $$ = createShared<ImmediateValue>(Element($1)); } |
-REALNUMBER { $$ = createShared<ImmediateValue>(Element($1)); } |
-STRING { $$ = createShared<ImmediateValue>(Element($1)); }
+BOOL { $$ = createShared<ImmediateValue>(Element::create<TypeMap::Bool>($1)); } |
+INTEGER { $$ = createShared<ImmediateValue>(Element::create<TypeMap::Integer>($1)); } |
+REALNUMBER { $$ = createShared<ImmediateValue>(Element::create<TypeMap::RealNumber>($1)); } |
+STRING { $$ = createShared<ImmediateValue>(Element::create<TypeMap::String>($1)); }
 ;
 
 TupleValue:

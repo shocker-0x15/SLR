@@ -24,7 +24,7 @@ namespace SLRSceneGraph {
         Triangle(uint64_t v0, uint64_t v1, uint64_t v2) : vIdx{v0, v1, v2} {}
     };
     
-    class SLR_SCENEGRAPH_API TriangleMeshNode : public SurfaceObjectNode {
+    class SLR_SCENEGRAPH_API TriangleMeshNode : public Node {
     public:
         struct MaterialGroup {
             SurfaceMaterialRef material;
@@ -33,24 +33,21 @@ namespace SLRSceneGraph {
             std::vector<Triangle> triangles;
         };
     private:
-        SLR::Triangle* m_trianglesForRendering;
-        Vertex* m_verticesForRendering;
-        
         std::vector<Vertex> m_vertices;
         std::vector<MaterialGroup> m_matGroups;
+        
+        void setupRawData() override;
     public:
-        TriangleMeshNode() : SurfaceObjectNode(), m_trianglesForRendering(nullptr), m_verticesForRendering(nullptr) { }
-        ~TriangleMeshNode();
+        TriangleMeshNode();
         
         uint64_t addVertex(const SLR::Vertex &v);
         void addTriangles(const SurfaceMaterialRef &mat, const Normal3DTextureRef &normalMap, const FloatTextureRef &alphaMap, const std::vector<Triangle> &&triangles);
         
         NodeRef copy() const override;
         
-        void applyTransform(const SLR::StaticTransform &t) final;
+        void applyTransform(const SLR::StaticTransform &t) override;
         
-        void applyTransformForRendering(const SLR::StaticTransform &tf) override;
-        void createSurfaceObjects() final;
+        void prepareForRendering() override;
     };
 }
 

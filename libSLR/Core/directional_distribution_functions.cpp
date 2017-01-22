@@ -7,6 +7,8 @@
 
 #include "directional_distribution_functions.h"
 #include "distributions.h"
+#include "../Memory/ArenaAllocator.h"
+#include "../Core/light_path_samplers.h"
 
 namespace SLR {
     SLR_API const DirectionType DirectionType::LowFreq = DirectionType::IE_LowFreq;
@@ -51,10 +53,55 @@ namespace SLR {
                 ++numFails;
                 continue;
             }
-            ret += fs * std::fabs(fsResult.dir_sn.z) * std::fabs(dir_sn.z) / (dirPDF * fsResult.dirPDF);
+            ret += fs * std::fabs(fsResult.dirLocal.z) * std::fabs(dir_sn.z) / (dirPDF * fsResult.dirPDF);
         }
         return ret.result / (M_PI * (numSamples - numFails));
     }
+    
+    SampledSpectrum BSDF::sample(const ABDFQuery* query, LightPathSampler &sampler, ArenaAllocator &mem, ABDFQueryResult** result) const {
+        BSDFQueryResult* concreteResult = mem.create<BSDFQueryResult>();
+        // MEMO: *(const BSDFQuery*)query doesn't seem a good way.
+        SampledSpectrum ret = sample(*(const BSDFQuery*)query, sampler.getBSDFSample(), concreteResult);
+        *result = concreteResult;
+        return ret;
+    }
+    
+    SampledSpectrum BSDF::evaluate(const ABDFQuery* query, const Vector3D &dir, SampledSpectrum* rev_fs) const {
+        return evaluate(*(const BSDFQuery*)query, dir, rev_fs);
+    }
+    
+    float BSDF::evaluatePDF(const ABDFQuery* query, const Vector3D &dir, float* revPDF) const {
+        return evaluatePDF(*(const BSDFQuery*)query, dir, revPDF);
+    }
+    
+    
+    
+    SampledSpectrum VolumetricBSDF::sample(const ABDFQuery* query, LightPathSampler &sampler, ArenaAllocator &mem, ABDFQueryResult** result) const {
+        PFQueryResult concreteResult;
+        PFQuery pfQuery(query->dirLocal, query->wlHint, query->dirTypeFilter);
+        SampledSpectrum ret = m_pf->sample(pfQuery, sampler.getPFSample(), &concreteResult);
+        *result = mem.create<VolumetricBSDFQueryResult>(concreteResult);
+        return m_albedo * ret;
+    }
+    
+    SampledSpectrum VolumetricBSDF::evaluate(const ABDFQuery* query, const Vector3D &dir, SampledSpectrum* rev_fs) const {
+        PFQuery pfQuery(query->dirLocal, query->wlHint, query->dirTypeFilter);
+        SampledSpectrum ret = m_pf->evaluate(pfQuery, dir);
+        if (rev_fs)
+            *rev_fs *= m_albedo;
+        return m_albedo * ret;
+    }
+    
+    float VolumetricBSDF::evaluatePDF(const ABDFQuery* query, const Vector3D &dir, float* revPDF) const {
+        PFQuery pfQuery(query->dirLocal, query->wlHint, query->dirTypeFilter);
+        float ret = m_pf->evaluatePDF(pfQuery, dir);
+        Vector3D dirIn = pfQuery.dirLocal;
+        pfQuery.dirLocal = dir;
+        if (revPDF)
+            *revPDF = m_pf->evaluatePDF(pfQuery, dirIn);
+        return ret;
+    }
+    
     
     
     SampledSpectrum FresnelNoOp::evaluate(float cosEnter) const {
@@ -64,6 +111,8 @@ namespace SLR {
     float FresnelNoOp::evaluate(float cosEnter, uint32_t wlIdx) const {
         return 1.0f;
     }
+    
+    
     
     SampledSpectrum FresnelConductor::evaluate(float cosEnter) const {
         cosEnter = std::fabs(cosEnter);
@@ -86,6 +135,8 @@ namespace SLR {
         float Rperp2 = (tmp_f - _2EtaCosEnter + cosEnter2) / (tmp_f + _2EtaCosEnter + cosEnter2);
         return (Rparl2 + Rperp2) / 2.0f;
     }
+    
+    
     
     SampledSpectrum FresnelDielectric::evaluate(float cosEnter) const {
         cosEnter = std::clamp(cosEnter, -1.0f, 1.0f);
@@ -157,6 +208,7 @@ namespace SLR {
         float Rperp = ((etaEnter * cosEnter) - (etaExit * cosExit)) / ((etaEnter * cosEnter) + (etaExit * cosExit));
         return (Rparl * Rparl + Rperp * Rperp) / 2.0f;
     }
+    
     
     
     float GGX::sample(float u0, float u1, Normal3D* m, float* normalPDF) const {

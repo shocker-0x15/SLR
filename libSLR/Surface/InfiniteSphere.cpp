@@ -31,31 +31,32 @@ namespace SLR {
         return true;
     }
     
-    bool InfiniteSphere::intersect(const Ray &ray, Intersection *isect) const {
+    bool InfiniteSphere::intersect(const Ray &ray, SurfaceInteraction *si) const {
         if (!std::isinf(ray.distMax))
             return false;
         float theta, phi;
         ray.dir.toPolarYUp(&theta, &phi);
-        isect->dist = INFINITY;
-        isect->p = Point3D(ray.dir);
-        isect->gNormal = -ray.dir;
-        isect->u = phi;
-        isect->v = theta;
-        isect->texCoord = TexCoord2D(phi / (2 * M_PI), theta / M_PI);
+        *si = SurfaceInteraction(ray.time, // ---------------------------------- time
+                                 INFINITY, // ---------------------------------- distance
+                                 Point3D(ray.dir), // -------------------------- position in world coordinate
+                                 -ray.dir, // ---------------------------------- geometric normal in world coordinate
+                                 phi, theta, // -------------------------------- surface parameters
+                                 TexCoord2D(phi / (2 * M_PI), theta / M_PI) // - texture coordinate
+                                 );
         return true;
     }
     
-    void InfiniteSphere::getSurfacePoint(const Intersection &isect, SurfacePoint *surfPt) const {
-        surfPt->p = isect.p;
-        surfPt->atInfinity = true;
-        surfPt->gNormal = isect.gNormal;
-        surfPt->u = isect.u;
-        surfPt->v = isect.v;
-        surfPt->texCoord = isect.texCoord;
-        surfPt->texCoord0Dir = Vector3D(-std::cos(surfPt->u), 0.0f, -std::sin(surfPt->u));
-        surfPt->shadingFrame.x = surfPt->texCoord0Dir;
-        surfPt->shadingFrame.z = surfPt->gNormal;
-        surfPt->shadingFrame.y = cross(surfPt->shadingFrame.z, surfPt->shadingFrame.x);
+    void InfiniteSphere::getSurfacePoint(const SurfaceInteraction &si, SurfacePoint *surfPt) const {
+        float u, v;
+        si.getSurfaceParameter(&u, &v);
+        
+        Vector3D texCoord0Dir = Vector3D(-std::cos(u), 0.0f, -std::sin(u));
+        ReferenceFrame shadingFrame;
+        shadingFrame.x = texCoord0Dir;
+        shadingFrame.z = si.getGeometricNormal();
+        shadingFrame.y = cross(shadingFrame.z, shadingFrame.x);
+        
+        *surfPt = SurfacePoint(si, true, shadingFrame, texCoord0Dir);
     }
     
     float InfiniteSphere::area() const {

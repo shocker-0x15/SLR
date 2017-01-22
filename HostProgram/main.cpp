@@ -10,9 +10,10 @@
 #include <libSLR/defines.h>
 #include <libSLRSceneGraph/references.h>
 #include <libSLR/BasicTypes/Spectrum.h>
-#include <libSLR/Memory/ArenaAllocator.h>
 #include <libSLR/Core/Renderer.h>
 #include <libSLR/Core/RenderSettings.h>
+#include <libSLR/Scene/Scene.h>
+#include <libSLR/Memory/ArenaAllocator.h>
 #include <libSLRSceneGraph/Scene.h>
 #include <libSLRSceneGraph/API.hpp>
 
@@ -24,15 +25,16 @@ int main(int argc, const char * argv[]) {
         return -1;
     }
     
+    // print launching time
     using namespace std::chrono;
+    std::time_t ctimeLaunch = system_clock::to_time_t(system_clock::now());
+    printf("%s\n", std::ctime(&ctimeLaunch));
+    
     SLR::initSpectrum();
     
     StopWatch stopwatch;
-    StopWatchHiRes stopwatchHiRes;
     
-    std::time_t ctimeLaunch = system_clock::to_time_t(stopwatch.start());
-    printf("%s\n", std::ctime(&ctimeLaunch));
-    
+    // read a scene
     stopwatch.start();
     SLRSceneGraph::SceneRef scene = createShared<SLRSceneGraph::Scene>();
     SLRSceneGraph::RenderingContext context;
@@ -43,12 +45,7 @@ int main(int argc, const char * argv[]) {
     }
     printf("read scene: %g [s]\n", stopwatch.stop() * 1e-3f);
     
-    stopwatch.start();
-    const SLR::Scene* rawScene;
-    SLR::ArenaAllocator mem;
-    scene->build(&rawScene, mem);
-    printf("build scene: %g [s]\n", stopwatch.stop() * 1e-3f);
-    
+    // setup render settings
     SLR::RenderSettings settings;
 #ifdef DEBUG
     settings.addItem(SLR::RenderSettingItem::NumThreads, 1);
@@ -62,7 +59,12 @@ int main(int argc, const char * argv[]) {
     settings.addItem(SLR::RenderSettingItem::Brightness, context.brightness);
     settings.addItem(SLR::RenderSettingItem::RNGSeed, context.rngSeed);
     
+    scene->prepareForRendering();
+    SLR::Scene* rawScene = scene->getRaw();
+    SLR::ArenaAllocator sceneMem;
+    rawScene->build(&sceneMem);
     context.renderer->render(*rawScene, settings);
+    rawScene->destory();
     
     return 0;
 }

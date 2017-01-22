@@ -24,15 +24,15 @@ namespace SLR {
     template <typename RealType> struct CompensatedSum;
     template <typename RealType> struct RGBSamplesTemplate;
     template <typename RealType> struct RGBTemplate;
-    template <typename RealType> struct RGBStorageTemplate;
-    template <typename RealType, uint32_t N> struct ContinuousSpectrumTemplate;
-    template <typename RealType, uint32_t N> struct RegularContinuousSpectrumTemplate;
-    template <typename RealType, uint32_t N> struct IrregularContinuousSpectrumTemplate;
-    template <typename RealType, uint32_t N> struct UpsampledContinuousSpectrumTemplate;
+    template <typename RealType> class RGBStorageTemplate;
+    template <typename RealType, uint32_t N> class ContinuousSpectrumTemplate;
+    template <typename RealType, uint32_t N> class RegularContinuousSpectrumTemplate;
+    template <typename RealType, uint32_t N> class IrregularContinuousSpectrumTemplate;
+    template <typename RealType, uint32_t N> class UpsampledContinuousSpectrumTemplate;
     template <typename RealType, uint32_t N> struct WavelengthSamplesTemplate;
     template <typename RealType, uint32_t N> struct SampledSpectrumTemplate;
     template <typename RealType, uint32_t N> struct DiscretizedSpectrumTemplate;
-    template <typename RealType, uint32_t numStrata> struct SpectrumStorageTemplate;
+    template <typename RealType, uint32_t numStrata> class SpectrumStorageTemplate;
     // FIXME: Current code is inconsistent with respect to float precision.
     typedef float SpectrumFloat;
     typedef RGBTemplate<SpectrumFloat> RGBInputSpectrum;
@@ -119,36 +119,50 @@ namespace SLR {
     struct BoundingBox3D;
     struct Vertex;
     struct ReferenceFrame;
-    template <typename T> class ScopedPop;
-    struct Intersection;
-    struct SurfacePoint;
-    struct MediumPoint;
+    template <typename T> struct ScopedPop;
+    class Interaction;
+    class SurfaceInteraction;
+    class MediumInteraction;
+    class InteractionPoint;
+    class SurfacePoint;
+    class MediumPoint;
     
     // Surfaces
     class Surface;
     class Triangle;
     class InfiniteSphere;
     
+    // Media
+    class Medium;
+    class HomogeneousMedium;
+    class AchromaticExtinctionGridMedium;
+    class GridMedium;
+    class SubGridMedium;
+    class EnclosedMedium;
+    
     class Object;
     
     struct LightPosQuery;
-    struct LightPosSample;
     struct LightPosQueryResult;
+    struct SurfaceLightPosSample;
+    struct SurfaceLightPosQueryResult;
+    struct VolumetricLightPosSample;
+    struct VolumetricLightPosQueryResult;
     class Light;
+    class SurfaceLight;
+    class VolumetricLight;
     
     // Surface Objects
     class SurfaceObject;
     class SingleSurfaceObject;
+    class BumpSingleSurfaceObject;
     class InfiniteSphereSurfaceObject;
-    class SurfaceObjectAggregate;
     class TransformedSurfaceObject;
+    class SurfaceObjectAggregate;
     
     // Medium Objects
     class MediumObject;
-    class HomogeneousMediumObject;
-    class EnclosedHomogeneousMediumObject;
-    class AchromaticExtinctionGridMediumObject;
-    class GridMediumObject;
+    class SingleMediumObject;
     class MediumObjectAggregate;
     
     class Scene;
@@ -159,6 +173,7 @@ namespace SLR {
     class EquirectangularCamera;
     
     // Path Samplers
+    class FreePathSampler;
     class LightPathSampler;
     class IndependentLightPathSampler;
     
@@ -173,18 +188,28 @@ namespace SLR {
     struct EDFQuery;
     struct EDFSample;
     struct EDFQueryResult;
+    struct ABDFQuery;
+    struct ABDFSample;
+    struct ABDFReverseInfo;
+    struct ABDFQueryResult;
     struct BSDFQuery;
     struct BSDFSample;
     struct BSDFReverseInfo;
     struct BSDFQueryResult;
+    struct VolumetricBSDFQuery;
+    struct VolumetricBSDFSample;
+    struct VolumetricBSDFReverseInfo;
+    struct VolumetricBSDFQueryResult;
     struct IDFQuery;
     struct IDFSample;
     struct IDFQueryResult;
     struct PFSample;
     struct PFQueryResult;
     class EDF;
+    class AbstractBDF;
     class BSDF;
     class PhaseFunction;
+    class VolumetricBSDF;
     class IDF;
     class DiffuseEDF;
     class IBLEDF;
@@ -232,7 +257,7 @@ namespace SLR {
     class VoronoiNormal3DTexture;
     class VoronoiFloatTexture;
     
-    // Materials
+    // Surface Materials
     class SVFresnel;
     class SVFresnelNoOp;
     class SVFresnelConductor;
@@ -240,7 +265,6 @@ namespace SLR {
     class SVMicrofacetDistribution;
     class SVGGX;
     class SurfaceMaterial;
-    class EmitterSurfaceProperty;
     class DiffuseReflection;
     class SpecularReflection;
     class SpecularScattering;
@@ -250,9 +274,24 @@ namespace SLR {
     class MicrofacetScattering;
     class SummedSurfaceMaterial;
     class MixedSurfaceMaterial;
-    class EmitterSurfaceMaterial;
+    class EmitterSurfaceProperty;
     class DiffuseEmission;
     class IBLEmission;
+    class EmitterSurfaceMaterial;
+    
+    // Medium Materials
+    class MediumMaterial;
+    class EmitterMediumProperty;
+    class EmitterMediumMaterial;
+    
+    // Scene
+    class Node;
+    class InternalNode;
+    class ReferenceNode;
+    class InfiniteSphereNode;
+    class PerspectiveCameraNode;
+    class EquirectangularCameraNode;
+    class TriangleMeshNode;
     
     class RenderSettings;
     class Renderer;

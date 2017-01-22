@@ -6,12 +6,30 @@
 //
 
 #include "nodes.h"
-#include <libSLR/Core/SurfaceObject.h>
 #include <libSLR/Memory/ArenaAllocator.h>
-#include <libSLR/Core/cameras.h>
+#include <libSLR/Core/SurfaceObject.h>
+#include <libSLR/Core/MediumObject.h>
 #include <libSLR/Core/Transform.h>
+#include <libSLR/Scene/nodes.h>
 
 namespace SLRSceneGraph {
+    Node::~Node() {
+        if (m_rawData)
+            delete m_rawData;
+    }
+    
+    
+    
+    void InternalNode::setupRawData() {
+        m_rawData = new SLR::InternalNode();
+        ((SLR::InternalNode*)m_rawData)->setTransform(m_localToWorld.get());
+    }
+    
+    InternalNode::InternalNode(const TransformRef &localToWorld) :
+    m_localToWorld(localToWorld) {
+        setupRawData();
+    }
+    
     bool InternalNode::addChildNode(const NodeRef &node) {
         // Create a shared_ptr for passing it to contains() with a No-Op deleter so that "this" will not be deleted.
         NodeRef thisRef(this, [](void* ptr){});
@@ -19,20 +37,22 @@ namespace SLRSceneGraph {
             printf("This causes a circular reference.\n");
             return false;
         }
-        if (node->isInstanced()) {
+        if (node->isUniqueInTree()) {
+            if (contains(node)) {
+                printf("This node already has the given node.\n");
+                return false;
+            }
+        }
+        else {
+            // multiple instances in the same internal node make no sense.
             auto it = std::find(m_childNodes.begin(), m_childNodes.end(), node);
             if (it != m_childNodes.end()) {
                 printf("Another instanced node already exists in this node.\n");
                 return false;
             }
         }
-        else {
-            if (contains(node)) {
-                printf("This node already has the given node.\n");
-                return false;
-            }
-        }
         m_childNodes.push_back(node);
+        ((SLR::InternalNode*)m_rawData)->addChildNode(node->getRaw());
         return true;
     }
     
@@ -44,15 +64,14 @@ namespace SLRSceneGraph {
         return m_childNodes[i];
     }
     
-    
     void InternalNode::setTransform(const TransformRef &tf) {
         m_localToWorld = tf;
+        ((SLR::InternalNode*)m_rawData)->setTransform(tf.get());
     }
     
     const TransformRef InternalNode::getTransform() const {
         return m_localToWorld;
     }
-    
     
     bool InternalNode::contains(const NodeRef &obj) const {
         for (int i = 0; i < m_childNodes.size(); ++i) {
@@ -67,17 +86,25 @@ namespace SLRSceneGraph {
     }
     
     NodeRef InternalNode::copy() const {
-        InternalNodeRef ret = createShared<InternalNode>();
-        ret->m_localToWorld = TransformRef(m_localToWorld->copy());
+        InternalNodeRef ret = createShared<InternalNode>(m_localToWorld);
+        ret->m_name = m_name;
         for (int i = 0; i < m_childNodes.size(); ++i) {
             NodeRef c = m_childNodes[i]->copy();
             ret->m_childNodes.push_back(c);
         }
+        ret->setupRawData();
         return ret;
     }
     
+    void InternalNode::prepareForRendering() {
+        SLR::InternalNode &raw = *(SLR::InternalNode*)m_rawData;
+        raw.setTransform(m_localToWorld.get());
+        for (int i = 0; i < m_childNodes.size(); ++i) {
+            m_childNodes[i]->prepareForRendering();
+        }
+    }
     
-    void InternalNode::applyTransform() {
+    void InternalNode::propagateTransform() {
         TransformRef tf = getTransform();
         if (tf->isStatic()) {
             for (int i = 0; i < m_childNodes.size(); ++i)
@@ -107,95 +134,24 @@ namespace SLRSceneGraph {
         //    m_localToWorld = Matrix4x4::Identity;
     }
     
-    void InternalNode::getRenderingData(SLR::ArenaAllocator &mem, const SLR::Transform* subTF, RenderingData *data) {
-        const SLR::Transform* reduced;
-        if (subTF)
-            reduced = SLR::ChainedTransform(subTF, m_localToWorld.get()).reduce(mem);// &m_localToWorld or m_localToWorld.copy(tfMem)?
-        else
-            reduced = m_localToWorld.get();
-        
-        if (m_localToWorld->isStatic()) {
-            for (int i = 0; i < m_childNodes.size(); ++i)
-                m_childNodes[i]->getRenderingData(mem, reduced, data);
-        }
-        else {
-            RenderingData subData;
-            for (int i = 0; i < m_childNodes.size(); ++i)
-                m_childNodes[i]->getRenderingData(mem, nullptr, &subData);
-            if (subData.surfObjs.size() > 1) {
-                SLR::SurfaceObjectAggregate* aggr = mem.create<SLR::SurfaceObjectAggregate>(subData.surfObjs);
-                reduced = SLR::ChainedTransform(subTF, m_localToWorld.get()).reduce(mem);// &m_localToWorld or m_localToWorld.copy(tfMem)?
-                SLR::TransformedSurfaceObject* tfobj = mem.create<SLR::TransformedSurfaceObject>(aggr, reduced);
-                data->surfObjs.push_back(tfobj);
-            }
-            else if (subData.surfObjs.size() == 1) {
-                SLR::TransformedSurfaceObject* tfobj = mem.create<SLR::TransformedSurfaceObject>(subData.surfObjs[0], reduced);
-                data->surfObjs.push_back(tfobj);
-            }
-            
-            if (subData.camera) {
-                data->camera = subData.camera;
-                data->camTransform = SLR::ChainedTransform(reduced, subData.camTransform).reduce(mem);
-            }
-        }
+    
+    
+    void ReferenceNode::setupRawData() {
+        m_rawData = new SLR::ReferenceNode(m_node->getRaw());
     }
     
-    
-    SurfaceObjectNode::~SurfaceObjectNode() {
-        if (!m_ready)
-            return;
-        for (int i = 0; i < m_numRefinedObjs; ++i)
-            delete m_refinedObjs[i];
-        delete[] m_refinedObjs;
+    ReferenceNode::ReferenceNode(const NodeRef &node) : m_node(node) {
+        setupRawData();
     }
     
-    void SurfaceObjectNode::getRenderingData(SLR::ArenaAllocator &mem, const SLR::Transform* subTF, RenderingData *data) {
-        if (!m_ready) {
-            createSurfaceObjects();
-            m_ready = true;
-        }
-        size_t curSize = data->surfObjs.size();
-        data->surfObjs.resize(curSize + m_numRefinedObjs);
-        
-        SLR::StaticTransform transform;
-        if (subTF) {
-            SLRAssert(subTF->isStatic(), "Transformation given to SurfaceObjectNode must be static.");
-            subTF->sample(0.0f, &transform);
-        }
-        // TODO: consider SingleSurfaceObject for which analytic transform is NOT applicable.
-        applyTransformForRendering(transform);
-        for (int i = 0; i < m_numRefinedObjs; ++i) {
-            SLR::SingleSurfaceObject* obj = m_refinedObjs[i];
-            data->surfObjs[curSize + i] = obj;
-        }
+    NodeRef ReferenceNode::copy() const {
+        NodeRef ret = createShared<ReferenceNode>(m_node->copy());
+        return ret;
     }
     
-    
-    void ReferenceNode::getRenderingData(SLR::ArenaAllocator &mem, const SLR::Transform* subTF, RenderingData *data) {
-        if (!m_ready) {
-            m_node->getRenderingData(mem, nullptr, &m_subData);
-            if (m_subData.surfObjs.size() > 1)
-                m_surfObj = mem.create<SLR::SurfaceObjectAggregate>(m_subData.surfObjs);
-            else
-                m_surfObj = m_subData.surfObjs[0];
-            m_ready = true;
-        }
-        data->surfObjs.push_back(mem.create<SLR::TransformedSurfaceObject>(m_surfObj, subTF));
-    }
-    
-    
-    CameraNode::~CameraNode() {
-        if (!m_ready)
-            return;
-        delete m_camera;
-    }
-    
-    void CameraNode::getRenderingData(SLR::ArenaAllocator &mem, const SLR::Transform* subTF, RenderingData *data) {
-        if (!m_ready) {
-            createCamera();
-            m_ready = true;
-        }
-        data->camera = m_camera;
-        data->camTransform = subTF;
+    void ReferenceNode::prepareForRendering() {
+        SLR::ReferenceNode &raw = *(SLR::ReferenceNode*)m_rawData;
+        (void)raw;
+        m_node->prepareForRendering();
     }
 }

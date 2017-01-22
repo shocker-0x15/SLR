@@ -38,18 +38,24 @@ namespace SLR {
         float lx, ly;
         concentricSampleDisk(smp.uPos[0], smp.uPos[1], &lx, &ly);
         Point3D orgLocal = Point3D(m_lensRadius * lx, m_lensRadius * ly, 0.0f);
-        SurfacePoint &surfPt = result->surfPt;
-        surfPt.p = staticTF * orgLocal;
-        surfPt.atInfinity = false;
-        surfPt.gNormal = staticTF * Normal3D(0, 0, 1);
-        surfPt.u = lx;
-        surfPt.v = ly;
-        surfPt.texCoord = TexCoord2D::Zero;
-        surfPt.texCoord0Dir = Vector3D::Zero;
-        surfPt.shadingFrame.z = (Vector3D)surfPt.gNormal;
-        surfPt.shadingFrame.x = staticTF * Vector3D(1, 0, 0);// assume the transform doesn't include scaling.
-        surfPt.shadingFrame.y = cross(surfPt.shadingFrame.z, surfPt.shadingFrame.x);
-        surfPt.obj = nullptr;
+        
+        Normal3D geometricNormal = staticTF * Normal3D(0, 0, 1);
+        
+        ReferenceFrame shadingFrame;
+        shadingFrame.z = (Vector3D)geometricNormal;
+        shadingFrame.x = staticTF * Vector3D(1, 0, 0);// assume the transform doesn't include scaling.
+        shadingFrame.y = cross(shadingFrame.z, shadingFrame.x);
+        
+        result->surfPt = SurfacePoint(staticTF * orgLocal, // - position in world coordinate
+                                      false, // --------------- atInfinity
+                                      shadingFrame, // -------- shading frame
+                                      geometricNormal, // ----- geometric normal in world coordinate
+                                      lx, ly, // -------------- surface parameter
+                                      TexCoord2D::Zero, // ---- texture coordinate
+                                      Vector3D::Zero // ------- direction of texture coordinate 0
+                                      );
+        result->surfPt.setObject(nullptr);
+        
         result->posType = m_lensRadius > 0.0f ? DirectionType::LowFreq : DirectionType::Delta0D;
         result->areaPDF = m_lensRadius > 0.0f ? 1.0f / (M_PI * m_lensRadius * m_lensRadius) : 1.0f;
         
@@ -57,7 +63,9 @@ namespace SLR {
     }
     
     IDF* PerspectiveCamera::createIDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem) const {
-        return mem.create<PerspectiveIDF>(*this, Point3D(m_lensRadius * surfPt.u, m_lensRadius * surfPt.v, 0.0f));
+        float u, v;
+        surfPt.getSurfaceParameter(&u, &v);
+        return mem.create<PerspectiveIDF>(*this, Point3D(m_lensRadius * u, m_lensRadius * v, 0.0f));
     }
     
     SampledSpectrum PerspectiveIDF::sample(const IDFSample &smp, IDFQueryResult *result) const {

@@ -15,9 +15,9 @@
 namespace SLR {
     class SLR_API IsotropicPhaseFunction : public PhaseFunction {
     public:
-        SampledSpectrum sample(const Vector3D &dirOut, const PFSample &smp, PFQueryResult* result) const override;
-        SampledSpectrum evaluate(const Vector3D &dirOut, const Vector3D &dirIn) const override;
-        float evaluatePDF(const Vector3D &dirOut, const Vector3D &dirIn) const override;
+        SampledSpectrum sample(const PFQuery &query, const PFSample &smp, PFQueryResult* result) const override;
+        SampledSpectrum evaluate(const PFQuery &query, const Vector3D &dirIn) const override;
+        float evaluatePDF(const PFQuery &query, const Vector3D &dirIn) const override;
     };
     
     
@@ -27,9 +27,9 @@ namespace SLR {
     public:
         HenyeyGreensteinPhaseFunction(float g) : m_g(g) { SLRAssert(m_g != 0.0f, "g must not be equal to zero."); }
         
-        SampledSpectrum sample(const Vector3D &dirOut, const PFSample &smp, PFQueryResult* result) const override;
-        SampledSpectrum evaluate(const Vector3D &dirOut, const Vector3D &dirIn) const override;
-        float evaluatePDF(const Vector3D &dirOut, const Vector3D &dirIn) const override;
+        SampledSpectrum sample(const PFQuery &query, const PFSample &smp, PFQueryResult* result) const override;
+        SampledSpectrum evaluate(const PFQuery &query, const Vector3D &dirIn) const override;
+        float evaluatePDF(const PFQuery &query, const Vector3D &dirIn) const override;
     };
     
     
@@ -39,9 +39,9 @@ namespace SLR {
     public:
         SchlickPhaseFunction(float k) : m_k(k) { SLRAssert(k > -1.0f && k < 1.0f, "k must be in the range(-1, 1). %g", m_k); }
         
-        SampledSpectrum sample(const Vector3D &dirOut, const PFSample &smp, PFQueryResult* result) const override;
-        SampledSpectrum evaluate(const Vector3D &dirOut, const Vector3D &dirIn) const override;
-        float evaluatePDF(const Vector3D &dirOut, const Vector3D &dirIn) const override;
+        SampledSpectrum sample(const PFQuery &query, const PFSample &smp, PFQueryResult* result) const override;
+        SampledSpectrum evaluate(const PFQuery &query, const Vector3D &dirIn) const override;
+        float evaluatePDF(const PFQuery &query, const Vector3D &dirIn) const override;
     };
 }
 

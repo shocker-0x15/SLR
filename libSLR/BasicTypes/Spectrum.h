@@ -12,16 +12,19 @@
 #include "../references.h"
 
 namespace SLR {
-    //         |              Input|     Calculation|             Storage|
-    //      RGB|                RGB|             RGB|                 RGB|
-    // Spectral| ContinuousSpectrum| SampledSpectrum| DiscretizedSpectrum| + SampledWavelengths
+    //             |  RGB Rendering|  Spectral Rendering|   |            typedefs
+    // ------------+---------------+--------------------+   +--------------------
+    //        Input|            RGB|  ContinuousSpectrum| > |       InputSpectrum
+    //  Calculation|            RGB|     SampledSpectrum| > |     SampledSpectrum
+    //             | (+ RGBSamples)| + WavelengthSamples| > |   WavelengthSamples
+    // Contribution|            RGB| DiscretizedSpectrum| > | DiscretizedSpectrum
+    //      Storage|     RGBStorage|     SpectrumStorage| > |     SpectrumStorage
     
     enum class ColorSpace {
         sRGB,
         sRGB_NonLinear,
         XYZ,
         xyY,
-        uvN,// custom format for spectral upsampling
     };
     
     enum class RGBColorSpace {

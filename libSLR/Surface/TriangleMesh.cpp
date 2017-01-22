@@ -128,7 +128,7 @@ namespace SLR {
         return true;
     }
     
-    bool Triangle::intersect(const Ray &ray, Intersection* isect) const {
+    bool Triangle::intersect(const Ray &ray, SurfaceInteraction* si) const {
         const Vertex &v0 = *m_v[0];
         const Vertex &v1 = *m_v[1];
         const Vertex &v2 = *m_v[2];
@@ -167,51 +167,50 @@ namespace SLR {
                 return false;
         }
         
-        isect->dist = tt;
-        isect->p = ray.org + ray.dir * tt;
-        isect->gNormal = normalize(cross(edge01, edge02));
-        isect->u = b0;
-        isect->v = b1;
-        isect->texCoord = texCoord;
+        *si = SurfaceInteraction(ray.time, // ------------------------- time
+                                 tt, // ------------------------------- distance
+                                 ray.org + ray.dir * tt, // ----------- position in world coordinate
+                                 normalize(cross(edge01, edge02)), // - geometric normal in world coordinate
+                                 b0, b1, // --------------------------- surface parameters
+                                 texCoord //--------------------------- texture coordinate
+                                 );
         
         return true;
     }
     
-    void Triangle::getSurfacePoint(const Intersection &isect, SurfacePoint* surfPt) const {
-        surfPt->p = isect.p;
-        surfPt->atInfinity = false;
-        surfPt->gNormal = isect.gNormal;
-        surfPt->u = isect.u;
-        surfPt->v = isect.v;
-        surfPt->texCoord = isect.texCoord;
-        
+    void Triangle::getSurfacePoint(const SurfaceInteraction &si, SurfacePoint* surfPt) const {
         const Vertex &v0 = *m_v[0];
         const Vertex &v1 = *m_v[1];
         const Vertex &v2 = *m_v[2];
-        float b0 = isect.u, b1 = isect.v;
+        float b0, b1;
+        si.getSurfaceParameter(&b0, &b1);
         float b2 = 1.0f - b0 - b1;
         
         // TODO: It might be preferable to explicitly calculate this direction from texture coordinates at the setup time and add an attribute to Triangle.
+        Vector3D texCoord0Dir;
         Vector3D dP0 = v0.position - v2.position;
         Vector3D dP1 = v1.position - v2.position;
         TexCoord2D dTC0 = v0.texCoord - v2.texCoord;
         TexCoord2D dTC1 = v1.texCoord - v2.texCoord;
         float detTC = dTC0.u * dTC1.v - dTC0.v * dTC1.u;
         if (detTC != 0)
-            surfPt->texCoord0Dir = normalize((1.0f / detTC) * Vector3D(dTC1.v * dP0.x - dTC0.v * dP1.x,
-                                                                       dTC1.v * dP0.y - dTC0.v * dP1.y,
-                                                                       dTC1.v * dP0.z - dTC0.v * dP1.z));
+            texCoord0Dir = normalize((1.0f / detTC) * Vector3D(dTC1.v * dP0.x - dTC0.v * dP1.x,
+                                                               dTC1.v * dP0.y - dTC0.v * dP1.y,
+                                                               dTC1.v * dP0.z - dTC0.v * dP1.z));
         else
-            surfPt->texCoord0Dir = normalize(dP0);
+            texCoord0Dir = normalize(dP0);
         
-        surfPt->shadingFrame.z = normalize(b0 * v0.normal + b1 * v1.normal + b2 * v2.normal);
-        surfPt->shadingFrame.x = normalize(b0 * v0.tangent + b1 * v1.tangent + b2 * v2.tangent);
+        ReferenceFrame shadingFrame;
+        shadingFrame.z = normalize(b0 * v0.normal + b1 * v1.normal + b2 * v2.normal);
+        shadingFrame.x = normalize(b0 * v0.tangent + b1 * v1.tangent + b2 * v2.tangent);
         // guarantee the orthogonality between the normal and tangent.
         // Orthogonality break might be caused by barycentric interpolation?
-        float dotNT = dot(surfPt->shadingFrame.z, surfPt->shadingFrame.x);
+        float dotNT = dot(shadingFrame.z, shadingFrame.x);
         if (std::fabs(dotNT) >= 0.01f)
-            surfPt->shadingFrame.x = SLR::normalize(surfPt->shadingFrame.x - dotNT * surfPt->shadingFrame.z);
-        surfPt->shadingFrame.y = cross(surfPt->shadingFrame.z, surfPt->shadingFrame.x);
+            shadingFrame.x = normalize(shadingFrame.x - dotNT * shadingFrame.z);
+        shadingFrame.y = cross(shadingFrame.z, shadingFrame.x);
+        
+        *surfPt = SurfacePoint(si, false, shadingFrame, texCoord0Dir);
     }
     
     float Triangle::area() const {
@@ -230,32 +229,36 @@ namespace SLR {
         const Vertex v0 = *m_v[0];
         const Vertex v1 = *m_v[1];
         const Vertex v2 = *m_v[2];
-        
-        surfPt->p = b0 * v0.position + b1 * v1.position + b2 * v2.position;
-        surfPt->atInfinity = false;
-        surfPt->gNormal = cross(v1.position - v0.position, v2.position - v0.position).normalize();
-        surfPt->u = b0;
-        surfPt->v = b1;
-        surfPt->texCoord = b0 * v0.texCoord + b1 * v1.texCoord + b2 * v2.texCoord;
-        
+
         Vector3D dP0 = v0.position - v2.position;
         Vector3D dP1 = v1.position - v2.position;
         TexCoord2D dTC0 = v0.texCoord - v2.texCoord;
         TexCoord2D dTC1 = v1.texCoord - v2.texCoord;
         float invDetTC = 1.0f / (dTC0.u * dTC1.v - dTC0.v * dTC1.u);
-        surfPt->texCoord0Dir = invDetTC * Vector3D(dTC1.v * dP0.x - dTC0.v * dP1.x,
-                                                   dTC1.v * dP0.y - dTC0.v * dP1.y,
-                                                   dTC1.v * dP0.z - dTC0.v * dP1.z);
+        Vector3D texCoord0Dir = invDetTC * Vector3D(dTC1.v * dP0.x - dTC0.v * dP1.x,
+                                                    dTC1.v * dP0.y - dTC0.v * dP1.y,
+                                                    dTC1.v * dP0.z - dTC0.v * dP1.z);
         
-        surfPt->shadingFrame.z = normalize(b0 * v0.normal + b1 * v1.normal + b2 * v2.normal);
-        surfPt->shadingFrame.x = normalize(b0 * v0.tangent + b1 * v1.tangent + b2 * v2.tangent);
-        surfPt->shadingFrame.y = cross(surfPt->shadingFrame.z, surfPt->shadingFrame.x);
+        ReferenceFrame shadingFrame;
+        shadingFrame.z = normalize(b0 * v0.normal + b1 * v1.normal + b2 * v2.normal);
+        shadingFrame.x = normalize(b0 * v0.tangent + b1 * v1.tangent + b2 * v2.tangent);
+        shadingFrame.y = cross(shadingFrame.z, shadingFrame.x);
         
+        *surfPt = SurfacePoint(b0 * v0.position + b1 * v1.position + b2 * v2.position,
+                               false,
+                               shadingFrame,
+                               cross(v1.position - v0.position, v2.position - v0.position).normalize(),
+                               b0, b1,
+                               b0 * v0.texCoord + b1 * v1.texCoord + b2 * v2.texCoord,
+                               texCoord0Dir
+                               );
         *areaPDF = 1.0f / area();
     }
     
     float Triangle::evaluateAreaPDF(const SurfacePoint& surfPt) const {
-        SLRAssert(surfPt.u + surfPt.v <= 1.0f, "Invalid parameters for a triangle.");
+        float u, v;
+        surfPt.getSurfaceParameter(&u, &v);
+        SLRAssert(u + v <= 1.0f, "Invalid parameters for a triangle.");
         return 1.0f / area();
     }
 }

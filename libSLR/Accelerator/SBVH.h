@@ -414,8 +414,8 @@ namespace SLR {
             return m_bounds;
         }
         
-        bool intersect(Ray &ray, Intersection* isect) const override {
-            uint32_t objDepth = (uint32_t)isect->getObjectDepth();
+        bool intersect(Ray &ray, SurfaceInteraction* si) const override {
+            bool found = false;
             bool dirIsPositive[] = {ray.dir.x >= 0, ray.dir.y >= 0, ray.dir.z >= 0};
             
             const uint32_t StackSize = 64;
@@ -433,12 +433,21 @@ namespace SLR {
                     idxStack[depth++] = positiveDir ? node.c0 : node.c1;
                 }
                 else {
-                    for (uint32_t i = 0; i < node.numLeaves; ++i)
-                        if (m_objLists[node.offsetFirstLeaf + i]->intersect(ray, isect))
-                            ray.distMax = isect->dist;
+                    for (uint32_t i = 0; i < node.numLeaves; ++i) {
+#ifdef DEBUG
+                        if (Accelerator::traceTraverse) {
+                            debugPrintf("%s%u\n",
+                                        Accelerator::traceTraversePrefix.c_str(), node.offsetFirstLeaf + i);
+                        }
+#endif
+                        if (m_objLists[node.offsetFirstLeaf + i]->intersect(ray, si)) {
+                            found = true;
+                            ray.distMax = si->getDistance();
+                        }
+                    }
                 }
             }
-            return isect->getObjectDepth() > objDepth;
+            return found;
         }
     };    
 }

@@ -10,22 +10,22 @@
 
 namespace SLR {
     SampledSpectrum LambertianBRDF::sampleInternal(const BSDFQuery &query, float uComponent, const float uDir[2], BSDFQueryResult* result) const {
-        result->dir_sn = cosineSampleHemisphere(uDir[0], uDir[1]);
-        result->dirPDF = result->dir_sn.z / M_PI;
-        result->dirType = m_type;
-        result->dir_sn.z *= dot(query.dir_sn, query.gNormal_sn) > 0 ? 1 : -1;
+        result->dirLocal = cosineSampleHemisphere(uDir[0], uDir[1]);
+        result->dirPDF = result->dirLocal.z / M_PI;
+        result->sampledType = m_type;
+        result->dirLocal.z *= dot(query.dirLocal, query.gNormalLocal) > 0 ? 1 : -1;
         SampledSpectrum fs = m_R / M_PI;
-//        if (dot(result->dir_sn, query.gNormal_sn) < 0)
+//        if (dot(result->dirLocal, query.gNormal_sn) < 0)
 //            fs = SampledSpectrum::Zero;
         if (result->reverse) {
             result->reverse->fs = fs;
-            result->reverse->dirPDF = std::fabs(query.dir_sn.z) / M_PI;
+            result->reverse->dirPDF = std::fabs(query.dirLocal.z) / M_PI;
         }
         return fs;
     }
     
     SampledSpectrum LambertianBRDF::evaluateInternal(const BSDFQuery &query, const Vector3D &dir, SampledSpectrum* rev_fs) const {
-        if (query.dir_sn.z * dir.z <= 0.0f) {
+        if (query.dirLocal.z * dir.z <= 0.0f) {
             SampledSpectrum fs = SampledSpectrum::Zero;
             if (rev_fs)
                 *rev_fs = fs;
@@ -38,17 +38,17 @@ namespace SLR {
     }
     
     float LambertianBRDF::evaluatePDFInternal(const BSDFQuery &query, const Vector3D &dir, float* revPDF) const {
-        if (query.dir_sn.z * dir.z <= 0.0f) {
+        if (query.dirLocal.z * dir.z <= 0.0f) {
             if (revPDF)
                 *revPDF = 0.0f;
             return 0.0f;
         }
         if (revPDF)
-            *revPDF = std::fabs(query.dir_sn.z) / M_PI;
+            *revPDF = std::fabs(query.dirLocal.z) / M_PI;
         return std::abs(dir.z) / M_PI;
     }
     
-    float LambertianBRDF::weightInternal(const SLR::BSDFQuery &query) const {
+    float LambertianBRDF::weightInternal(const BSDFQuery &query) const {
         return m_R.importance(query.wlHint);
     }
     
@@ -59,10 +59,10 @@ namespace SLR {
     
     
     SampledSpectrum SpecularBRDF::sampleInternal(const BSDFQuery &query, float uComponent, const float uDir[2], BSDFQueryResult* result) const {
-        result->dir_sn = Vector3D(-query.dir_sn.x, -query.dir_sn.y, query.dir_sn.z);
+        result->dirLocal = Vector3D(-query.dirLocal.x, -query.dirLocal.y, query.dirLocal.z);
         result->dirPDF = 1.0f;
-        result->dirType = m_type;
-        SampledSpectrum fs = m_coeffR * m_fresnel.evaluate(query.dir_sn.z) / std::fabs(query.dir_sn.z);
+        result->sampledType = m_type;
+        SampledSpectrum fs = m_coeffR * m_fresnel.evaluate(query.dirLocal.z) / std::fabs(query.dirLocal.z);
         if (result->reverse) {
             result->reverse->fs = fs;
             result->reverse->dirPDF = 1.0f;
@@ -83,7 +83,7 @@ namespace SLR {
     }
     
     float SpecularBRDF::weightInternal(const BSDFQuery &query) const {
-        return m_coeffR.importance(query.wlHint) * m_fresnel.evaluate(query.dir_sn.z).importance(query.wlHint);
+        return m_coeffR.importance(query.wlHint) * m_fresnel.evaluate(query.dirLocal.z).importance(query.wlHint);
     }
     
     SampledSpectrum SpecularBRDF::getBaseColorInternal(DirectionType flags) const {
@@ -93,21 +93,21 @@ namespace SLR {
     
     
     SampledSpectrum SpecularBSDF::sampleInternal(const BSDFQuery &query, float uComponent, const float uDir[2], BSDFQueryResult* result) const {
-        SampledSpectrum F = m_fresnel.evaluate(query.dir_sn.z);
+        SampledSpectrum F = m_fresnel.evaluate(query.dirLocal.z);
         float reflectProb = F.importance(query.wlHint);
-        if (query.flags.isReflection())
+        if (query.dirTypeFilter.isReflection())
             reflectProb = 1.0f;
-        if (query.flags.isTransmission())
+        if (query.dirTypeFilter.isTransmission())
             reflectProb = 0.0f;
         if (uComponent < reflectProb) {
-            if (query.dir_sn.z == 0.0f) {
+            if (query.dirLocal.z == 0.0f) {
                 result->dirPDF = 0.0f;
                 return SampledSpectrum::Zero;
             }
-            result->dir_sn = Vector3D(-query.dir_sn.x, -query.dir_sn.y, query.dir_sn.z);
+            result->dirLocal = Vector3D(-query.dirLocal.x, -query.dirLocal.y, query.dirLocal.z);
             result->dirPDF = reflectProb;
-            result->dirType = DirectionType::Reflection | DirectionType::Delta0D;
-            SampledSpectrum fs = m_coeff * F / std::fabs(query.dir_sn.z);
+            result->sampledType = DirectionType::Reflection | DirectionType::Delta0D;
+            SampledSpectrum fs = m_coeff * F / std::fabs(query.dirLocal.z);
             if (result->reverse) {
                 result->reverse->fs = fs;
                 result->reverse->dirPDF = reflectProb;
@@ -115,11 +115,11 @@ namespace SLR {
             return fs;
         }
         else {
-            bool entering = query.dir_sn.z > 0.0f;
+            bool entering = query.dirLocal.z > 0.0f;
             float eEnter = entering ? m_fresnel.etaExt()[query.wlHint] : m_fresnel.etaInt()[query.wlHint];
             float eExit = entering ? m_fresnel.etaInt()[query.wlHint] : m_fresnel.etaExt()[query.wlHint];
             
-            float sinEnter2 = 1.0f - query.dir_sn.z * query.dir_sn.z;
+            float sinEnter2 = 1.0f - query.dirLocal.z * query.dirLocal.z;
             float rrEta = eEnter / eExit;// reciprocal of relative IOR.
             float sinExit2 = rrEta * rrEta * sinEnter2;
             
@@ -130,13 +130,13 @@ namespace SLR {
             float cosExit = std::sqrt(std::fmax(0.0f, 1.0f - sinExit2));
             if (entering)
                 cosExit = -cosExit;
-            result->dir_sn = Vector3D(rrEta * -query.dir_sn.x, rrEta * -query.dir_sn.y, cosExit);
+            result->dirLocal = Vector3D(rrEta * -query.dirLocal.x, rrEta * -query.dirLocal.y, cosExit);
             result->dirPDF = 1.0f - reflectProb;
-            result->dirType = DirectionType::Transmission | DirectionType::Delta0D | (m_type.isDispersive() ? DirectionType::Dispersive : DirectionType());
+            result->sampledType = DirectionType::Transmission | DirectionType::Delta0D | (m_type.isDispersive() ? DirectionType::Dispersive : DirectionType());
             SampledSpectrum ret = SampledSpectrum::Zero;
             ret[query.wlHint] = m_coeff[query.wlHint] * (1.0f - F[query.wlHint]);
             if (result->reverse) {
-                result->reverse->fs = ret / std::fabs(query.dir_sn.z);
+                result->reverse->fs = ret / std::fabs(query.dirLocal.z);
                 if (query.adjoint)
                     result->reverse->fs[query.wlHint] *= (eExit * eExit) / (eEnter * eEnter);
                 result->reverse->dirPDF = 1.0f - reflectProb;
@@ -160,7 +160,7 @@ namespace SLR {
         return 0.0f;
     }
     
-    float SpecularBSDF::weightInternal(const SLR::BSDFQuery &query) const {
+    float SpecularBSDF::weightInternal(const BSDFQuery &query) const {
         return m_coeff.importance(query.wlHint);
     }
     
@@ -172,17 +172,17 @@ namespace SLR {
     
     SampledSpectrum InverseBSDF::sampleInternal(const BSDFQuery &query, float uComponent, const float uDir[2], BSDFQueryResult* result) const {
         BSDFQuery mQuery = query;
-        mQuery.flags = mQuery.flags.flip();
+        mQuery.dirTypeFilter = mQuery.dirTypeFilter.flip();
         BSDFSample smp{uComponent, uDir[0], uDir[1]};
         SampledSpectrum ret = m_baseBSDF->sample(mQuery, smp, result);
-        result->dirType = result->dirType.flip();
-        result->dir_sn.z *= -1;
+        result->sampledType = result->sampledType.flip();
+        result->dirLocal.z *= -1;
         return ret;
     }
     
     SampledSpectrum InverseBSDF::evaluateInternal(const BSDFQuery &query, const Vector3D &dir, SampledSpectrum* rev_fs) const {
         BSDFQuery mQuery = query;
-        mQuery.flags = mQuery.flags.flip();
+        mQuery.dirTypeFilter = mQuery.dirTypeFilter.flip();
         Vector3D mDir = dir;
         mDir.z *= -1;
         return m_baseBSDF->evaluate(mQuery, mDir, rev_fs);
@@ -190,15 +190,15 @@ namespace SLR {
     
     float InverseBSDF::evaluatePDFInternal(const BSDFQuery &query, const Vector3D &dir, float* revPDF) const {
         BSDFQuery mQuery = query;
-        mQuery.flags.flip();
+        mQuery.dirTypeFilter.flip();
         Vector3D mDir = dir;
         mDir.z *= -1;
         return m_baseBSDF->evaluatePDF(mQuery, mDir, revPDF);
     }
     
-    float InverseBSDF::weightInternal(const SLR::BSDFQuery &query) const {
+    float InverseBSDF::weightInternal(const BSDFQuery &query) const {
         BSDFQuery mQuery = query;
-        mQuery.flags = mQuery.flags.flip();
+        mQuery.dirTypeFilter = mQuery.dirTypeFilter.flip();
         return m_baseBSDF->weight(mQuery);
     }
     

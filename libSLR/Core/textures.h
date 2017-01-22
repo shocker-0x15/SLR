@@ -17,7 +17,8 @@ namespace SLR {
     public:
         virtual ~Texture2DMapping() {}
         virtual Point3D map(const SurfacePoint &surfPt) const {
-            return Point3D(surfPt.texCoord.u, surfPt.texCoord.v, 0.0f);
+            TexCoord2D texCoord = surfPt.getTextureCoordinate();
+            return Point3D(texCoord.u, texCoord.v, 0.0f);
         }
     };
     
@@ -25,7 +26,8 @@ namespace SLR {
     public:
         virtual ~Texture3DMapping() {}
         virtual Point3D map(const SurfacePoint &surfPt) const {
-            return Point3D(surfPt.texCoord.u, surfPt.texCoord.v, 0.0f);
+            TexCoord2D texCoord = surfPt.getTextureCoordinate();
+            return Point3D(texCoord.u, texCoord.v, 0.0f);
         }
     };
     
@@ -35,8 +37,9 @@ namespace SLR {
     public:
         OffsetAndScale2DMapping(float ox, float oy, float sx, float sy) : m_offsetX(ox), m_offsetY(oy), m_scaleX(sx), m_scaleY(sy) {}
         Point3D map(const SurfacePoint &surfPt) const override {
-            return Point3D((surfPt.texCoord.u + m_offsetX) * m_scaleX,
-                           (surfPt.texCoord.v + m_offsetY) * m_scaleY,
+            TexCoord2D texCoord = surfPt.getTextureCoordinate();
+            return Point3D((texCoord.u + m_offsetX) * m_scaleX,
+                           (texCoord.v + m_offsetY) * m_scaleY,
                            0.0f);
         }
     };
@@ -45,7 +48,7 @@ namespace SLR {
     public:
         WorldPosition3DMapping() {}
         Point3D map(const SurfacePoint &surfPt) const override {
-            return surfPt.p;
+            return surfPt.getPosition();
         }
     };
     
@@ -66,7 +69,7 @@ namespace SLR {
         virtual Normal3D evaluate(const SurfacePoint &surfPt) const = 0;
         Normal3D evaluate(const TexCoord2D &tc) const {
             SurfacePoint surfPt;
-            surfPt.texCoord = tc;
+            surfPt.setTextureCoordinate(tc);
             return evaluate(surfPt);
         }
     };
@@ -78,7 +81,7 @@ namespace SLR {
         virtual float evaluate(const SurfacePoint &surfPt) const = 0;
         float evaluate(const TexCoord2D &tc) const {
             SurfacePoint surfPt;
-            surfPt.texCoord = tc;
+            surfPt.setTextureCoordinate(tc);
             return evaluate(surfPt);
         }
     };

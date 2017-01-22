@@ -15,9 +15,9 @@ namespace SLR {
         float sinphi_ay = std::sin(phi_h) / m_anisoY;
         float theta_h = std::atan(std::sqrt(-std::log(1 - uDir[0]) / (cosphi_ax * cosphi_ax + sinphi_ay * sinphi_ay)));
         Vector3D halfv = Vector3D(std::sin(theta_h) * std::cos(phi_h), std::sin(theta_h) * std::sin(phi_h), std::cos(theta_h));
-        halfv.z *= query.dir_sn.z > 0 ? 1 : -1;
-        result->dir_sn = 2 * dot(query.dir_sn, halfv) * halfv - query.dir_sn;
-        if (result->dir_sn.z * query.dir_sn.z <= 0) {
+        halfv.z *= query.dirLocal.z > 0 ? 1 : -1;
+        result->dirLocal = 2 * dot(query.dirLocal, halfv) * halfv - query.dirLocal;
+        if (result->dirLocal.z * query.dirLocal.z <= 0) {
             result->dirPDF = 0.0f;
             return SampledSpectrum::Zero;
         }
@@ -25,12 +25,12 @@ namespace SLR {
         float hx_ax = halfv.x / m_anisoX;
         float hy_ay = halfv.y / m_anisoY;
         float dotHN = std::fabs(halfv.z);
-        float dotHI = dot(halfv, result->dir_sn);
+        float dotHI = dot(halfv, result->dirLocal);
         float numerator = std::exp(-(hx_ax * hx_ax + hy_ay * hy_ay) / (dotHN * dotHN));
         float commonDenom = 4 * M_PI * m_anisoX * m_anisoY * dotHI * dotHN * dotHN * dotHN;
         
         result->dirPDF = numerator / commonDenom;
-        result->dirType = m_type;
+        result->sampledType = m_type;
         SampledSpectrum fs = m_R * (numerator / (commonDenom * dotHI * dotHN));
         if (result->reverse) {
             result->reverse->fs = fs;
@@ -40,12 +40,12 @@ namespace SLR {
     }
     
     SampledSpectrum ModifiedWardDurBRDF::evaluateInternal(const BSDFQuery &query, const Vector3D &dir, SampledSpectrum* rev_fs) const {
-        if (dir.z * query.dir_sn.z <= 0) {
+        if (dir.z * query.dirLocal.z <= 0) {
             if (rev_fs)
                 *rev_fs = SampledSpectrum::Zero;
             return SampledSpectrum::Zero;
         }
-        Vector3D halfv = normalize(query.dir_sn + dir);
+        Vector3D halfv = normalize(query.dirLocal + dir);
         float hx_ax = halfv.x / m_anisoX;
         float hy_ay = halfv.y / m_anisoY;
         float dotHN = std::fabs(halfv.z);
@@ -59,12 +59,12 @@ namespace SLR {
     }
     
     float ModifiedWardDurBRDF::evaluatePDFInternal(const BSDFQuery &query, const Vector3D &dir, float* revPDF) const {
-        if (dir.z * query.dir_sn.z <= 0) {
+        if (dir.z * query.dirLocal.z <= 0) {
             if (revPDF)
                 *revPDF = 0.0f;
             return 0.0f;
         }
-        Vector3D halfv = normalize(query.dir_sn + dir);
+        Vector3D halfv = normalize(query.dirLocal + dir);
         float hx_ax = halfv.x / m_anisoX;
         float hy_ay = halfv.y / m_anisoY;
         float dotHN = std::fabs(halfv.z);
@@ -77,7 +77,7 @@ namespace SLR {
         return ret;
     }
 
-    float ModifiedWardDurBRDF::weightInternal(const SLR::BSDFQuery &query) const {
+    float ModifiedWardDurBRDF::weightInternal(const BSDFQuery &query) const {
         return m_R.importance(query.wlHint);
     }
     

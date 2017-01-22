@@ -167,15 +167,20 @@ namespace SLR {
     
     
     template <typename RealType>
-    struct SLR_API RGBStorageTemplate {
+    class SLR_API RGBStorageTemplate {
         CompensatedSum<RGBTemplate<RealType>> value;
         
+    public:
         RGBStorageTemplate(const RGBTemplate<RealType> &v = RGBTemplate<RealType>::Zero) :
         value(v) {}
         
         RGBStorageTemplate &add(const RGBSamplesTemplate<RealType> &wls, const RGBTemplate<RealType> &val) {
             value += val;
             return *this;
+        }
+        
+        CompensatedSum<RGBTemplate<RealType>> &getValue() {
+            return value;
         }
     };    
 }

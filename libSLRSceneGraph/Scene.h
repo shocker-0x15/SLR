@@ -5,27 +5,28 @@
 //  Copyright (c) 2015年 渡部 心. All rights reserved.
 //
 
-#ifndef __SLRSceneGraph__Scene__
-#define __SLRSceneGraph__Scene__
+#ifndef __SLRSceneGraph_Scene__
+#define __SLRSceneGraph_Scene__
 
 #include <libSLR/defines.h>
 #include "references.h"
 
 namespace SLRSceneGraph {
     class SLR_SCENEGRAPH_API Scene {
+        SLR::Scene* m_raw;
         InternalNodeRef m_rootNode;
         InfiniteSphereNodeRef m_envNode;
-        std::unique_ptr<SLR::Scene> m_raw;
     public:
         Scene();
         ~Scene();
         
-        InternalNodeRef &rootNode() { return m_rootNode; };
-        void setEnvNode(const InfiniteSphereNodeRef &node) { m_envNode = node; };
+        InternalNodeRef &rootNode() {
+            return m_rootNode;
+        }
+        void setEnvironmentNode(const InfiniteSphereNodeRef &node);
         
-        void build(const SLR::Scene** scene, SLR::ArenaAllocator &mem);
-        
-        const SLR::Scene* raw() const { return m_raw.get(); }
+        void prepareForRendering();
+        SLR::Scene* getRaw() const { return m_raw; }
     };
     
     struct SLR_SCENEGRAPH_API RenderingContext {

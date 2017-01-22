@@ -1,5 +1,6 @@
 //setRenderer("method": "PT", ("samples": 16384,));
-setRenderer("method": "BPT", ("samples": 16384,));
+setRenderer("method": "BPT", ("samples": 1,));
+//setRenderer("method": "debug", (("geometric normal", "shading normal"),));
 setRenderSettings("width": 1920, "height": 1080, "brightness": 2.0);
 
 setEnvironment("images/Malibu_Overlook_3k_corrected.exr");
@@ -79,8 +80,10 @@ function lowpolyTreeMaterial(name, attrs) {
     return createSurfaceMaterial("Ashikhmin", (RdTex, RsTex, nxTex, nyTex));
 }
 lowpolyTree = load3DModel("models/lowpoly_tree.assbin", lowpolyTreeMaterial);
-setTransform(lowpolyTree, translate(0.3727, 0.8596, 0.8495) * scale(0.25));
-addChild(root, lowpolyTree);
+lowpolyTreeTFNode = createNode();
+addChild(lowpolyTreeTFNode, lowpolyTree);
+setTransform(lowpolyTreeTFNode, translate(0.3727, 0.8596, 0.8495) * scale(0.25));
+addChild(root, lowpolyTreeTFNode);
 
 function toyCarMaterial(name, attrs) {
     difCol = attrs["diffuse color"];
@@ -90,13 +93,15 @@ function toyCarMaterial(name, attrs) {
     return createSurfaceMaterial("Ashikhmin", (RdTex, RsTex, nxTex, nyTex));
 }
 toyCar = load3DModel("models/toycar.assbin", toyCarMaterial);
-setTransform(toyCar, 
+toyCarTFNode = createNode();
+addChild(toyCarTFNode, toyCar);
+setTransform(toyCarTFNode, 
              translate(0.0, 0.72593, 1.4) * 
              rotateZ(0.0) * 
              rotateY(105.319 * 3.1415926536 / 180.0) * 
              rotateX(-16.663 * 3.1415926536 / 180.0) *
              scale(0.1));
-//addChild(root, toyCar);
+//addChild(root, toyCarTFNode);
 
 cameraNode = createNode();
 camera = createPerspectiveCamera("aspect": 16.0 / 9.0, "fovY": 0.5235987756, "radius": 0.0025, 

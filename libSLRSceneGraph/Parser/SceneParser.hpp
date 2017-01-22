@@ -34,10 +34,8 @@ namespace SLRSceneGraph {
         FloatTexture,
         SurfaceMaterial,
         EmitterSurfaceProperty,
-        Mesh,
-        Camera,
         Node,
-        ReferenceNode,
+        InternalNode,
         Tuple,
         Function, 
         Any,
@@ -48,7 +46,13 @@ namespace SLRSceneGraph {
     std::ostream &operator<<(std::ostream &out, Type t);
     
     namespace TypeMap {
-#define TypeMapDef(TypeName, InternalTypeName) struct TypeName { enum : uint32_t { Value = (uint32_t)Type::TypeName }; typedef InternalTypeName InternalType; };
+#define TypeMapDef(TypeName, InternalTypeName) \
+    struct TypeName { \
+        enum : uint32_t { \
+            Value = (uint32_t)Type::TypeName \
+        }; \
+        typedef InternalTypeName InternalType; \
+    };
         TypeMapDef(Bool, bool);
         TypeMapDef(Integer, int32_t);
         TypeMapDef(RealNumber, double);
@@ -68,10 +72,8 @@ namespace SLRSceneGraph {
         TypeMapDef(FloatTexture, SLRSceneGraph::FloatTexture);
         TypeMapDef(SurfaceMaterial, SLRSceneGraph::SurfaceMaterial);
         TypeMapDef(EmitterSurfaceProperty, SLRSceneGraph::EmitterSurfaceProperty);
-        TypeMapDef(Mesh, SLRSceneGraph::TriangleMeshNode);
-        TypeMapDef(Camera, SLRSceneGraph::CameraNode);
-        TypeMapDef(Node, SLRSceneGraph::InternalNode);
-        TypeMapDef(ReferenceNode, SLRSceneGraph::ReferenceNode);
+        TypeMapDef(Node, SLRSceneGraph::Node);
+        TypeMapDef(InternalNode, SLRSceneGraph::InternalNode);
         TypeMapDef(Tuple, SLRSceneGraph::ParameterList);
         TypeMapDef(Function, SLRSceneGraph::Function);
         TypeMapDef(Void, void);
@@ -103,14 +105,27 @@ namespace SLRSceneGraph {
         Element(const SLR::Point3D &val);
         Element(const SLR::Vector3D &val);
         Element(const SLR::Normal3D &val);
-        Element(const std::string &val) : type(Type::String), valueRef(createShared<std::string>(val)) { }
+        //Element(const std::string &val) : type(Type::String), valueRef(createShared<std::string>(val)) { }
         Element(const ErrorMessage &val) : type(Type::Error), valueRef(createShared<ErrorMessage>(val)) { }
         
         Element() : type(Type::Void), valueRef(nullptr) { }
+        template <typename T>
+        Element(Type t, const std::shared_ptr<T> &ref) : type(t), valueRef(ref) { }
+        // This is danger because there is a possibility that the destructor of an rvalue passed as "val" runs.
+//        template <typename Map>
+//        Element(Map dummy, const typename Map::InternalType &val) : type((Type)Map::Value), valueRef(createShared<typename Map::InternalType>(val)) { }
+        template <typename Map, typename ...ArgTypes>
+        static Element create(ArgTypes&&... args) {
+            Element ret((Type)Map::Value, createShared<typename Map::InternalType>(args...));
+            return ret;
+        }
         template <typename Map>
-        Element(Map dummy, const typename Map::InternalType &val) : type((Type)Map::Value), valueRef(createShared<typename Map::InternalType>(val)) { }
-        template <typename Map>
-        Element(Map dummy, const std::shared_ptr<typename Map::InternalType> &valRef = nullptr) : type((Type)Map::Value), valueRef(valRef) { }
+        static Element createFromReference(const std::shared_ptr<typename Map::InternalType> &ref) {
+            Element ret((Type)Map::Value, ref);
+            return ret;
+        }
+//        template <typename Map>
+//        Element(Map dummy, const std::shared_ptr<typename Map::InternalType> &valRef = nullptr) : type((Type)Map::Value), valueRef(valRef) { }
 //        Element(Type t = Type::Void, const std::shared_ptr<void> &vr = nullptr) : type(t), valueRef(vr) { };
         
         template <typename Map>
@@ -218,7 +233,9 @@ namespace SLRSceneGraph {
     bool mapParamsToArgs(const ParameterList &params, const std::vector<ArgInfo> signature, std::map<std::string, Element>* args);
     
     class Function {
+    public:
         typedef std::function<Element(const std::map<std::string, Element> &, ExecuteContext &, ErrorMessage*)> Procedure;
+    private:
         
 		// workaround: MSVC(VS2015 Update1) fails to compile the 3rd constructor.
 #ifdef SLR_Platform_Windows_MSVC

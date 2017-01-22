@@ -13,11 +13,13 @@
 #include "../Core/RandomNumberGenerator.h"
 #include "../Core/cameras.h"
 #include "../Core/light_path_samplers.h"
-#include "../Core/Scene.h"
 #include "../Core/ProgressReporter.h"
+#include "../Scene/Scene.h"
 #include "../Memory/ArenaAllocator.h"
 #include "../Helper/ThreadPool.h"
 #include "../RNGs/XORShiftRNG.h"
+
+#include "../Core/Accelerator.h"
 
 namespace SLR {
     DebugRenderer::DebugRenderer(bool channelFlags[(int)ExtraChannel::NumChannels]) {
@@ -60,7 +62,7 @@ namespace SLR {
 //        ProgressReporter reporter("Rendering", 1);
         
         DefaultAllocator &defMem = DefaultAllocator::instance();
-        std::array<std::unique_ptr<Image2D, Allocator::DeleterType>, (int)ExtraChannel::NumChannels> chImages;
+        std::array<std::unique_ptr<TiledImage2D, Allocator::DeleterType<TiledImage2D>>, (int)ExtraChannel::NumChannels> chImages;
         for (int i = 0; i < m_channels.size(); ++i) {
             if (!m_channels[i]) {
                 chImages[i] = nullptr;
@@ -130,6 +132,11 @@ namespace SLR {
                 float time = pathSampler.getTimeSample(timeStart, timeEnd);
                 PixelPosition p = pathSampler.getPixelPositionSample(basePixelX + lx, basePixelY + ly);
                 
+//                if (basePixelX + lx == 1032 && basePixelY + ly == 744) {
+//                    Accelerator::traceTraverse = true;
+//                    printf("");
+//                }
+                
                 float selectWLPDF;
                 WavelengthSamples wls = WavelengthSamples::createWithEqualOffsets(pathSampler.getWavelengthSample(), pathSampler.getWLSelectionSample(), &selectWLPDF);
                 
@@ -144,7 +151,7 @@ namespace SLR {
                 SampledSpectrum We1 = idf->sample(WeSample, &WeResult);
                 (void)We1;
                 
-                Ray ray(lensResult.surfPt.p, lensResult.surfPt.shadingFrame.fromLocal(WeResult.dirLocal), time);
+                Ray ray(lensResult.surfPt.getPosition(), lensResult.surfPt.fromLocal(WeResult.dirLocal), time);
                 DebugInfo info = contribution(*scene, wls, ray, pathSampler, mem);
                 
                 for (int i = 0; i < renderer->m_channels.size(); ++i) {
@@ -154,25 +161,28 @@ namespace SLR {
                     switch ((ExtraChannel)i) {
                         case ExtraChannel::GeometricNormal: {
                             RGB8x3 val;
-                            val.r = (uint8_t)std::clamp((0.5f * info.surfPt.gNormal.x + 0.5f) * 255, 0.0f, 255.0f);
-                            val.g = (uint8_t)std::clamp((0.5f * info.surfPt.gNormal.y + 0.5f) * 255, 0.0f, 255.0f);
-                            val.b = (uint8_t)std::clamp((0.5f * info.surfPt.gNormal.z + 0.5f) * 255, 0.0f, 255.0f);
+                            Normal3D gNormal = info.surfPt.getGeometricNormal();
+                            val.r = (uint8_t)std::clamp((0.5f * gNormal.x + 0.5f) * 255, 0.0f, 255.0f);
+                            val.g = (uint8_t)std::clamp((0.5f * gNormal.y + 0.5f) * 255, 0.0f, 255.0f);
+                            val.b = (uint8_t)std::clamp((0.5f * gNormal.z + 0.5f) * 255, 0.0f, 255.0f);
                             chImg->set((int)p.x, (int)p.y, val);
                             break;
                         }
                         case ExtraChannel::ShadingNormal: {
                             RGB8x3 val;
-                            val.r = (uint8_t)std::clamp((0.5f * info.surfPt.shadingFrame.z.x + 0.5f) * 255, 0.0f, 255.0f);
-                            val.g = (uint8_t)std::clamp((0.5f * info.surfPt.shadingFrame.z.y + 0.5f) * 255, 0.0f, 255.0f);
-                            val.b = (uint8_t)std::clamp((0.5f * info.surfPt.shadingFrame.z.z + 0.5f) * 255, 0.0f, 255.0f);
+                            Normal3D shadingNormal = info.surfPt.getShadingFrame().z;
+                            val.r = (uint8_t)std::clamp((0.5f * shadingNormal.x + 0.5f) * 255, 0.0f, 255.0f);
+                            val.g = (uint8_t)std::clamp((0.5f * shadingNormal.y + 0.5f) * 255, 0.0f, 255.0f);
+                            val.b = (uint8_t)std::clamp((0.5f * shadingNormal.z + 0.5f) * 255, 0.0f, 255.0f);
                             chImg->set((int)p.x, (int)p.y, val);
                             break;
                         }
                         case ExtraChannel::ShadingTangent: {
                             RGB8x3 val;
-                            val.r = (uint8_t)std::clamp((0.5f * info.surfPt.shadingFrame.x.x + 0.5f) * 255, 0.0f, 255.0f);
-                            val.g = (uint8_t)std::clamp((0.5f * info.surfPt.shadingFrame.x.y + 0.5f) * 255, 0.0f, 255.0f);
-                            val.b = (uint8_t)std::clamp((0.5f * info.surfPt.shadingFrame.x.z + 0.5f) * 255, 0.0f, 255.0f);
+                            Normal3D shadingTangent = info.surfPt.getShadingFrame().x;
+                            val.r = (uint8_t)std::clamp((0.5f * shadingTangent.x + 0.5f) * 255, 0.0f, 255.0f);
+                            val.g = (uint8_t)std::clamp((0.5f * shadingTangent.y + 0.5f) * 255, 0.0f, 255.0f);
+                            val.b = (uint8_t)std::clamp((0.5f * shadingTangent.z + 0.5f) * 255, 0.0f, 255.0f);
                             chImg->set((int)p.x, (int)p.y, val);
                             break;
                         }
@@ -199,10 +209,10 @@ namespace SLR {
         
         DebugInfo ret;
         
-        Intersection isect;
-        if (!scene.intersect(ray, &isect))
+        SurfaceInteraction si;
+        if (!scene.intersect(ray, &si))
             return DebugInfo();
-        isect.getSurfacePoint(&surfPt);
+        si.getSurfacePoint(&surfPt);
         ret.surfPt = surfPt;
         
         return ret;

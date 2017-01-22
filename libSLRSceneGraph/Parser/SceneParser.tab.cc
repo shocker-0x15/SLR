@@ -1141,25 +1141,25 @@ namespace SLRSceneGraph {
 
   case 48:
 #line 192 "SceneParser.yy" // lalr1.cc:859
-    { yylhs.value.as< ValueRef > () = createShared<ImmediateValue>(Element(yystack_[0].value.as< bool > ())); }
+    { yylhs.value.as< ValueRef > () = createShared<ImmediateValue>(Element::create<TypeMap::Bool>(yystack_[0].value.as< bool > ())); }
 #line 1146 "SceneParser.tab.cc" // lalr1.cc:859
     break;
 
   case 49:
 #line 193 "SceneParser.yy" // lalr1.cc:859
-    { yylhs.value.as< ValueRef > () = createShared<ImmediateValue>(Element(yystack_[0].value.as< int32_t > ())); }
+    { yylhs.value.as< ValueRef > () = createShared<ImmediateValue>(Element::create<TypeMap::Integer>(yystack_[0].value.as< int32_t > ())); }
 #line 1152 "SceneParser.tab.cc" // lalr1.cc:859
     break;
 
   case 50:
 #line 194 "SceneParser.yy" // lalr1.cc:859
-    { yylhs.value.as< ValueRef > () = createShared<ImmediateValue>(Element(yystack_[0].value.as< double > ())); }
+    { yylhs.value.as< ValueRef > () = createShared<ImmediateValue>(Element::create<TypeMap::RealNumber>(yystack_[0].value.as< double > ())); }
 #line 1158 "SceneParser.tab.cc" // lalr1.cc:859
     break;
 
   case 51:
 #line 195 "SceneParser.yy" // lalr1.cc:859
-    { yylhs.value.as< ValueRef > () = createShared<ImmediateValue>(Element(yystack_[0].value.as< std::string > ())); }
+    { yylhs.value.as< ValueRef > () = createShared<ImmediateValue>(Element::create<TypeMap::String>(yystack_[0].value.as< std::string > ())); }
 #line 1164 "SceneParser.tab.cc" // lalr1.cc:859
     break;
 

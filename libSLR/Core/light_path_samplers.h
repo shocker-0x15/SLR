@@ -13,6 +13,7 @@
 #include "cameras.h"
 #include "directional_distribution_functions.h"
 #include "SurfaceObject.h"
+#include "MediumObject.h"
 
 #include "../RNGs/XORShiftRNG.h"
 
@@ -34,19 +35,30 @@ namespace SLR {
         virtual IDFSample getIDFSample() = 0;
         virtual BSDFSample getBSDFSample() = 0;
         virtual PFSample getPFSample() = 0;
+        virtual FreePathSampler &getFreePathSampler() = 0;
         virtual float getPathTerminationSample() = 0;
         virtual float getLightSelectionSample() = 0;
-        virtual LightPosSample getLightPosSample() = 0;
+        virtual SurfaceLightPosSample getSurfaceLightPosSample() = 0;
+        virtual VolumetricLightPosSample getVolumetricLightPosSample() = 0;
         virtual EDFSample getEDFSample() = 0;
+    };
+    
+    class SLR_API FreePathSampler {
+        XORShiftRNG &m_rng;
+    public:
+        FreePathSampler(XORShiftRNG& rng) : m_rng(rng) { }
+        
+        float getSample() { return m_rng.getFloat0cTo1o(); }
     };
     
     
     
     class SLR_API IndependentLightPathSampler : public LightPathSampler {
         XORShiftRNG m_rng;
+        FreePathSampler m_freePathSampler;
     public:
-        IndependentLightPathSampler() { }
-        IndependentLightPathSampler(uint32_t seed) : m_rng(seed) { }
+        IndependentLightPathSampler() :m_rng() , m_freePathSampler(m_rng) { }
+        IndependentLightPathSampler(uint32_t seed) : m_rng(seed), m_freePathSampler(m_rng) { }
         
         float getTimeSample(float timeBegin, float timeEnd) override { float v = m_rng.getFloat0cTo1o(); return timeBegin * (1 - v) + timeEnd * v; }
         PixelPosition getPixelPositionSample(uint32_t baseX, uint32_t baseY) override { return PixelPosition(baseX + m_rng.getFloat0cTo1o(), baseY + m_rng.getFloat0cTo1o()); }
@@ -56,9 +68,11 @@ namespace SLR {
         IDFSample getIDFSample() override { return IDFSample(m_rng.getFloat0cTo1o(), m_rng.getFloat0cTo1o()); }
         BSDFSample getBSDFSample() override { return BSDFSample(m_rng.getFloat0cTo1o(), m_rng.getFloat0cTo1o(), m_rng.getFloat0cTo1o()); }
         PFSample getPFSample() override { return PFSample(m_rng.getFloat0cTo1o(), m_rng.getFloat0cTo1o()); }
+        FreePathSampler &getFreePathSampler() override { return m_freePathSampler; }
         float getPathTerminationSample() override { return m_rng.getFloat0cTo1o(); }
         float getLightSelectionSample() override { return m_rng.getFloat0cTo1o(); }
-        LightPosSample getLightPosSample() override { return LightPosSample(m_rng.getFloat0cTo1o(), m_rng.getFloat0cTo1o()); }
+        SurfaceLightPosSample getSurfaceLightPosSample() override { return SurfaceLightPosSample(m_rng.getFloat0cTo1o(), m_rng.getFloat0cTo1o()); }
+        VolumetricLightPosSample getVolumetricLightPosSample() override { return VolumetricLightPosSample(m_rng.getFloat0cTo1o(), m_rng.getFloat0cTo1o(), m_rng.getFloat0cTo1o()); }
         EDFSample getEDFSample() override { return EDFSample(m_rng.getFloat0cTo1o(), m_rng.getFloat0cTo1o(), m_rng.getFloat0cTo1o()); }
     };
 }

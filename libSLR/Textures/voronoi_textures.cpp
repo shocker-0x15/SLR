@@ -25,7 +25,7 @@ namespace SLR {
         return hash;
     }
     
-    static uint64_t getFNV1Hash64(uint8_t *bytes, size_t length) {
+    static inline uint64_t getFNV1Hash64(uint8_t *bytes, size_t length) {
         uint64_t hash = FNV_OFFSET_BASIS_64;
         for (int i = 0; i < length; ++i)
             hash = (FNV_PRIME_64 * hash) ^ (bytes[i]);

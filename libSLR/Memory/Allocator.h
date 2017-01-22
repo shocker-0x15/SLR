@@ -14,7 +14,7 @@
 namespace SLR {
     class SLR_API Allocator {
     public:
-        typedef std::function<void(void*)> DeleterType;
+        template <typename T> using DeleterType = std::function<void(T*)>;
         
         virtual void* alloc(uintptr_t size, uintptr_t align) = 0;
         virtual void free(void* ptr) = 0;
@@ -22,41 +22,46 @@ namespace SLR {
         template <typename T>
         T* alloc(size_t numElems = 1, uintptr_t align = alignof(T)) {
             return (T*)alloc(numElems * sizeof(T), align);
-        };
+        }
         template <typename T, typename ...ArgTypes>
         T* create(ArgTypes&&... args) {
             T* ptr = alloc<T>();
             new (ptr) T(std::forward<ArgTypes>(args)...);
             return ptr;
-        };
+        }
+        template <typename T>
+        void destroy(T* ptr) {
+            ptr->~T();
+            free(ptr);
+        }
         
         template <typename T, typename ...ArgTypes>
         std::shared_ptr<T> createShared(ArgTypes&&... args) {
             T* rawPtr = alloc<T>();
             new (rawPtr) T(std::forward<ArgTypes>(args)...);
-            std::function<void(void*)> deleter = std::bind(&Allocator::free, this, std::placeholders::_1);
+            std::function<void(void*)> deleter = std::bind(&Allocator::destroy<T>, this, std::placeholders::_1);
             return std::shared_ptr<T>(rawPtr, deleter);
-        };
+        }
         
         template <typename T, typename ...ArgTypes>
-        std::unique_ptr<T, DeleterType> createUnique(ArgTypes&&... args) {
+        std::unique_ptr<T, DeleterType<T>> createUnique(ArgTypes&&... args) {
             T* rawPtr = alloc<T>();
             new (rawPtr) T(std::forward<ArgTypes>(args)...);
-            DeleterType deleter = std::bind(&Allocator::free, this, std::placeholders::_1);
-            return std::unique_ptr<T, DeleterType>(rawPtr, deleter);
-        };
+            DeleterType<T> deleter = std::bind(&Allocator::destroy<T>, this, std::placeholders::_1);
+            return std::unique_ptr<T, DeleterType<T>>(rawPtr, deleter);
+        }
     };
     
     class DefaultAllocator : public Allocator {
         DefaultAllocator() { };
     public:
-        void* alloc(uintptr_t size, uintptr_t align) override { return SLR_memalign(size, align); };
-        void free(void* ptr) override { SLR_freealign(ptr); };
+        void* alloc(uintptr_t size, uintptr_t align) override { return SLR_memalign(size, align); }
+        void free(void* ptr) override { SLR_freealign(ptr); }
         
         static DefaultAllocator &instance() {
             static DefaultAllocator s_instance;
             return s_instance;
-        };
+        }
     };    
 }
 

@@ -52,17 +52,11 @@ namespace SLRSceneGraph {
             case Type::EmitterSurfaceProperty:
                 out << "EmitterSurfaceProperty";
                 break;
-            case Type::Mesh:
-                out << "Mesh";
-                break;
-            case Type::Camera:
-                out << "Camera";
-                break;
             case Type::Node:
                 out << "Node";
                 break;
-            case Type::ReferenceNode:
-                out << "ReferenceNode";
+            case Type::InternalNode:
+                out << "InternalNode";
                 break;
             case Type::Tuple:
                 out << "Tuple";
@@ -129,17 +123,11 @@ namespace SLRSceneGraph {
             case Type::EmitterSurfaceProperty:
                 out << "EmitterSurfaceProperty";
                 break;
-            case Type::Mesh:
-                out << "Mesh";
-                break;
-            case Type::Camera:
-                out << "Camera";
-                break;
             case Type::Node:
                 out << "Node";
                 break;
-            case Type::ReferenceNode:
-                out << "ReferenceNode";
+            case Type::InternalNode:
+                out << "InternalNode";
                 break;
             case Type::Tuple:
                 out << elem.raw<TypeMap::Tuple>();
@@ -399,54 +387,77 @@ namespace SLRSceneGraph {
     bool mapParamsToArgs(const ParameterList &params, const std::vector<ArgInfo> signature, std::map<std::string, Element>* args) {
         args->clear();
         size_t numArgs = signature.size();
-        std::vector<bool> assigned(numArgs, false);
+        std::vector<bool> assignedFlags(numArgs, false);
+        std::map<std::string, bool> namedUsedFlags;
+        for (auto &it : params.named)
+            namedUsedFlags[it.first] = false;
         
         // find key-matched arguments defined in the function signature.
-        for (auto namedParam : params.named) {
-            const std::string key = namedParam.first;
-            const Element value = namedParam.second;
-            size_t idx = std::distance(std::begin(signature),
-                                       std::find_if(std::begin(signature), std::end(signature),
-                                                    [&key, &value](const ArgInfo &arg) {
-                                                        return arg.name == key && (value.isConvertibleTo(arg.expectedType) || arg.expectedType == Type::Any);
-                                                    }));
-            // If params has a key which does not defined in the signatures, the mapping fails.
-            if (idx == numArgs) {
+        for (auto it = std::begin(signature); it != std::end(signature); ++it) {
+            int argIdx = (int)std::distance(std::begin(signature), it);
+            const ArgInfo argInfo = *it;
+            // not found
+            if (params(argInfo.name).type == Type::Void)
+                continue;
+            const Element &value = params(argInfo.name, argInfo.expectedType);
+            // found, but not compatible
+            if (value.type == Type::Void) {
                 args->clear();
                 return false;
             }
-            const ArgInfo &argInfo = signature[idx];
-            (*args)[argInfo.name] = argInfo.expectedType == Type::Any ? value : value.as(argInfo.expectedType);
-            assigned[idx] = true;
+            (*args)[argInfo.name] = value;
+            assignedFlags[argIdx] = true;
+            namedUsedFlags[argInfo.name] = true;
+        }
+        // There is an unnecessary named parameter.
+        for (const auto &it : namedUsedFlags) {
+            if (!it.second) {
+                args->clear();
+                return false;
+            }
         }
         // find arguments which have not assigned a value.
-        for (auto it = std::begin(params.unnamed); it != std::end(params.unnamed); ++it) {
-            const Element &value = *it;
-            size_t idx = std::distance(std::begin(signature),
-                                       std::find_if(std::begin(signature), std::end(signature),
-                                                    [&signature, &value, &assigned](const ArgInfo &arg) {
-                                                        size_t curIdx = std::distance(&signature[0], &arg);
-                                                        return assigned[curIdx] == false && (value.isConvertibleTo(arg.expectedType) || arg.expectedType == Type::Any);
-                                                    }));
-            // If params has an extra parameters, the mapping fails.
-            if (idx == numArgs) {
-                args->clear();
-                return false;
-            }
-            const ArgInfo &argInfo = signature[idx];
-            (*args)[argInfo.name] = argInfo.expectedType == Type::Any ? value : value.as(argInfo.expectedType);
-            assigned[idx] = true;
-        }
-        // If there are arguments they have not assigned yet and does not have default values, the mapping fails.
-        for (int i = 0; i < numArgs; ++i) {
-            if (assigned[i])
+        int unnamedParamIdx = 0;
+        for (auto it = std::begin(signature); it != std::end(signature); ++it) {
+            int argIdx = (int)std::distance(std::begin(signature), it);
+            if (assignedFlags[argIdx])
                 continue;
-            const ArgInfo &argInfo = signature[i];
-            if (argInfo.defaultValue.type == Type::Void) {
+            const ArgInfo argInfo = *it;
+            if (unnamedParamIdx < params.numUnnamed()) {
+                if (params(unnamedParamIdx).isConvertibleTo(argInfo.expectedType)) {
+                    (*args)[argInfo.name] = params(unnamedParamIdx, argInfo.expectedType);
+                    ++unnamedParamIdx;
+                }
+                else {
+                    // If there are arguments they have not been assigned yet and does not have default values, the mapping fails.
+                    if (argInfo.defaultValue.type == Type::Void) {
+                        args->clear();
+                        return false;
+                    }
+                    (*args)[argInfo.name] = argInfo.defaultValue;
+                }
+            }
+            else {
+                // If there are arguments they have not been assigned yet and does not have default values, the mapping fails.
+                if (argInfo.defaultValue.type == Type::Void) {
+                    args->clear();
+                    return false;
+                }
+                (*args)[argInfo.name] = argInfo.defaultValue;
+            }
+            assignedFlags[argIdx] = true;
+        }
+        // There is an unnecessary unnamed parameter.
+        if (unnamedParamIdx < params.numUnnamed()) {
+            args->clear();
+            return false;
+        }
+
+        for (int i = 0; i < numArgs; ++i) {
+            if (assignedFlags[i] == false) {
                 args->clear();
                 return false;
             }
-            (*args)[argInfo.name] = argInfo.defaultValue;
         }
         
         return true;
@@ -546,6 +557,7 @@ namespace SLRSceneGraph {
                 info.addSubstOperator = [](Element &l, const Element &r) { l = l + r; };
                 info.subSubstOperator = [](Element &l, const Element &r) { l = l - r; };
                 info.convertFunctions[(Type)i] = [](const Element &v) { return v; };
+                info.convertFunctions[Type::Any] = [](const Element &v) { return v; };
             }
             
             // Bool
@@ -617,8 +629,8 @@ namespace SLRSceneGraph {
                     return Element(ErrorMessage("== operator does not support the right operand type."));
                 };
                 
-                info.convertFunctions[Type::Integer] = [](const Element &elemFrom) { return Element(TypeMap::Integer(), elemFrom.raw<TypeMap::Bool>()); };
-                info.convertFunctions[Type::RealNumber] = [](const Element &elemFrom) { return Element(TypeMap::RealNumber(), elemFrom.raw<TypeMap::Bool>()); };
+                info.convertFunctions[Type::Integer] = [](const Element &elemFrom) { return Element::create<TypeMap::Integer>(elemFrom.raw<TypeMap::Bool>()); };
+                info.convertFunctions[Type::RealNumber] = [](const Element &elemFrom) { return Element::create<TypeMap::RealNumber>(elemFrom.raw<TypeMap::Bool>()); };
             }
             
             // Integer
@@ -705,8 +717,8 @@ namespace SLRSceneGraph {
                     return Element(ErrorMessage("== operator does not support the right operand type."));
                 };
                 
-                info.convertFunctions[Type::Bool] = [](const Element &elemFrom) { return Element(TypeMap::Bool(), elemFrom.raw<TypeMap::Integer>()); };
-                info.convertFunctions[Type::RealNumber] = [](const Element &elemFrom) { return Element(TypeMap::RealNumber(), elemFrom.raw<TypeMap::Integer>()); };
+                info.convertFunctions[Type::Bool] = [](const Element &elemFrom) { return Element::create<TypeMap::Bool>(elemFrom.raw<TypeMap::Integer>()); };
+                info.convertFunctions[Type::RealNumber] = [](const Element &elemFrom) { return Element::create<TypeMap::RealNumber>(elemFrom.raw<TypeMap::Integer>()); };
             }
             
             // Real Number
@@ -844,12 +856,12 @@ namespace SLRSceneGraph {
                 TypeInfo &info = infos[(uint32_t)Type::Matrix];
                 
                 info.affOperator = [](const Element &v) { return v; };
-                info.negOperator = [](const Element &v) { return Element(TypeMap::Matrix(), -v.raw<TypeMap::Matrix>()); };
+                info.negOperator = [](const Element &v) { return Element::create<TypeMap::Matrix>(-v.raw<TypeMap::Matrix>()); };
                 
                 info.mulOperator = [](const Element &v0, const Element &v1) {
                     auto lVal = v0.raw<TypeMap::Matrix>();
                     if (v1.isConvertibleTo<TypeMap::RealNumber>())
-                        return Element(TypeMap::Matrix(), lVal * v1.asRaw<TypeMap::RealNumber>());
+                        return Element::create<TypeMap::Matrix>(lVal * v1.asRaw<TypeMap::RealNumber>());
                     else if (v1.isConvertibleTo<TypeMap::Vertex>()) {
                         auto rVal = v1.asRaw<TypeMap::Vertex>();
                         SLR::Vertex vtx;
@@ -857,10 +869,10 @@ namespace SLRSceneGraph {
                         vtx.normal = lVal * rVal.normal;
                         vtx.tangent = lVal * rVal.tangent;
                         vtx.texCoord = rVal.texCoord;
-                        return Element(TypeMap::Vertex(), vtx);
+                        return Element::create<TypeMap::Vertex>(vtx);
                     }
                     else if (v1.isConvertibleTo<TypeMap::Matrix>())
-                        return Element(TypeMap::Matrix(), lVal * v1.asRaw<TypeMap::Matrix>());
+                        return Element::create<TypeMap::Matrix>(lVal * v1.asRaw<TypeMap::Matrix>());
                     return Element(ErrorMessage("* operator does not support the right operand type."));
                 };
                 info.eqOperator = [](const Element &v0, const Element &v1) {
@@ -871,7 +883,8 @@ namespace SLRSceneGraph {
                 };
                 
                 info.convertFunctions[Type::Transform] = [](const Element &elemFrom) {
-                    return Element(TypeMap::Transform(), createShared<SLR::StaticTransform>(elemFrom.raw<TypeMap::Matrix>()));
+                    TransformRef rawRef = createShared<SLR::StaticTransform>(elemFrom.raw<TypeMap::Matrix>());
+                    return Element::createFromReference<TypeMap::Transform>(rawRef);
                 };
             }
             
@@ -882,10 +895,20 @@ namespace SLRSceneGraph {
                 info.mulOperator = [](const Element &v0, const Element &v1) {
                     auto lVal = v0.rawRef<TypeMap::Spectrum>();
                     if (v1.isConvertibleTo<TypeMap::RealNumber>())
-                        return Element(TypeMap::Spectrum(), InputSpectrumRef(lVal->createScaled(v1.asRaw<TypeMap::RealNumber>())));
+                        return Element::createFromReference<TypeMap::Spectrum>(InputSpectrumRef(lVal->createScaled(v1.asRaw<TypeMap::RealNumber>())));
                     return Element(ErrorMessage("* operator does not support the right operand type."));
                 };
             }
+            
+            // InternalNode
+            {
+                TypeInfo &info = infos[(uint32_t)Type::InternalNode];
+                
+                info.convertFunctions[Type::Node] = [](const Element &elemFrom) {
+                    return Element::createFromReference<TypeMap::Node>(elemFrom.rawRef<TypeMap::Node>());
+                };
+            }
+            
             initialized = true;
         }
     }
@@ -967,7 +990,7 @@ namespace SLRSceneGraph {
         }
         
         LocalVariables &current = context.stackVariables.current();
-        current[m_funcName] = Element(TypeMap::Function(), createShared<Function>(context.stackVariables.current().depth(), args, m_blockStmt));
+        current[m_funcName] = Element::create<TypeMap::Function>(context.stackVariables.current().depth(), args, m_blockStmt);
         return true;
     }
     
@@ -1182,7 +1205,7 @@ namespace SLRSceneGraph {
             }
             params->add(key.raw<TypeMap::String>(), value);
         }
-        m_result = Element(TypeMap::Tuple(), params);
+        m_result = Element::createFromReference<TypeMap::Tuple>(params);
         return true;
     }
     
@@ -1216,7 +1239,7 @@ namespace SLRSceneGraph {
     }
     
     void Parameter::getKeyAndValue(Element* key, Element* value) const {
-        *key = m_keyExpr ? m_keyExpr->result() : Element(TypeMap::String(), "");
+        *key = m_keyExpr ? m_keyExpr->result() : Element::create<TypeMap::String>("");
         *value = m_valueExpr->result();
     }
 }

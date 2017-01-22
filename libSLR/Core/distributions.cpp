@@ -32,6 +32,18 @@ namespace SLR {
     
     
     
+    template <typename RealType>
+    SLR_API RealType evaluateProbability(const RealType* importances, uint32_t numImportances, uint32_t idx) {
+        CompensatedSum<RealType> sum(0);
+        for (int i = 0; i < numImportances; ++i)
+            sum += importances[i];
+        return importances[idx] / sum;
+    }
+    template SLR_API float evaluateProbability(const float* importances, uint32_t numImportances, uint32_t idx);
+    template SLR_API double evaluateProbability(const double* importances, uint32_t numImportances, uint32_t idx);
+    
+    
+    
     // "A Low Distortion Map Between Disk and Square"
     template <typename RealType>
     void concentricSampleDisk(RealType u0, RealType u1, RealType* dx, RealType* dy) {
@@ -146,7 +158,7 @@ namespace SLR {
     
     template <typename RealType>
     RegularConstantContinuous1DTemplate<RealType>::RegularConstantContinuous1DTemplate(const std::vector<RealType> &values) :
-    m_numValues(values.size()) {
+    m_numValues((uint32_t)values.size()) {
         m_PDF = new RealType[m_numValues];
         m_CDF = new RealType[m_numValues + 1];
         std::memcpy(m_PDF, values.data(), sizeof(RealType) * m_numValues);
@@ -201,7 +213,7 @@ namespace SLR {
         m_integral = sum;
         auto pickFuncTop = [this](uint32_t idx) { return m_1DDists[idx].integral(); };
         m_top1DDist = new RegularConstantContinuous1DTemplate<RealType>(numD2, pickFuncTop);
-        SLRAssert(!std::isnan(m_integral) && !std::isinf(m_integral), "invalid integral value.");
+        SLRAssert(std::isfinite(m_integral), "invalid integral value.");
     };
     
     template <typename RealType>

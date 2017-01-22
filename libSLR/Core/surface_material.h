@@ -5,8 +5,8 @@
 //  Copyright (c) 2015年 渡部 心. All rights reserved.
 //
 
-#ifndef __SLR__materials__
-#define __SLR__materials__
+#ifndef __SLR_surface_material__
+#define __SLR_surface_material__
 
 #include "../defines.h"
 #include "../references.h"
@@ -62,7 +62,7 @@ namespace SLR {
                 SLRAssert(!m_mat->isEmitting(), "EmitterSurfaceMaterial can not have an emitting SurfaceMaterial.");
         }
         
-        BSDF* getBSDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem, float scale = 1.0f) const override { return m_mat->getBSDF(surfPt, wls, mem); }
+        BSDF* getBSDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem, float scale) const override { return m_mat->getBSDF(surfPt, wls, mem); }
         SampledSpectrum emittance(const SurfacePoint &surfPt, const WavelengthSamples &wls) const override { return m_emit->emittance(surfPt, wls); }
         bool isEmitting() const override { return true; }
         EDF* getEDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem, float scale) const override { return m_emit->getEDF(surfPt, wls, mem); }
@@ -70,6 +70,7 @@ namespace SLR {
     
     
     
+    // Spatial Varying Fresnel
     class SLR_API SVFresnel {
     public:
         SVFresnel() { }
@@ -108,6 +109,7 @@ namespace SLR {
     
     
     
+    // Spatial Varying Microfacet Distribution
     class SLR_API SVMicrofacetDistribution {
     public:
         SVMicrofacetDistribution() { }
@@ -125,4 +127,4 @@ namespace SLR {
     };
 }
 
-#endif
+#endif /* __SLR_surface_material__ */

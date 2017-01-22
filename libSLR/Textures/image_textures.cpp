@@ -127,7 +127,7 @@ namespace SLR {
                 default:
                     return 0.0f;
             }
-            SLRAssert(!std::isnan(luminance) && !std::isinf(luminance), "Invalid area average value.");
+            SLRAssert(std::isfinite(luminance), "Invalid area average value.");
             return std::sin(M_PI * (y + 0.5f) / mapHeight) * luminance;
         };
         return new RegularConstantContinuous2D(mapWidth, mapHeight, pickFunc);

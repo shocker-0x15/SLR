@@ -16,14 +16,14 @@
 namespace SLRSceneGraph {
     namespace BuiltinFunctions {
         namespace Transform {
-            extern const Function translate;
-            extern const Function rotate;
-            extern const Function rotateX;
-            extern const Function rotateY;
-            extern const Function rotateZ;
-            extern const Function scale;
-            extern const Function lookAt;
-            extern const Function AnimatedTransform;
+            extern const Element translate;
+            extern const Element rotate;
+            extern const Element rotateX;
+            extern const Element rotateY;
+            extern const Element rotateZ;
+            extern const Element scale;
+            extern const Element lookAt;
+            extern const Element AnimatedTransform;
         }
     }
 }

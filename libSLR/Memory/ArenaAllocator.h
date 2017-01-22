@@ -30,41 +30,27 @@ namespace SLR {
         template <typename T>
         T* allocateNewBlock(size_t count) const {
             return (T*)SLR_memalign(count * sizeof(T), SLR_L1_Cacheline_Size);
-        };
+        }
         template <typename T>
         T* allocateNewBlock(size_t count, size_t align) const {
-            return (T*)SLR_memalign(count * sizeof(T), align);
-        };
+            return (T*)SLR_memalign(count * sizeof(T), std::max<size_t>(align, SLR_L1_Cacheline_Size));
+        }
         void deallocateBlock(void* ptr) const {
             if (!ptr)
                 return;
             SLR_freealign(ptr);
-        };
+        }
     public:
-        ArenaAllocator(size_t blockSize = 262144) : m_blockSize(blockSize) { };
+        ArenaAllocator(size_t blockSize = 262144) : m_blockSize(blockSize) { }
         ~ArenaAllocator();
         
         void* alloc(uintptr_t size, uintptr_t align) override;
-        void free(void* ptr) override;
-        
-        void* alloc(size_t numBytes);
+        void free(void* ptr) override {
+            // ArenaAllocator assumes a user should not use free().
+        }
+
         void reset();
         size_t totalAllocated() const;
-        
-        template <typename T>
-        T* alloc(size_t n = 1, bool runConstructor = true) {
-            T *ret = (T *)alloc(n * sizeof(T));
-            if (runConstructor)
-                for (size_t i = 0; i < n; ++i) new (&ret[i]) T();
-            return ret;
-        };
-        
-        template <typename T, typename ...ArgTypes>
-        T* create(ArgTypes&&... args) {
-            T* ptr = (T*)alloc(sizeof(T));
-            new (ptr) T(std::forward<ArgTypes>(args)...);
-            return ptr;
-        };
     };    
 }
 

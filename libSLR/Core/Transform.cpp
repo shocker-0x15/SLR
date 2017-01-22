@@ -6,72 +6,22 @@
 //
 
 #include "Transform.h"
-#include "../Memory/ArenaAllocator.h"
+#include "../Memory/Allocator.h"
 
 namespace SLR {
-    Ray Transform::mul(const Ray &r) const {
-        StaticTransform tf;
-        sample(r.time, &tf);
-        return tf * r;
+    Transform* StaticTransform::copy(Allocator* mem) const {
+        return mem->create<StaticTransform>(*this);
     }
     
-    Point3D Transform::mul(const Point3D &p, float t) const {
-        StaticTransform tf;
-        sample(t, &tf);
-        return tf * p;
+    
+    
+    Transform* AnimatedTransform::copy(Allocator* mem) const {
+        return mem->create<AnimatedTransform>(*this);
     }
     
-    Normal3D Transform::mul(const Normal3D &n, float t) const {
-        StaticTransform tf;
-        sample(t, &tf);
-        return tf * n;
-    }
     
-    Ray Transform::mulInv(const Ray &r) const {
-        StaticTransform tf;
-        sample(r.time, &tf);
-        return invert(tf) * r;
-    }
     
-    Point3D Transform::mulInv(const Point3D &p, float t) const {
-        StaticTransform tf;
-        sample(t, &tf);
-        return invert(tf) * p;
-    }
-    
-    Normal3D Transform::mulInv(const Normal3D &n, float t) const {
-        StaticTransform tf;
-        sample(t, &tf);
-        return invert(tf) * n;
-    }
-    
-    Transform* StaticTransform::copy() const {
-        return new StaticTransform(*this);
-    }
-    Transform* StaticTransform::copy(ArenaAllocator &mem) const {
-        return mem.create<StaticTransform>(*this);
-    }
-    Transform* StaticTransform::createByMulLeft(const StaticTransform &staticTF, ArenaAllocator &mem) const {
-        return mem.create<StaticTransform>(staticTF * *this);
-    }
-    Transform* StaticTransform::createByMulRight(const StaticTransform &staticTF, ArenaAllocator &mem) const {
-        return mem.create<StaticTransform>(*this * staticTF);
-    }
-    
-    Transform* AnimatedTransform::copy() const {
-        return new AnimatedTransform(*this);
-    }
-    Transform* AnimatedTransform::copy(ArenaAllocator &mem) const {
-        return mem.create<AnimatedTransform>(*this);
-    }
-    Transform* AnimatedTransform::createByMulLeft(const StaticTransform &staticTF, ArenaAllocator &mem) const {
-        return mem.create<AnimatedTransform>(staticTF * m_tfBegin, staticTF * m_tfEnd, m_tBegin, m_tEnd);
-    }
-    Transform* AnimatedTransform::createByMulRight(const StaticTransform &staticTF, ArenaAllocator &mem) const {
-        return mem.create<AnimatedTransform>(m_tfBegin * staticTF, m_tfEnd * staticTF, m_tBegin, m_tEnd);
-    }
-    
-    void ChainedTransform::reduce(SLR::ArenaAllocator &mem, std::vector<const SLR::Transform*> &reducedTFs) const {
+    void ChainedTransform::reduce(Allocator* mem, std::vector<Transform*> &reducedTFs) const {
         using namespace SLR;
         const Transform* linearTFs[10];
         uint32_t idx = 0;
@@ -87,38 +37,35 @@ namespace SLR {
             current = parent;
         }
         
+        current = linearTFs[0];
+        reducedTFs.push_back(current->copy(mem));
+        
         uint32_t numLinearTFs = idx;
-        for (int i = 0; i < numLinearTFs; ++i) {
+        for (int i = 1; i < numLinearTFs; ++i) {
             current = linearTFs[i];
-            if (reducedTFs.size() == 0) {
-                reducedTFs.push_back(current->copy(mem));
-                continue;
-            }
-            
-            const SLR::Transform* top = reducedTFs.back();
-            bool mergeable = current->isStatic() || top->isStatic();
+            const Transform* child = reducedTFs.back();
+            bool mergeable = current->isStatic() || child->isStatic();
             if (mergeable) {
-                if (current->isStatic() && top->isStatic()) {
+                mem->destroy(reducedTFs.back());
+                reducedTFs.pop_back();
+                if (current->isStatic() && child->isStatic()) {
                     StaticTransform curSample;
                     current->sample(0.0f, &curSample);
-                    StaticTransform topSample;
-                    top->sample(0.0f, &topSample);
-                    reducedTFs.pop_back();
-                    reducedTFs.push_back((curSample * topSample).copy(mem));
+                    StaticTransform childSample;
+                    child->sample(0.0f, &childSample);
+                    reducedTFs.push_back((curSample * childSample).copy(mem));
                 }
                 else if (current->isStatic()) {
                     StaticTransform curSample;
                     current->sample(0.0f, &curSample);
-                    Transform* animated = top->createByMulLeft(curSample, mem);
-                    reducedTFs.pop_back();
-                    reducedTFs.push_back(animated);
+                    AnimatedTransform &atf = *(AnimatedTransform*)child;
+                    reducedTFs.push_back((curSample * atf).copy(mem));
                 }
                 else {
-                    StaticTransform topSample;
-                    top->sample(0.0f, &topSample);
-                    Transform* animated = current->createByMulRight(topSample, mem);
-                    reducedTFs.pop_back();
-                    reducedTFs.push_back(animated);
+                    StaticTransform childSample;
+                    child->sample(0.0f, &childSample);
+                    AnimatedTransform &atf = *(AnimatedTransform*)current;
+                    reducedTFs.push_back((atf * childSample).copy(mem));
                 }
             }
             else {
@@ -127,18 +74,18 @@ namespace SLR {
         }
     }
     
-    const SLR::Transform* ChainedTransform::reduce(SLR::ArenaAllocator &mem) const {
+    Transform* ChainedTransform::reduce(Allocator* mem) const {
         using namespace SLR;
-        std::vector<const Transform*> reducedTFs;
+        std::vector<Transform*> reducedTFs;
         reduce(mem, reducedTFs);
         
-        const Transform* ret = nullptr;
+        Transform* ret = nullptr;
         if (reducedTFs.size() > 1) {
-            ChainedTransform* chain = mem.create<ChainedTransform>(nullptr, reducedTFs[0]);
+            ChainedTransform* chain = mem->create<ChainedTransform>(nullptr, reducedTFs[0]);
             ChainedTransform* prevChain = chain;
             ret = chain;
             for (int i = 1; i < reducedTFs.size() - 1; ++i) {
-                chain = mem.create<ChainedTransform>(nullptr, reducedTFs[i]);
+                chain = mem->create<ChainedTransform>(nullptr, reducedTFs[i]);
                 prevChain->setParent(chain);
                 prevChain = chain;
             }
@@ -151,10 +98,7 @@ namespace SLR {
         return ret;
     }
     
-    SLR::Transform* ChainedTransform::copy() const {
-        return new ChainedTransform(*this);
-    }
-    SLR::Transform* ChainedTransform::copy(SLR::ArenaAllocator &mem) const {
-        return mem.create<ChainedTransform>(*this);
+    Transform* ChainedTransform::copy(Allocator* mem) const {
+        return mem->create<ChainedTransform>(this->m_parent, this->m_transform);
     }
 }

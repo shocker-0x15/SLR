@@ -20,19 +20,8 @@ namespace SLR {
         virtual bool isStatic() const = 0;
         virtual void sample(float time, StaticTransform* tf) const { SLRAssert_NotImplemented(); }
         virtual bool isChained() const = 0;
-        virtual Transform* copy() const = 0;
-        virtual Transform* copy(ArenaAllocator &mem) const = 0;
-        virtual Transform* createByMulLeft(const StaticTransform &staticTF, ArenaAllocator &mem) const { SLRAssert_NotImplemented(); return nullptr; }
-        virtual Transform* createByMulRight(const StaticTransform &staticTF, ArenaAllocator &mem) const { SLRAssert_NotImplemented(); return nullptr; }
+        virtual Transform* copy(Allocator* mem) const = 0;
         virtual BoundingBox3D motionBounds(const BoundingBox3D &bb) const { SLRAssert_NotImplemented(); return BoundingBox3D(); }
-        
-        Ray mul(const Ray &r) const;
-        Point3D mul(const Point3D &p, float t) const;
-        Normal3D mul(const Normal3D &n, float t) const;
-        
-        Ray mulInv(const Ray &r) const;
-        Point3D mulInv(const Point3D &p, float t) const;
-        Normal3D mulInv(const Normal3D &n, float t) const;
     };
     
     class SLR_API StaticTransform : public Transform {
@@ -75,11 +64,9 @@ namespace SLR {
         bool isStatic() const override { return true; }
         void sample(float time, StaticTransform* tf) const override { *tf = *this; }
         bool isChained() const override { return false; }
-        Transform* copy() const override;
-        Transform* copy(ArenaAllocator &mem) const override;
-        Transform* createByMulLeft(const StaticTransform &staticTF, ArenaAllocator &mem) const override;
-        Transform* createByMulRight(const StaticTransform &staticTF, ArenaAllocator &mem) const override;
+        Transform* copy(Allocator* mem) const override;
         BoundingBox3D motionBounds(const BoundingBox3D &bb) const override { return *this * bb; }
+        
         
         
         friend StaticTransform invert(const StaticTransform &t) { return StaticTransform(t.matInv, t.mat); }
@@ -98,6 +85,13 @@ namespace SLR {
         m_tfBegin(tfBegin), m_tfEnd(tfEnd), m_tBegin(tBegin), m_tEnd(tEnd) {
             decompose(tfBegin.getMatrix4x4(), &m_T[0], &m_R[0], &m_S[0]);
             decompose(tfEnd.getMatrix4x4(), &m_T[1], &m_R[1], &m_S[1]);
+        }
+        
+        AnimatedTransform operator*(const StaticTransform &tf) const {
+            return AnimatedTransform(m_tfBegin * tf, m_tfEnd * tf, m_tBegin, m_tEnd);
+        }
+        friend AnimatedTransform operator*(const StaticTransform &tf, const AnimatedTransform &atf) {
+            return AnimatedTransform(tf * atf.m_tfBegin, tf * atf.m_tfEnd, atf.m_tBegin, atf.m_tEnd);
         }
         
         bool isStatic() const override { return m_tfBegin == m_tfEnd; }
@@ -122,11 +116,7 @@ namespace SLR {
         }
         
         bool isChained() const override { return false; }
-        
-        Transform* copy() const override;
-        Transform* copy(ArenaAllocator &mem) const override;
-        Transform* createByMulLeft(const StaticTransform &staticTF, ArenaAllocator &mem) const override;
-        Transform* createByMulRight(const StaticTransform &staticTF, ArenaAllocator &mem) const override;
+        Transform* copy(Allocator* mem) const override;
         
         // FIXME: This sampling-based way does not guarantee to generate the actual bounds.
         BoundingBox3D motionBounds(const BoundingBox3D &bb) const override {
@@ -143,25 +133,28 @@ namespace SLR {
         }
     };
     
-    class SLR_API ChainedTransform : public SLR::Transform {
-        const SLR::Transform* m_parent;
-        const SLR::Transform* m_transform;
+    class SLR_API ChainedTransform : public Transform {
+        const Transform* m_parent;
+        const Transform* m_transform;
+        ChainedTransform(const ChainedTransform &src) { SLRAssert(false, "copy constructor of ChainedTransform is prohibited."); };
     public:
-        ChainedTransform(const SLR::Transform* parent, const SLR::Transform* transform) : m_parent(parent), m_transform(transform) {
+        ChainedTransform(const Transform* parent, const Transform* transform) :
+        m_parent(parent), m_transform(transform) {
+            SLRAssert(parent && transform, "Transforms must not be null.");
             SLRAssert(transform->isChained() == false, "\"transform\" cannot be a ChainedTransform.");
         }
         
-        void setParent(const SLR::Transform* parent) { m_parent = parent; }
-        void setTransform(const SLR::Transform* transform) { m_transform = transform; }
+        void setParent(const Transform* parent) { m_parent = parent; }
+        void setTransform(const Transform* transform) { m_transform = transform; }
         
-        void reduce(SLR::ArenaAllocator &mem, std::vector<const SLR::Transform*> &reducedTFs) const;
-        const SLR::Transform* reduce(SLR::ArenaAllocator &mem) const;
+        void reduce(Allocator* mem, std::vector<Transform*> &reducedTFs) const;
+        Transform* reduce(Allocator* mem) const;
         
         bool isStatic() const override {
             bool ret = true;
-            const SLR::Transform* current = this;
+            const Transform* current = this;
             while (ret && current) {
-                const SLR::Transform* parent = nullptr;
+                const Transform* parent = nullptr;
                 if (current->isChained()) {
                     parent = ((ChainedTransform*)current)->m_parent;
                     current = ((ChainedTransform*)current)->m_transform;
@@ -175,9 +168,9 @@ namespace SLR {
         
         void sample(float time, StaticTransform* tf) const override {
             StaticTransform ret;
-            const SLR::Transform* current = this;
+            const Transform* current = this;
             while (current) {
-                const SLR::Transform* parent = nullptr;
+                const Transform* parent = nullptr;
                 if (current->isChained()) {
                     parent = ((ChainedTransform*)current)->m_parent;
                     current = ((ChainedTransform*)current)->m_transform;
@@ -191,15 +184,13 @@ namespace SLR {
         }
         
         bool isChained() const override { return true; }
-
-        Transform* copy() const override;
-        SLR::Transform* copy(SLR::ArenaAllocator &mem) const override;
+        Transform* copy(Allocator* mem) const override;
         
         BoundingBox3D motionBounds(const BoundingBox3D &bb) const override {
             BoundingBox3D ret = bb;
-            const SLR::Transform* current = this;
+            const Transform* current = this;
             while (current) {
-                const SLR::Transform* parent = nullptr;
+                const Transform* parent = nullptr;
                 if (current->isChained()) {
                     parent = ((ChainedTransform*)current)->m_parent;
                     current = ((ChainedTransform*)current)->m_transform;

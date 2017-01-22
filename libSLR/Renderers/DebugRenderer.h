@@ -31,7 +31,7 @@ namespace SLR {
             };
             
             const DebugRenderer* renderer;
-            std::array<std::unique_ptr<Image2D, Allocator::DeleterType>, (int)ExtraChannel::NumChannels>* chImages;
+            std::array<std::unique_ptr<TiledImage2D, Allocator::DeleterType<TiledImage2D>>, (int)ExtraChannel::NumChannels>* chImages;
             const Scene* scene;
             
             ArenaAllocator* mems;

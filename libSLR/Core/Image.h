@@ -136,9 +136,9 @@ namespace SLR {
                                 float uvs[3];
                                 Upsampling::sRGB_to_uvs(spType, RGB, uvs);
                                 uvs16Fx3 storedVal{(half)uvs[0], (half)uvs[1], (half)uvs[2]};
-                                SLRAssert(!std::isnan((float)storedVal.u) && !std::isinf((float)storedVal.u) &&
-                                          !std::isnan((float)storedVal.v) && !std::isinf((float)storedVal.v) &&
-                                          !std::isnan((float)storedVal.s) && !std::isinf((float)storedVal.s), "Invalid value.");
+                                SLRAssert(std::isfinite((float)storedVal.u) &&
+                                          std::isfinite((float)storedVal.v) &&
+                                          std::isfinite((float)storedVal.s), "Invalid value.");
                                 setInternal(x, y, &storedVal, m_stride);
                             };
 #else
@@ -181,9 +181,9 @@ namespace SLR {
                                 float uvs[3];
                                 Upsampling::sRGB_to_uvs(spType, RGB, uvs);
                                 uvs16Fx3 storedVal{(half)uvs[0], (half)uvs[1], (half)uvs[2]};
-                                SLRAssert(!std::isnan((float)storedVal.u) && !std::isinf((float)storedVal.u) &&
-                                          !std::isnan((float)storedVal.v) && !std::isinf((float)storedVal.v) &&
-                                          !std::isnan((float)storedVal.s) && !std::isinf((float)storedVal.s), "Invalid value.");
+                                SLRAssert(storedVal.u.isFinite() &&
+                                          storedVal.v.isFinite() &&
+                                          storedVal.s.isFinite(), "Invalid value.");
                                 setInternal(x, y, &storedVal, m_stride);
                             };
 #else
@@ -226,10 +226,8 @@ namespace SLR {
                                 float uvs[3];
                                 Upsampling::sRGB_to_uvs(spType, RGB, uvs);
                                 uvsA16Fx4 storedVal{(half)uvs[0], (half)uvs[1], (half)uvs[2], (half)(val.a / 255.0f)};
-                                SLRAssert(!std::isnan((float)storedVal.u) && !std::isinf((float)storedVal.u) &&
-                                          !std::isnan((float)storedVal.v) && !std::isinf((float)storedVal.v) &&
-                                          !std::isnan((float)storedVal.s) && !std::isinf((float)storedVal.s) &&
-                                          !std::isnan((float)storedVal.a) && !std::isinf((float)storedVal.a) && (float)storedVal.a >= 0,
+                                SLRAssert(storedVal.u.isFinite() && storedVal.v.isFinite() && storedVal.s.isFinite() &&
+                                          storedVal.a.isFinite() && (float)storedVal.a >= 0,
                                           "Invalid value: %g, %g, %g, %g", (float)storedVal.u, (float)storedVal.v, (float)storedVal.s, (float)storedVal.a);
                                 setInternal(x, y, &storedVal, m_stride);
                             };
@@ -277,10 +275,8 @@ namespace SLR {
                                 SLRAssert(val.a > 0.0f, "Invalid alpha value.");
                                 Upsampling::sRGB_to_uvs(spType, RGB, uvs);
                                 uvsA16Fx4 storedVal{(half)uvs[0], (half)uvs[1], (half)uvs[2], (half)val.a};
-                                SLRAssert(!std::isnan((float)storedVal.u) && !std::isinf((float)storedVal.u) &&
-                                          !std::isnan((float)storedVal.v) && !std::isinf((float)storedVal.v) &&
-                                          !std::isnan((float)storedVal.s) && !std::isinf((float)storedVal.s) &&
-                                          !std::isnan((float)storedVal.a) && !std::isinf((float)storedVal.a) && (float)storedVal.a >= 0,
+                                SLRAssert(storedVal.u.isFinite() && storedVal.v.isFinite() && storedVal.s.isFinite() &&
+                                          storedVal.a.isFinite() && (float)storedVal.a >= 0,
                                           "Invalid value: %g, %g, %g, %g", (float)storedVal.u, (float)storedVal.v, (float)storedVal.s, (float)storedVal.a);
                                 setInternal(x, y, &storedVal, m_stride);
                             };

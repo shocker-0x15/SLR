@@ -6,3 +6,8 @@
 //
 
 #include "Accelerator.h"
+
+namespace SLR {
+    bool Accelerator::traceTraverse = false;
+    std::string Accelerator::traceTraversePrefix = "";
+}

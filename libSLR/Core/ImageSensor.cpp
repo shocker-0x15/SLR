@@ -91,7 +91,7 @@ namespace SLR {
         uint32_t lx = x & s_localMask;
         uint32_t ly = y & s_localMask;
         SpectrumStorage &storage = *(SpectrumStorage*)(m_data + sizeof(SpectrumStorage) * ((ty * m_numTileX + tx) * s_tileWidth * s_tileWidth + ly * s_tileWidth + lx));
-        return storage.value;
+        return storage.getValue();
     }
     
     SpectrumStorage &ImageSensor::pixel(uint32_t x, uint32_t y) {
@@ -109,7 +109,7 @@ namespace SLR {
         uint32_t lx = x & s_localMask;
         uint32_t ly = y & s_localMask;
         SpectrumStorage &storage = *(SpectrumStorage*)(m_separatedData[idx] + sizeof(SpectrumStorage) * ((ty * m_numTileX + tx) * s_tileWidth * s_tileWidth + ly * s_tileWidth + lx));
-        return storage.value;
+        return storage.getValue();
     }
     
     SpectrumStorage &ImageSensor::pixel(uint32_t idx, uint32_t x, uint32_t y) {
@@ -124,14 +124,14 @@ namespace SLR {
     void ImageSensor::add(float px, float py, const WavelengthSamples &wls, const SampledSpectrum &contribution) {
         uint32_t ipx = std::min((uint32_t)px, m_width - 1);
         uint32_t ipy = std::min((uint32_t)py, m_height - 1);
-		SLRAssert(!contribution.hasInf() && !contribution.hasNaN(), "invalid value: (%u, %u), %s", ipx, ipy, contribution.toString().c_str());
+		SLRAssert(contribution.allFinite(), "invalid value: (%u, %u), %s", ipx, ipy, contribution.toString().c_str());
         pixel(ipx, ipy).add(wls, contribution);
     }
     
     void ImageSensor::add(uint32_t idx, float px, float py, const WavelengthSamples &wls, const SampledSpectrum &contribution) {
         uint32_t ipx = std::min((uint32_t)px, m_width - 1);
         uint32_t ipy = std::min((uint32_t)py, m_height - 1);
-		SLRAssert(!contribution.hasInf() && !contribution.hasNaN(), "invalid value: idx: %u, (%u, %u), %s", idx, ipx, ipy, contribution.toString().c_str());
+		SLRAssert(contribution.allFinite(), "invalid value: idx: %u, (%u, %u), %s", idx, ipx, ipy, contribution.toString().c_str());
         pixel(idx, ipx, ipy).add(wls, contribution);
     }
     

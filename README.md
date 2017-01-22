@@ -26,12 +26,13 @@ SLR consists of the following components.
     * Mixed BSDF
     * ~~Layered BSDF~~ (TODO)
 * Volume Rendering
+    * Homogeneous Media
+    * Heterogeneous Media (trilinear-interpolated grid)
+    * Media enclosed by surfaces
     * Phase Functions
         * Isotropic
         * Henyey-Greenstein
         * Schlick
-    * Homogeneous Media
-    * Heterogeneous Media (trilinear-interpolated grid)
 * Texture Types
     * Constant
     * Image

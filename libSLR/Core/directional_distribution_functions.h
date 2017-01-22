@@ -91,6 +91,7 @@ namespace SLR {
     };
     
     
+    
     struct SLR_API EDFQuery {
         DirectionType flags;
         EDFQuery(DirectionType f = DirectionType::All) : flags(f) { };
@@ -108,22 +109,43 @@ namespace SLR {
         DirectionType dirType;
     };
     
-    struct SLR_API BSDFQuery {
-        Vector3D dir_sn;
-        Normal3D gNormal_sn;
+    
+    
+    struct SLR_API ABDFQuery {
+        Vector3D dirLocal;
         int16_t wlHint;
-        DirectionType flags;
-        bool adjoint;
+        DirectionType dirTypeFilter;
         
-        BSDFQuery(const Vector3D &dirSN, const Normal3D &gNormalSN, int16_t wl, DirectionType f = DirectionType::All, bool adj = false) :
-        dir_sn(dirSN), gNormal_sn(gNormalSN), wlHint(wl), flags(f), adjoint(adj) { }
+        ABDFQuery(const Vector3D &dirL, int16_t wl, DirectionType filter) : dirLocal(dirL), wlHint(wl), dirTypeFilter(filter) { }
     };
     
-    struct SLR_API BSDFSample {
+    struct SLR_API ABDFSample {
         float uComponent;
         float uDir[2];
-        BSDFSample() {}
-        BSDFSample(float uComp, float uDir0, float uDir1) : uComponent(uComp), uDir{uDir0, uDir1} {}
+        
+        ABDFSample() { }
+        ABDFSample(float uComp, float uDir0, float uDir1) : uComponent(uComp), uDir{uDir0, uDir1} { }
+    };
+    
+    struct SLR_API ABDFQueryResult {
+        Vector3D dirLocal;
+        float dirPDF;
+        DirectionType sampledType;
+    };
+    
+    
+    
+    struct SLR_API BSDFQuery : public ABDFQuery {
+        Normal3D gNormalLocal;
+        bool adjoint;
+        
+        BSDFQuery(const Vector3D &dirSN, const Normal3D &gNormalSN, int16_t wl, DirectionType filter = DirectionType::All, bool adj = false) :
+        ABDFQuery(dirSN, wl, filter), gNormalLocal(gNormalSN), adjoint(adj) { }
+    };
+    
+    struct SLR_API BSDFSample : public ABDFSample {
+        BSDFSample() : ABDFSample() {}
+        BSDFSample(float uComp, float uDir0, float uDir1) : ABDFSample(uComp, uDir0, uDir1) { }
     };
     
     struct SLR_API BSDFReverseInfo {
@@ -131,12 +153,20 @@ namespace SLR {
         float dirPDF;
     };
     
-    struct SLR_API BSDFQueryResult {
-        Vector3D dir_sn;
-        float dirPDF;
-        DirectionType dirType;
+    struct SLR_API BSDFQueryResult : public ABDFQueryResult {
         BSDFReverseInfo* reverse;
         BSDFQueryResult() : reverse(nullptr) { }
+    };
+    
+    
+    
+    struct SLR_API PFQuery {
+        Vector3D dirLocal;
+        int16_t wlHint;
+        DirectionType dirTypeFilter;
+        
+        PFQuery(const Vector3D &dirL, int16_t wl, DirectionType filter = DirectionType::All) :
+        dirLocal(dirL), wlHint(wl), dirTypeFilter(filter) { }
     };
     
     struct SLR_API PFSample {
@@ -147,7 +177,31 @@ namespace SLR {
     struct SLR_API PFQueryResult {
         Vector3D dirLocal;
         float dirPDF;
+        DirectionType sampledType;
     };
+    
+    
+    
+    struct SLR_API VolumetricBSDFQuery : public ABDFQuery {
+        VolumetricBSDFQuery(const Vector3D &dirSN, int16_t wl, DirectionType filter) :
+        ABDFQuery(dirSN, wl, filter) { }
+    };
+    
+    struct SLR_API VolumetricBSDFSample : public ABDFSample {
+        VolumetricBSDFSample() : ABDFSample() {}
+        VolumetricBSDFSample(float uComp, float uDir0, float uDir1) : ABDFSample(uComp, uDir0, uDir1) { }
+    };
+    
+    struct SLR_API VolumetricBSDFQueryResult : public ABDFQueryResult {
+        VolumetricBSDFQueryResult() { }
+        VolumetricBSDFQueryResult(const PFQueryResult &pfResult) {
+            dirLocal = pfResult.dirLocal;
+            dirPDF = pfResult.dirPDF;
+            sampledType = pfResult.sampledType;
+        }
+    };
+    
+
     
     struct SLR_API IDFSample {
         float uDir[2];
@@ -186,20 +240,27 @@ namespace SLR {
         bool hasNonDelta() const { return matches(DirectionType::WholeSphere | DirectionType::NonDelta); }
     };
     
-    class SLR_API BSDF {
+    // Abstract Bidirectional Distribution Function
+    class SLR_API AbstractBDF {
     protected:
         DirectionType m_type;
+    public:
+        AbstractBDF(DirectionType type) : m_type(type) { }
+        virtual ~AbstractBDF() { }
         
+        virtual SampledSpectrum sample(const ABDFQuery* query, LightPathSampler &sampler, ArenaAllocator &mem, ABDFQueryResult** result) const = 0;
+        virtual SampledSpectrum evaluate(const ABDFQuery* query, const Vector3D &dir, SampledSpectrum* rev_fs = nullptr) const = 0;
+        virtual float evaluatePDF(const ABDFQuery* query, const Vector3D &dir, float* revPDF = nullptr) const = 0;
+        
+        virtual bool matches(DirectionType flags) const { return m_type.matches(flags); };
+        bool hasNonDelta() const { return matches(DirectionType::WholeSphere | DirectionType::NonDelta); }
+    };
+    
+    class SLR_API BSDF : public AbstractBDF {
+    protected:        
         DirectionType sideTest(const Normal3D& ng, const Vector3D& d0, const Vector3D &d1) const {
             bool reflect = dot(Vector3D(ng), d0) * dot(Vector3D(ng), d1) > 0;
             return DirectionType::AllFreq | (reflect ? DirectionType::Reflection : DirectionType::Transmission);
-        }
-        bool matches(DirectionType flags, BSDFQueryResult* result) const {
-            if (matches(flags))
-                return true;
-            result->dirPDF = 0.0f;
-            result->dirType = DirectionType();
-            return false;
         }
         virtual SampledSpectrum sampleInternal(const BSDFQuery &query, float uComponent, const float uDir[2], BSDFQueryResult* result) const = 0;
         virtual SampledSpectrum evaluateInternal(const BSDFQuery &query, const Vector3D &dir, SampledSpectrum* rev_fs) const = 0;
@@ -209,66 +270,68 @@ namespace SLR {
         friend class MultiBSDF;
         friend class InverseBSDF;
     public:
-        BSDF(DirectionType type) : m_type(type) { }
-        virtual ~BSDF() { }
+        BSDF(DirectionType type) : SLR::AbstractBDF(type) { }
         
         SampledSpectrum sample(const BSDFQuery &query, const BSDFSample &smp, BSDFQueryResult* result) const {
-            if (!matches(query.flags, result))
+            if (!matches(query.dirTypeFilter)) {
+                result->dirPDF = 0.0f;
+                result->sampledType = DirectionType();
                 return SampledSpectrum::Zero;
+            }
             SampledSpectrum fs_sn = sampleInternal(query, smp.uComponent, smp.uDir, result);
             float snCorrection = (query.adjoint ?
-                                  std::fabs(query.dir_sn.z / dot(query.dir_sn, query.gNormal_sn)) :
-                                  std::fabs(result->dir_sn.z / dot(result->dir_sn, query.gNormal_sn)));
+                                  std::fabs(query.dirLocal.z / dot(query.dirLocal, query.gNormalLocal)) :
+                                  std::fabs(result->dirLocal.z / dot(result->dirLocal, query.gNormalLocal)));
             if (result->reverse)
                 result->reverse->fs *= snCorrection;
-            SLRAssert(result->dirPDF == 0 || (!fs_sn.hasNaN() && !fs_sn.hasInf() && !std::isnan(snCorrection) && !std::isinf(snCorrection) &&
-                                              !std::isnan(result->dirPDF) && !std::isinf(result->dirPDF)),
+            SLRAssert(result->dirPDF == 0 || (fs_sn.allFinite() && std::isfinite(snCorrection) &&
+                                              std::isfinite(result->dirPDF)),
                       "fs_sn: %s, snCorrection: %g, PDF: %g, wlIdx: %u, qDir: %s, sample: (%g, %g, %g), rDir: %s, gNormal: %s",
                       fs_sn.toString().c_str(), snCorrection, result->dirPDF, query.wlHint,
-                      query.dir_sn.toString().c_str(), smp.uComponent, smp.uDir[0], smp.uDir[1], result->dir_sn.toString().c_str(), query.gNormal_sn.toString().c_str());
+                      query.dirLocal.toString().c_str(), smp.uComponent, smp.uDir[0], smp.uDir[1], result->dirLocal.toString().c_str(), query.gNormalLocal.toString().c_str());
             return fs_sn * snCorrection;
         }
         SampledSpectrum evaluate(const BSDFQuery &query, const Vector3D &dir, SampledSpectrum* rev_fs = nullptr) const {
             BSDFQuery mQuery = query;
-            mQuery.flags &= sideTest(query.gNormal_sn, query.dir_sn, dir);
-            if (!matches(mQuery.flags)) {
+            mQuery.dirTypeFilter &= sideTest(query.gNormalLocal, query.dirLocal, dir);
+            if (!matches(mQuery.dirTypeFilter)) {
                 if (rev_fs)
                     *rev_fs = SampledSpectrum::Zero;
                 return SampledSpectrum::Zero;
             }
             SampledSpectrum fs_sn = evaluateInternal(mQuery, dir, rev_fs);
             float snCorrection = (query.adjoint ?
-                                  std::fabs(query.dir_sn.z / dot(query.dir_sn, query.gNormal_sn)) :
-                                  std::fabs(dir.z / dot(dir, query.gNormal_sn)));
-            SLRAssert(!fs_sn.hasNaN() && !fs_sn.hasInf() && !std::isnan(snCorrection) && !std::isinf(snCorrection),
+                                  std::fabs(query.dirLocal.z / dot(query.dirLocal, query.gNormalLocal)) :
+                                  std::fabs(dir.z / dot(dir, query.gNormalLocal)));
+            SLRAssert(fs_sn.allFinite() && std::isfinite(snCorrection),
                       "fs_sn: %s, snCorrection: %g, wlIdx: %u, qDir: %s, rDir: %s, gNormal: %s",
                       fs_sn.toString().c_str(), snCorrection, query.wlHint,
-                      query.dir_sn.toString().c_str(), dir.toString().c_str(), query.gNormal_sn.toString().c_str());
+                      query.dirLocal.toString().c_str(), dir.toString().c_str(), query.gNormalLocal.toString().c_str());
             
             if (rev_fs)
                 *rev_fs *= snCorrection;
             return fs_sn * snCorrection;
         }
         float evaluatePDF(const BSDFQuery &query, const Vector3D &dir, float* revPDF = nullptr) const {
-            if (!matches(query.flags)) {
+            if (!matches(query.dirTypeFilter)) {
                 if (revPDF)
                     *revPDF = 0;
                 return 0;
             }
             float ret = evaluatePDFInternal(query, dir, revPDF);
-            SLRAssert(!std::isnan(ret) && !std::isinf(ret) && ret >= 0,
+            SLRAssert(std::isfinite(ret) && ret >= 0,
                       "PDF: %g, wlIdx: %u, qDir: %s, rDir: %s",
-                      ret, query.wlHint, query.dir_sn.toString().c_str(), dir.toString().c_str());
+                      ret, query.wlHint, query.dirLocal.toString().c_str(), dir.toString().c_str());
             return ret;
         }
         float weight(const BSDFQuery &query) const {
-            if (!matches(query.flags))
+            if (!matches(query.dirTypeFilter))
                 return 0;
             float weight_sn = weightInternal(query);
-            float snCorrection = query.adjoint ? std::fabs(query.dir_sn.z / dot(query.dir_sn, query.gNormal_sn)) : 1;
-            SLRAssert(!std::isnan(weight_sn) && !std::isinf(weight_sn) && !std::isnan(snCorrection) && !std::isinf(snCorrection),
+            float snCorrection = query.adjoint ? std::fabs(query.dirLocal.z / dot(query.dirLocal, query.gNormalLocal)) : 1;
+            SLRAssert(std::isfinite(weight_sn) && std::isfinite(snCorrection),
                       "weight_sn: %g, snCorrection: %g, wlIdx: %u, qDir: %s",
-                      weight_sn, snCorrection, query.wlHint, query.dir_sn.toString().c_str());
+                      weight_sn, snCorrection, query.wlHint, query.dirLocal.toString().c_str());
             return weight_sn * snCorrection;
         }
         
@@ -280,8 +343,9 @@ namespace SLR {
             return getBaseColorInternal(flags);
         }
         
-        virtual bool matches(DirectionType flags) const { return m_type.matches(flags); };
-        bool hasNonDelta() const { return matches(DirectionType::WholeSphere | DirectionType::NonDelta); }
+        SampledSpectrum sample(const ABDFQuery* query, LightPathSampler &sampler, ArenaAllocator &mem, ABDFQueryResult** result) const override;
+        SampledSpectrum evaluate(const ABDFQuery* query, const Vector3D &dir, SampledSpectrum* rev_fs = nullptr) const override;
+        float evaluatePDF(const ABDFQuery* query, const Vector3D &dir, float* revPDF = nullptr) const override;
     };
     
     class SLR_API PhaseFunction {
@@ -289,22 +353,28 @@ namespace SLR {
         PhaseFunction() {}
         virtual ~PhaseFunction() {}
         
-        virtual SampledSpectrum sample(const Vector3D &dirOut, const PFSample &smp, PFQueryResult* result) const = 0;
-        virtual SampledSpectrum evaluate(const Vector3D &dirOut, const Vector3D &dirIn) const = 0;
-        virtual float evaluatePDF(const Vector3D &dirOut, const Vector3D &dirIn) const = 0;
+        virtual DirectionType directionType() const = 0;
+        
+        virtual SampledSpectrum sample(const PFQuery &query, const PFSample &smp, PFQueryResult* result) const = 0;
+        virtual SampledSpectrum evaluate(const PFQuery &query, const Vector3D &dirIn) const = 0;
+        virtual float evaluatePDF(const PFQuery &query, const Vector3D &dirIn) const = 0;
+    };
+    
+    class SLR_API VolumetricBSDF : public AbstractBDF {
+        const PhaseFunction* m_pf;
+        SampledSpectrum m_albedo;
+    public:
+        VolumetricBSDF(const SampledSpectrum &albedo, const PhaseFunction* pf) : AbstractBDF(pf->directionType()), m_pf(pf), m_albedo(albedo) { }
+        
+        SampledSpectrum sample(const ABDFQuery* query, LightPathSampler &sampler, ArenaAllocator &mem, ABDFQueryResult** result) const override;
+        SampledSpectrum evaluate(const ABDFQuery* query, const Vector3D &dir, SampledSpectrum* rev_fs = nullptr) const override;
+        float evaluatePDF(const ABDFQuery* query, const Vector3D &dir, float* revPDF = nullptr) const override;
     };
     
     class SLR_API IDF {
     protected:
         const DirectionType m_type;
         
-        bool matches(DirectionType flags, BSDFQueryResult* result) const {
-            if (matches(flags))
-                return true;
-            result->dirPDF = 0.0f;
-            result->dirType = DirectionType();
-            return false;
-        }
     public:
         IDF(DirectionType type) : m_type(type) { }
         virtual ~IDF() { }

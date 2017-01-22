@@ -16,20 +16,20 @@
 namespace SLRSceneGraph {
     namespace BuiltinFunctions {
         namespace Math {
-            extern const Function min;
-            extern const Function max;
-            extern const Function clamp;
-            extern const Function sqrt;
-            extern const Function pow;
-            extern const Function sin;
-            extern const Function cos;
-            extern const Function tan;
-            extern const Function asin;
-            extern const Function acos;
-            extern const Function atan;
-            extern const Function dot;
-            extern const Function cross;
-            extern const Function distance;
+            extern const Element min;
+            extern const Element max;
+            extern const Element clamp;
+            extern const Element sqrt;
+            extern const Element pow;
+            extern const Element sin;
+            extern const Element cos;
+            extern const Element tan;
+            extern const Element asin;
+            extern const Element acos;
+            extern const Element atan;
+            extern const Element dot;
+            extern const Element cross;
+            extern const Element distance;
         }
     }
 }

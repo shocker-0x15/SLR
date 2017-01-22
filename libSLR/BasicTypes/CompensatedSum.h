@@ -20,14 +20,15 @@ namespace SLR {
         CompensatedSum &operator=(const RealType &value) {
             result = value;
             comp = 0;
-        };
+            return *this;
+        }
         CompensatedSum &operator+=(const RealType &value) {
             RealType cInput = value - comp;
             RealType sumTemp = result + cInput;
             comp = (sumTemp - result) - cInput;
             result = sumTemp;
             return *this;
-        };
+        }
         operator RealType() const { return result; };
     };    
 }

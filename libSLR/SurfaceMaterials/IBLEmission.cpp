@@ -9,7 +9,7 @@
 #include "../EDFs/IBLEDF.h"
 #include "../Memory/ArenaAllocator.h"
 #include "../Core/textures.h"
-#include "../Core/Scene.h"
+#include "../Scene/Scene.h"
 
 namespace SLR {
     SampledSpectrum IBLEmission::emittance(const SurfacePoint &surfPt, const WavelengthSamples &wls) const {

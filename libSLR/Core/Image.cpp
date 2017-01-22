@@ -123,9 +123,9 @@ namespace SLR {
                     sumG += coeffsCorners[i] * rgb[1];
                     sumB += coeffsCorners[i] * rgb[2];
                 }
-                SLRAssert(!std::isnan(sumR.result) && !std::isinf(sumR.result), "Invalid value.");
-                SLRAssert(!std::isnan(sumG.result) && !std::isinf(sumG.result), "Invalid value.");
-                SLRAssert(!std::isnan(sumB.result) && !std::isinf(sumB.result), "Invalid value.");
+                SLRAssert(std::isfinite(sumR.result), "Invalid value.");
+                SLRAssert(std::isfinite(sumG.result), "Invalid value.");
+                SLRAssert(std::isfinite(sumB.result), "Invalid value.");
                 
                 for (uint32_t x = xLeftPix + 1; x < xRightPix; ++x) {
                     pix = get<uvs16Fx3>(x, yTopPix);
@@ -165,9 +165,9 @@ namespace SLR {
                     sumG += coeffsEdges[2] * rgb[1];
                     sumB += coeffsEdges[2] * rgb[2];
                 }
-                SLRAssert(!std::isnan(sumR.result) && !std::isinf(sumR.result), "Invalid value.");
-                SLRAssert(!std::isnan(sumG.result) && !std::isinf(sumG.result), "Invalid value.");
-                SLRAssert(!std::isnan(sumB.result) && !std::isinf(sumB.result), "Invalid value.");
+                SLRAssert(std::isfinite(sumR.result), "Invalid value.");
+                SLRAssert(std::isfinite(sumG.result), "Invalid value.");
+                SLRAssert(std::isfinite(sumB.result), "Invalid value.");
                 
                 for (uint32_t y = yTopPix + 1; y < yBottomPix; ++y) {
                     for (uint32_t x = xLeftPix + 1; x < xRightPix; ++x) {
@@ -181,17 +181,17 @@ namespace SLR {
                         sumB += rgb[2];
                     }
                 }
-                SLRAssert(!std::isnan(sumR.result) && !std::isinf(sumR.result), "Invalid value.");
-                SLRAssert(!std::isnan(sumG.result) && !std::isinf(sumG.result), "Invalid value.");
-                SLRAssert(!std::isnan(sumB.result) && !std::isinf(sumB.result), "Invalid value.");
+                SLRAssert(std::isfinite(sumR.result), "Invalid value.");
+                SLRAssert(std::isfinite(sumG.result), "Invalid value.");
+                SLRAssert(std::isfinite(sumB.result), "Invalid value.");
                 
                 rgb[0] = sumR / area;
                 rgb[1] = sumG / area;
                 rgb[2] = sumB / area;
                 Upsampling::sRGB_to_uvs(m_spType, rgb, uvs);
-                SLRAssert(!std::isnan(uvs[0]) && !std::isinf(uvs[0]), "Invalid value.");
-                SLRAssert(!std::isnan(uvs[1]) && !std::isinf(uvs[1]), "Invalid value.");
-                SLRAssert(!std::isnan(uvs[2]) && !std::isinf(uvs[2]), "Invalid value.");
+                SLRAssert(std::isfinite(uvs[0]), "Invalid value.");
+                SLRAssert(std::isfinite(uvs[1]), "Invalid value.");
+                SLRAssert(std::isfinite(uvs[2]), "Invalid value.");
                 
                 uvs16Fx3 ret{half(uvs[0]), half(uvs[1]), half(uvs[2])};
                 memcpy(avg, &ret, sizeof(ret));
@@ -216,10 +216,10 @@ namespace SLR {
                     sumB += coeffsCorners[i] * rgb[2];
                     sumA += coeffsCorners[i] * pix.a;
                 }
-                SLRAssert(!std::isnan(sumR.result) && !std::isinf(sumR.result), "Invalid value.");
-                SLRAssert(!std::isnan(sumG.result) && !std::isinf(sumG.result), "Invalid value.");
-                SLRAssert(!std::isnan(sumB.result) && !std::isinf(sumB.result), "Invalid value.");
-                SLRAssert(!std::isnan(sumA.result) && !std::isinf(sumA.result), "Invalid value.");
+                SLRAssert(std::isfinite(sumR.result), "Invalid value.");
+                SLRAssert(std::isfinite(sumG.result), "Invalid value.");
+                SLRAssert(std::isfinite(sumB.result), "Invalid value.");
+                SLRAssert(std::isfinite(sumA.result), "Invalid value.");
                 
                 for (uint32_t x = xLeftPix + 1; x < xRightPix; ++x) {
                     pix = get<uvsA16Fx4>(x, yTopPix);
@@ -263,10 +263,10 @@ namespace SLR {
                     sumB += coeffsEdges[2] * rgb[2];
                     sumA += coeffsEdges[2] * pix.a;
                 }
-                SLRAssert(!std::isnan(sumR.result) && !std::isinf(sumR.result), "Invalid value.");
-                SLRAssert(!std::isnan(sumG.result) && !std::isinf(sumG.result), "Invalid value.");
-                SLRAssert(!std::isnan(sumB.result) && !std::isinf(sumB.result), "Invalid value.");
-                SLRAssert(!std::isnan(sumA.result) && !std::isinf(sumA.result), "Invalid value.");
+                SLRAssert(std::isfinite(sumR.result), "Invalid value.");
+                SLRAssert(std::isfinite(sumG.result), "Invalid value.");
+                SLRAssert(std::isfinite(sumB.result), "Invalid value.");
+                SLRAssert(std::isfinite(sumA.result), "Invalid value.");
                 
                 for (uint32_t y = yTopPix + 1; y < yBottomPix; ++y) {
                     for (uint32_t x = xLeftPix + 1; x < xRightPix; ++x) {
@@ -281,18 +281,18 @@ namespace SLR {
                         sumA += pix.a;
                     }
                 }
-                SLRAssert(!std::isnan(sumR.result) && !std::isinf(sumR.result), "Invalid value.");
-                SLRAssert(!std::isnan(sumG.result) && !std::isinf(sumG.result), "Invalid value.");
-                SLRAssert(!std::isnan(sumB.result) && !std::isinf(sumB.result), "Invalid value.");
-                SLRAssert(!std::isnan(sumA.result) && !std::isinf(sumA.result), "Invalid value.");
+                SLRAssert(std::isfinite(sumR.result), "Invalid value.");
+                SLRAssert(std::isfinite(sumG.result), "Invalid value.");
+                SLRAssert(std::isfinite(sumB.result), "Invalid value.");
+                SLRAssert(std::isfinite(sumA.result), "Invalid value.");
                 
                 rgb[0] = sumR / area;
                 rgb[1] = sumG / area;
                 rgb[2] = sumB / area;
                 Upsampling::sRGB_to_uvs(m_spType, rgb, uvs);
-                SLRAssert(!std::isnan(uvs[0]) && !std::isinf(uvs[0]), "Invalid value.");
-                SLRAssert(!std::isnan(uvs[1]) && !std::isinf(uvs[1]), "Invalid value.");
-                SLRAssert(!std::isnan(uvs[2]) && !std::isinf(uvs[2]), "Invalid value.");
+                SLRAssert(std::isfinite(uvs[0]), "Invalid value.");
+                SLRAssert(std::isfinite(uvs[1]), "Invalid value.");
+                SLRAssert(std::isfinite(uvs[2]), "Invalid value.");
                 
                 uvsA16Fx4 ret{half(uvs[0]), half(uvs[1]), half(uvs[2]), half(sumA / area)};
                 memcpy(avg, &ret, sizeof(ret));

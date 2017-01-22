@@ -39,8 +39,6 @@ namespace SLRSceneGraph {
             nodeOut = nullptr;
             return;
         }
-        nodeOut = createShared<InternalNode>();
-        nodeOut->setName(nodeSrc->mName.C_Str());
         
         const aiMatrix4x4 &tf = nodeSrc->mTransformation;
         float tfElems[] = {
@@ -49,7 +47,9 @@ namespace SLRSceneGraph {
             tf.c1, tf.c2, tf.c3, tf.c4,
             tf.d1, tf.d2, tf.d3, tf.d4,
         };
-        nodeOut->setTransform(createShared<SLR::StaticTransform>(SLR::Matrix4x4(tfElems)));
+        
+        nodeOut = createShared<InternalNode>(createShared<SLR::StaticTransform>(SLR::Matrix4x4(tfElems)));
+        nodeOut->setName(nodeSrc->mName.C_Str());
         
         std::vector<Triangle> meshIndices;
         for (int m = 0; m < nodeSrc->mNumMeshes; ++m) {
