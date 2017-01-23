@@ -45,35 +45,47 @@ namespace SLR {
     }
     
     bool Scene::intersect(Ray &ray, SurfaceInteraction *si) const {
-        if (m_surfaceAggregate->intersect(ray, si))
+        float importances[2] = {m_surfaceAggregate->importance(), 0.0f};
+        if (m_envSphere)
+            importances[1] = m_envSphere->importance();
+        
+        if (m_surfaceAggregate->intersect(ray, si)) {
+            si->setLightProb(evaluateProbability(importances, 2, 0) * si->getLightProb());
             return true;
+        }
         if (m_envSphere) {
-            if (m_envSphere->intersect(ray, si))
+            if (m_envSphere->intersect(ray, si)) {
+                si->setLightProb(evaluateProbability(importances, 2, 1) * si->getLightProb());
                 return true;
+            }
         }
         return false;
     }
     
     bool Scene::interact(Ray &ray, const WavelengthSamples &wls, LightPathSampler &pathSampler, ArenaAllocator &mem,
                          Interaction** interact, SampledSpectrum* medThroughput, bool* singleWavelength) const {
+        float importances[3] = {m_surfaceAggregate->importance(), m_mediumAggregate->importance(), 0.0f};
+        if (m_envSphere)
+            importances[2] = m_envSphere->importance();
+        
         SurfaceInteraction si;
         bool hitSurface = m_surfaceAggregate->intersect(ray, &si);
         MediumInteraction mi;
         bool hitMedium = m_mediumAggregate->interact(ray, wls, pathSampler, &mi, medThroughput, singleWavelength);
         if (hitMedium) {
-            if (interact)
-                *interact = mem.create<MediumInteraction>(mi);
+            mi.setLightProb(evaluateProbability(importances, 3, 1) * mi.getLightProb());
+            *interact = mem.create<MediumInteraction>(mi);
             return true;
         }
         if (hitSurface) {
-            if (interact)
-                *interact = mem.create<SurfaceInteraction>(si);
+            mi.setLightProb(evaluateProbability(importances, 3, 0) * mi.getLightProb());
+            *interact = mem.create<SurfaceInteraction>(si);
             return true;
         }
         if (m_envSphere) {
             if (m_envSphere->intersect(ray, &si)) {
-                if (interact)
-                    *interact = mem.create<SurfaceInteraction>(si);
+                mi.setLightProb(evaluateProbability(importances, 3, 2) * mi.getLightProb());
+                *interact = mem.create<SurfaceInteraction>(si);
                 return true;
             }
         }
@@ -113,43 +125,27 @@ namespace SLR {
         return true;
     }
     
-    void Scene::selectSurfaceLight(float u, SurfaceLight* light, float* prob) const {
+    void Scene::selectSurfaceLight(float u, float time, SurfaceLight* light, float* prob) const {
         if (m_envSphere) {
             float sumImps = m_surfaceAggregate->importance() + m_envSphere->importance();
             float su = sumImps * u;
             if (su < m_surfaceAggregate->importance()) {
                 u = u / (m_surfaceAggregate->importance() / sumImps);
-                m_surfaceAggregate->selectLight(u, light, prob);
+                m_surfaceAggregate->selectLight(u, time, light, prob);
                 *prob *= m_surfaceAggregate->importance() / sumImps;
             }
             else {
                 u = (u - m_surfaceAggregate->importance()) / (m_envSphere->importance() / sumImps);
-                m_envSphere->selectLight(u, light, prob);
+                m_envSphere->selectLight(u, time, light, prob);
                 *prob *= m_envSphere->importance() / sumImps;
             }
         }
         else {
-            m_surfaceAggregate->selectLight(u, light, prob);
+            m_surfaceAggregate->selectLight(u, time, light, prob);
         }
     }
     
-    float Scene::evaluateSurfaceLightProb(const SurfaceLight &light) const {
-        float ret = 0.0f;
-        if (m_envSphere) {
-            float sumImps = m_surfaceAggregate->importance() + m_envSphere->importance();
-            if (light.top() == m_envSphere)
-                ret = m_envSphere->importance() / sumImps;
-            else
-                ret = m_surfaceAggregate->importance()  / sumImps * m_surfaceAggregate->evaluateProb(light);
-        }
-        else {
-            ret = m_surfaceAggregate->evaluateProb(light);
-        }
-        SLRAssert(std::isfinite(ret), "%g", ret);
-        return ret;
-    }
-    
-    void Scene::selectLight(float u, ArenaAllocator &mem, Light** light, float *prob) const {
+    void Scene::selectLight(float u, float time, ArenaAllocator &mem, Light** light, float *prob) const {
         float importances[3] = {m_surfaceAggregate->importance(), m_mediumAggregate->importance(), 0.0f};
         if (m_envSphere)
             importances[2] = m_envSphere->importance();
@@ -161,19 +157,19 @@ namespace SLR {
         switch (idx) {
             case 0: {
                 SurfaceLight* surfLight = mem.create<SurfaceLight>();
-                m_surfaceAggregate->selectLight(u, surfLight, prob);
+                m_surfaceAggregate->selectLight(u, time, surfLight, prob);
                 *light = surfLight;
                 break;
             }
             case 1: {
                 VolumetricLight* volLight = mem.create<VolumetricLight>();
-                m_mediumAggregate->selectLight(u, volLight, prob);
+                m_mediumAggregate->selectLight(u, time, volLight, prob);
                 *light = volLight;
                 break;
             }
             case 2: {
                 SurfaceLight* surfLight = mem.create<SurfaceLight>();
-                m_envSphere->selectLight(u, surfLight, prob);
+                m_envSphere->selectLight(u, time, surfLight, prob);
                 *light = surfLight;
                 break;
             }
@@ -181,17 +177,5 @@ namespace SLR {
                 break;
         }
         *prob *= prob1st;
-    }
-    
-    float Scene::evaluateLightProb(const Light* light) const {
-        float importances[3] = {m_surfaceAggregate->importance(), m_mediumAggregate->importance(), 0.0f};
-        if (m_envSphere)
-            importances[2] = m_envSphere->importance();
-        if (m_surfaceAggregate->contains(light))
-            return m_surfaceAggregate->evaluateProbability(light) * evaluateProbability(importances, 3, 0);
-        else if (m_mediumAggregate->contains(light))
-            return m_mediumAggregate->evaluateProbability(light) * evaluateProbability(importances, 3, 1);
-        else
-            return /*m_envSphere->evaluateProb(light)*/1.0f * evaluateProbability(importances, 3, 2);
     }
 }

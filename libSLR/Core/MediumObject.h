@@ -27,15 +27,11 @@ namespace SLR {
     };
     
     class SLR_API VolumetricLight : public Light {
-        mutable FixedStack<const MediumObject*> m_hierarchy;
+        const SingleMediumObject* m_obj;
     public:
         VolumetricLight() { }
-        VolumetricLight(const FixedStack<const MediumObject*> &hierarchy) : m_hierarchy(hierarchy) { }
-        VolumetricLight(const MediumInteraction &mi);
         
-        void push(const MediumObject* obj) const { m_hierarchy.push(obj); }
-        ScopedPop<const MediumObject*> scopedPop() const { return ScopedPop<const MediumObject*>(m_hierarchy); }
-        const MediumObject* top() const { return m_hierarchy.top(); }
+        void setObject(const SingleMediumObject* obj) { m_obj = obj; }
         
         SampledSpectrum sample(const LightPosQuery &query, const VolumetricLightPosSample &smp, VolumetricLightPosQueryResult* result) const;
         Ray sampleRay(const LightPosQuery &lightPosQuery, const VolumetricLightPosSample &lightPosSample,
@@ -53,24 +49,21 @@ namespace SLR {
     public:
         virtual bool isEmitting() const = 0;
         virtual float importance() const = 0;
-        virtual void selectLight(float u, VolumetricLight* light, float* prob) const = 0;
-        virtual float evaluateProb(const VolumetricLight &light) const = 0;
+        virtual void selectLight(float u, float time, VolumetricLight* light, float* prob) const = 0;
         
-        virtual SampledSpectrum sample(const VolumetricLight &light,
+        virtual SampledSpectrum sample(const StaticTransform &transform,
                                        const LightPosQuery &query, const VolumetricLightPosSample &smp, VolumetricLightPosQueryResult* result) const {
-            SLRAssert(light.top() == this, "Object stored in Intersection does not match this object.");
-            ScopedPop<const MediumObject*> sp = light.scopedPop();
-            return light.top()->sample(light, query, smp, result);
+            SLRAssert_ShouldNotBeCalled();
+            return SampledSpectrum::Zero;
         }
-        virtual Ray sampleRay(const VolumetricLight &light,
+        virtual Ray sampleRay(const StaticTransform &transform,
                               const LightPosQuery &lightPosQuery, const VolumetricLightPosSample &lightPosSample,
                               const EDFQuery &edfQuery, const EDFSample &edfSample,
                               ArenaAllocator &mem,
                               VolumetricLightPosQueryResult* lightPosResult, SampledSpectrum* Le0, EDF** edf,
                               EDFQueryResult* edfResult, SampledSpectrum* Le1) const {
-            SLRAssert(light.top() == this, "Object stored in Intersection does not match this object.");
-            ScopedPop<const MediumObject*> sp = light.scopedPop();
-            return light.top()->sampleRay(light, lightPosQuery, lightPosSample, edfQuery, edfSample, mem, lightPosResult, Le0, edf, edfResult, Le1);
+            SLRAssert_ShouldNotBeCalled();
+            return Ray();
         }
         
         virtual bool getMediumContaining(const Point3D &p, const SingleMediumObject** curMedium) const = 0;
@@ -81,13 +74,8 @@ namespace SLR {
         virtual bool interact(Ray &ray, const WavelengthSamples &wls, LightPathSampler &pathSampler,
                               MediumInteraction* mi, SampledSpectrum* medThroughput, bool* singleWavelength) const = 0;
         virtual SampledSpectrum evaluateTransmittance(Ray &ray, const WavelengthSamples &wls, LightPathSampler &pathSampler, bool* singleWavelength) const = 0;
-        virtual void getMediumPoint(const MediumInteraction &mi, MediumPoint* medPt) const = 0;
-        
-        bool contains(const Light* light) const override {
-            return ((const VolumetricLight*)light)->top() == this;
-        }
-        float evaluateProbability(const Light* light) const override {
-            return evaluateProb(*(const VolumetricLight*)light);
+        virtual void getMediumPoint(const MediumInteraction &mi, MediumPoint* medPt) const {
+            SLRAssert_ShouldNotBeCalled();
         }
     };
     
@@ -109,12 +97,11 @@ namespace SLR {
         // MediumObject's methods
         bool isEmitting() const override;
         float importance() const override;
-        void selectLight(float u, VolumetricLight* light, float* prob) const override;
-        float evaluateProb(const VolumetricLight &light) const override;
+        void selectLight(float u, float time, VolumetricLight* light, float* prob) const override;
         
-        SampledSpectrum sample(const VolumetricLight &light,
+        SampledSpectrum sample(const StaticTransform &transform,
                                const LightPosQuery &query, const VolumetricLightPosSample &smp, VolumetricLightPosQueryResult* result) const override;
-        Ray sampleRay(const VolumetricLight &light,
+        Ray sampleRay(const StaticTransform &transform,
                       const LightPosQuery &lightPosQuery, const VolumetricLightPosSample &lightPosSample,
                       const EDFQuery &edfQuery, const EDFSample &edfSample,
                       ArenaAllocator &mem,
@@ -141,8 +128,9 @@ namespace SLR {
         BoundingBox3D m_bounds;
         std::vector<const MediumObject*> m_objLists;
         const MediumObject** m_lightList;
+        std::map<uint32_t, uint32_t> m_objToLightMap;
+        uint32_t m_numLights;
         RegularConstantDiscrete1D* m_lightDist1D;
-        std::map<const MediumObject*, uint32_t> m_revMap;
     public:
         MediumObjectAggregate(const std::vector<MediumObject*> &objs);
         ~MediumObjectAggregate();
@@ -156,8 +144,7 @@ namespace SLR {
         // MediumObject's methods
         bool isEmitting() const override;
         float importance() const override;
-        void selectLight(float u, VolumetricLight* light, float* prob) const override;
-        float evaluateProb(const VolumetricLight &light) const override;
+        void selectLight(float u, float time, VolumetricLight* light, float* prob) const override;
         
         bool getMediumContaining(const Point3D &p, const SingleMediumObject** curMedium) const override;
         bool intersectBoundary(const Ray &ray, float* distToBoundary, bool* enter, const SingleMediumObject** boundaryMedium) const override;
@@ -166,11 +153,6 @@ namespace SLR {
         bool interact(Ray &ray, const WavelengthSamples &wls, LightPathSampler &pathSampler,
                       MediumInteraction* mi, SampledSpectrum* medThroughput, bool* singleWavelength) const override;
         SampledSpectrum evaluateTransmittance(Ray &ray, const WavelengthSamples &wls, LightPathSampler &pathSampler, bool* singleWavelength) const override;
-        void getMediumPoint(const MediumInteraction &mi, MediumPoint* medPt) const override {
-            SLRAssert(mi.top() == this, "Object stored in MediumInteraction does not match this object.");
-            ScopedPop<const MediumObject*> sp = mi.scopedPop();
-            mi.getMediumPoint(medPt);
-        }
         //----------------------------------------------------------------
     };
 }

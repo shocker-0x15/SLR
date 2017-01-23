@@ -29,7 +29,13 @@ namespace SLR {
     };
     
     class SLR_API Light {
-    public:        
+    protected:
+        StaticTransform m_appliedTransform;
+    public:
+        void applyTransformFromLeft(const StaticTransform &transform) {
+            m_appliedTransform = transform * m_appliedTransform;
+        }
+        
         virtual SampledSpectrum sample(const LightPosQuery &query, LightPathSampler &pathSampler, ArenaAllocator &mem, LightPosQueryResult** lpResult) const = 0;
     };
     
@@ -70,9 +76,6 @@ namespace SLR {
             *bbox1 = baseBBox;
             bbox1->minP[splitAxis] = std::max(bbox1->minP[splitAxis], splitPos);
         }
-        
-        virtual bool contains(const Light* light) const = 0;
-        virtual float evaluateProbability(const Light* light) const = 0;
     };
 }
 

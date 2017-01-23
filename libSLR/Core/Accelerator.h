@@ -22,15 +22,7 @@ namespace SLR {
         
         virtual BoundingBox3D bounds() const = 0;
         
-        virtual bool intersect(Ray &ray, SurfaceInteraction* si) const = 0;
-        
-        bool intersect(Ray &ray, SurfacePoint* surfPt) const {
-            SurfaceInteraction si;
-            if (!intersect(ray, &si))
-                return false;
-            si.getSurfacePoint(surfPt);
-            return true;
-        }
+        virtual bool intersect(Ray &ray, SurfaceInteraction* si, uint32_t* closestIndex) const = 0;
         
         static bool traceTraverse;
         static std::string traceTraversePrefix;

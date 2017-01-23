@@ -13,10 +13,8 @@
 #include "Transform.h"
 
 namespace SLR {
-    const float Ray::Epsilon = 0.0001f;
-    
     void SurfaceInteraction::getSurfacePoint(SurfacePoint* surfPt) const {
-        top()->getSurfacePoint(*this, surfPt);
+        m_obj->getSurfacePoint(*this, surfPt);
     }
     
     InteractionPoint* SurfaceInteraction::createInteractionPoint(ArenaAllocator &mem) const {
@@ -25,23 +23,16 @@ namespace SLR {
         return surfPt;
     }
     
-    Light* SurfaceInteraction::createLight(ArenaAllocator &mem) const {
-        return mem.create<SurfaceLight>(m_hierarchy);
-    }
     
     
     void MediumInteraction::getMediumPoint(SLR::MediumPoint *medPt) const {
-        top()->getMediumPoint(*this, medPt);
+        m_obj->getMediumPoint(*this, medPt);
     }
     
     InteractionPoint* MediumInteraction::createInteractionPoint(ArenaAllocator &mem) const {
         MediumPoint* medPt = mem.create<MediumPoint>();
         getMediumPoint(medPt);
         return medPt;
-    }
-    
-    Light* MediumInteraction::createLight(ArenaAllocator &mem) const {
-        return mem.create<VolumetricLight>(m_hierarchy);
     }
     
     

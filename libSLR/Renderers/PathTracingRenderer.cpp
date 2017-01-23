@@ -173,7 +173,7 @@ namespace SLR {
             if (bsdf->hasNonDelta()) {
                 SurfaceLight light;
                 float lightProb;
-                scene.selectSurfaceLight(pathSampler.getLightSelectionSample(), &light, &lightProb);
+                scene.selectSurfaceLight(pathSampler.getLightSelectionSample(), ray.time, &light, &lightProb);
                 SLRAssert(std::isfinite(lightProb), "lightProb: unexpected value detected: %f", lightProb);
                 
                 LightPosQuery lpQuery(ray.time, wls);
@@ -238,9 +238,8 @@ namespace SLR {
                 
                 EDF* edf = surfPt.createEDF(wls, mem);
                 SampledSpectrum Le = surfPt.emittance(wls) * edf->evaluate(EDFQuery(), dirOut_sn);
-                float lightProb = scene.evaluateSurfaceLightProb(SurfaceLight(si));
                 float dist2 = surfPt.getSquaredDistance(ray.org);
-                float lightPDF = lightProb * surfPt.evaluateAreaPDF() * dist2 / surfPt.calcCosTerm(ray.dir);
+                float lightPDF = si.getLightProb() * surfPt.evaluateAreaPDF() * dist2 / surfPt.calcCosTerm(ray.dir);
                 SLRAssert(Le.allFinite(), "Le: unexpected value detected: %s", Le.toString().c_str());
                 SLRAssert(!std::isnan(lightPDF)/* && !std::isinf(lightPDF)*/, "lightPDF: unexpected value detected: %f", lightPDF);
                 

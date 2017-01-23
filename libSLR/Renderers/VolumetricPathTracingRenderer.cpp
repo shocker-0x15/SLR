@@ -190,7 +190,7 @@ namespace SLR {
             if (abdf->hasNonDelta()) {
                 Light* light;
                 float lightProb;
-                scene.selectLight(pathSampler.getLightSelectionSample(), mem, &light, &lightProb);
+                scene.selectLight(pathSampler.getLightSelectionSample(), ray.time, mem, &light, &lightProb);
                 SLRAssert(std::isfinite(lightProb), "lightProb: unexpected value detected: %f", lightProb);
                 
                 LightPosQuery lpQuery(ray.time, wls);
@@ -266,10 +266,8 @@ namespace SLR {
                 
                 EDF* edf = interPt->createEDF(wls, mem);
                 SampledSpectrum Le = interPt->fluxDensity(wls) * edf->evaluate(EDFQuery(), dirOut_local);
-                Light* light = interact->createLight(mem);
-                float lightProb = scene.evaluateLightProb(light);
                 float dist2 = interPt->getSquaredDistance(ray.org);
-                float lightPDF = lightProb * interPt->evaluateSpatialPDF() * dist2 / interPt->calcCosTerm(ray.dir);
+                float lightPDF = interact->getLightProb() * interPt->evaluateSpatialPDF() * dist2 / interPt->calcCosTerm(ray.dir);
                 SLRAssert(Le.allFinite(), "Le: unexpected value detected: %s", Le.toString().c_str());
                 SLRAssert(!std::isnan(lightPDF)/* && !std::isinf(lightPDF)*/, "lightPDF: unexpected value detected: %f", lightPDF);
                 

@@ -10,7 +10,13 @@
 
 #include "../defines.h"
 #include "../references.h"
-#include "geometry.h"
+#include "../BasicTypes/Point3.h"
+#include "../BasicTypes/Vector3.h"
+#include "../BasicTypes/Vector4.h"
+#include "../BasicTypes/Normal3.h"
+#include "../BasicTypes/Matrix4x4.h"
+#include "../BasicTypes/Quaternion.h"
+#include "../BasicTypes/BoundingBox3.h"
 
 namespace SLR {
     class SLR_API Transform {

@@ -123,7 +123,7 @@ namespace SLR {
                     // select one light from all the lights in the scene.
                     float lightProb;
                     SurfaceLight light;
-                    scene->selectSurfaceLight(pathSampler.getLightSelectionSample(), &light, &lightProb);
+                    scene->selectSurfaceLight(pathSampler.getLightSelectionSample(), time, &light, &lightProb);
                     SLRAssert(std::isfinite(lightProb), "lightProb: unexpected value detected: %f", lightProb);
                     
                     // sample a ray with its radiance (emittance, EDF value) from the selected light.
@@ -294,8 +294,7 @@ namespace SLR {
                 SampledSpectrum Le0 = surfPt.emittance(wls);
                 SampledSpectrum Le1 = edf->evaluate(EDFQuery(), dirOut_sn);
                 
-                float lightProb = scene->evaluateSurfaceLightProb(SurfaceLight(si));
-                float extend1stAreaPDF = lightProb * surfPt.evaluateAreaPDF();
+                float extend1stAreaPDF = si.getLightProb() * surfPt.evaluateAreaPDF();
                 float extend2ndAreaPDF = edf->evaluatePDF(EDFQuery(), dirOut_sn) * cosLast / dist2;
                 
                 float MISWeight = calculateMISWeight(extend1stAreaPDF, 1.0f, extend2ndAreaPDF, 1.0f,

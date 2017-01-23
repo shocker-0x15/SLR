@@ -414,8 +414,8 @@ namespace SLR {
             return m_bounds;
         }
         
-        bool intersect(Ray &ray, SurfaceInteraction* si) const override {
-            bool found = false;
+        bool intersect(Ray &ray, SurfaceInteraction* si, uint32_t* closestIndex) const override {
+            *closestIndex = UINT32_MAX;
             bool dirIsPositive[] = {ray.dir.x >= 0, ray.dir.y >= 0, ray.dir.z >= 0};
             
             const uint32_t StackSize = 64;
@@ -441,13 +441,13 @@ namespace SLR {
                         }
 #endif
                         if (m_objLists[node.offsetFirstLeaf + i]->intersect(ray, si)) {
-                            found = true;
+                            *closestIndex = node.offsetFirstLeaf + i;
                             ray.distMax = si->getDistance();
                         }
                     }
                 }
             }
-            return found;
+            return *closestIndex != UINT32_MAX;
         }
     };    
 }

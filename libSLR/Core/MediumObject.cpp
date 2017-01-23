@@ -18,12 +18,8 @@
 #include "../Scene/Scene.h"
 
 namespace SLR {
-    VolumetricLight::VolumetricLight(const MediumInteraction &mi) : m_hierarchy(mi.getHierarchy()) {
-        SLRAssert(m_hierarchy.top()->isEmitting(), "This is not a light.");
-    }
-    
     SampledSpectrum VolumetricLight::sample(const LightPosQuery &query, const VolumetricLightPosSample &smp, VolumetricLightPosQueryResult* result) const {
-        return m_hierarchy.top()->sample(*this, query, smp, result);
+        return m_obj->sample(m_appliedTransform, query, smp, result);
     }
     
     Ray VolumetricLight::sampleRay(const LightPosQuery &lightPosQuery, const VolumetricLightPosSample &lightPosSample,
@@ -31,7 +27,7 @@ namespace SLR {
                                    ArenaAllocator &mem,
                                    VolumetricLightPosQueryResult* lightPosResult, SampledSpectrum* Le0, EDF** edf,
                                    EDFQueryResult* edfResult, SampledSpectrum* Le1) const {
-        return m_hierarchy.top()->sampleRay(*this, lightPosQuery, lightPosSample, edfQuery, edfSample, mem, lightPosResult, Le0, edf, edfResult, Le1);
+        return m_obj->sampleRay(m_appliedTransform, lightPosQuery, lightPosSample, edfQuery, edfSample, mem, lightPosResult, Le0, edf, edfResult, Le1);
     }
     
     SampledSpectrum VolumetricLight::sample(const LightPosQuery &query, LightPathSampler &pathSampler, ArenaAllocator &mem, LightPosQueryResult** lpResult) const {
@@ -51,23 +47,18 @@ namespace SLR {
         return 1.0f;
     }
     
-    void SingleMediumObject::selectLight(float u, VolumetricLight* light, float* prob) const {
-        light->push(this);
+    void SingleMediumObject::selectLight(float u, float time, VolumetricLight* light, float* prob) const {
+        light->setObject(this);
         *prob = 1.0f;
     }
     
-    float SingleMediumObject::evaluateProb(const VolumetricLight &light) const {
-        SLRAssert(light.top() == this, "Object stored in Light does not match this object.");
-        return 1.0f;
-    }
-    
-    SampledSpectrum SingleMediumObject::sample(const VolumetricLight &light,
+    SampledSpectrum SingleMediumObject::sample(const StaticTransform &transform,
                                                const LightPosQuery &query, const VolumetricLightPosSample &smp, VolumetricLightPosQueryResult* result) const {
         SLRAssert_NotImplemented();
         return SampledSpectrum::Zero;
     }
     
-    Ray SingleMediumObject::sampleRay(const VolumetricLight &light,
+    Ray SingleMediumObject::sampleRay(const StaticTransform &transform,
                                       const LightPosQuery &lightPosQuery, const VolumetricLightPosSample &lightPosSample,
                                       const EDFQuery &edfQuery, const EDFSample &edfSample,
                                       ArenaAllocator &mem,
@@ -134,29 +125,31 @@ namespace SLR {
         for (int i = 0; i < objs.size(); ++i)
             m_objLists.push_back(objs[i]);
         
-        std::vector<const MediumObject*> lights;
+        std::vector<uint32_t> lightIndices;
         std::vector<float> lightImportances;
         for (int i = 0; i < objs.size(); ++i) {
             const MediumObject* obj = objs[i];
             if (obj->isEmitting()) {
-                lights.push_back(obj);
+                lightIndices.push_back(i);
                 lightImportances.push_back(obj->importance());
             }
         }
         
-        m_lightList = new const MediumObject*[lightImportances.size()];
+        m_numLights = (uint32_t)lightImportances.size();
+        m_lightList = new const MediumObject*[m_numLights];
         m_lightDist1D = new RegularConstantDiscrete1D(lightImportances);
         
-        for (int i = 0; i < lights.size(); ++i) {
-            const MediumObject* light = lights[i];
+        for (int i = 0; i < m_numLights; ++i) {
+            uint32_t objIdx = lightIndices[i];
+            const MediumObject* light = objs[objIdx];
             m_lightList[i] = light;
-            m_revMap[light] = i;
+            m_objToLightMap[objIdx] = i;
         }
     }
     
     MediumObjectAggregate::~MediumObjectAggregate() {
-        delete m_lightList;
         delete m_lightDist1D;
+        delete[] m_lightList;
     }
     
     BoundingBox3D MediumObjectAggregate::bounds() const {
@@ -164,29 +157,19 @@ namespace SLR {
     }
     
     bool MediumObjectAggregate::isEmitting() const {
-        return m_revMap.size() > 0;
+        return m_numLights > 0;
     }
     
     float MediumObjectAggregate::importance() const {
         return m_lightDist1D->integral();
     }
     
-    void MediumObjectAggregate::selectLight(float u, VolumetricLight* light, float* prob) const {
+    void MediumObjectAggregate::selectLight(float u, float time, VolumetricLight* light, float* prob) const {
         uint32_t lIdx = m_lightDist1D->sample(u, prob, &u);
         const MediumObject* obj = m_lightList[lIdx];
         float cProb;
-        obj->selectLight(u, light, &cProb);
+        obj->selectLight(u, time, light, &cProb);
         *prob *= cProb;
-        light->push(this);
-    }
-    
-    float MediumObjectAggregate::evaluateProb(const VolumetricLight &light) const {
-        SLRAssert(light.top() == this, "Object stored in Intersection does not match this object.");
-        
-        ScopedPop<const MediumObject*> sp = light.scopedPop();
-        SLRAssert(m_revMap.count(light.top()) > 0, "Specified light is not found.");
-        float prob = m_lightDist1D->evaluatePMF(m_revMap.at(light.top()));
-        return prob * light.top()->evaluateProb(light);
     }
     
     bool MediumObjectAggregate::getMediumContaining(const Point3D &p, const SingleMediumObject** curMedium) const {

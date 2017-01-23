@@ -17,6 +17,7 @@
 #include <libSLR/Memory/ArenaAllocator.h>
 #include <libSLR/Scene/nodes.h>
 #include <libSLR/Scene/Scene.h>
+#include <libSLR/Surface/TriangleMesh.h>
 #include <libSLR/Renderers/DebugRenderer.h>
 #include <libSLR/Renderers/PathTracingRenderer.h>
 #include <libSLR/Renderers/BidirectionalPathTracingRenderer.h>
@@ -723,6 +724,13 @@ namespace SLRSceneGraph {
                                                    return Element::createFromReference<TypeMap::Node>(lightMesh);
                                                }
                                                );
+//            stack["createHomogeneousMedium"] =
+//            Element::create<TypeMap::Function>(1,
+//                                               std::vector<ArgInfo>{{"min", Type::Point}, {"max", Type::Point}, {"sigma_s", Type::Spectrum}, {"sigma_a", Type::Spectrum}},
+//                                               [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
+//
+//                                               }
+//                                               );
             stack["createNode"] =
             Element::create<TypeMap::Function>(1,
                                                std::vector<ArgInfo>{},

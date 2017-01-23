@@ -68,6 +68,8 @@ namespace SLR {
     template <typename RealType> struct Matrix4x4Template;
     template <typename RealType> struct QuaternionTemplate;
     template <typename RealType> struct TexCoord2Template;
+    template <typename RealType> struct RayTemplate;
+    template <typename RealType> struct BoundingBox3Template;
     typedef Vector3Template<float> Vector3D;
     typedef Vector3Template<float> Tangent3D;
     typedef Vector3Template<float> Bitangent3D;
@@ -78,6 +80,8 @@ namespace SLR {
     typedef Matrix4x4Template<float> Matrix4x4;
     typedef QuaternionTemplate<float> Quaternion;
     typedef TexCoord2Template<float> TexCoord2D;
+    typedef RayTemplate<float> Ray;
+    typedef BoundingBox3Template<float> BoundingBox3D;
     typedef CompensatedSum<float> FloatSum;
     
     // Transforms
@@ -114,21 +118,18 @@ namespace SLR {
     //
     class ImageSensor;
     
-    //
-    struct Ray;
-    struct BoundingBox3D;
-    struct Vertex;
-    struct ReferenceFrame;
-    template <typename T> struct ScopedPop;
+    // geometry
     class Interaction;
     class SurfaceInteraction;
     class MediumInteraction;
+    struct ReferenceFrame;
     class InteractionPoint;
     class SurfacePoint;
     class MediumPoint;
     
     // Surfaces
     class Surface;
+    struct Vertex;
     class Triangle;
     class InfiniteSphere;
     

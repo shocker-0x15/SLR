@@ -46,10 +46,8 @@ namespace SLR {
         bool testVisibility(const SurfacePoint &shdP, const SurfacePoint &lightP, float time) const;
         bool testVisibility(const InteractionPoint* shdP, const InteractionPoint* lightP, float time,
                             const WavelengthSamples &wls, LightPathSampler &pathSampler, SampledSpectrum* fractionalVisibility, bool* singleWavelength) const;
-        void selectSurfaceLight(float u, SurfaceLight* light, float* prob) const;
-        float evaluateSurfaceLightProb(const SurfaceLight &light) const;
-        void selectLight(float u, ArenaAllocator &mem, Light** light, float* prob) const;
-        float evaluateLightProb(const Light* light) const;
+        void selectSurfaceLight(float u, float time, SurfaceLight* light, float* prob) const;
+        void selectLight(float u, float time, ArenaAllocator &mem, Light** light, float* prob) const;
     };
 }
 

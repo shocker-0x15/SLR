@@ -14,6 +14,7 @@
 #include <assimp/postprocess.h>
 #include <libSLR/Memory/Allocator.h>
 #include <libSLR/Core/Transform.h>
+#include <libSLR/Surface/TriangleMesh.h>
 
 template <typename RealType>
 inline void makeTangent(RealType nx, RealType ny, RealType nz, RealType* s) {

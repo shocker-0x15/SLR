@@ -23,6 +23,10 @@
 		460A20221D602C5700870E0F /* AshikhminShirleyReflection.h in Headers */ = {isa = PBXBuildFile; fileRef = 460A20201D602C5700870E0F /* AshikhminShirleyReflection.h */; };
 		460A20251D602CB800870E0F /* AshikhminShirleyBRDF.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 460A20231D602CB800870E0F /* AshikhminShirleyBRDF.cpp */; };
 		460A20261D602CB800870E0F /* AshikhminShirleyBRDF.h in Headers */ = {isa = PBXBuildFile; fileRef = 460A20241D602CB800870E0F /* AshikhminShirleyBRDF.h */; };
+		4613A1771E364E3500D05AA6 /* BoundingBox3.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4613A1751E364E3500D05AA6 /* BoundingBox3.cpp */; };
+		4613A1781E364E3500D05AA6 /* BoundingBox3.h in Headers */ = {isa = PBXBuildFile; fileRef = 4613A1761E364E3500D05AA6 /* BoundingBox3.h */; };
+		4613A17B1E36500600D05AA6 /* Ray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4613A1791E36500600D05AA6 /* Ray.cpp */; };
+		4613A17C1E36500600D05AA6 /* Ray.h in Headers */ = {isa = PBXBuildFile; fileRef = 4613A17A1E36500600D05AA6 /* Ray.h */; };
 		462018CE1CD7D05800A5CAF1 /* MicrofacetBSDF.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 462018CC1CD7D05800A5CAF1 /* MicrofacetBSDF.cpp */; };
 		462018D11CD7D09E00A5CAF1 /* MicrofacetBSDF.h in Headers */ = {isa = PBXBuildFile; fileRef = 462018D01CD7D09E00A5CAF1 /* MicrofacetBSDF.h */; };
 		46224C511C5DDFB0009EC594 /* BidirectionalPathTracingRenderer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 46224C4F1C5DDFB0009EC594 /* BidirectionalPathTracingRenderer.cpp */; };
@@ -256,6 +260,10 @@
 		460A20201D602C5700870E0F /* AshikhminShirleyReflection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AshikhminShirleyReflection.h; path = libSLR/SurfaceMaterials/AshikhminShirleyReflection.h; sourceTree = SOURCE_ROOT; };
 		460A20231D602CB800870E0F /* AshikhminShirleyBRDF.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; lineEnding = 0; name = AshikhminShirleyBRDF.cpp; path = libSLR/BSDFs/AshikhminShirleyBRDF.cpp; sourceTree = SOURCE_ROOT; xcLanguageSpecificationIdentifier = xcode.lang.cpp; };
 		460A20241D602CB800870E0F /* AshikhminShirleyBRDF.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AshikhminShirleyBRDF.h; path = libSLR/BSDFs/AshikhminShirleyBRDF.h; sourceTree = SOURCE_ROOT; };
+		4613A1751E364E3500D05AA6 /* BoundingBox3.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = BoundingBox3.cpp; path = libSLR/BasicTypes/BoundingBox3.cpp; sourceTree = SOURCE_ROOT; };
+		4613A1761E364E3500D05AA6 /* BoundingBox3.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = BoundingBox3.h; path = libSLR/BasicTypes/BoundingBox3.h; sourceTree = SOURCE_ROOT; };
+		4613A1791E36500600D05AA6 /* Ray.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Ray.cpp; path = libSLR/BasicTypes/Ray.cpp; sourceTree = SOURCE_ROOT; };
+		4613A17A1E36500600D05AA6 /* Ray.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Ray.h; path = libSLR/BasicTypes/Ray.h; sourceTree = SOURCE_ROOT; };
 		462018CC1CD7D05800A5CAF1 /* MicrofacetBSDF.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; lineEnding = 0; name = MicrofacetBSDF.cpp; path = libSLR/BSDFs/MicrofacetBSDF.cpp; sourceTree = SOURCE_ROOT; xcLanguageSpecificationIdentifier = xcode.lang.cpp; };
 		462018D01CD7D09E00A5CAF1 /* MicrofacetBSDF.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MicrofacetBSDF.h; path = libSLR/BSDFs/MicrofacetBSDF.h; sourceTree = SOURCE_ROOT; };
 		46224C4F1C5DDFB0009EC594 /* BidirectionalPathTracingRenderer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; lineEnding = 0; name = BidirectionalPathTracingRenderer.cpp; path = libSLR/Renderers/BidirectionalPathTracingRenderer.cpp; sourceTree = SOURCE_ROOT; xcLanguageSpecificationIdentifier = xcode.lang.cpp; };
@@ -510,6 +518,10 @@
 				4651F3311C5677F20026B8A5 /* Quaternion.cpp */,
 				466F6C151BB6B2830056F2FA /* TexCoord2.h */,
 				4651F3331C5678AB0026B8A5 /* TexCoord2.cpp */,
+				4613A17A1E36500600D05AA6 /* Ray.h */,
+				4613A1791E36500600D05AA6 /* Ray.cpp */,
+				4613A1761E364E3500D05AA6 /* BoundingBox3.h */,
+				4613A1751E364E3500D05AA6 /* BoundingBox3.cpp */,
 			);
 			path = BasicTypes;
 			sourceTree = "<group>";
@@ -927,6 +939,7 @@
 				466F6CE51BB6CA2D0056F2FA /* EquirectangularCamera.h in Headers */,
 				46B36DE71D33E7CF00D7C56B /* Accelerator.h in Headers */,
 				466F6CD21BB6CA070056F2FA /* Point3.h in Headers */,
+				4613A17C1E36500600D05AA6 /* Ray.h in Headers */,
 				466F6CD41BB6CA070056F2FA /* RGBTypes.h in Headers */,
 				466F6D511BB715490056F2FA /* PathTracingRenderer.h in Headers */,
 				466F6CEE1BB6CA420056F2FA /* geometry.h in Headers */,
@@ -950,6 +963,7 @@
 				4645457D1E0EB27200B4CECD /* VolumetricPathTracingRenderer.h in Headers */,
 				466F6D4D1BB7153E0056F2FA /* TriangleMesh.h in Headers */,
 				464545981E1E2D8E00B4CECD /* Scene.h in Headers */,
+				4613A1781E364E3500D05AA6 /* BoundingBox3.h in Headers */,
 				466F6D071BB6CA510056F2FA /* MultiEDF.h in Headers */,
 				466F6CFF1BB6CA420056F2FA /* Transform.h in Headers */,
 			);
@@ -1126,6 +1140,7 @@
 				466F6D3F1BB6DC840056F2FA /* basic_SurfaceMaterials.cpp in Sources */,
 				46B36DE61D33E7CF00D7C56B /* Accelerator.cpp in Sources */,
 				46BF49871BB7303D0036033F /* spectrum_library.cpp in Sources */,
+				4613A17B1E36500600D05AA6 /* Ray.cpp in Sources */,
 				460A20211D602C5700870E0F /* AshikhminShirleyReflection.cpp in Sources */,
 				466F6D061BB6CA510056F2FA /* MultiEDF.cpp in Sources */,
 				4645459B1E1E2DE300B4CECD /* nodes.cpp in Sources */,
@@ -1141,6 +1156,7 @@
 				4651F3341C5678AB0026B8A5 /* TexCoord2.cpp in Sources */,
 				466F6CEF1BB6CA420056F2FA /* Image.cpp in Sources */,
 				466F6CF61BB6CA420056F2FA /* RenderSettings.cpp in Sources */,
+				4613A1771E364E3500D05AA6 /* BoundingBox3.cpp in Sources */,
 				466F6CD51BB6CA070056F2FA /* Spectrum.cpp in Sources */,
 				4651F32C1C5672460026B8A5 /* Vector4.cpp in Sources */,
 				4651F32E1C5672E10026B8A5 /* Normal3.cpp in Sources */,
