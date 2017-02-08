@@ -31,19 +31,13 @@ namespace SLR {
         SampledSpectrum extinctionCoefficient(const Point3D &p, const WavelengthSamples &wls) const override {
             if (m_region.contains(p))
                 return m_sigma_e->evaluate(wls);
-                return SampledSpectrum::Zero;
+            return SampledSpectrum::Zero;
         }
-        bool interact(const Ray &ray, const WavelengthSamples &wls, LightPathSampler &pathSampler,
+        bool interact(const Ray &ray, float distanceLimit, const WavelengthSamples &wls, LightPathSampler &pathSampler,
                       MediumInteraction* mi, SampledSpectrum* medThroughput, bool* singleWavelength) const override;
+        SampledSpectrum evaluateTransmittance(Ray &ray, float distanceLimit, const WavelengthSamples &wls, LightPathSampler &pathSampler,
+                                              bool* singleWavelength) const override;
         void getMediumPoint(const MediumInteraction &mi, MediumPoint* medPt) const override;
-        void queryCoefficients(const Point3D &p, const WavelengthSamples &wls, SampledSpectrum* sigma_s, SampledSpectrum* sigma_e) const override {
-            if (!contains(p)) {
-                *sigma_e = SampledSpectrum::Zero;
-                *sigma_s = SampledSpectrum::Zero;
-            }
-            *sigma_s = m_sigma_s->evaluate(wls);
-            *sigma_e = m_sigma_e->evaluate(wls);
-        }
         float volume() const override { return m_region.volume(); }
         void sample(float u0, float u1, float u2, MediumPoint* medPt, float* volumePDF) const override;
         float evaluateVolumePDF(const MediumPoint& medPt) const override;

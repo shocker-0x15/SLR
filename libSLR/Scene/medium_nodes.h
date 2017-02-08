@@ -16,8 +16,11 @@
 namespace SLR {
     class SLR_API HomogeneousMediumNode : public Node {
         HomogeneousMedium* m_medium;
+        const MediumMaterial* m_material;
+        
+        SingleMediumObject* m_obj;
     public:
-        HomogeneousMediumNode(const BoundingBox3D &region, const InputSpectrum* sigma_s, const InputSpectrum* sigma_e);
+        HomogeneousMediumNode(const BoundingBox3D &region, const InputSpectrum* sigma_s, const InputSpectrum* sigma_e, const MediumMaterial* material);
         ~HomogeneousMediumNode();
         
         bool isDirectlyTransformable() const override { return false; }
@@ -29,9 +32,10 @@ namespace SLR {
     
     class SLR_API GridMediumNode : public Node {
         GridMedium* m_medium;
+        const MediumMaterial* m_material;
     public:
         GridMediumNode(const BoundingBox3D &region, const InputSpectrum** sigma_s_grid, const InputSpectrum** sigma_e_grid,
-                       uint32_t numX, uint32_t numY, uint32_t numZ);
+                       uint32_t numX, uint32_t numY, uint32_t numZ, const MediumMaterial* material);
         ~GridMediumNode();
         
         bool isDirectlyTransformable() const override { return false; }

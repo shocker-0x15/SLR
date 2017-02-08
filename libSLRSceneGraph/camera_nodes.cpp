@@ -9,38 +9,61 @@
 #include <libSLR/Scene/camera_nodes.h>
 
 namespace SLRSceneGraph {
+    void PerspectiveCameraNode::allocateRawData() {
+        m_rawData = (SLR::Node*)malloc(sizeof(SLR::PerspectiveCameraNode));
+    }
+    
     void PerspectiveCameraNode::setupRawData() {
-        m_rawData = new SLR::PerspectiveCameraNode(m_sensitivity, m_aspect, m_fovY, m_lensRadius, m_imgPlaneDistance, m_objPlaneDistance);
+        new (m_rawData) SLR::PerspectiveCameraNode(m_sensitivity, m_aspect, m_fovY, m_lensRadius, m_imgPlaneDistance, m_objPlaneDistance);
+        m_setup = true;
+    }
+    
+    void PerspectiveCameraNode::terminateRawData() {
+        SLR::PerspectiveCameraNode &raw = *(SLR::PerspectiveCameraNode*)m_rawData;
+        if (m_setup)
+            raw.~PerspectiveCameraNode();
+        m_setup = false;
     }
     
     PerspectiveCameraNode::PerspectiveCameraNode(float sensitivity, float aspect, float fovY, float lensRadius, float imgPDist, float objPDist) :
     m_sensitivity(sensitivity), m_aspect(aspect), m_fovY(fovY), m_lensRadius(lensRadius), m_imgPlaneDistance(imgPDist), m_objPlaneDistance(objPDist) {
-        setupRawData();
+        allocateRawData();
     }
     
     NodeRef PerspectiveCameraNode::copy() const {
-        PerspectiveCameraNodeRef ret = createShared<PerspectiveCameraNode>(m_sensitivity, m_aspect, m_fovY, m_lensRadius, m_imgPlaneDistance, m_objPlaneDistance);
-        return ret;
+        return createShared<PerspectiveCameraNode>(m_sensitivity, m_aspect, m_fovY, m_lensRadius, m_imgPlaneDistance, m_objPlaneDistance);
     }
     
     void PerspectiveCameraNode::prepareForRendering() {
-        new (m_rawData) SLR::PerspectiveCameraNode(m_sensitivity, m_aspect, m_fovY, m_lensRadius, m_imgPlaneDistance, m_objPlaneDistance);
+        terminateRawData();
+        setupRawData();
     }
     
     
     
+    void EquirectangularCameraNode::allocateRawData() {
+        m_rawData = (SLR::Node*)malloc(sizeof(SLR::EquirectangularCameraNode));
+    }
+    
     void EquirectangularCameraNode::setupRawData() {
-        m_rawData = new SLR::EquirectangularCameraNode(m_sensitivity, m_phiAngle, m_thetaAngle);
+        new (m_rawData) SLR::EquirectangularCameraNode(m_sensitivity, m_phiAngle, m_thetaAngle);
+        m_setup = true;
+    }
+    
+    void EquirectangularCameraNode::terminateRawData() {
+        SLR::EquirectangularCameraNode &raw = *(SLR::EquirectangularCameraNode*)m_rawData;
+        if (m_setup)
+            raw.~EquirectangularCameraNode();
+        m_setup = false;
     }
     
     EquirectangularCameraNode::EquirectangularCameraNode(float sensitivity, float phiAngle, float thetaAngle) :
     m_sensitivity(sensitivity), m_phiAngle(phiAngle), m_thetaAngle(thetaAngle) {
-        setupRawData();
+        allocateRawData();
     }
     
     NodeRef EquirectangularCameraNode::copy() const {
-        EquirectangularCameraNodeRef ret = createShared<EquirectangularCameraNode>(m_sensitivity, m_phiAngle, m_thetaAngle);
-        return ret;
+        return createShared<EquirectangularCameraNode>(m_sensitivity, m_phiAngle, m_thetaAngle);
     }
     
     void EquirectangularCameraNode::prepareForRendering() {

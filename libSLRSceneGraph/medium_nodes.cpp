@@ -6,40 +6,67 @@
 //
 
 #include "medium_nodes.h"
+#include "medium_materials.hpp"
 #include <libSLR/Core/Transform.h>
 #include <libSLR/Core/MediumObject.h>
+#include <libSLR/Scene/medium_nodes.h>
 #include <libSLR/Medium/HomogeneousMedium.h>
 #include <libSLR/Medium/GridMedium.h>
 
 namespace SLRSceneGraph {
-    void HomogeneousMediumNode::setupRawData() {
-        
+    void HomogeneousMediumNode::allocateRawData() {
+        m_rawData = (SLR::Node*)malloc(sizeof(SLR::HomogeneousMediumNode));
     }
     
-    HomogeneousMediumNode::HomogeneousMediumNode(const SLR::BoundingBox3D &region, const InputSpectrumRef &sigma_s, const InputSpectrumRef &sigma_e) :
-    m_region(region), m_sigma_s(sigma_s), m_sigma_e(sigma_e) {
-        setupRawData();
+    void HomogeneousMediumNode::setupRawData() {
+        new (m_rawData) SLR::HomogeneousMediumNode(m_region, m_sigma_s.get(), m_sigma_e.get(), m_material->getRaw());
+        m_setup = true;
+    }
+    
+    void HomogeneousMediumNode::terminateRawData() {
+        SLR::HomogeneousMediumNode &raw = *(SLR::HomogeneousMediumNode*)m_rawData;
+        if (m_setup)
+            raw.~HomogeneousMediumNode();
+        m_setup = false;
+    }
+    
+    HomogeneousMediumNode::HomogeneousMediumNode(const SLR::BoundingBox3D &region, const InputSpectrumRef &sigma_s, const InputSpectrumRef &sigma_e, const MediumMaterialRef &material) :
+    m_region(region), m_sigma_s(sigma_s), m_sigma_e(sigma_e), m_material(material) {
+        allocateRawData();
     }
     
     NodeRef HomogeneousMediumNode::copy() const {
-        SLRAssert_NotImplemented();
-        return nullptr;
+        return createShared<HomogeneousMediumNode>(m_region, m_sigma_s, m_sigma_e, m_material);
     }
     
     void HomogeneousMediumNode::prepareForRendering() {
-        
+        terminateRawData();
+        setupRawData();
     }
     
     
     
+    void GridMediumNode::allocateRawData() {
+        m_rawData = (SLR::Node*)malloc(sizeof(SLR::GridMediumNode));
+    }
+    
     void GridMediumNode::setupRawData() {
-        
+        SLRAssert_NotImplemented();
+//        new (m_rawData) SLR::GridMediumNode(m_region, m_sigma_s, m_sigma_e, m_numX, m_numY, m_numZ);
+        m_setup = true;
+    }
+    
+    void GridMediumNode::terminateRawData() {
+        SLR::GridMediumNode &raw = *(SLR::GridMediumNode*)m_rawData;
+        if (m_setup)
+            raw.~GridMediumNode();
+        m_setup = false;
     }
     
     GridMediumNode::GridMediumNode(const SLR::BoundingBox3D &region, const SLR::InputSpectrum** sigma_s, const SLR::InputSpectrum** sigma_e,
-                                   uint32_t elemSize, uint32_t numX, uint32_t numY, uint32_t numZ) :
+                                   uint32_t elemSize, uint32_t numX, uint32_t numY, uint32_t numZ, const MediumMaterialRef &material) :
     m_region(region),
-    m_numX(numX), m_numY(numY), m_numZ(numZ) {
+    m_numX(numX), m_numY(numY), m_numZ(numZ), m_material(material) {
         // allocate 3D grid as 2D array.
         m_sigma_s = (SLR::InputSpectrum**)malloc(sizeof(SLR::InputSpectrum*) * m_numZ);
         m_sigma_e = (SLR::InputSpectrum**)malloc(sizeof(SLR::InputSpectrum*) * m_numZ);
@@ -51,7 +78,7 @@ namespace SLRSceneGraph {
             memcpy((void*)m_sigma_e[z], (void*)sigma_e[z], allocateSize);
         }
         
-        setupRawData();
+        allocateRawData();
     }
     
     GridMediumNode::~GridMediumNode() {
@@ -71,6 +98,7 @@ namespace SLRSceneGraph {
     }
     
     void GridMediumNode::prepareForRendering() {
-        
+        terminateRawData();
+        setupRawData();
     }
 }

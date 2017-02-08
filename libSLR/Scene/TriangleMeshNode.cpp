@@ -38,7 +38,7 @@ namespace SLR {
         
         StaticTransform transform;
         if (subTF) {
-            SLRAssert(subTF->isStatic(), "Transformation given to SurfaceObjectNode must be static.");
+            SLRAssert(subTF->isStatic(), "Transformation given to TriangleMeshNode must be static.");
             subTF->sample(0.0f, &transform);
         }
         for (int i = 0; i < m_numVertices; ++i) {

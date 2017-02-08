@@ -42,12 +42,14 @@ namespace SLR {
         const Transform* m_localToWorld;
         
         Transform* m_appliedTransform;
-        SurfaceObjectAggregate* m_subObj;
-        std::vector<TransformedSurfaceObject*> m_TFObjs;
+        SurfaceObjectAggregate* m_subSurfObj;
+        MediumObjectAggregate* m_subMedObj;
+        std::vector<TransformedSurfaceObject*> m_TFSurfObjs;
+        std::vector<TransformedMediumObject*> m_TFMedObjs;
     public:
-        InternalNode() :
-        m_localToWorld(nullptr),
-        m_appliedTransform(nullptr), m_subObj(nullptr) { }
+        InternalNode(const Transform* localToWorld) :
+        m_localToWorld(localToWorld),
+        m_appliedTransform(nullptr), m_subSurfObj(nullptr), m_subMedObj(nullptr) { }
         
         bool isDirectlyTransformable() const override { return true; }
         void createRenderingData(Allocator* mem, const Transform* subTF, RenderingData *data) override;

@@ -40,15 +40,19 @@ namespace SLRSceneGraph {
     typedef std::shared_ptr<Normal3DTexture> Normal3DTextureRef;
     typedef std::shared_ptr<FloatTexture> FloatTextureRef;
     
-    class SurfaceMaterial;
-    class EmitterSurfaceProperty;
     class SVFresnel;
     class SVMicrofacetDistribution;
+    class SurfaceMaterial;
+    class EmitterSurfaceProperty;
+    class MediumMaterial;
+    class EmitterMediumProperty;
     
     typedef std::shared_ptr<SVFresnel> SVFresnelRef;
     typedef std::shared_ptr<SVMicrofacetDistribution> SVMicrofacetDistributionRef;
     typedef std::shared_ptr<SurfaceMaterial> SurfaceMaterialRef;
     typedef std::shared_ptr<EmitterSurfaceProperty> EmitterSurfacePropertyRef;
+    typedef std::shared_ptr<MediumMaterial> MediumMaterialRef;
+    typedef std::shared_ptr<EmitterMediumProperty> EmitterMediumPropertyRef;
     
     class IBLEmission;
     typedef std::shared_ptr<IBLEmission> IBLEmissionRef;
@@ -67,8 +71,6 @@ namespace SLRSceneGraph {
     typedef std::shared_ptr<Node> NodeRef;
     typedef std::shared_ptr<InternalNode> InternalNodeRef;
     typedef std::shared_ptr<ReferenceNode> ReferenceNodeRef;
-    typedef std::shared_ptr<PerspectiveCameraNode> PerspectiveCameraNodeRef;
-    typedef std::shared_ptr<EquirectangularCameraNode> EquirectangularCameraNodeRef;
     typedef std::shared_ptr<TriangleMeshNode> TriangleMeshNodeRef;
     typedef std::shared_ptr<InfiniteSphereNode> InfiniteSphereNodeRef;
     

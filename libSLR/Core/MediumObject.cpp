@@ -68,50 +68,88 @@ namespace SLR {
         return Ray();
     }
     
-    bool SingleMediumObject::getMediumContaining(const Point3D &p, const SingleMediumObject** curMedium) const {
-        if (m_medium->contains(p)) {
-            *curMedium = this;
-            return true;
-        }
-        return false;
-    }
-    
-    bool SingleMediumObject::intersectBoundary(const Ray &ray, float* distToBoundary, bool* enter, const SingleMediumObject** boundaryMedium) const {
-        if (m_medium->intersectBoundary(ray, distToBoundary, enter)) {
-            *boundaryMedium = this;
-            return true;
-        }
-        return false;
-    }
-    
-    float SingleMediumObject::majorantExtinctionCoefficient() const {
-        return m_medium->majorantExtinctionCoefficient();
-    }
-    
-    SampledSpectrum SingleMediumObject::extinctionCoefficient(const Point3D &p, const WavelengthSamples &wls) const {
-        return m_medium->extinctionCoefficient(p, wls);
-    }
-    
-    bool SingleMediumObject::interact(Ray &ray, const WavelengthSamples &wls, LightPathSampler &pathSampler,
+    bool SingleMediumObject::interact(Ray &ray, float distanceLimit, const WavelengthSamples &wls, LightPathSampler &pathSampler,
                                       MediumInteraction* mi, SampledSpectrum* medThroughput, bool* singleWavelength) const {
-        SLRAssert_NotImplemented();
+        if (!m_medium->interact(ray, distanceLimit, wls, pathSampler, mi, medThroughput, singleWavelength))
+            return false;
+        mi->setObject(this);
+        mi->setLightProb(isEmitting() ? 1.0f : 0.0f);
+        
         return true;
     }
     
-    SampledSpectrum SingleMediumObject::evaluateTransmittance(Ray &ray, const WavelengthSamples &wls, LightPathSampler &pathSampler, bool* singleWavelength) const {
-        SLRAssert_NotImplemented();
-        return SampledSpectrum::Zero;
+    SampledSpectrum SingleMediumObject::evaluateTransmittance(Ray &ray, float distanceLimit, const WavelengthSamples &wls, LightPathSampler &pathSampler,
+                                                              bool* singleWavelength) const {
+        return m_medium->evaluateTransmittance(ray, distanceLimit, wls, pathSampler, singleWavelength);
     }
     
     void SingleMediumObject::getMediumPoint(const MediumInteraction &mi, MediumPoint* medPt) const {
-        SLRAssert_NotImplemented();
+        m_medium->getMediumPoint(mi, medPt);
+        medPt->setObject(this);
+        medPt->applyTransform(mi.getAppliedTransform());
     }
     
     AbstractBDF* SingleMediumObject::createAbstractBDF(const MediumPoint &medPt, const WavelengthSamples &wls, ArenaAllocator &mem) const {
         PhaseFunction* pf = m_material->getPhaseFunction(medPt, wls, mem);
         SampledSpectrum sigma_s, sigma_e;
-        m_medium->queryCoefficients(medPt.getPosition(), wls, &sigma_s, &sigma_e);
+        medPt.getMediumCoefficients(&sigma_s, &sigma_e);
         return mem.create<VolumetricBSDF>(sigma_s / sigma_e, pf);
+    }
+    
+    
+    
+    BoundingBox3D TransformedMediumObject::bounds() const {
+        return m_transform->motionBounds(m_medObj->bounds());
+    }
+    
+    bool TransformedMediumObject::isEmitting() const {
+        return m_medObj->isEmitting();
+    }
+    
+    float TransformedMediumObject::importance() const {
+        return m_medObj->importance();
+    }
+    
+    void TransformedMediumObject::selectLight(float u, float time, VolumetricLight* light, float* prob) const {
+        m_medObj->selectLight(u, time, light, prob);
+        StaticTransform tf;
+        m_transform->sample(time, &tf);
+        light->applyTransformFromLeft(tf);
+    }
+    
+    bool TransformedMediumObject::contains(const Point3D &p, float time) const {
+        StaticTransform tf;
+        m_transform->sample(time, &tf);
+        Point3D localP = invert(tf) * p;
+        return m_medObj->contains(localP, time);
+    }
+    
+    bool TransformedMediumObject::intersectBoundary(const Ray &ray, float* distToBoundary, bool* enter) const {
+        StaticTransform tf;
+        m_transform->sample(ray.time, &tf);
+        Ray localRay = invert(tf) * ray;
+        return m_medObj->intersectBoundary(localRay, distToBoundary, enter);
+    }
+    
+    bool TransformedMediumObject::interact(Ray &ray, float distanceLimit, const WavelengthSamples &wls, LightPathSampler &pathSampler,
+                                           MediumInteraction* mi, SampledSpectrum* medThroughput, bool* singleWavelength) const {
+        StaticTransform tf;
+        m_transform->sample(ray.time, &tf);
+        Ray localRay = invert(tf) * ray;
+        bool hit = m_medObj->interact(localRay, distanceLimit, wls, pathSampler, mi, medThroughput, singleWavelength);
+        ray.distMin = distanceLimit;
+        if (hit)
+            mi->applyTransformFromLeft(tf);
+        return hit;
+    }
+    
+    SampledSpectrum TransformedMediumObject::evaluateTransmittance(Ray &ray, float distanceLimit, const WavelengthSamples &wls, LightPathSampler &pathSampler, bool* singleWavelength) const {
+        StaticTransform tf;
+        m_transform->sample(ray.time, &tf);
+        Ray localRay = invert(tf) * ray;
+        SampledSpectrum ret = m_medObj->evaluateTransmittance(localRay, distanceLimit, wls, pathSampler, singleWavelength);
+        ray.distMin = distanceLimit;
+        return ret;
     }
     
     
@@ -172,181 +210,112 @@ namespace SLR {
         *prob *= cProb;
     }
     
-    bool MediumObjectAggregate::getMediumContaining(const Point3D &p, const SingleMediumObject** curMedium) const {
-        for (int i = 0; i < m_objLists.size(); ++i) {
-            if (m_objLists[i]->getMediumContaining(p, curMedium))
-                return true;
-        }
-        return false;
-    }
-    
-    bool MediumObjectAggregate::intersectBoundary(const Ray &ray, float* distToBoundary, bool* enter, const SingleMediumObject** boundaryMedium) const {
-        *distToBoundary = INFINITY;
-        for (int i = 0; i < m_objLists.size(); ++i) {
-            float dist = INFINITY;
-            bool isEntering;
-            const SingleMediumObject* medium;
-            if (m_objLists[i]->intersectBoundary(ray, &dist, &isEntering, &medium)) {
-                if (dist < *distToBoundary) {
-                    *distToBoundary = dist;
-                    *enter = isEntering;
-                    *boundaryMedium = medium;
-                }
-            }
-        }
-        return !std::isinf(*distToBoundary);
-    }
-    
-    float MediumObjectAggregate::majorantExtinctionCoefficient() const {
-        float maxMajorantExtinctionCoefficient = 0;
-        for (int i = 0; i < m_objLists.size(); ++i)
-            maxMajorantExtinctionCoefficient = std::max(maxMajorantExtinctionCoefficient, m_objLists[i]->majorantExtinctionCoefficient());
-        return maxMajorantExtinctionCoefficient;
-    }
-    
-    SampledSpectrum MediumObjectAggregate::extinctionCoefficient(const Point3D &p, const WavelengthSamples &wls) const {
-        const SingleMediumObject* medium;
-        if (getMediumContaining(p, &medium))
-            return medium->extinctionCoefficient(p, wls);
-        return SampledSpectrum::Zero;
-    }
-    
-    bool MediumObjectAggregate::interact(Ray &ray, const WavelengthSamples &wls, LightPathSampler &pathSampler,
-                                         MediumInteraction* mi, SampledSpectrum* medThroughput, bool* singleWavelength) const {
-        FreePathSampler sampler = pathSampler.getFreePathSampler();
-        FloatSum sampledDistance = ray.distMin;
+    bool MediumObjectAggregate::interact(Ray &ray, float distanceLimit, const WavelengthSamples &wls, LightPathSampler &pathSampler,
+                                         MediumInteraction* mi, SampledSpectrum* medThroughput, bool* singleWavelength) const {        
+        *medThroughput = SampledSpectrum::One;
+        *singleWavelength = false;
         
-        // Current implementation does not allow overlapped media.
-        // If allowing overlapping, it might require to get medium list containing queryPoint.
-        Point3D queryPoint = ray.org + ray.distMin * ray.dir;
-        const SingleMediumObject* curMedium = nullptr;
+        Point3D currentPoint = ray.org + ray.distMin * ray.dir;
+        // The following process is logically the same as:
+        // curMedia = m_accelerator->queryCurrentMedia(currentPoint);
+        const MediumObject* curMedium = nullptr;
         for (int i = 0; i < m_objLists.size(); ++i) {
-            m_objLists[i]->getMediumContaining(queryPoint, &curMedium);
-            if (curMedium)
-                break;
+            if (m_objLists[i]->contains(currentPoint, ray.time))
+                curMedium = m_objLists[i];
         }
         
         while (true) {
-            // find the next boundary distance and medium
-            ray.distMin = sampledDistance;
-            bool enter;
-            float distToNextBoundary = ray.distMax;
-            const SingleMediumObject* boundaryMedium = nullptr;
-            if (curMedium) {
-                ray.distMin *= 1 + Ray::Epsilon;
+            const MediumObject* nextMedium = nullptr;
+            float distToNextBoundary = INFINITY;
+            // The following process is logically the same as:
+            // nextMedium = m_accelerator->queryNextMedia(ray, &distToNextBoundary);
+            uint32_t objIdx = -1;
+            for (int i = 0; i < m_objLists.size(); ++i) {
                 float distToBoundary = INFINITY;
-                curMedium->intersectBoundary(ray, &distToBoundary, &enter, &boundaryMedium);
-            }
-            else {
-                for (int i = 0; i < m_objLists.size(); ++i) {
-                    float distToBoundary = INFINITY;
-                    if (m_objLists[i]->intersectBoundary(ray, &distToBoundary, &enter, &boundaryMedium)) {
-                        // Because overlapped media are not allowed, exitting in this code path is invalid.
-                        if (enter == false)
-                            continue;
-                        distToNextBoundary = std::min(distToNextBoundary, distToBoundary);
+                bool enter;
+                if (m_objLists[i]->intersectBoundary(ray, &distToBoundary, &enter)) {
+                    if (distToBoundary < distToNextBoundary) {
+                        distToNextBoundary = distToBoundary;
+                        objIdx = enter ? i : -1;
+                        nextMedium = enter ? m_objLists[i] : nullptr;
                     }
                 }
             }
+            distToNextBoundary = std::min(distToNextBoundary, distanceLimit);
             
-            float majorant = 0.0f;
-            if (curMedium)
-                majorant = curMedium->majorantExtinctionCoefficient();
-            
-            sampledDistance += -std::log(sampler.getSample()) / majorant;
-            while (sampledDistance < distToNextBoundary) {
-                queryPoint = ray.org + sampledDistance * ray.dir;
-                
-                SampledSpectrum extCoeff = curMedium->extinctionCoefficient(queryPoint, wls);
-                float probRealCollision = extCoeff[wls.selectedLambda] / majorant;
-                if (sampler.getSample() < probRealCollision) {
-                    *mi = MediumInteraction(ray.time, sampledDistance, queryPoint);
-                    *medThroughput = SampledSpectrum::Zero;
-                    (*medThroughput)[wls.selectedLambda] = 1.0f / extCoeff[wls.selectedLambda];
-                    *singleWavelength = true;
-                    return true;
+            bool hit = false;
+            if (curMedium) {
+                SampledSpectrum curMedThroughput;
+                bool curSingleWavelength;
+                hit = curMedium->interact(ray, distToNextBoundary, wls, pathSampler, mi, &curMedThroughput, &curSingleWavelength);
+                *medThroughput *= curMedThroughput;
+                *singleWavelength |= curSingleWavelength;
+            }
+            if (hit) {
+                if (m_objToLightMap.count(objIdx) > 0) {
+                    uint32_t lightIdx = m_objToLightMap.at(objIdx);
+                    mi->setLightProb(m_lightDist1D->evaluatePMF(lightIdx) * mi->getLightProb());
                 }
-                sampledDistance += -std::log(sampler.getSample()) / majorant;
+                return true;
             }
             
-            sampledDistance = distToNextBoundary;
-            curMedium = boundaryMedium;
-            
-            if (sampledDistance >= ray.distMax) {
-                *medThroughput = SampledSpectrum::Zero;
-                (*medThroughput)[wls.selectedLambda] = 1.0f;
-                *singleWavelength = true;
+            if (distToNextBoundary == distanceLimit)
                 return false;
-            }
+            
+            ray.distMin = distToNextBoundary * (1.0f + Ray::Epsilon);
+            curMedium = nextMedium;
         }
         
         SLRAssert(false, "This code path should never be executed.");
         return true;
     }
     
-    SampledSpectrum MediumObjectAggregate::evaluateTransmittance(Ray &ray, const WavelengthSamples &wls, LightPathSampler &pathSampler, bool *singleWavelength) const {
-        FreePathSampler sampler = pathSampler.getFreePathSampler();
-        FloatSum sampledDistance = ray.distMin;
+    SampledSpectrum MediumObjectAggregate::evaluateTransmittance(Ray &ray, float distanceLimit, const WavelengthSamples &wls, LightPathSampler &pathSampler,
+                                                                 bool* singleWavelength) const {
+        SampledSpectrum transmittance = SampledSpectrum::One;
+        *singleWavelength = false;
         
-        // Current implementation does not allow overlapped media.
-        // If allowing overlapping, it might require to get medium list containing queryPoint.
-        Point3D queryPoint = ray.org + ray.distMin * ray.dir;
-        const SingleMediumObject* curMedium = nullptr;
+        Point3D currentPoint = ray.org + ray.distMin * ray.dir;
+        // The following process is logically the same as:
+        // curMedia = m_accelerator->queryCurrentMedia(currentPoint);
+        const MediumObject* curMedium = nullptr;
         for (int i = 0; i < m_objLists.size(); ++i) {
-            m_objLists[i]->getMediumContaining(queryPoint, &curMedium);
-            if (curMedium)
-                break;
+            if (m_objLists[i]->contains(currentPoint, ray.time))
+                curMedium = m_objLists[i];
         }
         
-        SampledSpectrum transmittance = SampledSpectrum::Zero;
-        transmittance[wls.selectedLambda] = 1.0f;
         while (true) {
-            // find the next boundary distance and medium
-            ray.distMin = sampledDistance;
-            bool enter;
-            float distToNextBoundary = ray.distMax;
-            const SingleMediumObject* boundaryMedium = nullptr;
-            if (curMedium) {
-                ray.distMin *= 1 + Ray::Epsilon;
+            const MediumObject* nextMedium = nullptr;
+            float distToNextBoundary = INFINITY;
+            // The following process is logically the same as:
+            // nextMedium = m_accelerator->queryNextMedia(ray, &distToNextBoundary);
+            for (int i = 0; i < m_objLists.size(); ++i) {
                 float distToBoundary = INFINITY;
-                curMedium->intersectBoundary(ray, &distToBoundary, &enter, &boundaryMedium);
-            }
-            else {
-                for (int i = 0; i < m_objLists.size(); ++i) {
-                    float distToBoundary = INFINITY;
-                    if (m_objLists[i]->intersectBoundary(ray, &distToBoundary, &enter, &boundaryMedium)) {
-                        // Because overlapped media are not allowed, exitting in this code path is invalid.
-                        if (enter == false)
-                            continue;
-                        distToNextBoundary = std::min(distToNextBoundary, distToBoundary);
+                bool enter;
+                if (m_objLists[i]->intersectBoundary(ray, &distToBoundary, &enter)) {
+                    if (distToBoundary < distToNextBoundary) {
+                        distToNextBoundary = distToBoundary;
+                        nextMedium = enter ? m_objLists[i] : nullptr;
                     }
                 }
             }
+            distToNextBoundary = std::min(distToNextBoundary, distanceLimit);
             
-            float majorant = 0.0f;
-            if (curMedium)
-                majorant = curMedium->majorantExtinctionCoefficient();
-            
-            sampledDistance += -std::log(sampler.getSample()) / majorant;
-            while (sampledDistance < distToNextBoundary) {
-                queryPoint = ray.org + sampledDistance * ray.dir;
-                
-                SampledSpectrum extCoeff = curMedium->extinctionCoefficient(queryPoint, wls);
-                float probRealCollision = extCoeff[wls.selectedLambda] / majorant;
-                transmittance[wls.selectedLambda] *= (1.0f - probRealCollision);
-                sampledDistance += -std::log(sampler.getSample()) / majorant;
+            if (curMedium) {
+                SampledSpectrum curTransmittance;
+                bool curSingleWavelength;
+                curTransmittance = curMedium->evaluateTransmittance(ray, distToNextBoundary, wls, pathSampler, &curSingleWavelength);
+                transmittance *= curTransmittance;
+                *singleWavelength |= curSingleWavelength;
             }
             
-            sampledDistance = distToNextBoundary;
-            curMedium = boundaryMedium;
+            if (distToNextBoundary == distanceLimit)
+                break;
             
-            if (sampledDistance >= ray.distMax) {
-                *singleWavelength = true;
-                return transmittance;
-            }
+            ray.distMin = distToNextBoundary * (1.0f + Ray::Epsilon);
+            curMedium = nextMedium;
         }
         
-        SLRAssert(false, "This code path should never be executed.");
         return transmittance;
     }
 }

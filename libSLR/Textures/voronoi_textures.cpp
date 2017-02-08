@@ -33,20 +33,17 @@ namespace SLR {
         return hash;
     }
     
-    SampledSpectrum VoronoiSpectrumTexture::evaluate(const SurfacePoint &surfPt, const WavelengthSamples &wls) const {
-        Point3D evalp = m_mapping->map(surfPt) / m_scale;
+    static void evaluateVoronoi(const Point3D &p, float* closestDistance, uint32_t* hashOfClosest, uint32_t* closestFPIdx) {
         int32_t iEvalCoord[3];
-        iEvalCoord[0] = std::floor(evalp.x);
-        iEvalCoord[1] = std::floor(evalp.y);
-        iEvalCoord[2] = std::floor(evalp.z);
+        iEvalCoord[0] = std::floor(p.x);
+        iEvalCoord[1] = std::floor(p.y);
+        iEvalCoord[2] = std::floor(p.z);
         
-        int32_t rangeBaseX = -1 + std::round(evalp.x - iEvalCoord[0]);
-        int32_t rangeBaseY = -1 + std::round(evalp.y - iEvalCoord[1]);
-        int32_t rangeBaseZ = -1 + std::round(evalp.z - iEvalCoord[2]);
+        int32_t rangeBaseX = -1 + std::round(p.x - iEvalCoord[0]);
+        int32_t rangeBaseY = -1 + std::round(p.y - iEvalCoord[1]);
+        int32_t rangeBaseZ = -1 + std::round(p.z - iEvalCoord[2]);
         
-        float closestDistance = INFINITY;
-        uint32_t hashOfClosest = 0;
-        uint32_t closestFPIdx = 0;
+        *closestDistance = INFINITY;
         for (int iz = rangeBaseZ; iz < rangeBaseZ + 2; ++iz) {
             for (int iy = rangeBaseY; iy < rangeBaseY + 2; ++iy) {
                 for (int ix = rangeBaseX; ix < rangeBaseX + 2; ++ix) {
@@ -57,18 +54,27 @@ namespace SLR {
                     uint32_t numFeaturePoints = 1 + std::min(int32_t(8 * rng.getFloat0cTo1o()), 8);
                     for (int i = 0; i < numFeaturePoints; ++i) {
                         Point3D fp = Point3D(iCoord[0] + rng.getFloat0cTo1o(), iCoord[1] + rng.getFloat0cTo1o(), iCoord[2] + rng.getFloat0cTo1o());
-                        float dist = distance(evalp, fp);
-                        if (dist < closestDistance) {
-                            closestDistance = dist;
-                            hashOfClosest = hash;
-                            closestFPIdx = i;
+                        float dist = distance(p, fp);
+                        if (dist < *closestDistance) {
+                            *closestDistance = dist;
+                            *hashOfClosest = hash;
+                            *closestFPIdx = i;
                         }
                     }
                 }
             }
         }
+    }
+    
+    
+    
+    SampledSpectrum VoronoiSpectrumTexture::evaluate(const Point3D &p, const WavelengthSamples &wls) const {
+        float closestDistance;
+        uint32_t hash;
+        uint32_t fpIdx;
+        evaluateVoronoi(p, &closestDistance, &hash, &fpIdx);
         
-        LinearCongruentialRNG rng(hashOfClosest + closestFPIdx);
+        LinearCongruentialRNG rng(hash + fpIdx);
         float rgb[3] = {
             rng.getFloat0cTo1o() * m_brightness,
             rng.getFloat0cTo1o() * m_brightness,
@@ -87,82 +93,24 @@ namespace SLR {
         return nullptr;
     }
     
-    Normal3D VoronoiNormal3DTexture::evaluate(const SurfacePoint &surfPt) const {
-        Point3D evalp = m_mapping->map(surfPt) / m_scale;
-        int32_t iEvalCoord[3];
-        iEvalCoord[0] = std::floor(evalp.x);
-        iEvalCoord[1] = std::floor(evalp.y);
-        iEvalCoord[2] = std::floor(evalp.z);
+    Normal3D VoronoiNormal3DTexture::evaluate(const Point3D &p) const {
+        float closestDistance;
+        uint32_t hash;
+        uint32_t fpIdx;
+        evaluateVoronoi(p, &closestDistance, &hash, &fpIdx);
         
-        int32_t rangeBaseX = -1 + std::round(evalp.x - iEvalCoord[0]);
-        int32_t rangeBaseY = -1 + std::round(evalp.y - iEvalCoord[1]);
-        int32_t rangeBaseZ = -1 + std::round(evalp.z - iEvalCoord[2]);
-        
-        float closestDistance = INFINITY;
-        uint32_t hashOfClosest = 0;
-        uint32_t closestFPIdx = 0;
-        for (int iz = rangeBaseZ; iz < rangeBaseZ + 2; ++iz) {
-            for (int iy = rangeBaseY; iy < rangeBaseY + 2; ++iy) {
-                for (int ix = rangeBaseX; ix < rangeBaseX + 2; ++ix) {
-                    int32_t iCoord[3] = {iEvalCoord[0] + ix, iEvalCoord[1] + iy, iEvalCoord[2] + iz};
-                    uint32_t hash = getFNV1Hash32((uint8_t*)iCoord, sizeof(iCoord));
-                    LinearCongruentialRNG rng(hash);
-                    
-                    uint32_t numFeaturePoints = 1 + std::min(int32_t(8 * rng.getFloat0cTo1o()), 8);
-                    for (int i = 0; i < numFeaturePoints; ++i) {
-                        Point3D fp = Point3D(iCoord[0] + rng.getFloat0cTo1o(), iCoord[1] + rng.getFloat0cTo1o(), iCoord[2] + rng.getFloat0cTo1o());
-                        float dist = distance(evalp, fp);
-                        if (dist < closestDistance) {
-                            closestDistance = dist;
-                            hashOfClosest = hash;
-                            closestFPIdx = i;
-                        }
-                    }
-                }
-            }
-        }
-        
-        LinearCongruentialRNG rng(hashOfClosest + closestFPIdx);
+        LinearCongruentialRNG rng(hash + fpIdx);
         return uniformSampleCone(rng.getFloat0cTo1o(), rng.getFloat0cTo1o(), m_cosThetaMax);
     }
     
-    float VoronoiFloatTexture::evaluate(const SurfacePoint &surfPt) const {
-        Point3D evalp = m_mapping->map(surfPt) / m_scale;
-        int32_t iEvalCoord[3];
-        iEvalCoord[0] = std::floor(evalp.x);
-        iEvalCoord[1] = std::floor(evalp.y);
-        iEvalCoord[2] = std::floor(evalp.z);
-        
-        int32_t rangeBaseX = -1 + std::round(evalp.x - iEvalCoord[0]);
-        int32_t rangeBaseY = -1 + std::round(evalp.y - iEvalCoord[1]);
-        int32_t rangeBaseZ = -1 + std::round(evalp.z - iEvalCoord[2]);
-        
-        float closestDistance = INFINITY;
-        uint32_t hashOfClosest = 0;
-        uint32_t closestFPIdx = 0;
-        for (int iz = rangeBaseZ; iz < rangeBaseZ + 2; ++iz) {
-            for (int iy = rangeBaseY; iy < rangeBaseY + 2; ++iy) {
-                for (int ix = rangeBaseX; ix < rangeBaseX + 2; ++ix) {
-                    int32_t iCoord[3] = {iEvalCoord[0] + ix, iEvalCoord[1] + iy, iEvalCoord[2] + iz};
-                    uint32_t hash = getFNV1Hash32((uint8_t*)iCoord, sizeof(iCoord));
-                    LinearCongruentialRNG rng(hash);
-                    
-                    uint32_t numFeaturePoints = 1 + std::min(int32_t(8 * rng.getFloat0cTo1o()), 8);
-                    for (int i = 0; i < numFeaturePoints; ++i) {
-                        Point3D fp = Point3D(iCoord[0] + rng.getFloat0cTo1o(), iCoord[1] + rng.getFloat0cTo1o(), iCoord[2] + rng.getFloat0cTo1o());
-                        float dist = distance(evalp, fp);
-                        if (dist < closestDistance) {
-                            closestDistance = dist;
-                            hashOfClosest = hash;
-                            closestFPIdx = i;
-                        }
-                    }
-                }
-            }
-        }
+    float VoronoiFloatTexture::evaluate(const Point3D &p) const {
+        float closestDistance;
+        uint32_t hash;
+        uint32_t fpIdx;
+        evaluateVoronoi(p, &closestDistance, &hash, &fpIdx);
         
         if (m_flat) {
-            LinearCongruentialRNG rng(hashOfClosest + closestFPIdx);
+            LinearCongruentialRNG rng(hash + fpIdx);
             return m_valueScale * rng.getFloat0cTo1o();
         }
         else {

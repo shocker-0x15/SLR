@@ -34,6 +34,8 @@ namespace SLRSceneGraph {
         FloatTexture,
         SurfaceMaterial,
         EmitterSurfaceProperty,
+        MediumMaterial,
+        EmitterMediumProperty,
         Node,
         InternalNode,
         Tuple,
@@ -72,6 +74,8 @@ namespace SLRSceneGraph {
         TypeMapDef(FloatTexture, SLRSceneGraph::FloatTexture);
         TypeMapDef(SurfaceMaterial, SLRSceneGraph::SurfaceMaterial);
         TypeMapDef(EmitterSurfaceProperty, SLRSceneGraph::EmitterSurfaceProperty);
+        TypeMapDef(MediumMaterial, SLRSceneGraph::MediumMaterial);
+        TypeMapDef(EmitterMediumProperty, SLRSceneGraph::EmitterMediumProperty);
         TypeMapDef(Node, SLRSceneGraph::Node);
         TypeMapDef(InternalNode, SLRSceneGraph::InternalNode);
         TypeMapDef(Tuple, SLRSceneGraph::ParameterList);

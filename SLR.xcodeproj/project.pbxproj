@@ -27,6 +27,11 @@
 		4613A1781E364E3500D05AA6 /* BoundingBox3.h in Headers */ = {isa = PBXBuildFile; fileRef = 4613A1761E364E3500D05AA6 /* BoundingBox3.h */; };
 		4613A17B1E36500600D05AA6 /* Ray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4613A1791E36500600D05AA6 /* Ray.cpp */; };
 		4613A17C1E36500600D05AA6 /* Ray.h in Headers */ = {isa = PBXBuildFile; fileRef = 4613A17A1E36500600D05AA6 /* Ray.h */; };
+		461BDAD71E45E7C600D97D37 /* basic_MediumMaterials.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 461BDAD51E45E7C600D97D37 /* basic_MediumMaterials.cpp */; };
+		461BDAD81E45E7C600D97D37 /* basic_MediumMaterials.h in Headers */ = {isa = PBXBuildFile; fileRef = 461BDAD61E45E7C600D97D37 /* basic_MediumMaterials.h */; };
+		461BDADA1E45EB2F00D97D37 /* medium_material_headers.h in Headers */ = {isa = PBXBuildFile; fileRef = 461BDAD91E45EB2F00D97D37 /* medium_material_headers.h */; };
+		461BDADD1E46FE4A00D97D37 /* medium_materials.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 461BDADB1E46FE4A00D97D37 /* medium_materials.cpp */; };
+		461BDADE1E46FE4A00D97D37 /* medium_materials.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 461BDADC1E46FE4A00D97D37 /* medium_materials.hpp */; };
 		462018CE1CD7D05800A5CAF1 /* MicrofacetBSDF.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 462018CC1CD7D05800A5CAF1 /* MicrofacetBSDF.cpp */; };
 		462018D11CD7D09E00A5CAF1 /* MicrofacetBSDF.h in Headers */ = {isa = PBXBuildFile; fileRef = 462018D01CD7D09E00A5CAF1 /* MicrofacetBSDF.h */; };
 		46224C511C5DDFB0009EC594 /* BidirectionalPathTracingRenderer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 46224C4F1C5DDFB0009EC594 /* BidirectionalPathTracingRenderer.cpp */; };
@@ -264,6 +269,11 @@
 		4613A1761E364E3500D05AA6 /* BoundingBox3.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = BoundingBox3.h; path = libSLR/BasicTypes/BoundingBox3.h; sourceTree = SOURCE_ROOT; };
 		4613A1791E36500600D05AA6 /* Ray.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Ray.cpp; path = libSLR/BasicTypes/Ray.cpp; sourceTree = SOURCE_ROOT; };
 		4613A17A1E36500600D05AA6 /* Ray.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Ray.h; path = libSLR/BasicTypes/Ray.h; sourceTree = SOURCE_ROOT; };
+		461BDAD51E45E7C600D97D37 /* basic_MediumMaterials.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = basic_MediumMaterials.cpp; path = libSLR/MediumMaterials/basic_MediumMaterials.cpp; sourceTree = SOURCE_ROOT; };
+		461BDAD61E45E7C600D97D37 /* basic_MediumMaterials.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = basic_MediumMaterials.h; path = libSLR/MediumMaterials/basic_MediumMaterials.h; sourceTree = SOURCE_ROOT; };
+		461BDAD91E45EB2F00D97D37 /* medium_material_headers.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = medium_material_headers.h; path = libSLR/MediumMaterials/medium_material_headers.h; sourceTree = SOURCE_ROOT; };
+		461BDADB1E46FE4A00D97D37 /* medium_materials.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = medium_materials.cpp; path = libSLRSceneGraph/medium_materials.cpp; sourceTree = "<group>"; };
+		461BDADC1E46FE4A00D97D37 /* medium_materials.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = medium_materials.hpp; path = libSLRSceneGraph/medium_materials.hpp; sourceTree = "<group>"; };
 		462018CC1CD7D05800A5CAF1 /* MicrofacetBSDF.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; lineEnding = 0; name = MicrofacetBSDF.cpp; path = libSLR/BSDFs/MicrofacetBSDF.cpp; sourceTree = SOURCE_ROOT; xcLanguageSpecificationIdentifier = xcode.lang.cpp; };
 		462018D01CD7D09E00A5CAF1 /* MicrofacetBSDF.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MicrofacetBSDF.h; path = libSLR/BSDFs/MicrofacetBSDF.h; sourceTree = SOURCE_ROOT; };
 		46224C4F1C5DDFB0009EC594 /* BidirectionalPathTracingRenderer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; lineEnding = 0; name = BidirectionalPathTracingRenderer.cpp; path = libSLR/Renderers/BidirectionalPathTracingRenderer.cpp; sourceTree = SOURCE_ROOT; xcLanguageSpecificationIdentifier = xcode.lang.cpp; };
@@ -478,6 +488,16 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		461BDAD41E45E57900D97D37 /* MediumMaterials */ = {
+			isa = PBXGroup;
+			children = (
+				461BDAD91E45EB2F00D97D37 /* medium_material_headers.h */,
+				461BDAD61E45E7C600D97D37 /* basic_MediumMaterials.h */,
+				461BDAD51E45E7C600D97D37 /* basic_MediumMaterials.cpp */,
+			);
+			name = MediumMaterials;
+			sourceTree = "<group>";
+		};
 		4634EB8E1B9B529B0047AE54 /* Accelerator */ = {
 			isa = PBXGroup;
 			children = (
@@ -750,16 +770,18 @@
 				4602E8AE1BC40E8700EC16FA /* textures.cpp */,
 				4602E8AD1BC40E8700EC16FA /* surface_materials.hpp */,
 				4602E8AC1BC40E8700EC16FA /* surface_materials.cpp */,
+				461BDADC1E46FE4A00D97D37 /* medium_materials.hpp */,
+				461BDADB1E46FE4A00D97D37 /* medium_materials.cpp */,
 				466F6D191BB6CB4E0056F2FA /* nodes.h */,
 				466F6D181BB6CB4E0056F2FA /* nodes.cpp */,
 				466F6D131BB6CB4E0056F2FA /* camera_nodes.h */,
 				466F6D121BB6CB4E0056F2FA /* camera_nodes.cpp */,
 				466F6D1D1BB6CB4E0056F2FA /* TriangleMeshNode.h */,
 				466F6D1C1BB6CB4E0056F2FA /* TriangleMeshNode.cpp */,
-				464545911E1CEC6300B4CECD /* medium_nodes.h */,
-				464545901E1CEC6300B4CECD /* medium_nodes.cpp */,
 				466F6D151BB6CB4E0056F2FA /* InfiniteSphereNode.h */,
 				466F6D141BB6CB4E0056F2FA /* InfiniteSphereNode.cpp */,
+				464545911E1CEC6300B4CECD /* medium_nodes.h */,
+				464545901E1CEC6300B4CECD /* medium_nodes.cpp */,
 				466F6D171BB6CB4E0056F2FA /* node_constructor.h */,
 				466F6D161BB6CB4E0056F2FA /* node_constructor.cpp */,
 				466F6D1B1BB6CB4E0056F2FA /* Scene.h */,
@@ -870,6 +892,7 @@
 				4645457F1E16C22100B4CECD /* Medium */,
 				4634EC051B9B529B0047AE54 /* Textures */,
 				4634EBF61B9B529B0047AE54 /* SurfaceMaterials */,
+				461BDAD41E45E57900D97D37 /* MediumMaterials */,
 				4634EBCC1B9B529B0047AE54 /* Helper */,
 			);
 			path = SLR;
@@ -951,6 +974,7 @@
 				46B39C9A1D90234400AB9CC9 /* Object.h in Headers */,
 				466F6CF91BB6CA420056F2FA /* surface_material.h in Headers */,
 				46BF49891BB731CF0036033F /* spectrum_library.h in Headers */,
+				461BDADA1E45EB2F00D97D37 /* medium_material_headers.h in Headers */,
 				464545A41E1F5EDF00B4CECD /* camera_nodes.h in Headers */,
 				468F9DE11D81D98200DD02BD /* ProgressReporter.h in Headers */,
 				464545A01E1E315100B4CECD /* TriangleMeshNode.h in Headers */,
@@ -963,6 +987,7 @@
 				4645457D1E0EB27200B4CECD /* VolumetricPathTracingRenderer.h in Headers */,
 				466F6D4D1BB7153E0056F2FA /* TriangleMesh.h in Headers */,
 				464545981E1E2D8E00B4CECD /* Scene.h in Headers */,
+				461BDAD81E45E7C600D97D37 /* basic_MediumMaterials.h in Headers */,
 				4613A1781E364E3500D05AA6 /* BoundingBox3.h in Headers */,
 				466F6D071BB6CA510056F2FA /* MultiEDF.h in Headers */,
 				466F6CFF1BB6CA420056F2FA /* Transform.h in Headers */,
@@ -985,6 +1010,7 @@
 				464EAAFE1D683DA0000E1C65 /* builtin_math.hpp in Headers */,
 				466F6D251BB6CB4E0056F2FA /* nodes.h in Headers */,
 				466F6D231BB6CB4E0056F2FA /* node_constructor.h in Headers */,
+				461BDADE1E46FE4A00D97D37 /* medium_materials.hpp in Headers */,
 				4602E8B31BC40E8700EC16FA /* textures.hpp in Headers */,
 				46B9589B1BDCD2B300A915DE /* location.hh in Headers */,
 				46AE85291BB718C400C70BF3 /* references.h in Headers */,
@@ -1140,6 +1166,7 @@
 				466F6D3F1BB6DC840056F2FA /* basic_SurfaceMaterials.cpp in Sources */,
 				46B36DE61D33E7CF00D7C56B /* Accelerator.cpp in Sources */,
 				46BF49871BB7303D0036033F /* spectrum_library.cpp in Sources */,
+				461BDAD71E45E7C600D97D37 /* basic_MediumMaterials.cpp in Sources */,
 				4613A17B1E36500600D05AA6 /* Ray.cpp in Sources */,
 				460A20211D602C5700870E0F /* AshikhminShirleyReflection.cpp in Sources */,
 				466F6D061BB6CA510056F2FA /* MultiEDF.cpp in Sources */,
@@ -1191,6 +1218,7 @@
 				466F6D341BB6D7A00056F2FA /* image_loader.cpp in Sources */,
 				466F6D1E1BB6CB4E0056F2FA /* camera_nodes.cpp in Sources */,
 				466F6D261BB6CB4E0056F2FA /* Scene.cpp in Sources */,
+				461BDADD1E46FE4A00D97D37 /* medium_materials.cpp in Sources */,
 				464EAB051D68471C000E1C65 /* builtin_texture.cpp in Sources */,
 				466F6D281BB6CB4E0056F2FA /* TriangleMeshNode.cpp in Sources */,
 				464EAAFD1D683DA0000E1C65 /* builtin_math.cpp in Sources */,

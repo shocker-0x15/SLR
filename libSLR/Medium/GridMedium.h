@@ -35,10 +35,11 @@ namespace SLR {
             return m_region.intersectBoundary(ray, distToBoundary, enter);
         }
         SampledSpectrum extinctionCoefficient(const Point3D &p, const WavelengthSamples &wls) const override;
-        bool interact(const Ray &ray, const WavelengthSamples &wls, LightPathSampler &pathSampler,
+        bool interact(const Ray &ray, float distanceLimit, const WavelengthSamples &wls, LightPathSampler &pathSampler,
                       MediumInteraction* mi, SampledSpectrum* medThroughput, bool* singleWavelength) const override;
+        SampledSpectrum evaluateTransmittance(Ray &ray, float distanceLimit, const WavelengthSamples &wls, LightPathSampler &pathSampler,
+                                              bool* singleWavelength) const override;
         void getMediumPoint(const MediumInteraction &mi, MediumPoint* medPt) const override;
-        void queryCoefficients(const Point3D &p, const WavelengthSamples &wls, SampledSpectrum* sigma_s, SampledSpectrum* sigma_e) const override;
         float volume() const override { return m_region.volume(); }
         void sample(float u0, float u1, float u2, MediumPoint* medPt, float* volumePDF) const override;
         float evaluateVolumePDF(const MediumPoint& medPt) const override;
@@ -61,10 +62,11 @@ namespace SLR {
             return m_region.intersectBoundary(ray, distToBoundary, enter);
         }
         SampledSpectrum extinctionCoefficient(const Point3D &p, const WavelengthSamples &wls) const override;
-        bool interact(const Ray &ray, const WavelengthSamples &wls, LightPathSampler &pathSampler,
+        bool interact(const Ray &ray, float distanceLimit, const WavelengthSamples &wls, LightPathSampler &pathSampler,
                       MediumInteraction* mi, SampledSpectrum* medThroughput, bool* singleWavelength) const override;
+        SampledSpectrum evaluateTransmittance(Ray &ray, float distanceLimit, const WavelengthSamples &wls, LightPathSampler &pathSampler,
+                                              bool* singleWavelength) const override;
         void getMediumPoint(const MediumInteraction &mi, MediumPoint* medPt) const override;
-        void queryCoefficients(const Point3D &p, const WavelengthSamples &wls, SampledSpectrum* sigma_s, SampledSpectrum* sigma_e) const override;
         float volume() const override { return m_region.volume(); }
         void sample(float u0, float u1, float u2, MediumPoint* medPt, float* volumePDF) const override;
         float evaluateVolumePDF(const MediumPoint& medPt) const override;

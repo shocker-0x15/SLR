@@ -19,6 +19,7 @@ namespace SLR {
         ConstantSpectrumTexture(const InputSpectrum* value) : m_value(value) { }
         
         SampledSpectrum evaluate(const SurfacePoint &surfPt, const WavelengthSamples &wls) const override { return m_value->evaluate(wls); }
+        SampledSpectrum evaluate(const MediumPoint &medPt, const WavelengthSamples &wls) const override { return m_value->evaluate(wls); }
         RegularConstantContinuous2D* createIBLImportanceMap() const override;
     };
     
@@ -28,6 +29,7 @@ namespace SLR {
         ConstantFloatTexture(float value) : m_value(value) { }
         
         float evaluate(const SurfacePoint &surfPt) const override { return m_value; }
+        float evaluate(const MediumPoint &medPt) const override { return m_value; }
     };    
 }
 

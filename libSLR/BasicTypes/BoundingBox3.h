@@ -92,6 +92,10 @@ namespace SLR {
                     (p.z >= minP.z && p.z < maxP.z));
         }
         
+        void localCoordinates(const Point3Template<RealType> &p, Point3Template<RealType>* param) const {
+            *param = (p - minP) / (maxP - minP);
+        }
+        
         // check intersection between ray segment and bounding volume.
         bool intersect(const RayTemplate<RealType> &r) const {
             RealType dist0 = r.distMin, dist1 = r.distMax;
@@ -123,7 +127,7 @@ namespace SLR {
                 if (dist0 > dist1)
                     return false;
             }
-            if (contains(r.org)) {
+            if (contains(r.org + r.distMin * r.dir)) {
                 *distToBoundary = dist1;
                 *enter = false;
                 return dist1 >= r.distMin && dist1 < r.distMax;

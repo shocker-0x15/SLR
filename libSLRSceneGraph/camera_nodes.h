@@ -21,7 +21,9 @@ namespace SLRSceneGraph {
         float m_imgPlaneDistance;
         float m_objPlaneDistance;
         
+        void allocateRawData() override;
         void setupRawData() override;
+        void terminateRawData() override;
     public:
         PerspectiveCameraNode(float sensitivity, float aspect, float fovY, float lensRadius, float imgPDist, float objPDist);
         
@@ -35,7 +37,9 @@ namespace SLRSceneGraph {
         float m_phiAngle;
         float m_thetaAngle;
         
+        void allocateRawData() override;
         void setupRawData() override;
+        void terminateRawData() override;
     public:
         EquirectangularCameraNode(float sensitivity, float phiAngle, float thetaAngle);
         

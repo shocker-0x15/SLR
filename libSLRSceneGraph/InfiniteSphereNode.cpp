@@ -11,19 +11,30 @@
 #include "Scene.h"
 
 namespace SLRSceneGraph {
+    void InfiniteSphereNode::allocateRawData() {
+        m_rawData = (SLR::Node*)malloc(sizeof(SLR::InfiniteSphereNode));
+    }
+    
     void InfiniteSphereNode::setupRawData() {
         SceneRef scene = m_scene.lock();
-        m_rawData = new SLR::InfiniteSphereNode(scene->getRaw(), m_IBLTex->getRaw(), m_scale);
+        new (m_rawData) SLR::InfiniteSphereNode(scene->getRaw(), m_IBLTex->getRaw(), m_scale);
+        m_setup = true;
+    }
+    
+    void InfiniteSphereNode::terminateRawData() {
+        SLR::InfiniteSphereNode &raw = *(SLR::InfiniteSphereNode*)m_rawData;
+        if (m_setup)
+            raw.~InfiniteSphereNode();
+        m_setup = false;
     }
     
     InfiniteSphereNode::InfiniteSphereNode(const SceneWRef &scene, const SpectrumTextureRef &IBLTex, float scale) :
     m_scene(scene), m_IBLTex(IBLTex), m_scale(scale) {
-        setupRawData();
+        allocateRawData();
     }
     
     void InfiniteSphereNode::prepareForRendering() {
-        SLR::InfiniteSphereNode &raw = *(SLR::InfiniteSphereNode*)m_rawData;
-        SceneRef scene = m_scene.lock();
-        new (&raw) SLR::InfiniteSphereNode(scene->getRaw(), m_IBLTex->getRaw(), m_scale);
+        terminateRawData();
+        setupRawData();
     }
 }

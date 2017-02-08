@@ -12,6 +12,7 @@ namespace SLR {
     SampledSpectrum IsotropicPhaseFunction::sample(const PFQuery &query, const PFSample &smp, PFQueryResult* result) const {
         result->dirLocal = uniformSampleSphere(smp.uDir[0], smp.uDir[1]);
         result->dirPDF = 1 / (4 * M_PI);
+        result->sampledType = directionType();
         return SampledSpectrum(1 / (4 * M_PI));
     }
     
@@ -34,6 +35,7 @@ namespace SLR {
         float sinTheta = std::sqrt(1 - cosTheta * cosTheta);
         result->dirLocal = Vector3D(std::cos(phi) * sinTheta, std::sin(phi) * sinTheta, cosTheta);
         result->dirPDF = value;
+        result->sampledType = directionType();
         return SampledSpectrum(value);
     }
     
@@ -59,6 +61,7 @@ namespace SLR {
         float sinTheta = std::sqrt(1 - cosTheta * cosTheta);
         result->dirLocal = Vector3D(std::cos(phi) * sinTheta, std::sin(phi) * sinTheta, cosTheta);
         result->dirPDF = value;
+        result->sampledType = directionType();
         return SampledSpectrum(value);
     }
     

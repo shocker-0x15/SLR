@@ -19,7 +19,9 @@ namespace SLRSceneGraph {
         SpectrumTextureRef m_IBLTex;
         float m_scale;
         
+        void allocateRawData() override;
         void setupRawData() override;
+        void terminateRawData() override;
     public:
         InfiniteSphereNode(const SceneWRef &scene, const SpectrumTextureRef &IBLTex, float scale);
         

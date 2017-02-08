@@ -10,10 +10,9 @@
 #include "../Core/distributions.h"
 
 namespace SLR {
-    SampledSpectrum ImageSpectrumTexture::evaluate(const SurfacePoint &surfPt, const WavelengthSamples &wls) const {
-        Point3D tc = m_mapping->map(surfPt);
-        float u = std::fmod(tc.x, 1.0f);
-        float v = std::fmod(tc.y, 1.0f);
+    SampledSpectrum ImageSpectrumTexture::evaluate(const Point3D &p, const WavelengthSamples &wls) const {
+        float u = std::fmod(p.x, 1.0f);
+        float v = std::fmod(p.y, 1.0f);
         u += u < 0 ? 1.0f : 0.0f;
         v += v < 0 ? 1.0f : 0.0f;
         uint32_t px = std::min((uint32_t)(m_data->width() * u), m_data->width() - 1);
@@ -133,10 +132,11 @@ namespace SLR {
         return new RegularConstantContinuous2D(mapWidth, mapHeight, pickFunc);
     }
     
-    Normal3D ImageNormal3DTexture::evaluate(const SurfacePoint &surfPt) const {
-        Point3D tc = m_mapping->map(surfPt);
-        float u = std::fmod(tc.x, 1.0f);
-        float v = std::fmod(tc.y, 1.0f);
+    
+    
+    Normal3D ImageNormal3DTexture::evaluate(const Point3D &p) const {
+        float u = std::fmod(p.x, 1.0f);
+        float v = std::fmod(p.y, 1.0f);
         u += u < 0 ? 1.0f : 0.0f;
         v += v < 0 ? 1.0f : 0.0f;
         uint32_t px = std::min((uint32_t)(m_data->width() * u), m_data->width() - 1);
@@ -170,10 +170,11 @@ namespace SLR {
         return ret;
     }
     
-    float ImageFloatTexture::evaluate(const SurfacePoint &surfPt) const {
-        Point3D tc = m_mapping->map(surfPt);
-        float u = std::fmod(tc.x, 1.0f);
-        float v = std::fmod(tc.y, 1.0f);
+    
+    
+    float ImageFloatTexture::evaluate(const Point3D &p) const {
+        float u = std::fmod(p.x, 1.0f);
+        float v = std::fmod(p.y, 1.0f);
         u += u < 0 ? 1.0f : 0.0f;
         v += v < 0 ? 1.0f : 0.0f;
         uint32_t px = std::min((uint32_t)(m_data->width() * u), m_data->width() - 1);

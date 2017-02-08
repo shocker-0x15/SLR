@@ -6,11 +6,15 @@
 //
 
 #include "medium_nodes.h"
+#include "../Memory/ArenaAllocator.h"
+#include "../Core/medium_material.h"
+#include "../Core/MediumObject.h"
 #include "../Medium/HomogeneousMedium.h"
 #include "../Medium/GridMedium.h"
 
 namespace SLR {
-    HomogeneousMediumNode::HomogeneousMediumNode(const BoundingBox3D &region, const InputSpectrum* sigma_s, const InputSpectrum* sigma_e) {
+    HomogeneousMediumNode::HomogeneousMediumNode(const BoundingBox3D &region, const InputSpectrum* sigma_s, const InputSpectrum* sigma_e, const MediumMaterial* material) :
+    m_material(material) {
         m_medium = new HomogeneousMedium(region, sigma_s, sigma_e);
     }
     
@@ -19,17 +23,19 @@ namespace SLR {
     }
     
     void HomogeneousMediumNode::createRenderingData(Allocator *mem, const Transform *subTF, RenderingData *data) {
-        
+        m_obj = mem->create<SingleMediumObject>(m_medium, m_material);
+        data->medObjs.push_back(m_obj);
     }
     
     void HomogeneousMediumNode::destroyRenderingData(Allocator *mem) {
-        
+        mem->destroy(m_obj);
     }
     
     
     
     GridMediumNode::GridMediumNode(const BoundingBox3D &region, const InputSpectrum** sigma_s_grid, const InputSpectrum** sigma_e_grid,
-                                   uint32_t numX, uint32_t numY, uint32_t numZ) {
+                                   uint32_t numX, uint32_t numY, uint32_t numZ, const MediumMaterial* material) :
+    m_material(material) {
         float maxExtinctionCoefficient = -INFINITY;
         for (int z = 0; z < numZ; ++z) {
             const InputSpectrum* zSlice = sigma_e_grid[z];

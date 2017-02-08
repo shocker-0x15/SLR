@@ -31,11 +31,13 @@
 #include "camera_nodes.h"
 #include "TriangleMeshNode.h"
 #include "InfiniteSphereNode.h"
+#include "medium_nodes.h"
 #include "node_constructor.h"
 
 #include "Helper/image_loader.h"
 #include "textures.hpp"
 #include "surface_materials.hpp"
+#include "medium_materials.hpp"
 
 namespace SLRSceneGraph {
     static bool strToImageStoreMode(const std::string &str, SLR::ImageStoreMode* mode) {
@@ -359,7 +361,7 @@ namespace SLRSceneGraph {
                                                        values.resize(numSamples);
                                                        for (int i = 0; i < numSamples; ++i) {
                                                            const Element &el = valueList(i);
-                                                           values.push_back(el.raw<TypeMap::RealNumber>());
+                                                           values.push_back(el.asRaw<TypeMap::RealNumber>());
                                                        }
                                                        
                                                        return Element::createFromReference<TypeMap::Spectrum>(Spectrum::create(type, minWL, maxWL, values.data(), (uint32_t)numSamples));
@@ -385,8 +387,8 @@ namespace SLRSceneGraph {
                                                        for (int i = 0; i < numSamples; ++i) {
                                                            const Element &elWavelength = wavelengthList(i);
                                                            const Element &elValue = valueList(i);
-                                                           wls.push_back(elWavelength.raw<TypeMap::RealNumber>());
-                                                           values.push_back(elValue.raw<TypeMap::RealNumber>());
+                                                           wls[i] = elWavelength.asRaw<TypeMap::RealNumber>();
+                                                           values[i] = elValue.asRaw<TypeMap::RealNumber>();
                                                        }
                                                        
                                                        return Element::createFromReference<TypeMap::Spectrum>(Spectrum::create(type, wls.data(), values.data(), (uint32_t)numSamples));
@@ -658,6 +660,25 @@ namespace SLRSceneGraph {
                                                    return Element();
                                                }
                                                );
+            stack["createMediumMaterial"] =
+            Element::create<TypeMap::Function>(1,
+                                               std::vector<ArgInfo>{{"type", Type::String}, {"params", Type::Tuple}},
+                                               [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
+                                                   std::string type = args.at("type").raw<TypeMap::String>();
+                                                   const ParameterList &params = args.at("params").raw<TypeMap::Tuple>();
+                                                   if (type == "isotropic") {
+                                                       const static Function configFunc{
+                                                           0, {},
+                                                           [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
+                                                               return Element::createFromReference<TypeMap::MediumMaterial>(MediumMaterial::createIsotropic());
+                                                           }
+                                                       };
+                                                       return configFunc(params, context, err);
+                                                   }
+                                                   *err = ErrorMessage("Specified material type is invalid.");
+                                                   return Element();
+                                               }
+                                               );
             stack["createMesh"] =
             Element::create<TypeMap::Function>(1,
                                                std::vector<ArgInfo>{{"vertices", Type::Tuple}, {"matGroups", Type::Tuple}},
@@ -697,17 +718,17 @@ namespace SLRSceneGraph {
                                                        return 0;
                                                    };
                                                    
-                                                   TriangleMeshNodeRef lightMesh = createShared<TriangleMeshNode>();
+                                                   TriangleMeshNodeRef mesh = createShared<TriangleMeshNode>();
                                                    for (int i = 0; i < vertices.size(); ++i) {
                                                        if (vertices[i].type == Type::Vertex) {
-                                                           lightMesh->addVertex(vertices[i].raw<TypeMap::Vertex>());
+                                                           mesh->addVertex(vertices[i].raw<TypeMap::Vertex>());
                                                        }
                                                        else {
                                                            const Function &CreateVertex = context.stackVariables["createVertex"].raw<TypeMap::Function>();
                                                            Element vtx = CreateVertex(vertices[i].raw<TypeMap::Tuple>(), context, err);
                                                            if (err->error)
                                                                return Element();
-                                                           lightMesh->addVertex(vtx.raw<TypeMap::Vertex>());
+                                                           mesh->addVertex(vtx.raw<TypeMap::Vertex>());
                                                        }
                                                    }
                                                    for (int i = 0; i < matGroups.size(); ++i) {
@@ -718,19 +739,25 @@ namespace SLRSceneGraph {
                                                        sigMatGroup.perform<uint32_t>(procMatGroup, matGroups[i].raw<TypeMap::Tuple>(), 0, err);
                                                        if (err->error)
                                                            return Element();
-                                                       lightMesh->addTriangles(resultMatGroup.material, resultMatGroup.normalMap, resultMatGroup.alphaMap, std::move(resultMatGroup.triangles));
+                                                       mesh->addTriangles(resultMatGroup.material, resultMatGroup.normalMap, resultMatGroup.alphaMap, std::move(resultMatGroup.triangles));
                                                    }
                                                    
-                                                   return Element::createFromReference<TypeMap::Node>(lightMesh);
+                                                   return Element::createFromReference<TypeMap::Node>(mesh);
                                                }
                                                );
-//            stack["createHomogeneousMedium"] =
-//            Element::create<TypeMap::Function>(1,
-//                                               std::vector<ArgInfo>{{"min", Type::Point}, {"max", Type::Point}, {"sigma_s", Type::Spectrum}, {"sigma_a", Type::Spectrum}},
-//                                               [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
-//
-//                                               }
-//                                               );
+            stack["createHomogeneousMedium"] =
+            Element::create<TypeMap::Function>(1,
+                                               std::vector<ArgInfo>{{"min", Type::Point}, {"max", Type::Point}, {"sigma_s", Type::Spectrum}, {"sigma_e", Type::Spectrum}, {"mat", Type::MediumMaterial}},
+                                               [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
+                                                   const auto &minP = args.at("min").raw<TypeMap::Point>();
+                                                   const auto &maxP = args.at("max").raw<TypeMap::Point>();
+                                                   InputSpectrumRef sigma_s = args.at("sigma_s").rawRef<TypeMap::Spectrum>();
+                                                   InputSpectrumRef sigma_e = args.at("sigma_e").rawRef<TypeMap::Spectrum>();
+                                                   MediumMaterialRef mat = args.at("mat").rawRef<TypeMap::MediumMaterial>();
+                                                   NodeRef mediumNode = createShared<HomogeneousMediumNode>(SLR::BoundingBox3D(minP, maxP), sigma_s, sigma_e, mat);
+                                                   return Element::createFromReference<TypeMap::Node>(mediumNode);
+                                               }
+                                               );
             stack["createNode"] =
             Element::create<TypeMap::Function>(1,
                                                std::vector<ArgInfo>{},
@@ -982,7 +1009,7 @@ namespace SLRSceneGraph {
                                                    float imgDist = args.at("imgDist").raw<TypeMap::RealNumber>();
                                                    float objDist = args.at("objDist").raw<TypeMap::RealNumber>();
                                                    
-                                                   PerspectiveCameraNodeRef rawRef = createShared<PerspectiveCameraNode>(sensitivity, aspect, fovY, radius, imgDist, objDist);
+                                                   NodeRef rawRef = createShared<PerspectiveCameraNode>(sensitivity, aspect, fovY, radius, imgDist, objDist);
                                                    return Element::createFromReference<TypeMap::Node>(rawRef);
                                                }
                                                );

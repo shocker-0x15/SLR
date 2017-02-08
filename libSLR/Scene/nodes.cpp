@@ -9,6 +9,7 @@
 #include "../Memory/ArenaAllocator.h"
 #include "../Core/Transform.h"
 #include "../Core/SurfaceObject.h"
+#include "../Core/MediumObject.h"
 #include "../SurfaceMaterials/IBLEmission.h"
 
 namespace SLR {
@@ -31,10 +32,15 @@ namespace SLR {
                 else {
                     RenderingData subData(nullptr);
                     child->createRenderingData(mem, nullptr, &subData);
-                    m_TFObjs.push_back(nullptr);
+                    m_TFSurfObjs.push_back(nullptr);
                     if (subData.surfObjs.size() > 0) {
-                        m_TFObjs.back() = mem->create<TransformedSurfaceObject>(subData.surfObjs[0], m_appliedTransform);
-                        data->surfObjs.push_back(m_TFObjs.back());
+                        m_TFSurfObjs.back() = mem->create<TransformedSurfaceObject>(subData.surfObjs[0], m_appliedTransform);
+                        data->surfObjs.push_back(m_TFSurfObjs.back());
+                    }
+                    m_TFMedObjs.push_back(nullptr);
+                    if (subData.medObjs.size() > 0) {
+                        m_TFMedObjs.back() = mem->create<TransformedMediumObject>(subData.medObjs[0], m_appliedTransform);
+                        data->medObjs.push_back(m_TFMedObjs.back());
                     }
                     
                     // TODO: need to check the program not to do more than once.
@@ -53,15 +59,29 @@ namespace SLR {
             if (subData.surfObjs.size() > 0) {
                 SurfaceObject* child;
                 if (subData.surfObjs.size() > 1) {
-                    m_subObj = mem->create<SurfaceObjectAggregate>(subData.surfObjs);
-                    child = m_subObj;
+                    m_subSurfObj = mem->create<SurfaceObjectAggregate>(subData.surfObjs);
+                    child = m_subSurfObj;
                 }
                 else if (subData.surfObjs.size() == 1) {
                     child = subData.surfObjs[0];
                 }
                 
-                m_TFObjs.push_back(mem->create<TransformedSurfaceObject>(child, m_appliedTransform));
-                data->surfObjs.push_back(m_TFObjs.back());
+                m_TFSurfObjs.push_back(mem->create<TransformedSurfaceObject>(child, m_appliedTransform));
+                data->surfObjs.push_back(m_TFSurfObjs.back());
+            }
+            
+            if (subData.medObjs.size() > 0) {
+                MediumObject* child;
+                if (subData.surfObjs.size() > 1) {
+                    m_subMedObj = mem->create<MediumObjectAggregate>(subData.medObjs);
+                    child = m_subMedObj;
+                }
+                else if (subData.surfObjs.size() == 1) {
+                    child = subData.medObjs[0];
+                }
+                
+                m_TFMedObjs.push_back(mem->create<TransformedMediumObject>(child, m_appliedTransform));
+                data->medObjs.push_back(m_TFMedObjs.back());
             }
             
             if (subData.camera) {
@@ -79,22 +99,36 @@ namespace SLR {
                     child->destroyRenderingData(mem);
                 }
                 else {
-                    TransformedSurfaceObject* tfObj = m_TFObjs.back();
-                    if (tfObj)
-                        mem->destroy(tfObj);
-                    m_TFObjs.pop_back();
+                    TransformedMediumObject* tfMedObj = m_TFMedObjs.back();
+                    if (tfMedObj)
+                        mem->destroy(tfMedObj);
+                    m_TFMedObjs.pop_back();
+                    
+                    TransformedSurfaceObject* tfSurfObj = m_TFSurfObjs.back();
+                    if (tfSurfObj)
+                        mem->destroy(tfSurfObj);
+                    m_TFSurfObjs.pop_back();
                 }
             }
-            SLRAssert(m_TFObjs.size() == 0, "Destroying transformed objects is inconsitent.");
+            SLRAssert(m_TFSurfObjs.size() == 0, "Destroying transformed objects is inconsitent.");
         }
         else {
-            if (m_TFObjs.size() > 0) {
-                mem->destroy(m_TFObjs.back());
-                m_TFObjs.clear();
+            if (m_TFMedObjs.size() > 0) {
+                mem->destroy(m_TFMedObjs.back());
+                m_TFMedObjs.clear();
                 
-                if (m_subObj)
-                    mem->destroy(m_subObj);
-                m_subObj = nullptr;
+                if (m_subMedObj)
+                    mem->destroy(m_subMedObj);
+                m_subMedObj = nullptr;
+            }
+            
+            if (m_TFSurfObjs.size() > 0) {
+                mem->destroy(m_TFSurfObjs.back());
+                m_TFSurfObjs.clear();
+                
+                if (m_subSurfObj)
+                    mem->destroy(m_subSurfObj);
+                m_subSurfObj = nullptr;
             }
             
             for (int i = (int)m_childNodes.size() - 1; i >= 0; --i)

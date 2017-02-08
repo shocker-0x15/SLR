@@ -15,11 +15,14 @@ namespace SLRSceneGraph {
     class SLR_SCENEGRAPH_API Node {
     protected:
         SLR::Node* m_rawData;
+        bool m_setup;
         std::string m_name;
         
+        virtual void allocateRawData() = 0;
         virtual void setupRawData() = 0;
+        virtual void terminateRawData() = 0;
     public:
-        Node() : m_rawData(nullptr) { }
+        Node() : m_rawData(nullptr), m_setup(false) { }
         virtual ~Node();
 
         SLR::Node* getRaw() const {
@@ -46,7 +49,9 @@ namespace SLRSceneGraph {
         std::vector<NodeRef> m_childNodes;
         TransformRef m_localToWorld;
         
+        void allocateRawData() override;
         void setupRawData() override;
+        void terminateRawData() override;
     public:
         InternalNode(const TransformRef &localToWorld);
         
@@ -74,7 +79,9 @@ namespace SLRSceneGraph {
     class SLR_SCENEGRAPH_API ReferenceNode : public Node {
         NodeRef m_node;
         
+        void allocateRawData() override;
         void setupRawData() override;
+        void terminateRawData() override;
     public:
         ReferenceNode(const NodeRef &node);
         

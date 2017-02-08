@@ -164,9 +164,8 @@ namespace SLR {
     // Medium Objects
     class MediumObject;
     class SingleMediumObject;
+    class TransformedMediumObject;
     class MediumObjectAggregate;
-    
-    class Scene;
     
     // Cameras
     class Camera;
@@ -242,6 +241,7 @@ namespace SLR {
     class Texture2DMapping;
     class Texture3DMapping;
     class OffsetAndScale2DMapping;
+    class OffsetAndScale3DMapping;
     class WorldPosition3DMapping;
     class SpectrumTexture;
     class Normal3DTexture;
@@ -282,6 +282,7 @@ namespace SLR {
     
     // Medium Materials
     class MediumMaterial;
+    class IsotropicScattering;
     class EmitterMediumProperty;
     class EmitterMediumMaterial;
     
@@ -293,6 +294,9 @@ namespace SLR {
     class PerspectiveCameraNode;
     class EquirectangularCameraNode;
     class TriangleMeshNode;
+    class HomogeneousMediumNode;
+    class GridMediumNode;
+    class Scene;
     
     class RenderSettings;
     class Renderer;

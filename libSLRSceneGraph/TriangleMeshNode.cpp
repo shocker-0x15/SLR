@@ -14,12 +14,24 @@
 #include <libSLR/Scene/TriangleMeshNode.h>
 
 namespace SLRSceneGraph {
+    void TriangleMeshNode::allocateRawData() {
+        m_rawData = (SLR::Node*)malloc(sizeof(SLR::TriangleMeshNode));
+    }
+    
     void TriangleMeshNode::setupRawData() {
-        m_rawData = new SLR::TriangleMeshNode();
+        new (m_rawData) SLR::TriangleMeshNode();
+        m_setup = true;
+    }
+    
+    void TriangleMeshNode::terminateRawData() {
+        SLR::TriangleMeshNode &raw = *(SLR::TriangleMeshNode*)m_rawData;
+        if (m_setup)
+            raw.~TriangleMeshNode();
+        m_setup = false;
     }
     
     TriangleMeshNode::TriangleMeshNode() {
-        setupRawData();
+        allocateRawData();
     }
 
     uint64_t TriangleMeshNode::addVertex(const SLR::Vertex &v) {
@@ -68,6 +80,8 @@ namespace SLRSceneGraph {
     }
     
     void TriangleMeshNode::prepareForRendering() {
+        terminateRawData();
+        setupRawData();
         SLR::TriangleMeshNode &raw = *(SLR::TriangleMeshNode*)getRaw();
         
         uint32_t numVertices = (uint32_t)m_vertices.size();

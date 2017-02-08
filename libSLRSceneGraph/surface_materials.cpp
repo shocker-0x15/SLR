@@ -21,6 +21,8 @@ namespace SLRSceneGraph {
         delete m_rawData;
     }
     
+    
+    
     EmitterSurfaceMaterial::EmitterSurfaceMaterial(const SurfaceMaterialRef &mat, const EmitterSurfacePropertyRef &emit) :
     m_mat(mat), m_emit(emit) {
         m_rawData = new SLR::EmitterSurfaceMaterial(mat->getRaw(), emit->getRaw());

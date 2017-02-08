@@ -36,7 +36,9 @@ namespace SLRSceneGraph {
         std::vector<Vertex> m_vertices;
         std::vector<MaterialGroup> m_matGroups;
         
+        void allocateRawData() override;
         void setupRawData() override;
+        void terminateRawData() override;
     public:
         TriangleMeshNode();
         

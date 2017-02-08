@@ -6,16 +6,51 @@
 //
 
 #include "HomogeneousMedium.h"
+#include "light_path_samplers.h"
 
 namespace SLR {
-    bool HomogeneousMedium::interact(const Ray &ray, const WavelengthSamples &wls, LightPathSampler &pathSampler,
+    bool HomogeneousMedium::interact(const Ray &ray, float distanceLimit, const WavelengthSamples &wls, LightPathSampler &pathSampler,
                                      MediumInteraction* mi, SampledSpectrum* medThroughput, bool* singleWavelength) const {
-        SLRAssert_NotImplemented();
+        FreePathSampler &sampler = pathSampler.getFreePathSampler();
+        Point3D queryPoint = ray.org + ray.distMin * ray.dir;
+        FloatSum sampledDistance = ray.distMin;
+        
+        SampledSpectrum extCoeff = extinctionCoefficient(queryPoint, wls);
+        float distance = -std::log(sampler.getSample()) / extCoeff[wls.selectedLambda];
+        SampledSpectrum transmittance = exp(-extCoeff * std::min(distance, distanceLimit - ray.distMin));
+        *singleWavelength = false;
+        sampledDistance += distance;
+        if (sampledDistance < distanceLimit) {
+            Point3D p = ray.org + sampledDistance * ray.dir;
+            Point3D param;
+            m_region.localCoordinates(p, &param);
+            *mi = MediumInteraction(ray.time, sampledDistance, p,
+                                    m_sigma_s->evaluate(wls), extCoeff, normalize(ray.dir), param.x, param.y, param.z);
+            float distPDF = extCoeff[wls.selectedLambda] * transmittance[wls.selectedLambda];
+            *medThroughput = transmittance / distPDF;
+            return true;
+        }
+        
+        *medThroughput = transmittance / transmittance[wls.selectedLambda];
         return false;
     }
     
+    SampledSpectrum HomogeneousMedium::evaluateTransmittance(Ray &ray, float distanceLimit, const WavelengthSamples &wls, SLR::LightPathSampler &pathSampler, bool *singleWavelength) const {
+        Point3D queryPoint = ray.org + ray.distMin * ray.dir;
+        
+        SampledSpectrum extCoeff = extinctionCoefficient(queryPoint, wls);
+        float distance = distanceLimit - ray.distMin;
+        SampledSpectrum transmittance = exp(-extCoeff * distance);
+        *singleWavelength = false;
+        
+        return transmittance;
+    }
+    
     void HomogeneousMedium::getMediumPoint(const MediumInteraction &mi, MediumPoint* medPt) const {
-        SLRAssert_NotImplemented();
+        ReferenceFrame shadingFrame;
+        shadingFrame.z = mi.getIncomingDirection();
+        shadingFrame.z.makeCoordinateSystem(&shadingFrame.x, &shadingFrame.y);
+        *medPt = MediumPoint(mi, false, shadingFrame);
     }
     
     void HomogeneousMedium::sample(float u0, float u1, float u2, MediumPoint* medPt, float* volumePDF) const {

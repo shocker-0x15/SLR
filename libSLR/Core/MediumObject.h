@@ -66,14 +66,11 @@ namespace SLR {
             return Ray();
         }
         
-        virtual bool getMediumContaining(const Point3D &p, const SingleMediumObject** curMedium) const = 0;
-        virtual bool intersectBoundary(const Ray &ray, float* distToBoundary, bool* enter, const SingleMediumObject** boundaryMedium) const = 0;
-        // The term "majorant" comes from the paper of Residual Ratio Tracking.
-        virtual float majorantExtinctionCoefficient() const = 0;
-        virtual SampledSpectrum extinctionCoefficient(const Point3D &p, const WavelengthSamples &wls) const = 0;
-        virtual bool interact(Ray &ray, const WavelengthSamples &wls, LightPathSampler &pathSampler,
+        virtual bool contains(const Point3D &p, float time) const = 0;
+        virtual bool intersectBoundary(const Ray &ray, float* distToBoundary, bool* enter) const = 0;
+        virtual bool interact(Ray &ray, float distanceLimit, const WavelengthSamples &wls, LightPathSampler &pathSampler,
                               MediumInteraction* mi, SampledSpectrum* medThroughput, bool* singleWavelength) const = 0;
-        virtual SampledSpectrum evaluateTransmittance(Ray &ray, const WavelengthSamples &wls, LightPathSampler &pathSampler, bool* singleWavelength) const = 0;
+        virtual SampledSpectrum evaluateTransmittance(Ray &ray, float distanceLimit, const WavelengthSamples &wls, LightPathSampler &pathSampler, bool* singleWavelength) const = 0;
         virtual void getMediumPoint(const MediumInteraction &mi, MediumPoint* medPt) const {
             SLRAssert_ShouldNotBeCalled();
         }
@@ -108,17 +105,47 @@ namespace SLR {
                       VolumetricLightPosQueryResult* lightPosResult, SampledSpectrum* Le0, EDF** edf,
                       EDFQueryResult* edfResult, SampledSpectrum* Le1) const override;
 
-        bool getMediumContaining(const Point3D &p, const SingleMediumObject** curMedium) const override;
-        bool intersectBoundary(const Ray &ray, float* distToBoundary, bool* enter, const SingleMediumObject** boundaryMedium) const override;
-        float majorantExtinctionCoefficient() const override;
-        SampledSpectrum extinctionCoefficient(const Point3D &p, const WavelengthSamples &wls) const override;
-        bool interact(Ray &ray, const WavelengthSamples &wls, LightPathSampler &pathSampler,
+        bool contains(const Point3D &p, float time) const override { return m_medium->contains(p); }
+        bool intersectBoundary(const Ray &ray, float* distToBoundary, bool* enter) const override {
+            return m_medium->intersectBoundary(ray, distToBoundary, enter);
+        }
+        bool interact(Ray &ray, float distanceLimit, const WavelengthSamples &wls, LightPathSampler &pathSampler,
                       MediumInteraction* mi, SampledSpectrum* medThroughput, bool* singleWavelength) const override;
-        SampledSpectrum evaluateTransmittance(Ray &ray, const WavelengthSamples &wls, LightPathSampler &pathSampler, bool* singleWavelength) const override;
+        SampledSpectrum evaluateTransmittance(Ray &ray, float distanceLimit, const WavelengthSamples &wls, LightPathSampler &pathSampler, bool* singleWavelength) const override;
         void getMediumPoint(const MediumInteraction &mi, MediumPoint* medPt) const override;
         //----------------------------------------------------------------
         
         virtual AbstractBDF* createAbstractBDF(const MediumPoint &medPt, const WavelengthSamples &wls, ArenaAllocator &mem) const;
+    };
+    
+    
+    
+    class SLR_API TransformedMediumObject : public MediumObject {
+        const MediumObject* m_medObj;
+        const Transform* m_transform;
+        friend class Light;
+    public:
+        TransformedMediumObject(const MediumObject* medObj, const Transform* transform) : m_medObj(medObj), m_transform(transform) { }
+        
+        //----------------------------------------------------------------
+        // Object's methods
+        BoundingBox3D bounds() const override;
+        //----------------------------------------------------------------
+        
+        //----------------------------------------------------------------
+        // MediumObject's methods
+        bool isEmitting() const override;
+        float importance() const override;
+        void selectLight(float u, float time, VolumetricLight* light, float* prob) const override;
+        
+        bool contains(const Point3D &p, float time) const override;
+        bool intersectBoundary(const Ray &ray, float* distToBoundary, bool* enter) const override;
+        bool interact(Ray &ray, float distanceLimit, const WavelengthSamples &wls, LightPathSampler &pathSampler,
+                      MediumInteraction* mi, SampledSpectrum* medThroughput, bool* singleWavelength) const override;
+        SampledSpectrum evaluateTransmittance(Ray &ray, float distanceLimit, const WavelengthSamples &wls, LightPathSampler &pathSampler, bool* singleWavelength) const override;
+        //----------------------------------------------------------------
+        
+        void setTransform(const Transform* t) { m_transform = t; }
     };
     
     
@@ -146,13 +173,15 @@ namespace SLR {
         float importance() const override;
         void selectLight(float u, float time, VolumetricLight* light, float* prob) const override;
         
-        bool getMediumContaining(const Point3D &p, const SingleMediumObject** curMedium) const override;
-        bool intersectBoundary(const Ray &ray, float* distToBoundary, bool* enter, const SingleMediumObject** boundaryMedium) const override;
-        float majorantExtinctionCoefficient() const override;
-        SampledSpectrum extinctionCoefficient(const Point3D &p, const WavelengthSamples &wls) const override;
-        bool interact(Ray &ray, const WavelengthSamples &wls, LightPathSampler &pathSampler,
+        bool contains(const Point3D &p, float time) const override {
+            return m_bounds.contains(p);
+        }
+        bool intersectBoundary(const Ray &ray, float* distToBoundary, bool* enter) const override {
+            return m_bounds.intersectBoundary(ray, distToBoundary, enter);
+        }
+        bool interact(Ray &ray, float distanceLimit, const WavelengthSamples &wls, LightPathSampler &pathSampler,
                       MediumInteraction* mi, SampledSpectrum* medThroughput, bool* singleWavelength) const override;
-        SampledSpectrum evaluateTransmittance(Ray &ray, const WavelengthSamples &wls, LightPathSampler &pathSampler, bool* singleWavelength) const override;
+        SampledSpectrum evaluateTransmittance(Ray &ray, float distanceLimit, const WavelengthSamples &wls, LightPathSampler &pathSampler, bool* singleWavelength) const override;
         //----------------------------------------------------------------
     };
 }

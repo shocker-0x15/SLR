@@ -34,7 +34,7 @@ namespace SLR {
         m_worldCenter = worldBounds.centroid();
         m_worldRadius = (worldBounds.maxP - m_worldCenter).length();
         m_worldDiscArea = M_PI * m_worldRadius * m_worldRadius;
-    };
+    }
     
     void Scene::destory() {
         m_sceneMem->destroy(m_mediumAggregate);
@@ -71,7 +71,7 @@ namespace SLR {
         SurfaceInteraction si;
         bool hitSurface = m_surfaceAggregate->intersect(ray, &si);
         MediumInteraction mi;
-        bool hitMedium = m_mediumAggregate->interact(ray, wls, pathSampler, &mi, medThroughput, singleWavelength);
+        bool hitMedium = m_mediumAggregate->interact(ray, ray.distMax, wls, pathSampler, &mi, medThroughput, singleWavelength);
         if (hitMedium) {
             mi.setLightProb(evaluateProbability(importances, 3, 1) * mi.getLightProb());
             *interact = mem.create<MediumInteraction>(mi);
@@ -121,7 +121,7 @@ namespace SLR {
         SurfaceInteraction si;
         if (m_surfaceAggregate->intersect(ray, &si))
             return false;
-        *fractionalVisibility = m_mediumAggregate->evaluateTransmittance(ray, wls, pathSampler, singleWavelength);
+        *fractionalVisibility = m_mediumAggregate->evaluateTransmittance(ray, ray.distMax, wls, pathSampler, singleWavelength);
         return true;
     }
     

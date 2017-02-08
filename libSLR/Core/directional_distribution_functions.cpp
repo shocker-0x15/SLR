@@ -78,22 +78,22 @@ namespace SLR {
     
     SampledSpectrum VolumetricBSDF::sample(const ABDFQuery* query, LightPathSampler &sampler, ArenaAllocator &mem, ABDFQueryResult** result) const {
         PFQueryResult concreteResult;
-        PFQuery pfQuery(query->dirLocal, query->wlHint, query->dirTypeFilter);
-        SampledSpectrum ret = m_pf->sample(pfQuery, sampler.getPFSample(), &concreteResult);
+        PFQuery pfQuery(-query->dirLocal, query->wlHint, query->dirTypeFilter);
+        SampledSpectrum ret = m_albedo * m_pf->sample(pfQuery, sampler.getPFSample(), &concreteResult);
         *result = mem.create<VolumetricBSDFQueryResult>(concreteResult);
-        return m_albedo * ret;
+        return ret;
     }
     
     SampledSpectrum VolumetricBSDF::evaluate(const ABDFQuery* query, const Vector3D &dir, SampledSpectrum* rev_fs) const {
-        PFQuery pfQuery(query->dirLocal, query->wlHint, query->dirTypeFilter);
-        SampledSpectrum ret = m_pf->evaluate(pfQuery, dir);
+        PFQuery pfQuery(-query->dirLocal, query->wlHint, query->dirTypeFilter);
+        SampledSpectrum ret = m_albedo * m_pf->evaluate(pfQuery, dir);
         if (rev_fs)
-            *rev_fs *= m_albedo;
-        return m_albedo * ret;
+            *rev_fs = ret;
+        return ret;
     }
     
     float VolumetricBSDF::evaluatePDF(const ABDFQuery* query, const Vector3D &dir, float* revPDF) const {
-        PFQuery pfQuery(query->dirLocal, query->wlHint, query->dirTypeFilter);
+        PFQuery pfQuery(-query->dirLocal, query->wlHint, query->dirTypeFilter);
         float ret = m_pf->evaluatePDF(pfQuery, dir);
         Vector3D dirIn = pfQuery.dirLocal;
         pfQuery.dirLocal = dir;

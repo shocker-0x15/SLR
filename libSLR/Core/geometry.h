@@ -77,20 +77,25 @@ namespace SLR {
         friend class MediumPoint;
         
         const SingleMediumObject* m_obj;
-        float m_u, m_v, m_t;
+        SampledSpectrum m_scatteringCoefficient;
+        SampledSpectrum m_extinctionCoefficient;
+        Vector3D m_dirIn;
+        float m_u, m_v, m_w;
     public:
         MediumInteraction() : Interaction(0.0f, INFINITY, Point3D::Zero)
         {}
-        MediumInteraction(float time, float dist, const Point3D &p) :
-        Interaction(time, dist, p)
+        MediumInteraction(float time, float dist, const Point3D &p,
+                          const SampledSpectrum &sigma_s, const SampledSpectrum &sigma_e, const Vector3D &dirIn, float u, float v, float w) :
+        Interaction(time, dist, p), m_scatteringCoefficient(sigma_s), m_extinctionCoefficient(sigma_e), m_dirIn(dirIn), m_u(u), m_v(v), m_w(w)
         {}
         
         void setObject(const SingleMediumObject* obj) { m_obj = obj; }
         
-        void getMediumParameter(float* u, float* v, float* t) const {
+        Vector3D getIncomingDirection() const { return m_dirIn; }
+        void getMediumParameter(float* u, float* v, float* w) const {
             *u = m_u;
             *v = m_v;
-            *t = m_t;
+            *w = m_w;
         }
         
         void getMediumPoint(MediumPoint* medPt) const;
@@ -154,7 +159,7 @@ namespace SLR {
         
         virtual ABDFQuery* createABDFQuery(const Vector3D &dirLocal, int16_t selectedWL, DirectionType dirType, bool adjoint, ArenaAllocator &mem) const = 0;
         virtual AbstractBDF* createAbstractBDF(const WavelengthSamples &wls, ArenaAllocator &mem) const = 0;
-        virtual SampledSpectrum evaluateInteractance(const WavelengthSamples &wls) const = 0;
+        virtual SampledSpectrum evaluateInteractance() const = 0;
         virtual float calcCosTerm(const Vector3D &vecWorld) const = 0;
         
         virtual void applyTransform(const StaticTransform &transform);
@@ -183,6 +188,7 @@ namespace SLR {
                      const Vector3D &texCoord0Dir) :
         InteractionPoint(si.m_p, atInfinity, shadingFrame),
         m_gNormal(si.m_gNormal), m_u(si.m_u), m_v(si.m_v), m_texCoord(si.m_texCoord), m_texCoord0Dir(texCoord0Dir) { }
+        
         void setObject(const SingleSurfaceObject* obj) { m_obj = obj; }
         
         const Normal3D &getGeometricNormal() const { return m_gNormal; }
@@ -216,7 +222,7 @@ namespace SLR {
         AbstractBDF* createAbstractBDF(const WavelengthSamples &wls, ArenaAllocator &mem) const override {
             return (AbstractBDF*)createBSDF(wls, mem);
         }
-        SampledSpectrum evaluateInteractance(const WavelengthSamples &wls) const override {
+        SampledSpectrum evaluateInteractance() const override {
             return SampledSpectrum::One;
         }
         float calcCosTerm(const Vector3D &vecWorld) const override {
@@ -234,8 +240,17 @@ namespace SLR {
     
     
     class SLR_API MediumPoint : public InteractionPoint {
+        float m_u, m_v, m_w;
+        SampledSpectrum m_scatteringCoefficient;
+        SampledSpectrum m_extinctionCoefficient;
         const SingleMediumObject* m_obj;
     public:
+        MediumPoint() { }
+        MediumPoint(const MediumInteraction &mi,
+                    bool atInfinity, const ReferenceFrame &shadingFrame) :
+        InteractionPoint(mi.m_p, atInfinity, shadingFrame), m_u(mi.m_u), m_v(mi.m_v), m_w(mi.m_w),
+        m_scatteringCoefficient(mi.m_scatteringCoefficient), m_extinctionCoefficient(mi.m_extinctionCoefficient) { }
+        
         void setObject(const SingleMediumObject* obj) { m_obj = obj; }
         
         SampledSpectrum emittance(const WavelengthSamples &wls) const;
@@ -255,7 +270,13 @@ namespace SLR {
         
         ABDFQuery* createABDFQuery(const Vector3D &dirLocal, int16_t selectedWL, DirectionType filter, bool adjoint, ArenaAllocator &mem) const override;
         AbstractBDF* createAbstractBDF(const WavelengthSamples &wls, ArenaAllocator &mem) const override;
-        SampledSpectrum evaluateInteractance(const WavelengthSamples &wls) const override;
+        SampledSpectrum evaluateInteractance() const override {
+            return m_extinctionCoefficient;
+        }
+        void getMediumCoefficients(SampledSpectrum* sigma_s, SampledSpectrum* sigma_e) const {
+            *sigma_s = m_scatteringCoefficient;
+            *sigma_e = m_extinctionCoefficient;
+        }
         float calcCosTerm(const Vector3D &vecWorld) const override {
             return 1.0f;
         }
@@ -330,10 +351,11 @@ namespace SLR {
         virtual bool intersectBoundary(const Ray &ray, float* distToBoundary, bool* enter) const = 0;
         // The term "majorant" comes from the paper of Residual Ratio Tracking.
         virtual SampledSpectrum extinctionCoefficient(const Point3D &p, const WavelengthSamples &wls) const = 0;
-        virtual bool interact(const Ray &ray, const WavelengthSamples &wls, LightPathSampler &pathSampler,
+        virtual bool interact(const Ray &ray, float distanceLimit, const WavelengthSamples &wls, LightPathSampler &pathSampler,
                               MediumInteraction* mi, SampledSpectrum* medThroughput, bool* singleWavelength) const = 0;
+        virtual SampledSpectrum evaluateTransmittance(Ray &ray, float distanceLimit, const WavelengthSamples &wls, LightPathSampler &pathSampler,
+                                                      bool* singleWavelength) const = 0;
         virtual void getMediumPoint(const MediumInteraction &mi, MediumPoint* medPt) const = 0;
-        virtual void queryCoefficients(const Point3D &p, const WavelengthSamples &wls, SampledSpectrum* sigma_s, SampledSpectrum* sigma_e) const = 0;
         virtual float volume() const = 0;
         virtual void sample(float u0, float u1, float u2, MediumPoint* medPt, float* volumePDF) const = 0;
         virtual float evaluateVolumePDF(const MediumPoint& medPt) const = 0;

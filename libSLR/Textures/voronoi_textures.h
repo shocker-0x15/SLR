@@ -24,7 +24,13 @@ namespace SLR {
         VoronoiSpectrumTexture(const Texture3DMapping* mapping, float scale, float brightness) :
         m_mapping(mapping), m_scale(scale), m_brightness(brightness) { }
         
-        SampledSpectrum evaluate(const SurfacePoint &surfPt, const WavelengthSamples &wls) const override;
+        SampledSpectrum evaluate(const Point3D &p, const WavelengthSamples &wls) const;
+        SampledSpectrum evaluate(const SurfacePoint &surfPt, const WavelengthSamples &wls) const override {
+            return evaluate(m_mapping->map(surfPt) / m_scale, wls);
+        }
+        SampledSpectrum evaluate(const MediumPoint &medPt, const WavelengthSamples &wls) const override {
+            return evaluate(m_mapping->map(medPt) / m_scale, wls);
+        }
         RegularConstantContinuous2D* createIBLImportanceMap() const override;
     };
     
@@ -36,7 +42,13 @@ namespace SLR {
         VoronoiNormal3DTexture(const Texture3DMapping* mapping, float scale, float thetaMax) :
         m_mapping(mapping), m_scale(scale), m_cosThetaMax(std::cos(thetaMax)) { }
         
-        Normal3D evaluate(const SurfacePoint &surfPt) const override;
+        Normal3D evaluate(const Point3D &p) const;
+        Normal3D evaluate(const SurfacePoint &surfPt) const override {
+            return evaluate(m_mapping->map(surfPt) / m_scale);
+        }
+        Normal3D evaluate(const MediumPoint &medPt) const override {
+            return evaluate(m_mapping->map(medPt) / m_scale);
+        }
     };
     
     class SLR_API VoronoiFloatTexture : public FloatTexture {
@@ -48,7 +60,13 @@ namespace SLR {
         VoronoiFloatTexture(const Texture3DMapping* mapping, float scale, float valueScale, bool flat) :
         m_mapping(mapping), m_scale(scale), m_valueScale(valueScale), m_flat(flat) { }
         
-        float evaluate(const SurfacePoint &surfPt) const override;
+        float evaluate(const Point3D &p) const;
+        float evaluate(const SurfacePoint &surfPt) const override {
+            return evaluate(m_mapping->map(surfPt) / m_scale);
+        }
+        float evaluate(const MediumPoint &medPt) const override {
+            return evaluate(m_mapping->map(medPt) / m_scale);
+        }
     };
 }
 

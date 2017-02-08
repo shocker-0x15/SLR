@@ -18,10 +18,13 @@ namespace SLRSceneGraph {
         SLR::BoundingBox3D m_region;
         InputSpectrumRef m_sigma_s;
         InputSpectrumRef m_sigma_e;
+        MediumMaterialRef m_material;
         
+        void allocateRawData() override;
         void setupRawData() override;
+        void terminateRawData() override;
     public:
-        HomogeneousMediumNode(const SLR::BoundingBox3D &region, const InputSpectrumRef &sigma_s, const InputSpectrumRef &sigma_e);
+        HomogeneousMediumNode(const SLR::BoundingBox3D &region, const InputSpectrumRef &sigma_s, const InputSpectrumRef &sigma_e, const MediumMaterialRef &material);
         
         NodeRef copy() const override;
         
@@ -34,11 +37,14 @@ namespace SLRSceneGraph {
         SLR::InputSpectrum** m_sigma_s;
         SLR::InputSpectrum** m_sigma_e;
         uint32_t m_numX, m_numY, m_numZ;
+        MediumMaterialRef m_material;
         
+        void allocateRawData() override;
         void setupRawData() override;
+        void terminateRawData() override;
     public:
         GridMediumNode(const SLR::BoundingBox3D &region, const SLR::InputSpectrum** sigma_s, const SLR::InputSpectrum** sigma_e,
-                       uint32_t elemSize, uint32_t numX, uint32_t numY, uint32_t numZ);
+                       uint32_t elemSize, uint32_t numX, uint32_t numY, uint32_t numZ, const MediumMaterialRef &material);
         ~GridMediumNode();
         
         NodeRef copy() const override;

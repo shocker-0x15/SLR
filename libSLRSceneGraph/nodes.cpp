@@ -15,19 +15,30 @@
 namespace SLRSceneGraph {
     Node::~Node() {
         if (m_rawData)
-            delete m_rawData;
+            free(m_rawData);
     }
     
     
     
+    void InternalNode::allocateRawData() {
+        m_rawData = (SLR::Node*)malloc(sizeof(SLR::InternalNode));
+    }
+    
     void InternalNode::setupRawData() {
-        m_rawData = new SLR::InternalNode();
-        ((SLR::InternalNode*)m_rawData)->setTransform(m_localToWorld.get());
+        new (m_rawData) SLR::InternalNode(m_localToWorld.get());
+        m_setup = true;
+    }
+    
+    void InternalNode::terminateRawData() {
+        SLR::InternalNode &raw = *(SLR::InternalNode*)m_rawData;
+        if (m_setup)
+            raw.~InternalNode();
+        m_setup = false;
     }
     
     InternalNode::InternalNode(const TransformRef &localToWorld) :
     m_localToWorld(localToWorld) {
-        setupRawData();
+        allocateRawData();
     }
     
     bool InternalNode::addChildNode(const NodeRef &node) {
@@ -52,7 +63,6 @@ namespace SLRSceneGraph {
             }
         }
         m_childNodes.push_back(node);
-        ((SLR::InternalNode*)m_rawData)->addChildNode(node->getRaw());
         return true;
     }
     
@@ -66,7 +76,6 @@ namespace SLRSceneGraph {
     
     void InternalNode::setTransform(const TransformRef &tf) {
         m_localToWorld = tf;
-        ((SLR::InternalNode*)m_rawData)->setTransform(tf.get());
     }
     
     const TransformRef InternalNode::getTransform() const {
@@ -97,10 +106,13 @@ namespace SLRSceneGraph {
     }
     
     void InternalNode::prepareForRendering() {
-        SLR::InternalNode &raw = *(SLR::InternalNode*)m_rawData;
-        raw.setTransform(m_localToWorld.get());
+        terminateRawData();
+        setupRawData();
+        
+        SLR::InternalNode &raw = *(SLR::InternalNode*)getRaw();
         for (int i = 0; i < m_childNodes.size(); ++i) {
             m_childNodes[i]->prepareForRendering();
+            raw.addChildNode(m_childNodes[i]->getRaw());
         }
     }
     
@@ -136,12 +148,24 @@ namespace SLRSceneGraph {
     
     
     
+    void ReferenceNode::allocateRawData() {
+        m_rawData = (SLR::Node*)malloc(sizeof(SLR::ReferenceNode));
+    }
+    
     void ReferenceNode::setupRawData() {
-        m_rawData = new SLR::ReferenceNode(m_node->getRaw());
+        new (m_rawData) SLR::ReferenceNode(m_node->getRaw());
+        m_setup = true;
+    }
+    
+    void ReferenceNode::terminateRawData() {
+        SLR::ReferenceNode &raw = *(SLR::ReferenceNode*)m_rawData;
+        if (m_setup)
+            raw.~ReferenceNode();
+        m_setup = false;
     }
     
     ReferenceNode::ReferenceNode(const NodeRef &node) : m_node(node) {
-        setupRawData();
+        allocateRawData();
     }
     
     NodeRef ReferenceNode::copy() const {
@@ -150,8 +174,8 @@ namespace SLRSceneGraph {
     }
     
     void ReferenceNode::prepareForRendering() {
-        SLR::ReferenceNode &raw = *(SLR::ReferenceNode*)m_rawData;
-        (void)raw;
+        terminateRawData();
+        setupRawData();
         m_node->prepareForRendering();
     }
 }

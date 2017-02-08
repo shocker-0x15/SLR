@@ -20,7 +20,13 @@ namespace SLR {
         ImageSpectrumTexture(const TiledImage2D* image, const Texture2DMapping* mapping) :
         m_data(image), m_mapping(mapping) { }
         
-        SampledSpectrum evaluate(const SurfacePoint &surfPt, const WavelengthSamples &wls) const override;
+        SampledSpectrum evaluate(const Point3D &p, const WavelengthSamples &wls) const;
+        SampledSpectrum evaluate(const SurfacePoint &surfPt, const WavelengthSamples &wls) const override {
+            return evaluate(m_mapping->map(surfPt), wls);
+        }
+        SampledSpectrum evaluate(const MediumPoint &medPt, const WavelengthSamples &wls) const override {
+            return evaluate(m_mapping->map(medPt), wls);
+        }
         RegularConstantContinuous2D* createIBLImportanceMap() const override;
     };
     
@@ -31,7 +37,13 @@ namespace SLR {
         ImageNormal3DTexture(const TiledImage2D* image, const Texture2DMapping* mapping) :
         m_data(image), m_mapping(mapping) { }
         
-        Normal3D evaluate(const SurfacePoint &surfPt) const override;
+        Normal3D evaluate(const Point3D &p) const ;
+        Normal3D evaluate(const SurfacePoint &surfPt) const override {
+            return evaluate(m_mapping->map(surfPt));
+        }
+        Normal3D evaluate(const MediumPoint &medPt) const override {
+            return evaluate(m_mapping->map(medPt));
+        }
     };
     
     class SLR_API ImageFloatTexture : public FloatTexture {
@@ -41,7 +53,13 @@ namespace SLR {
         ImageFloatTexture(const TiledImage2D* image, const Texture2DMapping* mapping) :
         m_data(image), m_mapping(mapping) { }
         
-        float evaluate(const SurfacePoint &surfPt) const override;
+        float evaluate(const Point3D &p) const;
+        float evaluate(const SurfacePoint &surfPt) const override {
+            return evaluate(m_mapping->map(surfPt));
+        }
+        float evaluate(const MediumPoint &medPt) const override {
+            return evaluate(m_mapping->map(medPt));
+        }
     };
 }
 
