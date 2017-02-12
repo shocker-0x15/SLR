@@ -11,6 +11,7 @@
 #include "../Memory/ArenaAllocator.h"
 #include "../Core/medium_material.h"
 #include "../Core/light_path_samplers.h"
+#include "../Core/SurfaceObject.h"
 #include "../Accelerator/StandardBVH.h"
 #include "../Accelerator/SBVH.h"
 #include "../Accelerator/QBVH.h"
@@ -150,6 +151,64 @@ namespace SLR {
         SampledSpectrum ret = m_medObj->evaluateTransmittance(localRay, distanceLimit, wls, pathSampler, singleWavelength);
         ray.distMin = distanceLimit;
         return ret;
+    }
+    
+    
+    
+    BoundingBox3D EnclosedMediumObject::bounds() const {
+        return intersection(m_boundary->bounds(), m_medToSurfTF * m_medObj->bounds());
+    }
+    
+    bool EnclosedMediumObject::contains(const Point3D &p, float time) const {
+        if (!m_medObj->contains(p, time))
+            return false;
+        
+        Point3D pInSurf = m_medToSurfTF * p;
+        return m_boundary->contains(pInSurf, time);
+    }
+    
+    bool EnclosedMediumObject::intersectBoundary(const Ray &ray, float* distToBoundary, bool* enter) const {
+        SurfaceInteraction si;
+        Ray r = m_medToSurfTF * ray;
+        bool hit = m_boundary->intersect(r, &si);
+        if (!hit)
+            return false;
+        float distToSurf = si.getDistance();
+        bool enterToSurf = dot(si.getGeometricNormal(), r.dir) < 0.0f;
+        
+        float distToRawMed;
+        bool enterToRawMed;
+        hit = m_medObj->intersectBoundary(ray, &distToRawMed, &enterToRawMed);
+        if (!hit)
+            return false;
+        
+        if (enterToSurf && enterToRawMed) {
+            *distToBoundary = std::max(distToSurf, distToRawMed);
+            *enter = true;
+        }
+        else if (enterToSurf && !enterToRawMed) {
+            *distToBoundary = std::min(distToSurf, distToRawMed);
+            *enter = true;
+        }
+        else if (!enterToSurf && enterToRawMed) {
+            *distToBoundary = std::min(distToSurf, distToRawMed);
+            *enter = true;
+        }
+        else {
+            *distToBoundary = std::min(distToSurf, distToRawMed);
+            *enter = false;
+        }
+        
+        return true;
+    }
+    
+    bool EnclosedMediumObject::interact(Ray &ray, float distanceLimit, const WavelengthSamples &wls, LightPathSampler &pathSampler,
+                                        MediumInteraction* mi, SampledSpectrum* medThroughput, bool* singleWavelength) const {
+        return m_medObj->interact(ray, distanceLimit, wls, pathSampler, mi, medThroughput, singleWavelength);
+    }
+    
+    SampledSpectrum EnclosedMediumObject::evaluateTransmittance(Ray &ray, float distanceLimit, const WavelengthSamples &wls, LightPathSampler &pathSampler, bool* singleWavelength) const {
+        return m_medObj->evaluateTransmittance(ray, distanceLimit, wls, pathSampler, singleWavelength);
     }
     
     

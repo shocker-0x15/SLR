@@ -150,6 +150,37 @@ namespace SLR {
     
     
     
+    class SLR_API EnclosedMediumObject : public MediumObject {
+        const MediumObject* m_medObj;
+        const SurfaceObject* m_boundary;
+        const StaticTransform m_medToSurfTF;
+    public:
+        EnclosedMediumObject(const MediumObject* medObj, const SurfaceObject* boundary, const StaticTransform medToSurfTF) :
+        m_medObj(medObj), m_boundary(boundary), m_medToSurfTF(medToSurfTF) { }
+        
+        //----------------------------------------------------------------
+        // Object's methods
+        BoundingBox3D bounds() const override;
+        //----------------------------------------------------------------
+        
+        //----------------------------------------------------------------
+        // MediumObject's methods
+        bool isEmitting() const override { return m_medObj->isEmitting(); }
+        float importance() const override { return m_medObj->importance(); }
+        void selectLight(float u, float time, VolumetricLight* light, float* prob) const override {
+            m_medObj->selectLight(u, time, light, prob);
+        }
+        
+        bool contains(const Point3D &p, float time) const override;
+        bool intersectBoundary(const Ray &ray, float* distToBoundary, bool* enter) const override;
+        bool interact(Ray &ray, float distanceLimit, const WavelengthSamples &wls, LightPathSampler &pathSampler,
+                      MediumInteraction* mi, SampledSpectrum* medThroughput, bool* singleWavelength) const override;
+        SampledSpectrum evaluateTransmittance(Ray &ray, float distanceLimit, const WavelengthSamples &wls, LightPathSampler &pathSampler, bool* singleWavelength) const override;
+        //----------------------------------------------------------------
+    };
+    
+    
+    
     class SLR_API MediumObjectAggregate : public MediumObject {
 //        Accelerator* m_accelerator;
         BoundingBox3D m_bounds;

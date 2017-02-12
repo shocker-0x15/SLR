@@ -14,6 +14,17 @@
 #include <libSLR/Core/geometry.h>
 
 namespace SLRSceneGraph {
+    class SLR_SCENEGRAPH_API SurfaceNode : public Node {
+    protected:
+        MediumNodeRef m_enclosedMediumNode;
+    public:
+        void setInternalMedium(const MediumNodeRef &medium) {
+            m_enclosedMediumNode = medium;
+        }
+    };
+    
+    
+    
     // There is a possibility to define a unique vertex format suitable for editing.
     // Current implementation uses the vertex for rendering as is.
     typedef SLR::Vertex Vertex;
@@ -24,7 +35,7 @@ namespace SLRSceneGraph {
         Triangle(uint64_t v0, uint64_t v1, uint64_t v2) : vIdx{v0, v1, v2} {}
     };
     
-    class SLR_SCENEGRAPH_API TriangleMeshNode : public Node {
+    class SLR_SCENEGRAPH_API TriangleMeshNode : public SurfaceNode {
     public:
         struct MaterialGroup {
             SurfaceMaterialRef material;
@@ -35,6 +46,7 @@ namespace SLRSceneGraph {
     private:
         std::vector<Vertex> m_vertices;
         std::vector<MaterialGroup> m_matGroups;
+        bool m_onlyForBoundary;
         
         void allocateRawData() override;
         void setupRawData() override;
@@ -44,6 +56,9 @@ namespace SLRSceneGraph {
         
         uint64_t addVertex(const SLR::Vertex &v);
         void addTriangles(const SurfaceMaterialRef &mat, const Normal3DTextureRef &normalMap, const FloatTextureRef &alphaMap, const std::vector<Triangle> &&triangles);
+        void useOnlyForBoundary(bool b) {
+            m_onlyForBoundary = b;
+        }
         
         NodeRef copy() const override;
         

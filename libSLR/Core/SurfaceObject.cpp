@@ -280,6 +280,13 @@ namespace SLR {
         light->applyTransformFromLeft(tf);
     }
     
+    bool TransformedSurfaceObject::contains(const Point3D &p, float time) const {
+        StaticTransform sampledTF;
+        m_transform->sample(time, &sampledTF);
+        Point3D localP = invert(sampledTF) * p;
+        return m_surfObj->contains(localP, time);
+    }
+    
     bool TransformedSurfaceObject::intersect(Ray &ray, SurfaceInteraction* si) const {
 #ifdef DEBUG
         if (Accelerator::traceTraverse) {
@@ -374,6 +381,16 @@ namespace SLR {
     
     float SurfaceObjectAggregate::costForIntersect() const {
         return m_accelerator->costForIntersect();
+    }
+    
+    bool SurfaceObjectAggregate::contains(const Point3D &p, float time) const {
+        Ray probeRay(p, Vector3D::Ex, time);
+        SurfaceInteraction si;
+        uint32_t closestIndex;
+        bool hit = m_accelerator->intersect(probeRay, &si, &closestIndex);
+        if (!hit)
+            return false;
+        return dot(si.getGeometricNormal(), probeRay.dir) >= 0.0f;
     }
     
     bool SurfaceObjectAggregate::intersect(Ray &ray, SurfaceInteraction* si) const {

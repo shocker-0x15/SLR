@@ -14,7 +14,24 @@
 #include "../Surface/TriangleMesh.h"
 
 namespace SLR {
-    class SLR_API TriangleMeshNode : public Node {
+    class SLR_API SurfaceNode : public Node {
+    protected:
+        MediumNode* m_enclosedMediumNode;
+        SurfaceObject* m_boundarySurfObj;
+        MediumObject* m_enclosedMedObj;
+        Transform* m_mediumTransform;
+        TransformedMediumObject* m_TFMedObj;
+    public:
+        SurfaceNode() : m_enclosedMediumNode(nullptr), m_boundarySurfObj(nullptr), m_enclosedMedObj(nullptr), m_mediumTransform(nullptr), m_TFMedObj(nullptr) { }
+        
+        void setInternalMedium(MediumNode* medium) {
+            m_enclosedMediumNode = medium;
+        }
+    };
+    
+    
+    
+    class SLR_API TriangleMeshNode : public SurfaceNode {
     public:
         class MaterialGroup {
             friend class TriangleMeshNode;
@@ -44,10 +61,11 @@ namespace SLR {
         uint32_t m_numVertices;
         std::unique_ptr<MaterialGroup[]> m_matGroups;
         uint32_t m_numMatGroups;
+        bool m_onlyForBoundary;
         
         std::vector<SurfaceObject*> m_objs;
     public:
-        TriangleMeshNode() : m_vertices(nullptr) { }
+        TriangleMeshNode(bool onlyForBoundary) : m_vertices(nullptr), m_onlyForBoundary(onlyForBoundary) { }
         ~TriangleMeshNode() { }
         
         void setVertices(std::unique_ptr<Vertex[]> &vertices, uint32_t numVertices);

@@ -742,7 +742,7 @@ namespace SLRSceneGraph {
                                                        mesh->addTriangles(resultMatGroup.material, resultMatGroup.normalMap, resultMatGroup.alphaMap, std::move(resultMatGroup.triangles));
                                                    }
                                                    
-                                                   return Element::createFromReference<TypeMap::Node>(mesh);
+                                                   return Element::createFromReference<TypeMap::SurfaceNode>(mesh);
                                                }
                                                );
             stack["createHomogeneousMedium"] =
@@ -754,8 +754,8 @@ namespace SLRSceneGraph {
                                                    InputSpectrumRef sigma_s = args.at("sigma_s").rawRef<TypeMap::Spectrum>();
                                                    InputSpectrumRef sigma_e = args.at("sigma_e").rawRef<TypeMap::Spectrum>();
                                                    MediumMaterialRef mat = args.at("mat").rawRef<TypeMap::MediumMaterial>();
-                                                   NodeRef mediumNode = createShared<HomogeneousMediumNode>(SLR::BoundingBox3D(minP, maxP), sigma_s, sigma_e, mat);
-                                                   return Element::createFromReference<TypeMap::Node>(mediumNode);
+                                                   MediumNodeRef mediumNode = createShared<HomogeneousMediumNode>(SLR::BoundingBox3D(minP, maxP), sigma_s, sigma_e, mat);
+                                                   return Element::createFromReference<TypeMap::MediumNode>(mediumNode);
                                                }
                                                );
             stack["createNode"] =
@@ -803,123 +803,43 @@ namespace SLRSceneGraph {
                                                    return Element();
                                                }
                                                );
+            stack["setInternalMedium"] =
+            Element::create<TypeMap::Function>(1,
+                                               std::vector<ArgInfo>{{"surface", Type::SurfaceNode}, {"medium", Type::MediumNode}},
+                                               [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
+                                                   SurfaceNodeRef surface = args.at("surface").rawRef<TypeMap::SurfaceNode>();
+                                                   MediumNodeRef medium = args.at("medium").rawRef<TypeMap::MediumNode>();
+                                                   surface->setInternalMedium(medium);
+                                                   return Element();
+                                               }
+                                               );
             stack["load3DModel"] =
             Element::create<TypeMap::Function>(1,
-                                               std::vector<ArgInfo>{{"path", Type::String}, {"matProc", Type::Function, Element::createFromReference<TypeMap::Function>(nullptr)}},
+                                               std::vector<ArgInfo>{
+                                                   {"path", Type::String},
+                                                   {"matProc", Type::Function, Element::createFromReference<TypeMap::Function>(nullptr)},
+                                                   {"meshProc", Type::Function, Element::createFromReference<TypeMap::Function>(nullptr)}},
                                                [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
                                                    std::string path = context.absFileDirPath + args.at("path").raw<TypeMap::String>();
-                                                   std::string pathPrefix = path.substr(0, path.find_last_of("/") + 1);
                                                    auto userMatProcRef = args.at("matProc").rawRef<TypeMap::Function>();
+                                                   auto meshProcRef = args.at("meshProc").rawRef<TypeMap::Function>();
                                                    
                                                    CreateMaterialFunction matProc = createMaterialDefaultFunction;
                                                    if (userMatProcRef) {
-                                                       const Function &userMatProc = *userMatProcRef.get();
-                                                       matProc = [&pathPrefix, &userMatProc, &context, &err](const aiMaterial* aiMat, const std::string &pathPrefix, SLR::Allocator* mem) {
-                                                           using namespace SLR;
-                                                           aiString aiStr;
-                                                           float color[3];
-                                                           
-                                                           aiMat->Get(AI_MATKEY_NAME, aiStr);
-                                                           Element matName = Element::create<TypeMap::String>(std::string(aiStr.C_Str()));
-                                                           Element matAttrs = Element::create<TypeMap::Tuple>();
-                                                           
-                                                           auto &attrs = matAttrs.raw<TypeMap::Tuple>();
-#ifdef SLR_Platform_Windows_MSVC
-                                                           FuncGetPathElement getPathElement{ pathPrefix };
-#else
-                                                           auto getPathElement = [&pathPrefix](const aiString &str) {
-                                                               return Element::create<TypeMap::String>(pathPrefix + std::string(str.C_Str()));
-                                                           };
-#endif
-                                                           auto getRGBElement = [](const float* RGB) {
-                                                               ParameterListRef values = createShared<ParameterList>();
-                                                               values->add("", Element(RGB[0]));
-                                                               values->add("", Element(RGB[1]));
-                                                               values->add("", Element(RGB[2]));
-                                                               return Element::createFromReference<TypeMap::Tuple>(values);
-                                                           };
-                                                           
-                                                           Element diffuseTexturesElement = Element::create<TypeMap::Tuple>();
-                                                           auto &diffuseTextures = diffuseTexturesElement.raw<TypeMap::Tuple>();
-                                                           for (int i = 0; i < aiMat->GetTextureCount(aiTextureType_DIFFUSE); ++i) {
-                                                               if (aiMat->Get(AI_MATKEY_TEXTURE_DIFFUSE(i), aiStr) == aiReturn_SUCCESS)
-                                                                   diffuseTextures.add("", getPathElement(aiStr));
-                                                           }
-                                                           attrs.add("diffuse textures", diffuseTexturesElement);
-                                                           
-                                                           Element specularTexturesElement = Element::create<TypeMap::Tuple>();
-                                                           auto &specularTextures = specularTexturesElement.raw<TypeMap::Tuple>();
-                                                           for (int i = 0; i < aiMat->GetTextureCount(aiTextureType_SPECULAR); ++i) {
-                                                               if (aiMat->Get(AI_MATKEY_TEXTURE_SPECULAR(i), aiStr) == aiReturn_SUCCESS)
-                                                                   specularTextures.add("", getPathElement(aiStr));
-                                                           }
-                                                           attrs.add("specular textures", specularTexturesElement);
-                                                           
-                                                           Element emissiveTexturesElement = Element::create<TypeMap::Tuple>();
-                                                           auto &emissiveTextures = emissiveTexturesElement.raw<TypeMap::Tuple>();
-                                                           for (int i = 0; i < aiMat->GetTextureCount(aiTextureType_EMISSIVE); ++i) {
-                                                               if (aiMat->Get(AI_MATKEY_TEXTURE_EMISSIVE(i), aiStr) == aiReturn_SUCCESS)
-                                                                   emissiveTextures.add("", getPathElement(aiStr));
-                                                           }
-                                                           attrs.add("emissive textures", emissiveTexturesElement);
-                                                           
-                                                           Element heightTexturesElement = Element::create<TypeMap::Tuple>();
-                                                           auto &heightTextures = heightTexturesElement.raw<TypeMap::Tuple>();
-                                                           for (int i = 0; i < aiMat->GetTextureCount(aiTextureType_HEIGHT); ++i) {
-                                                               if (aiMat->Get(AI_MATKEY_TEXTURE_HEIGHT(i), aiStr) == aiReturn_SUCCESS)
-                                                                   heightTextures.add("", getPathElement(aiStr));
-                                                           }
-                                                           attrs.add("height textures", heightTexturesElement);
-                                                           
-                                                           Element normalTexturesElement = Element::create<TypeMap::Tuple>();
-                                                           auto &normalTextures = normalTexturesElement.raw<TypeMap::Tuple>();
-                                                           for (int i = 0; i < aiMat->GetTextureCount(aiTextureType_NORMALS); ++i) {
-                                                               if (aiMat->Get(AI_MATKEY_TEXTURE_NORMALS(i), aiStr) == aiReturn_SUCCESS)
-                                                                   normalTextures.add("", getPathElement(aiStr));
-                                                           }
-                                                           attrs.add("normal textures", normalTexturesElement);
-                                                           
-                                                           if (aiMat->Get(AI_MATKEY_COLOR_DIFFUSE, color, nullptr) == aiReturn_SUCCESS)
-                                                               attrs.add("diffuse color", getRGBElement(color));
-                                                           
-                                                           if (aiMat->Get(AI_MATKEY_COLOR_SPECULAR, color, nullptr) == aiReturn_SUCCESS)
-                                                               attrs.add("specular color", getRGBElement(color));
-                                                           
-                                                           if (aiMat->Get(AI_MATKEY_COLOR_EMISSIVE, color, nullptr) == aiReturn_SUCCESS)
-                                                               attrs.add("emissive color", getRGBElement(color));
-                                                           
-                                                           ParameterList params;
-                                                           params.add("", matName);
-                                                           params.add("", matAttrs);
-                                                           Element result = userMatProc(params, context, err);
-                                                           if (result.type == Type::Tuple) {
-                                                               const ParameterList &tuple = result.raw<TypeMap::Tuple>();
-                                                               const Element &eMat = tuple(0);
-                                                               const Element &eNormalMap = tuple(1);
-                                                               const Element &eAlphaMap = tuple(2);
-                                                               if (eMat.type == Type::SurfaceMaterial) {
-                                                                   SurfaceMaterialRef mat = eMat.rawRef<TypeMap::SurfaceMaterial>();
-                                                                   Normal3DTextureRef normalMap;
-                                                                   if (eNormalMap.type == Type::NormalTexture)
-                                                                       normalMap = eNormalMap.rawRef<TypeMap::NormalTexture>();
-                                                                   FloatTextureRef alphaMap;
-                                                                   if (eAlphaMap.type == Type::FloatTexture)
-                                                                       alphaMap = eAlphaMap.rawRef<TypeMap::FloatTexture>();
-                                                                   
-                                                                   return SurfaceAttributeTuple(mat, normalMap, alphaMap);
-                                                               }
-                                                           }
-                                                           else if (result.type == Type::SurfaceMaterial) {
-                                                               return SurfaceAttributeTuple(result.rawRef<TypeMap::SurfaceMaterial>(), nullptr, nullptr);
-                                                           }
-                                                           
-                                                           printf("User defined material function is invalid, fall back to the default function.\n");
-                                                           return createMaterialDefaultFunction(aiMat, pathPrefix, mem);
+                                                       matProc = [&userMatProcRef, &context, &err](const aiMaterial* aiMat, const std::string &pathPrefix, SLR::Allocator* mem) {
+                                                           return createMaterialFunction(*userMatProcRef.get(), context, err, aiMat, pathPrefix, mem);
+                                                       };
+                                                   }
+                                                   
+                                                   MeshCallback meshCallback = meshCallbackDefaultFunction;
+                                                   if (meshProcRef) {
+                                                       meshCallback = [&meshProcRef, &context, &err](const std::string &name, const TriangleMeshNodeRef &mesh, const SLR::Point3D &minP, const SLR::Point3D &maxP) {
+                                                           return meshCallbackFunction(*meshProcRef.get(), context, err, name, mesh, minP, maxP);
                                                        };
                                                    }
                                                    
                                                    InternalNodeRef modelNode;
-                                                   construct(path, modelNode, matProc);
+                                                   construct(path, modelNode, matProc, meshCallback);
                                                    if (!modelNode) {
                                                        *err = ErrorMessage("Some errors occur during loading a 3D model.");
                                                        return Element();

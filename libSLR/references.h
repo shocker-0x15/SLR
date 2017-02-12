@@ -139,7 +139,6 @@ namespace SLR {
     class AchromaticExtinctionGridMedium;
     class GridMedium;
     class SubGridMedium;
-    class EnclosedMedium;
     
     class Object;
     
@@ -165,6 +164,7 @@ namespace SLR {
     class MediumObject;
     class SingleMediumObject;
     class TransformedMediumObject;
+    class EnclosedMediumObject;
     class MediumObjectAggregate;
     
     // Cameras
@@ -293,7 +293,9 @@ namespace SLR {
     class InfiniteSphereNode;
     class PerspectiveCameraNode;
     class EquirectangularCameraNode;
+    class SurfaceNode;
     class TriangleMeshNode;
+    class MediumNode;
     class HomogeneousMediumNode;
     class GridMediumNode;
     class Scene;

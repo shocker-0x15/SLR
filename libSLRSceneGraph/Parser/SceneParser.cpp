@@ -909,6 +909,24 @@ namespace SLRSceneGraph {
                 };
             }
             
+            // SurfaceNode
+            {
+                TypeInfo &info = infos[(uint32_t)Type::SurfaceNode];
+                
+                info.convertFunctions[Type::Node] = [](const Element &elemFrom) {
+                    return Element::createFromReference<TypeMap::Node>(elemFrom.rawRef<TypeMap::Node>());
+                };
+            }
+            
+            // MediumNode
+            {
+                TypeInfo &info = infos[(uint32_t)Type::MediumNode];
+                
+                info.convertFunctions[Type::Node] = [](const Element &elemFrom) {
+                    return Element::createFromReference<TypeMap::Node>(elemFrom.rawRef<TypeMap::Node>());
+                };
+            }
+            
             initialized = true;
         }
     }

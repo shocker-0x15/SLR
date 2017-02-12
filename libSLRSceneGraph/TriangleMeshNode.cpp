@@ -8,6 +8,7 @@
 #include "TriangleMeshNode.h"
 #include "textures.hpp"
 #include "surface_materials.hpp"
+#include "medium_nodes.h"
 #include <libSLR/Core/Transform.h>
 #include <libSLR/Core/SurfaceObject.h>
 #include <libSLR/Surface/TriangleMesh.h>
@@ -19,7 +20,7 @@ namespace SLRSceneGraph {
     }
     
     void TriangleMeshNode::setupRawData() {
-        new (m_rawData) SLR::TriangleMeshNode();
+        new (m_rawData) SLR::TriangleMeshNode(m_onlyForBoundary);
         m_setup = true;
     }
     
@@ -30,7 +31,7 @@ namespace SLRSceneGraph {
         m_setup = false;
     }
     
-    TriangleMeshNode::TriangleMeshNode() {
+    TriangleMeshNode::TriangleMeshNode() : m_onlyForBoundary(false) {
         allocateRawData();
     }
 
@@ -117,5 +118,10 @@ namespace SLRSceneGraph {
         std::unique_ptr<SLR::TriangleMeshNode::MaterialGroup[]> matGroupsHolder(matGroups);
         raw.setVertices(verticesHolder, numVertices);
         raw.setMaterialGroups(matGroupsHolder, numMatGroups);
+        
+        if (m_enclosedMediumNode) {
+            m_enclosedMediumNode->prepareForRendering();
+            raw.setInternalMedium((SLR::MediumNode*)m_enclosedMediumNode->getRaw());
+        }
     }
 }

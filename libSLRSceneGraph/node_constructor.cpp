@@ -35,7 +35,7 @@ inline void makeTangent(RealType nx, RealType ny, RealType nz, RealType* s) {
 namespace SLRSceneGraph {
     static void recursiveConstruct(const aiScene* objSrc, const aiNode* nodeSrc,
                                    const std::vector<SurfaceMaterialRef> &materials, const std::vector<Normal3DTextureRef> &normalMaps, const std::vector<FloatTextureRef> &alphaMaps,
-                                   InternalNodeRef &nodeOut) {
+                                   const MeshCallback &meshCallback, InternalNodeRef &nodeOut) {
         if (nodeSrc->mNumMeshes == 0 && nodeSrc->mNumChildren == 0) {
             nodeOut = nullptr;
             return;
@@ -82,28 +82,36 @@ namespace SLRSceneGraph {
                 surfMesh->addVertex(outVtx);
             }
             
+            SLR::BoundingBox3D bbox;
             meshIndices.clear();
             for (int f = 0; f < mesh->mNumFaces; ++f) {
                 const aiFace &face = mesh->mFaces[f];
                 meshIndices.emplace_back(face.mIndices[0], face.mIndices[1], face.mIndices[2]);
+                
+                const aiVector3D &p = mesh->mVertices[face.mIndices[0]];
+                bbox.unify(SLR::Point3D(p.x, p.y, p.z));
             }
             surfMesh->addTriangles(surfMat, normalMap, alphaMap, std::move(meshIndices));
             
             surfMesh->setName(mesh->mName.C_Str());
+            
+            bool render = meshCallback(surfMesh->getName(), surfMesh, bbox.minP, bbox.maxP);
+            surfMesh->useOnlyForBoundary(!render);
+            
             nodeOut->addChildNode(surfMesh);
         }
         
         if (nodeSrc->mNumChildren) {
             for (int c = 0; c < nodeSrc->mNumChildren; ++c) {
                 InternalNodeRef subNode;
-                recursiveConstruct(objSrc, nodeSrc->mChildren[c], materials, normalMaps, alphaMaps, subNode);
+                recursiveConstruct(objSrc, nodeSrc->mChildren[c], materials, normalMaps, alphaMaps, meshCallback, subNode);
                 if (subNode != nullptr)
                     nodeOut->addChildNode(subNode);
             }
         }
     }
     
-    SLR_SCENEGRAPH_API SurfaceAttributeTuple createMaterialDefaultFunction(const aiMaterial* aiMat, const std::string &pathPrefix, SLR::Allocator* mem) {
+    SurfaceAttributeTuple createMaterialDefaultFunction(const aiMaterial* aiMat, const std::string &pathPrefix, SLR::Allocator* mem) {
         using namespace SLR;
         aiReturn ret;
         (void)ret;
@@ -145,7 +153,149 @@ namespace SLRSceneGraph {
         return SurfaceAttributeTuple(mat, normalTex, alphaTex);
     }
     
-    SLR_SCENEGRAPH_API void construct(const std::string &filePath, InternalNodeRef &nodeOut, const CreateMaterialFunction &materialFunc) {
+    SurfaceAttributeTuple createMaterialFunction(const Function &userMatProc, ExecuteContext &context, ErrorMessage* err,
+                                                 const aiMaterial* aiMat, const std::string &pathPrefix, SLR::Allocator* mem) {
+        using namespace SLR;
+        aiString aiStr;
+        float color[3];
+        
+        aiMat->Get(AI_MATKEY_NAME, aiStr);
+        Element matName = Element::create<TypeMap::String>(std::string(aiStr.C_Str()));
+        Element matAttrs = Element::create<TypeMap::Tuple>();
+        
+        auto &attrs = matAttrs.raw<TypeMap::Tuple>();
+#ifdef SLR_Platform_Windows_MSVC
+        FuncGetPathElement getPathElement{ pathPrefix };
+#else
+        auto getPathElement = [&pathPrefix](const aiString &str) {
+            return Element::create<TypeMap::String>(pathPrefix + std::string(str.C_Str()));
+        };
+#endif
+        auto getRGBElement = [](const float* RGB) {
+            ParameterListRef values = createShared<ParameterList>();
+            values->add("", Element(RGB[0]));
+            values->add("", Element(RGB[1]));
+            values->add("", Element(RGB[2]));
+            return Element::createFromReference<TypeMap::Tuple>(values);
+        };
+        
+        Element diffuseTexturesElement = Element::create<TypeMap::Tuple>();
+        auto &diffuseTextures = diffuseTexturesElement.raw<TypeMap::Tuple>();
+        for (int i = 0; i < aiMat->GetTextureCount(aiTextureType_DIFFUSE); ++i) {
+            if (aiMat->Get(AI_MATKEY_TEXTURE_DIFFUSE(i), aiStr) == aiReturn_SUCCESS)
+                diffuseTextures.add("", getPathElement(aiStr));
+        }
+        attrs.add("diffuse textures", diffuseTexturesElement);
+        
+        Element specularTexturesElement = Element::create<TypeMap::Tuple>();
+        auto &specularTextures = specularTexturesElement.raw<TypeMap::Tuple>();
+        for (int i = 0; i < aiMat->GetTextureCount(aiTextureType_SPECULAR); ++i) {
+            if (aiMat->Get(AI_MATKEY_TEXTURE_SPECULAR(i), aiStr) == aiReturn_SUCCESS)
+                specularTextures.add("", getPathElement(aiStr));
+        }
+        attrs.add("specular textures", specularTexturesElement);
+        
+        Element emissiveTexturesElement = Element::create<TypeMap::Tuple>();
+        auto &emissiveTextures = emissiveTexturesElement.raw<TypeMap::Tuple>();
+        for (int i = 0; i < aiMat->GetTextureCount(aiTextureType_EMISSIVE); ++i) {
+            if (aiMat->Get(AI_MATKEY_TEXTURE_EMISSIVE(i), aiStr) == aiReturn_SUCCESS)
+                emissiveTextures.add("", getPathElement(aiStr));
+        }
+        attrs.add("emissive textures", emissiveTexturesElement);
+        
+        Element heightTexturesElement = Element::create<TypeMap::Tuple>();
+        auto &heightTextures = heightTexturesElement.raw<TypeMap::Tuple>();
+        for (int i = 0; i < aiMat->GetTextureCount(aiTextureType_HEIGHT); ++i) {
+            if (aiMat->Get(AI_MATKEY_TEXTURE_HEIGHT(i), aiStr) == aiReturn_SUCCESS)
+                heightTextures.add("", getPathElement(aiStr));
+        }
+        attrs.add("height textures", heightTexturesElement);
+        
+        Element normalTexturesElement = Element::create<TypeMap::Tuple>();
+        auto &normalTextures = normalTexturesElement.raw<TypeMap::Tuple>();
+        for (int i = 0; i < aiMat->GetTextureCount(aiTextureType_NORMALS); ++i) {
+            if (aiMat->Get(AI_MATKEY_TEXTURE_NORMALS(i), aiStr) == aiReturn_SUCCESS)
+                normalTextures.add("", getPathElement(aiStr));
+        }
+        attrs.add("normal textures", normalTexturesElement);
+        
+        if (aiMat->Get(AI_MATKEY_COLOR_DIFFUSE, color, nullptr) == aiReturn_SUCCESS)
+            attrs.add("diffuse color", getRGBElement(color));
+        
+        if (aiMat->Get(AI_MATKEY_COLOR_SPECULAR, color, nullptr) == aiReturn_SUCCESS)
+            attrs.add("specular color", getRGBElement(color));
+        
+        if (aiMat->Get(AI_MATKEY_COLOR_EMISSIVE, color, nullptr) == aiReturn_SUCCESS)
+            attrs.add("emissive color", getRGBElement(color));
+        
+        ParameterList params;
+        params.add("", matName);
+        params.add("", matAttrs);
+        
+        // perform the user-defined material create function.
+        Element result = userMatProc(params, context, err);
+        if (err->error) {
+            
+        }
+        
+        if (result.type == Type::Tuple) {
+            const ParameterList &tuple = result.raw<TypeMap::Tuple>();
+            const Element &eMat = tuple(0);
+            const Element &eNormalMap = tuple(1);
+            const Element &eAlphaMap = tuple(2);
+            if (eMat.type == Type::SurfaceMaterial) {
+                SurfaceMaterialRef mat = eMat.rawRef<TypeMap::SurfaceMaterial>();
+                Normal3DTextureRef normalMap;
+                if (eNormalMap.type == Type::NormalTexture)
+                    normalMap = eNormalMap.rawRef<TypeMap::NormalTexture>();
+                FloatTextureRef alphaMap;
+                if (eAlphaMap.type == Type::FloatTexture)
+                    alphaMap = eAlphaMap.rawRef<TypeMap::FloatTexture>();
+                
+                return SurfaceAttributeTuple(mat, normalMap, alphaMap);
+            }
+        }
+        else if (result.type == Type::SurfaceMaterial) {
+            return SurfaceAttributeTuple(result.rawRef<TypeMap::SurfaceMaterial>(), nullptr, nullptr);
+        }
+        
+        printf("User defined material function is invalid, fall back to the default function.\n");
+        return createMaterialDefaultFunction(aiMat, pathPrefix, mem);
+    }
+    
+    bool meshCallbackDefaultFunction(const std::string &name, const TriangleMeshNodeRef &mesh, const SLR::Point3D &minP, const SLR::Point3D &maxP) {
+        return true;
+    }
+    
+    bool meshCallbackFunction(const Function &meshProc, ExecuteContext &context, ErrorMessage* err,
+                              const std::string &name, const TriangleMeshNodeRef &mesh, const SLR::Point3D &minP, const SLR::Point3D &maxP) {
+        Element elName = Element::create<TypeMap::String>(name);
+        Element elMesh = Element::createFromReference<TypeMap::SurfaceNode>(mesh);
+        Element elMinP = Element::create<TypeMap::Point>(minP);
+        Element elMaxP = Element::create<TypeMap::Point>(maxP);
+        
+        ParameterList params;
+        params.add("", elName);
+        params.add("", elMesh);
+        params.add("", elMinP);
+        params.add("", elMaxP);
+        
+        // perform the user-defined mesh callback function.
+        Element result = meshProc(params, context, err);
+        if (err->error) {
+            
+        }
+        
+        if (result.type == Type::Bool) {
+            return result.asRaw<TypeMap::Bool>();
+        }
+        
+        printf("User defined mesh callback function is invalid, fall back to the default function.\n");
+        return meshCallbackDefaultFunction(name, mesh, minP, maxP);
+    }
+    
+    SLR_SCENEGRAPH_API void construct(const std::string &filePath, InternalNodeRef &nodeOut,
+                                      const CreateMaterialFunction &materialFunc, const MeshCallback &meshCallback) {
         using namespace SLR;
         DefaultAllocator &defMem = DefaultAllocator::instance();
         
@@ -172,7 +322,7 @@ namespace SLRSceneGraph {
             alphaMaps.push_back(surfAttr.alphaMap);
         }
         
-        recursiveConstruct(scene, scene->mRootNode, materials, normalMaps, alphaMaps, nodeOut);
+        recursiveConstruct(scene, scene->mRootNode, materials, normalMaps, alphaMaps, meshCallback, nodeOut);
         
         nodeOut->setName(filePath);
         

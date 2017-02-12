@@ -38,6 +38,8 @@ namespace SLRSceneGraph {
         EmitterMediumProperty,
         Node,
         InternalNode,
+        SurfaceNode,
+        MediumNode,
         Tuple,
         Function, 
         Any,
@@ -78,6 +80,8 @@ namespace SLRSceneGraph {
         TypeMapDef(EmitterMediumProperty, SLRSceneGraph::EmitterMediumProperty);
         TypeMapDef(Node, SLRSceneGraph::Node);
         TypeMapDef(InternalNode, SLRSceneGraph::InternalNode);
+        TypeMapDef(SurfaceNode, SLRSceneGraph::SurfaceNode);
+        TypeMapDef(MediumNode, SLRSceneGraph::MediumNode);
         TypeMapDef(Tuple, SLRSceneGraph::ParameterList);
         TypeMapDef(Function, SLRSceneGraph::Function);
         TypeMapDef(Void, void);

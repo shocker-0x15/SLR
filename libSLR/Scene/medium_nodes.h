@@ -14,7 +14,13 @@
 #include "geometry.h"
 
 namespace SLR {
-    class SLR_API HomogeneousMediumNode : public Node {
+    class SLR_API MediumNode : public Node {
+    public:
+    };
+    
+    
+    
+    class SLR_API HomogeneousMediumNode : public MediumNode {
         HomogeneousMedium* m_medium;
         const MediumMaterial* m_material;
         
@@ -30,7 +36,7 @@ namespace SLR {
     
     
     
-    class SLR_API GridMediumNode : public Node {
+    class SLR_API GridMediumNode : public MediumNode {
         GridMedium* m_medium;
         const MediumMaterial* m_material;
     public:
