@@ -11,6 +11,7 @@
 #include "../Core/MediumObject.h"
 #include "../Medium/HomogeneousMedium.h"
 #include "../Medium/GridMedium.h"
+#include "../Medium/DensityGridMedium.h"
 
 namespace SLR {
     HomogeneousMediumNode::HomogeneousMediumNode(const BoundingBox3D &region, const InputSpectrum* sigma_s, const InputSpectrum* sigma_e, const MediumMaterial* material) :
@@ -59,5 +60,35 @@ namespace SLR {
     
     void GridMediumNode::destroyRenderingData(Allocator *mem) {
         
+    }
+    
+    
+    
+    DensityGridMediumNode::DensityGridMediumNode(const BoundingBox3D &region, const InputSpectrum* base_sigma_s, const InputSpectrum* base_sigma_e, const float* density_grid,
+                                                 uint32_t numX, uint32_t numY, uint32_t numZ, const MediumMaterial* material) :
+    m_material(material) {
+        float maxDensity = -INFINITY;
+        for (int z = 0; z < numZ; ++z) {
+            for (int y = 0; y < numY; ++y) {
+                for (int x = 0; x < numX; ++x) {
+                    maxDensity = std::max(maxDensity, density_grid[numX * numY * z + numX * y + x]);
+                }
+            }
+        }
+        float maxExtinctionCoefficient = base_sigma_e->calcBounds() * maxDensity;
+        m_medium = new DensityGridMedium(region, base_sigma_s, base_sigma_e, density_grid, numX, numY, numZ, maxExtinctionCoefficient);
+    }
+    
+    DensityGridMediumNode::~DensityGridMediumNode() {
+        delete m_medium;
+    }
+    
+    void DensityGridMediumNode::createRenderingData(Allocator *mem, const Transform *subTF, RenderingData *data) {
+        m_obj = mem->create<SingleMediumObject>(m_medium, m_material);
+        data->medObjs.push_back(m_obj);
+    }
+    
+    void DensityGridMediumNode::destroyRenderingData(Allocator *mem) {
+        mem->destroy(m_obj);
     }
 }

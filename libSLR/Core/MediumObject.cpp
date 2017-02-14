@@ -301,6 +301,8 @@ namespace SLR {
                 }
             }
             distToNextBoundary = std::min(distToNextBoundary, distanceLimit);
+            if (curMedium && std::isinf(distToNextBoundary))
+                return false;
             
             bool hit = false;
             if (curMedium) {
@@ -358,6 +360,8 @@ namespace SLR {
                     }
                 }
             }
+            if (curMedium && std::isinf(distToNextBoundary))
+                return false;
             distToNextBoundary = std::min(distToNextBoundary, distanceLimit);
             
             if (curMedium) {

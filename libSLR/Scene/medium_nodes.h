@@ -48,6 +48,23 @@ namespace SLR {
         void createRenderingData(Allocator* mem, const Transform* subTF, RenderingData *data) override;
         void destroyRenderingData(Allocator* mem) override;
     };
+    
+    
+    
+    class SLR_API DensityGridMediumNode : public MediumNode {
+        DensityGridMedium* m_medium;
+        const MediumMaterial* m_material;
+        
+        SingleMediumObject* m_obj;
+    public:
+        DensityGridMediumNode(const BoundingBox3D &region, const InputSpectrum* base_sigma_s, const InputSpectrum* base_sigma_e, const float* density_grid,
+                              uint32_t numX, uint32_t numY, uint32_t numZ, const MediumMaterial* material);
+        ~DensityGridMediumNode();
+        
+        bool isDirectlyTransformable() const override { return false; }
+        void createRenderingData(Allocator* mem, const Transform* subTF, RenderingData *data) override;
+        void destroyRenderingData(Allocator* mem) override;
+    };
 }
 
 #endif /* __SLR_medium_nodes_h__ */

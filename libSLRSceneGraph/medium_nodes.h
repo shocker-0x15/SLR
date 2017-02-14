@@ -38,7 +38,8 @@ namespace SLRSceneGraph {
     };
     
     
-    class SLR_SCENEGRAPH_API GridMediumNode : public Node {
+    
+    class SLR_SCENEGRAPH_API GridMediumNode : public MediumNode {
         SLR::BoundingBox3D m_region;
         SLR::InputSpectrum** m_sigma_s;
         SLR::InputSpectrum** m_sigma_e;
@@ -52,6 +53,29 @@ namespace SLRSceneGraph {
         GridMediumNode(const SLR::BoundingBox3D &region, const SLR::InputSpectrum** sigma_s, const SLR::InputSpectrum** sigma_e,
                        uint32_t elemSize, uint32_t numX, uint32_t numY, uint32_t numZ, const MediumMaterialRef &material);
         ~GridMediumNode();
+        
+        NodeRef copy() const override;
+        
+        void prepareForRendering() override;
+    };
+    
+    
+    
+    class SLR_SCENEGRAPH_API DensityGridMediumNode : public MediumNode {
+        SLR::BoundingBox3D m_region;
+        InputSpectrumRef m_base_sigma_s;
+        InputSpectrumRef m_base_sigma_e;
+        std::unique_ptr<float[]> m_density_grid;
+        uint32_t m_numX, m_numY, m_numZ;
+        MediumMaterialRef m_material;
+        
+        void allocateRawData() override;
+        void setupRawData() override;
+        void terminateRawData() override;
+    public:
+        DensityGridMediumNode(const SLR::BoundingBox3D &region, const InputSpectrumRef &base_sigma_s, const InputSpectrumRef &base_sigma_e, std::unique_ptr<float[]> &density_grid,
+                              uint32_t numX, uint32_t numY, uint32_t numZ, const MediumMaterialRef &material);
+        ~DensityGridMediumNode();
         
         NodeRef copy() const override;
         

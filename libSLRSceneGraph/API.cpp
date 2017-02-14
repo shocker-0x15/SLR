@@ -758,6 +758,50 @@ namespace SLRSceneGraph {
                                                    return Element::createFromReference<TypeMap::MediumNode>(mediumNode);
                                                }
                                                );
+            stack["createGridMedium"] =
+            Element::create<TypeMap::Function>(1,
+                                               std::vector<std::vector<ArgInfo>>{
+                                                   {
+                                                       {"min", Type::Point}, {"max", Type::Point},
+                                                       {"base_sigma_s", Type::Spectrum}, {"base_sigma_e", Type::Spectrum},
+                                                       {"density_grid", Type::Tuple}, {"numX", Type::Integer}, {"numY", Type::Integer}, {"numZ", Type::Integer},
+                                                       {"mat", Type::MediumMaterial}
+                                                   },
+                                                   {
+                                                       {"min", Type::Point}, {"max", Type::Point},
+                                                       {"sigma_s", Type::Tuple}, {"sigma_e", Type::Tuple}, {"mat", Type::MediumMaterial}
+                                                   }
+                                               },
+                                               std::vector<Function::Procedure>{
+                                                   [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
+                                                       const auto &minP = args.at("min").raw<TypeMap::Point>();
+                                                       const auto &maxP = args.at("max").raw<TypeMap::Point>();
+                                                       InputSpectrumRef base_sigma_s = args.at("base_sigma_s").rawRef<TypeMap::Spectrum>();
+                                                       InputSpectrumRef base_sigma_e = args.at("base_sigma_e").rawRef<TypeMap::Spectrum>();
+                                                       const ParameterList &density_grid = args.at("density_grid").raw<TypeMap::Tuple>();
+                                                       uint32_t numX = args.at("numX").raw<TypeMap::Integer>();
+                                                       uint32_t numY = args.at("numY").raw<TypeMap::Integer>();
+                                                       uint32_t numZ = args.at("numZ").raw<TypeMap::Integer>();
+                                                       SLRAssert(numX * numY * numZ == density_grid.numUnnamed(), "The number of elements of density_grid and specified grid dimensions do not match.");
+                                                       std::unique_ptr<float[]> densityArray(new float[numX * numY * numZ]);
+                                                       for (int z = 0; z < numZ; ++z) {
+                                                           for (int y = 0; y < numY; ++y) {
+                                                               for (int x = 0; x < numX; ++x) {
+                                                                   uint32_t linearIdx = numX * numY * z + numX * y + x;
+                                                                   densityArray[linearIdx] = density_grid(linearIdx).raw<TypeMap::RealNumber>();
+                                                               }
+                                                           }
+                                                       }
+                                                       MediumMaterialRef mat = args.at("mat").rawRef<TypeMap::MediumMaterial>();
+                                                       MediumNodeRef mediumNode = createShared<DensityGridMediumNode>(SLR::BoundingBox3D(minP, maxP), base_sigma_s, base_sigma_e, densityArray, numX, numY, numZ, mat);
+                                                       return Element::createFromReference<TypeMap::MediumNode>(mediumNode);
+                                                   },
+                                                   [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
+                                                       SLRAssert_NotImplemented();
+                                                       return Element();
+                                                   }
+                                               }
+                                               );
             stack["createNode"] =
             Element::create<TypeMap::Function>(1,
                                                std::vector<ArgInfo>{},

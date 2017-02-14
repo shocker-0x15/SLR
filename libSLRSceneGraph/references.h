@@ -70,6 +70,7 @@ namespace SLRSceneGraph {
     class MediumNode;
     class HomogeneousMediumNode;
     class GridMediumNode;
+    class DensityGridMediumNode;
     typedef std::shared_ptr<Node> NodeRef;
     typedef std::shared_ptr<InternalNode> InternalNodeRef;
     typedef std::shared_ptr<ReferenceNode> ReferenceNodeRef;

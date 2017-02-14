@@ -31,7 +31,6 @@ namespace SLR {
                 Point3D param;
                 m_region.localCoordinates(queryPoint, &param);
                 SampledSpectrum scatCoeff;
-                SLRAssert_NotImplemented();
                 *mi = MediumInteraction(ray.time, sampledDistance, queryPoint,
                                         scatCoeff, extCoeff, normalize(ray.dir), param.x, param.y, param.z);
                 *medThroughput = SampledSpectrum::Zero;

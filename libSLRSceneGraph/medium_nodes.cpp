@@ -12,6 +12,7 @@
 #include <libSLR/Scene/medium_nodes.h>
 #include <libSLR/Medium/HomogeneousMedium.h>
 #include <libSLR/Medium/GridMedium.h>
+#include <libSLR/Medium/DensityGridMedium.h>
 
 namespace SLRSceneGraph {
     void HomogeneousMediumNode::allocateRawData() {
@@ -98,6 +99,45 @@ namespace SLRSceneGraph {
     }
     
     void GridMediumNode::prepareForRendering() {
+        terminateRawData();
+        setupRawData();
+    }
+    
+    
+    
+    void DensityGridMediumNode::allocateRawData() {
+        m_rawData = (SLR::Node*)malloc(sizeof(SLR::DensityGridMediumNode));
+    }
+    
+    void DensityGridMediumNode::setupRawData() {
+        new (m_rawData) SLR::DensityGridMediumNode(m_region, m_base_sigma_s.get(), m_base_sigma_e.get(), m_density_grid.get(), m_numX, m_numY, m_numZ, m_material->getRaw());
+        m_setup = true;
+    }
+    
+    void DensityGridMediumNode::terminateRawData() {
+        SLR::DensityGridMediumNode &raw = *(SLR::DensityGridMediumNode*)m_rawData;
+        if (m_setup)
+            raw.~DensityGridMediumNode();
+        m_setup = false;
+    }
+    
+    DensityGridMediumNode::DensityGridMediumNode(const SLR::BoundingBox3D &region, const InputSpectrumRef &base_sigma_s, const InputSpectrumRef &base_sigma_e, std::unique_ptr<float[]> &density_grid,
+                                                 uint32_t numX, uint32_t numY, uint32_t numZ, const MediumMaterialRef &material) :
+    m_region(region), m_base_sigma_s(base_sigma_s), m_base_sigma_e(base_sigma_e),
+    m_density_grid(std::move(density_grid)), m_numX(numX), m_numY(numY), m_numZ(numZ), m_material(material) {
+        allocateRawData();
+    }
+    
+    DensityGridMediumNode::~DensityGridMediumNode() {
+        Node::~Node();
+    }
+    
+    NodeRef DensityGridMediumNode::copy() const {
+        SLRAssert_NotImplemented();
+        return nullptr;
+    }
+    
+    void DensityGridMediumNode::prepareForRendering() {
         terminateRawData();
         setupRawData();
     }

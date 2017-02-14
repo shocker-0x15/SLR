@@ -32,6 +32,8 @@
 		461BDADA1E45EB2F00D97D37 /* medium_material_headers.h in Headers */ = {isa = PBXBuildFile; fileRef = 461BDAD91E45EB2F00D97D37 /* medium_material_headers.h */; };
 		461BDADD1E46FE4A00D97D37 /* medium_materials.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 461BDADB1E46FE4A00D97D37 /* medium_materials.cpp */; };
 		461BDADE1E46FE4A00D97D37 /* medium_materials.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 461BDADC1E46FE4A00D97D37 /* medium_materials.hpp */; };
+		461BDAE51E52057900D97D37 /* DensityGridMedium.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 461BDAE31E52057900D97D37 /* DensityGridMedium.cpp */; };
+		461BDAE61E52057900D97D37 /* DensityGridMedium.h in Headers */ = {isa = PBXBuildFile; fileRef = 461BDAE41E52057900D97D37 /* DensityGridMedium.h */; };
 		462018CE1CD7D05800A5CAF1 /* MicrofacetBSDF.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 462018CC1CD7D05800A5CAF1 /* MicrofacetBSDF.cpp */; };
 		462018D11CD7D09E00A5CAF1 /* MicrofacetBSDF.h in Headers */ = {isa = PBXBuildFile; fileRef = 462018D01CD7D09E00A5CAF1 /* MicrofacetBSDF.h */; };
 		46224C511C5DDFB0009EC594 /* BidirectionalPathTracingRenderer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 46224C4F1C5DDFB0009EC594 /* BidirectionalPathTracingRenderer.cpp */; };
@@ -274,6 +276,8 @@
 		461BDAD91E45EB2F00D97D37 /* medium_material_headers.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = medium_material_headers.h; path = libSLR/MediumMaterials/medium_material_headers.h; sourceTree = SOURCE_ROOT; };
 		461BDADB1E46FE4A00D97D37 /* medium_materials.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = medium_materials.cpp; path = libSLRSceneGraph/medium_materials.cpp; sourceTree = "<group>"; };
 		461BDADC1E46FE4A00D97D37 /* medium_materials.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = medium_materials.hpp; path = libSLRSceneGraph/medium_materials.hpp; sourceTree = "<group>"; };
+		461BDAE31E52057900D97D37 /* DensityGridMedium.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DensityGridMedium.cpp; path = libSLR/Medium/DensityGridMedium.cpp; sourceTree = SOURCE_ROOT; };
+		461BDAE41E52057900D97D37 /* DensityGridMedium.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DensityGridMedium.h; path = libSLR/Medium/DensityGridMedium.h; sourceTree = SOURCE_ROOT; };
 		462018CC1CD7D05800A5CAF1 /* MicrofacetBSDF.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; lineEnding = 0; name = MicrofacetBSDF.cpp; path = libSLR/BSDFs/MicrofacetBSDF.cpp; sourceTree = SOURCE_ROOT; xcLanguageSpecificationIdentifier = xcode.lang.cpp; };
 		462018D01CD7D09E00A5CAF1 /* MicrofacetBSDF.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MicrofacetBSDF.h; path = libSLR/BSDFs/MicrofacetBSDF.h; sourceTree = SOURCE_ROOT; };
 		46224C4F1C5DDFB0009EC594 /* BidirectionalPathTracingRenderer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; lineEnding = 0; name = BidirectionalPathTracingRenderer.cpp; path = libSLR/Renderers/BidirectionalPathTracingRenderer.cpp; sourceTree = SOURCE_ROOT; xcLanguageSpecificationIdentifier = xcode.lang.cpp; };
@@ -726,6 +730,8 @@
 				464545881E1C01CD00B4CECD /* HomogeneousMedium.cpp */,
 				4645458D1E1CD37A00B4CECD /* GridMedium.h */,
 				4645458C1E1CD37A00B4CECD /* GridMedium.cpp */,
+				461BDAE41E52057900D97D37 /* DensityGridMedium.h */,
+				461BDAE31E52057900D97D37 /* DensityGridMedium.cpp */,
 			);
 			name = Medium;
 			sourceTree = "<group>";
@@ -989,6 +995,7 @@
 				464545981E1E2D8E00B4CECD /* Scene.h in Headers */,
 				461BDAD81E45E7C600D97D37 /* basic_MediumMaterials.h in Headers */,
 				4613A1781E364E3500D05AA6 /* BoundingBox3.h in Headers */,
+				461BDAE61E52057900D97D37 /* DensityGridMedium.h in Headers */,
 				466F6D071BB6CA510056F2FA /* MultiEDF.h in Headers */,
 				466F6CFF1BB6CA420056F2FA /* Transform.h in Headers */,
 			);
@@ -1146,6 +1153,7 @@
 				46EA72A91D59F22B00738511 /* debugPrintf.cpp in Sources */,
 				46BF8CAF1E2263CE00EF8E13 /* medium_nodes.cpp in Sources */,
 				4651F3381C567CA30026B8A5 /* SpectrumType.cpp in Sources */,
+				461BDAE51E52057900D97D37 /* DensityGridMedium.cpp in Sources */,
 				468F9DDC1D8063DA00DD02BD /* Matrix3x3.cpp in Sources */,
 				464545971E1E2D8E00B4CECD /* Scene.cpp in Sources */,
 				466F6CFA1BB6CA420056F2FA /* SurfaceObject.cpp in Sources */,

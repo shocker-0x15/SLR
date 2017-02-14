@@ -139,6 +139,7 @@ namespace SLR {
     class AchromaticExtinctionGridMedium;
     class GridMedium;
     class SubGridMedium;
+    class DensityGridMedium;
     
     class Object;
     
@@ -298,6 +299,7 @@ namespace SLR {
     class MediumNode;
     class HomogeneousMediumNode;
     class GridMediumNode;
+    class DensityGridMediumNode;
     class Scene;
     
     class RenderSettings;
