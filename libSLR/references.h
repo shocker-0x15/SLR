@@ -29,6 +29,7 @@ namespace SLR {
     template <typename RealType, uint32_t N> class RegularContinuousSpectrumTemplate;
     template <typename RealType, uint32_t N> class IrregularContinuousSpectrumTemplate;
     template <typename RealType, uint32_t N> class UpsampledContinuousSpectrumTemplate;
+    template <typename RealType, uint32_t N> class ScaledAndOffsetUpsampledContinuousSpectrumTemplate;
     template <typename RealType, uint32_t N> struct WavelengthSamplesTemplate;
     template <typename RealType, uint32_t N> struct SampledSpectrumTemplate;
     template <typename RealType, uint32_t N> struct DiscretizedSpectrumTemplate;
@@ -42,6 +43,7 @@ namespace SLR {
     typedef RegularContinuousSpectrumTemplate<SpectrumFloat, NumSpectralSamples> RegularContinuousSpectrum;
     typedef IrregularContinuousSpectrumTemplate<SpectrumFloat, NumSpectralSamples> IrregularContinuousSpectrum;
     typedef UpsampledContinuousSpectrumTemplate<SpectrumFloat, NumSpectralSamples> UpsampledContinuousSpectrum;
+    typedef ScaledAndOffsetUpsampledContinuousSpectrumTemplate<SpectrumFloat, NumSpectralSamples> ScaledAndOffsetUpsampledContinuousSpectrum;
 #ifdef Use_Spectral_Representation
     typedef WavelengthSamplesTemplate<SpectrumFloat, NumSpectralSamples> WavelengthSamples;
     typedef SampledSpectrumTemplate<SpectrumFloat, NumSpectralSamples> SampledSpectrum;

@@ -361,7 +361,7 @@ namespace SLRSceneGraph {
                                                        values.resize(numSamples);
                                                        for (int i = 0; i < numSamples; ++i) {
                                                            const Element &el = valueList(i);
-                                                           values.push_back(el.asRaw<TypeMap::RealNumber>());
+                                                           values[i] = el.asRaw<TypeMap::RealNumber>();
                                                        }
                                                        
                                                        return Element::createFromReference<TypeMap::Spectrum>(Spectrum::create(type, minWL, maxWL, values.data(), (uint32_t)numSamples));
@@ -438,6 +438,20 @@ namespace SLRSceneGraph {
                                                        }
                                                        return Element::createFromReference<TypeMap::Spectrum>(spectrum);
                                                    }
+                                               }
+                                               );
+            stack["scaleAndOffset"] =
+            Element::create<TypeMap::Function>(1,
+                                               std::vector<ArgInfo>{
+                                                   {"spectrum", Type::Spectrum},
+                                                   {"scale", Type::RealNumber},
+                                                   {"offset", Type::RealNumber}
+                                               },
+                                               [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
+                                                   InputSpectrumRef spectrum = args.at("spectrum").rawRef<TypeMap::Spectrum>();
+                                                   float scale = args.at("scale").raw<TypeMap::RealNumber>();
+                                                   float offset = args.at("offset").raw<TypeMap::RealNumber>();
+                                                   return Element::createFromReference<TypeMap::Spectrum>(InputSpectrumRef(spectrum->createScaledAndOffset(scale, offset)));
                                                }
                                                );
             stack["Image2D"] =

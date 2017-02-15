@@ -76,7 +76,7 @@ namespace SLR {
         virtual ~ContinuousSpectrumTemplate() { }
         virtual RealType calcBounds() const = 0;
         virtual SampledSpectrumTemplate<RealType, N> evaluate(const WavelengthSamplesTemplate<RealType, N> &wls) const = 0;
-        virtual ContinuousSpectrumTemplate* createScaled(RealType scale) const = 0;
+        virtual ContinuousSpectrumTemplate* createScaledAndOffset(RealType scale, RealType offset) const = 0;
     };
     
     
@@ -101,7 +101,7 @@ namespace SLR {
         
         SampledSpectrumTemplate<RealType, N> evaluate(const WavelengthSamplesTemplate<RealType, N> &wls) const override;
         
-        ContinuousSpectrumTemplate<RealType, N>* createScaled(RealType scale) const override;
+        ContinuousSpectrumTemplate<RealType, N>* createScaledAndOffset(RealType scale, RealType offset) const override;
     };
 
     
@@ -130,7 +130,7 @@ namespace SLR {
         
         SampledSpectrumTemplate<RealType, N> evaluate(const WavelengthSamplesTemplate<RealType, N> &wls) const override;
         
-        ContinuousSpectrumTemplate<RealType, N>* createScaled(RealType scale) const override;
+        ContinuousSpectrumTemplate<RealType, N>* createScaledAndOffset(RealType scale, RealType offset) const override;
     };
 
     
@@ -160,9 +160,28 @@ namespace SLR {
         
         SampledSpectrumTemplate<RealType, N> evaluate(const WavelengthSamplesTemplate<RealType, N> &wls) const override;
         
-        ContinuousSpectrumTemplate<RealType, N>* createScaled(RealType scale) const override {
-            return new UpsampledContinuousSpectrumTemplate(m_adjIndices, m_s, m_t, this->m_scale * scale);
+        ContinuousSpectrumTemplate<RealType, N>* createScaledAndOffset(RealType scale, RealType offset) const override;
+    };
+    
+    
+    
+    template <typename RealType, uint32_t N>
+    class SLR_API ScaledAndOffsetUpsampledContinuousSpectrumTemplate : public ContinuousSpectrumTemplate<RealType, N> {
+        const UpsampledContinuousSpectrumTemplate<RealType, N> m_baseSpectrum;
+        RealType m_scale;
+        RealType m_offset;
+        
+    public:
+        ScaledAndOffsetUpsampledContinuousSpectrumTemplate(const UpsampledContinuousSpectrumTemplate<RealType, N> &baseSpectrum, RealType scale, RealType offset) :
+        m_baseSpectrum(baseSpectrum), m_scale(scale), m_offset(offset) { }
+        
+        RealType calcBounds() const override {
+            return m_baseSpectrum.calcBounds() * m_scale + m_offset;
         }
+        
+        SampledSpectrumTemplate<RealType, N> evaluate(const WavelengthSamplesTemplate<RealType, N> &wls) const override;
+        
+        ContinuousSpectrumTemplate<RealType, N>* createScaledAndOffset(RealType scale, RealType offset) const override;
     };
 
     

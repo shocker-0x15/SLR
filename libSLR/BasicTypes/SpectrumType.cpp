@@ -50,10 +50,10 @@ namespace SLR {
     }
     
     template <typename RealType, uint32_t N>
-    ContinuousSpectrumTemplate<RealType, N>* RegularContinuousSpectrumTemplate<RealType, N>::createScaled(RealType scale) const {
+    ContinuousSpectrumTemplate<RealType, N>* RegularContinuousSpectrumTemplate<RealType, N>::createScaledAndOffset(RealType scale, RealType offset) const {
         RealType* sValues = new RealType[numSamples];
         for (int i = 0; i < numSamples; ++i)
-            sValues[i] = scale * values[i];
+            sValues[i] = scale * values[i] + offset;
         ContinuousSpectrumTemplate<RealType, N>* ret = new RegularContinuousSpectrumTemplate(minLambda, maxLambda, sValues, numSamples);
         delete[] sValues;
         return ret;
@@ -95,10 +95,10 @@ namespace SLR {
     }
     
     template <typename RealType, uint32_t N>
-    ContinuousSpectrumTemplate<RealType, N>* IrregularContinuousSpectrumTemplate<RealType, N>::createScaled(RealType scale) const {
+    ContinuousSpectrumTemplate<RealType, N>* IrregularContinuousSpectrumTemplate<RealType, N>::createScaledAndOffset(RealType scale, RealType offset) const {
         RealType* sValues = new RealType[numSamples];
         for (int i = 0; i < numSamples; ++i)
-            sValues[i] = scale * values[i];
+            sValues[i] = scale * values[i] + offset;
         ContinuousSpectrumTemplate<RealType, N>* ret = new IrregularContinuousSpectrumTemplate(lambdas, sValues, numSamples);
         delete[] sValues;
         return ret;
@@ -265,7 +265,7 @@ namespace SLR {
                 maxValue = std::max<RealType>(maxValue, spectrum[j]);
         }
         
-        return maxValue;
+        return maxValue * m_scale;
     }
     
     template <typename RealType, uint32_t N>
@@ -313,8 +313,32 @@ namespace SLR {
         return ret * m_scale;
     }
     
+    template <typename RealType, uint32_t N>
+    ContinuousSpectrumTemplate<RealType, N>* UpsampledContinuousSpectrumTemplate<RealType, N>::createScaledAndOffset(RealType scale, RealType offset) const {
+        if (scale > 0 && offset == 0)
+            return new UpsampledContinuousSpectrumTemplate(m_adjIndices, m_s, m_t, this->m_scale * scale);
+        else
+            return new ScaledAndOffsetUpsampledContinuousSpectrumTemplate<RealType, N>(*this, scale, offset);
+    }
+    
     template struct SLR_API UpsampledContinuousSpectrumTemplate<float, NumSpectralSamples>;
     template struct SLR_API UpsampledContinuousSpectrumTemplate<double, NumSpectralSamples>;
+    
+    
+    
+    template <typename RealType, uint32_t N>
+    SampledSpectrumTemplate<RealType, N> ScaledAndOffsetUpsampledContinuousSpectrumTemplate<RealType, N>::evaluate(const WavelengthSamplesTemplate<RealType, N> &wls) const {
+        return m_baseSpectrum.evaluate(wls) * m_scale + SampledSpectrumTemplate<RealType, N>(m_offset);
+    }
+    
+    template <typename RealType, uint32_t N>
+    ContinuousSpectrumTemplate<RealType, N>* ScaledAndOffsetUpsampledContinuousSpectrumTemplate<RealType, N>::createScaledAndOffset(RealType scale, RealType offset) const {
+        // (spectrum * scale0 + offset0) * scale1 + offset1 = spectrum * (scale0 * scale1) + (offset0 * scale1 + offset1)
+        return new ScaledAndOffsetUpsampledContinuousSpectrumTemplate(m_baseSpectrum, m_scale * scale, m_offset * scale + offset);
+    }
+    
+    template struct SLR_API ScaledAndOffsetUpsampledContinuousSpectrumTemplate<float, NumSpectralSamples>;
+    template struct SLR_API ScaledAndOffsetUpsampledContinuousSpectrumTemplate<double, NumSpectralSamples>;
     
 
     template struct SLR_API SampledSpectrumTemplate<float, NumSpectralSamples>;
