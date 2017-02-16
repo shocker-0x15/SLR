@@ -1,12 +1,12 @@
 //
-//  BidirectionalPathTracingRenderer.h
+//  VolumetricBPTRenderer.h
 //
-//  Created by 渡部 心 on 2016/01/31.
-//  Copyright (c) 2016年 渡部 心. All rights reserved.
+//  Created by 渡部 心 on 2017/02/16.
+//  Copyright (c) 2017年 渡部 心. All rights reserved.
 //
 
-#ifndef BidirectionalPathTracingRenderer_h
-#define BidirectionalPathTracingRenderer_h
+#ifndef __SLR_VolumetricBPTRenderer__
+#define __SLR_VolumetricBPTRenderer__
 
 #include "../defines.h"
 #include "../references.h"
@@ -16,7 +16,14 @@
 #include "../Core/directional_distribution_functions.h"
 
 namespace SLR {
-    class SLR_API BidirectionalPathTracingRenderer : public Renderer {
+    class SLR_API VolumetricBPTRenderer : public Renderer {
+        struct SLR_API DDFQuery {
+            Vector3D dir_sn;
+            Normal3D gNormal_sn;
+            int16_t wlHint;
+            bool adjoint;
+        };
+        
         struct DDFProxy {
             virtual const void* getDDF() const = 0;
             virtual SampledSpectrum evaluate(const Vector3D &dir_sn, SampledSpectrum* revVal) const = 0;
@@ -35,17 +42,17 @@ namespace SLR {
                 return edf->evaluatePDF(query, dir_sn);
             }
         };
-        struct BSDFProxy : public DDFProxy {
-            const BSDF* bsdf;
-            BSDFQuery query;
+        struct ABDFProxy : public DDFProxy {
+            const AbstractBDF* abdf;
+            const ABDFQuery* query;
             
-            BSDFProxy(const BSDF* _bsdf, const BSDFQuery &_query) : bsdf(_bsdf), query(_query) {}
-            const void* getDDF() const override { return bsdf; }
+            ABDFProxy(const AbstractBDF* _abdf, const ABDFQuery* _query) : abdf(_abdf), query(_query) {}
+            const void* getDDF() const override { return abdf; }
             SampledSpectrum evaluate(const Vector3D &dir_sn, SampledSpectrum* revVal) const override {
-                return bsdf->evaluate(query, dir_sn, revVal);
+                return abdf->evaluate(query, dir_sn, revVal);
             }
             float evaluatePDF(const Vector3D &dir_sn, float* revVal) const override {
-                return bsdf->evaluatePDF(query, dir_sn, revVal);
+                return abdf->evaluatePDF(query, dir_sn, revVal);
             }
         };
         struct IDFProxy : public DDFProxy {
@@ -61,21 +68,21 @@ namespace SLR {
             }
         };
         
-        struct BPTVertex {
-            SurfacePoint surfPt;
+        struct VBPTVertex {
+            const InteractionPoint* interPt;
             const DDFProxy* ddf;
             SampledSpectrum alpha;
             float cosIn;
-            float areaPDF;
+            float spatialPDF;
             float RRProb;
-            float revAreaPDF;
+            float revSpatialPDF;
             float revRRProb;
             DirectionType sampledType;
             bool lambdaSelected;
-            BPTVertex(const SurfacePoint &_surfPt, const DDFProxy* _ddf,
-                      const SampledSpectrum &_alpha, float _cosIn, float _areaPDF, float _RRProb, DirectionType _sampledType, bool _lambdaSelected) :
-            surfPt(_surfPt), ddf(_ddf),
-            alpha(_alpha), cosIn(_cosIn), areaPDF(_areaPDF), RRProb(_RRProb), revAreaPDF(NAN), revRRProb(NAN), sampledType(_sampledType), lambdaSelected(_lambdaSelected) {}
+            VBPTVertex(const InteractionPoint* _interPt, const DDFProxy* _ddf,
+                      const SampledSpectrum &_alpha, float _cosIn, float _spatialPDF, float _RRProb, DirectionType _sampledType, bool _lambdaSelected) :
+            interPt(_interPt), ddf(_ddf),
+            alpha(_alpha), cosIn(_cosIn), spatialPDF(_spatialPDF), RRProb(_RRProb), revSpatialPDF(NAN), revRRProb(NAN), sampledType(_sampledType), lambdaSelected(_lambdaSelected) {}
         };
         
         struct Job {
@@ -98,24 +105,24 @@ namespace SLR {
             // working area
             float curPx, curPy;
             int16_t wlHint;
-            std::vector<BPTVertex> lightVertices;
-            std::vector<BPTVertex> eyeVertices;
+            std::vector<VBPTVertex> lightVertices;
+            std::vector<VBPTVertex> eyeVertices;
             
             ProgressReporter* reporter;
             
             void kernel(uint32_t threadID);
             void generateSubPath(const WavelengthSamples &initWLs, const SampledSpectrum &initAlpha, const Ray &initRay, float dirPDF, DirectionType sampledType,
                                  float cosLast, bool adjoint, IndependentLightPathSampler &pathSampler, ArenaAllocator &mem);
-            float calculateMISWeight(float lExtend1stAreaPDF, float lExtend1stRRProb, float lExtend2ndAreaPDF, float lExtend2ndRRProb,
-                                     float eExtend1stAreaPDF, float eExtend1stRRProb, float eExtend2ndAreaPDF, float eExtend2ndRRProb,
+            float calculateMISWeight(float lExtend1stSpatialPDF, float lExtend1stRRProb, float lExtend2ndSpatialPDF, float lExtend2ndRRProb,
+                                     float eExtend1stSpatialPDF, float eExtend1stRRProb, float eExtend2ndSpatialPDF, float eExtend2ndRRProb,
                                      uint32_t numLVtx, uint32_t numEVtx) const;
         };
         
         uint32_t m_samplesPerPixel;
     public:
-        BidirectionalPathTracingRenderer(uint32_t spp);
+        VolumetricBPTRenderer(uint32_t spp);
         void render(const Scene &scene, const RenderSettings &settings) const override;
     };
 }
 
-#endif /* BidirectionalPathTracingRenderer_hpp */
+#endif /* __SLR_VolumetricBPTRenderer__ */

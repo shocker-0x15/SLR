@@ -66,8 +66,8 @@ namespace SLR {
         return m_obj->createEDF(*this, wls, mem);
     }
     
-    ABDFQuery* SurfacePoint::createABDFQuery(const Vector3D &dirLocal, int16_t selectedWL, DirectionType filter, bool adjoint, ArenaAllocator &mem) const {
-        return mem.create<BSDFQuery>(dirLocal, toLocal(m_gNormal), selectedWL, filter, adjoint);
+    ABDFQuery* SurfacePoint::createABDFQuery(const Vector3D &dirLocal, int16_t selectedWL, DirectionType filter, bool reqRev, bool adjoint, ArenaAllocator &mem) const {
+        return mem.create<BSDFQuery>(dirLocal, toLocal(m_gNormal), selectedWL, filter,reqRev, adjoint);
     }
     
     void SurfacePoint::applyTransform(const SLR::StaticTransform &transform) {
@@ -80,6 +80,7 @@ namespace SLR {
     
     SampledSpectrum MediumPoint::emittance(const WavelengthSamples &wls) const {
         SLRAssert_NotImplemented();
+//        return m_obj->emittance(*this, wls) / evaluateInteractance(); // need to consider dividing by zero.
         return SampledSpectrum::Zero;
     }
     
@@ -103,8 +104,8 @@ namespace SLR {
         return nullptr;
     }
     
-    ABDFQuery* MediumPoint::createABDFQuery(const Vector3D &dirLocal, int16_t selectedWL, DirectionType filter, bool adjoint, ArenaAllocator &mem) const {
-        return mem.create<VolumetricBSDFQuery>(dirLocal, selectedWL, filter);
+    ABDFQuery* MediumPoint::createABDFQuery(const Vector3D &dirLocal, int16_t selectedWL, DirectionType filter, bool reqRev, bool adjoint, ArenaAllocator &mem) const {
+        return mem.create<VolumetricBSDFQuery>(dirLocal, selectedWL, filter, reqRev);
     }
     
     AbstractBDF* MediumPoint::createAbstractBDF(const WavelengthSamples &wls, SLR::ArenaAllocator &mem) const {

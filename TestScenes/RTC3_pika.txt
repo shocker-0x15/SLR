@@ -1,5 +1,6 @@
 //setRenderer("method": "PT", ("samples": 16384,));
-setRenderer("method": "BPT", ("samples": 1,));
+setRenderer("method": "BPT", ("samples": 16384,));
+//setRenderer("method": "Volumetric BPT", ("samples": 16384,));
 //setRenderer("method": "debug", (("geometric normal", "shading normal"),));
 setRenderSettings("width": 1920, "height": 1080, "brightness": 2.0);
 

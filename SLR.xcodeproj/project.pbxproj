@@ -34,6 +34,8 @@
 		461BDADE1E46FE4A00D97D37 /* medium_materials.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 461BDADC1E46FE4A00D97D37 /* medium_materials.hpp */; };
 		461BDAE51E52057900D97D37 /* DensityGridMedium.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 461BDAE31E52057900D97D37 /* DensityGridMedium.cpp */; };
 		461BDAE61E52057900D97D37 /* DensityGridMedium.h in Headers */ = {isa = PBXBuildFile; fileRef = 461BDAE41E52057900D97D37 /* DensityGridMedium.h */; };
+		461BDAE91E55EAB900D97D37 /* VolumetricBPTRenderer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 461BDAE71E55EAB900D97D37 /* VolumetricBPTRenderer.cpp */; };
+		461BDAEA1E55EAB900D97D37 /* VolumetricBPTRenderer.h in Headers */ = {isa = PBXBuildFile; fileRef = 461BDAE81E55EAB900D97D37 /* VolumetricBPTRenderer.h */; };
 		462018CE1CD7D05800A5CAF1 /* MicrofacetBSDF.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 462018CC1CD7D05800A5CAF1 /* MicrofacetBSDF.cpp */; };
 		462018D11CD7D09E00A5CAF1 /* MicrofacetBSDF.h in Headers */ = {isa = PBXBuildFile; fileRef = 462018D01CD7D09E00A5CAF1 /* MicrofacetBSDF.h */; };
 		46224C511C5DDFB0009EC594 /* BidirectionalPathTracingRenderer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 46224C4F1C5DDFB0009EC594 /* BidirectionalPathTracingRenderer.cpp */; };
@@ -278,6 +280,8 @@
 		461BDADC1E46FE4A00D97D37 /* medium_materials.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = medium_materials.hpp; path = libSLRSceneGraph/medium_materials.hpp; sourceTree = "<group>"; };
 		461BDAE31E52057900D97D37 /* DensityGridMedium.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DensityGridMedium.cpp; path = libSLR/Medium/DensityGridMedium.cpp; sourceTree = SOURCE_ROOT; };
 		461BDAE41E52057900D97D37 /* DensityGridMedium.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DensityGridMedium.h; path = libSLR/Medium/DensityGridMedium.h; sourceTree = SOURCE_ROOT; };
+		461BDAE71E55EAB900D97D37 /* VolumetricBPTRenderer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = VolumetricBPTRenderer.cpp; path = libSLR/Renderers/VolumetricBPTRenderer.cpp; sourceTree = SOURCE_ROOT; };
+		461BDAE81E55EAB900D97D37 /* VolumetricBPTRenderer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = VolumetricBPTRenderer.h; path = libSLR/Renderers/VolumetricBPTRenderer.h; sourceTree = SOURCE_ROOT; };
 		462018CC1CD7D05800A5CAF1 /* MicrofacetBSDF.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; lineEnding = 0; name = MicrofacetBSDF.cpp; path = libSLR/BSDFs/MicrofacetBSDF.cpp; sourceTree = SOURCE_ROOT; xcLanguageSpecificationIdentifier = xcode.lang.cpp; };
 		462018D01CD7D09E00A5CAF1 /* MicrofacetBSDF.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MicrofacetBSDF.h; path = libSLR/BSDFs/MicrofacetBSDF.h; sourceTree = SOURCE_ROOT; };
 		46224C4F1C5DDFB0009EC594 /* BidirectionalPathTracingRenderer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; lineEnding = 0; name = BidirectionalPathTracingRenderer.cpp; path = libSLR/Renderers/BidirectionalPathTracingRenderer.cpp; sourceTree = SOURCE_ROOT; xcLanguageSpecificationIdentifier = xcode.lang.cpp; };
@@ -666,6 +670,8 @@
 				46224C4F1C5DDFB0009EC594 /* BidirectionalPathTracingRenderer.cpp */,
 				46B39C8B1D8F468C00AB9CC9 /* VolumetricPathTracingRenderer.h */,
 				46B39C8A1D8F468C00AB9CC9 /* VolumetricPathTracingRenderer.cpp */,
+				461BDAE81E55EAB900D97D37 /* VolumetricBPTRenderer.h */,
+				461BDAE71E55EAB900D97D37 /* VolumetricBPTRenderer.cpp */,
 				462982D21C65FF980052228B /* DebugRenderer.h */,
 				462982CE1C65FF670052228B /* DebugRenderer.cpp */,
 			);
@@ -941,6 +947,7 @@
 				466F6D581BB715660056F2FA /* defines.h in Headers */,
 				466F6CE11BB6CA260056F2FA /* ModifiedWardDurBRDF.h in Headers */,
 				462982D31C65FF980052228B /* DebugRenderer.h in Headers */,
+				461BDAEA1E55EAB900D97D37 /* VolumetricBPTRenderer.h in Headers */,
 				460A20261D602CB800870E0F /* AshikhminShirleyBRDF.h in Headers */,
 				460A201E1D6029EC00870E0F /* QBVH.h in Headers */,
 				468F9DDD1D8063DA00DD02BD /* Matrix3x3.h in Headers */,
@@ -1134,6 +1141,7 @@
 				466F6D4A1BB7153E0056F2FA /* InfiniteSphere.cpp in Sources */,
 				466F6CFE1BB6CA420056F2FA /* Transform.cpp in Sources */,
 				46B39C991D90234400AB9CC9 /* Object.cpp in Sources */,
+				461BDAE91E55EAB900D97D37 /* VolumetricBPTRenderer.cpp in Sources */,
 				46BF8CB81E31323F00EF8E13 /* VolumetricPathTracingRenderer.cpp in Sources */,
 				466F6D4C1BB7153E0056F2FA /* TriangleMesh.cpp in Sources */,
 				466F6CE81BB6CA420056F2FA /* cameras.cpp in Sources */,

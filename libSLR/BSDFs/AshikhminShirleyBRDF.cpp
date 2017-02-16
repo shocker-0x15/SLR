@@ -82,15 +82,15 @@ namespace SLR {
         }
         
         result->dirPDF = (specularDirPDF * specularWeight + diffuseDirPDF * diffuseWeght) / sumWeights;
-        if (result->reverse) {
+        if (query.requestReverse) {
             float revVDotHV = std::fabs(result->dirLocal.z);
             float revSpecularWeight = iRs + (1 - iRs) * std::pow(1.0f - revVDotHV, 5);
             float revTransmissionTerm = 1 - std::pow(1 - revVDotHV * 0.5f, 5);
             float revDiffuseWeght = 28 * iRd / 23 * (1 - iRs) * revTransmissionTerm * revTransmissionTerm;
             float revSumWeights = revSpecularWeight + revDiffuseWeght;
             
-            result->reverse->fs = fs;
-            result->reverse->dirPDF = (revSpecularDirPDF * revSpecularWeight + revDiffuseDirPDF * revDiffuseWeght) / revSumWeights;
+            result->reverse.value = fs;
+            result->reverse.dirPDF = (revSpecularDirPDF * revSpecularWeight + revDiffuseDirPDF * revDiffuseWeght) / revSumWeights;
         }
         return fs;
     }
@@ -119,7 +119,7 @@ namespace SLR {
     
     float AshikhminShirleyBRDF::evaluatePDFInternal(const BSDFQuery &query, const Vector3D &dir, float* revPDF) const {
         if (dir.z * query.dirLocal.z <= 0) {
-            if (revPDF)
+            if (query.requestReverse)
                 *revPDF = 0.0f;
             return 0.0f;
         }
@@ -141,7 +141,7 @@ namespace SLR {
         float diffuseWeght = 28 * iRd / 23 * (1 - iRs) * transmissionTerm * transmissionTerm;
         float sumWeights = specularWeight + diffuseWeght;
         
-        if (revPDF) {
+        if (query.requestReverse) {
             float revVDotHV = std::fabs(dir.z);
             float revSpecularWeight = iRs + (1 - iRs) * std::pow(1.0f - revVDotHV, 5);
             float revTransmissionTerm = 1 - std::pow(1 - revVDotHV * 0.5f, 5);

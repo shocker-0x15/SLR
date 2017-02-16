@@ -90,32 +90,32 @@ namespace SLR {
         }
         
         result->dirPDF *= weights[idx];
-        result->reverse->dirPDF *= revWeights[idx];
+        result->reverse.dirPDF *= revWeights[idx];
         
         if (!result->sampledType.isDelta()) {
             for (int i = 0; i < m_numComponents; ++i) {
                 float revPDF;
                 if (i != idx && m_BSDFs[i]->matches(query.dirTypeFilter)) {
                     result->dirPDF += m_BSDFs[i]->evaluatePDFInternal(query, result->dirLocal, &revPDF) * weights[i];
-                    result->reverse->dirPDF += revPDF * revWeights[i];
+                    result->reverse.dirPDF += revPDF * revWeights[i];
                 }
             }
             
             BSDFQuery mQuery = query;
             mQuery.dirTypeFilter &= sideTest(query.gNormalLocal, query.dirLocal, result->dirLocal);
             value = SampledSpectrum::Zero;
-            result->reverse->fs = SampledSpectrum::Zero;
+            result->reverse.value = SampledSpectrum::Zero;
             
             for (int i = 0; i < m_numComponents; ++i) {
                 if (!m_BSDFs[i]->matches(mQuery.dirTypeFilter))
                     continue;
                 SampledSpectrum eRev_fs;
                 value += m_BSDFs[i]->evaluateInternal(mQuery, result->dirLocal, &eRev_fs);
-                result->reverse->fs += eRev_fs;
+                result->reverse.value += eRev_fs;
             }
         }
         result->dirPDF /= sumWeights;
-        result->reverse->dirPDF /= sumRevWeights;
+        result->reverse.dirPDF /= sumRevWeights;
         
         return value;
     }

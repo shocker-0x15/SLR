@@ -34,10 +34,17 @@ namespace SLR {
     }
     
     SampledSpectrum SurfaceLight::sample(const LightPosQuery &query, LightPathSampler &pathSampler, ArenaAllocator &mem, LightPosQueryResult** lpResult) const {
-        SurfaceLightPosQueryResult* result = mem.create<SurfaceLightPosQueryResult>();
-        SampledSpectrum ret = sample(query, pathSampler.getSurfaceLightPosSample(), result);
-        *lpResult = result;
+        *lpResult = mem.create<SurfaceLightPosQueryResult>();
+        SampledSpectrum ret = sample(query, pathSampler.getSurfaceLightPosSample(), (SurfaceLightPosQueryResult*)*lpResult);
         return ret;
+    }
+    
+    Ray SurfaceLight::sampleRay(const LightPosQuery &lightPosQuery, LightPathSampler &pathSampler, const EDFQuery &edfQuery, ArenaAllocator &mem,
+                                LightPosQueryResult** lightPosResult, SampledSpectrum* Le0, EDF** edf,
+                                EDFQueryResult* edfResult, SampledSpectrum* Le1) const {
+        *lightPosResult = mem.create<SurfaceLightPosQueryResult>();
+        return sampleRay(lightPosQuery, pathSampler.getSurfaceLightPosSample(), edfQuery, pathSampler.getEDFSample(), mem,
+                         (SurfaceLightPosQueryResult*)*lightPosResult, Le0, edf, edfResult, Le1);
     }
     
     

@@ -22,6 +22,7 @@
 #include <libSLR/Renderers/PathTracingRenderer.h>
 #include <libSLR/Renderers/BidirectionalPathTracingRenderer.h>
 #include <libSLR/Renderers/VolumetricPathTracingRenderer.h>
+#include <libSLR/Renderers/VolumetricBPTRenderer.h>
 
 #include "Parser/BuiltinFunctions/builtin_math.hpp"
 #include "Parser/BuiltinFunctions/builtin_transform.hpp"
@@ -1021,17 +1022,28 @@ namespace SLRSceneGraph {
                                                        };
                                                        return configBPT(config, context, err);
                                                    }
-                                                    else if (method == "Volumetric PT") {
-                                                        const static Function configVolumetricPT{
-                                                            0, {{"samples", Type::Integer, Element(8)}},
-                                                            [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
-                                                                uint32_t spp = args.at("samples").raw<TypeMap::Integer>();
-                                                                context.renderingContext->renderer = createUnique<SLR::VolumetricPathTracingRenderer>(spp);
-                                                                return Element();
-                                                            }
-                                                        };
-                                                        return configVolumetricPT(config, context, err);
-                                                    }
+                                                   else if (method == "Volumetric PT") {
+                                                       const static Function configVolumetricPT{
+                                                           0, {{"samples", Type::Integer, Element(8)}},
+                                                           [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
+                                                               uint32_t spp = args.at("samples").raw<TypeMap::Integer>();
+                                                               context.renderingContext->renderer = createUnique<SLR::VolumetricPathTracingRenderer>(spp);
+                                                               return Element();
+                                                           }
+                                                       };
+                                                       return configVolumetricPT(config, context, err);
+                                                   }
+                                                   else if (method == "Volumetric BPT") {
+                                                       const static Function configVolumetricBPT{
+                                                           0, {{"samples", Type::Integer, Element(8)}},
+                                                           [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
+                                                               uint32_t spp = args.at("samples").raw<TypeMap::Integer>();
+                                                               context.renderingContext->renderer = createUnique<SLR::VolumetricBPTRenderer>(spp);
+                                                               return Element();
+                                                           }
+                                                       };
+                                                       return configVolumetricBPT(config, context, err);
+                                                   }
                                                    else if (method == "debug") {
                                                        const static Function configDebug{
                                                            0, {{"outputs", Type::Tuple}},

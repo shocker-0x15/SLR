@@ -19,7 +19,7 @@ namespace SLR {
         
         SampledSpectrum sample(const PFQuery &query, const PFSample &smp, PFQueryResult* result) const override;
         SampledSpectrum evaluate(const PFQuery &query, const Vector3D &dirIn) const override;
-        float evaluatePDF(const PFQuery &query, const Vector3D &dirIn) const override;
+        float evaluatePDF(const PFQuery &query, const Vector3D &dirIn, float* revPDF = nullptr) const override;
     };
     
     
@@ -33,7 +33,7 @@ namespace SLR {
         
         SampledSpectrum sample(const PFQuery &query, const PFSample &smp, PFQueryResult* result) const override;
         SampledSpectrum evaluate(const PFQuery &query, const Vector3D &dirIn) const override;
-        float evaluatePDF(const PFQuery &query, const Vector3D &dirIn) const override;
+        float evaluatePDF(const PFQuery &query, const Vector3D &dirIn, float* revPDF = nullptr) const override;
     };
     
     
@@ -47,7 +47,7 @@ namespace SLR {
         
         SampledSpectrum sample(const PFQuery &query, const PFSample &smp, PFQueryResult* result) const override;
         SampledSpectrum evaluate(const PFQuery &query, const Vector3D &dirIn) const override;
-        float evaluatePDF(const PFQuery &query, const Vector3D &dirIn) const override;
+        float evaluatePDF(const PFQuery &query, const Vector3D &dirIn, float* revPDF = nullptr) const override;
     };
 }
 

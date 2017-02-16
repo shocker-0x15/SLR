@@ -142,8 +142,6 @@ namespace SLR {
                                                                      IndependentLightPathSampler &pathSampler, ArenaAllocator &mem) const {
         WavelengthSamples wls = initWLs;
         Ray ray = initRay;
-        SurfacePoint surfPt;
-        MediumPoint medPt;
         SampledSpectrum alpha = SampledSpectrum::One;
         float initY = alpha.importance(wls.selectedLambda);
         SampledSpectrumSum sp(SampledSpectrum::Zero);
@@ -168,7 +166,7 @@ namespace SLR {
         Vector3D dirOut_local = interPt->toLocal(-ray.dir);
         if (interPt->isEmitting()) {
             EDF* edf = interPt->createEDF(wls, mem);
-            SampledSpectrum Le = interPt->fluxDensity(wls) * edf->evaluate(EDFQuery(), dirOut_local);
+            SampledSpectrum Le = interPt->emittance(wls) * edf->evaluate(EDFQuery(), dirOut_local);
             sp += alpha * Le;
         }
         if (interPt->atInfinity())
@@ -180,7 +178,7 @@ namespace SLR {
                 break;
             
             AbstractBDF* abdf = interPt->createAbstractBDF(wls, mem);
-            ABDFQuery* abdfQuery = interPt->createABDFQuery(dirOut_local, wls.selectedLambda, DirectionType::All, false, mem);
+            ABDFQuery* abdfQuery = interPt->createABDFQuery(dirOut_local, wls.selectedLambda, DirectionType::All, false, false, mem);
             
             // on Surface: probability: 1.0 or probability density delta function
             // in Medium: probability density: extinction coefficient
@@ -265,7 +263,7 @@ namespace SLR {
                 float abdfPDF = abdfResult->dirPDF;
                 
                 EDF* edf = interPt->createEDF(wls, mem);
-                SampledSpectrum Le = interPt->fluxDensity(wls) * edf->evaluate(EDFQuery(), dirOut_local);
+                SampledSpectrum Le = interPt->emittance(wls) * edf->evaluate(EDFQuery(), dirOut_local);
                 float dist2 = interPt->getSquaredDistance(ray.org);
                 float lightPDF = interact->getLightProb() * interPt->evaluateSpatialPDF() * dist2 / interPt->calcCosTerm(ray.dir);
                 SLRAssert(Le.allFinite(), "Le: unexpected value detected: %s", Le.toString().c_str());

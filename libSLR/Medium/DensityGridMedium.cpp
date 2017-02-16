@@ -80,22 +80,28 @@ namespace SLR {
         }
         
         // estimate Monte Carlo throughput T(s, wl_j)/p(s, wl_i) by ratio tracking.
-        SampledSpectrum trDiff = SampledSpectrum::One;
-        for (int wl = 0; wl < WavelengthSamples::NumComponents; ++wl) {
-            if (wl == wls.selectedLambda)
-                continue;
-            sampledDistance = ray.distMin;
-            sampledDistance += -std::log(sampler.getSample()) / majorant;
-            while (sampledDistance < hitDistance) {
-                Point3D queryPoint = ray.org + sampledDistance * ray.dir;
-                float density = calcDensity(queryPoint);
-                SampledSpectrum extCoeff = m_base_sigma_e->evaluate(wls) * density;
-                float probRealCollision = (extCoeff[wl] - extCoeff[wls.selectedLambda]) / majorant;
-                trDiff[wl] *= (1.0f - probRealCollision);
-                sampledDistance += -std::log(sampler.getSample()) / majorant;
-            }
+        if (wls.lambdaSelected()) {
+            *medThroughput = SampledSpectrum::Zero;
+            (*medThroughput)[wls.selectedLambda] = 1.0f;
         }
-        *medThroughput = trDiff;
+        else {
+            SampledSpectrum trDiff = SampledSpectrum::One;
+            for (int wl = 0; wl < WavelengthSamples::NumComponents; ++wl) {
+                if (wl == wls.selectedLambda)
+                    continue;
+                sampledDistance = ray.distMin;
+                sampledDistance += -std::log(sampler.getSample()) / majorant;
+                while (sampledDistance < hitDistance) {
+                    Point3D queryPoint = ray.org + sampledDistance * ray.dir;
+                    float density = calcDensity(queryPoint);
+                    SampledSpectrum extCoeff = m_base_sigma_e->evaluate(wls) * density;
+                    float probRealCollision = (extCoeff[wl] - extCoeff[wls.selectedLambda]) / majorant;
+                    trDiff[wl] *= (1.0f - probRealCollision);
+                    sampledDistance += -std::log(sampler.getSample()) / majorant;
+                }
+            }
+            *medThroughput = trDiff;
+        }
         if (hit)
             *medThroughput /= extCoeffSelected;
         
@@ -111,16 +117,33 @@ namespace SLR {
         
         // estimate transmittance by ratio tracking.
         SampledSpectrum transmittance = SampledSpectrum::One;
-        for (int wl = 0; wl < WavelengthSamples::NumComponents; ++wl) {
+        if (wls.lambdaSelected()) {
+            transmittance = SampledSpectrum::Zero;
+            transmittance[wls.selectedLambda] = 1.0f;
+            
             FloatSum sampledDistance = ray.distMin;
             sampledDistance += -std::log(sampler.getSample()) / majorant;
             while (sampledDistance < distanceLimit) {
                 Point3D queryPoint = ray.org + sampledDistance * ray.dir;
                 float density = calcDensity(queryPoint);
                 SampledSpectrum extCoeff = m_base_sigma_e->evaluate(wls) * density;
-                float probRealCollision = extCoeff[wl] / majorant;
-                transmittance[wl] *= (1.0f - probRealCollision);
+                float probRealCollision = extCoeff[wls.selectedLambda] / majorant;
+                transmittance[wls.selectedLambda] *= (1.0f - probRealCollision);
                 sampledDistance += -std::log(sampler.getSample()) / majorant;
+            }
+        }
+        else {
+            for (int wl = 0; wl < WavelengthSamples::NumComponents; ++wl) {
+                FloatSum sampledDistance = ray.distMin;
+                sampledDistance += -std::log(sampler.getSample()) / majorant;
+                while (sampledDistance < distanceLimit) {
+                    Point3D queryPoint = ray.org + sampledDistance * ray.dir;
+                    float density = calcDensity(queryPoint);
+                    SampledSpectrum extCoeff = m_base_sigma_e->evaluate(wls) * density;
+                    float probRealCollision = extCoeff[wl] / majorant;
+                    transmittance[wl] *= (1.0f - probRealCollision);
+                    sampledDistance += -std::log(sampler.getSample()) / majorant;
+                }
             }
         }
         

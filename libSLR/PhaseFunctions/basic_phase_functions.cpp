@@ -13,6 +13,9 @@ namespace SLR {
         result->dirLocal = uniformSampleSphere(smp.uDir[0], smp.uDir[1]);
         result->dirPDF = 1 / (4 * M_PI);
         result->sampledType = directionType();
+        if (query.requestReverse)
+            result->revDirPDF = result->dirPDF;
+            
         return SampledSpectrum(1 / (4 * M_PI));
     }
     
@@ -20,8 +23,11 @@ namespace SLR {
         return SampledSpectrum(1 / (4 * M_PI));
     }
     
-    float IsotropicPhaseFunction::evaluatePDF(const PFQuery &query, const Vector3D &dirIn) const {
-        return 1 / (4 * M_PI);
+    float IsotropicPhaseFunction::evaluatePDF(const PFQuery &query, const Vector3D &dirIn, float* revPDF) const {
+        float ret = 1 / (4 * M_PI);
+        if (query.requestReverse)
+            *revPDF = ret;
+        return ret;
     }
     
     
@@ -36,6 +42,9 @@ namespace SLR {
         result->dirLocal = Vector3D(std::cos(phi) * sinTheta, std::sin(phi) * sinTheta, cosTheta);
         result->dirPDF = value;
         result->sampledType = directionType();
+        if (query.requestReverse)
+            result->revDirPDF = result->dirPDF;
+        
         return SampledSpectrum(value);
     }
     
@@ -45,9 +54,12 @@ namespace SLR {
         return SampledSpectrum(value);
     }
     
-    float HenyeyGreensteinPhaseFunction::evaluatePDF(const PFQuery &query, const Vector3D &dirIn) const {
+    float HenyeyGreensteinPhaseFunction::evaluatePDF(const PFQuery &query, const Vector3D &dirIn, float* revPDF) const {
         float cosTheta = dirIn.z;
-        return (1 - m_g * m_g) / (4 * M_PI * std::pow(1 + m_g * m_g - 2 * m_g * cosTheta, 1.5f));
+        float ret = (1 - m_g * m_g) / (4 * M_PI * std::pow(1 + m_g * m_g - 2 * m_g * cosTheta, 1.5f));
+        if (query.requestReverse)
+            *revPDF = ret;
+        return ret;
     }
     
     
@@ -62,6 +74,9 @@ namespace SLR {
         result->dirLocal = Vector3D(std::cos(phi) * sinTheta, std::sin(phi) * sinTheta, cosTheta);
         result->dirPDF = value;
         result->sampledType = directionType();
+        if (query.requestReverse)
+            result->revDirPDF = result->dirPDF;
+        
         return SampledSpectrum(value);
     }
     
@@ -72,9 +87,12 @@ namespace SLR {
         return SampledSpectrum(value);
     }
     
-    float SchlickPhaseFunction::evaluatePDF(const PFQuery &query, const Vector3D &dirIn) const {
+    float SchlickPhaseFunction::evaluatePDF(const PFQuery &query, const Vector3D &dirIn, float* revPDF) const {
         float cosTheta = dirIn.z;
         float dTerm = (1 + m_k * cosTheta);
-        return (1 - m_k * m_k) / (4 * M_PI * dTerm * dTerm);
+        float ret = (1 - m_k * m_k) / (4 * M_PI * dTerm * dTerm);
+        if (query.requestReverse)
+            *revPDF = ret;
+        return ret;
     }
 }

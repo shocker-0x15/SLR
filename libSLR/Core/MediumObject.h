@@ -41,6 +41,9 @@ namespace SLR {
                       EDFQueryResult* edfResult, SampledSpectrum* Le1) const;
         
         SampledSpectrum sample(const LightPosQuery &query, LightPathSampler &pathSampler, ArenaAllocator &mem, LightPosQueryResult** lpResult) const override;
+        Ray sampleRay(const LightPosQuery &lightPosQuery, LightPathSampler &pathSampler, const EDFQuery &edfQuery, ArenaAllocator &mem,
+                      LightPosQueryResult** lightPosResult, SampledSpectrum* Le0, EDF** edf,
+                      EDFQueryResult* edfResult, SampledSpectrum* Le1) const override;
     };
     
     

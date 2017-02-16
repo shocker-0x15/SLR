@@ -26,9 +26,9 @@ namespace SLR {
         if (!std::isfinite(cos_dAzimuth))
             cos_dAzimuth = 0.0f;
         SampledSpectrum fs = m_R * ((m_A + m_B * std::max(0.0f, cos_dAzimuth) * sinAlpha * tanBeta) / M_PI);
-        if (result->reverse) {
-            result->reverse->fs = fs;
-            result->reverse->dirPDF = std::fabs(query.dirLocal.z) / M_PI;
+        if (query.requestReverse) {
+            result->reverse.value = fs;
+            result->reverse.dirPDF = std::fabs(query.dirLocal.z) / M_PI;
         }
         return fs;
     }
@@ -55,11 +55,11 @@ namespace SLR {
     
     float OrenNayerBRDF::evaluatePDFInternal(const BSDFQuery &query, const Vector3D &dir, float* revPDF) const {
         if (query.dirLocal.z * dir.z <= 0.0f) {
-            if (revPDF)
+            if (query.requestReverse)
                 *revPDF = 0.0f;
             return 0.0f;
         }
-        if (revPDF)
+        if (query.requestReverse)
             *revPDF = std::fabs(query.dirLocal.z) / M_PI;
         return std::abs(dir.z) / M_PI;
     }

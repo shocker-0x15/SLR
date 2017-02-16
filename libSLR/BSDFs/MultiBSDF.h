@@ -24,7 +24,7 @@ namespace SLR {
         float evaluatePDFInternalWithRev(const BSDFQuery &query, const Vector3D &dirOut, float* revPDF) const;
         
         SampledSpectrum sampleInternal(const BSDFQuery &query, float uComponent, const float uDir[2], BSDFQueryResult* result) const override {
-            return result->reverse ? sampleInternalWithRev(query, uComponent, uDir, result) : sampleInternalNoRev(query, uComponent, uDir, result);
+            return query.requestReverse ? sampleInternalWithRev(query, uComponent, uDir, result) : sampleInternalNoRev(query, uComponent, uDir, result);
         }
         SampledSpectrum evaluateInternal(const BSDFQuery &query, const Vector3D &dirOut, SampledSpectrum* rev_fs) const override;
         float evaluatePDFInternal(const BSDFQuery &query, const Vector3D &dirOut, float* revPDF) const override {

@@ -38,6 +38,14 @@ namespace SLR {
         return ret;
     }
     
+    Ray VolumetricLight::sampleRay(const LightPosQuery &lightPosQuery, LightPathSampler &pathSampler, const EDFQuery &edfQuery, ArenaAllocator &mem,
+                                   LightPosQueryResult** lightPosResult, SampledSpectrum* Le0, EDF** edf,
+                                   EDFQueryResult* edfResult, SampledSpectrum* Le1) const {
+        *lightPosResult = mem.create<VolumetricLightPosQueryResult>();
+        return sampleRay(lightPosQuery, pathSampler.getVolumetricLightPosSample(), edfQuery, pathSampler.getEDFSample(), mem,
+                         (VolumetricLightPosQueryResult*)*lightPosResult, Le0, edf, edfResult, Le1);
+    }
+    
     
     
     bool SingleMediumObject::isEmitting() const {

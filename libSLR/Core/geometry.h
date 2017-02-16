@@ -153,11 +153,11 @@ namespace SLR {
         Vector3D fromLocal(const Vector3D &vecLocal) const { return m_shadingFrame.fromLocal(vecLocal); }
         
         virtual bool isEmitting() const = 0;
-        virtual SampledSpectrum fluxDensity(const WavelengthSamples &wls) const = 0;
+        virtual SampledSpectrum emittance(const WavelengthSamples &wls) const = 0;
         virtual float evaluateSpatialPDF() const = 0;
         virtual EDF* createEDF(const WavelengthSamples &wls, ArenaAllocator &mem) const = 0;
         
-        virtual ABDFQuery* createABDFQuery(const Vector3D &dirLocal, int16_t selectedWL, DirectionType dirType, bool adjoint, ArenaAllocator &mem) const = 0;
+        virtual ABDFQuery* createABDFQuery(const Vector3D &dirLocal, int16_t selectedWL, DirectionType dirType, bool reqRev, bool adjoint, ArenaAllocator &mem) const = 0;
         virtual AbstractBDF* createAbstractBDF(const WavelengthSamples &wls, ArenaAllocator &mem) const = 0;
         virtual SampledSpectrum evaluateInteractance() const = 0;
         virtual float calcCosTerm(const Vector3D &vecWorld) const = 0;
@@ -203,22 +203,19 @@ namespace SLR {
             return m_shadingFrame.toLocal(m_gNormal);
         }
         
-        SampledSpectrum emittance(const WavelengthSamples &wls) const;
         float evaluateAreaPDF() const;
         BSDF* createBSDF(const WavelengthSamples &wls, ArenaAllocator &mem) const;
         
         //----------------------------------------------------------------
         // InteractionPoint's methods
         bool isEmitting() const override;
-        SampledSpectrum fluxDensity(const WavelengthSamples &wls) const override {
-            return emittance(wls);
-        }
+        SampledSpectrum emittance(const WavelengthSamples &wls) const override;
         float evaluateSpatialPDF() const override {
             return evaluateAreaPDF();
         }
         EDF* createEDF(const WavelengthSamples &wls, ArenaAllocator &mem) const override;
         
-        ABDFQuery* createABDFQuery(const Vector3D &dirLocal, int16_t selectedWL, DirectionType filter, bool adjoint, ArenaAllocator &mem) const override;
+        ABDFQuery* createABDFQuery(const Vector3D &dirLocal, int16_t selectedWL, DirectionType filter, bool reqRev, bool adjoint, ArenaAllocator &mem) const override;
         AbstractBDF* createAbstractBDF(const WavelengthSamples &wls, ArenaAllocator &mem) const override {
             return (AbstractBDF*)createBSDF(wls, mem);
         }
@@ -253,22 +250,19 @@ namespace SLR {
         
         void setObject(const SingleMediumObject* obj) { m_obj = obj; }
         
-        SampledSpectrum emittance(const WavelengthSamples &wls) const;
         float evaluateVolumePDF() const;
         BSDF* createPhaseFunction(const WavelengthSamples &wls, ArenaAllocator &mem) const;
         
         //----------------------------------------------------------------
         // InteractionPoint's methods
         bool isEmitting() const override;
-        SampledSpectrum fluxDensity(const WavelengthSamples &wls) const override {
-            return emittance(wls);
-        }
+        SampledSpectrum emittance(const WavelengthSamples &wls) const override;
         float evaluateSpatialPDF() const override {
             return evaluateVolumePDF();
         }
         EDF* createEDF(const WavelengthSamples &wls, ArenaAllocator &mem) const override;
         
-        ABDFQuery* createABDFQuery(const Vector3D &dirLocal, int16_t selectedWL, DirectionType filter, bool adjoint, ArenaAllocator &mem) const override;
+        ABDFQuery* createABDFQuery(const Vector3D &dirLocal, int16_t selectedWL, DirectionType filter, bool reqRev, bool adjoint, ArenaAllocator &mem) const override;
         AbstractBDF* createAbstractBDF(const WavelengthSamples &wls, ArenaAllocator &mem) const override;
         SampledSpectrum evaluateInteractance() const override {
             return m_extinctionCoefficient;

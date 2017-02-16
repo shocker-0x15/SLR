@@ -32,9 +32,9 @@ namespace SLR {
         result->dirPDF = numerator / commonDenom;
         result->sampledType = m_type;
         SampledSpectrum fs = m_R * (numerator / (commonDenom * dotHI * dotHN));
-        if (result->reverse) {
-            result->reverse->fs = fs;
-            result->reverse->dirPDF = result->dirPDF;
+        if (query.requestReverse) {
+            result->reverse.value = fs;
+            result->reverse.dirPDF = result->dirPDF;
         }
         return fs;
     }
@@ -60,7 +60,7 @@ namespace SLR {
     
     float ModifiedWardDurBRDF::evaluatePDFInternal(const BSDFQuery &query, const Vector3D &dir, float* revPDF) const {
         if (dir.z * query.dirLocal.z <= 0) {
-            if (revPDF)
+            if (query.requestReverse)
                 *revPDF = 0.0f;
             return 0.0f;
         }
@@ -72,7 +72,7 @@ namespace SLR {
         float numerator = std::exp(-(hx_ax * hx_ax + hy_ay * hy_ay) / (dotHN * dotHN));
         float denominator = 4 * M_PI * m_anisoX * m_anisoY * dotHI * dotHN * dotHN * dotHN;
         float ret = numerator / denominator;
-        if (revPDF)
+        if (query.requestReverse)
             *revPDF = ret;
         return ret;
     }

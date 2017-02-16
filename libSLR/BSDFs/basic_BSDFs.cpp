@@ -17,9 +17,9 @@ namespace SLR {
         SampledSpectrum fs = m_R / M_PI;
 //        if (dot(result->dirLocal, query.gNormal_sn) < 0)
 //            fs = SampledSpectrum::Zero;
-        if (result->reverse) {
-            result->reverse->fs = fs;
-            result->reverse->dirPDF = std::fabs(query.dirLocal.z) / M_PI;
+        if (query.requestReverse) {
+            result->reverse.value = fs;
+            result->reverse.dirPDF = std::fabs(query.dirLocal.z) / M_PI;
         }
         return fs;
     }
@@ -39,11 +39,11 @@ namespace SLR {
     
     float LambertianBRDF::evaluatePDFInternal(const BSDFQuery &query, const Vector3D &dir, float* revPDF) const {
         if (query.dirLocal.z * dir.z <= 0.0f) {
-            if (revPDF)
+            if (query.requestReverse)
                 *revPDF = 0.0f;
             return 0.0f;
         }
-        if (revPDF)
+        if (query.requestReverse)
             *revPDF = std::fabs(query.dirLocal.z) / M_PI;
         return std::abs(dir.z) / M_PI;
     }
@@ -63,9 +63,9 @@ namespace SLR {
         result->dirPDF = 1.0f;
         result->sampledType = m_type;
         SampledSpectrum fs = m_coeffR * m_fresnel.evaluate(query.dirLocal.z) / std::fabs(query.dirLocal.z);
-        if (result->reverse) {
-            result->reverse->fs = fs;
-            result->reverse->dirPDF = 1.0f;
+        if (query.requestReverse) {
+            result->reverse.value = fs;
+            result->reverse.dirPDF = 1.0f;
         }
         return fs;
     }
@@ -77,7 +77,7 @@ namespace SLR {
     }
     
     float SpecularBRDF::evaluatePDFInternal(const BSDFQuery &query, const Vector3D &dir, float* revPDF) const {
-        if (revPDF)
+        if (query.requestReverse)
             *revPDF = 0.0f;
         return 0.0f;
     }
@@ -108,9 +108,9 @@ namespace SLR {
             result->dirPDF = reflectProb;
             result->sampledType = DirectionType::Reflection | DirectionType::Delta0D;
             SampledSpectrum fs = m_coeff * F / std::fabs(query.dirLocal.z);
-            if (result->reverse) {
-                result->reverse->fs = fs;
-                result->reverse->dirPDF = reflectProb;
+            if (query.requestReverse) {
+                result->reverse.value = fs;
+                result->reverse.dirPDF = reflectProb;
             }
             return fs;
         }
@@ -135,11 +135,11 @@ namespace SLR {
             result->sampledType = DirectionType::Transmission | DirectionType::Delta0D | (m_type.isDispersive() ? DirectionType::Dispersive : DirectionType());
             SampledSpectrum ret = SampledSpectrum::Zero;
             ret[query.wlHint] = m_coeff[query.wlHint] * (1.0f - F[query.wlHint]);
-            if (result->reverse) {
-                result->reverse->fs = ret / std::fabs(query.dirLocal.z);
+            if (query.requestReverse) {
+                result->reverse.value = ret / std::fabs(query.dirLocal.z);
                 if (query.adjoint)
-                    result->reverse->fs[query.wlHint] *= (eExit * eExit) / (eEnter * eEnter);
-                result->reverse->dirPDF = 1.0f - reflectProb;
+                    result->reverse.value[query.wlHint] *= (eExit * eExit) / (eEnter * eEnter);
+                result->reverse.dirPDF = 1.0f - reflectProb;
             }
             if (!query.adjoint)
                 ret[query.wlHint] *= (eEnter * eEnter) / (eExit * eExit);
@@ -155,7 +155,7 @@ namespace SLR {
     }
     
     float SpecularBSDF::evaluatePDFInternal(const BSDFQuery &query, const Vector3D &dir, float* revPDF) const {
-        if (revPDF)
+        if (query.requestReverse)
             *revPDF = 0.0f;
         return 0.0f;
     }

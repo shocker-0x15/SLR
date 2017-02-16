@@ -32,9 +32,9 @@ namespace SLR {
         SampledSpectrum F = m_F.evaluate(dotHV);
         float G = m_D->evaluateSmithG1(query.dirLocal, m) * m_D->evaluateSmithG1(result->dirLocal, m);
         SampledSpectrum fs = F * D * G / (4 * query.dirLocal.z * result->dirLocal.z);
-        if (result->reverse) {
-            result->reverse->dirPDF = commonPDFTerm * m_D->evaluatePDF(sign * result->dirLocal, m);
-            result->reverse->fs = fs;
+        if (query.requestReverse) {
+            result->reverse.dirPDF = commonPDFTerm * m_D->evaluatePDF(sign * result->dirLocal, m);
+            result->reverse.value = fs;
         }
         
         SLRAssert(fs.allFinite(), "fs: %s, F: %s, G, %g, D: %g, wlIdx: %u, qDir: %s, rDir: %s",
@@ -71,7 +71,7 @@ namespace SLR {
     
     float MicrofacetBRDF::evaluatePDFInternal(const BSDFQuery &query, const Vector3D &dir, float* revPDF) const {
         if (dir.z * query.dirLocal.z <= 0) {
-            if (revPDF)
+            if (query.requestReverse)
                 *revPDF = 0.0f;
             return 0.0f;
         }
@@ -82,7 +82,7 @@ namespace SLR {
         Normal3D m = sign * halfVector(query.dirLocal, dir);
         float dotHV = dot(query.dirLocal, m);
         if (dotHV * sign <= 0) {
-            if (revPDF)
+            if (query.requestReverse)
                 *revPDF = 0.0f;
             return 0.0f;
         }
@@ -94,7 +94,7 @@ namespace SLR {
                   "commonPDFTerm: %g, mPDF: %g, wlIdx: %u, qDir: %s, dir: %s",
                   commonPDFTerm, mPDF, query.wlHint, query.dirLocal.toString().c_str(), dir.toString().c_str());
         
-        if (revPDF)
+        if (query.requestReverse)
             *revPDF = commonPDFTerm * m_D->evaluatePDF(sign * dir, m);
         return ret;
     }
@@ -147,9 +147,9 @@ namespace SLR {
             SLRAssert(fs.allFinite(), "fs: %s, F: %s, G, %g, D: %g, wlIdx: %u, qDir: %s, rDir: %s",
                       fs.toString().c_str(), F.toString().c_str(), G, D, query.wlHint, query.dirLocal.toString().c_str(), result->dirLocal.toString().c_str());
             
-            if (result->reverse) {
-                result->reverse->dirPDF = commonPDFTerm * m_D->evaluatePDF(sign * result->dirLocal, m);
-                result->reverse->fs = fs;
+            if (query.requestReverse) {
+                result->reverse.dirPDF = commonPDFTerm * m_D->evaluatePDF(sign * result->dirLocal, m);
+                result->reverse.value = fs;
             }
             return fs;
         }
@@ -189,9 +189,9 @@ namespace SLR {
             SLRAssert(ret.allFinite(), "fs: %s, wlIdx: %u, qDir: %s, rDir: %s",
                       ret.toString().c_str(), query.wlHint, query.dirLocal.toString().c_str(), result->dirLocal.toString().c_str());
             
-            if (result->reverse) {
-                result->reverse->dirPDF = commonPDFTerm * m_D->evaluatePDF(-sign * result->dirLocal, m) * eEnter[query.wlHint] * eEnter[query.wlHint] * std::fabs(dotHV);
-                result->reverse->fs = ret;
+            if (query.requestReverse) {
+                result->reverse.dirPDF = commonPDFTerm * m_D->evaluatePDF(-sign * result->dirLocal, m) * eEnter[query.wlHint] * eEnter[query.wlHint] * std::fabs(dotHV);
+                result->reverse.value = ret;
             }
             return ret;
         }
@@ -267,7 +267,7 @@ namespace SLR {
             m = normalize(-(eEnter[query.wlHint] * query.dirLocal + eExit[query.wlHint] * dir));
         float dotHV = dot(query.dirLocal, m);
         if (dotHV * sign <= 0) {
-            if (revPDF)
+            if (query.requestReverse)
                 *revPDF = 0.0f;
             return 0.0f;
         }
@@ -286,7 +286,7 @@ namespace SLR {
                       "commonPDFTerm: %g, mPDF: %g, F: %s, wlIdx: %u, qDir: %s, dir: %s",
                       commonPDFTerm, mPDF, F.toString().c_str(), query.wlHint, query.dirLocal.toString().c_str(), dir.toString().c_str());
             
-            if (revPDF)
+            if (query.requestReverse)
                 *revPDF = commonPDFTerm * m_D->evaluatePDF(sign * dir, m);
             return commonPDFTerm * mPDF;
         }
@@ -298,7 +298,7 @@ namespace SLR {
                       "commonPDFTerm: %g, mPDF: %g, F: %s, wlIdx: %u, qDir: %s, dir: %s",
                       commonPDFTerm, mPDF, F.toString().c_str(), query.wlHint, query.dirLocal.toString().c_str(), dir.toString().c_str());
             
-            if (revPDF)
+            if (query.requestReverse)
                 *revPDF = commonPDFTerm * m_D->evaluatePDF(-sign * dir, m) * eEnter[query.wlHint] * eEnter[query.wlHint] * std::fabs(dotHV);
             return commonPDFTerm * mPDF * eExit[query.wlHint] * eExit[query.wlHint] * std::fabs(dotHL);
         }

@@ -115,8 +115,9 @@ namespace SLR {
         Vector3D dirLocal;
         int16_t wlHint;
         DirectionType dirTypeFilter;
+        bool requestReverse;
         
-        ABDFQuery(const Vector3D &dirL, int16_t wl, DirectionType filter) : dirLocal(dirL), wlHint(wl), dirTypeFilter(filter) { }
+        ABDFQuery(const Vector3D &dirL, int16_t wl, DirectionType filter, bool reqRev) : dirLocal(dirL), wlHint(wl), dirTypeFilter(filter), requestReverse(reqRev) { }
     };
     
     struct SLR_API ABDFSample {
@@ -127,10 +128,25 @@ namespace SLR {
         ABDFSample(float uComp, float uDir0, float uDir1) : uComponent(uComp), uDir{uDir0, uDir1} { }
     };
     
+    struct SLR_API ABDFReverseInfo {
+        SampledSpectrum value;
+        float dirPDF;
+    };
+    
     struct SLR_API ABDFQueryResult {
         Vector3D dirLocal;
         float dirPDF;
         DirectionType sampledType;
+        ABDFReverseInfo reverse;
+        ABDFQueryResult() { }
+        
+        SampledSpectrum reverseValue() const {
+            return reverse.value;
+        }
+        
+        float reverseDirPDF() const {
+            return reverse.dirPDF;
+        }
     };
     
     
@@ -139,8 +155,8 @@ namespace SLR {
         Normal3D gNormalLocal;
         bool adjoint;
         
-        BSDFQuery(const Vector3D &dirSN, const Normal3D &gNormalSN, int16_t wl, DirectionType filter = DirectionType::All, bool adj = false) :
-        ABDFQuery(dirSN, wl, filter), gNormalLocal(gNormalSN), adjoint(adj) { }
+        BSDFQuery(const Vector3D &dirSN, const Normal3D &gNormalSN, int16_t wl, DirectionType filter = DirectionType::All, bool reqRev = false, bool adj = false) :
+        ABDFQuery(dirSN, wl, filter, reqRev), gNormalLocal(gNormalSN), adjoint(adj) { }
     };
     
     struct SLR_API BSDFSample : public ABDFSample {
@@ -148,14 +164,10 @@ namespace SLR {
         BSDFSample(float uComp, float uDir0, float uDir1) : ABDFSample(uComp, uDir0, uDir1) { }
     };
     
-    struct SLR_API BSDFReverseInfo {
-        SampledSpectrum fs;
-        float dirPDF;
+    struct SLR_API BSDFReverseInfo : public ABDFReverseInfo {
     };
     
     struct SLR_API BSDFQueryResult : public ABDFQueryResult {
-        BSDFReverseInfo* reverse;
-        BSDFQueryResult() : reverse(nullptr) { }
     };
     
     
@@ -164,9 +176,10 @@ namespace SLR {
         Vector3D dirLocal;
         int16_t wlHint;
         DirectionType dirTypeFilter;
+        bool requestReverse;
         
-        PFQuery(const Vector3D &dirL, int16_t wl, DirectionType filter = DirectionType::All) :
-        dirLocal(dirL), wlHint(wl), dirTypeFilter(filter) { }
+        PFQuery(const Vector3D &dirL, int16_t wl, DirectionType filter = DirectionType::All, bool reqRev = false) :
+        dirLocal(dirL), wlHint(wl), dirTypeFilter(filter), requestReverse(reqRev) { }
     };
     
     struct SLR_API PFSample {
@@ -178,13 +191,14 @@ namespace SLR {
         Vector3D dirLocal;
         float dirPDF;
         DirectionType sampledType;
+        float revDirPDF;
     };
     
     
     
     struct SLR_API VolumetricBSDFQuery : public ABDFQuery {
-        VolumetricBSDFQuery(const Vector3D &dirSN, int16_t wl, DirectionType filter) :
-        ABDFQuery(dirSN, wl, filter) { }
+        VolumetricBSDFQuery(const Vector3D &dirSN, int16_t wl, DirectionType filter, bool reqRev) :
+        ABDFQuery(dirSN, wl, filter, reqRev) { }
     };
     
     struct SLR_API VolumetricBSDFSample : public ABDFSample {
@@ -282,8 +296,8 @@ namespace SLR {
             float snCorrection = (query.adjoint ?
                                   std::fabs(query.dirLocal.z / dot(query.dirLocal, query.gNormalLocal)) :
                                   std::fabs(result->dirLocal.z / dot(result->dirLocal, query.gNormalLocal)));
-            if (result->reverse)
-                result->reverse->fs *= snCorrection;
+            if (query.requestReverse)
+                result->reverse.value *= snCorrection;
             SLRAssert(result->dirPDF == 0 || (fs_sn.allFinite() && std::isfinite(snCorrection) &&
                                               std::isfinite(result->dirPDF)),
                       "fs_sn: %s, snCorrection: %g, PDF: %g, wlIdx: %u, qDir: %s, sample: (%g, %g, %g), rDir: %s, gNormal: %s",
@@ -314,7 +328,7 @@ namespace SLR {
         }
         float evaluatePDF(const BSDFQuery &query, const Vector3D &dir, float* revPDF = nullptr) const {
             if (!matches(query.dirTypeFilter)) {
-                if (revPDF)
+                if (query.requestReverse)
                     *revPDF = 0;
                 return 0;
             }
@@ -357,7 +371,7 @@ namespace SLR {
         
         virtual SampledSpectrum sample(const PFQuery &query, const PFSample &smp, PFQueryResult* result) const = 0;
         virtual SampledSpectrum evaluate(const PFQuery &query, const Vector3D &dirIn) const = 0;
-        virtual float evaluatePDF(const PFQuery &query, const Vector3D &dirIn) const = 0;
+        virtual float evaluatePDF(const PFQuery &query, const Vector3D &dirIn, float* revPDF = nullptr) const = 0;
     };
     
     class SLR_API VolumetricBSDF : public AbstractBDF {

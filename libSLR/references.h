@@ -312,7 +312,7 @@ namespace SLR {
     class BidirectionalPathTracingRenderer;
     class AMCMCPPMRenderer;
     class VolumetricPathTracingRenderer;
-    class VolumetricBidirectionalPathTracingRenderer;
+    class VolumetricBPTRenderer;
     
     class ProgressReporter;
 }
