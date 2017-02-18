@@ -32,6 +32,7 @@
 #include "camera_nodes.h"
 #include "TriangleMeshNode.h"
 #include "InfiniteSphereNode.h"
+#include "InfinitesimalPointNode.h"
 #include "medium_nodes.h"
 #include "node_constructor.h"
 
@@ -671,6 +672,18 @@ namespace SLRSceneGraph {
                                                        };
                                                        return configFunc(params, context, err);
                                                    }
+                                                   else if (type == "ideal directional") {
+                                                       const static Function configFunc{
+                                                           0, {
+                                                               {"emittance", Type::SpectrumTexture}
+                                                           },
+                                                           [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
+                                                               SpectrumTextureRef emittance = args.at("emittance").rawRef<TypeMap::SpectrumTexture>();
+                                                               return Element::createFromReference<TypeMap::EmitterSurfaceProperty>(SurfaceMaterial::createIdealDirectionalEmitter(emittance));
+                                                           }
+                                                       };
+                                                       return configFunc(params, context, err);
+                                                   }
                                                    *err = ErrorMessage("Specified material type is invalid.");
                                                    return Element();
                                                }
@@ -758,6 +771,19 @@ namespace SLRSceneGraph {
                                                    }
                                                    
                                                    return Element::createFromReference<TypeMap::SurfaceNode>(mesh);
+                                               }
+                                               );
+            stack["createInfinitesimalPoint"] =
+            Element::create<TypeMap::Function>(1,
+                                               std::vector<ArgInfo>{{"position", Type::Point}, {"direction", Type::Vector}, {"material", Type::SurfaceMaterial}},
+                                               [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
+                                                   const auto &position = args.at("position").raw<TypeMap::Point>();
+                                                   const auto &direction = args.at("direction").raw<TypeMap::Point>();
+                                                   const SurfaceMaterialRef material = args.at("material").rawRef<TypeMap::SurfaceMaterial>();
+                                                   
+                                                   SurfaceNodeRef node = createShared<InfinitesimalPointNode>(position, direction, material);
+                                                   
+                                                   return Element::createFromReference<TypeMap::SurfaceNode>(node);
                                                }
                                                );
             stack["createHomogeneousMedium"] =

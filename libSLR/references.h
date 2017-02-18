@@ -134,6 +134,7 @@ namespace SLR {
     struct Vertex;
     class Triangle;
     class InfiniteSphere;
+    class InfinitesimalPoint;
     
     // Media
     class Medium;
@@ -215,6 +216,7 @@ namespace SLR {
     class VolumetricBSDF;
     class IDF;
     class DiffuseEDF;
+    class IdealDirectionalEDF;
     class IBLEDF;
     class MultiEDF;
     class Fresnel;
@@ -280,6 +282,7 @@ namespace SLR {
     class MixedSurfaceMaterial;
     class EmitterSurfaceProperty;
     class DiffuseEmission;
+    class IdealDirectionalEmission;
     class IBLEmission;
     class EmitterSurfaceMaterial;
     
@@ -294,6 +297,7 @@ namespace SLR {
     class InternalNode;
     class ReferenceNode;
     class InfiniteSphereNode;
+    class InfinitesimalPointNode;
     class PerspectiveCameraNode;
     class EquirectangularCameraNode;
     class SurfaceNode;

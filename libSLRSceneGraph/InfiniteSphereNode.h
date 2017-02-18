@@ -11,10 +11,9 @@
 #include <libSLR/defines.h>
 #include "references.h"
 #include "nodes.h"
-#include <libSLR/Surface/InfiniteSphere.h>
 
 namespace SLRSceneGraph {
-    class SLR_SCENEGRAPH_API InfiniteSphereNode : public Node {
+    class SLR_SCENEGRAPH_API InfiniteSphereNode : public SurfaceNode {
         SceneWRef m_scene;
         SpectrumTextureRef m_IBLTex;
         float m_scale;

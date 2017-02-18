@@ -114,6 +114,11 @@ namespace SLRSceneGraph {
         m_rawData = new SLR::DiffuseEmission(emittance->getRaw());
     };
     
+    IdealDirectionalEmission::IdealDirectionalEmission(const SpectrumTextureRef &emittance) :
+    m_emittance(emittance) {
+        m_rawData = new SLR::IdealDirectionalEmission(emittance->getRaw());
+    };
+    
     IBLEmission::IBLEmission(const SceneWRef &scene, const SpectrumTextureRef &coeffM, float scale) :
     m_scene(scene), m_coeffM(coeffM), m_scale(scale) {
         SceneRef sceneRef = m_scene.lock();
@@ -166,6 +171,10 @@ namespace SLRSceneGraph {
     
     EmitterSurfacePropertyRef SurfaceMaterial::createDiffuseEmitter(const SpectrumTextureRef &emittance) {
         return createShared<DiffuseEmission>(emittance);
+    }
+    
+    EmitterSurfacePropertyRef SurfaceMaterial::createIdealDirectionalEmitter(const SpectrumTextureRef &emittance) {
+        return createShared<IdealDirectionalEmission>(emittance);
     }
     
     SurfaceMaterialRef SurfaceMaterial::createEmitterSurfaceMaterial(const SurfaceMaterialRef &mat, const EmitterSurfacePropertyRef &emit) {

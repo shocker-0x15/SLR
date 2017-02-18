@@ -14,17 +14,6 @@
 #include <libSLR/Core/geometry.h>
 
 namespace SLRSceneGraph {
-    class SLR_SCENEGRAPH_API SurfaceNode : public Node {
-    protected:
-        MediumNodeRef m_enclosedMediumNode;
-    public:
-        void setInternalMedium(const MediumNodeRef &medium) {
-            m_enclosedMediumNode = medium;
-        }
-    };
-    
-    
-    
     // There is a possibility to define a unique vertex format suitable for editing.
     // Current implementation uses the vertex for rendering as is.
     typedef SLR::Vertex Vertex;

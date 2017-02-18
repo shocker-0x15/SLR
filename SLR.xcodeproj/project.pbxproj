@@ -214,6 +214,12 @@
 		46EA72A91D59F22B00738511 /* debugPrintf.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 46EA72A81D59F22B00738511 /* debugPrintf.cpp */; };
 		46F0BB131CD9FA2B00F81BFC /* MicrofacetSurfaceMaterial.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 46F0BB111CD9FA2B00F81BFC /* MicrofacetSurfaceMaterial.cpp */; };
 		46F0BB161CD9FA7100F81BFC /* MicrofacetSurfaceMaterial.h in Headers */ = {isa = PBXBuildFile; fileRef = 46F0BB151CD9FA7100F81BFC /* MicrofacetSurfaceMaterial.h */; };
+		46F815B71E572E4C005B9909 /* InfinitesimalPoint.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 46F815B51E572E4C005B9909 /* InfinitesimalPoint.cpp */; };
+		46F815B81E572E4C005B9909 /* InfinitesimalPoint.h in Headers */ = {isa = PBXBuildFile; fileRef = 46F815B61E572E4C005B9909 /* InfinitesimalPoint.h */; };
+		46F815BB1E5735C6005B9909 /* IdealDirectionalEmission.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 46F815B91E5735C6005B9909 /* IdealDirectionalEmission.cpp */; };
+		46F815BC1E5735C6005B9909 /* IdealDirectionalEmission.h in Headers */ = {isa = PBXBuildFile; fileRef = 46F815BA1E5735C6005B9909 /* IdealDirectionalEmission.h */; };
+		46F815BF1E573739005B9909 /* InfinitesimalPointNode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 46F815BD1E573739005B9909 /* InfinitesimalPointNode.cpp */; };
+		46F815C01E573739005B9909 /* InfinitesimalPointNode.h in Headers */ = {isa = PBXBuildFile; fileRef = 46F815BE1E573739005B9909 /* InfinitesimalPointNode.h */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -468,6 +474,12 @@
 		46EA72A81D59F22B00738511 /* debugPrintf.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = debugPrintf.cpp; path = libSLR/debugPrintf.cpp; sourceTree = SOURCE_ROOT; };
 		46F0BB111CD9FA2B00F81BFC /* MicrofacetSurfaceMaterial.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MicrofacetSurfaceMaterial.cpp; path = libSLR/SurfaceMaterials/MicrofacetSurfaceMaterial.cpp; sourceTree = SOURCE_ROOT; };
 		46F0BB151CD9FA7100F81BFC /* MicrofacetSurfaceMaterial.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MicrofacetSurfaceMaterial.h; path = libSLR/SurfaceMaterials/MicrofacetSurfaceMaterial.h; sourceTree = SOURCE_ROOT; };
+		46F815B51E572E4C005B9909 /* InfinitesimalPoint.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = InfinitesimalPoint.cpp; path = libSLR/Surface/InfinitesimalPoint.cpp; sourceTree = SOURCE_ROOT; };
+		46F815B61E572E4C005B9909 /* InfinitesimalPoint.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = InfinitesimalPoint.h; path = libSLR/Surface/InfinitesimalPoint.h; sourceTree = SOURCE_ROOT; };
+		46F815B91E5735C6005B9909 /* IdealDirectionalEmission.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = IdealDirectionalEmission.cpp; path = libSLR/SurfaceMaterials/IdealDirectionalEmission.cpp; sourceTree = SOURCE_ROOT; };
+		46F815BA1E5735C6005B9909 /* IdealDirectionalEmission.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IdealDirectionalEmission.h; path = libSLR/SurfaceMaterials/IdealDirectionalEmission.h; sourceTree = SOURCE_ROOT; };
+		46F815BD1E573739005B9909 /* InfinitesimalPointNode.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = InfinitesimalPointNode.cpp; path = libSLRSceneGraph/InfinitesimalPointNode.cpp; sourceTree = "<group>"; };
+		46F815BE1E573739005B9909 /* InfinitesimalPointNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = InfinitesimalPointNode.h; path = libSLRSceneGraph/InfinitesimalPointNode.h; sourceTree = "<group>"; };
 		46FFDDFD1B9B258400E47537 /* HostProgram */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = HostProgram; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -685,6 +697,8 @@
 				466F6C891BB6B2FB0056F2FA /* TriangleMesh.cpp */,
 				466F6C881BB6B2FB0056F2FA /* InfiniteSphere.h */,
 				466F6C871BB6B2FB0056F2FA /* InfiniteSphere.cpp */,
+				46F815B61E572E4C005B9909 /* InfinitesimalPoint.h */,
+				46F815B51E572E4C005B9909 /* InfinitesimalPoint.cpp */,
 			);
 			path = Surface;
 			sourceTree = "<group>";
@@ -703,6 +717,8 @@
 				46F0BB111CD9FA2B00F81BFC /* MicrofacetSurfaceMaterial.cpp */,
 				466F6C941BB6B3090056F2FA /* DiffuseEmission.h */,
 				466F6C931BB6B3090056F2FA /* DiffuseEmission.cpp */,
+				46F815BA1E5735C6005B9909 /* IdealDirectionalEmission.h */,
+				46F815B91E5735C6005B9909 /* IdealDirectionalEmission.cpp */,
 				466F6C961BB6B3090056F2FA /* IBLEmission.h */,
 				466F6C951BB6B3090056F2FA /* IBLEmission.cpp */,
 				4602E8BD1BC418FA00EC16FA /* SummedSurfaceMaterial.h */,
@@ -792,6 +808,8 @@
 				466F6D1C1BB6CB4E0056F2FA /* TriangleMeshNode.cpp */,
 				466F6D151BB6CB4E0056F2FA /* InfiniteSphereNode.h */,
 				466F6D141BB6CB4E0056F2FA /* InfiniteSphereNode.cpp */,
+				46F815BE1E573739005B9909 /* InfinitesimalPointNode.h */,
+				46F815BD1E573739005B9909 /* InfinitesimalPointNode.cpp */,
 				464545911E1CEC6300B4CECD /* medium_nodes.h */,
 				464545901E1CEC6300B4CECD /* medium_nodes.cpp */,
 				466F6D171BB6CB4E0056F2FA /* node_constructor.h */,
@@ -929,6 +947,7 @@
 				466F6CFB1BB6CA420056F2FA /* SurfaceObject.h in Headers */,
 				466F6CD01BB6CA070056F2FA /* Matrix4x4.h in Headers */,
 				466F6CD11BB6CA070056F2FA /* Normal3.h in Headers */,
+				46F815BC1E5735C6005B9909 /* IdealDirectionalEmission.h in Headers */,
 				460A201C1D6029C700870E0F /* StandardBVH.h in Headers */,
 				466F6D031BB6CA510056F2FA /* basic_EDFs.h in Headers */,
 				466F6CD61BB6CA070056F2FA /* Spectrum.h in Headers */,
@@ -960,6 +979,7 @@
 				46BF8CB01E2263CE00EF8E13 /* medium_nodes.h in Headers */,
 				466F6CEB1BB6CA420056F2FA /* directional_distribution_functions.h in Headers */,
 				466F6CDA1BB6CA070056F2FA /* Vector3.h in Headers */,
+				46F815B81E572E4C005B9909 /* InfinitesimalPoint.h in Headers */,
 				466F6CCD1BB6CA070056F2FA /* common_spectra.h in Headers */,
 				466F6CE31BB6CA260056F2FA /* MultiBSDF.h in Headers */,
 				466F6CF41BB6CA420056F2FA /* RandomNumberGenerator.h in Headers */,
@@ -1025,6 +1045,7 @@
 				466F6D251BB6CB4E0056F2FA /* nodes.h in Headers */,
 				466F6D231BB6CB4E0056F2FA /* node_constructor.h in Headers */,
 				461BDADE1E46FE4A00D97D37 /* medium_materials.hpp in Headers */,
+				46F815C01E573739005B9909 /* InfinitesimalPointNode.h in Headers */,
 				4602E8B31BC40E8700EC16FA /* textures.hpp in Headers */,
 				46B9589B1BDCD2B300A915DE /* location.hh in Headers */,
 				46AE85291BB718C400C70BF3 /* references.h in Headers */,
@@ -1155,6 +1176,7 @@
 				46C4A1141D1308A6003530DA /* OrenNayerBRDF.cpp in Sources */,
 				46C4A1001D12F8E6003530DA /* voronoi_textures.cpp in Sources */,
 				466F6CF11BB6CA420056F2FA /* ImageSensor.cpp in Sources */,
+				46F815BB1E5735C6005B9909 /* IdealDirectionalEmission.cpp in Sources */,
 				466F6D521BB715600056F2FA /* checker_board_textures.cpp in Sources */,
 				468F9DCC1D7DC7EB00DD02BD /* XORShiftRNG.cpp in Sources */,
 				466F6D381BB6DC170056F2FA /* ArenaAllocator.cpp in Sources */,
@@ -1211,6 +1233,7 @@
 				4645459F1E1E315100B4CECD /* TriangleMeshNode.cpp in Sources */,
 				466F6D021BB6CA510056F2FA /* basic_EDFs.cpp in Sources */,
 				466F6D041BB6CA510056F2FA /* IBLEDF.cpp in Sources */,
+				46F815B71E572E4C005B9909 /* InfinitesimalPoint.cpp in Sources */,
 				466F6D541BB715600056F2FA /* constant_textures.cpp in Sources */,
 				4645458A1E1C01CD00B4CECD /* HomogeneousMedium.cpp in Sources */,
 				4651F3321C5677F20026B8A5 /* Quaternion.cpp in Sources */,
@@ -1239,6 +1262,7 @@
 				466F6D281BB6CB4E0056F2FA /* TriangleMeshNode.cpp in Sources */,
 				464EAAFD1D683DA0000E1C65 /* builtin_math.cpp in Sources */,
 				46B9589F1BDCD2B300A915DE /* SceneParser.tab.cc in Sources */,
+				46F815BF1E573739005B9909 /* InfinitesimalPointNode.cpp in Sources */,
 				464545921E1CEC6300B4CECD /* medium_nodes.cpp in Sources */,
 				466F6D241BB6CB4E0056F2FA /* nodes.cpp in Sources */,
 			);

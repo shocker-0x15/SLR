@@ -11,6 +11,7 @@
 #include "../Core/SurfaceObject.h"
 #include "../Core/MediumObject.h"
 #include "../SurfaceMaterials/IBLEmission.h"
+#include "../Surface/InfinitesimalPoint.h"
 
 namespace SLR {
     void InternalNode::addChildNode(Node *node) {
@@ -184,5 +185,31 @@ namespace SLR {
         if (m_emission)
             mem->destroy(m_emission);
         m_emission = nullptr;
+    }
+    
+    
+    
+    void InfinitesimalPointNode::createRenderingData(Allocator* mem, const Transform* subTF, RenderingData *data) {
+        // apply transform
+        StaticTransform transform;
+        if (subTF) {
+            SLRAssert(subTF->isStatic(), "Transformation given to InfinitesimalPointNode must be static.");
+            subTF->sample(0.0f, &transform);
+        }
+        Point3D p = transform * m_position;
+        Vector3D d = transform * m_direction;
+        
+        m_surface = mem->create<InfinitesimalPoint>(p, d);
+        m_obj = mem->create<SingleSurfaceObject>(m_surface, m_material);
+        data->surfObjs.push_back(m_obj);
+    }
+    
+    void InfinitesimalPointNode::destroyRenderingData(Allocator* mem) {
+        if (m_obj)
+            mem->destroy(m_obj);
+        m_obj = nullptr;
+        if (m_surface)
+            mem->destroy(m_surface);
+        m_surface = nullptr;
     }
 }

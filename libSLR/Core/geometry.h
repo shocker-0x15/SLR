@@ -322,7 +322,7 @@ namespace SLR {
         virtual bool intersect(const Ray &ray, SurfaceInteraction* si) const = 0;
         virtual void getSurfacePoint(const SurfaceInteraction &si, SurfacePoint* surfPt) const = 0;
         virtual float area() const = 0;
-        virtual void sample(float u0, float u1, SurfacePoint* surfPt, float* areaPDF) const = 0;
+        virtual void sample(float u0, float u1, SurfacePoint* surfPt, float* areaPDF, DirectionType* posType) const = 0;
         virtual float evaluateAreaPDF(const SurfacePoint& surfPt) const = 0;
     };
     

@@ -63,7 +63,7 @@ namespace SLR {
         return 4 * M_PI;// * Inf * Inf;
     }
     
-    void InfiniteSphere::sample(float u0, float u1, SurfacePoint *surfPt, float *areaPDF) const {
+    void InfiniteSphere::sample(float u0, float u1, SurfacePoint *surfPt, float *areaPDF, DirectionType* posType) const {
         SLRAssert_NotImplemented();
     }
     

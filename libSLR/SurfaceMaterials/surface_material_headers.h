@@ -16,6 +16,7 @@
 #include "MixedSurfaceMaterial.h"
 
 #include "DiffuseEmission.h"
+#include "IdealDirectionalEmission.h"
 #include "IBLEmission.h"
 
 #endif /* surface_material_headers_h */

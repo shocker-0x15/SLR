@@ -32,6 +32,7 @@ namespace SLRSceneGraph {
         static SurfaceMaterialRef createSummedMaterial(const SurfaceMaterialRef &mat0, const SurfaceMaterialRef &mat1);
         static SurfaceMaterialRef createMixedMaterial(const SurfaceMaterialRef &mat0, const SurfaceMaterialRef &mat1, const FloatTextureRef &factor);
         static EmitterSurfacePropertyRef createDiffuseEmitter(const SpectrumTextureRef &emittance);
+        static EmitterSurfacePropertyRef createIdealDirectionalEmitter(const SpectrumTextureRef &emittance);
         static SurfaceMaterialRef createEmitterSurfaceMaterial(const SurfaceMaterialRef &mat, const EmitterSurfacePropertyRef &emit);
     };
     
@@ -190,6 +191,12 @@ namespace SLRSceneGraph {
         SpectrumTextureRef m_emittance;
     public:
         DiffuseEmission(const SpectrumTextureRef &emittance);
+    };
+    
+    class SLR_SCENEGRAPH_API IdealDirectionalEmission : public EmitterSurfaceProperty {
+        SpectrumTextureRef m_emittance;
+    public:
+        IdealDirectionalEmission(const SpectrumTextureRef &emittance);
     };
     
     class SLR_SCENEGRAPH_API IBLEmission : public EmitterSurfaceProperty {

@@ -27,4 +27,13 @@ namespace SLR {
             return 0;
         return dir.z > 0.0f ? dir.z / M_PI : 0.0f;
     }
+    
+    
+    
+    SampledSpectrum IdealDirectionalEDF::sample(const EDFQuery &query, const EDFSample &smp, EDFQueryResult *result) const {
+        result->dir_sn = Vector3D::Ez;
+        result->dirPDF = 1.0f;
+        result->dirType = m_type;
+        return SampledSpectrum::One;
+    }
 }

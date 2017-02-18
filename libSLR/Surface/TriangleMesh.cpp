@@ -220,7 +220,7 @@ namespace SLR {
         return 0.5f * cross(p1 - p0, p2 - p0).length();
     }
     
-    void Triangle::sample(float u0, float u1, SurfacePoint* surfPt, float* areaPDF) const {
+    void Triangle::sample(float u0, float u1, SurfacePoint* surfPt, float* areaPDF, DirectionType* posType) const {
         //    const SurfaceMaterial* mat = m_mat;
         float b0, b1, b2;
         uniformSampleTriangle(u0, u1, &b0, &b1);
@@ -253,6 +253,7 @@ namespace SLR {
                                texCoord0Dir
                                );
         *areaPDF = 1.0f / area();
+        *posType = DirectionType::LowFreq;
     }
     
     float Triangle::evaluateAreaPDF(const SurfacePoint& surfPt) const {

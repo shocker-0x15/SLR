@@ -14,12 +14,6 @@
 #include "geometry.h"
 
 namespace SLR {
-    class SLR_API MediumNode : public Node {
-    public:
-    };
-    
-    
-    
     class SLR_API HomogeneousMediumNode : public MediumNode {
         HomogeneousMedium* m_medium;
         const MediumMaterial* m_material;

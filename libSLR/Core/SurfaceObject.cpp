@@ -74,8 +74,7 @@ namespace SLR {
     
     SampledSpectrum SingleSurfaceObject::sample(const StaticTransform &transform,
                                                 const LightPosQuery &query, const SurfaceLightPosSample &smp, SurfaceLightPosQueryResult* result) const {
-        m_surface->sample(smp.uPos[0], smp.uPos[1], &result->surfPt, &result->areaPDF);
-        result->posType = DirectionType::LowFreq;// TODO: consider sampling delta function. and dedicated enum?
+        m_surface->sample(smp.uPos[0], smp.uPos[1], &result->surfPt, &result->areaPDF, &result->posType);
         result->surfPt.setObject(this);
         result->surfPt.applyTransform(transform);
         return m_material->emittance(result->surfPt, query.wls);
@@ -220,9 +219,9 @@ namespace SLR {
                                       );
         result->surfPt.setObject(this);
         result->surfPt.applyTransform(transform);
-        result->posType = DirectionType::LowFreq;
         // The true value is: lim_{l to inf} uvPDF / (2 * M_PI * M_PI * std::sin(theta)) / l^2
         result->areaPDF = uvPDF / (2 * M_PI * M_PI * std::sin(theta));
+        result->posType = DirectionType::LowFreq;
         return m_material->emittance(result->surfPt, query.wls);
     }
     

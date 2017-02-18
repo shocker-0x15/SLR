@@ -14,23 +14,6 @@
 #include "../Surface/TriangleMesh.h"
 
 namespace SLR {
-    class SLR_API SurfaceNode : public Node {
-    protected:
-        MediumNode* m_enclosedMediumNode;
-        SurfaceObject* m_boundarySurfObj;
-        MediumObject* m_enclosedMedObj;
-        Transform* m_mediumTransform;
-        TransformedMediumObject* m_TFMedObj;
-    public:
-        SurfaceNode() : m_enclosedMediumNode(nullptr), m_boundarySurfObj(nullptr), m_enclosedMedObj(nullptr), m_mediumTransform(nullptr), m_TFMedObj(nullptr) { }
-        
-        void setInternalMedium(MediumNode* medium) {
-            m_enclosedMediumNode = medium;
-        }
-    };
-    
-    
-    
     class SLR_API TriangleMeshNode : public SurfaceNode {
     public:
         class MaterialGroup {

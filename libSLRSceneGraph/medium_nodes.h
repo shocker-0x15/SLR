@@ -14,12 +14,6 @@
 #include <libSLR/Core/geometry.h>
 
 namespace SLRSceneGraph {
-    class SLR_SCENEGRAPH_API MediumNode : public Node {
-    public:
-    };
-    
-    
-    
     class SLR_SCENEGRAPH_API HomogeneousMediumNode : public MediumNode {
         SLR::BoundingBox3D m_region;
         InputSpectrumRef m_sigma_s;

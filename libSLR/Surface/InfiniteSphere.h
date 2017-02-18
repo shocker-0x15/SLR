@@ -26,7 +26,7 @@ namespace SLR {
         bool intersect(const Ray &ray, SurfaceInteraction* si) const override;
         void getSurfacePoint(const SurfaceInteraction &si, SurfacePoint* surfPt) const override;
         float area() const override;
-        void sample(float u0, float u1, SurfacePoint* surfPt, float* areaPDF) const override;
+        void sample(float u0, float u1, SurfacePoint* surfPt, float* areaPDF, DirectionType* posType) const override;
         float evaluateAreaPDF(const SurfacePoint& surfPt) const override;
     };    
 }

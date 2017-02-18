@@ -91,6 +91,23 @@ namespace SLRSceneGraph {
         
         void prepareForRendering() override;
     };
+    
+    
+    
+    class SLR_SCENEGRAPH_API SurfaceNode : public Node {
+    protected:
+        MediumNodeRef m_enclosedMediumNode;
+    public:
+        void setInternalMedium(const MediumNodeRef &medium) {
+            m_enclosedMediumNode = medium;
+        }
+    };
+    
+    
+    
+    class SLR_SCENEGRAPH_API MediumNode : public Node {
+    public:
+    };
 }
 
 #endif
