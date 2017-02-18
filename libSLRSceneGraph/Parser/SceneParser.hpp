@@ -67,12 +67,12 @@ namespace SLRSceneGraph {
         TypeMapDef(Matrix, SLR::Matrix4x4);
         TypeMapDef(Vertex, SLR::Vertex);
         TypeMapDef(Transform, SLR::Transform);
-        TypeMapDef(Spectrum, SLR::InputSpectrum);
+        TypeMapDef(Spectrum, SLR::AssetSpectrum);
         TypeMapDef(Image2D, SLR::TiledImage2D);
         TypeMapDef(Texture2DMapping, SLRSceneGraph::Texture2DMapping);
         TypeMapDef(Texture3DMapping, SLRSceneGraph::Texture3DMapping);
         TypeMapDef(SpectrumTexture, SLRSceneGraph::SpectrumTexture);
-        TypeMapDef(NormalTexture, SLRSceneGraph::Normal3DTexture);
+        TypeMapDef(NormalTexture, SLRSceneGraph::NormalTexture);
         TypeMapDef(FloatTexture, SLRSceneGraph::FloatTexture);
         TypeMapDef(SurfaceMaterial, SLRSceneGraph::SurfaceMaterial);
         TypeMapDef(EmitterSurfaceProperty, SLRSceneGraph::EmitterSurfaceProperty);

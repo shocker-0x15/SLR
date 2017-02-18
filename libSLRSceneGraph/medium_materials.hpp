@@ -49,9 +49,9 @@ namespace SLRSceneGraph {
     
     
     
-    class SLR_SCENEGRAPH_API IsotropicScattering : public MediumMaterial {
+    class SLR_SCENEGRAPH_API IsotropicScatteringMediumMaterial : public MediumMaterial {
     public:
-        IsotropicScattering();
+        IsotropicScatteringMediumMaterial();
     };
 }
 

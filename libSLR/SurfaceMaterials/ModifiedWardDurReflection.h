@@ -13,12 +13,12 @@
 #include "../Core/surface_material.h"
 
 namespace SLR {
-    class SLR_API ModifiedWardDurReflection : public SurfaceMaterial {
+    class SLR_API ModifiedWardDurReflectionSurfaceMaterial : public SurfaceMaterial {
         const SpectrumTexture* m_reflectance;
         const FloatTexture* m_anisoX;
         const FloatTexture* m_anisoY;
     public:
-        ModifiedWardDurReflection(const SpectrumTexture* reflectance, const FloatTexture* anisoX, const FloatTexture* anisoY) :
+        ModifiedWardDurReflectionSurfaceMaterial(const SpectrumTexture* reflectance, const FloatTexture* anisoX, const FloatTexture* anisoY) :
         m_reflectance(reflectance), m_anisoX(anisoX), m_anisoY(anisoY) { };
         
         BSDF* getBSDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem, float scale = 1.0f) const override;

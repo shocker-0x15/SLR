@@ -13,12 +13,12 @@
 #include "../Core/geometry.h"
 
 namespace SLR {
-    class SLR_API InfinitesimalPoint : public Surface {
+    class SLR_API InfinitesimalPointSurfaceShape : public SurfaceShape {
         Point3D m_position;
         Vector3D m_direction;
     public:
-        InfinitesimalPoint(const Point3D &p, const Vector3D &d) : m_position(p), m_direction(d) { }
-        ~InfinitesimalPoint() { }
+        InfinitesimalPointSurfaceShape(const Point3D &p, const Vector3D &d) : m_position(p), m_direction(d) { }
+        ~InfinitesimalPointSurfaceShape() { }
         
         float costForIntersect() const override { return 0.0f; }
         BoundingBox3D bounds() const override { return m_position; }

@@ -31,7 +31,7 @@ namespace SLRSceneGraph {
         m_setup = false;
     }
     
-    HomogeneousMediumNode::HomogeneousMediumNode(const SLR::BoundingBox3D &region, const InputSpectrumRef &sigma_s, const InputSpectrumRef &sigma_e, const MediumMaterialRef &material) :
+    HomogeneousMediumNode::HomogeneousMediumNode(const SLR::BoundingBox3D &region, const AssetSpectrumRef &sigma_s, const AssetSpectrumRef &sigma_e, const MediumMaterialRef &material) :
     m_region(region), m_sigma_s(sigma_s), m_sigma_e(sigma_e), m_material(material) {
         allocateRawData();
     }
@@ -64,17 +64,17 @@ namespace SLRSceneGraph {
         m_setup = false;
     }
     
-    GridMediumNode::GridMediumNode(const SLR::BoundingBox3D &region, const SLR::InputSpectrum** sigma_s, const SLR::InputSpectrum** sigma_e,
+    GridMediumNode::GridMediumNode(const SLR::BoundingBox3D &region, const SLR::AssetSpectrum** sigma_s, const SLR::AssetSpectrum** sigma_e,
                                    uint32_t elemSize, uint32_t numX, uint32_t numY, uint32_t numZ, const MediumMaterialRef &material) :
     m_region(region),
     m_numX(numX), m_numY(numY), m_numZ(numZ), m_material(material) {
         // allocate 3D grid as 2D array.
-        m_sigma_s = (SLR::InputSpectrum**)malloc(sizeof(SLR::InputSpectrum*) * m_numZ);
-        m_sigma_e = (SLR::InputSpectrum**)malloc(sizeof(SLR::InputSpectrum*) * m_numZ);
+        m_sigma_s = (SLR::AssetSpectrum**)malloc(sizeof(SLR::AssetSpectrum*) * m_numZ);
+        m_sigma_e = (SLR::AssetSpectrum**)malloc(sizeof(SLR::AssetSpectrum*) * m_numZ);
         for (int z = 0; z < m_numZ; ++z) {
             size_t allocateSize = elemSize * m_numX * m_numY;
-            m_sigma_s[z] = (SLR::InputSpectrum*)malloc(allocateSize);
-            m_sigma_e[z] = (SLR::InputSpectrum*)malloc(allocateSize);
+            m_sigma_s[z] = (SLR::AssetSpectrum*)malloc(allocateSize);
+            m_sigma_e[z] = (SLR::AssetSpectrum*)malloc(allocateSize);
             memcpy((void*)m_sigma_s[z], (void*)sigma_s[z], allocateSize);
             memcpy((void*)m_sigma_e[z], (void*)sigma_e[z], allocateSize);
         }
@@ -121,7 +121,7 @@ namespace SLRSceneGraph {
         m_setup = false;
     }
     
-    DensityGridMediumNode::DensityGridMediumNode(const SLR::BoundingBox3D &region, const InputSpectrumRef &base_sigma_s, const InputSpectrumRef &base_sigma_e, std::unique_ptr<float[]> &density_grid,
+    DensityGridMediumNode::DensityGridMediumNode(const SLR::BoundingBox3D &region, const AssetSpectrumRef &base_sigma_s, const AssetSpectrumRef &base_sigma_e, std::unique_ptr<float[]> &density_grid,
                                                  uint32_t numX, uint32_t numY, uint32_t numZ, const MediumMaterialRef &material) :
     m_region(region), m_base_sigma_s(base_sigma_s), m_base_sigma_e(base_sigma_e),
     m_density_grid(std::move(density_grid)), m_numX(numX), m_numY(numY), m_numZ(numZ), m_material(material) {

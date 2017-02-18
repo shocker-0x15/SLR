@@ -14,13 +14,13 @@
 
 namespace SLR {
     class SLR_API ConstantSpectrumTexture : public SpectrumTexture {
-        const InputSpectrum* m_value;
+        const AssetSpectrum* m_value;
     public:
-        ConstantSpectrumTexture(const InputSpectrum* value) : m_value(value) { }
+        ConstantSpectrumTexture(const AssetSpectrum* value) : m_value(value) { }
         
         SampledSpectrum evaluate(const SurfacePoint &surfPt, const WavelengthSamples &wls) const override { return m_value->evaluate(wls); }
         SampledSpectrum evaluate(const MediumPoint &medPt, const WavelengthSamples &wls) const override { return m_value->evaluate(wls); }
-        RegularConstantContinuous2D* createIBLImportanceMap() const override;
+        RegularConstantContinuousDistribution2D* createIBLImportanceMap() const override;
     };
     
     class SLR_API ConstantFloatTexture : public FloatTexture {

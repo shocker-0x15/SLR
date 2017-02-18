@@ -88,12 +88,12 @@ namespace SLR {
 #endif
     }
     
-    RegularConstantContinuous2D* VoronoiSpectrumTexture::createIBLImportanceMap() const {
+    RegularConstantContinuousDistribution2D* VoronoiSpectrumTexture::createIBLImportanceMap() const {
         SLRAssert_NotImplemented();
         return nullptr;
     }
     
-    Normal3D VoronoiNormal3DTexture::evaluate(const Point3D &p) const {
+    Normal3D VoronoiNormalTexture::evaluate(const Point3D &p) const {
         float closestDistance;
         uint32_t hash;
         uint32_t fpIdx;

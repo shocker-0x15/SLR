@@ -28,7 +28,7 @@ namespace SLRSceneGraph {
     public:
         struct MaterialGroup {
             SurfaceMaterialRef material;
-            Normal3DTextureRef normalMap;
+            NormalTextureRef normalMap;
             FloatTextureRef alphaMap;
             std::vector<Triangle> triangles;
         };
@@ -44,7 +44,7 @@ namespace SLRSceneGraph {
         TriangleMeshNode();
         
         uint64_t addVertex(const SLR::Vertex &v);
-        void addTriangles(const SurfaceMaterialRef &mat, const Normal3DTextureRef &normalMap, const FloatTextureRef &alphaMap, const std::vector<Triangle> &&triangles);
+        void addTriangles(const SurfaceMaterialRef &mat, const NormalTextureRef &normalMap, const FloatTextureRef &alphaMap, const std::vector<Triangle> &&triangles);
         void useOnlyForBoundary(bool b) {
             m_onlyForBoundary = b;
         }

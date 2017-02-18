@@ -31,15 +31,15 @@ namespace SLR {
         SampledSpectrum evaluate(const MediumPoint &medPt, const WavelengthSamples &wls) const override {
             return evaluate(m_mapping->map(medPt) / m_scale, wls);
         }
-        RegularConstantContinuous2D* createIBLImportanceMap() const override;
+        RegularConstantContinuousDistribution2D* createIBLImportanceMap() const override;
     };
     
-    class SLR_API VoronoiNormal3DTexture : public Normal3DTexture {
+    class SLR_API VoronoiNormalTexture : public NormalTexture {
         const Texture3DMapping* m_mapping;
         float m_scale;
         float m_cosThetaMax;
     public:
-        VoronoiNormal3DTexture(const Texture3DMapping* mapping, float scale, float thetaMax) :
+        VoronoiNormalTexture(const Texture3DMapping* mapping, float scale, float thetaMax) :
         m_mapping(mapping), m_scale(scale), m_cosThetaMax(std::cos(thetaMax)) { }
         
         Normal3D evaluate(const Point3D &p) const;

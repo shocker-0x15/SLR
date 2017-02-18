@@ -242,7 +242,7 @@ namespace SLR {
         
         m_numLights = (uint32_t)lightImportances.size();
         m_lightList = new const MediumObject*[m_numLights];
-        m_lightDist1D = new RegularConstantDiscrete1D(lightImportances);
+        m_lightDist1D = new DiscreteDistribution1D(lightImportances);
         
         for (int i = 0; i < m_numLights; ++i) {
             uint32_t objIdx = lightIndices[i];

@@ -77,7 +77,7 @@ namespace SLR {
         return ret;
     }
     
-    RegularConstantContinuous2D* ImageSpectrumTexture::createIBLImportanceMap() const {
+    RegularConstantContinuousDistribution2D* ImageSpectrumTexture::createIBLImportanceMap() const {
         uint32_t mapWidth = m_data->width() / 4;
         uint32_t mapHeight = m_data->height() / 4;
         float deltaX = m_data->width() / mapWidth;
@@ -129,12 +129,12 @@ namespace SLR {
             SLRAssert(std::isfinite(luminance), "Invalid area average value.");
             return std::sin(M_PI * (y + 0.5f) / mapHeight) * luminance;
         };
-        return new RegularConstantContinuous2D(mapWidth, mapHeight, pickFunc);
+        return new RegularConstantContinuousDistribution2D(mapWidth, mapHeight, pickFunc);
     }
     
     
     
-    Normal3D ImageNormal3DTexture::evaluate(const Point3D &p) const {
+    Normal3D ImageNormalTexture::evaluate(const Point3D &p) const {
         float u = std::fmod(p.x, 1.0f);
         float v = std::fmod(p.y, 1.0f);
         u += u < 0 ? 1.0f : 0.0f;

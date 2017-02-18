@@ -40,7 +40,7 @@ namespace SLRSceneGraph {
         delete m_rawData;
     }
     
-    Normal3DTexture::~Normal3DTexture() {
+    NormalTexture::~NormalTexture() {
         delete m_rawData;
     }
     
@@ -48,7 +48,7 @@ namespace SLRSceneGraph {
         delete m_rawData;
     }
     
-    ConstantSpectrumTexture::ConstantSpectrumTexture(const InputSpectrumRef &value) : m_value(value) {
+    ConstantSpectrumTexture::ConstantSpectrumTexture(const AssetSpectrumRef &value) : m_value(value) {
         m_rawData = new SLR::ConstantSpectrumTexture(value.get());
     }
     
@@ -61,9 +61,9 @@ namespace SLRSceneGraph {
         m_rawData = new SLR::ImageSpectrumTexture(image.get(), mapping->getRaw());
     }
     
-    ImageNormal3DTexture::ImageNormal3DTexture(const Texture2DMappingRef &mapping, const TiledImage2DRef &image) :
+    ImageNormalTexture::ImageNormalTexture(const Texture2DMappingRef &mapping, const TiledImage2DRef &image) :
     m_mapping(mapping), m_data(image) {
-        m_rawData = new SLR::ImageNormal3DTexture(image.get(), mapping->getRaw());
+        m_rawData = new SLR::ImageNormalTexture(image.get(), mapping->getRaw());
     }
     
     ImageFloatTexture::ImageFloatTexture(const Texture2DMappingRef &mapping, const TiledImage2DRef &image) :
@@ -71,14 +71,14 @@ namespace SLRSceneGraph {
         m_rawData = new SLR::ImageFloatTexture(image.get(), mapping->getRaw());
     }
     
-    CheckerBoardSpectrumTexture::CheckerBoardSpectrumTexture(const Texture2DMappingRef &mapping, const InputSpectrumRef &v0, const InputSpectrumRef &v1) :
+    CheckerBoardSpectrumTexture::CheckerBoardSpectrumTexture(const Texture2DMappingRef &mapping, const AssetSpectrumRef &v0, const AssetSpectrumRef &v1) :
     m_mapping(mapping), m_values{v0, v1} {
         m_rawData = new SLR::CheckerBoardSpectrumTexture(mapping->getRaw(), v0.get(), v1.get());
     }
     
-    CheckerBoardNormal3DTexture::CheckerBoardNormal3DTexture(const Texture2DMappingRef &mapping, float stepWidth, bool reverse) :
+    CheckerBoardNormalTexture::CheckerBoardNormalTexture(const Texture2DMappingRef &mapping, float stepWidth, bool reverse) :
     m_mapping(mapping), m_stepWidth(stepWidth), m_reverse(reverse) {
-        m_rawData = new SLR::CheckerBoardNormal3DTexture(mapping->getRaw(), stepWidth, reverse);
+        m_rawData = new SLR::CheckerBoardNormalTexture(mapping->getRaw(), stepWidth, reverse);
     }
     
     CheckerBoardFloatTexture::CheckerBoardFloatTexture(const Texture2DMappingRef &mapping, float v0, float v1) :
@@ -91,9 +91,9 @@ namespace SLRSceneGraph {
         m_rawData = new SLR::VoronoiSpectrumTexture(mapping->getRaw(), scale, brightness);
     }
     
-    VoronoiNormal3DTexture::VoronoiNormal3DTexture(const Texture3DMappingRef &mapping, float scale, float thetaMax) :
+    VoronoiNormalTexture::VoronoiNormalTexture(const Texture3DMappingRef &mapping, float scale, float thetaMax) :
     m_mapping(mapping), m_scale(scale), m_thetaMax(thetaMax) {
-        m_rawData = new SLR::VoronoiNormal3DTexture(mapping->getRaw(), scale, thetaMax);
+        m_rawData = new SLR::VoronoiNormalTexture(mapping->getRaw(), scale, thetaMax);
     }
     
     VoronoiFloatTexture::VoronoiFloatTexture(const Texture3DMappingRef &mapping, float scale, float valueScale, bool flat) :

@@ -8,21 +8,21 @@
 #include "Vector3.h"
 
 namespace SLR {
-    template struct SLR_API Vector3Template<float>;
-//    template SLR_API const Vector3Template<float> Vector3Template<float>::Zero;
-//    template SLR_API const Vector3Template<float> Vector3Template<float>::One;
-//    template SLR_API const Vector3Template<float> Vector3Template<float>::Inf;
-//    template SLR_API const Vector3Template<float> Vector3Template<float>::NaN;
-//    template SLR_API const Vector3Template<float> Vector3Template<float>::Ex;
-//    template SLR_API const Vector3Template<float> Vector3Template<float>::Ey;
-//    template SLR_API const Vector3Template<float> Vector3Template<float>::Ez;
+    template struct SLR_API Vector3DTemplate<float>;
+//    template SLR_API const Vector3DTemplate<float> Vector3DTemplate<float>::Zero;
+//    template SLR_API const Vector3DTemplate<float> Vector3DTemplate<float>::One;
+//    template SLR_API const Vector3DTemplate<float> Vector3DTemplate<float>::Inf;
+//    template SLR_API const Vector3DTemplate<float> Vector3DTemplate<float>::NaN;
+//    template SLR_API const Vector3DTemplate<float> Vector3DTemplate<float>::Ex;
+//    template SLR_API const Vector3DTemplate<float> Vector3DTemplate<float>::Ey;
+//    template SLR_API const Vector3DTemplate<float> Vector3DTemplate<float>::Ez;
 
-    template struct SLR_API Vector3Template<double>;
-//    template SLR_API const Vector3Template<double> Vector3Template<double>::Zero;
-//    template SLR_API const Vector3Template<double> Vector3Template<double>::One;
-//    template SLR_API const Vector3Template<double> Vector3Template<double>::Inf;
-//    template SLR_API const Vector3Template<double> Vector3Template<double>::NaN;
-//    template SLR_API const Vector3Template<double> Vector3Template<double>::Ex;
-//    template SLR_API const Vector3Template<double> Vector3Template<double>::Ey;
-//    template SLR_API const Vector3Template<double> Vector3Template<double>::Ez;
+    template struct SLR_API Vector3DTemplate<double>;
+//    template SLR_API const Vector3DTemplate<double> Vector3DTemplate<double>::Zero;
+//    template SLR_API const Vector3DTemplate<double> Vector3DTemplate<double>::One;
+//    template SLR_API const Vector3DTemplate<double> Vector3DTemplate<double>::Inf;
+//    template SLR_API const Vector3DTemplate<double> Vector3DTemplate<double>::NaN;
+//    template SLR_API const Vector3DTemplate<double> Vector3DTemplate<double>::Ex;
+//    template SLR_API const Vector3DTemplate<double> Vector3DTemplate<double>::Ey;
+//    template SLR_API const Vector3DTemplate<double> Vector3DTemplate<double>::Ez;
 }

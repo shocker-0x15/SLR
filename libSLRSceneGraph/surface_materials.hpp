@@ -28,7 +28,7 @@ namespace SLRSceneGraph {
         static SurfaceMaterialRef createAshikhminShirley(const SpectrumTextureRef &Rd, const SpectrumTextureRef &Rs, const FloatTextureRef &nx, const FloatTextureRef &ny);
         static SurfaceMaterialRef createMicrofacetMetal(const SpectrumTextureRef &eta, const SpectrumTextureRef &k, const FloatTextureRef &alpha_g);
         static SurfaceMaterialRef createMicrofacetGlass(const SpectrumTextureRef &etaExt, const SpectrumTextureRef &etaInt, const FloatTextureRef &alpha_g);
-        static SurfaceMaterialRef createInverseMaterial(const SurfaceMaterialRef &baseMat);
+        static SurfaceMaterialRef createFlippedMaterial(const SurfaceMaterialRef &baseMat);
         static SurfaceMaterialRef createSummedMaterial(const SurfaceMaterialRef &mat0, const SurfaceMaterialRef &mat1);
         static SurfaceMaterialRef createMixedMaterial(const SurfaceMaterialRef &mat0, const SurfaceMaterialRef &mat1, const FloatTextureRef &factor);
         static EmitterSurfacePropertyRef createDiffuseEmitter(const SpectrumTextureRef &emittance);
@@ -108,66 +108,66 @@ namespace SLRSceneGraph {
     
     
     
-    class SLR_SCENEGRAPH_API DiffuseReflection : public SurfaceMaterial {
+    class SLR_SCENEGRAPH_API DiffuseReflectionSurfaceMaterial : public SurfaceMaterial {
         SpectrumTextureRef m_reflectance;
         FloatTextureRef m_sigma;
     public:
-        DiffuseReflection(const SpectrumTextureRef &reflectance, const FloatTextureRef &sigma);
+        DiffuseReflectionSurfaceMaterial(const SpectrumTextureRef &reflectance, const FloatTextureRef &sigma);
     };
     
-    class SLR_SCENEGRAPH_API SpecularReflection : public SurfaceMaterial {
+    class SLR_SCENEGRAPH_API SpecularReflectionSurfaceMaterial : public SurfaceMaterial {
         SpectrumTextureRef m_coeffR;
         SpectrumTextureRef m_eta;
         SpectrumTextureRef m_k;
     public:
-        SpecularReflection(const SpectrumTextureRef &coeffR, const SpectrumTextureRef &eta, const SpectrumTextureRef &k);
+        SpecularReflectionSurfaceMaterial(const SpectrumTextureRef &coeffR, const SpectrumTextureRef &eta, const SpectrumTextureRef &k);
     };
     
-    class SLR_SCENEGRAPH_API SpecularScattering : public SurfaceMaterial {
+    class SLR_SCENEGRAPH_API SpecularScatteringSurfaceMaterial : public SurfaceMaterial {
         SpectrumTextureRef m_coeff;
         SpectrumTextureRef m_etaExt;
         SpectrumTextureRef m_etaInt;
     public:
-        SpecularScattering(const SpectrumTextureRef &coeff, const SpectrumTextureRef &etaExt, const SpectrumTextureRef &etaInt);
+        SpecularScatteringSurfaceMaterial(const SpectrumTextureRef &coeff, const SpectrumTextureRef &etaExt, const SpectrumTextureRef &etaInt);
     };
     
-    class SLR_SCENEGRAPH_API InverseSurfaceMaterial : public SurfaceMaterial {
+    class SLR_SCENEGRAPH_API FlippedSurfaceMaterial : public SurfaceMaterial {
         SurfaceMaterialRef m_baseMat;
     public:
-        InverseSurfaceMaterial(const SurfaceMaterialRef &baseMat);
+        FlippedSurfaceMaterial(const SurfaceMaterialRef &baseMat);
     };
     
-    class SLR_SCENEGRAPH_API AshikhminShirleyReflection : public SurfaceMaterial {
+    class SLR_SCENEGRAPH_API AshikhminShirleyReflectionSurfaceMaterial : public SurfaceMaterial {
         SpectrumTextureRef m_Rs;
         SpectrumTextureRef m_Rd;
         FloatTextureRef m_nu;
         FloatTextureRef m_nv;
     public:
-        AshikhminShirleyReflection(const SpectrumTextureRef &Rs, const SpectrumTextureRef &Rd, const FloatTextureRef &nu, const FloatTextureRef &nv);
+        AshikhminShirleyReflectionSurfaceMaterial(const SpectrumTextureRef &Rs, const SpectrumTextureRef &Rd, const FloatTextureRef &nu, const FloatTextureRef &nv);
     };
     
-    class SLR_SCENEGRAPH_API ModifiedWardDurReflection : public SurfaceMaterial {
+    class SLR_SCENEGRAPH_API ModifiedWardDurReflectionSurfaceMaterial : public SurfaceMaterial {
         SpectrumTextureRef m_reflectance;
         FloatTextureRef m_anisoX;
         FloatTextureRef m_anisoY;
     public:
-        ModifiedWardDurReflection(const SpectrumTextureRef &reflectance, const FloatTextureRef &anisoX, const FloatTextureRef &anisoY);
+        ModifiedWardDurReflectionSurfaceMaterial(const SpectrumTextureRef &reflectance, const FloatTextureRef &anisoX, const FloatTextureRef &anisoY);
     };
     
-    class SLR_SCENEGRAPH_API MicrofacetReflection : public SurfaceMaterial {
+    class SLR_SCENEGRAPH_API MicrofacetReflectionSurfaceMaterial : public SurfaceMaterial {
         SpectrumTextureRef m_eta;
         SpectrumTextureRef m_k;
         const SVMicrofacetDistributionRef m_D;
     public:
-        MicrofacetReflection(const SpectrumTextureRef &eta, const SpectrumTextureRef &k, const SVMicrofacetDistributionRef &D);
+        MicrofacetReflectionSurfaceMaterial(const SpectrumTextureRef &eta, const SpectrumTextureRef &k, const SVMicrofacetDistributionRef &D);
     };
     
-    class SLR_SCENEGRAPH_API MicrofacetScattering : public SurfaceMaterial {
+    class SLR_SCENEGRAPH_API MicrofacetScatteringSurfaceMaterial : public SurfaceMaterial {
         SpectrumTextureRef m_etaExt;
         SpectrumTextureRef m_etaInt;
         SVMicrofacetDistributionRef m_D;
     public:
-        MicrofacetScattering(const SpectrumTextureRef &etaExt, const SpectrumTextureRef &etaInt, const SVMicrofacetDistributionRef &D);
+        MicrofacetScatteringSurfaceMaterial(const SpectrumTextureRef &etaExt, const SpectrumTextureRef &etaInt, const SVMicrofacetDistributionRef &D);
     };
     
     class SLR_SCENEGRAPH_API SummedSurfaceMaterial : public SurfaceMaterial {
@@ -187,24 +187,24 @@ namespace SLRSceneGraph {
     
     
     
-    class SLR_SCENEGRAPH_API DiffuseEmission : public EmitterSurfaceProperty {
+    class SLR_SCENEGRAPH_API DiffuseEmitterSurfaceProperty : public EmitterSurfaceProperty {
         SpectrumTextureRef m_emittance;
     public:
-        DiffuseEmission(const SpectrumTextureRef &emittance);
+        DiffuseEmitterSurfaceProperty(const SpectrumTextureRef &emittance);
     };
     
-    class SLR_SCENEGRAPH_API IdealDirectionalEmission : public EmitterSurfaceProperty {
+    class SLR_SCENEGRAPH_API IdealDirectionalEmitterSurfaceProperty : public EmitterSurfaceProperty {
         SpectrumTextureRef m_emittance;
     public:
-        IdealDirectionalEmission(const SpectrumTextureRef &emittance);
+        IdealDirectionalEmitterSurfaceProperty(const SpectrumTextureRef &emittance);
     };
     
-    class SLR_SCENEGRAPH_API IBLEmission : public EmitterSurfaceProperty {
+    class SLR_SCENEGRAPH_API IBLEmitterSurfaceProperty : public EmitterSurfaceProperty {
         SceneWRef m_scene;
         SpectrumTextureRef m_coeffM;
         float m_scale;
     public:
-        IBLEmission(const SceneWRef &scene, const SpectrumTextureRef &coeffM, float scale);
+        IBLEmitterSurfaceProperty(const SceneWRef &scene, const SpectrumTextureRef &coeffM, float scale);
     };
 }
 

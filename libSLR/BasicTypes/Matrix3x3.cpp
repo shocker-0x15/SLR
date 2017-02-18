@@ -24,9 +24,9 @@ namespace SLR {
     
     template <typename RealType>
     Matrix3x3Template<RealType> transpose(const Matrix3x3Template<RealType> &m) {
-        return Matrix3x3Template<RealType>(Vector3Template<RealType>(m.m00, m.m01, m.m02),
-                                           Vector3Template<RealType>(m.m10, m.m11, m.m12),
-                                           Vector3Template<RealType>(m.m20, m.m21, m.m22));
+        return Matrix3x3Template<RealType>(Vector3DTemplate<RealType>(m.m00, m.m01, m.m02),
+                                           Vector3DTemplate<RealType>(m.m10, m.m11, m.m12),
+                                           Vector3DTemplate<RealType>(m.m20, m.m21, m.m22));
     }
     template SLR_API Matrix3x3Template<float> transpose(const Matrix3x3Template<float> &m);
     template SLR_API Matrix3x3Template<double> transpose(const Matrix3x3Template<double> &m);
@@ -42,9 +42,9 @@ namespace SLR {
     template SLR_API Matrix3x3Template<double> invert(const Matrix3x3Template<double> &m);
     
     template <typename RealType>
-    Matrix3x3Template<RealType> rotate3x3(RealType angle, const Vector3Template<RealType> &axis) {
+    Matrix3x3Template<RealType> rotate3x3(RealType angle, const Vector3DTemplate<RealType> &axis) {
         Matrix3x3Template<RealType> matrix;
-        Vector3Template<RealType> nAxis = normalize(axis);
+        Vector3DTemplate<RealType> nAxis = normalize(axis);
         RealType c = std::cos(angle);
         RealType s = std::sin(angle);
         RealType oneMinusC = 1 - c;
@@ -61,6 +61,6 @@ namespace SLR {
         
         return matrix;
     }
-    template SLR_API Matrix3x3Template<float> rotate3x3(float angle, const Vector3Template<float> &axis);
-    template SLR_API Matrix3x3Template<double> rotate3x3(double angle, const Vector3Template<double> &axis);
+    template SLR_API Matrix3x3Template<float> rotate3x3(float angle, const Vector3DTemplate<float> &axis);
+    template SLR_API Matrix3x3Template<double> rotate3x3(double angle, const Vector3DTemplate<double> &axis);
 }

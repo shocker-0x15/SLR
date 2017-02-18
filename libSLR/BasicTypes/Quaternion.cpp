@@ -12,7 +12,7 @@ namespace SLR {
     template struct SLR_API QuaternionTemplate<double>;
     
     template <typename RealType>
-    void decompose(const Matrix4x4Template<RealType> &mat, Vector3Template<RealType>* T, QuaternionTemplate<RealType>* R, Matrix4x4Template<RealType>* S) {
+    void decompose(const Matrix4x4Template<RealType> &mat, Vector3DTemplate<RealType>* T, QuaternionTemplate<RealType>* R, Matrix4x4Template<RealType>* S) {
         T->x = mat[3][0];
         T->y = mat[3][1];
         T->z = mat[3][2];
@@ -41,6 +41,6 @@ namespace SLR {
         
         *S = invert(curR) * matRS;
     }
-    template SLR_API void decompose(const Matrix4x4Template<float> &mat, Vector3Template<float>* T, QuaternionTemplate<float>* R, Matrix4x4Template<float>* S);
-    template SLR_API void decompose(const Matrix4x4Template<double> &mat, Vector3Template<double>* T, QuaternionTemplate<double>* R, Matrix4x4Template<double>* S);
+    template SLR_API void decompose(const Matrix4x4Template<float> &mat, Vector3DTemplate<float>* T, QuaternionTemplate<float>* R, Matrix4x4Template<float>* S);
+    template SLR_API void decompose(const Matrix4x4Template<double> &mat, Vector3DTemplate<double>* T, QuaternionTemplate<double>* R, Matrix4x4Template<double>* S);
 }

@@ -83,11 +83,11 @@ namespace SLR {
     
     class SLR_API SingleSurfaceObject : public SurfaceObject {
     protected:
-        const Surface* m_surface;
+        const SurfaceShape* m_surface;
         const SurfaceMaterial* m_material;
     public:
         SingleSurfaceObject() { }
-        SingleSurfaceObject(const Surface* surf, const SurfaceMaterial* mat) : m_surface(surf), m_material(mat) { }
+        SingleSurfaceObject(const SurfaceShape* surf, const SurfaceMaterial* mat) : m_surface(surf), m_material(mat) { }
         virtual ~SingleSurfaceObject() { }
         
         //----------------------------------------------------------------
@@ -131,9 +131,9 @@ namespace SLR {
     
     
     class SLR_API BumpSingleSurfaceObject : public SingleSurfaceObject {
-        const Normal3DTexture* m_normalMap;
+        const NormalTexture* m_normalMap;
     public:
-        BumpSingleSurfaceObject(const Surface* surf, const SurfaceMaterial* mat, const Normal3DTexture* normalMap) :
+        BumpSingleSurfaceObject(const SurfaceShape* surf, const SurfaceMaterial* mat, const NormalTexture* normalMap) :
         SingleSurfaceObject(surf, mat), m_normalMap(normalMap) { }
         
         //----------------------------------------------------------------
@@ -146,9 +146,9 @@ namespace SLR {
     
     class SLR_API InfiniteSphereSurfaceObject : public SingleSurfaceObject {
         const Scene* m_scene;
-        const RegularConstantContinuous2D* m_dist;
+        const RegularConstantContinuousDistribution2D* m_dist;
     public:
-        InfiniteSphereSurfaceObject(const Scene* scene, const IBLEmission* emitter);
+        InfiniteSphereSurfaceObject(const Scene* scene, const IBLEmitterSurfaceProperty* emitter);
         ~InfiniteSphereSurfaceObject();
         
         //----------------------------------------------------------------
@@ -209,7 +209,7 @@ namespace SLR {
         const SurfaceObject** m_lightList;
         std::map<uint32_t, uint32_t> m_objToLightMap;
         uint32_t m_numLights;
-        RegularConstantDiscrete1D* m_lightDist1D;
+        DiscreteDistribution1D* m_lightDist1D;
     public:
         SurfaceObjectAggregate(std::vector<SurfaceObject*> &objs);
         ~SurfaceObjectAggregate();

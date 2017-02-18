@@ -895,7 +895,7 @@ namespace SLRSceneGraph {
                 info.mulOperator = [](const Element &v0, const Element &v1) {
                     auto lVal = v0.rawRef<TypeMap::Spectrum>();
                     if (v1.isConvertibleTo<TypeMap::RealNumber>())
-                        return Element::createFromReference<TypeMap::Spectrum>(InputSpectrumRef(lVal->createScaledAndOffset(v1.asRaw<TypeMap::RealNumber>(), 0.0f)));
+                        return Element::createFromReference<TypeMap::Spectrum>(AssetSpectrumRef(lVal->createScaledAndOffset(v1.asRaw<TypeMap::RealNumber>(), 0.0f)));
                     return Element(ErrorMessage("* operator does not support the right operand type."));
                 };
             }

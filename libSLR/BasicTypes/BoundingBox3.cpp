@@ -8,6 +8,6 @@
 #include "BoundingBox3.h"
 
 namespace SLR {
-    template struct SLR_API BoundingBox3Template<float>;
-    template struct SLR_API BoundingBox3Template<double>;
+    template struct SLR_API BoundingBox3DTemplate<float>;
+    template struct SLR_API BoundingBox3DTemplate<double>;
 }

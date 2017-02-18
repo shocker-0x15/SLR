@@ -23,12 +23,12 @@ namespace SLR {
         Vertex(const Point3D &pos, const Normal3D &norm, const Tangent3D &tang, const TexCoord2D &tc) : position(pos), normal(norm), tangent(tang), texCoord(tc) { }
     };
     
-    class SLR_API Triangle : public Surface {
+    class SLR_API TriangleSurfaceShape : public SurfaceShape {
         const Vertex* m_v[3];
         const FloatTexture* m_alphaTex;
     public:
-        Triangle() : m_v{nullptr, nullptr, nullptr}, m_alphaTex(nullptr) { }
-        Triangle(const Vertex* v0, const Vertex* v1, const Vertex* v2, const FloatTexture* aTex) :
+        TriangleSurfaceShape() : m_v{nullptr, nullptr, nullptr}, m_alphaTex(nullptr) { }
+        TriangleSurfaceShape(const Vertex* v0, const Vertex* v1, const Vertex* v2, const FloatTexture* aTex) :
         m_v{v0, v1, v2}, m_alphaTex(aTex) { }
         
         // TODO: consider a better cost value.

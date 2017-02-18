@@ -9,12 +9,12 @@
 #include "light_path_samplers.h"
 
 namespace SLR {
-    bool GridMedium::subdivide(Allocator* mem, Medium** fragments, uint32_t* numFragments) const {
+    bool GridMediumDistribution::subdivide(Allocator* mem, MediumDistribution** fragments, uint32_t* numFragments) const {
         SLRAssert_NotImplemented();
         return true;
     }
     
-    bool GridMedium::interact(const Ray &ray, float distanceLimit, const WavelengthSamples &wls, LightPathSampler &pathSampler,
+    bool GridMediumDistribution::interact(const Ray &ray, float distanceLimit, const WavelengthSamples &wls, LightPathSampler &pathSampler,
                               MediumInteraction *mi, SampledSpectrum *medThroughput, bool* singleWavelength) const {
         FreePathSampler &sampler = pathSampler.getFreePathSampler();
         Point3D queryPoint = ray.org + ray.distMin * ray.dir;
@@ -47,7 +47,7 @@ namespace SLR {
         return false;
     }
     
-    SampledSpectrum GridMedium::evaluateTransmittance(Ray &ray, float distanceLimit, const WavelengthSamples &wls, SLR::LightPathSampler &pathSampler, bool *singleWavelength) const {
+    SampledSpectrum GridMediumDistribution::evaluateTransmittance(Ray &ray, float distanceLimit, const WavelengthSamples &wls, SLR::LightPathSampler &pathSampler, bool *singleWavelength) const {
         FreePathSampler sampler = pathSampler.getFreePathSampler();
         Point3D queryPoint = ray.org + ray.distMin * ray.dir;
         FloatSum sampledDistance = ray.distMin;
@@ -69,7 +69,7 @@ namespace SLR {
         return transmittance;
     }
     
-    SampledSpectrum GridMedium::extinctionCoefficient(const Point3D &p, const WavelengthSamples &wls) const {
+    SampledSpectrum GridMediumDistribution::extinctionCoefficient(const Point3D &p, const WavelengthSamples &wls) const {
         if (!m_region.contains(p))
             return SampledSpectrum::Zero;
         Point3D param;
@@ -80,45 +80,45 @@ namespace SLR {
         return SampledSpectrum::Zero;
     }
     
-    void GridMedium::getMediumPoint(const MediumInteraction &mi, MediumPoint* medPt) const {
+    void GridMediumDistribution::getMediumPoint(const MediumInteraction &mi, MediumPoint* medPt) const {
         SLRAssert_NotImplemented();
     }
     
-    void GridMedium::sample(float u0, float u1, float u2, MediumPoint *medPt, float *volumePDF) const {
+    void GridMediumDistribution::sample(float u0, float u1, float u2, MediumPoint *medPt, float *volumePDF) const {
         SLRAssert_NotImplemented();
     }
     
-    float GridMedium::evaluateVolumePDF(const MediumPoint &medPt) const {
+    float GridMediumDistribution::evaluateVolumePDF(const MediumPoint &medPt) const {
         return 1.0f / volume();
     }
     
     
     
-    bool SubGridMedium::interact(const Ray &ray, float distanceLimit, const WavelengthSamples &wls, LightPathSampler &pathSampler,
+    bool SubGridMediumDistribution::interact(const Ray &ray, float distanceLimit, const WavelengthSamples &wls, LightPathSampler &pathSampler,
                                  MediumInteraction *mi, SampledSpectrum *medThroughput, bool* singleWavelength) const {
         SLRAssert_NotImplemented();
         return false;
     }
     
-    SampledSpectrum SubGridMedium::evaluateTransmittance(Ray &ray, float distanceLimit, const WavelengthSamples &wls, SLR::LightPathSampler &pathSampler, bool *singleWavelength) const {
+    SampledSpectrum SubGridMediumDistribution::evaluateTransmittance(Ray &ray, float distanceLimit, const WavelengthSamples &wls, SLR::LightPathSampler &pathSampler, bool *singleWavelength) const {
         SLRAssert_NotImplemented();
         return SampledSpectrum::Zero;
     }
     
-    SampledSpectrum SubGridMedium::extinctionCoefficient(const Point3D &p, const WavelengthSamples &wls) const {
+    SampledSpectrum SubGridMediumDistribution::extinctionCoefficient(const Point3D &p, const WavelengthSamples &wls) const {
         SLRAssert_NotImplemented();
         return SampledSpectrum::Zero;
     }
     
-    void SubGridMedium::getMediumPoint(const MediumInteraction &mi, MediumPoint* medPt) const {
+    void SubGridMediumDistribution::getMediumPoint(const MediumInteraction &mi, MediumPoint* medPt) const {
         SLRAssert_NotImplemented();
     }
     
-    void SubGridMedium::sample(float u0, float u1, float u2, MediumPoint *medPt, float *volumePDF) const {
+    void SubGridMediumDistribution::sample(float u0, float u1, float u2, MediumPoint *medPt, float *volumePDF) const {
         SLRAssert_NotImplemented();
     }
     
-    float SubGridMedium::evaluateVolumePDF(const MediumPoint &medPt) const {
+    float SubGridMediumDistribution::evaluateVolumePDF(const MediumPoint &medPt) const {
         return 1.0f / volume();
     }
 }

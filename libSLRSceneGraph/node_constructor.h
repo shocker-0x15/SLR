@@ -15,9 +15,9 @@
 namespace SLRSceneGraph {
     struct SurfaceAttributeTuple {
         SurfaceMaterialRef material;
-        Normal3DTextureRef normalMap;
+        NormalTextureRef normalMap;
         FloatTextureRef alphaMap;
-        SurfaceAttributeTuple(const SurfaceMaterialRef &mat, const Normal3DTextureRef &norm, const FloatTextureRef &alpha) :
+        SurfaceAttributeTuple(const SurfaceMaterialRef &mat, const NormalTextureRef &norm, const FloatTextureRef &alpha) :
         material(mat), normalMap(norm), alphaMap(alpha) {}
     };
     

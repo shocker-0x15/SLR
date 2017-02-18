@@ -13,22 +13,22 @@
 #include "../Core/geometry.h"
 
 namespace SLR {
-    class DensityGridMedium : public Medium {
+    class DensityGridMediumDistribution : public MediumDistribution {
         BoundingBox3D m_region;
-        const InputSpectrum* m_base_sigma_s;
-        const InputSpectrum* m_base_sigma_e;
+        const AssetSpectrum* m_base_sigma_s;
+        const AssetSpectrum* m_base_sigma_e;
         const float* m_density_grid;
         uint32_t m_numX, m_numY, m_numZ;
         
         float calcDensity(const Point3D &p) const;
     public:
-        DensityGridMedium(const BoundingBox3D &region, const InputSpectrum* base_sigma_s, const InputSpectrum* base_sigma_e, const float* density_grid,
-                          uint32_t numX, uint32_t numY, uint32_t numZ, float maxExtinctionCoefficient) :
-        Medium(maxExtinctionCoefficient),
+        DensityGridMediumDistribution(const BoundingBox3D &region, const AssetSpectrum* base_sigma_s, const AssetSpectrum* base_sigma_e, const float* density_grid,
+                                      uint32_t numX, uint32_t numY, uint32_t numZ, float maxExtinctionCoefficient) :
+        MediumDistribution(maxExtinctionCoefficient),
         m_region(region), m_base_sigma_s(base_sigma_s), m_base_sigma_e(base_sigma_e), m_density_grid(density_grid), 
         m_numX(numX), m_numY(numY), m_numZ(numZ) { }
         
-        bool subdivide(Allocator* mem, Medium** fragments, uint32_t* numFragments) const override;
+        bool subdivide(Allocator* mem, MediumDistribution** fragments, uint32_t* numFragments) const override;
         
         BoundingBox3D bounds() const override { return m_region; }
         bool contains(const Point3D &p) const override { return m_region.contains(p); }

@@ -13,10 +13,10 @@
 #include "../Core/geometry.h"
 
 namespace SLR {
-    class SLR_API InfiniteSphere : public Surface {
+    class SLR_API InfiniteSphereSurfaceShape : public SurfaceShape {
     public:
-        InfiniteSphere() { };
-        ~InfiniteSphere() { };
+        InfiniteSphereSurfaceShape() { };
+        ~InfiniteSphereSurfaceShape() { };
         
         float costForIntersect() const override { return 1.0f; }
         BoundingBox3D bounds() const override;

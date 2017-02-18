@@ -8,15 +8,15 @@
 #include "Normal3.h"
 
 namespace SLR {
-    template struct SLR_API Normal3Template<float>;
-//    template SLR_API const Normal3Template<float> Normal3Template<float>::Zero;
-//    template SLR_API const Normal3Template<float> Normal3Template<float>::One;
-//    template SLR_API const Normal3Template<float> Normal3Template<float>::Inf;
-//    template SLR_API const Normal3Template<float> Normal3Template<float>::NaN;
+    template struct SLR_API Normal3DTemplate<float>;
+//    template SLR_API const Normal3DTemplate<float> Normal3DTemplate<float>::Zero;
+//    template SLR_API const Normal3DTemplate<float> Normal3DTemplate<float>::One;
+//    template SLR_API const Normal3DTemplate<float> Normal3DTemplate<float>::Inf;
+//    template SLR_API const Normal3DTemplate<float> Normal3DTemplate<float>::NaN;
 
-    template struct SLR_API Normal3Template<double>;
-//    template SLR_API const Normal3Template<double> Normal3Template<double>::Zero;
-//    template SLR_API const Normal3Template<double> Normal3Template<double>::One;
-//    template SLR_API const Normal3Template<double> Normal3Template<double>::Inf;
-//    template SLR_API const Normal3Template<double> Normal3Template<double>::NaN;
+    template struct SLR_API Normal3DTemplate<double>;
+//    template SLR_API const Normal3DTemplate<double> Normal3DTemplate<double>::Zero;
+//    template SLR_API const Normal3DTemplate<double> Normal3DTemplate<double>::One;
+//    template SLR_API const Normal3DTemplate<double> Normal3DTemplate<double>::Inf;
+//    template SLR_API const Normal3DTemplate<double> Normal3DTemplate<double>::NaN;
 }

@@ -13,7 +13,7 @@
 #include "../Scene/medium_nodes.h"
 
 namespace SLR {
-    void TriangleMeshNode::MaterialGroup::setTriangles(std::unique_ptr<Triangle[]> &triangles, uint32_t numTriangles) {
+    void TriangleMeshNode::MaterialGroup::setTriangles(std::unique_ptr<TriangleSurfaceShape[]> &triangles, uint32_t numTriangles) {
         m_triangles = std::move(triangles);
         m_numTriangles = numTriangles;
     }
@@ -61,11 +61,11 @@ namespace SLR {
             const MaterialGroup &matGroup = m_matGroups[i];
             
             const SurfaceMaterial* mat = matGroup.m_material;
-            const Normal3DTexture* normalMap = matGroup.m_normalMap;
+            const NormalTexture* normalMap = matGroup.m_normalMap;
 //            const FloatTexture* alphaMap = matGroup.m_alphaMap;
             
             for (int tIdx = 0; tIdx < matGroup.m_numTriangles; ++tIdx) {
-                Triangle &tri = matGroup.m_triangles[tIdx];
+                TriangleSurfaceShape &tri = matGroup.m_triangles[tIdx];
 
                 SurfaceObject* obj;
                 if (normalMap)

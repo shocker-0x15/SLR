@@ -14,30 +14,30 @@
 
 namespace SLR {
     template <typename RealType>
-    struct SLR_API Vector3Template {
+    struct SLR_API Vector3DTemplate {
         RealType x, y, z;
         
-        Vector3Template(RealType v = 0.0f) : x(v), y(v), z(v) { }
-        CONSTEXPR_CONSTRUCTOR Vector3Template(RealType xx, RealType yy, RealType zz) : x(xx), y(yy), z(zz) { }
+        Vector3DTemplate(RealType v = 0.0f) : x(v), y(v), z(v) { }
+        CONSTEXPR_CONSTRUCTOR Vector3DTemplate(RealType xx, RealType yy, RealType zz) : x(xx), y(yy), z(zz) { }
         
-        Vector3Template operator+() const { return *this; }
-        Vector3Template operator-() const { return Vector3Template(-x, -y, -z); }
+        Vector3DTemplate operator+() const { return *this; }
+        Vector3DTemplate operator-() const { return Vector3DTemplate(-x, -y, -z); }
         
-        Vector3Template operator+(const Vector3Template &v) const { return Vector3Template(x + v.x, y + v.y, z + v.z); }
-        Vector3Template operator-(const Vector3Template &v) const { return Vector3Template(x - v.x, y - v.y, z - v.z); }
-        Vector3Template operator*(const Vector3Template &v) const { return Vector3Template(x * v.x, y * v.y, z * v.z); }
-        Vector3Template operator/(const Vector3Template &v) const { return Vector3Template(x / v.x, y / v.y, z / v.z); }
-        Vector3Template operator*(RealType s) const { return Vector3Template(x * s, y * s, z * s); }
-        Vector3Template operator/(RealType s) const { RealType r = 1.0f / s; return Vector3Template(x * r, y * r, z * r); }
-        friend inline Vector3Template operator*(RealType s, const Vector3Template &v) { return Vector3Template(s * v.x, s * v.y, s * v.z); }
+        Vector3DTemplate operator+(const Vector3DTemplate &v) const { return Vector3DTemplate(x + v.x, y + v.y, z + v.z); }
+        Vector3DTemplate operator-(const Vector3DTemplate &v) const { return Vector3DTemplate(x - v.x, y - v.y, z - v.z); }
+        Vector3DTemplate operator*(const Vector3DTemplate &v) const { return Vector3DTemplate(x * v.x, y * v.y, z * v.z); }
+        Vector3DTemplate operator/(const Vector3DTemplate &v) const { return Vector3DTemplate(x / v.x, y / v.y, z / v.z); }
+        Vector3DTemplate operator*(RealType s) const { return Vector3DTemplate(x * s, y * s, z * s); }
+        Vector3DTemplate operator/(RealType s) const { RealType r = 1.0f / s; return Vector3DTemplate(x * r, y * r, z * r); }
+        friend inline Vector3DTemplate operator*(RealType s, const Vector3DTemplate &v) { return Vector3DTemplate(s * v.x, s * v.y, s * v.z); }
         
-        Vector3Template &operator+=(const Vector3Template &v) { x += v.x; y += v.y; z += v.z; return *this; }
-        Vector3Template &operator-=(const Vector3Template &v) { x -= v.x; y -= v.y; z -= v.z; return *this; }
-        Vector3Template &operator*=(RealType s) { x *= s; y *= s; z *= s; return *this; }
-        Vector3Template &operator/=(RealType s) { RealType r = 1.0f / s; x *= r; y *= r; z *= r; return *this; }
+        Vector3DTemplate &operator+=(const Vector3DTemplate &v) { x += v.x; y += v.y; z += v.z; return *this; }
+        Vector3DTemplate &operator-=(const Vector3DTemplate &v) { x -= v.x; y -= v.y; z -= v.z; return *this; }
+        Vector3DTemplate &operator*=(RealType s) { x *= s; y *= s; z *= s; return *this; }
+        Vector3DTemplate &operator/=(RealType s) { RealType r = 1.0f / s; x *= r; y *= r; z *= r; return *this; }
         
-        bool operator==(const Vector3Template &v) const { return x == v.x && y == v.y && z == v.z; }
-        bool operator!=(const Vector3Template &v) const { return x != v.x || y != v.y || z != v.z; }
+        bool operator==(const Vector3DTemplate &v) const { return x == v.x && y == v.y && z == v.z; }
+        bool operator!=(const Vector3DTemplate &v) const { return x != v.x || y != v.y || z != v.z; }
         
         RealType &operator[](unsigned int index) {
             SLRAssert(index < 3, "\"index\" is out of range [0, 2].");
@@ -50,24 +50,24 @@ namespace SLR {
         
         RealType length() const { return std::sqrt(x * x + y * y + z * z); }
         RealType sqLength() const { return x * x + y * y + z * z; }
-        Vector3Template& normalize() {
+        Vector3DTemplate& normalize() {
             RealType length = std::sqrt(x * x + y * y + z * z);
             return *this /= length;
         }
-        Vector3Template reciprocal() const { return Vector3Template(1.0f / x, 1.0f / y, 1.0f / z); }
-        void makeCoordinateSystem(Vector3Template<RealType>* vx, Vector3Template<RealType>* vy) const {
+        Vector3DTemplate reciprocal() const { return Vector3DTemplate(1.0f / x, 1.0f / y, 1.0f / z); }
+        void makeCoordinateSystem(Vector3DTemplate<RealType>* vx, Vector3DTemplate<RealType>* vy) const {
             if (std::fabs(x) > std::fabs(y)) {
                 float invLen = 1.0f / std::sqrt(x * x + z * z);
-                *vx = Vector3Template<RealType>(-z * invLen, 0.0f, x * invLen);
+                *vx = Vector3DTemplate<RealType>(-z * invLen, 0.0f, x * invLen);
             }
             else {
                 float invLen = 1.0f / std::sqrt(y * y + z * z);
-                *vx = Vector3Template<RealType>(0.0f, z * invLen, -y * invLen);
+                *vx = Vector3DTemplate<RealType>(0.0f, z * invLen, -y * invLen);
             }
             *vy = cross(*this, *vx);
         }
-        static Vector3Template fromPolarYUp(RealType phi, RealType theta) {
-            return Vector3Template(-std::sin(phi) * std::sin(theta), std::cos(theta), std::cos(phi) * std::sin(theta));
+        static Vector3DTemplate fromPolarYUp(RealType phi, RealType theta) {
+            return Vector3DTemplate(-std::sin(phi) * std::sin(theta), std::cos(theta), std::cos(phi) * std::sin(theta));
         }
         void toPolarYUp(RealType* theta, RealType* phi) const {
             *theta = std::acos(std::clamp(y, (RealType)-1.0, (RealType)1.0));
@@ -81,67 +81,67 @@ namespace SLR {
         
         std::string toString() const { char str[256]; sprintf(str, "(%g, %g, %g)", x, y, z); return str; }
         
-        static const Vector3Template Zero;
-        static const Vector3Template One;
-        static const Vector3Template Inf;
-        static const Vector3Template NaN;
-        static const Vector3Template Ex;
-        static const Vector3Template Ey;
-        static const Vector3Template Ez;
+        static const Vector3DTemplate Zero;
+        static const Vector3DTemplate One;
+        static const Vector3DTemplate Inf;
+        static const Vector3DTemplate NaN;
+        static const Vector3DTemplate Ex;
+        static const Vector3DTemplate Ey;
+        static const Vector3DTemplate Ez;
     };
     template <typename RealType>
-    const Vector3Template<RealType> Vector3Template<RealType>::Zero = Vector3Template<RealType>(0);
+    const Vector3DTemplate<RealType> Vector3DTemplate<RealType>::Zero = Vector3DTemplate<RealType>(0);
     template <typename RealType>
-    const Vector3Template<RealType> Vector3Template<RealType>::One = Vector3Template<RealType>(1);
+    const Vector3DTemplate<RealType> Vector3DTemplate<RealType>::One = Vector3DTemplate<RealType>(1);
     template <typename RealType>
-    const Vector3Template<RealType> Vector3Template<RealType>::Inf = Vector3Template<RealType>(std::numeric_limits<RealType>::infinity());
+    const Vector3DTemplate<RealType> Vector3DTemplate<RealType>::Inf = Vector3DTemplate<RealType>(std::numeric_limits<RealType>::infinity());
     template <typename RealType>
-    const Vector3Template<RealType> Vector3Template<RealType>::NaN = Vector3Template<RealType>(std::numeric_limits<RealType>::quiet_NaN());
+    const Vector3DTemplate<RealType> Vector3DTemplate<RealType>::NaN = Vector3DTemplate<RealType>(std::numeric_limits<RealType>::quiet_NaN());
     template <typename RealType>
-    const Vector3Template<RealType> Vector3Template<RealType>::Ex = Vector3Template<RealType>(1, 0, 0);
+    const Vector3DTemplate<RealType> Vector3DTemplate<RealType>::Ex = Vector3DTemplate<RealType>(1, 0, 0);
     template <typename RealType>
-    const Vector3Template<RealType> Vector3Template<RealType>::Ey = Vector3Template<RealType>(0, 1, 0);
+    const Vector3DTemplate<RealType> Vector3DTemplate<RealType>::Ey = Vector3DTemplate<RealType>(0, 1, 0);
     template <typename RealType>
-    const Vector3Template<RealType> Vector3Template<RealType>::Ez = Vector3Template<RealType>(0, 0, 1);
+    const Vector3DTemplate<RealType> Vector3DTemplate<RealType>::Ez = Vector3DTemplate<RealType>(0, 0, 1);
     
     
     template <typename RealType>
-    inline Vector3Template<RealType> normalize(const Vector3Template<RealType> &v) {
+    inline Vector3DTemplate<RealType> normalize(const Vector3DTemplate<RealType> &v) {
         RealType l = v.length();
         return v / l;
     }
     
     template <typename RealType>
-    inline RealType dot(const Vector3Template<RealType> &vec1, const Vector3Template<RealType> &vec2) {
+    inline RealType dot(const Vector3DTemplate<RealType> &vec1, const Vector3DTemplate<RealType> &vec2) {
         return vec1.x * vec2.x + vec1.y * vec2.y + vec1.z * vec2.z;
     }
     
     template <typename RealType>
-    inline Vector3Template<RealType> cross(const Vector3Template<RealType> &vec1, const Vector3Template<RealType> &vec2) {
-        return Vector3Template<RealType>(vec1.y * vec2.z - vec1.z * vec2.y,
+    inline Vector3DTemplate<RealType> cross(const Vector3DTemplate<RealType> &vec1, const Vector3DTemplate<RealType> &vec2) {
+        return Vector3DTemplate<RealType>(vec1.y * vec2.z - vec1.z * vec2.y,
                                          vec1.z * vec2.x - vec1.x * vec2.z,
                                          vec1.x * vec2.y - vec1.y * vec2.x);
     }
     
     template <typename RealType>
-    inline RealType absDot(const Vector3Template<RealType> &vec1, const Vector3Template<RealType> &vec2) {
+    inline RealType absDot(const Vector3DTemplate<RealType> &vec1, const Vector3DTemplate<RealType> &vec2) {
         return std::abs(vec1.x * vec2.x + vec1.y * vec2.y + vec1.z * vec2.z);
     }
     
     template <typename RealType>
-    inline Vector3Template<RealType> min(const Vector3Template<RealType> &vec1, const Vector3Template<RealType> &vec2) {
+    inline Vector3DTemplate<RealType> min(const Vector3DTemplate<RealType> &vec1, const Vector3DTemplate<RealType> &vec2) {
         using std::fmin;
-        return Vector3Template<RealType>(fmin(vec1.x, vec2.x), fmin(vec1.y, vec2.y), fmin(vec1.z, vec2.z));
+        return Vector3DTemplate<RealType>(fmin(vec1.x, vec2.x), fmin(vec1.y, vec2.y), fmin(vec1.z, vec2.z));
     }
     
     template <typename RealType>
-    inline Vector3Template<RealType> max(const Vector3Template<RealType> &vec1, const Vector3Template<RealType> &vec2) {
+    inline Vector3DTemplate<RealType> max(const Vector3DTemplate<RealType> &vec1, const Vector3DTemplate<RealType> &vec2) {
         using std::fmax;
-        return Vector3Template<RealType>(fmax(vec1.x, vec2.x), fmax(vec1.y, vec2.y), fmax(vec1.z, vec2.z));
+        return Vector3DTemplate<RealType>(fmax(vec1.x, vec2.x), fmax(vec1.y, vec2.y), fmax(vec1.z, vec2.z));
     }
     
     template <typename RealType>
-    inline Vector3Template<RealType> halfVector(const Vector3Template<RealType> &vec1, const Vector3Template<RealType> &vec2) {
+    inline Vector3DTemplate<RealType> halfVector(const Vector3DTemplate<RealType> &vec1, const Vector3DTemplate<RealType> &vec2) {
         return normalize(vec1 + vec2);
     }
 }

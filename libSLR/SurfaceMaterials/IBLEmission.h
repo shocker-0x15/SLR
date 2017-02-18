@@ -13,18 +13,18 @@
 #include "../Core/surface_material.h"
 
 namespace SLR {
-    class SLR_API IBLEmission : public EmitterSurfaceProperty {
+    class SLR_API IBLEmitterSurfaceProperty : public EmitterSurfaceProperty {
         const Scene* m_scene;
         const SpectrumTexture* m_coeffM;
         float m_scale;
     public:
-        IBLEmission(const Scene* scene, const SpectrumTexture* coeffM, float scale) :
+        IBLEmitterSurfaceProperty(const Scene* scene, const SpectrumTexture* coeffM, float scale) :
         m_scene(scene), m_coeffM(coeffM), m_scale(scale) {};
         
         SampledSpectrum emittance(const SurfacePoint &surfPt, const WavelengthSamples &wls) const override;
         EDF* getEDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem, float scale = 1.0f) const override;
         
-        RegularConstantContinuous2D* createIBLImportanceMap() const;
+        RegularConstantContinuousDistribution2D* createIBLImportanceMap() const;
     };
 }
 

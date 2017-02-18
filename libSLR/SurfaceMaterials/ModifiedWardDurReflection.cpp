@@ -11,7 +11,7 @@
 #include "../Core/textures.h"
 
 namespace SLR {
-    BSDF* ModifiedWardDurReflection::getBSDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem, float scale) const {
+    BSDF* ModifiedWardDurReflectionSurfaceMaterial::getBSDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem, float scale) const {
         SampledSpectrum R = m_reflectance->evaluate(surfPt, wls);
         float anisoX = m_anisoX->evaluate(surfPt);
         float anisoY = m_anisoY->evaluate(surfPt);

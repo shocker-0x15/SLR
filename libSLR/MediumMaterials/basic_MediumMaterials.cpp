@@ -11,13 +11,19 @@
 #include "../PhaseFunctions/basic_phase_functions.h"
 
 namespace SLR {
-    PhaseFunction* IsotropicScattering::getPhaseFunction(const MediumPoint &medPt, const WavelengthSamples &wls, ArenaAllocator &mem, float scale) const {
+    PhaseFunction* IsotropicScatteringMediumMaterial::getPhaseFunction(const MediumPoint &medPt, const WavelengthSamples &wls, ArenaAllocator &mem, float scale) const {
         return mem.create<IsotropicPhaseFunction>();
     }
     
     
     
-    PhaseFunction* HenyeyGreensteinScattering::getPhaseFunction(const MediumPoint &medPt, const WavelengthSamples &wls, ArenaAllocator &mem, float scale) const {
+    PhaseFunction* HenyeyGreensteinScatteringMediumMaterial::getPhaseFunction(const MediumPoint &medPt, const WavelengthSamples &wls, ArenaAllocator &mem, float scale) const {
         return mem.create<HenyeyGreensteinPhaseFunction>(m_g->evaluate(medPt));
+    }
+    
+    
+    
+    PhaseFunction* SchlickScatteringMediumMaterial::getPhaseFunction(const MediumPoint &medPt, const WavelengthSamples &wls, ArenaAllocator &mem, float scale) const {
+        return mem.create<SchlickPhaseFunction>(m_g->evaluate(medPt));
     }
 }

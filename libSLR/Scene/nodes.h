@@ -111,7 +111,7 @@ namespace SLR {
         const SpectrumTexture* m_IBLTex;
         float m_scale;
         
-        IBLEmission* m_emission;
+        IBLEmitterSurfaceProperty* m_emission;
         InfiniteSphereSurfaceObject* m_obj;
     public:
         InfiniteSphereNode(const Scene* scene, const SpectrumTexture* IBLTex, float scale) :
@@ -129,7 +129,7 @@ namespace SLR {
         const Point3D m_position;
         const Vector3D m_direction;
         const SurfaceMaterial* m_material;
-        InfinitesimalPoint* m_surface;
+        InfinitesimalPointSurfaceShape* m_surface;
         SingleSurfaceObject* m_obj;
     public:
         InfinitesimalPointNode(const Point3D &p, const Vector3D &d, const SurfaceMaterial* mat) : m_position(p), m_direction(d), m_material(mat), m_surface(nullptr), m_obj(nullptr) { }

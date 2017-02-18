@@ -8,12 +8,12 @@
 #include "checker_board_textures.h"
 
 namespace SLR {
-    RegularConstantContinuous2D* CheckerBoardSpectrumTexture::createIBLImportanceMap() const {
+    RegularConstantContinuousDistribution2D* CheckerBoardSpectrumTexture::createIBLImportanceMap() const {
         SLRAssert_NotImplemented();
         return nullptr;
     }
     
-    Normal3D CheckerBoardNormal3DTexture::evaluate(const Point3D &p) const {
+    Normal3D CheckerBoardNormalTexture::evaluate(const Point3D &p) const {
         float halfWidth = m_stepWidth * 0.5f;
         
         float uComp = 0.0f;

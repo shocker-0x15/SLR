@@ -16,19 +16,19 @@ namespace SLR {
     template <typename RealType>
     struct SLR_API QuaternionTemplate {
         union {
-            Vector3Template<RealType> v;
+            Vector3DTemplate<RealType> v;
             struct { RealType x, y, z; };
         };
         RealType w;
         
         QuaternionTemplate() : w(1.0f) { };
         CONSTEXPR_CONSTRUCTOR QuaternionTemplate(RealType xx, RealType yy, RealType zz, RealType ww) : v(xx, yy, zz), w(ww) { };
-        CONSTEXPR_CONSTRUCTOR QuaternionTemplate(const Vector3Template<RealType> &vv, RealType ww) : v(vv), w(ww) { };
+        CONSTEXPR_CONSTRUCTOR QuaternionTemplate(const Vector3DTemplate<RealType> &vv, RealType ww) : v(vv), w(ww) { };
         QuaternionTemplate(const Matrix4x4Template<RealType> &m) {
             RealType trace = m[0][0] + m[1][1] + m[2][2];
             if (trace > 0.0f) {
                 RealType s = std::sqrt(trace + 1.0f);
-                v = (0.5f / s) * Vector3Template<RealType>(m[1][2] - m[2][1], m[2][0] - m[0][2], m[0][1] - m[1][0]);
+                v = (0.5f / s) * Vector3DTemplate<RealType>(m[1][2] - m[2][1], m[2][0] - m[0][2], m[0][1] - m[1][0]);
                 w = s / 2.0f;
             }
             else {
@@ -48,7 +48,7 @@ namespace SLR {
                 w = (m[j][k] - m[k][j]) * s;
                 q[j] = (m[i][j] + m[j][i]) * s;
                 q[k] = (m[i][k] + m[k][i]) * s;
-                v = Vector3Template<RealType>(q[0], q[1], q[2]);
+                v = Vector3DTemplate<RealType>(q[0], q[1], q[2]);
             }
         };
         
@@ -73,9 +73,9 @@ namespace SLR {
             RealType xx = x * x, yy = y * y, zz = z * z;
             RealType xy = x * y, yz = y * z, zx = z * x;
             RealType xw = x * w, yw = y * w, zw = z * w;
-            return Matrix4x4Template<RealType>(Vector3Template<RealType>(1 - 2 * (yy + zz), 2 * (xy + zw), 2 * (zx - yw)),
-                                               Vector3Template<RealType>(2 * (xy - zw), 1 - 2 * (xx + zz), 2 * (yz + xw)),
-                                               Vector3Template<RealType>(2 * (zx + yw), 2 * (yz - xw), 1 - 2 * (xx + yy)));
+            return Matrix4x4Template<RealType>(Vector3DTemplate<RealType>(1 - 2 * (yy + zz), 2 * (xy + zw), 2 * (zx - yw)),
+                                               Vector3DTemplate<RealType>(2 * (xy - zw), 1 - 2 * (xx + zz), 2 * (yz + xw)),
+                                               Vector3DTemplate<RealType>(2 * (zx + yw), 2 * (yz - xw), 1 - 2 * (xx + yy)));
         };
         
         bool operator==(const QuaternionTemplate &q) const { return v == q.v && w == q.w; };
@@ -107,7 +107,7 @@ namespace SLR {
     }
     
     template <typename RealType>
-    SLR_API void decompose(const Matrix4x4Template<RealType> &mat, Vector3Template<RealType>* T, QuaternionTemplate<RealType>* R, Matrix4x4Template<RealType>* S);
+    SLR_API void decompose(const Matrix4x4Template<RealType> &mat, Vector3DTemplate<RealType>* T, QuaternionTemplate<RealType>* R, Matrix4x4Template<RealType>* S);
 }
 
 #endif /* __SLR_Quaternion__ */

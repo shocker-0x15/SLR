@@ -86,7 +86,7 @@ namespace SLR {
     
     
     template <typename RealType>
-    RegularConstantDiscrete1DTemplate<RealType>::RegularConstantDiscrete1DTemplate(const std::vector<RealType> &values) {
+    DiscreteDistribution1DTemplate<RealType>::DiscreteDistribution1DTemplate(const std::vector<RealType> &values) {
         m_numValues = (uint32_t)values.size();
         m_PMF = new RealType[m_numValues];
         m_CDF = new RealType[m_numValues + 1];
@@ -106,7 +106,7 @@ namespace SLR {
     };
     
     template <typename RealType>
-    uint32_t RegularConstantDiscrete1DTemplate<RealType>::sample(RealType u, RealType* prob) const {
+    uint32_t DiscreteDistribution1DTemplate<RealType>::sample(RealType u, RealType* prob) const {
         SLRAssert(u >= 0 && u < 1, "\"u\" must be in range [0, 1).");
         int idx = m_numValues;
         for (int d = prevPowerOf2(m_numValues); d > 0; d >>= 1)
@@ -118,7 +118,7 @@ namespace SLR {
     };
     
     template <typename RealType>
-    uint32_t RegularConstantDiscrete1DTemplate<RealType>::sample(RealType u, RealType* prob, RealType* remapped) const {
+    uint32_t DiscreteDistribution1DTemplate<RealType>::sample(RealType u, RealType* prob, RealType* remapped) const {
         SLRAssert(u >= 0 && u < 1, "\"u\" must be in range [0, 1).");
         int idx = m_numValues;
         for (int d = prevPowerOf2(m_numValues); d > 0; d >>= 1)
@@ -130,13 +130,13 @@ namespace SLR {
         return idx;
     };
     
-    template class SLR_API RegularConstantDiscrete1DTemplate<float>;
-    template class SLR_API RegularConstantDiscrete1DTemplate<double>;
+    template class SLR_API DiscreteDistribution1DTemplate<float>;
+    template class SLR_API DiscreteDistribution1DTemplate<double>;
     
     
     
     template <typename RealType>
-    RegularConstantContinuous1DTemplate<RealType>::RegularConstantContinuous1DTemplate(uint32_t numValues, const std::function<RealType(uint32_t)> &pickFunc) :
+    RegularConstantContinuousDistribution1DTemplate<RealType>::RegularConstantContinuousDistribution1DTemplate(uint32_t numValues, const std::function<RealType(uint32_t)> &pickFunc) :
     m_numValues(numValues) {
         m_PDF = new RealType[m_numValues];
         m_CDF = new RealType[m_numValues + 1];
@@ -157,7 +157,7 @@ namespace SLR {
     };
     
     template <typename RealType>
-    RegularConstantContinuous1DTemplate<RealType>::RegularConstantContinuous1DTemplate(const std::vector<RealType> &values) :
+    RegularConstantContinuousDistribution1DTemplate<RealType>::RegularConstantContinuousDistribution1DTemplate(const std::vector<RealType> &values) :
     m_numValues((uint32_t)values.size()) {
         m_PDF = new RealType[m_numValues];
         m_CDF = new RealType[m_numValues + 1];
@@ -177,7 +177,7 @@ namespace SLR {
     };
     
     template <typename RealType>
-    RealType RegularConstantContinuous1DTemplate<RealType>::sample(RealType u, RealType* PDF) const {
+    RealType RegularConstantContinuousDistribution1DTemplate<RealType>::sample(RealType u, RealType* PDF) const {
         SLRAssert(u < 1, "\"u\" must be in range [0, 1).");
         int idx = m_numValues;
         for (int d = prevPowerOf2(m_numValues); d > 0; d >>= 1)
@@ -190,34 +190,34 @@ namespace SLR {
     };
     
     template <typename RealType>
-    RealType RegularConstantContinuous1DTemplate<RealType>::evaluatePDF(RealType smp) const {
+    RealType RegularConstantContinuousDistribution1DTemplate<RealType>::evaluatePDF(RealType smp) const {
         SLRAssert(smp >= 0 && smp < 1.0, "\"smp\" is out of range [0, 1)");
         return m_PDF[(int32_t)(smp * m_numValues)];
     };
     
-    template class SLR_API RegularConstantContinuous1DTemplate<float>;
-    template class SLR_API RegularConstantContinuous1DTemplate<double>;
+    template class SLR_API RegularConstantContinuousDistribution1DTemplate<float>;
+    template class SLR_API RegularConstantContinuousDistribution1DTemplate<double>;
     
     
     
     template <typename RealType>
-    RegularConstantContinuous2DTemplate<RealType>::RegularConstantContinuous2DTemplate(uint32_t numD1, uint32_t numD2, const std::function<RealType(uint32_t, uint32_t)> &pickFunc) :
+    RegularConstantContinuousDistribution2DTemplate<RealType>::RegularConstantContinuousDistribution2DTemplate(uint32_t numD1, uint32_t numD2, const std::function<RealType(uint32_t, uint32_t)> &pickFunc) :
     m_num1DDists(numD2) {
-        m_1DDists = (RegularConstantContinuous1DTemplate<RealType>*)malloc(sizeof(RegularConstantContinuous1DTemplate<RealType>) * numD2);
+        m_1DDists = (RegularConstantContinuousDistribution1DTemplate<RealType>*)malloc(sizeof(RegularConstantContinuousDistribution1DTemplate<RealType>) * numD2);
         CompensatedSum<RealType> sum(0);
         for (int i = 0; i < numD2; ++i) {
             auto pickFunc1D = std::bind(pickFunc, std::placeholders::_1, i);
-            new (m_1DDists + i) RegularConstantContinuous1DTemplate<RealType>(numD1, pickFunc1D);
+            new (m_1DDists + i) RegularConstantContinuousDistribution1DTemplate<RealType>(numD1, pickFunc1D);
             sum += m_1DDists[i].integral();
         }
         m_integral = sum;
         auto pickFuncTop = [this](uint32_t idx) { return m_1DDists[idx].integral(); };
-        m_top1DDist = new RegularConstantContinuous1DTemplate<RealType>(numD2, pickFuncTop);
+        m_top1DDist = new RegularConstantContinuousDistribution1DTemplate<RealType>(numD2, pickFuncTop);
         SLRAssert(std::isfinite(m_integral), "invalid integral value.");
     };
     
     template <typename RealType>
-    void RegularConstantContinuous2DTemplate<RealType>::sample(RealType u0, RealType u1, RealType* d0, RealType* d1, RealType* PDF) const {
+    void RegularConstantContinuousDistribution2DTemplate<RealType>::sample(RealType u0, RealType u1, RealType* d0, RealType* d1, RealType* PDF) const {
         SLRAssert(u0 >= 0 && u0 < 1, "\"u0\" must be in range [0, 1).");
         SLRAssert(u1 >= 0 && u1 < 1, "\"u1\" must be in range [0, 1).");
         RealType topPDF;
@@ -228,7 +228,7 @@ namespace SLR {
     };
     
     template <typename RealType>
-    RealType RegularConstantContinuous2DTemplate<RealType>::evaluatePDF(RealType d0, RealType d1) const {
+    RealType RegularConstantContinuousDistribution2DTemplate<RealType>::evaluatePDF(RealType d0, RealType d1) const {
         SLRAssert(d0 >= 0 && d0 < 1.0, "\"d0\" is out of range [0, 1)");
         SLRAssert(d1 >= 0 && d1 < 1.0, "\"d1\" is out of range [0, 1)");
         uint32_t idx1D = std::min(uint32_t(m_num1DDists * d1), m_num1DDists - 1);
@@ -236,7 +236,7 @@ namespace SLR {
     };
     
     template <typename RealType>
-    void RegularConstantContinuous2DTemplate<RealType>::exportBMP(const std::string &filename, float gamma) const {
+    void RegularConstantContinuousDistribution2DTemplate<RealType>::exportBMP(const std::string &filename, float gamma) const {
         uint32_t width = m_1DDists[0].numValues();
         uint32_t height = m_num1DDists;
         uint32_t byteWidth = width * 3 + width % 4;
@@ -269,6 +269,6 @@ namespace SLR {
         free(data);
     };
     
-    template class SLR_API RegularConstantContinuous2DTemplate<float>;
-    template class SLR_API RegularConstantContinuous2DTemplate<double>;
+    template class SLR_API RegularConstantContinuousDistribution2DTemplate<float>;
+    template class SLR_API RegularConstantContinuousDistribution2DTemplate<double>;
 }

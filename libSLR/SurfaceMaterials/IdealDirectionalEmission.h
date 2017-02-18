@@ -13,10 +13,10 @@
 #include "../Core/surface_material.h"
 
 namespace SLR {
-    class SLR_API IdealDirectionalEmission : public EmitterSurfaceProperty {
+    class SLR_API IdealDirectionalEmitterSurfaceProperty : public EmitterSurfaceProperty {
         const SpectrumTexture* m_emittance;
     public:
-        IdealDirectionalEmission(const SpectrumTexture* emittance) :
+        IdealDirectionalEmitterSurfaceProperty(const SpectrumTexture* emittance) :
         m_emittance(emittance) {};
         
         SampledSpectrum emittance(const SurfacePoint &surfPt, const WavelengthSamples &wls) const override;

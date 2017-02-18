@@ -13,15 +13,15 @@
 #include "../Core/geometry.h"
 
 namespace SLR {
-    class HomogeneousMedium : public Medium {
+    class HomogeneousMediumDistribution : public MediumDistribution {
         BoundingBox3D m_region;
-        const InputSpectrum* m_sigma_s;
-        const InputSpectrum* m_sigma_e;
+        const AssetSpectrum* m_sigma_s;
+        const AssetSpectrum* m_sigma_e;
     public:
-        HomogeneousMedium(const BoundingBox3D &region, const InputSpectrum* sigma_s, const InputSpectrum* sigma_e) :
-        Medium(sigma_e->calcBounds()), m_region(region), m_sigma_s(sigma_s), m_sigma_e(sigma_e) { }
+        HomogeneousMediumDistribution(const BoundingBox3D &region, const AssetSpectrum* sigma_s, const AssetSpectrum* sigma_e) :
+        MediumDistribution(sigma_e->calcBounds()), m_region(region), m_sigma_s(sigma_s), m_sigma_e(sigma_e) { }
         
-        bool subdivide(Allocator* mem, Medium** fragments, uint32_t* numFragments) const override { return false; }
+        bool subdivide(Allocator* mem, MediumDistribution** fragments, uint32_t* numFragments) const override { return false; }
         
         BoundingBox3D bounds() const override { return m_region; }
         bool contains(const Point3D &p) const override { return m_region.contains(p); }

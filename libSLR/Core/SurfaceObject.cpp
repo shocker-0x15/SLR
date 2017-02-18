@@ -168,9 +168,9 @@ namespace SLR {
     
     
     
-    InfiniteSphereSurfaceObject::InfiniteSphereSurfaceObject(const Scene* scene, const IBLEmission* emitter) :
+    InfiniteSphereSurfaceObject::InfiniteSphereSurfaceObject(const Scene* scene, const IBLEmitterSurfaceProperty* emitter) :
     m_scene(scene) {
-        m_surface = new InfiniteSphere();
+        m_surface = new InfiniteSphereSurfaceShape();
         m_material = new EmitterSurfaceMaterial(nullptr, emitter);
         m_dist = emitter->createIBLImportanceMap();
     }
@@ -348,7 +348,7 @@ namespace SLR {
         
         m_numLights = (uint32_t)lightImportances.size();
         m_lightList = new const SurfaceObject*[m_numLights];
-        m_lightDist1D = new RegularConstantDiscrete1D(lightImportances);
+        m_lightDist1D = new DiscreteDistribution1D(lightImportances);
         
         for (int i = 0; i < m_numLights; ++i) {
             uint32_t objIdx = lightIndices[i];

@@ -397,7 +397,7 @@ namespace SLRSceneGraph {
                                                    },
                                                    [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err)  {
                                                        using namespace SLR;
-                                                       InputSpectrumRef spectrum;
+                                                       AssetSpectrumRef spectrum;
                                                        std::string ID = args.at("ID").raw<TypeMap::String>();
                                                        auto idx = args.at("idx").raw<TypeMap::Integer>();
                                                        if (ID == "D65") {
@@ -450,10 +450,10 @@ namespace SLRSceneGraph {
                                                    {"offset", Type::RealNumber}
                                                },
                                                [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
-                                                   InputSpectrumRef spectrum = args.at("spectrum").rawRef<TypeMap::Spectrum>();
+                                                   AssetSpectrumRef spectrum = args.at("spectrum").rawRef<TypeMap::Spectrum>();
                                                    float scale = args.at("scale").raw<TypeMap::RealNumber>();
                                                    float offset = args.at("offset").raw<TypeMap::RealNumber>();
-                                                   return Element::createFromReference<TypeMap::Spectrum>(InputSpectrumRef(spectrum->createScaledAndOffset(scale, offset)));
+                                                   return Element::createFromReference<TypeMap::Spectrum>(AssetSpectrumRef(spectrum->createScaledAndOffset(scale, offset)));
                                                }
                                                );
             stack["Image2D"] =
@@ -596,14 +596,14 @@ namespace SLRSceneGraph {
                                                        };
                                                        return configFunc(params, context, err);
                                                    }
-                                                   else if (type == "inverse") {
+                                                   else if (type == "flipped") {
                                                        const static Function configFunc{
                                                            0, {
                                                                {"base", Type::SurfaceMaterial}
                                                            },
                                                            [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
                                                                SurfaceMaterialRef base = args.at("base").rawRef<TypeMap::SurfaceMaterial>();
-                                                               return Element::createFromReference<TypeMap::SurfaceMaterial>(SurfaceMaterial::createInverseMaterial(base));
+                                                               return Element::createFromReference<TypeMap::SurfaceMaterial>(SurfaceMaterial::createFlippedMaterial(base));
                                                            }
                                                        };
                                                        return configFunc(params, context, err);
@@ -792,8 +792,8 @@ namespace SLRSceneGraph {
                                                [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
                                                    const auto &minP = args.at("min").raw<TypeMap::Point>();
                                                    const auto &maxP = args.at("max").raw<TypeMap::Point>();
-                                                   InputSpectrumRef sigma_s = args.at("sigma_s").rawRef<TypeMap::Spectrum>();
-                                                   InputSpectrumRef sigma_e = args.at("sigma_e").rawRef<TypeMap::Spectrum>();
+                                                   AssetSpectrumRef sigma_s = args.at("sigma_s").rawRef<TypeMap::Spectrum>();
+                                                   AssetSpectrumRef sigma_e = args.at("sigma_e").rawRef<TypeMap::Spectrum>();
                                                    MediumMaterialRef mat = args.at("mat").rawRef<TypeMap::MediumMaterial>();
                                                    MediumNodeRef mediumNode = createShared<HomogeneousMediumNode>(SLR::BoundingBox3D(minP, maxP), sigma_s, sigma_e, mat);
                                                    return Element::createFromReference<TypeMap::MediumNode>(mediumNode);
@@ -817,8 +817,8 @@ namespace SLRSceneGraph {
                                                    [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
                                                        const auto &minP = args.at("min").raw<TypeMap::Point>();
                                                        const auto &maxP = args.at("max").raw<TypeMap::Point>();
-                                                       InputSpectrumRef base_sigma_s = args.at("base_sigma_s").rawRef<TypeMap::Spectrum>();
-                                                       InputSpectrumRef base_sigma_e = args.at("base_sigma_e").rawRef<TypeMap::Spectrum>();
+                                                       AssetSpectrumRef base_sigma_s = args.at("base_sigma_s").rawRef<TypeMap::Spectrum>();
+                                                       AssetSpectrumRef base_sigma_e = args.at("base_sigma_e").rawRef<TypeMap::Spectrum>();
                                                        const ParameterList &density_grid = args.at("density_grid").raw<TypeMap::Tuple>();
                                                        uint32_t numX = args.at("numX").raw<TypeMap::Integer>();
                                                        uint32_t numY = args.at("numY").raw<TypeMap::Integer>();
@@ -1171,13 +1171,13 @@ namespace SLRSceneGraph {
         using namespace SLR;
         
 #ifdef Use_Spectral_Representation
-        SLR_SCENEGRAPH_API InputSpectrumRef create(SpectrumType spType, ColorSpace space, SpectrumFloat e0, SpectrumFloat e1, SpectrumFloat e2) {
+        SLR_SCENEGRAPH_API AssetSpectrumRef create(SpectrumType spType, ColorSpace space, SpectrumFloat e0, SpectrumFloat e1, SpectrumFloat e2) {
             return createShared<UpsampledContinuousSpectrum>(spType, space, e0, e1, e2);
         }
-        SLR_SCENEGRAPH_API InputSpectrumRef create(SpectrumType spType, SpectrumFloat minLambda, SpectrumFloat maxLambda, const SpectrumFloat* values, uint32_t numSamples) {
+        SLR_SCENEGRAPH_API AssetSpectrumRef create(SpectrumType spType, SpectrumFloat minLambda, SpectrumFloat maxLambda, const SpectrumFloat* values, uint32_t numSamples) {
             return createShared<RegularContinuousSpectrum>(minLambda, maxLambda, values, numSamples);
         }
-        SLR_SCENEGRAPH_API InputSpectrumRef create(SpectrumType spType, const SpectrumFloat* lambdas, const SpectrumFloat* values, uint32_t numSamples) {
+        SLR_SCENEGRAPH_API AssetSpectrumRef create(SpectrumType spType, const SpectrumFloat* lambdas, const SpectrumFloat* values, uint32_t numSamples) {
             return createShared<IrregularContinuousSpectrum>(lambdas, values, numSamples);
         }
 #else
@@ -1313,16 +1313,16 @@ namespace SLRSceneGraph {
             XYZ[2] = Z / integralCMF;
         }
         
-        SLR_SCENEGRAPH_API InputSpectrumRef create(SpectrumType spType, ColorSpace space, SpectrumFloat e0, SpectrumFloat e1, SpectrumFloat e2) {
+        SLR_SCENEGRAPH_API AssetSpectrumRef create(SpectrumType spType, ColorSpace space, SpectrumFloat e0, SpectrumFloat e1, SpectrumFloat e2) {
             SLRAssert(e0 >= 0.0 && e1 >= 0.0 && e2 >= 0.0, "Values should not be minus.");
             switch (space) {
                 case ColorSpace::sRGB:
-                    return createShared<RGBInputSpectrum>(e0, e1, e2);
+                    return createShared<RGBAssetSpectrum>(e0, e1, e2);
                 case ColorSpace::sRGB_NonLinear: {
                     e0 = sRGB_degamma(e0);
                     e1 = sRGB_degamma(e1);
                     e2 = sRGB_degamma(e2);
-                    return createShared<RGBInputSpectrum>(e0, e1, e2);
+                    return createShared<RGBAssetSpectrum>(e0, e1, e2);
                 }
                 case ColorSpace::xyY: {
                     SpectrumFloat xyY[3] = {e0, e1, e2};
@@ -1351,14 +1351,14 @@ namespace SLRSceneGraph {
                     RGB[0] = RGB[0] < 0.0f ? 0.0f : RGB[0];
                     RGB[1] = RGB[1] < 0.0f ? 0.0f : RGB[1];
                     RGB[2] = RGB[2] < 0.0f ? 0.0f : RGB[2];
-                    return createShared<RGBInputSpectrum>(RGB[0], RGB[1], RGB[2]);
+                    return createShared<RGBAssetSpectrum>(RGB[0], RGB[1], RGB[2]);
                 }
                 default:
                     SLRAssert(false, "Invalid color space.");
-                    return createShared<RGBInputSpectrum>();
+                    return createShared<RGBAssetSpectrum>();
             }
         }
-        SLR_SCENEGRAPH_API InputSpectrumRef create(SpectrumType spType, SpectrumFloat minLambda, SpectrumFloat maxLambda, const SpectrumFloat* values, uint32_t numSamples) {
+        SLR_SCENEGRAPH_API AssetSpectrumRef create(SpectrumType spType, SpectrumFloat minLambda, SpectrumFloat maxLambda, const SpectrumFloat* values, uint32_t numSamples) {
             SpectrumFloat XYZ[3];
             spectrum_to_XYZ(minLambda, maxLambda, values, numSamples, XYZ);
             SpectrumFloat RGB[3];
@@ -1378,9 +1378,9 @@ namespace SLRSceneGraph {
             RGB[0] = RGB[0] < 0.0f ? 0.0f : RGB[0];
             RGB[1] = RGB[1] < 0.0f ? 0.0f : RGB[1];
             RGB[2] = RGB[2] < 0.0f ? 0.0f : RGB[2];
-            return createShared<RGBInputSpectrum>(RGB[0], RGB[1], RGB[2]);
+            return createShared<RGBAssetSpectrum>(RGB[0], RGB[1], RGB[2]);
         }
-        SLR_SCENEGRAPH_API InputSpectrumRef create(SpectrumType spType, const SpectrumFloat* lambdas, const SpectrumFloat* values, uint32_t numSamples) {
+        SLR_SCENEGRAPH_API AssetSpectrumRef create(SpectrumType spType, const SpectrumFloat* lambdas, const SpectrumFloat* values, uint32_t numSamples) {
             SpectrumFloat XYZ[3];
             spectrum_to_XYZ(lambdas, values, numSamples, XYZ);
             SpectrumFloat RGB[3];
@@ -1400,7 +1400,7 @@ namespace SLRSceneGraph {
             RGB[0] = RGB[0] < 0.0f ? 0.0f : RGB[0];
             RGB[1] = RGB[1] < 0.0f ? 0.0f : RGB[1];
             RGB[2] = RGB[2] < 0.0f ? 0.0f : RGB[2];
-            return createShared<RGBInputSpectrum>(RGB[0], RGB[1], RGB[2]);
+            return createShared<RGBAssetSpectrum>(RGB[0], RGB[1], RGB[2]);
         }
 #endif
     } // namespace Spectrum

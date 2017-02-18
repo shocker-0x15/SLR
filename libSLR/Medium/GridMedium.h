@@ -13,21 +13,21 @@
 #include "../Core/geometry.h"
 
 namespace SLR {
-    class GridMedium : public Medium {
+    class GridMediumDistribution : public MediumDistribution {
         BoundingBox3D m_region;
-        const InputSpectrum** m_sigma_s_grid;
-        const InputSpectrum** m_sigma_e_grid;
+        const AssetSpectrum** m_sigma_s_grid;
+        const AssetSpectrum** m_sigma_e_grid;
         uint32_t m_numX, m_numY, m_numZ;
         
         friend class SubGridMedium;
     public:
-        GridMedium(const BoundingBox3D &region, const InputSpectrum** sigma_s_grid, const InputSpectrum** sigma_e_grid,
-                   uint32_t numX, uint32_t numY, uint32_t numZ, float maxExtinctionCoefficient) :
-        Medium(maxExtinctionCoefficient),
+        GridMediumDistribution(const BoundingBox3D &region, const AssetSpectrum** sigma_s_grid, const AssetSpectrum** sigma_e_grid,
+                               uint32_t numX, uint32_t numY, uint32_t numZ, float maxExtinctionCoefficient) :
+        MediumDistribution(maxExtinctionCoefficient),
         m_region(region), m_sigma_s_grid(sigma_s_grid), m_sigma_e_grid(sigma_e_grid),
         m_numX(numX), m_numY(numY), m_numZ(numZ) { }
         
-        bool subdivide(Allocator* mem, Medium** fragments, uint32_t* numFragments) const override;
+        bool subdivide(Allocator* mem, MediumDistribution** fragments, uint32_t* numFragments) const override;
         
         BoundingBox3D bounds() const override { return m_region; }
         bool contains(const Point3D &p) const override { return m_region.contains(p); }
@@ -47,14 +47,14 @@ namespace SLR {
     
     
     
-    class SubGridMedium : public Medium {
+    class SubGridMediumDistribution : public MediumDistribution {
         BoundingBox3D m_region;
-        const GridMedium* m_entity;
+        const GridMediumDistribution* m_entity;
     public:
-        SubGridMedium(const BoundingBox3D &region, const GridMedium* entity, float maxExtinctionCoefficient) :
-        Medium(maxExtinctionCoefficient), m_region(region), m_entity(entity) { }
+        SubGridMediumDistribution(const BoundingBox3D &region, const GridMediumDistribution* entity, float maxExtinctionCoefficient) :
+        MediumDistribution(maxExtinctionCoefficient), m_region(region), m_entity(entity) { }
         
-        bool subdivide(Allocator* mem, Medium** fragments, uint32_t* numFragments) const override { return false; }
+        bool subdivide(Allocator* mem, MediumDistribution** fragments, uint32_t* numFragments) const override { return false; }
         
         BoundingBox3D bounds() const override { return m_region; }
         bool contains(const Point3D &p) const override { return m_region.contains(p); }

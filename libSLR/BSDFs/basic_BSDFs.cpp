@@ -170,7 +170,7 @@ namespace SLR {
     
     
     
-    SampledSpectrum InverseBSDF::sampleInternal(const BSDFQuery &query, float uComponent, const float uDir[2], BSDFQueryResult* result) const {
+    SampledSpectrum FlippedBSDF::sampleInternal(const BSDFQuery &query, float uComponent, const float uDir[2], BSDFQueryResult* result) const {
         BSDFQuery mQuery = query;
         mQuery.dirTypeFilter = mQuery.dirTypeFilter.flip();
         BSDFSample smp{uComponent, uDir[0], uDir[1]};
@@ -180,7 +180,7 @@ namespace SLR {
         return ret;
     }
     
-    SampledSpectrum InverseBSDF::evaluateInternal(const BSDFQuery &query, const Vector3D &dir, SampledSpectrum* rev_fs) const {
+    SampledSpectrum FlippedBSDF::evaluateInternal(const BSDFQuery &query, const Vector3D &dir, SampledSpectrum* rev_fs) const {
         BSDFQuery mQuery = query;
         mQuery.dirTypeFilter = mQuery.dirTypeFilter.flip();
         Vector3D mDir = dir;
@@ -188,7 +188,7 @@ namespace SLR {
         return m_baseBSDF->evaluate(mQuery, mDir, rev_fs);
     }
     
-    float InverseBSDF::evaluatePDFInternal(const BSDFQuery &query, const Vector3D &dir, float* revPDF) const {
+    float FlippedBSDF::evaluatePDFInternal(const BSDFQuery &query, const Vector3D &dir, float* revPDF) const {
         BSDFQuery mQuery = query;
         mQuery.dirTypeFilter.flip();
         Vector3D mDir = dir;
@@ -196,13 +196,13 @@ namespace SLR {
         return m_baseBSDF->evaluatePDF(mQuery, mDir, revPDF);
     }
     
-    float InverseBSDF::weightInternal(const BSDFQuery &query) const {
+    float FlippedBSDF::weightInternal(const BSDFQuery &query) const {
         BSDFQuery mQuery = query;
         mQuery.dirTypeFilter = mQuery.dirTypeFilter.flip();
         return m_baseBSDF->weight(mQuery);
     }
     
-    SampledSpectrum InverseBSDF::getBaseColorInternal(DirectionType flags) const {
+    SampledSpectrum FlippedBSDF::getBaseColorInternal(DirectionType flags) const {
         return m_baseBSDF->getBaseColor(flags.flip());
     }
 }

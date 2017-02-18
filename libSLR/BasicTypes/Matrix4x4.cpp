@@ -24,10 +24,10 @@ namespace SLR {
     
     template <typename RealType>
     Matrix4x4Template<RealType> transpose(const Matrix4x4Template<RealType> &m) {
-        return Matrix4x4Template<RealType>(Vector4Template<RealType>(m.m00, m.m01, m.m02, m.m03),
-                                           Vector4Template<RealType>(m.m10, m.m11, m.m12, m.m13),
-                                           Vector4Template<RealType>(m.m20, m.m21, m.m22, m.m23),
-                                           Vector4Template<RealType>(m.m30, m.m31, m.m32, m.m33));
+        return Matrix4x4Template<RealType>(Vector4DTemplate<RealType>(m.m00, m.m01, m.m02, m.m03),
+                                           Vector4DTemplate<RealType>(m.m10, m.m11, m.m12, m.m13),
+                                           Vector4DTemplate<RealType>(m.m20, m.m21, m.m22, m.m23),
+                                           Vector4DTemplate<RealType>(m.m30, m.m31, m.m32, m.m33));
     }
     template SLR_API Matrix4x4Template<float> transpose(const Matrix4x4Template<float> &m);
     template SLR_API Matrix4x4Template<double> transpose(const Matrix4x4Template<double> &m);
@@ -68,7 +68,7 @@ namespace SLR {
             
             mat[pvCol][pvCol] = 1.0f;
             mat.scaleRow(pvCol, 1.0f / pivot);
-            Vector4Template<RealType> addendRow = mat.row(pvCol);
+            Vector4DTemplate<RealType> addendRow = mat.row(pvCol);
             for (int r = 0; r < 4; ++r) {
                 if (r != pvCol) {
                     RealType s = mat[pvCol][r];
@@ -91,26 +91,26 @@ namespace SLR {
     template SLR_API Matrix4x4Template<double> invert(const Matrix4x4Template<double> &m);
     
     template <typename RealType>
-    Matrix4x4Template<RealType> lookAt(const Point3Template<RealType> &eye, const Point3Template<RealType> &tgt, const Vector3Template<RealType> &up) {
-        Vector3Template<RealType> z = normalize(eye - tgt);
-        Vector3Template<RealType> x = normalize(cross(up, z));
-        Vector3Template<RealType> y = cross(z, x);
-        Vector4Template<RealType> t = Vector4Template<RealType>(-dot(Vector3Template<RealType>(eye), x),
-                                                                -dot(Vector3Template<RealType>(eye), y),
-                                                                -dot(Vector3Template<RealType>(eye), z), 1.0f);
+    Matrix4x4Template<RealType> lookAt(const Point3DTemplate<RealType> &eye, const Point3DTemplate<RealType> &tgt, const Vector3DTemplate<RealType> &up) {
+        Vector3DTemplate<RealType> z = normalize(eye - tgt);
+        Vector3DTemplate<RealType> x = normalize(cross(up, z));
+        Vector3DTemplate<RealType> y = cross(z, x);
+        Vector4DTemplate<RealType> t = Vector4DTemplate<RealType>(-dot(Vector3DTemplate<RealType>(eye), x),
+                                                                -dot(Vector3DTemplate<RealType>(eye), y),
+                                                                -dot(Vector3DTemplate<RealType>(eye), z), 1.0f);
         
-        return Matrix4x4Template<RealType>(Vector4Template<RealType>(x.x, y.x, z.x, 0.0f),
-                                           Vector4Template<RealType>(x.y, y.y, z.y, 0.0f),
-                                           Vector4Template<RealType>(x.z, y.z, z.z, 0.0f),
+        return Matrix4x4Template<RealType>(Vector4DTemplate<RealType>(x.x, y.x, z.x, 0.0f),
+                                           Vector4DTemplate<RealType>(x.y, y.y, z.y, 0.0f),
+                                           Vector4DTemplate<RealType>(x.z, y.z, z.z, 0.0f),
                                            t);
     }
-    template SLR_API Matrix4x4Template<float> lookAt(const Point3Template<float> &eye, const Point3Template<float> &tgt, const Vector3Template<float> &up);
-    template SLR_API Matrix4x4Template<double> lookAt(const Point3Template<double> &eye, const Point3Template<double> &tgt, const Vector3Template<double> &up);
+    template SLR_API Matrix4x4Template<float> lookAt(const Point3DTemplate<float> &eye, const Point3DTemplate<float> &tgt, const Vector3DTemplate<float> &up);
+    template SLR_API Matrix4x4Template<double> lookAt(const Point3DTemplate<double> &eye, const Point3DTemplate<double> &tgt, const Vector3DTemplate<double> &up);
     
     template <typename RealType>
-    Matrix4x4Template<RealType> rotate(RealType angle, const Vector3Template<RealType> &axis) {
+    Matrix4x4Template<RealType> rotate(RealType angle, const Vector3DTemplate<RealType> &axis) {
         Matrix4x4Template<RealType> matrix;
-        Vector3Template<RealType> nAxis = normalize(axis);
+        Vector3DTemplate<RealType> nAxis = normalize(axis);
         RealType c = std::cos(angle);
         RealType s = std::sin(angle);
         RealType oneMinusC = 1 - c;
@@ -131,8 +131,8 @@ namespace SLR {
         
         return matrix;
     }
-    template SLR_API Matrix4x4Template<float> rotate(float angle, const Vector3Template<float> &axis);
-    template SLR_API Matrix4x4Template<double> rotate(double angle, const Vector3Template<double> &axis);
+    template SLR_API Matrix4x4Template<float> rotate(float angle, const Vector3DTemplate<float> &axis);
+    template SLR_API Matrix4x4Template<double> rotate(double angle, const Vector3DTemplate<double> &axis);
     
     template <typename RealType>
     Matrix4x4Template<RealType> camera(RealType aspect, RealType fovY, RealType near, RealType far) {

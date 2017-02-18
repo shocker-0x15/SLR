@@ -11,11 +11,11 @@
 #include "../Core/textures.h"
 
 namespace SLR {
-    SampledSpectrum DiffuseEmission::emittance(const SurfacePoint &surfPt, const WavelengthSamples &wls) const {
+    SampledSpectrum DiffuseEmitterSurfaceProperty::emittance(const SurfacePoint &surfPt, const WavelengthSamples &wls) const {
         return m_emittance->evaluate(surfPt, wls);
     }
     
-    EDF* DiffuseEmission::getEDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem, float scale) const {
+    EDF* DiffuseEmitterSurfaceProperty::getEDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem, float scale) const {
         return mem.create<DiffuseEDF>();
     }    
 }

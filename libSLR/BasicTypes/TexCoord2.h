@@ -13,28 +13,28 @@
 
 namespace SLR {
     template <typename RealType>
-    struct SLR_API TexCoord2Template {
+    struct SLR_API TexCoord2DTemplate {
         RealType u, v;
         
-        TexCoord2Template(RealType val = 0.0f) : u(val), v(val) { };
-        CONSTEXPR_CONSTRUCTOR TexCoord2Template(RealType uu, RealType vv) : u(uu), v(vv) { };
+        TexCoord2DTemplate(RealType val = 0.0f) : u(val), v(val) { };
+        CONSTEXPR_CONSTRUCTOR TexCoord2DTemplate(RealType uu, RealType vv) : u(uu), v(vv) { };
         
-        TexCoord2Template operator+() const { return *this; };
-        TexCoord2Template operator-() const { return TexCoord2Template(-u, -v); };
+        TexCoord2DTemplate operator+() const { return *this; };
+        TexCoord2DTemplate operator-() const { return TexCoord2DTemplate(-u, -v); };
         
-        TexCoord2Template operator+(const TexCoord2Template<RealType> &t) const { return TexCoord2Template(u + t.u, v + t.v); };
-        TexCoord2Template operator-(const TexCoord2Template<RealType> &t) const { return TexCoord2Template(u - t.u, v - t.v); };
-        TexCoord2Template operator*(RealType s) const { return TexCoord2Template(u * s, v * s); };
-        TexCoord2Template operator/(RealType s) const { RealType r = 1.0f / s; return TexCoord2Template(u * r, v * r); };
-        friend inline TexCoord2Template operator*(RealType s, const TexCoord2Template &t) { return TexCoord2Template(s * t.u, s * t.v); };
+        TexCoord2DTemplate operator+(const TexCoord2DTemplate<RealType> &t) const { return TexCoord2DTemplate(u + t.u, v + t.v); };
+        TexCoord2DTemplate operator-(const TexCoord2DTemplate<RealType> &t) const { return TexCoord2DTemplate(u - t.u, v - t.v); };
+        TexCoord2DTemplate operator*(RealType s) const { return TexCoord2DTemplate(u * s, v * s); };
+        TexCoord2DTemplate operator/(RealType s) const { RealType r = 1.0f / s; return TexCoord2DTemplate(u * r, v * r); };
+        friend inline TexCoord2DTemplate operator*(RealType s, const TexCoord2DTemplate &t) { return TexCoord2DTemplate(s * t.u, s * t.v); };
         
-        TexCoord2Template &operator+=(const TexCoord2Template<RealType> &t) { u += t.u; v += t.v; return *this; };
-        TexCoord2Template &operator-=(const TexCoord2Template<RealType> &t) { u -= t.u; v -= t.v; return *this; };
-        TexCoord2Template &operator*=(RealType s) { u *= s; v *= s; return *this; };
-        TexCoord2Template &operator/=(RealType s) { RealType r = 1.0f / s; u *= r; v *= r; return *this; };
+        TexCoord2DTemplate &operator+=(const TexCoord2DTemplate<RealType> &t) { u += t.u; v += t.v; return *this; };
+        TexCoord2DTemplate &operator-=(const TexCoord2DTemplate<RealType> &t) { u -= t.u; v -= t.v; return *this; };
+        TexCoord2DTemplate &operator*=(RealType s) { u *= s; v *= s; return *this; };
+        TexCoord2DTemplate &operator/=(RealType s) { RealType r = 1.0f / s; u *= r; v *= r; return *this; };
         
-        bool operator==(const TexCoord2Template &t) const { return u == t.u && v == t.v; };
-        bool operator!=(const TexCoord2Template &t) const { return u != t.u || v != t.v; };
+        bool operator==(const TexCoord2DTemplate &t) const { return u == t.u && v == t.v; };
+        bool operator!=(const TexCoord2DTemplate &t) const { return u != t.u || v != t.v; };
         
         RealType &operator[](unsigned int index) {
             SLRAssert(index < 2, "\"index\" is out of range [0, 1].");
@@ -52,19 +52,19 @@ namespace SLR {
         
         void print() const { printf("(%g, %g)\n", u, v); };
         
-        static const TexCoord2Template Zero;
-        static const TexCoord2Template One;
-        static const TexCoord2Template Inf;
-        static const TexCoord2Template NaN;
+        static const TexCoord2DTemplate Zero;
+        static const TexCoord2DTemplate One;
+        static const TexCoord2DTemplate Inf;
+        static const TexCoord2DTemplate NaN;
     };  
     template <typename RealType>
-    const TexCoord2Template<RealType> TexCoord2Template<RealType>::Zero = TexCoord2Template<RealType>(0);
+    const TexCoord2DTemplate<RealType> TexCoord2DTemplate<RealType>::Zero = TexCoord2DTemplate<RealType>(0);
     template <typename RealType>
-    const TexCoord2Template<RealType> TexCoord2Template<RealType>::One = TexCoord2Template<RealType>(1);
+    const TexCoord2DTemplate<RealType> TexCoord2DTemplate<RealType>::One = TexCoord2DTemplate<RealType>(1);
     template <typename RealType>
-    const TexCoord2Template<RealType> TexCoord2Template<RealType>::Inf = TexCoord2Template<RealType>(std::numeric_limits<RealType>::infinity());
+    const TexCoord2DTemplate<RealType> TexCoord2DTemplate<RealType>::Inf = TexCoord2DTemplate<RealType>(std::numeric_limits<RealType>::infinity());
     template <typename RealType>
-    const TexCoord2Template<RealType> TexCoord2Template<RealType>::NaN = TexCoord2Template<RealType>(std::numeric_limits<RealType>::quiet_NaN());
+    const TexCoord2DTemplate<RealType> TexCoord2DTemplate<RealType>::NaN = TexCoord2DTemplate<RealType>(std::numeric_limits<RealType>::quiet_NaN());
 }
 
 #endif /* __SLR_TexCoord2__ */

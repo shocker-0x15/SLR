@@ -12,7 +12,7 @@
 #include "../Core/textures.h"
 
 namespace SLR {
-    BSDF* DiffuseReflection::getBSDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem, float scale) const {
+    BSDF* DiffuseReflectionSurfaceMaterial::getBSDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem, float scale) const {
         BSDF* bsdf = nullptr;
         if (m_sigma) {
             float sigma = m_sigma->evaluate(surfPt);
@@ -26,7 +26,7 @@ namespace SLR {
     
     
     
-    BSDF* SpecularReflection::getBSDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem, float scale) const {
+    BSDF* SpecularReflectionSurfaceMaterial::getBSDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem, float scale) const {
         SampledSpectrum coeffR = m_coeffR->evaluate(surfPt, wls);
         SampledSpectrum eta = m_eta->evaluate(surfPt, wls);
         SampledSpectrum k = m_k->evaluate(surfPt, wls);
@@ -35,7 +35,7 @@ namespace SLR {
     
     
     
-    BSDF* SpecularScattering::getBSDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem, float scale) const {
+    BSDF* SpecularScatteringSurfaceMaterial::getBSDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem, float scale) const {
         SampledSpectrum coeff = m_coeff->evaluate(surfPt, wls);
         SampledSpectrum etaExt = m_etaExt->evaluate(surfPt, wls);
         SampledSpectrum etaInt = m_etaInt->evaluate(surfPt, wls);
@@ -44,8 +44,8 @@ namespace SLR {
     
     
     
-    BSDF* InverseSurfaceMaterial::getBSDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem, float scale) const {
+    BSDF* FlippedSurfaceMaterial::getBSDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem, float scale) const {
         BSDF* baseBSDF = m_baseMat->getBSDF(surfPt, wls, mem, scale);
-        return mem.create<InverseBSDF>(baseBSDF);
+        return mem.create<FlippedBSDF>(baseBSDF);
     }
 }

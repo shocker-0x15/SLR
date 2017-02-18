@@ -8,7 +8,7 @@
 #include "constant_textures.h"
 
 namespace SLR {    
-    RegularConstantContinuous2D* ConstantSpectrumTexture::createIBLImportanceMap() const {
+    RegularConstantContinuousDistribution2D* ConstantSpectrumTexture::createIBLImportanceMap() const {
         return nullptr;
     }    
 }

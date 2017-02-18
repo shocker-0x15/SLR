@@ -22,41 +22,41 @@ namespace SLR {
     SLR_API void concentricSampleDisk(RealType u0, RealType u1, RealType* dx, RealType* dy);
     
     template <typename RealType>
-    inline Vector3Template<RealType> cosineSampleHemisphere(RealType u0, RealType u1) {
+    inline Vector3DTemplate<RealType> cosineSampleHemisphere(RealType u0, RealType u1) {
 //        RealType phi = 2 * M_PI * u1;
 //        RealType theta = std::asin(std::sqrt(u0));
-//        return Vector3Template<RealType>(std::cos(phi) * std::sin(theta), std::sin(phi) * std::sin(theta), std::cos(theta));
+//        return Vector3DTemplate<RealType>(std::cos(phi) * std::sin(theta), std::sin(phi) * std::sin(theta), std::cos(theta));
         RealType x, y;
         concentricSampleDisk(u0, u1, &x, &y);
-        return Vector3Template<RealType>(x, y, std::sqrt(std::fmax(0.0f, 1.0f - x * x - y * y)));
+        return Vector3DTemplate<RealType>(x, y, std::sqrt(std::fmax(0.0f, 1.0f - x * x - y * y)));
     }
     
     template <typename RealType, int N>
-    inline Vector3Template<RealType> cosNSampleHemisphere(RealType u0, RealType u1) {
+    inline Vector3DTemplate<RealType> cosNSampleHemisphere(RealType u0, RealType u1) {
         RealType phi = 2 * M_PI * u1;
         RealType theta = std::acos(std::pow(u0, 1.0 / (1 + N)));
-        return Vector3Template<RealType>(std::cos(phi) * std::sin(theta), std::sin(phi) * std::sin(theta), std::cos(theta));
+        return Vector3DTemplate<RealType>(std::cos(phi) * std::sin(theta), std::sin(phi) * std::sin(theta), std::cos(theta));
     }
     
     template <typename RealType>
-    inline Vector3Template<RealType> uniformSampleHemisphere(RealType u0, RealType u1) {
+    inline Vector3DTemplate<RealType> uniformSampleHemisphere(RealType u0, RealType u1) {
         RealType phi = 2 * M_PI * u1;
         RealType theta = std::acos(1 - u0);
-        return Vector3Template<RealType>(std::cos(phi) * std::sin(theta), std::sin(phi) * std::sin(theta), std::cos(theta));
+        return Vector3DTemplate<RealType>(std::cos(phi) * std::sin(theta), std::sin(phi) * std::sin(theta), std::cos(theta));
     }
     
     template <typename RealType>
-    inline Vector3Template<RealType> uniformSampleSphere(RealType u0, RealType u1) {
+    inline Vector3DTemplate<RealType> uniformSampleSphere(RealType u0, RealType u1) {
         RealType phi = 2 * M_PI * u1;
         RealType theta = std::acos(1 - 2 * u0);
-        return Vector3Template<RealType>(std::cos(phi) * std::sin(theta), std::sin(phi) * std::sin(theta), std::cos(theta));
+        return Vector3DTemplate<RealType>(std::cos(phi) * std::sin(theta), std::sin(phi) * std::sin(theta), std::cos(theta));
     }
     
     template <typename RealType>
-    inline Vector3Template<RealType> uniformSampleCone(RealType u0, RealType u1, RealType cosThetaMax) {
+    inline Vector3DTemplate<RealType> uniformSampleCone(RealType u0, RealType u1, RealType cosThetaMax) {
         RealType phi = 2 * M_PI * u1;
         RealType theta = std::acos(1 - (1 - cosThetaMax) * u0);
-        return Vector3Template<RealType>(std::cos(phi) * std::sin(theta), std::sin(phi) * std::sin(theta), std::cos(theta));
+        return Vector3DTemplate<RealType>(std::cos(phi) * std::sin(theta), std::sin(phi) * std::sin(theta), std::cos(theta));
     }
     
     template <typename RealType>
@@ -69,14 +69,14 @@ namespace SLR {
     
     
     template <typename RealType>
-    class SLR_API RegularConstantDiscrete1DTemplate {
+    class SLR_API DiscreteDistribution1DTemplate {
         RealType* m_PMF;
         RealType* m_CDF;
         RealType m_integral;
         uint32_t m_numValues;
     public:
-        RegularConstantDiscrete1DTemplate(const std::vector<RealType> &values);
-        ~RegularConstantDiscrete1DTemplate() {
+        DiscreteDistribution1DTemplate(const std::vector<RealType> &values);
+        ~DiscreteDistribution1DTemplate() {
             delete[] m_PMF;
             delete[] m_CDF;
         };
@@ -94,15 +94,15 @@ namespace SLR {
     
     
     template <typename RealType>
-    class SLR_API RegularConstantContinuous1DTemplate {
+    class SLR_API RegularConstantContinuousDistribution1DTemplate {
         RealType* m_PDF;
         RealType* m_CDF;
         RealType m_integral;
         uint32_t m_numValues;
     public:
-        RegularConstantContinuous1DTemplate(uint32_t numValues, const std::function<RealType(uint32_t)> &pickFunc);
-        RegularConstantContinuous1DTemplate(const std::vector<RealType> &values);
-        ~RegularConstantContinuous1DTemplate() {
+        RegularConstantContinuousDistribution1DTemplate(uint32_t numValues, const std::function<RealType(uint32_t)> &pickFunc);
+        RegularConstantContinuousDistribution1DTemplate(const std::vector<RealType> &values);
+        ~RegularConstantContinuousDistribution1DTemplate() {
             delete[] m_PDF;
             delete[] m_CDF;
         };
@@ -117,14 +117,14 @@ namespace SLR {
     
     
     template <typename RealType>
-    class SLR_API RegularConstantContinuous2DTemplate {
-        RegularConstantContinuous1DTemplate<RealType>* m_1DDists;
+    class SLR_API RegularConstantContinuousDistribution2DTemplate {
+        RegularConstantContinuousDistribution1DTemplate<RealType>* m_1DDists;
         uint32_t m_num1DDists;
         RealType m_integral;
-        RegularConstantContinuous1DTemplate<RealType>* m_top1DDist;
+        RegularConstantContinuousDistribution1DTemplate<RealType>* m_top1DDist;
     public:
-        RegularConstantContinuous2DTemplate(uint32_t numD1, uint32_t numD2, const std::function<RealType(uint32_t, uint32_t)> &pickFunc);;
-        ~RegularConstantContinuous2DTemplate() {
+        RegularConstantContinuousDistribution2DTemplate(uint32_t numD1, uint32_t numD2, const std::function<RealType(uint32_t, uint32_t)> &pickFunc);;
+        ~RegularConstantContinuousDistribution2DTemplate() {
             free(m_1DDists);
             delete m_top1DDist;
         };

@@ -73,12 +73,12 @@ namespace SLRSceneGraph {
         };
     };
     
-    class SLR_SCENEGRAPH_API Normal3DTexture {
+    class SLR_SCENEGRAPH_API NormalTexture {
     protected:
-        SLR::Normal3DTexture* m_rawData;
+        SLR::NormalTexture* m_rawData;
     public:
-        virtual ~Normal3DTexture();
-        const SLR::Normal3DTexture* getRaw() const {
+        virtual ~NormalTexture();
+        const SLR::NormalTexture* getRaw() const {
             return m_rawData;
         };
     };
@@ -95,9 +95,9 @@ namespace SLRSceneGraph {
     
     
     class SLR_SCENEGRAPH_API ConstantSpectrumTexture : public SpectrumTexture {
-        InputSpectrumRef m_value;
+        AssetSpectrumRef m_value;
     public:
-        ConstantSpectrumTexture(const InputSpectrumRef &value);
+        ConstantSpectrumTexture(const AssetSpectrumRef &value);
     };
     
     class SLR_SCENEGRAPH_API ConstantFloatTexture : public FloatTexture {
@@ -114,11 +114,11 @@ namespace SLRSceneGraph {
         ImageSpectrumTexture(const Texture2DMappingRef &mapping, const TiledImage2DRef &image);
     };
     
-    class SLR_SCENEGRAPH_API ImageNormal3DTexture : public Normal3DTexture {
+    class SLR_SCENEGRAPH_API ImageNormalTexture : public NormalTexture {
         Texture2DMappingRef m_mapping;
         TiledImage2DRef m_data;
     public:
-        ImageNormal3DTexture(const Texture2DMappingRef &mapping, const TiledImage2DRef &image);
+        ImageNormalTexture(const Texture2DMappingRef &mapping, const TiledImage2DRef &image);
     };
     
     class SLR_SCENEGRAPH_API ImageFloatTexture : public FloatTexture {
@@ -131,17 +131,17 @@ namespace SLRSceneGraph {
     
     class SLR_SCENEGRAPH_API CheckerBoardSpectrumTexture : public SpectrumTexture {
         Texture2DMappingRef m_mapping;
-        InputSpectrumRef m_values[2];
+        AssetSpectrumRef m_values[2];
     public:
-        CheckerBoardSpectrumTexture(const Texture2DMappingRef &mapping, const InputSpectrumRef &v0, const InputSpectrumRef &v1);
+        CheckerBoardSpectrumTexture(const Texture2DMappingRef &mapping, const AssetSpectrumRef &v0, const AssetSpectrumRef &v1);
     };
     
-    class SLR_SCENEGRAPH_API CheckerBoardNormal3DTexture : public Normal3DTexture {
+    class SLR_SCENEGRAPH_API CheckerBoardNormalTexture : public NormalTexture {
         Texture2DMappingRef m_mapping;
         float m_stepWidth;
         bool m_reverse;
     public:
-        CheckerBoardNormal3DTexture(const Texture2DMappingRef &mapping, float stepWidth, bool reverse);
+        CheckerBoardNormalTexture(const Texture2DMappingRef &mapping, float stepWidth, bool reverse);
     };
     
     class SLR_SCENEGRAPH_API CheckerBoardFloatTexture : public FloatTexture {
@@ -160,12 +160,12 @@ namespace SLRSceneGraph {
         VoronoiSpectrumTexture(const Texture3DMappingRef &mapping, float scale, float brightness);
     };
     
-    class SLR_SCENEGRAPH_API VoronoiNormal3DTexture : public Normal3DTexture {
+    class SLR_SCENEGRAPH_API VoronoiNormalTexture : public NormalTexture {
         Texture3DMappingRef m_mapping;
         float m_scale;
         float m_thetaMax;
     public:
-        VoronoiNormal3DTexture(const Texture3DMappingRef &mapping, float scale, float thetaMax);
+        VoronoiNormalTexture(const Texture3DMappingRef &mapping, float scale, float thetaMax);
     };
     
     class SLR_SCENEGRAPH_API VoronoiFloatTexture : public FloatTexture {

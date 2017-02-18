@@ -27,14 +27,14 @@ namespace SLR {
         SampledSpectrum evaluate(const MediumPoint &medPt, const WavelengthSamples &wls) const override {
             return evaluate(m_mapping->map(medPt), wls);
         }
-        RegularConstantContinuous2D* createIBLImportanceMap() const override;
+        RegularConstantContinuousDistribution2D* createIBLImportanceMap() const override;
     };
     
-    class SLR_API ImageNormal3DTexture : public Normal3DTexture {
+    class SLR_API ImageNormalTexture : public NormalTexture {
         const TiledImage2D* m_data;
         const Texture2DMapping* m_mapping;
     public:
-        ImageNormal3DTexture(const TiledImage2D* image, const Texture2DMapping* mapping) :
+        ImageNormalTexture(const TiledImage2D* image, const Texture2DMapping* mapping) :
         m_data(image), m_mapping(mapping) { }
         
         Normal3D evaluate(const Point3D &p) const ;

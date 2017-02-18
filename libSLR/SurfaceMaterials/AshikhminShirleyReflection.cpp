@@ -11,7 +11,7 @@
 #include "../Core/textures.h"
 
 namespace SLR {
-    BSDF* AshikhminShirleyReflection::getBSDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem, float scale) const {
+    BSDF* AshikhminShirleyReflectionSurfaceMaterial::getBSDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem, float scale) const {
         SampledSpectrum Rs = m_Rs->evaluate(surfPt, wls);
         SampledSpectrum Rd = m_Rd->evaluate(surfPt, wls);
         float nu = m_nu->evaluate(surfPt);

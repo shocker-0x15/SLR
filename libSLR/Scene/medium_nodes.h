@@ -15,12 +15,12 @@
 
 namespace SLR {
     class SLR_API HomogeneousMediumNode : public MediumNode {
-        HomogeneousMedium* m_medium;
+        HomogeneousMediumDistribution* m_medium;
         const MediumMaterial* m_material;
         
         SingleMediumObject* m_obj;
     public:
-        HomogeneousMediumNode(const BoundingBox3D &region, const InputSpectrum* sigma_s, const InputSpectrum* sigma_e, const MediumMaterial* material);
+        HomogeneousMediumNode(const BoundingBox3D &region, const AssetSpectrum* sigma_s, const AssetSpectrum* sigma_e, const MediumMaterial* material);
         ~HomogeneousMediumNode();
         
         bool isDirectlyTransformable() const override { return false; }
@@ -31,10 +31,10 @@ namespace SLR {
     
     
     class SLR_API GridMediumNode : public MediumNode {
-        GridMedium* m_medium;
+        GridMediumDistribution* m_medium;
         const MediumMaterial* m_material;
     public:
-        GridMediumNode(const BoundingBox3D &region, const InputSpectrum** sigma_s_grid, const InputSpectrum** sigma_e_grid,
+        GridMediumNode(const BoundingBox3D &region, const AssetSpectrum** sigma_s_grid, const AssetSpectrum** sigma_e_grid,
                        uint32_t numX, uint32_t numY, uint32_t numZ, const MediumMaterial* material);
         ~GridMediumNode();
         
@@ -46,12 +46,12 @@ namespace SLR {
     
     
     class SLR_API DensityGridMediumNode : public MediumNode {
-        DensityGridMedium* m_medium;
+        DensityGridMediumDistribution* m_medium;
         const MediumMaterial* m_material;
         
         SingleMediumObject* m_obj;
     public:
-        DensityGridMediumNode(const BoundingBox3D &region, const InputSpectrum* base_sigma_s, const InputSpectrum* base_sigma_e, const float* density_grid,
+        DensityGridMediumNode(const BoundingBox3D &region, const AssetSpectrum* base_sigma_s, const AssetSpectrum* base_sigma_e, const float* density_grid,
                               uint32_t numX, uint32_t numY, uint32_t numZ, const MediumMaterial* material);
         ~DensityGridMediumNode();
         

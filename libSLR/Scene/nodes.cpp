@@ -173,7 +173,7 @@ namespace SLR {
     
     void InfiniteSphereNode::createRenderingData(Allocator* mem, const Transform* subTF, RenderingData* data) {
         SLRAssert(subTF == nullptr, "Transformation to InfiniteSphereNode is currently not supported.");
-        m_emission = mem->create<IBLEmission>(m_scene, m_IBLTex, m_scale);
+        m_emission = mem->create<IBLEmitterSurfaceProperty>(m_scene, m_IBLTex, m_scale);
         m_obj = mem->create<InfiniteSphereSurfaceObject>(data->scene, m_emission);
         data->envObj = m_obj;
     }
@@ -199,7 +199,7 @@ namespace SLR {
         Point3D p = transform * m_position;
         Vector3D d = transform * m_direction;
         
-        m_surface = mem->create<InfinitesimalPoint>(p, d);
+        m_surface = mem->create<InfinitesimalPointSurfaceShape>(p, d);
         m_obj = mem->create<SingleSurfaceObject>(m_surface, m_material);
         data->surfObjs.push_back(m_obj);
     }

@@ -8,15 +8,15 @@
 #include "Point3.h"
 
 namespace SLR {
-    template struct SLR_API Point3Template<float>;
-//    template SLR_API const Point3Template<float> Point3Template<float>::Zero;
-//    template SLR_API const Point3Template<float> Point3Template<float>::One;
-//    template SLR_API const Point3Template<float> Point3Template<float>::Inf;
-//    template SLR_API const Point3Template<float> Point3Template<float>::NaN;
+    template struct SLR_API Point3DTemplate<float>;
+//    template SLR_API const Point3DTemplate<float> Point3DTemplate<float>::Zero;
+//    template SLR_API const Point3DTemplate<float> Point3DTemplate<float>::One;
+//    template SLR_API const Point3DTemplate<float> Point3DTemplate<float>::Inf;
+//    template SLR_API const Point3DTemplate<float> Point3DTemplate<float>::NaN;
 
-    template struct SLR_API Point3Template<double>;
-//    template SLR_API const Point3Template<double> Point3Template<double>::Zero;
-//    template SLR_API const Point3Template<double> Point3Template<double>::One;
-//    template SLR_API const Point3Template<double> Point3Template<double>::Inf;
-//    template SLR_API const Point3Template<double> Point3Template<double>::NaN;
+    template struct SLR_API Point3DTemplate<double>;
+//    template SLR_API const Point3DTemplate<double> Point3DTemplate<double>::Zero;
+//    template SLR_API const Point3DTemplate<double> Point3DTemplate<double>::One;
+//    template SLR_API const Point3DTemplate<double> Point3DTemplate<double>::Inf;
+//    template SLR_API const Point3DTemplate<double> Point3DTemplate<double>::NaN;
 }

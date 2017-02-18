@@ -82,10 +82,10 @@ namespace SLR {
     
     
     class SLR_API SingleMediumObject : public MediumObject {
-        const Medium* m_medium;
+        const MediumDistribution* m_medium;
         const MediumMaterial* m_material;
     public:
-        SingleMediumObject(const Medium* medium, const MediumMaterial* material) :
+        SingleMediumObject(const MediumDistribution* medium, const MediumMaterial* material) :
         m_medium(medium), m_material(material) {}
         
         //----------------------------------------------------------------
@@ -191,7 +191,7 @@ namespace SLR {
         const MediumObject** m_lightList;
         std::map<uint32_t, uint32_t> m_objToLightMap;
         uint32_t m_numLights;
-        RegularConstantDiscrete1D* m_lightDist1D;
+        DiscreteDistribution1D* m_lightDist1D;
     public:
         MediumObjectAggregate(const std::vector<MediumObject*> &objs);
         ~MediumObjectAggregate();

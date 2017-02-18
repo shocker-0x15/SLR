@@ -16,13 +16,13 @@ namespace SLR {
     struct SLR_API RayTemplate {
         static const RealType Epsilon;
         
-        Point3Template<RealType> org;
-        Vector3Template<RealType> dir;
+        Point3DTemplate<RealType> org;
+        Vector3DTemplate<RealType> dir;
         RealType distMin, distMax;
         RealType time;
         
         RayTemplate() { }
-        RayTemplate(const Point3Template<RealType> &o, const Vector3Template<RealType> &d, RealType t, RealType dMin = 0.0f, RealType dMax = INFINITY) :
+        RayTemplate(const Point3DTemplate<RealType> &o, const Vector3DTemplate<RealType> &d, RealType t, RealType dMin = 0.0f, RealType dMax = INFINITY) :
         org(o), dir(d), distMin(dMin), distMax(dMax), time(t) { }
     };
     

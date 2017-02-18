@@ -59,7 +59,7 @@ namespace SLR {
     
     
     
-    class SLR_API InverseBSDF : public BSDF {
+    class SLR_API FlippedBSDF : public BSDF {
         const BSDF* m_baseBSDF;
         
         SampledSpectrum sampleInternal(const BSDFQuery &query, float uComponent, const float uDir[2], BSDFQueryResult* result) const override;
@@ -68,7 +68,7 @@ namespace SLR {
         float weightInternal(const BSDFQuery &query) const override;
         SampledSpectrum getBaseColorInternal(DirectionType flags) const override;
     public:
-        InverseBSDF(const BSDF* baseBSDF) : BSDF(baseBSDF->m_type.flip()), m_baseBSDF(baseBSDF) { }
+        FlippedBSDF(const BSDF* baseBSDF) : BSDF(baseBSDF->m_type.flip()), m_baseBSDF(baseBSDF) { }
     };
     
     
@@ -77,23 +77,23 @@ namespace SLR {
         SampledSpectrum sampleInternal(const BSDFQuery &query, float uComponent, const float uDir[2], BSDFQueryResult* result) const override {
             SLRAssert(false, "NullBSDF's method should not be called.");
             return SampledSpectrum::Zero;
-        };
+        }
         SampledSpectrum evaluateInternal(const BSDFQuery &query, const Vector3D &dir, SampledSpectrum* rev_fs) const override {
             SLRAssert(false, "NullBSDF's method should not be called.");
             return SampledSpectrum::Zero;
-        };
+        }
         float evaluatePDFInternal(const BSDFQuery &query, const Vector3D &dir, float* revPDF) const override {
             SLRAssert(false, "NullBSDF's method should not be called.");
             return 0;
-        };
+        }
         float weightInternal(const BSDFQuery &query) const override {
             SLRAssert(false, "NullBSDF's method should not be called.");
             return 0;
-        };
+        }
         SampledSpectrum getBaseColorInternal(DirectionType flags) const override {
             SLRAssert(false, "NullBSDF's method should not be called.");
             return SampledSpectrum::Zero;
-        };
+        }
     public:
         NullBSDF() : BSDF(DirectionType()) { }
     };

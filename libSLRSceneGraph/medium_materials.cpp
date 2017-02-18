@@ -29,13 +29,13 @@ namespace SLRSceneGraph {
     
     
     
-    IsotropicScattering::IsotropicScattering() {
-        m_rawData = new SLR::IsotropicScattering();
+    IsotropicScatteringMediumMaterial::IsotropicScatteringMediumMaterial() {
+        m_rawData = new SLR::IsotropicScatteringMediumMaterial();
     }
     
     
     
     MediumMaterialRef MediumMaterial::createIsotropic() {
-        return createShared<IsotropicScattering>();
+        return createShared<IsotropicScatteringMediumMaterial>();
     }
 }

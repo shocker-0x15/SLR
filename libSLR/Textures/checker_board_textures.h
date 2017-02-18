@@ -15,9 +15,9 @@
 namespace SLR {
     class SLR_API CheckerBoardSpectrumTexture : public SpectrumTexture {
         const Texture2DMapping* m_mapping;
-        const InputSpectrum* m_values[2];
+        const AssetSpectrum* m_values[2];
     public:
-        CheckerBoardSpectrumTexture(const Texture2DMapping* mapping, const InputSpectrum* v0, const InputSpectrum* v1) : m_mapping(mapping), m_values{v0, v1} { }
+        CheckerBoardSpectrumTexture(const Texture2DMapping* mapping, const AssetSpectrum* v0, const AssetSpectrum* v1) : m_mapping(mapping), m_values{v0, v1} { }
         
         SampledSpectrum evaluate(const Point3D &p, const WavelengthSamples &wls) const {
             return m_values[((int)(p.x * 2) + (int)(p.y * 2)) % 2]->evaluate(wls);
@@ -28,15 +28,15 @@ namespace SLR {
         SampledSpectrum evaluate(const MediumPoint &medPt, const WavelengthSamples &wls) const override {
             return evaluate(m_mapping->map(medPt), wls);
         }
-        RegularConstantContinuous2D* createIBLImportanceMap() const override;
+        RegularConstantContinuousDistribution2D* createIBLImportanceMap() const override;
     };
     
-    class SLR_API CheckerBoardNormal3DTexture : public Normal3DTexture {
+    class SLR_API CheckerBoardNormalTexture : public NormalTexture {
         const Texture2DMapping* m_mapping;
         float m_stepWidth;
         bool m_reverse;
     public:
-        CheckerBoardNormal3DTexture(const Texture2DMapping* mapping, float stepWidth, bool reverse) :
+        CheckerBoardNormalTexture(const Texture2DMapping* mapping, float stepWidth, bool reverse) :
         m_mapping(mapping), m_stepWidth(stepWidth), m_reverse(reverse) {
             SLRAssert(stepWidth > 0 && stepWidth <= 1.0f, "stepWidth must be in the range (0, 1].");
         }

@@ -14,9 +14,9 @@
 #include "../Medium/DensityGridMedium.h"
 
 namespace SLR {
-    HomogeneousMediumNode::HomogeneousMediumNode(const BoundingBox3D &region, const InputSpectrum* sigma_s, const InputSpectrum* sigma_e, const MediumMaterial* material) :
+    HomogeneousMediumNode::HomogeneousMediumNode(const BoundingBox3D &region, const AssetSpectrum* sigma_s, const AssetSpectrum* sigma_e, const MediumMaterial* material) :
     m_material(material) {
-        m_medium = new HomogeneousMedium(region, sigma_s, sigma_e);
+        m_medium = new HomogeneousMediumDistribution(region, sigma_s, sigma_e);
     }
     
     HomogeneousMediumNode::~HomogeneousMediumNode() {
@@ -34,20 +34,20 @@ namespace SLR {
     
     
     
-    GridMediumNode::GridMediumNode(const BoundingBox3D &region, const InputSpectrum** sigma_s_grid, const InputSpectrum** sigma_e_grid,
+    GridMediumNode::GridMediumNode(const BoundingBox3D &region, const AssetSpectrum** sigma_s_grid, const AssetSpectrum** sigma_e_grid,
                                    uint32_t numX, uint32_t numY, uint32_t numZ, const MediumMaterial* material) :
     m_material(material) {
         float maxExtinctionCoefficient = -INFINITY;
         for (int z = 0; z < numZ; ++z) {
-            const InputSpectrum* zSlice = sigma_e_grid[z];
+            const AssetSpectrum* zSlice = sigma_e_grid[z];
             for (int y = 0; y < numY; ++y) {
                 for (int x = 0; x < numX; ++x) {
-                    const InputSpectrum* spectrum = zSlice + numX * y + x;
+                    const AssetSpectrum* spectrum = zSlice + numX * y + x;
                     maxExtinctionCoefficient = std::max(maxExtinctionCoefficient, spectrum->calcBounds());
                 }
             }
         }
-        m_medium = new GridMedium(region, sigma_s_grid, sigma_e_grid, numX, numY, numZ, maxExtinctionCoefficient);
+        m_medium = new GridMediumDistribution(region, sigma_s_grid, sigma_e_grid, numX, numY, numZ, maxExtinctionCoefficient);
     }
     
     GridMediumNode::~GridMediumNode() {
@@ -64,7 +64,7 @@ namespace SLR {
     
     
     
-    DensityGridMediumNode::DensityGridMediumNode(const BoundingBox3D &region, const InputSpectrum* base_sigma_s, const InputSpectrum* base_sigma_e, const float* density_grid,
+    DensityGridMediumNode::DensityGridMediumNode(const BoundingBox3D &region, const AssetSpectrum* base_sigma_s, const AssetSpectrum* base_sigma_e, const float* density_grid,
                                                  uint32_t numX, uint32_t numY, uint32_t numZ, const MediumMaterial* material) :
     m_material(material) {
         float maxDensity = -INFINITY;
@@ -76,7 +76,7 @@ namespace SLR {
             }
         }
         float maxExtinctionCoefficient = base_sigma_e->calcBounds() * maxDensity;
-        m_medium = new DensityGridMedium(region, base_sigma_s, base_sigma_e, density_grid, numX, numY, numZ, maxExtinctionCoefficient);
+        m_medium = new DensityGridMediumDistribution(region, base_sigma_s, base_sigma_e, density_grid, numX, numY, numZ, maxExtinctionCoefficient);
     }
     
     DensityGridMediumNode::~DensityGridMediumNode() {

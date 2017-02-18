@@ -9,7 +9,7 @@
 #include "light_path_samplers.h"
 
 namespace SLR {
-    float DensityGridMedium::calcDensity(const Point3D &p) const {
+    float DensityGridMediumDistribution::calcDensity(const Point3D &p) const {
         Point3D param;
         m_region.localCoordinates(p, &param);
         if (param.x < 0 || param.y < 0 || param.z < 0 ||
@@ -40,12 +40,12 @@ namespace SLR {
         return density;
     }
     
-    bool DensityGridMedium::subdivide(Allocator* mem, Medium** fragments, uint32_t* numFragments) const {
+    bool DensityGridMediumDistribution::subdivide(Allocator* mem, MediumDistribution** fragments, uint32_t* numFragments) const {
         SLRAssert_NotImplemented();
         return true;
     }
     
-    bool DensityGridMedium::interact(const Ray &ray, float distanceLimit, const WavelengthSamples &wls, LightPathSampler &pathSampler,
+    bool DensityGridMediumDistribution::interact(const Ray &ray, float distanceLimit, const WavelengthSamples &wls, LightPathSampler &pathSampler,
                                      MediumInteraction *mi, SampledSpectrum *medThroughput, bool* singleWavelength) const {
         SLRAssert(std::isfinite(distanceLimit), "distanceLimit must be a finite value.");
         FreePathSampler &sampler = pathSampler.getFreePathSampler();
@@ -108,7 +108,7 @@ namespace SLR {
         return hit;
     }
     
-    SampledSpectrum DensityGridMedium::evaluateTransmittance(Ray &ray, float distanceLimit, const WavelengthSamples &wls, SLR::LightPathSampler &pathSampler, bool *singleWavelength) const {
+    SampledSpectrum DensityGridMediumDistribution::evaluateTransmittance(Ray &ray, float distanceLimit, const WavelengthSamples &wls, SLR::LightPathSampler &pathSampler, bool *singleWavelength) const {
         SLRAssert(std::isfinite(distanceLimit), "distanceLimit must be a finite value.");
         FreePathSampler sampler = pathSampler.getFreePathSampler();
         
@@ -150,22 +150,22 @@ namespace SLR {
         return transmittance;
     }
     
-    SampledSpectrum DensityGridMedium::extinctionCoefficient(const Point3D &p, const WavelengthSamples &wls) const {
+    SampledSpectrum DensityGridMediumDistribution::extinctionCoefficient(const Point3D &p, const WavelengthSamples &wls) const {
         return m_base_sigma_e->evaluate(wls) * calcDensity(p);
     }
     
-    void DensityGridMedium::getMediumPoint(const MediumInteraction &mi, MediumPoint* medPt) const {
+    void DensityGridMediumDistribution::getMediumPoint(const MediumInteraction &mi, MediumPoint* medPt) const {
         ReferenceFrame shadingFrame;
         shadingFrame.z = mi.getIncomingDirection();
         shadingFrame.z.makeCoordinateSystem(&shadingFrame.x, &shadingFrame.y);
         *medPt = MediumPoint(mi, false, shadingFrame);
     }
     
-    void DensityGridMedium::sample(float u0, float u1, float u2, MediumPoint *medPt, float *volumePDF) const {
+    void DensityGridMediumDistribution::sample(float u0, float u1, float u2, MediumPoint *medPt, float *volumePDF) const {
         SLRAssert_NotImplemented();
     }
     
-    float DensityGridMedium::evaluateVolumePDF(const MediumPoint &medPt) const {
+    float DensityGridMediumDistribution::evaluateVolumePDF(const MediumPoint &medPt) const {
         return 1.0f / volume();
     }
 }

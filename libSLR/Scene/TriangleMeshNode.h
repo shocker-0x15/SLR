@@ -20,23 +20,23 @@ namespace SLR {
             friend class TriangleMeshNode;
             
             const SurfaceMaterial* m_material;
-            const Normal3DTexture* m_normalMap;
+            const NormalTexture* m_normalMap;
             const FloatTexture* m_alphaMap;
-            std::unique_ptr<Triangle[]> m_triangles;
+            std::unique_ptr<TriangleSurfaceShape[]> m_triangles;
             uint32_t m_numTriangles;
         public:
             MaterialGroup() :
             m_material(nullptr), m_normalMap(nullptr), m_alphaMap(nullptr),
             m_triangles(nullptr), m_numTriangles(0) {
             }
-            MaterialGroup(const SurfaceMaterial* material, const Normal3DTexture* normalMap, const FloatTexture* alphaMap) :
+            MaterialGroup(const SurfaceMaterial* material, const NormalTexture* normalMap, const FloatTexture* alphaMap) :
             m_material(material), m_normalMap(normalMap), m_alphaMap(alphaMap),
             m_triangles(nullptr), m_numTriangles(0) {
             }
             ~MaterialGroup() {
             }
             
-            void setTriangles(std::unique_ptr<Triangle[]> &triangles, uint32_t numTriangles);
+            void setTriangles(std::unique_ptr<TriangleSurfaceShape[]> &triangles, uint32_t numTriangles);
         };
         
     private:

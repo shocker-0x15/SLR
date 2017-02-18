@@ -229,6 +229,7 @@ namespace SLR {
     };
     
     
+    
     class SLR_API EDF {
     protected:
         const DirectionType m_type;
@@ -254,6 +255,8 @@ namespace SLR {
         bool hasNonDelta() const { return matches(DirectionType::WholeSphere | DirectionType::NonDelta); }
     };
     
+    
+    
     // Abstract Bidirectional Distribution Function
     class SLR_API AbstractBDF {
     protected:
@@ -270,6 +273,8 @@ namespace SLR {
         bool hasNonDelta() const { return matches(DirectionType::WholeSphere | DirectionType::NonDelta); }
     };
     
+    
+    
     class SLR_API BSDF : public AbstractBDF {
     protected:        
         DirectionType sideTest(const Normal3D& ng, const Vector3D& d0, const Vector3D &d1) const {
@@ -282,7 +287,7 @@ namespace SLR {
         virtual float weightInternal(const BSDFQuery &query) const = 0;
         virtual SampledSpectrum getBaseColorInternal(DirectionType flags) const = 0;
         friend class MultiBSDF;
-        friend class InverseBSDF;
+        friend class FlippedBSDF;
     public:
         BSDF(DirectionType type) : SLR::AbstractBDF(type) { }
         
@@ -362,6 +367,8 @@ namespace SLR {
         float evaluatePDF(const ABDFQuery* query, const Vector3D &dir, float* revPDF = nullptr) const override;
     };
     
+    
+    
     class SLR_API PhaseFunction {
     public:
         PhaseFunction() {}
@@ -374,6 +381,8 @@ namespace SLR {
         virtual float evaluatePDF(const PFQuery &query, const Vector3D &dirIn, float* revPDF = nullptr) const = 0;
     };
     
+    
+    
     class SLR_API VolumetricBSDF : public AbstractBDF {
         const PhaseFunction* m_pf;
         SampledSpectrum m_albedo;
@@ -384,6 +393,8 @@ namespace SLR {
         SampledSpectrum evaluate(const ABDFQuery* query, const Vector3D &dir, SampledSpectrum* rev_fs = nullptr) const override;
         float evaluatePDF(const ABDFQuery* query, const Vector3D &dir, float* revPDF = nullptr) const override;
     };
+    
+    
     
     class SLR_API IDF {
     protected:
@@ -401,6 +412,7 @@ namespace SLR {
         virtual bool matches(DirectionType flags) const { return m_type.matches(flags); }
         bool hasNonDelta() const { return matches(DirectionType::WholeSphere | DirectionType::NonDelta); }
     };
+    
     
     
     class SLR_API Fresnel {
@@ -440,6 +452,7 @@ namespace SLR {
         
         static float evalF(float etaEnter, float etaExit, float cosEnter, float cosExit);
     };
+    
     
     
     class SLR_API MicrofacetDistribution {

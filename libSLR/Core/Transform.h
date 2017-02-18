@@ -30,6 +30,8 @@ namespace SLR {
         virtual BoundingBox3D motionBounds(const BoundingBox3D &bb) const { SLRAssert_NotImplemented(); return BoundingBox3D(); }
     };
     
+    
+    
     class SLR_API StaticTransform : public Transform {
         Matrix4x4 mat, matInv;
     public:
@@ -78,6 +80,8 @@ namespace SLR {
         friend StaticTransform invert(const StaticTransform &t) { return StaticTransform(t.matInv, t.mat); }
         friend StaticTransform transpose(const StaticTransform &t) { return StaticTransform(transpose(t.mat)); }
     };
+    
+    
     
     class SLR_API AnimatedTransform : public Transform {
         StaticTransform m_tfBegin;
@@ -138,6 +142,8 @@ namespace SLR {
             return ret;
         }
     };
+    
+    
     
     class SLR_API ChainedTransform : public Transform {
         const Transform* m_parent;

@@ -13,10 +13,10 @@
 #include "../Core/surface_material.h"
 
 namespace SLR {
-    class SLR_API DiffuseEmission : public EmitterSurfaceProperty {
+    class SLR_API DiffuseEmitterSurfaceProperty : public EmitterSurfaceProperty {
         const SpectrumTexture* m_emittance;
     public:
-        DiffuseEmission(const SpectrumTexture* emittance) :
+        DiffuseEmitterSurfaceProperty(const SpectrumTexture* emittance) :
         m_emittance(emittance) {};
         
         SampledSpectrum emittance(const SurfacePoint &surfPt, const WavelengthSamples &wls) const override;

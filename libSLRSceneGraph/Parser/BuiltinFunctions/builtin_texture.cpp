@@ -53,7 +53,7 @@ namespace SLRSceneGraph {
                                                                                },
                                                                                std::vector<Function::Procedure>{
                                                                                    [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
-                                                                                       InputSpectrumRef spectrum = args.at("spectrum").rawRef<TypeMap::Spectrum>();
+                                                                                       AssetSpectrumRef spectrum = args.at("spectrum").rawRef<TypeMap::Spectrum>();
                                                                                        SpectrumTextureRef rawRef = createShared<ConstantSpectrumTexture>(spectrum);
                                                                                        return Element::createFromReference<TypeMap::SpectrumTexture>(rawRef);
                                                                                    },
@@ -72,8 +72,8 @@ namespace SLRSceneGraph {
                                                                                                    {"c0", Type::Spectrum}, {"c1", Type::Spectrum}, {"mapping", Type::Texture2DMapping, Element::createFromReference<TypeMap::Texture2DMapping>(Texture2DMapping::sharedInstanceRef())}
                                                                                                },
                                                                                                [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
-                                                                                                   const InputSpectrumRef c0 = args.at("c0").rawRef<TypeMap::Spectrum>();
-                                                                                                   const InputSpectrumRef c1 = args.at("c1").rawRef<TypeMap::Spectrum>();
+                                                                                                   const AssetSpectrumRef c0 = args.at("c0").rawRef<TypeMap::Spectrum>();
+                                                                                                   const AssetSpectrumRef c1 = args.at("c1").rawRef<TypeMap::Spectrum>();
                                                                                                    const auto &mapping = args.at("mapping").rawRef<TypeMap::Texture2DMapping>();
                                                                                                    SpectrumTextureRef rawRef = createShared<CheckerBoardSpectrumTexture>(mapping, c0, c1);
                                                                                                    return Element::createFromReference<TypeMap::SpectrumTexture>(rawRef);
@@ -109,7 +109,7 @@ namespace SLRSceneGraph {
                                                                                  [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
                                                                                      const auto &image = args.at("image").rawRef<TypeMap::Image2D>();
                                                                                      const auto &mapping = args.at("mapping").rawRef<TypeMap::Texture2DMapping>();
-                                                                                     Normal3DTextureRef rawRef = createShared<ImageNormal3DTexture>(mapping, image);
+                                                                                     NormalTextureRef rawRef = createShared<ImageNormalTexture>(mapping, image);
                                                                                      return Element::createFromReference<TypeMap::NormalTexture>(rawRef);
                                                                                  },
                                                                                  [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
@@ -126,7 +126,7 @@ namespace SLRSceneGraph {
                                                                                                  float stepWidth = args.at("stepWidth").raw<TypeMap::RealNumber>();
                                                                                                  bool reverse = args.at("reverse").raw<TypeMap::Bool>();
                                                                                                  const auto &mapping = args.at("mapping").rawRef<TypeMap::Texture2DMapping>();
-                                                                                                 Normal3DTextureRef rawRef = createShared<CheckerBoardNormal3DTexture>(mapping, stepWidth, reverse);
+                                                                                                 NormalTextureRef rawRef = createShared<CheckerBoardNormalTexture>(mapping, stepWidth, reverse);
                                                                                                  return Element::createFromReference<TypeMap::NormalTexture>(rawRef);
                                                                                              }
                                                                                          };
@@ -143,7 +143,7 @@ namespace SLRSceneGraph {
                                                                                                  float scale = args.at("scale").raw<TypeMap::RealNumber>();
                                                                                                  float thetaMax = args.at("thetaMax").raw<TypeMap::RealNumber>();
                                                                                                  const auto &mapping = args.at("mapping").rawRef<TypeMap::Texture3DMapping>();
-                                                                                                 Normal3DTextureRef rawRef = createShared<VoronoiNormal3DTexture>(mapping, scale, thetaMax);
+                                                                                                 NormalTextureRef rawRef = createShared<VoronoiNormalTexture>(mapping, scale, thetaMax);
                                                                                                  return Element::createFromReference<TypeMap::NormalTexture>(rawRef);
                                                                                              }
                                                                                          };

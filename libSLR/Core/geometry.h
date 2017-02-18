@@ -281,10 +281,9 @@ namespace SLR {
     
     
     
-    // SurfaceShape?
-    class SLR_API Surface {
+    class SLR_API SurfaceShape {
     public:
-        virtual ~Surface() { }
+        virtual ~SurfaceShape() { }
         
         virtual float costForIntersect() const = 0;
         virtual BoundingBox3D bounds() const = 0;
@@ -328,17 +327,16 @@ namespace SLR {
     
     
     
-    // MediumDistribution?
-    class SLR_API Medium {
+    class SLR_API MediumDistribution {
     protected:
         float m_maxExtinctionCoefficient;
     public:
-        Medium(float maxExtinctionCoefficient) : m_maxExtinctionCoefficient(maxExtinctionCoefficient) { }
-        virtual ~Medium() { }
+        MediumDistribution(float maxExtinctionCoefficient) : m_maxExtinctionCoefficient(maxExtinctionCoefficient) { }
+        virtual ~MediumDistribution() { }
         
         float majorantExtinctionCoefficient() const { return m_maxExtinctionCoefficient; };
         
-        virtual bool subdivide(Allocator* mem, Medium** fragments, uint32_t* numFragments) const = 0;
+        virtual bool subdivide(Allocator* mem, MediumDistribution** fragments, uint32_t* numFragments) const = 0;
         
         virtual BoundingBox3D bounds() const = 0;
         virtual bool contains(const Point3D &p) const = 0;

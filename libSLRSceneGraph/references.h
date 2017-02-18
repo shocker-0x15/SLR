@@ -23,7 +23,7 @@
 namespace SLRSceneGraph {
     typedef std::shared_ptr<SLR::Transform> TransformRef;
     
-    typedef std::shared_ptr<SLR::InputSpectrum> InputSpectrumRef;
+    typedef std::shared_ptr<SLR::AssetSpectrum> AssetSpectrumRef;
     
     typedef std::shared_ptr<SLR::Image2D> Image2DRef;
     typedef std::shared_ptr<SLR::TiledImage2D> TiledImage2DRef;
@@ -31,13 +31,13 @@ namespace SLRSceneGraph {
     class Texture2DMapping;
     class Texture3DMapping;
     class SpectrumTexture;
-    class Normal3DTexture;
+    class NormalTexture;
     class FloatTexture;
     
     typedef std::shared_ptr<Texture2DMapping> Texture2DMappingRef;
     typedef std::shared_ptr<Texture3DMapping> Texture3DMappingRef;
     typedef std::shared_ptr<SpectrumTexture> SpectrumTextureRef;
-    typedef std::shared_ptr<Normal3DTexture> Normal3DTextureRef;
+    typedef std::shared_ptr<NormalTexture> NormalTextureRef;
     typedef std::shared_ptr<FloatTexture> FloatTextureRef;
     
     class SVFresnel;
@@ -54,8 +54,8 @@ namespace SLRSceneGraph {
     typedef std::shared_ptr<MediumMaterial> MediumMaterialRef;
     typedef std::shared_ptr<EmitterMediumProperty> EmitterMediumPropertyRef;
     
-    class IBLEmission;
-    typedef std::shared_ptr<IBLEmission> IBLEmissionRef;
+    class IBLEmitterSurfaceProperty;
+    typedef std::shared_ptr<IBLEmitterSurfaceProperty> IBLEmitterSurfacePropertyRef;
     
     // Nodes
     class Node;

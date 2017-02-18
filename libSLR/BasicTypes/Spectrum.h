@@ -14,7 +14,7 @@
 namespace SLR {
     //             |  RGB Rendering|  Spectral Rendering|   |            typedefs
     // ------------+---------------+--------------------+   +--------------------
-    //        Input|            RGB|  ContinuousSpectrum| > |       InputSpectrum
+    //        Input|            RGB|  ContinuousSpectrum| > |       AssetSpectrum
     //  Calculation|            RGB|     SampledSpectrum| > |     SampledSpectrum
     //             | (+ RGBSamples)| + WavelengthSamples| > |   WavelengthSamples
     // Contribution|            RGB| DiscretizedSpectrum| > | DiscretizedSpectrum

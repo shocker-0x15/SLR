@@ -12,15 +12,15 @@
 #include "../Scene/Scene.h"
 
 namespace SLR {
-    SampledSpectrum IBLEmission::emittance(const SurfacePoint &surfPt, const WavelengthSamples &wls) const {
+    SampledSpectrum IBLEmitterSurfaceProperty::emittance(const SurfacePoint &surfPt, const WavelengthSamples &wls) const {
         return M_PI * m_coeffM->evaluate(surfPt, wls) * m_scale;
     }
     
-    EDF* IBLEmission::getEDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem, float scale) const {
+    EDF* IBLEmitterSurfaceProperty::getEDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem, float scale) const {
         return mem.create<IBLEDF>(m_scene->getWorldDiscArea());
     }
     
-    RegularConstantContinuous2D* IBLEmission::createIBLImportanceMap() const {
+    RegularConstantContinuousDistribution2D* IBLEmitterSurfaceProperty::createIBLImportanceMap() const {
         return m_coeffM->createIBLImportanceMap();
     }
 }

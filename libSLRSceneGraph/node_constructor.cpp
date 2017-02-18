@@ -34,7 +34,7 @@ inline void makeTangent(RealType nx, RealType ny, RealType nz, RealType* s) {
 
 namespace SLRSceneGraph {
     static void recursiveConstruct(const aiScene* objSrc, const aiNode* nodeSrc,
-                                   const std::vector<SurfaceMaterialRef> &materials, const std::vector<Normal3DTextureRef> &normalMaps, const std::vector<FloatTextureRef> &alphaMaps,
+                                   const std::vector<SurfaceMaterialRef> &materials, const std::vector<NormalTextureRef> &normalMaps, const std::vector<FloatTextureRef> &alphaMaps,
                                    const MeshCallback &meshCallback, InternalNodeRef &nodeOut) {
         if (nodeSrc->mNumMeshes == 0 && nodeSrc->mNumChildren == 0) {
             nodeOut = nullptr;
@@ -62,7 +62,7 @@ namespace SLRSceneGraph {
             
             TriangleMeshNodeRef surfMesh = createShared<TriangleMeshNode>();
             const SurfaceMaterialRef &surfMat = materials[mesh->mMaterialIndex];
-            const Normal3DTextureRef &normalMap = normalMaps[mesh->mMaterialIndex];
+            const NormalTextureRef &normalMap = normalMaps[mesh->mMaterialIndex];
             const FloatTextureRef &alphaMap = alphaMaps[mesh->mMaterialIndex];
             
             for (int v = 0; v < mesh->mNumVertices; ++v) {
@@ -128,20 +128,20 @@ namespace SLRSceneGraph {
             diffuseTex = createShared<ImageSpectrumTexture>(mapping, image);
         }
         else if (aiMat->Get(AI_MATKEY_COLOR_DIFFUSE, color, nullptr) == aiReturn_SUCCESS) {
-            InputSpectrumRef sp = Spectrum::create(SpectrumType::Reflectance, ColorSpace::sRGB_NonLinear, color[0], color[1], color[2]);
+            AssetSpectrumRef sp = Spectrum::create(SpectrumType::Reflectance, ColorSpace::sRGB_NonLinear, color[0], color[1], color[2]);
             diffuseTex = createShared<ConstantSpectrumTexture>(sp);
         }
         else {
-            InputSpectrumRef sp = Spectrum::create(SpectrumType::Reflectance, ColorSpace::sRGB_NonLinear, 1.0f, 0.0f, 1.0f);
+            AssetSpectrumRef sp = Spectrum::create(SpectrumType::Reflectance, ColorSpace::sRGB_NonLinear, 1.0f, 0.0f, 1.0f);
             diffuseTex = createShared<ConstantSpectrumTexture>(sp);
         }
         
         SurfaceMaterialRef mat = SurfaceMaterial::createMatte(diffuseTex, nullptr);
         
-        Normal3DTextureRef normalTex;
+        NormalTextureRef normalTex;
         if (aiMat->Get(AI_MATKEY_TEXTURE_DISPLACEMENT(0), strValue) == aiReturn_SUCCESS) {
             TiledImage2DRef image = Image::createTiledImage((pathPrefix + strValue.C_Str()).c_str(), mem, ImageStoreMode::NormalTexture, SpectrumType::Reflectance);
-            normalTex = createShared<ImageNormal3DTexture>(mapping, image);
+            normalTex = createShared<ImageNormalTexture>(mapping, image);
         }
         
         FloatTextureRef alphaTex;
@@ -245,7 +245,7 @@ namespace SLRSceneGraph {
             const Element &eAlphaMap = tuple(2);
             if (eMat.type == Type::SurfaceMaterial) {
                 SurfaceMaterialRef mat = eMat.rawRef<TypeMap::SurfaceMaterial>();
-                Normal3DTextureRef normalMap;
+                NormalTextureRef normalMap;
                 if (eNormalMap.type == Type::NormalTexture)
                     normalMap = eNormalMap.rawRef<TypeMap::NormalTexture>();
                 FloatTextureRef alphaMap;
@@ -309,9 +309,9 @@ namespace SLRSceneGraph {
         
         std::string pathPrefix = filePath.substr(0, filePath.find_last_of("/") + 1);
         
-        // マテリアルの生成。
+        // create materials
         std::vector<SurfaceMaterialRef> materials;
-        std::vector<Normal3DTextureRef> normalMaps;
+        std::vector<NormalTextureRef> normalMaps;
         std::vector<FloatTextureRef> alphaMaps;
         for (int m = 0; m < scene->mNumMaterials; ++m) {
             const aiMaterial* aiMat = scene->mMaterials[m];

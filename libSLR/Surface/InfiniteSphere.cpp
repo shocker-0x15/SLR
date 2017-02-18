@@ -11,27 +11,27 @@
 #include "../Core/textures.h"
 
 namespace SLR {
-    BoundingBox3D InfiniteSphere::bounds() const {
-        SLRAssert(false, "InfiniteSphere::bounds() should not be called.");
+    BoundingBox3D InfiniteSphereSurfaceShape::bounds() const {
+        SLRAssert(false, "InfiniteSphereSurfaceShape::bounds() should not be called.");
         return BoundingBox3D(-Point3D::Inf, Point3D::Inf);
     }
     
-    BoundingBox3D InfiniteSphere::choppedBounds(BoundingBox3D::Axis chopAxis, float minChopPos, float maxChopPos) const {
-        SLRAssert(false, "InfiniteSphere::choppedBounds() should not be called.");
+    BoundingBox3D InfiniteSphereSurfaceShape::choppedBounds(BoundingBox3D::Axis chopAxis, float minChopPos, float maxChopPos) const {
+        SLRAssert(false, "InfiniteSphereSurfaceShape::choppedBounds() should not be called.");
         return BoundingBox3D(-Point3D::Inf, Point3D::Inf);
     }
     
-    void InfiniteSphere::splitBounds(BoundingBox3D::Axis chopAxis, float splitPos, BoundingBox3D* bbox0, BoundingBox3D* bbox1) const {
-        SLRAssert(false, "InfiniteSphere::splitBounds() should not be called.");
+    void InfiniteSphereSurfaceShape::splitBounds(BoundingBox3D::Axis chopAxis, float splitPos, BoundingBox3D* bbox0, BoundingBox3D* bbox1) const {
+        SLRAssert(false, "InfiniteSphereSurfaceShape::splitBounds() should not be called.");
         *bbox0 = BoundingBox3D(-Point3D::Inf, Point3D::Inf);
         *bbox1 = BoundingBox3D(-Point3D::Inf, Point3D::Inf);
     }
     
-    bool InfiniteSphere::preTransformed() const {
+    bool InfiniteSphereSurfaceShape::preTransformed() const {
         return true;
     }
     
-    bool InfiniteSphere::intersect(const Ray &ray, SurfaceInteraction *si) const {
+    bool InfiniteSphereSurfaceShape::intersect(const Ray &ray, SurfaceInteraction *si) const {
         if (!std::isinf(ray.distMax))
             return false;
         float theta, phi;
@@ -46,7 +46,7 @@ namespace SLR {
         return true;
     }
     
-    void InfiniteSphere::getSurfacePoint(const SurfaceInteraction &si, SurfacePoint *surfPt) const {
+    void InfiniteSphereSurfaceShape::getSurfacePoint(const SurfaceInteraction &si, SurfacePoint *surfPt) const {
         float u, v;
         si.getSurfaceParameter(&u, &v);
         
@@ -59,15 +59,15 @@ namespace SLR {
         *surfPt = SurfacePoint(si, true, shadingFrame, texCoord0Dir);
     }
     
-    float InfiniteSphere::area() const {
+    float InfiniteSphereSurfaceShape::area() const {
         return 4 * M_PI;// * Inf * Inf;
     }
     
-    void InfiniteSphere::sample(float u0, float u1, SurfacePoint *surfPt, float *areaPDF, DirectionType* posType) const {
+    void InfiniteSphereSurfaceShape::sample(float u0, float u1, SurfacePoint *surfPt, float *areaPDF, DirectionType* posType) const {
         SLRAssert_NotImplemented();
     }
     
-    float InfiniteSphere::evaluateAreaPDF(const SurfacePoint &surfPt) const {
+    float InfiniteSphereSurfaceShape::evaluateAreaPDF(const SurfacePoint &surfPt) const {
         SLRAssert_NotImplemented();
         return 0.0f;
     }    

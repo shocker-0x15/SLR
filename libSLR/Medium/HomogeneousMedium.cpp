@@ -9,8 +9,8 @@
 #include "light_path_samplers.h"
 
 namespace SLR {
-    bool HomogeneousMedium::interact(const Ray &ray, float distanceLimit, const WavelengthSamples &wls, LightPathSampler &pathSampler,
-                                     MediumInteraction* mi, SampledSpectrum* medThroughput, bool* singleWavelength) const {
+    bool HomogeneousMediumDistribution::interact(const Ray &ray, float distanceLimit, const WavelengthSamples &wls, LightPathSampler &pathSampler,
+                                                 MediumInteraction* mi, SampledSpectrum* medThroughput, bool* singleWavelength) const {
         FreePathSampler &sampler = pathSampler.getFreePathSampler();
         Point3D queryPoint = ray.org + ray.distMin * ray.dir;
         FloatSum sampledDistance = ray.distMin;
@@ -35,7 +35,7 @@ namespace SLR {
         return false;
     }
     
-    SampledSpectrum HomogeneousMedium::evaluateTransmittance(Ray &ray, float distanceLimit, const WavelengthSamples &wls, SLR::LightPathSampler &pathSampler, bool *singleWavelength) const {
+    SampledSpectrum HomogeneousMediumDistribution::evaluateTransmittance(Ray &ray, float distanceLimit, const WavelengthSamples &wls, SLR::LightPathSampler &pathSampler, bool *singleWavelength) const {
         Point3D queryPoint = ray.org + ray.distMin * ray.dir;
         
         SampledSpectrum extCoeff = extinctionCoefficient(queryPoint, wls);
@@ -46,18 +46,18 @@ namespace SLR {
         return transmittance;
     }
     
-    void HomogeneousMedium::getMediumPoint(const MediumInteraction &mi, MediumPoint* medPt) const {
+    void HomogeneousMediumDistribution::getMediumPoint(const MediumInteraction &mi, MediumPoint* medPt) const {
         ReferenceFrame shadingFrame;
         shadingFrame.z = mi.getIncomingDirection();
         shadingFrame.z.makeCoordinateSystem(&shadingFrame.x, &shadingFrame.y);
         *medPt = MediumPoint(mi, false, shadingFrame);
     }
     
-    void HomogeneousMedium::sample(float u0, float u1, float u2, MediumPoint* medPt, float* volumePDF) const {
+    void HomogeneousMediumDistribution::sample(float u0, float u1, float u2, MediumPoint* medPt, float* volumePDF) const {
         SLRAssert_NotImplemented();
     }
     
-    float HomogeneousMedium::evaluateVolumePDF(const MediumPoint &medPt) const {
+    float HomogeneousMediumDistribution::evaluateVolumePDF(const MediumPoint &medPt) const {
         return 1.0f / volume();
     }
 }

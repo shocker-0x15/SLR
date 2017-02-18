@@ -40,7 +40,7 @@ namespace SLRSceneGraph {
         return m_vertices.size() - 1;
     }
     
-    void TriangleMeshNode::addTriangles(const SurfaceMaterialRef &mat, const Normal3DTextureRef &normalMap, const FloatTextureRef &alphaMap,
+    void TriangleMeshNode::addTriangles(const SurfaceMaterialRef &mat, const NormalTextureRef &normalMap, const FloatTextureRef &alphaMap,
                                         const std::vector<Triangle> &&triangles) {
         m_matGroups.emplace_back();
         MaterialGroup &matGroup = m_matGroups.back();
@@ -99,19 +99,19 @@ namespace SLRSceneGraph {
             SLR::TriangleMeshNode::MaterialGroup &matGroup = matGroups[i];
             const MaterialGroup &srcMatGroup = m_matGroups[i];
             const SLR::SurfaceMaterial* surfMat = srcMatGroup.material->getRaw();
-            const SLR::Normal3DTexture* normalMap = srcMatGroup.normalMap ? srcMatGroup.normalMap->getRaw() : nullptr;
+            const SLR::NormalTexture* normalMap = srcMatGroup.normalMap ? srcMatGroup.normalMap->getRaw() : nullptr;
             const SLR::FloatTexture* alphaMap = srcMatGroup.alphaMap ? srcMatGroup.alphaMap->getRaw() : nullptr;
             new (&matGroup) SLR::TriangleMeshNode::MaterialGroup(surfMat, normalMap, alphaMap);
             
             uint32_t numTriangles = (uint32_t)srcMatGroup.triangles.size();
-            SLR::Triangle* triangles = new SLR::Triangle[numTriangles];
+            SLR::TriangleSurfaceShape* triangles = new SLR::TriangleSurfaceShape[numTriangles];
             for (int j = 0; j < numTriangles; ++j) {
-                SLR::Triangle &triangle = triangles[j];
+                SLR::TriangleSurfaceShape &triangle = triangles[j];
                 const Triangle &srcTri = srcMatGroup.triangles[j];
-                triangle = SLR::Triangle(&vertices[srcTri.vIdx[0]], &vertices[srcTri.vIdx[1]], &vertices[srcTri.vIdx[2]], alphaMap);
+                triangle = SLR::TriangleSurfaceShape(&vertices[srcTri.vIdx[0]], &vertices[srcTri.vIdx[1]], &vertices[srcTri.vIdx[2]], alphaMap);
             }
             
-            std::unique_ptr<SLR::Triangle[]> trianglesHolder(triangles);
+            std::unique_ptr<SLR::TriangleSurfaceShape[]> trianglesHolder(triangles);
             matGroup.setTriangles(trianglesHolder, numTriangles);
         }
         std::unique_ptr<SLR::Vertex[]> verticesHolder(vertices);

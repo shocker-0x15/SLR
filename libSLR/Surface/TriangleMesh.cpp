@@ -12,11 +12,11 @@
 #include "../Core/textures.h"
 
 namespace SLR {
-    BoundingBox3D Triangle::bounds() const {
+    BoundingBox3D TriangleSurfaceShape::bounds() const {
         return BoundingBox3D(m_v[0]->position).unify(m_v[1]->position).unify(m_v[2]->position);
     }
     
-    BoundingBox3D Triangle::choppedBounds(BoundingBox3D::Axis chopAxis, float minChopPos, float maxChopPos) const {
+    BoundingBox3D TriangleSurfaceShape::choppedBounds(BoundingBox3D::Axis chopAxis, float minChopPos, float maxChopPos) const {
         const float chopPos[2] = {minChopPos, maxChopPos};
         
         Point3D p[3] = {m_v[0]->position, m_v[1]->position, m_v[2]->position};
@@ -72,7 +72,7 @@ namespace SLR {
         return ret;
     }
     
-    void Triangle::splitBounds(BoundingBox3D::Axis splitAxis, float splitPos, BoundingBox3D* bbox0, BoundingBox3D* bbox1) const {
+    void TriangleSurfaceShape::splitBounds(BoundingBox3D::Axis splitAxis, float splitPos, BoundingBox3D* bbox0, BoundingBox3D* bbox1) const {
         Point3D p[3] = {m_v[0]->position, m_v[1]->position, m_v[2]->position};
         std::sort(p, p + 3, [splitAxis](const Point3D &pa, const Point3D &pb) { return pa[splitAxis] < pb[splitAxis]; });
         float minPos = p[0][splitAxis];
@@ -124,11 +124,11 @@ namespace SLR {
         SLRAssert(realLE(bbox0->maxP[splitAxis], splitPos, 1e-6f) && realGE(bbox1->minP[splitAxis], splitPos, 1e-6f), "invalid split bounds.");
     }
     
-    bool Triangle::preTransformed() const {
+    bool TriangleSurfaceShape::preTransformed() const {
         return true;
     }
     
-    bool Triangle::intersect(const Ray &ray, SurfaceInteraction* si) const {
+    bool TriangleSurfaceShape::intersect(const Ray &ray, SurfaceInteraction* si) const {
         const Vertex &v0 = *m_v[0];
         const Vertex &v1 = *m_v[1];
         const Vertex &v2 = *m_v[2];
@@ -178,7 +178,7 @@ namespace SLR {
         return true;
     }
     
-    void Triangle::getSurfacePoint(const SurfaceInteraction &si, SurfacePoint* surfPt) const {
+    void TriangleSurfaceShape::getSurfacePoint(const SurfaceInteraction &si, SurfacePoint* surfPt) const {
         const Vertex &v0 = *m_v[0];
         const Vertex &v1 = *m_v[1];
         const Vertex &v2 = *m_v[2];
@@ -213,14 +213,14 @@ namespace SLR {
         *surfPt = SurfacePoint(si, false, shadingFrame, texCoord0Dir);
     }
     
-    float Triangle::area() const {
+    float TriangleSurfaceShape::area() const {
         const Point3D &p0 = m_v[0]->position;
         const Point3D &p1 = m_v[1]->position;
         const Point3D &p2 = m_v[2]->position;
         return 0.5f * cross(p1 - p0, p2 - p0).length();
     }
     
-    void Triangle::sample(float u0, float u1, SurfacePoint* surfPt, float* areaPDF, DirectionType* posType) const {
+    void TriangleSurfaceShape::sample(float u0, float u1, SurfacePoint* surfPt, float* areaPDF, DirectionType* posType) const {
         //    const SurfaceMaterial* mat = m_mat;
         float b0, b1, b2;
         uniformSampleTriangle(u0, u1, &b0, &b1);
@@ -256,7 +256,7 @@ namespace SLR {
         *posType = DirectionType::LowFreq;
     }
     
-    float Triangle::evaluateAreaPDF(const SurfacePoint& surfPt) const {
+    float TriangleSurfaceShape::evaluateAreaPDF(const SurfacePoint& surfPt) const {
         float u, v;
         surfPt.getSurfaceParameter(&u, &v);
         SLRAssert(u + v <= 1.0f, "Invalid parameters for a triangle.");
