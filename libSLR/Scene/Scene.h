@@ -5,8 +5,8 @@
 //  Copyright (c) 2016年 渡部 心. All rights reserved.
 //
 
-#ifndef __SLR_Scene_h__
-#define __SLR_Scene_h__
+#ifndef __SLR_Scene__
+#define __SLR_Scene__
 
 #include "../defines.h"
 #include "../references.h"
@@ -51,4 +51,4 @@ namespace SLR {
     };
 }
 
-#endif /* Scene_h */
+#endif /* __SLR_Scene__ */

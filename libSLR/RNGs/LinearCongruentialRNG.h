@@ -5,8 +5,8 @@
 //  Copyright (c) 2016年 渡部 心. All rights reserved.
 //
 
-#ifndef LinearCongruentialRNG_h
-#define LinearCongruentialRNG_h
+#ifndef __SLR_LinearCongruentialRNG__
+#define __SLR_LinearCongruentialRNG__
 
 #include "../defines.h"
 #include "../references.h"
@@ -35,4 +35,4 @@ namespace SLR {
 }
 
 
-#endif /* LinearCongruential_h */
+#endif /* __SLR_LinearCongruentialRNG__ */

@@ -5,8 +5,8 @@
 //  Copyright (c) 2015年 渡部 心. All rights reserved.
 //
 
-#ifndef __SLR__MultiBSDF__
-#define __SLR__MultiBSDF__
+#ifndef __SLR_MultiBSDF__
+#define __SLR_MultiBSDF__
 
 #include "../defines.h"
 #include "../references.h"
@@ -39,4 +39,4 @@ namespace SLR {
     };
 }
 
-#endif /* defined(__SLR__MultiBSDF__) */
+#endif /* __SLR_MultiBSDF__ */

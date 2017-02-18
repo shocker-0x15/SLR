@@ -5,8 +5,8 @@
 //  Copyright (c) 2016年 渡部 心. All rights reserved.
 //
 
-#ifndef __SLR_MediumObject_h__
-#define __SLR_MediumObject_h__
+#ifndef __SLR_MediumObject__
+#define __SLR_MediumObject__
 
 #include "../defines.h"
 #include "../references.h"
@@ -220,4 +220,4 @@ namespace SLR {
     };
 }
 
-#endif /* MediumObject_h */
+#endif /* __SLR_MediumObject__ */

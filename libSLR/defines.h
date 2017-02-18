@@ -5,8 +5,8 @@
 //  Copyright (c) 2015年 渡部 心. All rights reserved.
 //
 
-#ifndef SLR_defines_h
-#define SLR_defines_h
+#ifndef __SLR_defines__
+#define __SLR_defines__
 
 // Platform defines
 #if defined(_WIN32) || defined(_WIN64)
@@ -161,4 +161,4 @@ std::unique_ptr<T> createUnique(ArgTypes&&... args) {
 
 #define Use_Spectral_Representation
 
-#endif
+#endif /* __SLR_defines__ */

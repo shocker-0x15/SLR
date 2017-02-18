@@ -5,8 +5,8 @@
 //  Copyright (c) 2014年 渡部 心. All rights reserved.
 //
 
-#ifndef __SLR_Vector4_h__
-#define __SLR_Vector4_h__
+#ifndef __SLR_Vector4__
+#define __SLR_Vector4__
 
 #include "../defines.h"
 #include "../references.h"
@@ -102,4 +102,4 @@ namespace SLR {
     }    
 }
 
-#endif
+#endif /* __SLR_Vector4__ */

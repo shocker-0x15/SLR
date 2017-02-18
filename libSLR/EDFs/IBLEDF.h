@@ -5,8 +5,8 @@
 //  Copyright (c) 2015年 渡部 心. All rights reserved.
 //
 
-#ifndef __SLR__IBLEDF__
-#define __SLR__IBLEDF__
+#ifndef __SLR_IBLEDF__
+#define __SLR_IBLEDF__
 
 #include "../defines.h"
 #include "../references.h"
@@ -25,4 +25,4 @@ namespace SLR {
     };
 }
 
-#endif /* defined(__SLR__IBLEDF__) */
+#endif /* __SLR_IBLEDF__ */

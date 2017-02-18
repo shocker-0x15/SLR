@@ -1,5 +1,5 @@
-#ifndef SLRSceneGraph_SceneParsingDriver_hpp
-#define SLRSceneGraph_SceneParsingDriver_hpp
+#ifndef __SLRSceneGraph_SceneParsingDriver__
+#define __SLRSceneGraph_SceneParsingDriver__
 
 #include <libSLR/defines.h>
 #include "../references.h"
@@ -47,4 +47,4 @@ namespace SLRSceneGraph {
     };
 }
 
-#endif
+#endif /* __SLRSceneGraph_SceneParsingDriver__ */

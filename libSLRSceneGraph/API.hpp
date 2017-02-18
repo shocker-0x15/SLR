@@ -5,8 +5,8 @@
 //  Copyright (c) 2015年 渡部 心. All rights reserved.
 //
 
-#ifndef SLRSceneGraph_API_hpp
-#define SLRSceneGraph_API_hpp
+#ifndef __SLRSceneGraph_API__
+#define __SLRSceneGraph_API__
 
 #include <libSLR/defines.h>
 #include "references.h"

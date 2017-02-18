@@ -5,8 +5,8 @@
 //  Copyright (c) 2014年 渡部 心. All rights reserved.
 //
 
-#ifndef __SLR_Matrix4x4_h__
-#define __SLR_Matrix4x4_h__
+#ifndef __SLR_Matrix4x4__
+#define __SLR_Matrix4x4__
 
 #include "../defines.h"
 #include "Vector3.h"
@@ -284,4 +284,4 @@ namespace SLR {
     SLR_API Matrix4x4Template<RealType> camera(RealType aspect, RealType fovY, RealType near, RealType far);
 }
 
-#endif
+#endif /* __SLR_Matrix4x4__ */

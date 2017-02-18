@@ -32,4 +32,4 @@ namespace SLR {
     };
 }
 
-#endif /* basic_MediumMaterials_hpp */
+#endif /* __SLR_basic_MediumMaterials__ */

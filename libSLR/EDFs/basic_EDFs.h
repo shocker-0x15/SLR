@@ -5,8 +5,8 @@
 //  Copyright (c) 2015年 渡部 心. All rights reserved.
 //
 
-#ifndef __SLR__basic_EDFs__
-#define __SLR__basic_EDFs__
+#ifndef __SLR_basic_EDFs__
+#define __SLR_basic_EDFs__
 
 #include "../defines.h"
 #include "../references.h"
@@ -40,4 +40,4 @@ namespace SLR {
     };
 }
 
-#endif /* defined(__SLR__basic_EDFs__) */
+#endif /* __SLR_basic_EDFs__ */

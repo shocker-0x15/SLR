@@ -5,8 +5,8 @@
 //  Copyright (c) 2015年 渡部 心. All rights reserved.
 //
 
-#ifndef SLR_Allocator_h
-#define SLR_Allocator_h
+#ifndef __SLR_Allocator__
+#define __SLR_Allocator__
 
 #include "../defines.h"
 #include "../references.h"
@@ -65,4 +65,4 @@ namespace SLR {
     };    
 }
 
-#endif
+#endif /* __SLR_Allocator__ */

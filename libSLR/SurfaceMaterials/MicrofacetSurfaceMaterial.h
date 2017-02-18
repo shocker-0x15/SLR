@@ -5,8 +5,8 @@
 //  Copyright (c) 2016年 渡部 心. All rights reserved.
 //
 
-#ifndef MicrofacetSurfaceMaterial_h
-#define MicrofacetSurfaceMaterial_h
+#ifndef __MicrofacetSurfaceMaterial__
+#define __MicrofacetSurfaceMaterial__
 
 #include "../defines.h"
 #include "../references.h"
@@ -36,4 +36,4 @@ namespace SLR {
     };
 }
 
-#endif /* MicrofacetSurfaceMaterial_hpp */
+#endif /* __MicrofacetSurfaceMaterial__ */

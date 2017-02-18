@@ -5,8 +5,8 @@
 //  Copyright (c) 2016年 渡部 心. All rights reserved.
 //
 
-#ifndef __SLR_light_path_samplers_h__
-#define __SLR_light_path_samplers_h__
+#ifndef __SLR_light_path_samplers__
+#define __SLR_light_path_samplers__
 
 #include "../defines.h"
 #include "../references.h"
@@ -77,4 +77,4 @@ namespace SLR {
     };
 }
 
-#endif /* light_path_samplers_hpp */
+#endif /* __SLR_light_path_samplers__ */

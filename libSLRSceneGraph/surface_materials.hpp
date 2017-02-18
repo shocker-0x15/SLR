@@ -5,8 +5,8 @@
 //  Copyright (c) 2015年 渡部 心. All rights reserved.
 //
 
-#ifndef surface_materials_hpp
-#define surface_materials_hpp
+#ifndef __SLRSceneGraph_surface_materials__
+#define __SLRSceneGraph_surface_materials__
 
 #include <libSLR/defines.h>
 #include "references.h"
@@ -208,4 +208,4 @@ namespace SLRSceneGraph {
     };
 }
 
-#endif /* surface_materials_hpp */
+#endif /* __SLRSceneGraph_surface_materials__ */

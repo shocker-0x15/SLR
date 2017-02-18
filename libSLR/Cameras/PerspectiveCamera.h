@@ -5,8 +5,8 @@
 //  Copyright (c) 2015年 渡部 心. All rights reserved.
 //
 
-#ifndef __SLR__PerspectiveCamera__
-#define __SLR__PerspectiveCamera__
+#ifndef __SLR_PerspectiveCamera__
+#define __SLR_PerspectiveCamera__
 
 #include "../defines.h"
 #include "../references.h"
@@ -53,4 +53,4 @@ namespace SLR {
     };    
 }
 
-#endif /* defined(__SLR__PerspectiveCamera__) */
+#endif /* __SLR_PerspectiveCamera__ */

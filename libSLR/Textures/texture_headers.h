@@ -5,12 +5,12 @@
 //  Copyright (c) 2015年 渡部 心. All rights reserved.
 //
 
-#ifndef texture_headers_h
-#define texture_headers_h
+#ifndef __SLR_texture_headers__
+#define __SLR_texture_headers__
 
 #include "constant_textures.h"
 #include "image_textures.h"
 #include "checker_board_textures.h"
 #include "voronoi_textures.h"
 
-#endif /* texture_headers_h */
+#endif /* __SLR_texture_headers__ */

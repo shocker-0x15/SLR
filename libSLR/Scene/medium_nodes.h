@@ -5,8 +5,8 @@
 //  Copyright (c) 2017年 渡部 心. All rights reserved.
 //
 
-#ifndef __SLR_medium_nodes_h__
-#define __SLR_medium_nodes_h__
+#ifndef __SLR_medium_nodes__
+#define __SLR_medium_nodes__
 
 #include "../defines.h"
 #include "../references.h"
@@ -61,4 +61,4 @@ namespace SLR {
     };
 }
 
-#endif /* __SLR_medium_nodes_h__ */
+#endif /* __SLR_medium_nodes__ */

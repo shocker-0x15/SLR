@@ -30,4 +30,4 @@ namespace SLRSceneGraph {
     };
 }
 
-#endif /* defined(__SLRSceneGraph__InfiniteSphereNode__) */
+#endif /* __SLRSceneGraph_InfiniteSphereNode__ */

@@ -5,8 +5,8 @@
 //  Copyright (c) 2016年 渡部 心. All rights reserved.
 //
 
-#ifndef DebugRenderer_h
-#define DebugRenderer_h
+#ifndef __SLR_DebugRenderer__
+#define __SLR_DebugRenderer__
 
 #include "../defines.h"
 #include "../references.h"
@@ -60,4 +60,4 @@ namespace SLR {
     };
 }
 
-#endif /* DebugRenderer_h */
+#endif /* __SLR_DebugRenderer__ */

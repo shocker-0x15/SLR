@@ -5,8 +5,8 @@
 //  Copyright (c) 2016年 渡部 心. All rights reserved.
 //
 
-#ifndef basic_phase_functions_h
-#define basic_phase_functions_h
+#ifndef __SLR_basic_phase_functions__
+#define __SLR_basic_phase_functions__
 
 #include "../defines.h"
 #include "../references.h"
@@ -51,4 +51,4 @@ namespace SLR {
     };
 }
 
-#endif /* basic_phase_functions_h */
+#endif /* __SLR_basic_phase_functions__ */

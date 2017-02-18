@@ -5,8 +5,8 @@
 //  Copyright (c) 2015年 渡部 心. All rights reserved.
 //
 
-#ifndef __SLR__InfiniteSphere__
-#define __SLR__InfiniteSphere__
+#ifndef __SLR_InfiniteSphere__
+#define __SLR_InfiniteSphere__
 
 #include "../defines.h"
 #include "../references.h"
@@ -31,4 +31,4 @@ namespace SLR {
     };    
 }
 
-#endif
+#endif /* __SLR_InfiniteSphere__ */

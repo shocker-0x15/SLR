@@ -5,8 +5,8 @@
 //  Copyright (c) 2015年 渡部 心. All rights reserved.
 //
 
-#ifndef SLR_SpectrumTypes_h
-#define SLR_SpectrumTypes_h
+#ifndef __SLR_SpectrumTypes__
+#define __SLR_SpectrumTypes__
 
 #include "../defines.h"
 #include "../references.h"
@@ -688,4 +688,4 @@ namespace SLR {
     };
 }
 
-#endif
+#endif /* __SLR_SpectrumTypes__ */

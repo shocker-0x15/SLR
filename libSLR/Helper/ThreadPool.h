@@ -5,8 +5,8 @@
 //  Copyright (c) 2015年 渡部 心. All rights reserved.
 //
 
-#ifndef __SLR__ThreadPool__
-#define __SLR__ThreadPool__
+#ifndef __SLR_ThreadPool__
+#define __SLR_ThreadPool__
 
 #include "../defines.h"
 #include "../references.h"
@@ -84,4 +84,4 @@ public:
     uint32_t numThreads() const { return (uint32_t)m_workers.size(); };
 };
 
-#endif
+#endif /* __SLR_ThreadPool__ */

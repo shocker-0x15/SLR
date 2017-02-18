@@ -5,8 +5,8 @@
 //  Copyright (c) 2015年 渡部 心. All rights reserved.
 //
 
-#ifndef __SLR__SurfaceObject__
-#define __SLR__SurfaceObject__
+#ifndef __SLR_SurfaceObject__
+#define __SLR_SurfaceObject__
 
 #include "../defines.h"
 #include "../references.h"
@@ -232,4 +232,4 @@ namespace SLR {
     };
 }
 
-#endif
+#endif /* __SLR_SurfaceObject__ */

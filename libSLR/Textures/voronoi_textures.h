@@ -5,8 +5,8 @@
 //  Copyright (c) 2016年 渡部 心. All rights reserved.
 //
 
-#ifndef voronoi_textures_h
-#define voronoi_textures_h
+#ifndef __SLR_voronoi_textures__
+#define __SLR_voronoi_textures__
 
 #include "../defines.h"
 #include "../references.h"
@@ -70,4 +70,4 @@ namespace SLR {
     };
 }
 
-#endif /* voronoi_textures_h */
+#endif /* __SLR_voronoi_textures__ */

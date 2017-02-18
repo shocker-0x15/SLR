@@ -5,8 +5,8 @@
 //  Copyright (c) 2015年 渡部 心. All rights reserved.
 //
 
-#ifndef __SLR__ModifiedWardDurReflection__
-#define __SLR__ModifiedWardDurReflection__
+#ifndef __SLR_ModifiedWardDurReflection__
+#define __SLR_ModifiedWardDurReflection__
 
 #include "../defines.h"
 #include "../references.h"
@@ -25,4 +25,4 @@ namespace SLR {
     };
 }
 
-#endif /* defined(__SLR__ModifiedWardDurReflection__) */
+#endif /* __SLR_ModifiedWardDurReflection__ */

@@ -5,8 +5,8 @@
 //  Copyright (c) 2015年 渡部 心. All rights reserved.
 //
 
-#ifndef __SLR__textures__
-#define __SLR__textures__
+#ifndef __SLR_textures__
+#define __SLR_textures__
 
 #include "../defines.h"
 #include "../references.h"
@@ -125,4 +125,4 @@ namespace SLR {
     };
 }
 
-#endif
+#endif /* __SLR_textures__ */

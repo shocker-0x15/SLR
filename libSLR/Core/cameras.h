@@ -4,8 +4,8 @@
 //  Copyright (c) 2015年 渡部 心. All rights reserved.
 //
 
-#ifndef __SLR__cameras__
-#define __SLR__cameras__
+#ifndef __SLR_cameras__
+#define __SLR_cameras__
 
 #include "../defines.h"
 #include "../references.h"
@@ -57,4 +57,4 @@ namespace SLR {
     };    
 }
 
-#endif
+#endif /* __SLR_cameras__ */

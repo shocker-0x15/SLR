@@ -5,8 +5,8 @@
 //  Copyright (c) 2015年 渡部 心. All rights reserved.
 //
 
-#ifndef __SLRSceneGraph__TriangleMeshNode__
-#define __SLRSceneGraph__TriangleMeshNode__
+#ifndef __SLRSceneGraph_TriangleMeshNode__
+#define __SLRSceneGraph_TriangleMeshNode__
 
 #include <libSLR/defines.h>
 #include "references.h"
@@ -57,4 +57,4 @@ namespace SLRSceneGraph {
     };
 }
 
-#endif /* defined(__SLRSceneGraph__TriangleMeshNode__) */
+#endif /* __SLRSceneGraph_TriangleMeshNode__ */

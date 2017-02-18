@@ -45,4 +45,4 @@ namespace SLRSceneGraph {
     };
 }
 
-#endif
+#endif /* __SLRSceneGraph_Scene__ */

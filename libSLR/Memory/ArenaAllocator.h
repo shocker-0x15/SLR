@@ -5,8 +5,8 @@
 //  Copyright (c) 2015年 渡部 心. All rights reserved.
 //
 
-#ifndef __SLR__ArenaAllocator__
-#define __SLR__ArenaAllocator__
+#ifndef __SLR_ArenaAllocator__
+#define __SLR_ArenaAllocator__
 
 #include "../defines.h"
 #include "../references.h"
@@ -54,4 +54,4 @@ namespace SLR {
     };    
 }
 
-#endif
+#endif /* __SLR_ArenaAllocator__ */

@@ -5,8 +5,8 @@
 //  Copyright (c) 2017年 渡部 心. All rights reserved.
 //
 
-#ifndef medium_materials_hpp
-#define medium_materials_hpp
+#ifndef __SLRSceneGraph_medium_materials__
+#define __SLRSceneGraph_medium_materials__
 
 #include <libSLR/defines.h>
 #include "references.h"
@@ -55,4 +55,4 @@ namespace SLRSceneGraph {
     };
 }
 
-#endif /* medium_materials_hpp */
+#endif /* __SLRSceneGraph_medium_materials__ */

@@ -5,8 +5,8 @@
 //  Copyright (c) 2015年 渡部 心. All rights reserved.
 //
 
-#ifndef __SLRSceneGraph__camera_nodes__
-#define __SLRSceneGraph__camera_nodes__
+#ifndef __SLRSceneGraph_camera_nodes__
+#define __SLRSceneGraph_camera_nodes__
 
 #include <libSLR/defines.h>
 #include "references.h"
@@ -49,4 +49,4 @@ namespace SLRSceneGraph {
     };    
 }
 
-#endif /* defined(__SLRSceneGraph__camera_nodes__) */
+#endif /* __SLRSceneGraph_camera_nodes__ */

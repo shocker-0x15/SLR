@@ -5,8 +5,8 @@
 //  Copyright (c) 2015年 渡部 心. All rights reserved.
 //
 
-#ifndef __SLR_TexCoord2_h__
-#define __SLR_TexCoord2_h__
+#ifndef __SLR_TexCoord2__
+#define __SLR_TexCoord2__
 
 #include "../defines.h"
 #include "../references.h"
@@ -67,4 +67,4 @@ namespace SLR {
     const TexCoord2Template<RealType> TexCoord2Template<RealType>::NaN = TexCoord2Template<RealType>(std::numeric_limits<RealType>::quiet_NaN());
 }
 
-#endif
+#endif /* __SLR_TexCoord2__ */

@@ -5,8 +5,8 @@
 //  Copyright (c) 2015年 渡部 心. All rights reserved.
 //
 
-#ifndef __SLRSceneGraph__node_constructor__
-#define __SLRSceneGraph__node_constructor__
+#ifndef __SLRSceneGraph_node_constructor__
+#define __SLRSceneGraph_node_constructor__
 
 #include <libSLR/defines.h>
 #include "references.h"
@@ -25,13 +25,15 @@ namespace SLRSceneGraph {
     SurfaceAttributeTuple createMaterialDefaultFunction(const aiMaterial* aiMat, const std::string &pathPrefix, SLR::Allocator* mem);
     SurfaceAttributeTuple createMaterialFunction(const Function &userMatProc, ExecuteContext &context, ErrorMessage* err,
                                                  const aiMaterial* aiMat, const std::string &pathPrefix, SLR::Allocator* mem);
+    
     typedef std::function<bool(const std::string &, const TriangleMeshNodeRef &, const SLR::Point3D &, const SLR::Point3D &)> MeshCallback;
     bool meshCallbackDefaultFunction(const std::string &name, const TriangleMeshNodeRef &mesh, const SLR::Point3D &minP, const SLR::Point3D &maxP);
     bool meshCallbackFunction(const Function &meshProc, ExecuteContext &context, ErrorMessage* err,
                               const std::string &name, const TriangleMeshNodeRef &mesh, const SLR::Point3D &minP, const SLR::Point3D &maxP);
+    
     SLR_SCENEGRAPH_API void construct(const std::string &filePath, InternalNodeRef &nodeOut,
                                       const CreateMaterialFunction &materialFunc = createMaterialDefaultFunction,
                                       const MeshCallback &meshCallback = meshCallbackDefaultFunction);
 }
 
-#endif
+#endif /* __SLRSceneGraph_node_constructor__ */

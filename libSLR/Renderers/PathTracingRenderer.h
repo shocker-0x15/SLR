@@ -5,8 +5,8 @@
 //  Copyright (c) 2015年 渡部 心. All rights reserved.
 //
 
-#ifndef __SLR__PathTracingRenderer__
-#define __SLR__PathTracingRenderer__
+#ifndef __SLR_PathTracingRenderer__
+#define __SLR_PathTracingRenderer__
 
 #include "../defines.h"
 #include "../references.h"
@@ -44,4 +44,4 @@ namespace SLR {
     };    
 }
 
-#endif
+#endif /* __SLR_PathTracingRenderer__ */

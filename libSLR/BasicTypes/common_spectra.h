@@ -5,8 +5,8 @@
 //  Copyright (c) 2015年 渡部 心. All rights reserved.
 //
 
-#ifndef SLR_common_spectra_h
-#define SLR_common_spectra_h
+#ifndef __SLR_common_spectra__
+#define __SLR_common_spectra__
 
 #include "../defines.h"
 
@@ -55,4 +55,4 @@ namespace SLR {
     }
 }
 
-#endif
+#endif /* __SLR_common_spectra__ */

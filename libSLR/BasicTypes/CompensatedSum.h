@@ -1,12 +1,12 @@
 //
-//  CompensatedSum.hpp
+//  CompensatedSum.h
 //
 //  Created by 渡部 心 on 2015/07/05.
 //  Copyright (c) 2015年 渡部 心. All rights reserved.
 //
 
-#ifndef SLR_CompensatedSum_h
-#define SLR_CompensatedSum_h
+#ifndef __SLR_CompensatedSum__
+#define __SLR_CompensatedSum__
 
 #include "../defines.h"
 #include "../references.h"
@@ -33,4 +33,4 @@ namespace SLR {
     };    
 }
 
-#endif
+#endif /* __SLR_CompensatedSum__ */

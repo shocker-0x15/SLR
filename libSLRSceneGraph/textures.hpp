@@ -5,8 +5,8 @@
 //  Copyright (c) 2015年 渡部 心. All rights reserved.
 //
 
-#ifndef textures_hpp
-#define textures_hpp
+#ifndef __SLRSceneGraph_textures__
+#define __SLRSceneGraph_textures__
 
 #include <libSLR/defines.h>
 #include "references.h"
@@ -178,4 +178,4 @@ namespace SLRSceneGraph {
     };
 }
 
-#endif /* textures_hpp */
+#endif /* __SLRSceneGraph_textures__ */

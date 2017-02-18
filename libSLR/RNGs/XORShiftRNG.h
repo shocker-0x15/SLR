@@ -5,8 +5,8 @@
 //  Copyright (c) 2014年 渡部 心. All rights reserved.
 //
 
-#ifndef __SLR__XORShiftRNG__
-#define __SLR__XORShiftRNG__
+#ifndef __SLR_XORShiftRNG__
+#define __SLR_XORShiftRNG__
 
 #include "../defines.h"
 #include "../references.h"
@@ -34,4 +34,4 @@ namespace SLR {
     template <> Types32bit::UInt XORShiftRNGTemplate<Types32bit>::getUInt();    
 }
 
-#endif
+#endif /* __SLR_XORShiftRNG__ */

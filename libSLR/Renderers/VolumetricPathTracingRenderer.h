@@ -5,8 +5,8 @@
 //  Copyright (c) 2016年 渡部 心. All rights reserved.
 //
 
-#ifndef __SLR_VolumetricPathTracingRenderer_h__
-#define __SLR_VolumetricPathTracingRenderer_h__
+#ifndef __SLR_VolumetricPathTracingRenderer__
+#define __SLR_VolumetricPathTracingRenderer__
 
 #include "../defines.h"
 #include "../references.h"
@@ -45,4 +45,4 @@ namespace SLR {
     };
 }
 
-#endif /* VolumetricPathTracingRenderer_h */
+#endif /* __SLR_VolumetricPathTracingRenderer__ */

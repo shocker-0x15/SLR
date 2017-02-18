@@ -5,8 +5,8 @@
 //  Copyright (c) 2015年 渡部 心. All rights reserved.
 //
 
-#ifndef surface_material_headers_h
-#define surface_material_headers_h
+#ifndef __surface_material_headers__
+#define __surface_material_headers__
 
 #include "basic_SurfaceMaterials.h"
 #include "ModifiedWardDurReflection.h"
@@ -19,4 +19,4 @@
 #include "IdealDirectionalEmission.h"
 #include "IBLEmission.h"
 
-#endif /* surface_material_headers_h */
+#endif /* __surface_material_headers__ */

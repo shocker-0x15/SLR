@@ -5,8 +5,8 @@
 //  Copyright (c) 2015年 渡部 心. All rights reserved.
 //
 
-#ifndef SLR_references_h
-#define SLR_references_h
+#ifndef __SLR_references__
+#define __SLR_references__
 
 #include <vector>
 #include <memory>
@@ -321,4 +321,4 @@ namespace SLR {
     class ProgressReporter;
 }
 
-#endif
+#endif /* __SLR_references__ */

@@ -5,8 +5,8 @@
 //  Copyright (c) 2016年 渡部 心. All rights reserved.
 //
 
-#ifndef __SLR_ProgressReporter_h__
-#define __SLR_ProgressReporter_h__
+#ifndef __SLR_ProgressReporter__
+#define __SLR_ProgressReporter__
 
 #include "../defines.h"
 #include "../references.h"
@@ -55,4 +55,4 @@ namespace SLR {
     };
 }
 
-#endif /* ProgressReporter_h */
+#endif /* __SLR_ProgressReporter__ */

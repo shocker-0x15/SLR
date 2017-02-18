@@ -36,4 +36,4 @@ namespace SLR {
     template <> Types64bit::Float RandomNumberGeneratorTemplate<Types64bit>::getFloat0cTo1o();    
 }
 
-#endif
+#endif /* __SLR_RandomNumberGenerator__ */

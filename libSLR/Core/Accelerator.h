@@ -5,8 +5,8 @@
 //  Copyright (c) 2016年 渡部 心. All rights reserved.
 //
 
-#ifndef Accelerator_h
-#define Accelerator_h
+#ifndef __SLR_Accelerator__
+#define __SLR_Accelerator__
 
 #include "../defines.h"
 #include "../references.h"
@@ -29,4 +29,4 @@ namespace SLR {
     };
 }
 
-#endif /* Accelerator_h */
+#endif /* __SLR_Accelerator__ */

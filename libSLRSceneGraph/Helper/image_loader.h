@@ -5,8 +5,8 @@
 //  Copyright (c) 2014年 渡部 心. All rights reserved.
 //
 
-#ifndef __CLeaR__image_loader__
-#define __CLeaR__image_loader__
+#ifndef __SLR_image_loader__
+#define __SLR_image_loader__
 
 #include <libSLR/defines.h>
 #include <libSLR/references.h>
@@ -27,4 +27,4 @@ enum class ColorFormat {
 bool getImageInfo(const std::string &filePath, uint32_t* width, uint32_t* height, uint64_t* requiredSize, ColorFormat* color);
 bool loadImage(const std::string &filePath, uint8_t* storage, bool gammaCorrection);
 
-#endif
+#endif /* __SLR_image_loader__ */

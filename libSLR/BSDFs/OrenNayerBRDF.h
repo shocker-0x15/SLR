@@ -5,8 +5,8 @@
 //  Copyright (c) 2016年 渡部 心. All rights reserved.
 //
 
-#ifndef OrenNayerBRDF_h
-#define OrenNayerBRDF_h
+#ifndef __SLR_OrenNayerBRDF__
+#define __SLR_OrenNayerBRDF__
 
 #include "../defines.h"
 #include "../references.h"
@@ -31,4 +31,4 @@ namespace SLR {
     };
 }
 
-#endif /* OrenNayerBRDF_h */
+#endif /* __SLR_OrenNayerBRDF__ */

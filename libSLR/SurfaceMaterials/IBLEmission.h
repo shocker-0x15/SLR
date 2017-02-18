@@ -5,8 +5,8 @@
 //  Copyright (c) 2015年 渡部 心. All rights reserved.
 //
 
-#ifndef __SLR__IBLEmission__
-#define __SLR__IBLEmission__
+#ifndef __SLR_IBLEmission__
+#define __SLR_IBLEmission__
 
 #include "../defines.h"
 #include "../references.h"
@@ -28,4 +28,4 @@ namespace SLR {
     };
 }
 
-#endif /* defined(__SLR__IBLEmission__) */
+#endif /* __SLR_IBLEmission__ */

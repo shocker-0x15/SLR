@@ -5,8 +5,8 @@
 //  Copyright (c) 2015年 渡部 心. All rights reserved.
 //
 
-#ifndef SceneParser_hpp
-#define SceneParser_hpp
+#ifndef __SLRSceneGraph_SceneParser__
+#define __SLRSceneGraph_SceneParser__
 
 #include <libSLR/defines.h>
 #include "../references.h"
@@ -642,4 +642,4 @@ namespace SLRSceneGraph {
     };
 }
 
-#endif /* SceneParser_hpp */
+#endif /* __SLRSceneGraph_SceneParser__ */

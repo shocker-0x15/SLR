@@ -5,8 +5,8 @@
 //  Copyright (c) 2016年 渡部 心. All rights reserved.
 //
 
-#ifndef MicrofacetBSDF_h
-#define MicrofacetBSDF_h
+#ifndef __SLR_MicrofacetBSDF__
+#define __SLR_MicrofacetBSDF__
 
 #include "../defines.h"
 #include "../references.h"
@@ -48,4 +48,4 @@ namespace SLR {
     };
 }
 
-#endif /* MicrofacetBSDF_hpp */
+#endif /* __SLR_MicrofacetBSDF__ */

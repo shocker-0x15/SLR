@@ -5,8 +5,8 @@
 //  Copyright (c) 2016年 渡部 心. All rights reserved.
 //
 
-#ifndef __SLR_Matrix3x3_h__
-#define __SLR_Matrix3x3_h__
+#ifndef __SLR_Matrix3x3__
+#define __SLR_Matrix3x3__
 
 #include "../defines.h"
 #include "Vector3.h"
@@ -234,4 +234,4 @@ namespace SLR {
     inline Matrix3x3Template<RealType> rotateZ3x3(RealType angle) { return rotate3x3(angle, Vector3Template<RealType>::Ez); }
 }
 
-#endif /* Matrix3x3_h */
+#endif /* __SLR_Matrix3x3__ */

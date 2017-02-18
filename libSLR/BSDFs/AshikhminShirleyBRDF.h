@@ -5,8 +5,8 @@
 //  Copyright (c) 2015年 渡部 心. All rights reserved.
 //
 
-#ifndef __SLR__AshikhminShirleyBRDF__
-#define __SLR__AshikhminShirleyBRDF__
+#ifndef __SLR_AshikhminShirleyBRDF__
+#define __SLR_AshikhminShirleyBRDF__
 
 #include "../defines.h"
 #include "../references.h"
@@ -31,4 +31,4 @@ namespace SLR {
     };
 }
 
-#endif /* defined(__SLR__AshikhminBRDF__) */
+#endif /* __SLR_AshikhminShirleyBRDF__ */

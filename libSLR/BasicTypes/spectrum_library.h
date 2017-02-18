@@ -5,8 +5,8 @@
 //  Copyright (c) 2015年 渡部 心. All rights reserved.
 //
 
-#ifndef SLR_spectum_library_h
-#define SLR_spectum_library_h
+#ifndef __SLR_spectum_library__
+#define __SLR_spectum_library__
 
 #include "../defines.h"
 
@@ -100,4 +100,4 @@ namespace SLR {
     }    
 }
 
-#endif
+#endif /* __SLR_spectum_library__ */

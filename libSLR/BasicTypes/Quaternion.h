@@ -5,8 +5,8 @@
 //  Copyright (c) 2015年 渡部 心. All rights reserved.
 //
 
-#ifndef SLR_Quaternion_h
-#define SLR_Quaternion_h
+#ifndef __SLR_Quaternion__
+#define __SLR_Quaternion__
 
 #include "../defines.h"
 #include "Vector3.h"
@@ -110,4 +110,4 @@ namespace SLR {
     SLR_API void decompose(const Matrix4x4Template<RealType> &mat, Vector3Template<RealType>* T, QuaternionTemplate<RealType>* R, Matrix4x4Template<RealType>* S);
 }
 
-#endif
+#endif /* __SLR_Quaternion__ */

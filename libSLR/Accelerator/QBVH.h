@@ -5,8 +5,8 @@
 //  Copyright (c) 2016年 渡部 心. All rights reserved.
 //
 
-#ifndef QBVH_h
-#define QBVH_h
+#ifndef __SLR_QBVH__
+#define __SLR_QBVH__
 
 #include "../defines.h"
 #include "../references.h"
@@ -343,4 +343,4 @@ namespace SLR {
     };
 }
 
-#endif /* QBVH_h */
+#endif /* __SLR_QBVH__ */

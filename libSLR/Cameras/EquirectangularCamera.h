@@ -5,8 +5,8 @@
 //  Copyright (c) 2015年 渡部 心. All rights reserved.
 //
 
-#ifndef __SLR__EquirectangularCamera__
-#define __SLR__EquirectangularCamera__
+#ifndef __SLR_EquirectangularCamera__
+#define __SLR_EquirectangularCamera__
 
 #include "../defines.h"
 #include "../references.h"
@@ -44,4 +44,4 @@ namespace SLR {
     };    
 }
 
-#endif /* defined(__SLR__EquirectangularCamera__) */
+#endif /* __SLR_EquirectangularCamera__ */

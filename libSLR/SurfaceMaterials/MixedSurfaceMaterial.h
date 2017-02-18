@@ -5,8 +5,8 @@
 //  Copyright (c) 2015年 渡部 心. All rights reserved.
 //
 
-#ifndef __SLR__MixedSurfaceMaterial__
-#define __SLR__MixedSurfaceMaterial__
+#ifndef __SLR_MixedSurfaceMaterial__
+#define __SLR_MixedSurfaceMaterial__
 
 #include "../defines.h"
 #include "../references.h"
@@ -25,4 +25,4 @@ namespace SLR {
     };
 }
 
-#endif /* defined(__SLR__MixedSurfaceMaterial__) */
+#endif /* __SLR_MixedSurfaceMaterial__ */

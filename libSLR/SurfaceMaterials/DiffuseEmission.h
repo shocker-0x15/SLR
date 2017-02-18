@@ -5,8 +5,8 @@
 //  Copyright (c) 2015年 渡部 心. All rights reserved.
 //
 
-#ifndef __SLR__DiffuseEmission__
-#define __SLR__DiffuseEmission__
+#ifndef __SLR_DiffuseEmission__
+#define __SLR_DiffuseEmission__
 
 #include "../defines.h"
 #include "../references.h"
@@ -24,4 +24,4 @@ namespace SLR {
     };
 }
 
-#endif /* defined(__SLR__DiffuseEmission__) */
+#endif /* __SLR_DiffuseEmission__ */

@@ -104,4 +104,4 @@ namespace SLR {
     }
 }
 
-#endif
+#endif /* __SLR_Point3__ */

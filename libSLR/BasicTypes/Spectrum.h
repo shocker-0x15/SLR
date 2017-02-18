@@ -5,8 +5,8 @@
 //  Copyright (c) 2015年 渡部 心. All rights reserved.
 //
 
-#ifndef __SLR__Spectrum__
-#define __SLR__Spectrum__
+#ifndef __SLR_Spectrum__
+#define __SLR_Spectrum__
 
 #include "../defines.h"
 #include "../references.h"
@@ -583,4 +583,4 @@ namespace SLR {
     SLR_API void initSpectrum();
 }
 
-#endif
+#endif /* __SLR_Spectrum__ */

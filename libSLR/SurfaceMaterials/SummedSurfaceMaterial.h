@@ -5,8 +5,8 @@
 //  Copyright (c) 2015年 渡部 心. All rights reserved.
 //
 
-#ifndef __SLR__SummedSurfaceMaterial__
-#define __SLR__SummedSurfaceMaterial__
+#ifndef __SLR_SummedSurfaceMaterial__
+#define __SLR_SummedSurfaceMaterial__
 
 #include "../defines.h"
 #include "../references.h"
@@ -24,4 +24,4 @@ namespace SLR {
     };
 }
 
-#endif /* defined(__SLR__SummedSurfaceMaterial__) */
+#endif /* __SLR_SummedSurfaceMaterial__ */

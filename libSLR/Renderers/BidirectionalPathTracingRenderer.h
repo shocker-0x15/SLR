@@ -5,8 +5,8 @@
 //  Copyright (c) 2016年 渡部 心. All rights reserved.
 //
 
-#ifndef BidirectionalPathTracingRenderer_h
-#define BidirectionalPathTracingRenderer_h
+#ifndef __SLR_BidirectionalPathTracingRenderer__
+#define __SLR_BidirectionalPathTracingRenderer__
 
 #include "../defines.h"
 #include "../references.h"
@@ -118,4 +118,4 @@ namespace SLR {
     };
 }
 
-#endif /* BidirectionalPathTracingRenderer_hpp */
+#endif /* __SLR_BidirectionalPathTracingRenderer__ */
