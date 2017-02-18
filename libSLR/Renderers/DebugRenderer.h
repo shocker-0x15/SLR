@@ -9,10 +9,10 @@
 #define __SLR_DebugRenderer__
 
 #include "../defines.h"
-#include "../references.h"
+#include "../declarations.h"
 #include "../Core/Renderer.h"
 #include "../Core/geometry.h"
-#include "../Memory/Allocator.h"
+#include "../MemoryAllocators/Allocator.h"
 
 namespace SLR {
     enum class ExtraChannel : uint32_t {

@@ -7,7 +7,7 @@
 
 #include "DiffuseEmission.h"
 #include "../EDFs/basic_EDFs.h"
-#include "../Memory/ArenaAllocator.h"
+#include "../MemoryAllocators/ArenaAllocator.h"
 #include "../Core/textures.h"
 
 namespace SLR {

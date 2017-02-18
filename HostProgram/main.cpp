@@ -8,12 +8,12 @@
 #include <thread>
 
 #include <libSLR/defines.h>
-#include <libSLRSceneGraph/references.h>
-#include <libSLR/BasicTypes/Spectrum.h>
+#include <libSLRSceneGraph/declarations.h>
+#include <libSLR/BasicTypes/spectrum_base.h>
 #include <libSLR/Core/Renderer.h>
 #include <libSLR/Core/RenderSettings.h>
 #include <libSLR/Scene/Scene.h>
-#include <libSLR/Memory/ArenaAllocator.h>
+#include <libSLR/MemoryAllocators/ArenaAllocator.h>
 #include <libSLRSceneGraph/Scene.h>
 #include <libSLRSceneGraph/API.hpp>
 

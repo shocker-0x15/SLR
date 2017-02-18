@@ -6,7 +6,7 @@
 //
 
 #include "medium_nodes.h"
-#include "../Memory/ArenaAllocator.h"
+#include "../MemoryAllocators/ArenaAllocator.h"
 #include "../Core/medium_material.h"
 #include "../Core/MediumObject.h"
 #include "../Medium/HomogeneousMedium.h"

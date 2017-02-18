@@ -1,12 +1,12 @@
 //
-//  references.h
+//  declarations.h
 //
 //  Created by 渡部 心 on 2015/04/27.
 //  Copyright (c) 2015年 渡部 心. All rights reserved.
 //
 
-#ifndef __SLR_references__
-#define __SLR_references__
+#ifndef __SLR_declarations__
+#define __SLR_declarations__
 
 #include <vector>
 #include <memory>
@@ -457,4 +457,4 @@ namespace SLR {
     // ----------------------------------------------------------------
 }
 
-#endif /* __SLR_references__ */
+#endif /* __SLR_declarations__ */

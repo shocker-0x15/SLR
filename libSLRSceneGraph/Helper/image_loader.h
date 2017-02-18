@@ -9,9 +9,9 @@
 #define __SLR_image_loader__
 
 #include <libSLR/defines.h>
-#include <libSLR/references.h>
-#include <libSLR/BasicTypes/Spectrum.h>
-#include "../references.h"
+#include <libSLR/declarations.h>
+#include <libSLR/BasicTypes/spectrum_base.h>
+#include "../declarations.h"
 #include <string>
 #include <cstdint>
 

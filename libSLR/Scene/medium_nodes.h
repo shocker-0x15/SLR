@@ -9,7 +9,7 @@
 #define __SLR_medium_nodes__
 
 #include "../defines.h"
-#include "../references.h"
+#include "../declarations.h"
 #include "nodes.h"
 #include "geometry.h"
 

@@ -9,7 +9,7 @@
 #define __SLR__constant_textures__
 
 #include "../defines.h"
-#include "../references.h"
+#include "../declarations.h"
 #include "../Core/textures.h"
 
 namespace SLR {

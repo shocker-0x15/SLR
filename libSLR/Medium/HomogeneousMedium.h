@@ -9,7 +9,7 @@
 #define __SLR_HomogeneousMedium__
 
 #include "../defines.h"
-#include "../references.h"
+#include "../declarations.h"
 #include "../Core/geometry.h"
 
 namespace SLR {

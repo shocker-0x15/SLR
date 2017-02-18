@@ -9,14 +9,14 @@
 #define __SLR_Transform__
 
 #include "../defines.h"
-#include "../references.h"
-#include "../BasicTypes/Point3.h"
-#include "../BasicTypes/Vector3.h"
-#include "../BasicTypes/Vector4.h"
-#include "../BasicTypes/Normal3.h"
+#include "../declarations.h"
+#include "../BasicTypes/Point3D.h"
+#include "../BasicTypes/Vector3D.h"
+#include "../BasicTypes/Vector4D.h"
+#include "../BasicTypes/Normal3D.h"
 #include "../BasicTypes/Matrix4x4.h"
 #include "../BasicTypes/Quaternion.h"
-#include "../BasicTypes/BoundingBox3.h"
+#include "../BasicTypes/BoundingBox3D.h"
 
 namespace SLR {
     class SLR_API Transform {

@@ -9,8 +9,8 @@
 #define __SLR_Matrix3x3__
 
 #include "../defines.h"
-#include "Vector3.h"
-#include "Point3.h"
+#include "Vector3D.h"
+#include "Point3D.h"
 
 namespace SLR {
     template <typename RealType>

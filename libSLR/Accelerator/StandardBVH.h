@@ -9,7 +9,7 @@
 #define __SLR_StandardBVH__
 
 #include "../defines.h"
-#include "../references.h"
+#include "../declarations.h"
 #include "../Core/Accelerator.h"
 
 namespace SLR {

@@ -1,5 +1,5 @@
 //
-//  references.h
+//  declarations.h
 //
 //  Created by 渡部 心 on 2015/09/27.
 //  Copyright (c) 2015年 渡部 心. All rights reserved.
@@ -8,7 +8,7 @@
 #ifndef __SLRSceneGraph_references__
 #define __SLRSceneGraph_references__
 
-#include <libSLR/references.h>
+#include <libSLR/declarations.h>
 
 #ifdef SLR_Platform_Windows_MSVC
 #   ifdef SLR_SCENEGRAPH_API_EXPORTS

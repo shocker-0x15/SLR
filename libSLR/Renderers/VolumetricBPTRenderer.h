@@ -9,7 +9,7 @@
 #define __SLR_VolumetricBPTRenderer__
 
 #include "../defines.h"
-#include "../references.h"
+#include "../declarations.h"
 #include "../Core/Renderer.h"
 
 #include "../Core/geometry.h"

@@ -1,15 +1,15 @@
 //
-//  Vector3.h
+//  Vector3D.h
 //
 //  Created by 渡部 心 on 11/07/16.
 //  Copyright (c) 2014年 渡部 心. All rights reserved.
 //
 
-#ifndef __SLR_Vector3__
-#define __SLR_Vector3__
+#ifndef __SLR_Vector3D__
+#define __SLR_Vector3D__
 
 #include "../defines.h"
-#include "../references.h"
+#include "../declarations.h"
 #include <limits>
 
 namespace SLR {
@@ -146,4 +146,4 @@ namespace SLR {
     }
 }
 
-#endif /* __SLR_Vector3__ */
+#endif /* __SLR_Vector3D__ */

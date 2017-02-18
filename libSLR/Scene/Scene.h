@@ -9,7 +9,7 @@
 #define __SLR_Scene__
 
 #include "../defines.h"
-#include "../references.h"
+#include "../declarations.h"
 #include "nodes.h"
 #include "SurfaceObject.h"
 #include "MediumObject.h"

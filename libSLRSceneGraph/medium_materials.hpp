@@ -9,7 +9,7 @@
 #define __SLRSceneGraph_medium_materials__
 
 #include <libSLR/defines.h>
-#include "references.h"
+#include "declarations.h"
 
 namespace SLRSceneGraph {
     class SLR_SCENEGRAPH_API MediumMaterial {

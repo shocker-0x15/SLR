@@ -9,7 +9,7 @@
 #define __SLR_textures__
 
 #include "../defines.h"
-#include "../references.h"
+#include "../declarations.h"
 #include "geometry.h"
 
 namespace SLR {

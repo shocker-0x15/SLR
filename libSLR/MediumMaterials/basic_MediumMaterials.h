@@ -9,7 +9,7 @@
 #define __SLR_basic_MediumMaterials__
 
 #include "../defines.h"
-#include "../references.h"
+#include "../declarations.h"
 #include "../Core/medium_material.h"
 
 namespace SLR {

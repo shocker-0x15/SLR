@@ -6,7 +6,7 @@
 //
 
 #include "basic_MediumMaterials.h"
-#include "../Memory/ArenaAllocator.h"
+#include "../MemoryAllocators/ArenaAllocator.h"
 #include "../Core/textures.h"
 #include "../PhaseFunctions/basic_phase_functions.h"
 

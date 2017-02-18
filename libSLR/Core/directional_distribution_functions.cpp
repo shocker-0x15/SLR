@@ -7,7 +7,7 @@
 
 #include "directional_distribution_functions.h"
 #include "distributions.h"
-#include "../Memory/ArenaAllocator.h"
+#include "../MemoryAllocators/ArenaAllocator.h"
 #include "../Core/light_path_samplers.h"
 
 namespace SLR {

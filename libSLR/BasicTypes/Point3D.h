@@ -1,16 +1,16 @@
 //
-//  Point3.h
+//  Point3D.h
 //
 //  Created by 渡部 心 on 12/08/29.
 //  Copyright (c) 2014年 渡部 心. All rights reserved.
 //
 
-#ifndef __SLR_Point3__
-#define __SLR_Point3__
+#ifndef __SLR_Point3D__
+#define __SLR_Point3D__
 
 #include "../defines.h"
-#include "../references.h"
-#include "Vector3.h"
+#include "../declarations.h"
+#include "Vector3D.h"
 
 namespace SLR {
     template <typename RealType>
@@ -104,4 +104,4 @@ namespace SLR {
     }
 }
 
-#endif /* __SLR_Point3__ */
+#endif /* __SLR_Point3D__ */

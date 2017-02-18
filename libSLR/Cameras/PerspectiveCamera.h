@@ -9,7 +9,7 @@
 #define __SLR_PerspectiveCamera__
 
 #include "../defines.h"
-#include "../references.h"
+#include "../declarations.h"
 #include "../Core/cameras.h"
 #include "../Core/directional_distribution_functions.h"
 

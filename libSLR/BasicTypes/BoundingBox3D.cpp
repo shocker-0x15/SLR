@@ -5,7 +5,7 @@
 //  Copyright (c) 2017年 渡部 心. All rights reserved.
 //
 
-#include "BoundingBox3.h"
+#include "BoundingBox3D.h"
 
 namespace SLR {
     template struct SLR_API BoundingBox3DTemplate<float>;

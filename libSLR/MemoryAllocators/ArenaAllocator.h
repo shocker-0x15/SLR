@@ -9,7 +9,7 @@
 #define __SLR_ArenaAllocator__
 
 #include "../defines.h"
-#include "../references.h"
+#include "../declarations.h"
 #include "Allocator.h"
 #include <list>
 

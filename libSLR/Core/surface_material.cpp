@@ -6,7 +6,7 @@
 //
 
 #include "surface_material.h"
-#include "../Memory/ArenaAllocator.h"
+#include "../MemoryAllocators/ArenaAllocator.h"
 #include "../Core/directional_distribution_functions.h"
 #include "../Core/textures.h"
 

@@ -9,11 +9,11 @@
 #define __SLRSceneGraph_API__
 
 #include <libSLR/defines.h>
-#include "references.h"
+#include "declarations.h"
 
 #include "Scene.h"
 #include "Parser/SceneParser.hpp"
-#include <libSLR/BasicTypes/Spectrum.h>
+#include <libSLR/BasicTypes/spectrum_base.h>
 #include <libSLR/Core/Image.h>
 
 namespace SLRSceneGraph {

@@ -1,13 +1,13 @@
 //
-//  Spectrum.cpp
+//  spectrum_base.cpp
 //
 //  Created by 渡部 心 on 2015/09/21.
 //  Copyright (c) 2015年 渡部 心. All rights reserved.
 //
 
-#include "Spectrum.h"
-#include "RGBTypes.h"
-#include "SpectrumTypes.h"
+#include "spectrum_base.h"
+#include "rgb_types.h"
+#include "spectrum_types.h"
 #include "../BasicTypes/CompensatedSum.h"
 
 namespace SLR {

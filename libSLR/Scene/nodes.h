@@ -9,9 +9,9 @@
 #define __SLR_nodes__
 
 #include "../defines.h"
-#include "../references.h"
-#include "../BasicTypes/Point3.h"
-#include "../BasicTypes/Vector3.h"
+#include "../declarations.h"
+#include "../BasicTypes/Point3D.h"
+#include "../BasicTypes/Vector3D.h"
 
 namespace SLR {
     struct SLR_API RenderingData {

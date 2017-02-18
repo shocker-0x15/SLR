@@ -9,7 +9,7 @@
 #define __SLR_SurfaceObject__
 
 #include "../defines.h"
-#include "../references.h"
+#include "../declarations.h"
 #include "Object.h"
 
 namespace SLR {

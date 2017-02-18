@@ -9,9 +9,10 @@
 #define __SLR_Image__
 
 #include "../defines.h"
-#include "../references.h"
-#include "../Memory/Allocator.h"
-#include "../BasicTypes/Spectrum.h"
+#include "../declarations.h"
+#include "../MemoryAllocators/Allocator.h"
+#include "../BasicTypes/spectrum_base.h"
+#include "../BasicTypes/spectrum_types.h"
 #include <half.h>
 
 namespace SLR {
@@ -134,7 +135,7 @@ namespace SLR {
                                 const RGB8x3 &val = *((RGB8x3*)linearData + m_width * y + x);
                                 float RGB[3] = {val.r / 255.0f, val.g / 255.0f, val.b / 255.0f};
                                 float uvs[3];
-                                Upsampling::sRGB_to_uvs(spType, RGB, uvs);
+                                UpsampledContinuousSpectrum::sRGB_to_uvs(spType, RGB, uvs);
                                 uvs16Fx3 storedVal{(half)uvs[0], (half)uvs[1], (half)uvs[2]};
                                 SLRAssert(std::isfinite((float)storedVal.u) &&
                                           std::isfinite((float)storedVal.v) &&
@@ -179,7 +180,7 @@ namespace SLR {
                                 const RGB_8x4 &val = *((RGB_8x4*)linearData + m_width * y + x);
                                 float RGB[3] = {val.r / 255.0f, val.g / 255.0f, val.b / 255.0f};
                                 float uvs[3];
-                                Upsampling::sRGB_to_uvs(spType, RGB, uvs);
+                                UpsampledContinuousSpectrum::sRGB_to_uvs(spType, RGB, uvs);
                                 uvs16Fx3 storedVal{(half)uvs[0], (half)uvs[1], (half)uvs[2]};
                                 SLRAssert(storedVal.u.isFinite() &&
                                           storedVal.v.isFinite() &&
@@ -224,7 +225,7 @@ namespace SLR {
                                 const RGBA8x4 &val = *((RGBA8x4*)linearData + m_width * y + x);
                                 float RGB[3] = {val.r / 255.0f, val.g / 255.0f, val.b / 255.0f};
                                 float uvs[3];
-                                Upsampling::sRGB_to_uvs(spType, RGB, uvs);
+                                UpsampledContinuousSpectrum::sRGB_to_uvs(spType, RGB, uvs);
                                 uvsA16Fx4 storedVal{(half)uvs[0], (half)uvs[1], (half)uvs[2], (half)(val.a / 255.0f)};
                                 SLRAssert(storedVal.u.isFinite() && storedVal.v.isFinite() && storedVal.s.isFinite() &&
                                           storedVal.a.isFinite() && (float)storedVal.a >= 0,
@@ -273,7 +274,7 @@ namespace SLR {
                                 RGB[1] = std::max(RGB[1], 0.0f);
                                 RGB[2] = std::max(RGB[2], 0.0f);
                                 SLRAssert(val.a > 0.0f, "Invalid alpha value.");
-                                Upsampling::sRGB_to_uvs(spType, RGB, uvs);
+                                UpsampledContinuousSpectrum::sRGB_to_uvs(spType, RGB, uvs);
                                 uvsA16Fx4 storedVal{(half)uvs[0], (half)uvs[1], (half)uvs[2], (half)val.a};
                                 SLRAssert(storedVal.u.isFinite() && storedVal.v.isFinite() && storedVal.s.isFinite() &&
                                           storedVal.a.isFinite() && (float)storedVal.a >= 0,

@@ -9,7 +9,7 @@
 #define __SLR_ThreadPool__
 
 #include "../defines.h"
-#include "../references.h"
+#include "../declarations.h"
 #include <thread>
 #include <condition_variable>
 #include <mutex>

@@ -15,7 +15,7 @@
 #include "../Core/light_path_samplers.h"
 #include "../Core/ProgressReporter.h"
 #include "../Scene/Scene.h"
-#include "../Memory/ArenaAllocator.h"
+#include "../MemoryAllocators/ArenaAllocator.h"
 #include "../Helper/ThreadPool.h"
 #include "../RNGs/XORShiftRNG.h"
 

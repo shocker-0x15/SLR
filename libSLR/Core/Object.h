@@ -9,7 +9,7 @@
 #define __SLR_Object__
 
 #include "../defines.h"
-#include "../references.h"
+#include "../declarations.h"
 #include "geometry.h"
 #include "directional_distribution_functions.h"
 

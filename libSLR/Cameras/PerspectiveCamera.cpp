@@ -7,7 +7,7 @@
 
 #include "PerspectiveCamera.h"
 #include "../Core/Transform.h"
-#include "../Memory/ArenaAllocator.h"
+#include "../MemoryAllocators/ArenaAllocator.h"
 #include "../Core/distributions.h"
 #include "../Core/ImageSensor.h"
 

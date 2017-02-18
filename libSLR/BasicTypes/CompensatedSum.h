@@ -9,7 +9,7 @@
 #define __SLR_CompensatedSum__
 
 #include "../defines.h"
-#include "../references.h"
+#include "../declarations.h"
 
 namespace SLR {
     template <typename RealType>

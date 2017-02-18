@@ -6,7 +6,7 @@
 //
 
 #include "camera_nodes.h"
-#include "../Memory/ArenaAllocator.h"
+#include "../MemoryAllocators/ArenaAllocator.h"
 #include "../Cameras/PerspectiveCamera.h"
 #include "../Cameras/EquirectangularCamera.h"
 

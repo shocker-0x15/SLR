@@ -9,7 +9,7 @@
 #define __SLR_MultiEDF__
 
 #include "../defines.h"
-#include "../references.h"
+#include "../declarations.h"
 #include "../Core/directional_distribution_functions.h"
 
 namespace SLR {

@@ -7,7 +7,7 @@
 
 #include "MicrofacetSurfaceMaterial.h"
 #include "../BSDFs/MicrofacetBSDF.h"
-#include "../Memory/ArenaAllocator.h"
+#include "../MemoryAllocators/ArenaAllocator.h"
 #include "../Core/textures.h"
 
 namespace SLR {

@@ -9,7 +9,7 @@
 #define __SLR_Accelerator__
 
 #include "../defines.h"
-#include "../references.h"
+#include "../declarations.h"
 #include "../Core/geometry.h"
 #include "../Core/SurfaceObject.h"
 

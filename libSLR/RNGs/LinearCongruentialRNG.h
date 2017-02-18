@@ -9,7 +9,7 @@
 #define __SLR_LinearCongruentialRNG__
 
 #include "../defines.h"
-#include "../references.h"
+#include "../declarations.h"
 #include "../Core/RandomNumberGenerator.h"
 
 namespace SLR {

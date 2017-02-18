@@ -9,7 +9,7 @@
 #define __SLR_ProgressReporter__
 
 #include "../defines.h"
-#include "../references.h"
+#include "../declarations.h"
 
 #include <atomic>
 #include <thread>

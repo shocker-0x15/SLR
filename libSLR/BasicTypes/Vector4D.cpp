@@ -5,7 +5,7 @@
 //  Copyright (c) 2016年 渡部 心. All rights reserved.
 //
 
-#include "Vector4.h"
+#include "Vector4D.h"
 
 namespace SLR {
     template struct SLR_API Vector4DTemplate<float>;

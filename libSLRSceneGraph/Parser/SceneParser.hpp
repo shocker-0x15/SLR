@@ -9,7 +9,7 @@
 #define __SLRSceneGraph_SceneParser__
 
 #include <libSLR/defines.h>
-#include "../references.h"
+#include "../declarations.h"
 
 #include "../Scene.h"
 

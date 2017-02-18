@@ -9,7 +9,7 @@
 #define __SLR_RenderSettings__
 
 #include "../defines.h"
-#include "../references.h"
+#include "../declarations.h"
 
 namespace SLR {
     enum class RenderSettingItem {

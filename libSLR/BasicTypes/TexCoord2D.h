@@ -1,5 +1,5 @@
 //
-//  TexCoord2.h
+//  TexCoord2D.h
 //
 //  Created by 渡部 心 on 2015/06/11.
 //  Copyright (c) 2015年 渡部 心. All rights reserved.
@@ -9,7 +9,7 @@
 #define __SLR_TexCoord2__
 
 #include "../defines.h"
-#include "../references.h"
+#include "../declarations.h"
 
 namespace SLR {
     template <typename RealType>

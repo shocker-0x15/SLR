@@ -9,7 +9,7 @@
 #define __SLR_DiffuseEmission__
 
 #include "../defines.h"
-#include "../references.h"
+#include "../declarations.h"
 #include "../Core/surface_material.h"
 
 namespace SLR {

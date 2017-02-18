@@ -9,10 +9,10 @@
 #define __SLR_geometry__
 
 #include "../defines.h"
-#include "../references.h"
-#include "../BasicTypes/TexCoord2.h"
-#include "../BasicTypes/RGBTypes.h"
-#include "../BasicTypes/SpectrumTypes.h"
+#include "../declarations.h"
+#include "../BasicTypes/TexCoord2D.h"
+#include "../BasicTypes/rgb_types.h"
+#include "../BasicTypes/spectrum_types.h"
 #include "Transform.h"
 
 namespace SLR {

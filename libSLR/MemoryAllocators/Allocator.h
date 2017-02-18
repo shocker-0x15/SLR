@@ -9,7 +9,7 @@
 #define __SLR_Allocator__
 
 #include "../defines.h"
-#include "../references.h"
+#include "../declarations.h"
 
 namespace SLR {
     class SLR_API Allocator {

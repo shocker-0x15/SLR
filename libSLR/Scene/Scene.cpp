@@ -6,7 +6,7 @@
 //
 
 #include "Scene.h"
-#include "../Memory/ArenaAllocator.h"
+#include "../MemoryAllocators/ArenaAllocator.h"
 #include "../Core/distributions.h"
 #include "../Core/Transform.h"
 #include "../Core/cameras.h"

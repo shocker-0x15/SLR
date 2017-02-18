@@ -12,7 +12,7 @@
 #include "textures.hpp"
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
-#include <libSLR/Memory/Allocator.h>
+#include <libSLR/MemoryAllocators/Allocator.h>
 #include <libSLR/Core/Transform.h>
 #include <libSLR/Surface/TriangleMesh.h>
 

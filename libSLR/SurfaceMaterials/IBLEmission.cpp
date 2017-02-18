@@ -7,7 +7,7 @@
 
 #include "IBLEmission.h"
 #include "../EDFs/IBLEDF.h"
-#include "../Memory/ArenaAllocator.h"
+#include "../MemoryAllocators/ArenaAllocator.h"
 #include "../Core/textures.h"
 #include "../Scene/Scene.h"
 

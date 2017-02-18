@@ -8,8 +8,8 @@
 #ifndef __SLR_Ray__
 #define __SLR_Ray__
 
-#include "Point3.h"
-#include "Vector3.h"
+#include "Point3D.h"
+#include "Vector3D.h"
 
 namespace SLR {
     template <typename RealType>

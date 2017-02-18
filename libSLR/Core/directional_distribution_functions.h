@@ -9,8 +9,8 @@
 #define __SLR_directional_distribution_functions__
 
 #include "../defines.h"
-#include "../references.h"
-#include "../BasicTypes/Spectrum.h"
+#include "../declarations.h"
+#include "../BasicTypes/spectrum_base.h"
 #include "geometry.h"
 #include <type_traits>
 

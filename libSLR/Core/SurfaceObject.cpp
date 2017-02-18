@@ -10,7 +10,7 @@
 #include "Transform.h"
 #include "distributions.h"
 #include "textures.h"
-#include "../Memory/ArenaAllocator.h"
+#include "../MemoryAllocators/ArenaAllocator.h"
 #include "../Accelerator/StandardBVH.h"
 #include "../Accelerator/SBVH.h"
 #include "../Accelerator/QBVH.h"

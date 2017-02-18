@@ -6,7 +6,7 @@
 //
 
 #include "nodes.h"
-#include "../Memory/ArenaAllocator.h"
+#include "../MemoryAllocators/ArenaAllocator.h"
 #include "../Core/Transform.h"
 #include "../Core/SurfaceObject.h"
 #include "../Core/MediumObject.h"

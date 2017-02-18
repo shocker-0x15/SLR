@@ -11,10 +11,11 @@
 
 #include "Parser/SceneParsingDriver.h"
 
+#include <libSLR/BasicTypes/spectrum_library.h>
 #include <libSLR/Core/Image.h>
 #include <libSLR/Core/Transform.h>
 #include <libSLR/RNGs/XORShiftRNG.h>
-#include <libSLR/Memory/ArenaAllocator.h>
+#include <libSLR/MemoryAllocators/ArenaAllocator.h>
 #include <libSLR/Scene/nodes.h>
 #include <libSLR/Scene/Scene.h>
 #include <libSLR/Surface/TriangleMesh.h>
@@ -59,7 +60,7 @@ namespace SLRSceneGraph {
             *type = SLR::SpectrumType::Reflectance;
         else if (str == "Illuminant")
             *type = SLR::SpectrumType::Illuminant;
-        else if (str == "IndexOfRefraction")
+        else if (str == "IndexOfRefraction" || str == "IoR" || str == "IOR")
             *type = SLR::SpectrumType::IndexOfRefraction;
         else
             return false;
@@ -313,7 +314,8 @@ namespace SLRSceneGraph {
                                                        {"values", Type::Tuple}
                                                    },
                                                    {
-                                                       {"ID", Type::String},
+                                                       {"type", Type::String},
+                                                       {"name", Type::String},
                                                        {"idx", Type::Integer, Element(0)}
                                                    }
                                                },
@@ -398,31 +400,50 @@ namespace SLRSceneGraph {
                                                    [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err)  {
                                                        using namespace SLR;
                                                        AssetSpectrumRef spectrum;
-                                                       std::string ID = args.at("ID").raw<TypeMap::String>();
+                                                       std::string type = args.at("type").raw<TypeMap::String>();
+                                                       std::string name = args.at("name").raw<TypeMap::String>();
                                                        auto idx = args.at("idx").raw<TypeMap::Integer>();
-                                                       if (ID == "D65") {
-                                                           if (idx != 0) {
-                                                               *err = ErrorMessage("Specified index is out of range for this spectrum.");
+                                                       if (type == "Illuminant") {
+                                                           if (SpectrumLibrary::Illuminant::database.count(name) > 0) {
+                                                               if (idx != 0) {
+                                                                   *err = ErrorMessage("Specified index is out of range for this spectrum.");
+                                                                   return Element();
+                                                               }
+                                                               const SpectrumLibrary::Illuminant::Data &data = SpectrumLibrary::Illuminant::database.at(name);
+                                                               if (data.dType == SpectrumLibrary::DistributionType::Regular)
+                                                                   spectrum = Spectrum::create(SpectrumType::Illuminant, data.minLambdas, data.maxLambdas, data.values, data.numSamples);
+                                                               else
+                                                                   spectrum = Spectrum::create(SpectrumType::Illuminant, data.lambdas, data.values, data.numSamples);
+                                                           }
+                                                           else {
+                                                               *err = ErrorMessage("unrecognized spectrum ID.");
                                                                return Element();
                                                            }
-                                                           spectrum = Spectrum::create(SpectrumType::Illuminant, StandardIlluminant::MinWavelength, StandardIlluminant::MaxWavelength,
-                                                                                       StandardIlluminant::D65, StandardIlluminant::NumSamples);
                                                        }
-                                                       else if (ID == "ColorChecker") {
-                                                           if (idx < 0 || idx >= 24) {
-                                                               *err = ErrorMessage("Specified index is out of range for this spectrum.");
+                                                       else if (type == "Reflectance") {
+                                                           if (SpectrumLibrary::Reflectance::database.count(name) > 0) {
+                                                               if (idx != 0) {
+                                                                   *err = ErrorMessage("Specified index is out of range for this spectrum.");
+                                                                   return Element();
+                                                               }
+                                                               const SpectrumLibrary::Reflectance::Data &data = SpectrumLibrary::Reflectance::database.at(name);
+                                                               if (data.dType == SpectrumLibrary::DistributionType::Regular)
+                                                                   spectrum = Spectrum::create(SpectrumType::Reflectance, data.minLambdas, data.maxLambdas, data.values, data.numSamples);
+                                                               else
+                                                                   spectrum = Spectrum::create(SpectrumType::Reflectance, data.lambdas, data.values, data.numSamples);
+                                                           }
+                                                           else {
+                                                               *err = ErrorMessage("unrecognized spectrum ID.");
                                                                return Element();
                                                            }
-                                                           spectrum = Spectrum::create(SpectrumType::Reflectance, ColorChecker::MinWavelength, ColorChecker::MaxWavelength,
-                                                                                       ColorChecker::Spectra[idx], ColorChecker::NumSamples);
                                                        }
-                                                       else {
-                                                           if (SpectrumLibrary::IORs.count(ID) > 0) {
+                                                       else if ("IoR") {
+                                                           if (SpectrumLibrary::IoR::database.count(name) > 0) {
                                                                if (idx < 0 || idx >= 2) {
                                                                    *err = ErrorMessage("Specified index is out of range.");
                                                                    return Element();
                                                                }
-                                                               const SpectrumLibrary::IndexOfRefraction &IOR = SpectrumLibrary::IORs.at(ID);
+                                                               const SpectrumLibrary::IoR::Data &IOR = SpectrumLibrary::IoR::database.at(name);
                                                                const float* values = idx == 0 ? IOR.etas : IOR.ks;
                                                                if (!values) {
                                                                    *err = ErrorMessage("This IOR doesn't have the spectrum corresponding to the index specified.");

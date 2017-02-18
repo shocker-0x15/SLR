@@ -6,8 +6,8 @@
 //
 
 #include "builtin_math.hpp"
-#include <libSLR/BasicTypes/Point3.h>
-#include <libSLR/BasicTypes/Vector3.h>
+#include <libSLR/BasicTypes/Point3D.h>
+#include <libSLR/BasicTypes/Vector3D.h>
 
 namespace SLRSceneGraph {
     namespace BuiltinFunctions {

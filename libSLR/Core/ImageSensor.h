@@ -9,9 +9,9 @@
 #define __SLR_ImageSensor__
 
 #include "../defines.h"
-#include "../references.h"
-#include "../BasicTypes/RGBTypes.h"
-#include "../BasicTypes/SpectrumTypes.h"
+#include "../declarations.h"
+#include "../BasicTypes/rgb_types.h"
+#include "../BasicTypes/spectrum_types.h"
 #include "../BasicTypes/CompensatedSum.h"
 
 namespace SLR {

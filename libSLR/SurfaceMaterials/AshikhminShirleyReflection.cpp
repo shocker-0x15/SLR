@@ -7,7 +7,7 @@
 
 #include "AshikhminShirleyReflection.h"
 #include "../BSDFs/AshikhminShirleyBRDF.h"
-#include "../Memory/ArenaAllocator.h"
+#include "../MemoryAllocators/ArenaAllocator.h"
 #include "../Core/textures.h"
 
 namespace SLR {

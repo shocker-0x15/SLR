@@ -9,7 +9,7 @@
 #define __SLR_light_path_samplers__
 
 #include "../defines.h"
-#include "../references.h"
+#include "../declarations.h"
 #include "cameras.h"
 #include "directional_distribution_functions.h"
 #include "SurfaceObject.h"

@@ -1,16 +1,16 @@
 //
-//  RGBTypes.h
+//  rgb_types.h
 //
 //  Created by 渡部 心 on 2015/05/04.
 //  Copyright (c) 2015年 渡部 心. All rights reserved.
 //
 
-#ifndef __SLR_RGBTypes__
-#define __SLR_RGBTypes__
+#ifndef __SLR_rgb_types__
+#define __SLR_rgb_types__
 
 #include "../defines.h"
-#include "../references.h"
-#include "Spectrum.h"
+#include "../declarations.h"
+#include "spectrum_base.h"
 #include "CompensatedSum.h"
 
 namespace SLR {
@@ -185,4 +185,4 @@ namespace SLR {
     };    
 }
 
-#endif /* __SLR_RGBTypes__ */
+#endif /* __SLR_rgb_types__ */

@@ -9,7 +9,7 @@
 
 #include "SurfaceObject.h"
 #include "MediumObject.h"
-#include "../Memory/ArenaAllocator.h"
+#include "../MemoryAllocators/ArenaAllocator.h"
 #include "Transform.h"
 
 namespace SLR {

@@ -9,9 +9,9 @@
 #define __SLR_Matrix4x4__
 
 #include "../defines.h"
-#include "Vector3.h"
-#include "Vector4.h"
-#include "Point3.h"
+#include "Vector3D.h"
+#include "Vector4D.h"
+#include "Point3D.h"
 
 #ifdef SLR_Platform_Windows_MSVC
 #   undef near

@@ -5,7 +5,7 @@
 //  Copyright (c) 2016年 渡部 心. All rights reserved.
 //
 
-#include "TexCoord2.h"
+#include "TexCoord2D.h"
 
 namespace SLR {
     template struct SLR_API TexCoord2DTemplate<float>;

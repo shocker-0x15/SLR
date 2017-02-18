@@ -1,16 +1,16 @@
 //
-//  Vector4.h
+//  Vector4D.h
 //
 //  Created by 渡部 心 on 11/08/22.
 //  Copyright (c) 2014年 渡部 心. All rights reserved.
 //
 
-#ifndef __SLR_Vector4__
-#define __SLR_Vector4__
+#ifndef __SLR_Vector4D__
+#define __SLR_Vector4D__
 
 #include "../defines.h"
-#include "../references.h"
-#include "Vector3.h"
+#include "../declarations.h"
+#include "Vector3D.h"
 
 namespace SLR {
     template <typename RealType>
@@ -102,4 +102,4 @@ namespace SLR {
     }    
 }
 
-#endif /* __SLR_Vector4__ */
+#endif /* __SLR_Vector4D__ */

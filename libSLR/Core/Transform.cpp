@@ -6,7 +6,7 @@
 //
 
 #include "Transform.h"
-#include "../Memory/Allocator.h"
+#include "../MemoryAllocators/Allocator.h"
 
 namespace SLR {
     Transform* StaticTransform::copy(Allocator* mem) const {

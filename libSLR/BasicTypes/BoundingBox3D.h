@@ -1,5 +1,5 @@
 //
-//  BoundingBox3.h
+//  BoundingBox3D.h
 //
 //  Created by 渡部 心 on 2017/01/23.
 //  Copyright (c) 2017年 渡部 心. All rights reserved.
@@ -8,7 +8,7 @@
 #ifndef __SLR_BoundingBox3__
 #define __SLR_BoundingBox3__
 
-#include "Point3.h"
+#include "Point3D.h"
 #include "Ray.h"
 
 namespace SLR {

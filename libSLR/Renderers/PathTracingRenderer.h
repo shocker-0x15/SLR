@@ -9,7 +9,7 @@
 #define __SLR_PathTracingRenderer__
 
 #include "../defines.h"
-#include "../references.h"
+#include "../declarations.h"
 #include "../Core/Renderer.h"
 
 namespace SLR {

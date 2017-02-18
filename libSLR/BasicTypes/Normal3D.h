@@ -1,5 +1,5 @@
 //
-//  Normal3.h
+//  Normal3D.h
 //
 //  Created by 渡部 心 on 2015/05/04.
 //  Copyright (c) 2015年 渡部 心. All rights reserved.
@@ -9,8 +9,8 @@
 #define __SLR_Normal3__
 
 #include "../defines.h"
-#include "../references.h"
-#include "Vector3.h"
+#include "../declarations.h"
+#include "Vector3D.h"
 
 namespace SLR {
     template <typename RealType>

@@ -9,7 +9,7 @@
 #define __SLR_Quaternion__
 
 #include "../defines.h"
-#include "Vector3.h"
+#include "Vector3D.h"
 #include "Matrix4x4.h"
 
 namespace SLR {

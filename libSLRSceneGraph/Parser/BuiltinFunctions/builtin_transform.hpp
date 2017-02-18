@@ -9,7 +9,7 @@
 #define SLRSceneGraph_builtin_transform_hpp
 
 #include <libSLR/defines.h>
-#include "../../references.h"
+#include "../../declarations.h"
 
 #include "../SceneParser.hpp"
 

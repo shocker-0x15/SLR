@@ -1,11 +1,11 @@
 //
-//  SpectrumType.cpp
+//  spectrum_types.cpp
 //
 //  Created by 渡部 心 on 2016/01/26.
 //  Copyright (c) 2016年 渡部 心. All rights reserved.
 //
 
-#include "SpectrumTypes.h"
+#include "spectrum_types.h"
 
 namespace SLR {
     template struct SLR_API WavelengthSamplesTemplate<float, NumSpectralSamples>;
@@ -111,7 +111,6 @@ namespace SLR {
     
     template <typename RealType, uint32_t N>
     void UpsampledContinuousSpectrumTemplate<RealType, N>::computeAdjacents(RealType u, RealType v) {
-        using namespace Upsampling;
         u = std::clamp<RealType>(u, 0.0f, GridWidth);
         v = std::clamp<RealType>(v, 0.0f, GridHeight);
         
@@ -235,10 +234,10 @@ namespace SLR {
         // TODO: Contain a factor for solid of natural reflectance.
         //if (spType == SpectrumType::Reflectance)
         //    brightness = std::min(brightness, evaluateMaximumBrightness(x, y));
-        m_scale = brightness / Upsampling::EqualEnergyReflectance;
+        m_scale = brightness / EqualEnergyReflectance;
         RealType xy[2] = {x, y};
         RealType uv[2];
-        Upsampling::xy_to_uv(xy, uv);
+        xy_to_uv(xy, uv);
         SLRAssert(!std::isinf(uv[0]) && !std::isnan(uv[0]) &&
                   !std::isinf(uv[1]) && !std::isnan(uv[1]) &&
                   !std::isinf(m_scale) && !std::isnan(m_scale), "Invalid value.");
@@ -248,8 +247,6 @@ namespace SLR {
     
     template <typename RealType, uint32_t N>
     RealType UpsampledContinuousSpectrumTemplate<RealType, N>::calcBounds() const {
-        using namespace Upsampling;
-        
         uint8_t adjIndices[4];
         adjIndices[0] = (m_adjIndices >> 0) & 0xFF;
         adjIndices[1] = (m_adjIndices >> 8) & 0xFF;
@@ -260,7 +257,7 @@ namespace SLR {
         
         RealType maxValue = -INFINITY;
         for (int i = 0; i < numAdjacents; ++i) {
-            const float* spectrum = spectrum_data_points[adjIndices[i]].spectrum;
+            const RealType* spectrum = spectrum_data_points[adjIndices[i]].spectrum;
             for (int j = 0; j < NumWavelengthSamples; ++j)
                 maxValue = std::max<RealType>(maxValue, spectrum[j]);
         }
@@ -270,8 +267,6 @@ namespace SLR {
     
     template <typename RealType, uint32_t N>
     SampledSpectrumTemplate<RealType, N> UpsampledContinuousSpectrumTemplate<RealType, N>::evaluate(const WavelengthSamplesTemplate<RealType, N> &wls) const {
-        using namespace Upsampling;
-        
         uint8_t adjIndices[4];
         adjIndices[0] = (m_adjIndices >> 0) & 0xFF;
         adjIndices[1] = (m_adjIndices >> 8) & 0xFF;
@@ -305,7 +300,7 @@ namespace SLR {
             SLRAssert(sBin < NumWavelengthSamples && sBinNext < NumWavelengthSamples, "Spectrum bin index is out of range.");
             RealType t = sBinF - sBin;
             for (int j = 0; j < numAdjacents; ++j) {
-                const float* spectrum = spectrum_data_points[adjIndices[j]].spectrum;
+                const RealType* spectrum = spectrum_data_points[adjIndices[j]].spectrum;
                 ret[i] += weights[j] * (spectrum[sBin] * (1 - t) + spectrum[sBinNext] * t);
             }
         }

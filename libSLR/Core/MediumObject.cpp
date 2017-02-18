@@ -8,7 +8,7 @@
 #include "MediumObject.h"
 #include "distributions.h"
 #include "textures.h"
-#include "../Memory/ArenaAllocator.h"
+#include "../MemoryAllocators/ArenaAllocator.h"
 #include "../Core/medium_material.h"
 #include "../Core/light_path_samplers.h"
 #include "../Core/SurfaceObject.h"

@@ -9,7 +9,7 @@
 #define __SLRSceneGraph_textures__
 
 #include <libSLR/defines.h>
-#include "references.h"
+#include "declarations.h"
 
 namespace SLRSceneGraph {
     class SLR_SCENEGRAPH_API Texture2DMapping {

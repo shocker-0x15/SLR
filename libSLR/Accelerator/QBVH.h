@@ -9,7 +9,7 @@
 #define __SLR_QBVH__
 
 #include "../defines.h"
-#include "../references.h"
+#include "../declarations.h"
 #include "../Core/Accelerator.h"
 
 #include "../Accelerator/SBVH.h"

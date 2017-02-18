@@ -9,9 +9,9 @@
 #define __SLR_surface_material__
 
 #include "../defines.h"
-#include "../references.h"
-#include "../BasicTypes/RGBTypes.h"
-#include "../BasicTypes/SpectrumTypes.h"
+#include "../declarations.h"
+#include "../BasicTypes/rgb_types.h"
+#include "../BasicTypes/spectrum_types.h"
 
 namespace SLR {
     class SLR_API SurfaceMaterial {

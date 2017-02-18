@@ -7,7 +7,7 @@
 
 #include "MixedSurfaceMaterial.h"
 #include "../BSDFs/MultiBSDF.h"
-#include "../Memory/ArenaAllocator.h"
+#include "../MemoryAllocators/ArenaAllocator.h"
 #include "../Core/textures.h"
 
 namespace SLR {

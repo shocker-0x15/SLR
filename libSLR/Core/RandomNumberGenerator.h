@@ -9,7 +9,7 @@
 #define __SLR_RandomNumberGenerator__
 
 #include "../defines.h"
-#include "../references.h"
+#include "../declarations.h"
 
 namespace SLR {
     struct SLR_API Types32bit {

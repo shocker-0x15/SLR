@@ -23,8 +23,6 @@
 		460A20221D602C5700870E0F /* AshikhminShirleyReflection.h in Headers */ = {isa = PBXBuildFile; fileRef = 460A20201D602C5700870E0F /* AshikhminShirleyReflection.h */; };
 		460A20251D602CB800870E0F /* AshikhminShirleyBRDF.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 460A20231D602CB800870E0F /* AshikhminShirleyBRDF.cpp */; };
 		460A20261D602CB800870E0F /* AshikhminShirleyBRDF.h in Headers */ = {isa = PBXBuildFile; fileRef = 460A20241D602CB800870E0F /* AshikhminShirleyBRDF.h */; };
-		4613A1771E364E3500D05AA6 /* BoundingBox3.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4613A1751E364E3500D05AA6 /* BoundingBox3.cpp */; };
-		4613A1781E364E3500D05AA6 /* BoundingBox3.h in Headers */ = {isa = PBXBuildFile; fileRef = 4613A1761E364E3500D05AA6 /* BoundingBox3.h */; };
 		4613A17B1E36500600D05AA6 /* Ray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4613A1791E36500600D05AA6 /* Ray.cpp */; };
 		4613A17C1E36500600D05AA6 /* Ray.h in Headers */ = {isa = PBXBuildFile; fileRef = 4613A17A1E36500600D05AA6 /* Ray.h */; };
 		461BDAD71E45E7C600D97D37 /* basic_MediumMaterials.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 461BDAD51E45E7C600D97D37 /* basic_MediumMaterials.cpp */; };
@@ -65,29 +63,35 @@
 		464EAB021D6843E6000E1C65 /* builtin_transform.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 464EAB001D6843E6000E1C65 /* builtin_transform.hpp */; };
 		464EAB051D68471C000E1C65 /* builtin_texture.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 464EAB031D68471C000E1C65 /* builtin_texture.cpp */; };
 		464EAB061D68471C000E1C65 /* builtin_texture.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 464EAB041D68471C000E1C65 /* builtin_texture.hpp */; };
-		4651F3281C56705B0026B8A5 /* Point3.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4651F3271C56705B0026B8A5 /* Point3.cpp */; };
-		4651F32A1C5670C70026B8A5 /* Vector3.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4651F3291C5670C70026B8A5 /* Vector3.cpp */; };
-		4651F32C1C5672460026B8A5 /* Vector4.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4651F32B1C5672460026B8A5 /* Vector4.cpp */; };
-		4651F32E1C5672E10026B8A5 /* Normal3.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4651F32D1C5672E10026B8A5 /* Normal3.cpp */; };
 		4651F3301C5673BC0026B8A5 /* Matrix4x4.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4651F32F1C5673BC0026B8A5 /* Matrix4x4.cpp */; };
 		4651F3321C5677F20026B8A5 /* Quaternion.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4651F3311C5677F20026B8A5 /* Quaternion.cpp */; };
-		4651F3341C5678AB0026B8A5 /* TexCoord2.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4651F3331C5678AB0026B8A5 /* TexCoord2.cpp */; };
-		4651F3361C567A820026B8A5 /* RGBTypes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4651F3351C567A820026B8A5 /* RGBTypes.cpp */; };
-		4651F3381C567CA30026B8A5 /* SpectrumType.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4651F3371C567CA30026B8A5 /* SpectrumType.cpp */; };
 		4651F33A1C57AAFD0026B8A5 /* distributions.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4651F3391C57AAFD0026B8A5 /* distributions.cpp */; };
-		466F6CCD1BB6CA070056F2FA /* common_spectra.h in Headers */ = {isa = PBXBuildFile; fileRef = 466F6C091BB6B2830056F2FA /* common_spectra.h */; };
+		465D8A6D1E58E127001B8382 /* Allocator.h in Headers */ = {isa = PBXBuildFile; fileRef = 465D8A661E58E127001B8382 /* Allocator.h */; };
+		465D8A6E1E58E127001B8382 /* ArenaAllocator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 465D8A671E58E127001B8382 /* ArenaAllocator.cpp */; };
+		465D8A6F1E58E127001B8382 /* ArenaAllocator.h in Headers */ = {isa = PBXBuildFile; fileRef = 465D8A681E58E127001B8382 /* ArenaAllocator.h */; };
+		465D8A7C1E58E278001B8382 /* Normal3D.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 465D8A741E58E278001B8382 /* Normal3D.cpp */; };
+		465D8A7D1E58E278001B8382 /* Normal3D.h in Headers */ = {isa = PBXBuildFile; fileRef = 465D8A751E58E278001B8382 /* Normal3D.h */; };
+		465D8A7E1E58E278001B8382 /* Point3D.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 465D8A761E58E278001B8382 /* Point3D.cpp */; };
+		465D8A7F1E58E278001B8382 /* Point3D.h in Headers */ = {isa = PBXBuildFile; fileRef = 465D8A771E58E278001B8382 /* Point3D.h */; };
+		465D8A801E58E278001B8382 /* Vector3D.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 465D8A781E58E278001B8382 /* Vector3D.cpp */; };
+		465D8A811E58E278001B8382 /* Vector3D.h in Headers */ = {isa = PBXBuildFile; fileRef = 465D8A791E58E278001B8382 /* Vector3D.h */; };
+		465D8A821E58E278001B8382 /* Vector4D.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 465D8A7A1E58E278001B8382 /* Vector4D.cpp */; };
+		465D8A831E58E278001B8382 /* Vector4D.h in Headers */ = {isa = PBXBuildFile; fileRef = 465D8A7B1E58E278001B8382 /* Vector4D.h */; };
+		465D8A861E58E2BE001B8382 /* TexCoord2D.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 465D8A841E58E2BE001B8382 /* TexCoord2D.cpp */; };
+		465D8A871E58E2BE001B8382 /* TexCoord2D.h in Headers */ = {isa = PBXBuildFile; fileRef = 465D8A851E58E2BE001B8382 /* TexCoord2D.h */; };
+		465D8A8A1E58E2CB001B8382 /* BoundingBox3D.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 465D8A881E58E2CB001B8382 /* BoundingBox3D.cpp */; };
+		465D8A8B1E58E2CB001B8382 /* BoundingBox3D.h in Headers */ = {isa = PBXBuildFile; fileRef = 465D8A891E58E2CB001B8382 /* BoundingBox3D.h */; };
+		465D8A901E58F667001B8382 /* rgb_types.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 465D8A8C1E58F667001B8382 /* rgb_types.cpp */; };
+		465D8A911E58F667001B8382 /* rgb_types.h in Headers */ = {isa = PBXBuildFile; fileRef = 465D8A8D1E58F667001B8382 /* rgb_types.h */; };
+		465D8A921E58F667001B8382 /* spectrum_types.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 465D8A8E1E58F667001B8382 /* spectrum_types.cpp */; };
+		465D8A931E58F667001B8382 /* spectrum_types.h in Headers */ = {isa = PBXBuildFile; fileRef = 465D8A8F1E58F667001B8382 /* spectrum_types.h */; };
+		465D8A961E58F819001B8382 /* spectrum_base.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 465D8A941E58F819001B8382 /* spectrum_base.cpp */; };
+		465D8A971E58F819001B8382 /* spectrum_base.h in Headers */ = {isa = PBXBuildFile; fileRef = 465D8A951E58F819001B8382 /* spectrum_base.h */; };
+		465D8A991E58F92F001B8382 /* declarations.h in Headers */ = {isa = PBXBuildFile; fileRef = 465D8A981E58F92F001B8382 /* declarations.h */; };
+		465D8A9B1E58F9A7001B8382 /* declarations.h in Headers */ = {isa = PBXBuildFile; fileRef = 465D8A9A1E58F9A7001B8382 /* declarations.h */; };
 		466F6CCE1BB6CA070056F2FA /* CompensatedSum.h in Headers */ = {isa = PBXBuildFile; fileRef = 466F6C0A1BB6B2830056F2FA /* CompensatedSum.h */; };
 		466F6CD01BB6CA070056F2FA /* Matrix4x4.h in Headers */ = {isa = PBXBuildFile; fileRef = 466F6C0C1BB6B2830056F2FA /* Matrix4x4.h */; };
-		466F6CD11BB6CA070056F2FA /* Normal3.h in Headers */ = {isa = PBXBuildFile; fileRef = 466F6C0D1BB6B2830056F2FA /* Normal3.h */; };
-		466F6CD21BB6CA070056F2FA /* Point3.h in Headers */ = {isa = PBXBuildFile; fileRef = 466F6C0E1BB6B2830056F2FA /* Point3.h */; };
 		466F6CD31BB6CA070056F2FA /* Quaternion.h in Headers */ = {isa = PBXBuildFile; fileRef = 466F6C0F1BB6B2830056F2FA /* Quaternion.h */; };
-		466F6CD41BB6CA070056F2FA /* RGBTypes.h in Headers */ = {isa = PBXBuildFile; fileRef = 466F6C101BB6B2830056F2FA /* RGBTypes.h */; };
-		466F6CD51BB6CA070056F2FA /* Spectrum.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 466F6C111BB6B2830056F2FA /* Spectrum.cpp */; };
-		466F6CD61BB6CA070056F2FA /* Spectrum.h in Headers */ = {isa = PBXBuildFile; fileRef = 466F6C121BB6B2830056F2FA /* Spectrum.h */; };
-		466F6CD71BB6CA070056F2FA /* SpectrumTypes.h in Headers */ = {isa = PBXBuildFile; fileRef = 466F6C131BB6B2830056F2FA /* SpectrumTypes.h */; };
-		466F6CD91BB6CA070056F2FA /* TexCoord2.h in Headers */ = {isa = PBXBuildFile; fileRef = 466F6C151BB6B2830056F2FA /* TexCoord2.h */; };
-		466F6CDA1BB6CA070056F2FA /* Vector3.h in Headers */ = {isa = PBXBuildFile; fileRef = 466F6C161BB6B2830056F2FA /* Vector3.h */; };
-		466F6CDB1BB6CA070056F2FA /* Vector4.h in Headers */ = {isa = PBXBuildFile; fileRef = 466F6C171BB6B2830056F2FA /* Vector4.h */; };
 		466F6CDE1BB6CA260056F2FA /* basic_BSDFs.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 466F6C1B1BB6B2900056F2FA /* basic_BSDFs.cpp */; };
 		466F6CDF1BB6CA260056F2FA /* basic_BSDFs.h in Headers */ = {isa = PBXBuildFile; fileRef = 466F6C1C1BB6B2900056F2FA /* basic_BSDFs.h */; };
 		466F6CE01BB6CA260056F2FA /* ModifiedWardDurBRDF.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 466F6C1D1BB6B2900056F2FA /* ModifiedWardDurBRDF.cpp */; };
@@ -145,9 +149,6 @@
 		466F6D351BB6D7A00056F2FA /* image_loader.h in Headers */ = {isa = PBXBuildFile; fileRef = 466F6D331BB6D7A00056F2FA /* image_loader.h */; };
 		466F6D361BB6DC080056F2FA /* bmp_exporter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 466F6C5A1BB6B2C30056F2FA /* bmp_exporter.cpp */; };
 		466F6D371BB6DC080056F2FA /* bmp_exporter.h in Headers */ = {isa = PBXBuildFile; fileRef = 466F6C5B1BB6B2C30056F2FA /* bmp_exporter.h */; };
-		466F6D381BB6DC170056F2FA /* ArenaAllocator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 466F6C631BB6B2D70056F2FA /* ArenaAllocator.cpp */; };
-		466F6D391BB6DC200056F2FA /* Allocator.h in Headers */ = {isa = PBXBuildFile; fileRef = 466F6C621BB6B2D70056F2FA /* Allocator.h */; };
-		466F6D3A1BB6DC200056F2FA /* ArenaAllocator.h in Headers */ = {isa = PBXBuildFile; fileRef = 466F6C641BB6B2D70056F2FA /* ArenaAllocator.h */; };
 		466F6D3F1BB6DC840056F2FA /* basic_SurfaceMaterials.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 466F6C911BB6B3090056F2FA /* basic_SurfaceMaterials.cpp */; };
 		466F6D401BB6DC840056F2FA /* basic_SurfaceMaterials.h in Headers */ = {isa = PBXBuildFile; fileRef = 466F6C921BB6B3090056F2FA /* basic_SurfaceMaterials.h */; };
 		466F6D411BB6DC840056F2FA /* DiffuseEmission.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 466F6C931BB6B3090056F2FA /* DiffuseEmission.cpp */; };
@@ -171,7 +172,6 @@
 		466F6D561BB715600056F2FA /* image_textures.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 466F6CA61BB6B31D0056F2FA /* image_textures.cpp */; };
 		466F6D571BB715600056F2FA /* image_textures.h in Headers */ = {isa = PBXBuildFile; fileRef = 466F6CA71BB6B31D0056F2FA /* image_textures.h */; };
 		466F6D581BB715660056F2FA /* defines.h in Headers */ = {isa = PBXBuildFile; fileRef = 466F6CAF1BB6B34E0056F2FA /* defines.h */; };
-		466F6D591BB715660056F2FA /* references.h in Headers */ = {isa = PBXBuildFile; fileRef = 466F6CB11BB6B34E0056F2FA /* references.h */; };
 		468F9DC31D7C383F00DD02BD /* basic_phase_functions.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 468F9DC11D7C383F00DD02BD /* basic_phase_functions.cpp */; };
 		468F9DC41D7C383F00DD02BD /* basic_phase_functions.h in Headers */ = {isa = PBXBuildFile; fileRef = 468F9DC21D7C383F00DD02BD /* basic_phase_functions.h */; };
 		468F9DCA1D7DC7EB00DD02BD /* LinearCongruentialRNG.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 468F9DC61D7DC7EB00DD02BD /* LinearCongruentialRNG.cpp */; };
@@ -183,7 +183,6 @@
 		468F9DDD1D8063DA00DD02BD /* Matrix3x3.h in Headers */ = {isa = PBXBuildFile; fileRef = 468F9DDB1D8063DA00DD02BD /* Matrix3x3.h */; };
 		468F9DE01D81D98200DD02BD /* ProgressReporter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 468F9DDE1D81D98200DD02BD /* ProgressReporter.cpp */; };
 		468F9DE11D81D98200DD02BD /* ProgressReporter.h in Headers */ = {isa = PBXBuildFile; fileRef = 468F9DDF1D81D98200DD02BD /* ProgressReporter.h */; };
-		46AE85291BB718C400C70BF3 /* references.h in Headers */ = {isa = PBXBuildFile; fileRef = 466F6D491BB7134E0056F2FA /* references.h */; };
 		46B36DE61D33E7CF00D7C56B /* Accelerator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 46B36DE41D33E7CF00D7C56B /* Accelerator.cpp */; };
 		46B36DE71D33E7CF00D7C56B /* Accelerator.h in Headers */ = {isa = PBXBuildFile; fileRef = 46B36DE51D33E7CF00D7C56B /* Accelerator.h */; };
 		46B39C921D900EFC00AB9CC9 /* MediumObject.h in Headers */ = {isa = PBXBuildFile; fileRef = 46B39C901D900EFC00AB9CC9 /* MediumObject.h */; };
@@ -196,7 +195,6 @@
 		46B958A11BDCD2B300A915DE /* SceneParsingDriver.h in Headers */ = {isa = PBXBuildFile; fileRef = 46B958991BDCD2B300A915DE /* SceneParsingDriver.h */; };
 		46B958A21BDCD2B300A915DE /* stack.hh in Headers */ = {isa = PBXBuildFile; fileRef = 46B9589A1BDCD2B300A915DE /* stack.hh */; };
 		46B958A41BDCD83D00A915DE /* SceneLexer.yy.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 46B958A31BDCD83D00A915DE /* SceneLexer.yy.cpp */; };
-		46BF49851BB72F600036033F /* common_spectra.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 46BF49841BB72F600036033F /* common_spectra.cpp */; };
 		46BF49871BB7303D0036033F /* spectrum_library.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 46BF49861BB7303D0036033F /* spectrum_library.cpp */; };
 		46BF49891BB731CF0036033F /* spectrum_library.h in Headers */ = {isa = PBXBuildFile; fileRef = 46BF49881BB731CF0036033F /* spectrum_library.h */; };
 		46BF49911BB7E7760036033F /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 46BF49901BB7E7760036033F /* main.cpp */; };
@@ -275,8 +273,6 @@
 		460A20201D602C5700870E0F /* AshikhminShirleyReflection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; name = AshikhminShirleyReflection.h; path = libSLR/SurfaceMaterials/AshikhminShirleyReflection.h; sourceTree = SOURCE_ROOT; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
 		460A20231D602CB800870E0F /* AshikhminShirleyBRDF.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; lineEnding = 0; name = AshikhminShirleyBRDF.cpp; path = libSLR/BSDFs/AshikhminShirleyBRDF.cpp; sourceTree = SOURCE_ROOT; xcLanguageSpecificationIdentifier = xcode.lang.cpp; };
 		460A20241D602CB800870E0F /* AshikhminShirleyBRDF.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AshikhminShirleyBRDF.h; path = libSLR/BSDFs/AshikhminShirleyBRDF.h; sourceTree = SOURCE_ROOT; };
-		4613A1751E364E3500D05AA6 /* BoundingBox3.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = BoundingBox3.cpp; path = libSLR/BasicTypes/BoundingBox3.cpp; sourceTree = SOURCE_ROOT; };
-		4613A1761E364E3500D05AA6 /* BoundingBox3.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; name = BoundingBox3.h; path = libSLR/BasicTypes/BoundingBox3.h; sourceTree = SOURCE_ROOT; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
 		4613A1791E36500600D05AA6 /* Ray.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Ray.cpp; path = libSLR/BasicTypes/Ray.cpp; sourceTree = SOURCE_ROOT; };
 		4613A17A1E36500600D05AA6 /* Ray.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; name = Ray.h; path = libSLR/BasicTypes/Ray.h; sourceTree = SOURCE_ROOT; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
 		461BDAD51E45E7C600D97D37 /* basic_MediumMaterials.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; lineEnding = 0; name = basic_MediumMaterials.cpp; path = libSLR/MediumMaterials/basic_MediumMaterials.cpp; sourceTree = SOURCE_ROOT; xcLanguageSpecificationIdentifier = xcode.lang.cpp; };
@@ -317,29 +313,35 @@
 		464EAB001D6843E6000E1C65 /* builtin_transform.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = builtin_transform.hpp; path = libSLRSceneGraph/Parser/BuiltinFunctions/builtin_transform.hpp; sourceTree = "<group>"; };
 		464EAB031D68471C000E1C65 /* builtin_texture.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; lineEnding = 0; name = builtin_texture.cpp; path = libSLRSceneGraph/Parser/BuiltinFunctions/builtin_texture.cpp; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.cpp; };
 		464EAB041D68471C000E1C65 /* builtin_texture.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = builtin_texture.hpp; path = libSLRSceneGraph/Parser/BuiltinFunctions/builtin_texture.hpp; sourceTree = "<group>"; };
-		4651F3271C56705B0026B8A5 /* Point3.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; lineEnding = 0; name = Point3.cpp; path = libSLR/BasicTypes/Point3.cpp; sourceTree = SOURCE_ROOT; xcLanguageSpecificationIdentifier = xcode.lang.cpp; };
-		4651F3291C5670C70026B8A5 /* Vector3.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Vector3.cpp; path = libSLR/BasicTypes/Vector3.cpp; sourceTree = SOURCE_ROOT; };
-		4651F32B1C5672460026B8A5 /* Vector4.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Vector4.cpp; path = libSLR/BasicTypes/Vector4.cpp; sourceTree = SOURCE_ROOT; };
-		4651F32D1C5672E10026B8A5 /* Normal3.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Normal3.cpp; path = libSLR/BasicTypes/Normal3.cpp; sourceTree = SOURCE_ROOT; };
 		4651F32F1C5673BC0026B8A5 /* Matrix4x4.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; lineEnding = 0; name = Matrix4x4.cpp; path = libSLR/BasicTypes/Matrix4x4.cpp; sourceTree = SOURCE_ROOT; xcLanguageSpecificationIdentifier = xcode.lang.cpp; };
 		4651F3311C5677F20026B8A5 /* Quaternion.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Quaternion.cpp; path = libSLR/BasicTypes/Quaternion.cpp; sourceTree = SOURCE_ROOT; };
-		4651F3331C5678AB0026B8A5 /* TexCoord2.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TexCoord2.cpp; path = libSLR/BasicTypes/TexCoord2.cpp; sourceTree = SOURCE_ROOT; };
-		4651F3351C567A820026B8A5 /* RGBTypes.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = RGBTypes.cpp; path = libSLR/BasicTypes/RGBTypes.cpp; sourceTree = SOURCE_ROOT; };
-		4651F3371C567CA30026B8A5 /* SpectrumType.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SpectrumType.cpp; path = libSLR/BasicTypes/SpectrumType.cpp; sourceTree = SOURCE_ROOT; };
 		4651F3391C57AAFD0026B8A5 /* distributions.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; lineEnding = 0; name = distributions.cpp; path = libSLR/Core/distributions.cpp; sourceTree = SOURCE_ROOT; xcLanguageSpecificationIdentifier = xcode.lang.cpp; };
-		466F6C091BB6B2830056F2FA /* common_spectra.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = common_spectra.h; path = libSLR/BasicTypes/common_spectra.h; sourceTree = SOURCE_ROOT; };
+		465D8A661E58E127001B8382 /* Allocator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Allocator.h; path = libSLR/MemoryAllocators/Allocator.h; sourceTree = SOURCE_ROOT; };
+		465D8A671E58E127001B8382 /* ArenaAllocator.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ArenaAllocator.cpp; path = libSLR/MemoryAllocators/ArenaAllocator.cpp; sourceTree = SOURCE_ROOT; };
+		465D8A681E58E127001B8382 /* ArenaAllocator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ArenaAllocator.h; path = libSLR/MemoryAllocators/ArenaAllocator.h; sourceTree = SOURCE_ROOT; };
+		465D8A741E58E278001B8382 /* Normal3D.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Normal3D.cpp; path = libSLR/BasicTypes/Normal3D.cpp; sourceTree = SOURCE_ROOT; };
+		465D8A751E58E278001B8382 /* Normal3D.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Normal3D.h; path = libSLR/BasicTypes/Normal3D.h; sourceTree = SOURCE_ROOT; };
+		465D8A761E58E278001B8382 /* Point3D.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Point3D.cpp; path = libSLR/BasicTypes/Point3D.cpp; sourceTree = SOURCE_ROOT; };
+		465D8A771E58E278001B8382 /* Point3D.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Point3D.h; path = libSLR/BasicTypes/Point3D.h; sourceTree = SOURCE_ROOT; };
+		465D8A781E58E278001B8382 /* Vector3D.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Vector3D.cpp; path = libSLR/BasicTypes/Vector3D.cpp; sourceTree = SOURCE_ROOT; };
+		465D8A791E58E278001B8382 /* Vector3D.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Vector3D.h; path = libSLR/BasicTypes/Vector3D.h; sourceTree = SOURCE_ROOT; };
+		465D8A7A1E58E278001B8382 /* Vector4D.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Vector4D.cpp; path = libSLR/BasicTypes/Vector4D.cpp; sourceTree = SOURCE_ROOT; };
+		465D8A7B1E58E278001B8382 /* Vector4D.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Vector4D.h; path = libSLR/BasicTypes/Vector4D.h; sourceTree = SOURCE_ROOT; };
+		465D8A841E58E2BE001B8382 /* TexCoord2D.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TexCoord2D.cpp; path = libSLR/BasicTypes/TexCoord2D.cpp; sourceTree = SOURCE_ROOT; };
+		465D8A851E58E2BE001B8382 /* TexCoord2D.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TexCoord2D.h; path = libSLR/BasicTypes/TexCoord2D.h; sourceTree = SOURCE_ROOT; };
+		465D8A881E58E2CB001B8382 /* BoundingBox3D.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = BoundingBox3D.cpp; path = libSLR/BasicTypes/BoundingBox3D.cpp; sourceTree = SOURCE_ROOT; };
+		465D8A891E58E2CB001B8382 /* BoundingBox3D.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = BoundingBox3D.h; path = libSLR/BasicTypes/BoundingBox3D.h; sourceTree = SOURCE_ROOT; };
+		465D8A8C1E58F667001B8382 /* rgb_types.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = rgb_types.cpp; path = libSLR/BasicTypes/rgb_types.cpp; sourceTree = SOURCE_ROOT; };
+		465D8A8D1E58F667001B8382 /* rgb_types.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = rgb_types.h; path = libSLR/BasicTypes/rgb_types.h; sourceTree = SOURCE_ROOT; };
+		465D8A8E1E58F667001B8382 /* spectrum_types.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = spectrum_types.cpp; path = libSLR/BasicTypes/spectrum_types.cpp; sourceTree = SOURCE_ROOT; };
+		465D8A8F1E58F667001B8382 /* spectrum_types.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = spectrum_types.h; path = libSLR/BasicTypes/spectrum_types.h; sourceTree = SOURCE_ROOT; };
+		465D8A941E58F819001B8382 /* spectrum_base.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = spectrum_base.cpp; path = libSLR/BasicTypes/spectrum_base.cpp; sourceTree = SOURCE_ROOT; };
+		465D8A951E58F819001B8382 /* spectrum_base.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = spectrum_base.h; path = libSLR/BasicTypes/spectrum_base.h; sourceTree = SOURCE_ROOT; };
+		465D8A981E58F92F001B8382 /* declarations.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = declarations.h; path = libSLR/declarations.h; sourceTree = SOURCE_ROOT; };
+		465D8A9A1E58F9A7001B8382 /* declarations.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = declarations.h; path = libSLRSceneGraph/declarations.h; sourceTree = "<group>"; };
 		466F6C0A1BB6B2830056F2FA /* CompensatedSum.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CompensatedSum.h; path = libSLR/BasicTypes/CompensatedSum.h; sourceTree = SOURCE_ROOT; };
 		466F6C0C1BB6B2830056F2FA /* Matrix4x4.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; name = Matrix4x4.h; path = libSLR/BasicTypes/Matrix4x4.h; sourceTree = SOURCE_ROOT; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
-		466F6C0D1BB6B2830056F2FA /* Normal3.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Normal3.h; path = libSLR/BasicTypes/Normal3.h; sourceTree = SOURCE_ROOT; };
-		466F6C0E1BB6B2830056F2FA /* Point3.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; name = Point3.h; path = libSLR/BasicTypes/Point3.h; sourceTree = SOURCE_ROOT; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
 		466F6C0F1BB6B2830056F2FA /* Quaternion.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Quaternion.h; path = libSLR/BasicTypes/Quaternion.h; sourceTree = SOURCE_ROOT; };
-		466F6C101BB6B2830056F2FA /* RGBTypes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RGBTypes.h; path = libSLR/BasicTypes/RGBTypes.h; sourceTree = SOURCE_ROOT; };
-		466F6C111BB6B2830056F2FA /* Spectrum.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Spectrum.cpp; path = libSLR/BasicTypes/Spectrum.cpp; sourceTree = SOURCE_ROOT; };
-		466F6C121BB6B2830056F2FA /* Spectrum.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Spectrum.h; path = libSLR/BasicTypes/Spectrum.h; sourceTree = SOURCE_ROOT; };
-		466F6C131BB6B2830056F2FA /* SpectrumTypes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SpectrumTypes.h; path = libSLR/BasicTypes/SpectrumTypes.h; sourceTree = SOURCE_ROOT; };
-		466F6C151BB6B2830056F2FA /* TexCoord2.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TexCoord2.h; path = libSLR/BasicTypes/TexCoord2.h; sourceTree = SOURCE_ROOT; };
-		466F6C161BB6B2830056F2FA /* Vector3.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Vector3.h; path = libSLR/BasicTypes/Vector3.h; sourceTree = SOURCE_ROOT; };
-		466F6C171BB6B2830056F2FA /* Vector4.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Vector4.h; path = libSLR/BasicTypes/Vector4.h; sourceTree = SOURCE_ROOT; };
 		466F6C1B1BB6B2900056F2FA /* basic_BSDFs.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; lineEnding = 0; name = basic_BSDFs.cpp; path = libSLR/BSDFs/basic_BSDFs.cpp; sourceTree = SOURCE_ROOT; xcLanguageSpecificationIdentifier = xcode.lang.cpp; };
 		466F6C1C1BB6B2900056F2FA /* basic_BSDFs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = basic_BSDFs.h; path = libSLR/BSDFs/basic_BSDFs.h; sourceTree = SOURCE_ROOT; };
 		466F6C1D1BB6B2900056F2FA /* ModifiedWardDurBRDF.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; lineEnding = 0; name = ModifiedWardDurBRDF.cpp; path = libSLR/BSDFs/ModifiedWardDurBRDF.cpp; sourceTree = SOURCE_ROOT; xcLanguageSpecificationIdentifier = xcode.lang.cpp; };
@@ -383,9 +385,6 @@
 		466F6C5A1BB6B2C30056F2FA /* bmp_exporter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = bmp_exporter.cpp; path = libSLR/Helper/bmp_exporter.cpp; sourceTree = SOURCE_ROOT; };
 		466F6C5B1BB6B2C30056F2FA /* bmp_exporter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = bmp_exporter.h; path = libSLR/Helper/bmp_exporter.h; sourceTree = SOURCE_ROOT; };
 		466F6C5F1BB6B2C30056F2FA /* ThreadPool.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ThreadPool.h; path = libSLR/Helper/ThreadPool.h; sourceTree = SOURCE_ROOT; };
-		466F6C621BB6B2D70056F2FA /* Allocator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Allocator.h; path = libSLR/Memory/Allocator.h; sourceTree = SOURCE_ROOT; };
-		466F6C631BB6B2D70056F2FA /* ArenaAllocator.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ArenaAllocator.cpp; path = libSLR/Memory/ArenaAllocator.cpp; sourceTree = SOURCE_ROOT; };
-		466F6C641BB6B2D70056F2FA /* ArenaAllocator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ArenaAllocator.h; path = libSLR/Memory/ArenaAllocator.h; sourceTree = SOURCE_ROOT; };
 		466F6C711BB6B2E30056F2FA /* PathTracingRenderer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; lineEnding = 0; name = PathTracingRenderer.cpp; path = libSLR/Renderers/PathTracingRenderer.cpp; sourceTree = SOURCE_ROOT; xcLanguageSpecificationIdentifier = xcode.lang.cpp; };
 		466F6C721BB6B2E30056F2FA /* PathTracingRenderer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PathTracingRenderer.h; path = libSLR/Renderers/PathTracingRenderer.h; sourceTree = SOURCE_ROOT; };
 		466F6C871BB6B2FB0056F2FA /* InfiniteSphere.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = InfiniteSphere.cpp; path = libSLR/Surface/InfiniteSphere.cpp; sourceTree = SOURCE_ROOT; };
@@ -409,7 +408,6 @@
 		466F6CA61BB6B31D0056F2FA /* image_textures.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; lineEnding = 0; name = image_textures.cpp; path = libSLR/Textures/image_textures.cpp; sourceTree = SOURCE_ROOT; xcLanguageSpecificationIdentifier = xcode.lang.cpp; };
 		466F6CA71BB6B31D0056F2FA /* image_textures.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = image_textures.h; path = libSLR/Textures/image_textures.h; sourceTree = SOURCE_ROOT; };
 		466F6CAF1BB6B34E0056F2FA /* defines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = defines.h; path = libSLR/defines.h; sourceTree = SOURCE_ROOT; };
-		466F6CB11BB6B34E0056F2FA /* references.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; name = references.h; path = libSLR/references.h; sourceTree = SOURCE_ROOT; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
 		466F6CC71BB6C9C10056F2FA /* libSLR.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = libSLR.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
 		466F6D0D1BB6CB3A0056F2FA /* libSLRSceneGraph.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = libSLRSceneGraph.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
 		466F6D121BB6CB4E0056F2FA /* camera_nodes.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; lineEnding = 0; name = camera_nodes.cpp; path = libSLRSceneGraph/camera_nodes.cpp; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.cpp; };
@@ -426,7 +424,6 @@
 		466F6D1D1BB6CB4E0056F2FA /* TriangleMeshNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; name = TriangleMeshNode.h; path = libSLRSceneGraph/TriangleMeshNode.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
 		466F6D321BB6D7A00056F2FA /* image_loader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = image_loader.cpp; path = libSLRSceneGraph/Helper/image_loader.cpp; sourceTree = "<group>"; };
 		466F6D331BB6D7A00056F2FA /* image_loader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = image_loader.h; path = libSLRSceneGraph/Helper/image_loader.h; sourceTree = "<group>"; };
-		466F6D491BB7134E0056F2FA /* references.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; lineEnding = 0; name = references.h; path = libSLRSceneGraph/references.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
 		468F9DC11D7C383F00DD02BD /* basic_phase_functions.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = basic_phase_functions.cpp; path = libSLR/PhaseFunctions/basic_phase_functions.cpp; sourceTree = SOURCE_ROOT; };
 		468F9DC21D7C383F00DD02BD /* basic_phase_functions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = basic_phase_functions.h; path = libSLR/PhaseFunctions/basic_phase_functions.h; sourceTree = SOURCE_ROOT; };
 		468F9DC61D7DC7EB00DD02BD /* LinearCongruentialRNG.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LinearCongruentialRNG.cpp; path = libSLR/RNGs/LinearCongruentialRNG.cpp; sourceTree = SOURCE_ROOT; };
@@ -455,7 +452,6 @@
 		46B958991BDCD2B300A915DE /* SceneParsingDriver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SceneParsingDriver.h; path = libSLRSceneGraph/Parser/SceneParsingDriver.h; sourceTree = "<group>"; };
 		46B9589A1BDCD2B300A915DE /* stack.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = stack.hh; path = libSLRSceneGraph/Parser/stack.hh; sourceTree = "<group>"; };
 		46B958A31BDCD83D00A915DE /* SceneLexer.yy.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SceneLexer.yy.cpp; path = libSLRSceneGraph/Parser/SceneLexer.yy.cpp; sourceTree = "<group>"; };
-		46BF49841BB72F600036033F /* common_spectra.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = common_spectra.cpp; path = libSLR/BasicTypes/common_spectra.cpp; sourceTree = SOURCE_ROOT; };
 		46BF49861BB7303D0036033F /* spectrum_library.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = spectrum_library.cpp; path = libSLR/BasicTypes/spectrum_library.cpp; sourceTree = SOURCE_ROOT; };
 		46BF49881BB731CF0036033F /* spectrum_library.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = spectrum_library.h; path = libSLR/BasicTypes/spectrum_library.h; sourceTree = SOURCE_ROOT; };
 		46BF49901BB7E7760036033F /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = main.cpp; path = HostProgram/main.cpp; sourceTree = "<group>"; };
@@ -531,37 +527,35 @@
 		4634EB901B9B529B0047AE54 /* Basic Types */ = {
 			isa = PBXGroup;
 			children = (
-				466F6C121BB6B2830056F2FA /* Spectrum.h */,
-				466F6C111BB6B2830056F2FA /* Spectrum.cpp */,
-				466F6C101BB6B2830056F2FA /* RGBTypes.h */,
-				4651F3351C567A820026B8A5 /* RGBTypes.cpp */,
-				466F6C131BB6B2830056F2FA /* SpectrumTypes.h */,
-				4651F3371C567CA30026B8A5 /* SpectrumType.cpp */,
-				466F6C091BB6B2830056F2FA /* common_spectra.h */,
-				46BF49841BB72F600036033F /* common_spectra.cpp */,
+				465D8A951E58F819001B8382 /* spectrum_base.h */,
+				465D8A941E58F819001B8382 /* spectrum_base.cpp */,
+				465D8A8D1E58F667001B8382 /* rgb_types.h */,
+				465D8A8C1E58F667001B8382 /* rgb_types.cpp */,
+				465D8A8F1E58F667001B8382 /* spectrum_types.h */,
+				465D8A8E1E58F667001B8382 /* spectrum_types.cpp */,
 				46BF49881BB731CF0036033F /* spectrum_library.h */,
 				46BF49861BB7303D0036033F /* spectrum_library.cpp */,
 				466F6C0A1BB6B2830056F2FA /* CompensatedSum.h */,
-				466F6C0E1BB6B2830056F2FA /* Point3.h */,
-				4651F3271C56705B0026B8A5 /* Point3.cpp */,
-				466F6C161BB6B2830056F2FA /* Vector3.h */,
-				4651F3291C5670C70026B8A5 /* Vector3.cpp */,
-				466F6C171BB6B2830056F2FA /* Vector4.h */,
-				4651F32B1C5672460026B8A5 /* Vector4.cpp */,
-				466F6C0D1BB6B2830056F2FA /* Normal3.h */,
-				4651F32D1C5672E10026B8A5 /* Normal3.cpp */,
+				465D8A771E58E278001B8382 /* Point3D.h */,
+				465D8A761E58E278001B8382 /* Point3D.cpp */,
+				465D8A791E58E278001B8382 /* Vector3D.h */,
+				465D8A781E58E278001B8382 /* Vector3D.cpp */,
+				465D8A7B1E58E278001B8382 /* Vector4D.h */,
+				465D8A7A1E58E278001B8382 /* Vector4D.cpp */,
+				465D8A751E58E278001B8382 /* Normal3D.h */,
+				465D8A741E58E278001B8382 /* Normal3D.cpp */,
 				468F9DDB1D8063DA00DD02BD /* Matrix3x3.h */,
 				468F9DDA1D8063DA00DD02BD /* Matrix3x3.cpp */,
 				466F6C0C1BB6B2830056F2FA /* Matrix4x4.h */,
 				4651F32F1C5673BC0026B8A5 /* Matrix4x4.cpp */,
 				466F6C0F1BB6B2830056F2FA /* Quaternion.h */,
 				4651F3311C5677F20026B8A5 /* Quaternion.cpp */,
-				466F6C151BB6B2830056F2FA /* TexCoord2.h */,
-				4651F3331C5678AB0026B8A5 /* TexCoord2.cpp */,
+				465D8A851E58E2BE001B8382 /* TexCoord2D.h */,
+				465D8A841E58E2BE001B8382 /* TexCoord2D.cpp */,
 				4613A17A1E36500600D05AA6 /* Ray.h */,
 				4613A1791E36500600D05AA6 /* Ray.cpp */,
-				4613A1761E364E3500D05AA6 /* BoundingBox3.h */,
-				4613A1751E364E3500D05AA6 /* BoundingBox3.cpp */,
+				465D8A891E58E2CB001B8382 /* BoundingBox3D.h */,
+				465D8A881E58E2CB001B8382 /* BoundingBox3D.cpp */,
 			);
 			name = "Basic Types";
 			path = BasicTypes;
@@ -670,9 +664,9 @@
 		4634EBD41B9B529B0047AE54 /* Memory Allocators */ = {
 			isa = PBXGroup;
 			children = (
-				466F6C621BB6B2D70056F2FA /* Allocator.h */,
-				466F6C641BB6B2D70056F2FA /* ArenaAllocator.h */,
-				466F6C631BB6B2D70056F2FA /* ArenaAllocator.cpp */,
+				465D8A661E58E127001B8382 /* Allocator.h */,
+				465D8A671E58E127001B8382 /* ArenaAllocator.cpp */,
+				465D8A681E58E127001B8382 /* ArenaAllocator.h */,
 			);
 			name = "Memory Allocators";
 			path = Memory;
@@ -800,7 +794,7 @@
 		466F6C061BB6B0920056F2FA /* SLR Scene Graph */ = {
 			isa = PBXGroup;
 			children = (
-				466F6D491BB7134E0056F2FA /* references.h */,
+				465D8A9A1E58F9A7001B8382 /* declarations.h */,
 				4602E8951BC2D8EF00EC16FA /* API.hpp */,
 				4602E8941BC2D8EF00EC16FA /* API.cpp */,
 				4602E8AF1BC40E8700EC16FA /* textures.hpp */,
@@ -914,7 +908,7 @@
 			isa = PBXGroup;
 			children = (
 				466F6CAF1BB6B34E0056F2FA /* defines.h */,
-				466F6CB11BB6B34E0056F2FA /* references.h */,
+				465D8A981E58F92F001B8382 /* declarations.h */,
 				46EA72A81D59F22B00738511 /* debugPrintf.cpp */,
 				4634EBD41B9B529B0047AE54 /* Memory Allocators */,
 				4634EB901B9B529B0047AE54 /* Basic Types */,
@@ -946,23 +940,21 @@
 			files = (
 				46D16E6C1D283E36009C241C /* SBVH.h in Headers */,
 				466F6CE91BB6CA420056F2FA /* cameras.h in Headers */,
-				466F6D391BB6DC200056F2FA /* Allocator.h in Headers */,
-				466F6CD91BB6CA070056F2FA /* TexCoord2.h in Headers */,
 				466F6CD31BB6CA070056F2FA /* Quaternion.h in Headers */,
-				466F6CD71BB6CA070056F2FA /* SpectrumTypes.h in Headers */,
+				465D8A8B1E58E2CB001B8382 /* BoundingBox3D.h in Headers */,
 				46224C541C5DDFF2009EC594 /* BidirectionalPathTracingRenderer.h in Headers */,
 				466F6D551BB715600056F2FA /* constant_textures.h in Headers */,
 				466F6D401BB6DC840056F2FA /* basic_SurfaceMaterials.h in Headers */,
+				465D8A971E58F819001B8382 /* spectrum_base.h in Headers */,
 				466F6CFB1BB6CA420056F2FA /* SurfaceObject.h in Headers */,
 				466F6CD01BB6CA070056F2FA /* Matrix4x4.h in Headers */,
-				466F6CD11BB6CA070056F2FA /* Normal3.h in Headers */,
 				46F815BC1E5735C6005B9909 /* IdealDirectionalEmission.h in Headers */,
 				460A201C1D6029C700870E0F /* StandardBVH.h in Headers */,
 				466F6D031BB6CA510056F2FA /* basic_EDFs.h in Headers */,
-				466F6CD61BB6CA070056F2FA /* Spectrum.h in Headers */,
 				466F6CE71BB6CA2D0056F2FA /* PerspectiveCamera.h in Headers */,
 				466F6D371BB6DC080056F2FA /* bmp_exporter.h in Headers */,
 				466F6D4B1BB7153E0056F2FA /* InfiniteSphere.h in Headers */,
+				465D8A831E58E278001B8382 /* Vector4D.h in Headers */,
 				468F9DC41D7C383F00DD02BD /* basic_phase_functions.h in Headers */,
 				4602E8BF1BC418FA00EC16FA /* SummedSurfaceMaterial.h in Headers */,
 				462018D11CD7D09E00A5CAF1 /* MicrofacetBSDF.h in Headers */,
@@ -979,7 +971,6 @@
 				460A20261D602CB800870E0F /* AshikhminShirleyBRDF.h in Headers */,
 				460A201E1D6029EC00870E0F /* QBVH.h in Headers */,
 				468F9DDD1D8063DA00DD02BD /* Matrix3x3.h in Headers */,
-				466F6D3A1BB6DC200056F2FA /* ArenaAllocator.h in Headers */,
 				4645459C1E1E2DE300B4CECD /* nodes.h in Headers */,
 				466F6CF51BB6CA420056F2FA /* Renderer.h in Headers */,
 				466F6D481BB6DC840056F2FA /* ModifiedWardDurReflection.h in Headers */,
@@ -987,50 +978,52 @@
 				46F0BB161CD9FA7100F81BFC /* MicrofacetSurfaceMaterial.h in Headers */,
 				46BF8CB01E2263CE00EF8E13 /* medium_nodes.h in Headers */,
 				466F6CEB1BB6CA420056F2FA /* directional_distribution_functions.h in Headers */,
-				466F6CDA1BB6CA070056F2FA /* Vector3.h in Headers */,
+				465D8A911E58F667001B8382 /* rgb_types.h in Headers */,
 				46F815B81E572E4C005B9909 /* InfinitesimalPoint.h in Headers */,
-				466F6CCD1BB6CA070056F2FA /* common_spectra.h in Headers */,
 				466F6CE31BB6CA260056F2FA /* MultiBSDF.h in Headers */,
 				466F6CF41BB6CA420056F2FA /* RandomNumberGenerator.h in Headers */,
 				466F6D421BB6DC840056F2FA /* DiffuseEmission.h in Headers */,
 				4645458F1E1CD37A00B4CECD /* GridMedium.h in Headers */,
+				465D8A6F1E58E127001B8382 /* ArenaAllocator.h in Headers */,
 				46C4A1021D12F8FD003530DA /* voronoi_textures.h in Headers */,
 				466F6CCE1BB6CA070056F2FA /* CompensatedSum.h in Headers */,
 				4602E8B71BC4152D00EC16FA /* surface_material_headers.h in Headers */,
 				46BF8CB41E23A72E00EF8E13 /* medium_material.h in Headers */,
 				466F6CEC1BB6CA420056F2FA /* distributions.h in Headers */,
 				466F6D571BB715600056F2FA /* image_textures.h in Headers */,
-				466F6CDB1BB6CA070056F2FA /* Vector4.h in Headers */,
 				466F6CE51BB6CA2D0056F2FA /* EquirectangularCamera.h in Headers */,
 				46B36DE71D33E7CF00D7C56B /* Accelerator.h in Headers */,
-				466F6CD21BB6CA070056F2FA /* Point3.h in Headers */,
+				465D8A991E58F92F001B8382 /* declarations.h in Headers */,
 				4613A17C1E36500600D05AA6 /* Ray.h in Headers */,
-				466F6CD41BB6CA070056F2FA /* RGBTypes.h in Headers */,
+				465D8A811E58E278001B8382 /* Vector3D.h in Headers */,
 				466F6D511BB715490056F2FA /* PathTracingRenderer.h in Headers */,
 				466F6CEE1BB6CA420056F2FA /* geometry.h in Headers */,
 				468F9DD11D7DE05400DD02BD /* light_path_samplers.h in Headers */,
 				46B39C921D900EFC00AB9CC9 /* MediumObject.h in Headers */,
 				466F6D081BB6CA740056F2FA /* ThreadPool.h in Headers */,
-				466F6D591BB715660056F2FA /* references.h in Headers */,
 				466F6D441BB6DC840056F2FA /* IBLEmission.h in Headers */,
 				46B39C9A1D90234400AB9CC9 /* Object.h in Headers */,
 				466F6CF91BB6CA420056F2FA /* surface_material.h in Headers */,
+				465D8A7D1E58E278001B8382 /* Normal3D.h in Headers */,
+				465D8A931E58F667001B8382 /* spectrum_types.h in Headers */,
 				46BF49891BB731CF0036033F /* spectrum_library.h in Headers */,
 				461BDADA1E45EB2F00D97D37 /* medium_material_headers.h in Headers */,
 				464545A41E1F5EDF00B4CECD /* camera_nodes.h in Headers */,
 				468F9DE11D81D98200DD02BD /* ProgressReporter.h in Headers */,
 				464545A01E1E315100B4CECD /* TriangleMeshNode.h in Headers */,
 				466F6CDF1BB6CA260056F2FA /* basic_BSDFs.h in Headers */,
+				465D8A6D1E58E127001B8382 /* Allocator.h in Headers */,
 				460A20221D602C5700870E0F /* AshikhminShirleyReflection.h in Headers */,
 				4645458B1E1C01CD00B4CECD /* HomogeneousMedium.h in Headers */,
+				465D8A871E58E2BE001B8382 /* TexCoord2D.h in Headers */,
 				466F6CF01BB6CA420056F2FA /* Image.h in Headers */,
 				466F6CF21BB6CA420056F2FA /* ImageSensor.h in Headers */,
 				466F6CFD1BB6CA420056F2FA /* textures.h in Headers */,
 				4645457D1E0EB27200B4CECD /* VolumetricPathTracingRenderer.h in Headers */,
+				465D8A7F1E58E278001B8382 /* Point3D.h in Headers */,
 				466F6D4D1BB7153E0056F2FA /* TriangleMesh.h in Headers */,
 				464545981E1E2D8E00B4CECD /* Scene.h in Headers */,
 				461BDAD81E45E7C600D97D37 /* basic_MediumMaterials.h in Headers */,
-				4613A1781E364E3500D05AA6 /* BoundingBox3.h in Headers */,
 				461BDAE61E52057900D97D37 /* DensityGridMedium.h in Headers */,
 				466F6D071BB6CA510056F2FA /* MultiEDF.h in Headers */,
 				466F6CFF1BB6CA420056F2FA /* Transform.h in Headers */,
@@ -1041,6 +1034,7 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				465D8A9B1E58F9A7001B8382 /* declarations.h in Headers */,
 				466F6D1F1BB6CB4E0056F2FA /* camera_nodes.h in Headers */,
 				4602E8B11BC40E8700EC16FA /* surface_materials.hpp in Headers */,
 				466F6D211BB6CB4E0056F2FA /* InfiniteSphereNode.h in Headers */,
@@ -1057,7 +1051,6 @@
 				46F815C01E573739005B9909 /* InfinitesimalPointNode.h in Headers */,
 				4602E8B31BC40E8700EC16FA /* textures.hpp in Headers */,
 				46B9589B1BDCD2B300A915DE /* location.hh in Headers */,
-				46AE85291BB718C400C70BF3 /* references.h in Headers */,
 				466F6D271BB6CB4E0056F2FA /* Scene.h in Headers */,
 				46B958A21BDCD2B300A915DE /* stack.hh in Headers */,
 				4638105C1C21AD0E00211293 /* SceneParser.hpp in Headers */,
@@ -1175,8 +1168,10 @@
 				46BF8CB81E31323F00EF8E13 /* VolumetricPathTracingRenderer.cpp in Sources */,
 				466F6D4C1BB7153E0056F2FA /* TriangleMesh.cpp in Sources */,
 				466F6CE81BB6CA420056F2FA /* cameras.cpp in Sources */,
-				4651F32A1C5670C70026B8A5 /* Vector3.cpp in Sources */,
 				4645458E1E1CD37A00B4CECD /* GridMedium.cpp in Sources */,
+				465D8A8A1E58E2CB001B8382 /* BoundingBox3D.cpp in Sources */,
+				465D8A821E58E278001B8382 /* Vector4D.cpp in Sources */,
+				465D8A801E58E278001B8382 /* Vector3D.cpp in Sources */,
 				460A20251D602CB800870E0F /* AshikhminShirleyBRDF.cpp in Sources */,
 				4651F3301C5673BC0026B8A5 /* Matrix4x4.cpp in Sources */,
 				466F6D451BB6DC840056F2FA /* MixedSurfaceMaterial.cpp in Sources */,
@@ -1188,13 +1183,14 @@
 				46F815BB1E5735C6005B9909 /* IdealDirectionalEmission.cpp in Sources */,
 				466F6D521BB715600056F2FA /* checker_board_textures.cpp in Sources */,
 				468F9DCC1D7DC7EB00DD02BD /* XORShiftRNG.cpp in Sources */,
-				466F6D381BB6DC170056F2FA /* ArenaAllocator.cpp in Sources */,
 				46EA72A91D59F22B00738511 /* debugPrintf.cpp in Sources */,
 				46BF8CAF1E2263CE00EF8E13 /* medium_nodes.cpp in Sources */,
-				4651F3381C567CA30026B8A5 /* SpectrumType.cpp in Sources */,
 				461BDAE51E52057900D97D37 /* DensityGridMedium.cpp in Sources */,
+				465D8A961E58F819001B8382 /* spectrum_base.cpp in Sources */,
 				468F9DDC1D8063DA00DD02BD /* Matrix3x3.cpp in Sources */,
 				464545971E1E2D8E00B4CECD /* Scene.cpp in Sources */,
+				465D8A7C1E58E278001B8382 /* Normal3D.cpp in Sources */,
+				465D8A921E58F667001B8382 /* spectrum_types.cpp in Sources */,
 				466F6CFA1BB6CA420056F2FA /* SurfaceObject.cpp in Sources */,
 				462018CE1CD7D05800A5CAF1 /* MicrofacetBSDF.cpp in Sources */,
 				466F6CE01BB6CA260056F2FA /* ModifiedWardDurBRDF.cpp in Sources */,
@@ -1207,7 +1203,6 @@
 				468F9DE01D81D98200DD02BD /* ProgressReporter.cpp in Sources */,
 				466F6CFC1BB6CA420056F2FA /* textures.cpp in Sources */,
 				466F6CE41BB6CA2D0056F2FA /* EquirectangularCamera.cpp in Sources */,
-				4651F3281C56705B0026B8A5 /* Point3.cpp in Sources */,
 				4651F33A1C57AAFD0026B8A5 /* distributions.cpp in Sources */,
 				468F9DC31D7C383F00DD02BD /* basic_phase_functions.cpp in Sources */,
 				466F6D3F1BB6DC840056F2FA /* basic_SurfaceMaterials.cpp in Sources */,
@@ -1217,23 +1212,18 @@
 				4613A17B1E36500600D05AA6 /* Ray.cpp in Sources */,
 				460A20211D602C5700870E0F /* AshikhminShirleyReflection.cpp in Sources */,
 				466F6D061BB6CA510056F2FA /* MultiEDF.cpp in Sources */,
+				465D8A7E1E58E278001B8382 /* Point3D.cpp in Sources */,
 				4645459B1E1E2DE300B4CECD /* nodes.cpp in Sources */,
 				46F0BB131CD9FA2B00F81BFC /* MicrofacetSurfaceMaterial.cpp in Sources */,
 				468F9DD01D7DE05400DD02BD /* light_path_samplers.cpp in Sources */,
 				466F6D411BB6DC840056F2FA /* DiffuseEmission.cpp in Sources */,
 				466F6D361BB6DC080056F2FA /* bmp_exporter.cpp in Sources */,
 				466F6D431BB6DC840056F2FA /* IBLEmission.cpp in Sources */,
-				4651F3361C567A820026B8A5 /* RGBTypes.cpp in Sources */,
 				466F6D561BB715600056F2FA /* image_textures.cpp in Sources */,
+				465D8A901E58F667001B8382 /* rgb_types.cpp in Sources */,
 				466F6CDE1BB6CA260056F2FA /* basic_BSDFs.cpp in Sources */,
-				46BF49851BB72F600036033F /* common_spectra.cpp in Sources */,
-				4651F3341C5678AB0026B8A5 /* TexCoord2.cpp in Sources */,
 				466F6CEF1BB6CA420056F2FA /* Image.cpp in Sources */,
 				466F6CF61BB6CA420056F2FA /* RenderSettings.cpp in Sources */,
-				4613A1771E364E3500D05AA6 /* BoundingBox3.cpp in Sources */,
-				466F6CD51BB6CA070056F2FA /* Spectrum.cpp in Sources */,
-				4651F32C1C5672460026B8A5 /* Vector4.cpp in Sources */,
-				4651F32E1C5672E10026B8A5 /* Normal3.cpp in Sources */,
 				468F9DCA1D7DC7EB00DD02BD /* LinearCongruentialRNG.cpp in Sources */,
 				46BF8CB31E23A72E00EF8E13 /* medium_material.cpp in Sources */,
 				466F6CE21BB6CA260056F2FA /* MultiBSDF.cpp in Sources */,
@@ -1244,6 +1234,8 @@
 				466F6D041BB6CA510056F2FA /* IBLEDF.cpp in Sources */,
 				46F815B71E572E4C005B9909 /* InfinitesimalPoint.cpp in Sources */,
 				466F6D541BB715600056F2FA /* constant_textures.cpp in Sources */,
+				465D8A861E58E2BE001B8382 /* TexCoord2D.cpp in Sources */,
+				465D8A6E1E58E127001B8382 /* ArenaAllocator.cpp in Sources */,
 				4645458A1E1C01CD00B4CECD /* HomogeneousMedium.cpp in Sources */,
 				4651F3321C5677F20026B8A5 /* Quaternion.cpp in Sources */,
 				466F6D471BB6DC840056F2FA /* ModifiedWardDurReflection.cpp in Sources */,
