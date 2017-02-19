@@ -6,12 +6,13 @@
 //
 
 #include "node.h"
+
 #include "../MemoryAllocators/ArenaAllocator.h"
 #include "../Core/transform.h"
 #include "../Core/surface_object.h"
 #include "../Core/medium_object.h"
-#include "../SurfaceMaterial/IBLEmitterSurfaceProperty.h"
 #include "../SurfaceShape/InfinitesimalPointSurfaceShape.h"
+#include "../SurfaceMaterial/IBLEmitterSurfaceProperty.h"
 
 namespace SLR {
     void InternalNode::addChildNode(Node *node) {

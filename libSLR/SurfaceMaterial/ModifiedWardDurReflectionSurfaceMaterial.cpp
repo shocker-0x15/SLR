@@ -6,9 +6,10 @@
 //
 
 #include "ModifiedWardDurReflectionSurfaceMaterial.h"
-#include "../BSDF/ModifiedWardDurBRDF.h"
+
 #include "../MemoryAllocators/ArenaAllocator.h"
 #include "../Core/textures.h"
+#include "../BSDF/ModifiedWardDurBRDF.h"
 
 namespace SLR {
     BSDF* ModifiedWardDurReflectionSurfaceMaterial::getBSDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem, float scale) const {

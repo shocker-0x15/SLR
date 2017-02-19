@@ -6,9 +6,10 @@
 //
 
 #include "directional_distribution_functions.h"
-#include "distributions.h"
+
 #include "../MemoryAllocators/ArenaAllocator.h"
 #include "../Core/light_path_sampler.h"
+#include "distributions.h"
 
 namespace SLR {
     SLR_API const DirectionType DirectionType::LowFreq = DirectionType::IE_LowFreq;

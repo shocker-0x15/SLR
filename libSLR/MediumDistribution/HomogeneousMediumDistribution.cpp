@@ -6,6 +6,7 @@
 //
 
 #include "HomogeneousMediumDistribution.h"
+
 #include "light_path_sampler.h"
 
 namespace SLR {

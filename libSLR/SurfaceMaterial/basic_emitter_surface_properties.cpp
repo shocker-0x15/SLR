@@ -6,9 +6,10 @@
 //
 
 #include "basic_emitter_surface_properties.h"
-#include "../EDF/basic_edfs.h"
+
 #include "../MemoryAllocators/ArenaAllocator.h"
 #include "../Core/textures.h"
+#include "../EDF/basic_edfs.h"
 
 namespace SLR {
     SampledSpectrum DiffuseEmitterSurfaceProperty::emittance(const SurfacePoint &surfPt, const WavelengthSamples &wls) const {

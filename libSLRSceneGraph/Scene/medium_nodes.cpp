@@ -6,6 +6,7 @@
 //
 
 #include "medium_nodes.h"
+
 #include <libSLR/Core/transform.h>
 #include <libSLR/Core/medium_object.h>
 #include <libSLR/Scene/medium_nodes.h>

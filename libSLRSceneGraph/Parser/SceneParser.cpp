@@ -6,6 +6,7 @@
 //
 
 #include "SceneParser.h"
+
 #include <libSLR/SurfaceShape/TriangleSurfaceShape.h>
 #include "../API.h"
 

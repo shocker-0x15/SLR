@@ -6,6 +6,7 @@
 //
 
 #include "TriangleSurfaceShape.h"
+
 #include "../BasicTypes/CompensatedSum.h"
 #include "../Core/distributions.h"
 #include "../Core/surface_object.h"

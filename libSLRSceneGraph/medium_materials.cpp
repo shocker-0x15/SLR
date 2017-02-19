@@ -6,6 +6,7 @@
 //
 
 #include "medium_materials.h"
+
 #include <libSLR/MediumMaterial/medium_material_headers.h>
 #include "textures.h"
 

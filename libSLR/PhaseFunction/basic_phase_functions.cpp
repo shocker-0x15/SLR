@@ -6,6 +6,7 @@
 //
 
 #include "basic_phase_functions.h"
+
 #include "../Core/distributions.h"
 
 namespace SLR {

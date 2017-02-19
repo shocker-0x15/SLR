@@ -6,6 +6,7 @@
 //
 
 #include "TriangleMeshNode.h"
+
 #include <libSLR/Core/transform.h>
 #include <libSLR/Core/surface_object.h>
 #include <libSLR/SurfaceShape/TriangleSurfaceShape.h>

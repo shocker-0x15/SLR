@@ -6,6 +6,7 @@
 //
 
 #include "surface_materials.h"
+
 #include <libSLR/SurfaceMaterial/surface_material_headers.h>
 #include "textures.h"
 #include "Scene/Scene.h"

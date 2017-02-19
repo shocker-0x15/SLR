@@ -6,6 +6,7 @@
 //
 
 #include "Scene.h"
+
 #include <libSLR/Core/transform.h>
 #include <libSLR/Core/renderer.h>
 #include <libSLR/Scene/Scene.h>

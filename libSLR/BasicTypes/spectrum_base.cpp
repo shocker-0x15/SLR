@@ -6,6 +6,7 @@
 //
 
 #include "spectrum_base.h"
+
 #include "rgb_types.h"
 #include "spectrum_types.h"
 #include "../BasicTypes/CompensatedSum.h"

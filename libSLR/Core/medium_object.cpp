@@ -6,16 +6,16 @@
 //
 
 #include "medium_object.h"
-#include "distributions.h"
-#include "textures.h"
+
 #include "../MemoryAllocators/ArenaAllocator.h"
-#include "../Core/medium_material.h"
-#include "../Core/light_path_sampler.h"
-#include "../Core/surface_object.h"
+#include "distributions.h"
+#include "surface_object.h"
+#include "light_path_sampler.h"
+#include "textures.h"
+#include "medium_material.h"
 #include "../Accelerator/StandardBVH.h"
 #include "../Accelerator/SBVH.h"
 #include "../Accelerator/QBVH.h"
-#include "../Core/light_path_sampler.h"
 #include "../Scene/Scene.h"
 
 namespace SLR {

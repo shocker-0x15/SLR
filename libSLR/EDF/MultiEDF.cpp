@@ -6,6 +6,7 @@
 //
 
 #include "MultiEDF.h"
+
 #include "../Core/distributions.h"
 
 namespace SLR {

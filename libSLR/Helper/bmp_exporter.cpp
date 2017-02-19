@@ -7,6 +7,7 @@
 //
 
 #include "bmp_exporter.h"
+
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>

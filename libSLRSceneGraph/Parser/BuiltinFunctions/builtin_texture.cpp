@@ -6,6 +6,7 @@
 //
 
 #include "builtin_texture.h"
+
 #include "../../textures.h"
 
 namespace SLRSceneGraph {

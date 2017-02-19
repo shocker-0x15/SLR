@@ -7,16 +7,16 @@
 
 #include "VolumetricBPTRenderer.h"
 
-#include "../Core/RenderSettings.h"
-#include "../Core/ImageSensor.h"
+#include "../MemoryAllocators/ArenaAllocator.h"
 #include "../Core/random_number_generator.h"
 #include "../Core/camera.h"
 #include "../Core/light_path_sampler.h"
+#include "../Core/ImageSensor.h"
+#include "../Core/RenderSettings.h"
 #include "../Core/ProgressReporter.h"
-#include "../Scene/Scene.h"
-#include "../MemoryAllocators/ArenaAllocator.h"
-#include "../Helper/ThreadPool.h"
 #include "../RNG/XORShiftRNG.h"
+#include "../Scene/Scene.h"
+#include "../Helper/ThreadPool.h"
 
 namespace SLR {
     VolumetricBPTRenderer::VolumetricBPTRenderer(uint32_t spp) : m_samplesPerPixel(spp) {

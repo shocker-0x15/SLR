@@ -6,6 +6,7 @@
 //
 
 #include "builtin_math.h"
+
 #include <libSLR/BasicTypes/Point3D.h>
 #include <libSLR/BasicTypes/Vector3D.h>
 

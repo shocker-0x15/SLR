@@ -6,10 +6,11 @@
 //
 
 #include "TriangleMeshNode.h"
+
 #include "../MemoryAllocators/ArenaAllocator.h"
+#include "../Core/transform.h"
 #include "../Core/surface_object.h"
 #include "../Core/medium_object.h"
-#include "../Core/transform.h"
 #include "../Scene/medium_nodes.h"
 
 namespace SLR {

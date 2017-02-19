@@ -6,8 +6,9 @@
 //
 
 #include "SummedSurfaceMaterial.h"
-#include "../BSDF/MultiBSDF.h"
+
 #include "../MemoryAllocators/ArenaAllocator.h"
+#include "../BSDF/MultiBSDF.h"
 
 namespace SLR {
     BSDF* SummedSurfaceMaterial::getBSDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem, float scale) const {

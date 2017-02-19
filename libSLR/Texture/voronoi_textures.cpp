@@ -6,8 +6,9 @@
 //
 
 #include "voronoi_textures.h"
-#include "../Core/geometry.h"
+
 #include "../Core/distributions.h"
+#include "../Core/geometry.h"
 #include "../RNG/LinearCongruentialRNG.h"
 
 namespace SLR {

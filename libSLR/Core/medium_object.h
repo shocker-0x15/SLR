@@ -10,7 +10,7 @@
 
 #include "../defines.h"
 #include "../declarations.h"
-#include "Object.h"
+#include "object.h"
 
 namespace SLR {
     struct SLR_API VolumetricLightPosSample {

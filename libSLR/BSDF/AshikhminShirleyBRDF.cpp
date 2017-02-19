@@ -6,6 +6,7 @@
 //
 
 #include "AshikhminShirleyBRDF.h"
+
 #include "../Core/distributions.h"
 
 namespace SLR {

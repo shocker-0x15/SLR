@@ -10,7 +10,6 @@
 
 #include "../defines.h"
 #include "../declarations.h"
-
 #include <atomic>
 #include <thread>
 #include <condition_variable>

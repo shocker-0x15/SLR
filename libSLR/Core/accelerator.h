@@ -11,7 +11,6 @@
 #include "../defines.h"
 #include "../declarations.h"
 #include "../Core/geometry.h"
-#include "../Core/surface_object.h"
 
 namespace SLR {
     class SLR_API Accelerator {

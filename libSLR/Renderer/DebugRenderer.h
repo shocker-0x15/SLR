@@ -11,6 +11,7 @@
 #include "../defines.h"
 #include "../declarations.h"
 #include "../Core/renderer.h"
+
 #include "../Core/geometry.h"
 #include "../MemoryAllocators/Allocator.h"
 

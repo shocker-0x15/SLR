@@ -6,8 +6,9 @@
 //
 
 #include "InfiniteSphereSurfaceShape.h"
-#include "../Core/surface_object.h"
+
 #include "../Core/distributions.h"
+#include "../Core/surface_object.h"
 #include "../Core/textures.h"
 
 namespace SLR {

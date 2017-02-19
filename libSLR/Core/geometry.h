@@ -10,9 +10,9 @@
 
 #include "../defines.h"
 #include "../declarations.h"
-#include "../BasicTypes/TexCoord2D.h"
 #include "../BasicTypes/rgb_types.h"
 #include "../BasicTypes/spectrum_types.h"
+#include "../BasicTypes/TexCoord2D.h"
 #include "transform.h"
 
 namespace SLR {

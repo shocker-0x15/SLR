@@ -10,8 +10,8 @@
 
 #include "../defines.h"
 #include "../declarations.h"
+#include "../Core/geometry.h"
 #include "node.h"
-#include "geometry.h"
 
 namespace SLR {
     class SLR_API HomogeneousMediumNode : public MediumNode {

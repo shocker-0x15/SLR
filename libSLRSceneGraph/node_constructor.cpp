@@ -6,6 +6,7 @@
 //
 
 #include "node_constructor.h"
+
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
 #include <libSLR/MemoryAllocators/Allocator.h>

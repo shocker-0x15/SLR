@@ -6,19 +6,20 @@
 //
 
 #include "surface_object.h"
-#include "surface_material.h"
-#include "transform.h"
-#include "distributions.h"
-#include "textures.h"
+
 #include "../MemoryAllocators/ArenaAllocator.h"
+#include "distributions.h"
+#include "transform.h"
+#include "light_path_sampler.h"
+#include "textures.h"
+#include "surface_material.h"
 #include "../Accelerator/StandardBVH.h"
 #include "../Accelerator/SBVH.h"
 #include "../Accelerator/QBVH.h"
-#include "../Core/light_path_sampler.h"
 #include "../SurfaceShape/InfiniteSphereSurfaceShape.h"
+#include "../BSDF/basic_bsdfs.h"
 #include "../SurfaceMaterial/IBLEmitterSurfaceProperty.h"
 #include "../Scene/Scene.h"
-#include "../BSDF/basic_bsdfs.h"
 
 namespace SLR {
     SampledSpectrum SurfaceLight::sample(const LightPosQuery &query, const SurfaceLightPosSample &smp, SurfaceLightPosQueryResult* result) const {

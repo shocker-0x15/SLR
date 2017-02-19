@@ -6,6 +6,7 @@
 //
 
 #include "GridMediumDistribution.h"
+
 #include "light_path_sampler.h"
 
 namespace SLR {

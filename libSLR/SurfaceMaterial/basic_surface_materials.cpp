@@ -6,10 +6,11 @@
 //
 
 #include "basic_surface_materials.h"
-#include "../BSDF/basic_bsdfs.h"
-#include "../BSDF/OrenNayerBRDF.h"
+
 #include "../MemoryAllocators/ArenaAllocator.h"
 #include "../Core/textures.h"
+#include "../BSDF/basic_bsdfs.h"
+#include "../BSDF/OrenNayerBRDF.h"
 
 namespace SLR {
     BSDF* DiffuseReflectionSurfaceMaterial::getBSDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem, float scale) const {

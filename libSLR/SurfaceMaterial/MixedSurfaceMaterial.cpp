@@ -6,9 +6,10 @@
 //
 
 #include "MixedSurfaceMaterial.h"
-#include "../BSDF/MultiBSDF.h"
+
 #include "../MemoryAllocators/ArenaAllocator.h"
 #include "../Core/textures.h"
+#include "../BSDF/MultiBSDF.h"
 
 namespace SLR {
     BSDF* MixedSurfaceMaterial::getBSDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem, float scale) const {

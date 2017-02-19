@@ -6,9 +6,10 @@
 //
 
 #include "IBLEmitterSurfaceProperty.h"
-#include "../EDF/IBLEDF.h"
+
 #include "../MemoryAllocators/ArenaAllocator.h"
 #include "../Core/textures.h"
+#include "../EDF/IBLEDF.h"
 #include "../Scene/Scene.h"
 
 namespace SLR {

@@ -6,6 +6,7 @@
 //
 
 #include "image_2d.h"
+
 #include "../BasicTypes/CompensatedSum.h"
 #include "../Helper/bmp_exporter.h"
 

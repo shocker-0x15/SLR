@@ -6,6 +6,7 @@
 //
 
 #include "distributions.h"
+
 #include "../BasicTypes/CompensatedSum.h"
 #include "../Helper/bmp_exporter.h"
 

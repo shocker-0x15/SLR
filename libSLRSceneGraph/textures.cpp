@@ -6,6 +6,7 @@
 //
 
 #include "textures.h"
+
 #include <libSLR/Texture/texture_headers.h>
 
 namespace SLRSceneGraph {

@@ -6,6 +6,7 @@
 //
 
 #include "ImageSensor.h"
+
 #include "../Helper/bmp_exporter.h"
 
 namespace SLR {

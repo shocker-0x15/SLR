@@ -6,9 +6,10 @@
 //
 
 #include "AshikhminShirleyReflectionSurfaceMaterial.h"
-#include "../BSDF/AshikhminShirleyBRDF.h"
+
 #include "../MemoryAllocators/ArenaAllocator.h"
 #include "../Core/textures.h"
+#include "../BSDF/AshikhminShirleyBRDF.h"
 
 namespace SLR {
     BSDF* AshikhminShirleyReflectionSurfaceMaterial::getBSDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem, float scale) const {

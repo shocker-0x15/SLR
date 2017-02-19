@@ -14,7 +14,6 @@
 #include "directional_distribution_functions.h"
 #include "surface_object.h"
 #include "medium_object.h"
-
 #include "../RNG/XORShiftRNG.h"
 
 namespace SLR {

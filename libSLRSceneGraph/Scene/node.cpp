@@ -6,6 +6,7 @@
 //
 
 #include "node.h"
+
 #include <libSLR/MemoryAllocators/ArenaAllocator.h>
 #include <libSLR/Core/surface_object.h>
 #include <libSLR/Core/medium_object.h>

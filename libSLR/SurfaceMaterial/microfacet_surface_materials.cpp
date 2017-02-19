@@ -6,9 +6,10 @@
 //
 
 #include "microfacet_surface_materials.h"
-#include "../BSDF/microfacet_bsdfs.h"
+
 #include "../MemoryAllocators/ArenaAllocator.h"
 #include "../Core/textures.h"
+#include "../BSDF/microfacet_bsdfs.h"
 
 namespace SLR {
     BSDF* MicrofacetReflectionSurfaceMaterial::getBSDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem, float scale) const {

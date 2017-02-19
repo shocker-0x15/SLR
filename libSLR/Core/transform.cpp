@@ -6,6 +6,7 @@
 //
 
 #include "transform.h"
+
 #include "../MemoryAllocators/Allocator.h"
 
 namespace SLR {

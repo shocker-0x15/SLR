@@ -6,8 +6,9 @@
 //
 
 #include "image_textures.h"
-#include "../Core/image_2d.h"
+
 #include "../Core/distributions.h"
+#include "../Core/image_2d.h"
 
 namespace SLR {
     SampledSpectrum ImageSpectrumTexture::evaluate(const Point3D &p, const WavelengthSamples &wls) const {

@@ -6,8 +6,9 @@
 //
 
 #include "PerspectiveCamera.h"
-#include "../Core/transform.h"
+
 #include "../MemoryAllocators/ArenaAllocator.h"
+#include "../Core/transform.h"
 #include "../Core/distributions.h"
 #include "../Core/ImageSensor.h"
 

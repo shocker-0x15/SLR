@@ -6,6 +6,7 @@
 //
 
 #include "camera_nodes.h"
+
 #include <libSLR/Scene/camera_nodes.h>
 
 namespace SLRSceneGraph {

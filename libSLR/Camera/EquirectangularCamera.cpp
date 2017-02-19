@@ -6,8 +6,9 @@
 //
 
 #include "EquirectangularCamera.h"
-#include "../Core/transform.h"
+
 #include "../MemoryAllocators/ArenaAllocator.h"
+#include "../Core/transform.h"
 #include "../Core/ImageSensor.h"
 
 namespace SLR {

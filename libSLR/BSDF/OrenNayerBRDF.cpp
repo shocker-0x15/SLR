@@ -6,6 +6,7 @@
 //
 
 #include "OrenNayerBRDF.h"
+
 #include "../Core/distributions.h"
 
 namespace SLR {
