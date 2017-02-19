@@ -9,7 +9,7 @@
 #define __SLRSceneGraph_Scene__
 
 #include <libSLR/defines.h>
-#include "declarations.h"
+#include "../declarations.h"
 
 namespace SLRSceneGraph {
     class SLR_SCENEGRAPH_API Scene {

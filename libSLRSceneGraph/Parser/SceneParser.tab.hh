@@ -42,7 +42,7 @@
 // //                    "%code requires" blocks.
 #line 15 "SceneParser.yy" // lalr1.cc:392
 
-    #include "../API.hpp"
+    #include "../API.h"
 
     #if DEBUG
     #define DSTMT(stmt) stmt;

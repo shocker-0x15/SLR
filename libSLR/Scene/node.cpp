@@ -171,24 +171,6 @@ namespace SLR {
     
     
     
-    void InfiniteSphereNode::createRenderingData(Allocator* mem, const Transform* subTF, RenderingData* data) {
-        SLRAssert(subTF == nullptr, "Transformation to InfiniteSphereNode is currently not supported.");
-        m_emission = mem->create<IBLEmitterSurfaceProperty>(m_scene, m_IBLTex, m_scale);
-        m_obj = mem->create<InfiniteSphereSurfaceObject>(data->scene, m_emission);
-        data->envObj = m_obj;
-    }
-    
-    void InfiniteSphereNode::destroyRenderingData(Allocator* mem) {
-        if (m_obj)
-            mem->destroy(m_obj);
-        m_obj = nullptr;
-        if (m_emission)
-            mem->destroy(m_emission);
-        m_emission = nullptr;
-    }
-    
-    
-    
     void InfinitesimalPointNode::createRenderingData(Allocator* mem, const Transform* subTF, RenderingData *data) {
         // apply transform
         StaticTransform transform;
@@ -211,5 +193,23 @@ namespace SLR {
         if (m_surface)
             mem->destroy(m_surface);
         m_surface = nullptr;
+    }
+    
+    
+    
+    void InfiniteSphereNode::createRenderingData(Allocator* mem, const Transform* subTF, RenderingData* data) {
+        SLRAssert(subTF == nullptr, "Transformation to InfiniteSphereNode is currently not supported.");
+        m_emission = mem->create<IBLEmitterSurfaceProperty>(m_scene, m_IBLTex, m_scale);
+        m_obj = mem->create<InfiniteSphereSurfaceObject>(data->scene, m_emission);
+        data->envObj = m_obj;
+    }
+    
+    void InfiniteSphereNode::destroyRenderingData(Allocator* mem) {
+        if (m_obj)
+            mem->destroy(m_obj);
+        m_obj = nullptr;
+        if (m_emission)
+            mem->destroy(m_emission);
+        m_emission = nullptr;
     }
 }

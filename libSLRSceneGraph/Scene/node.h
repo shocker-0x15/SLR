@@ -1,15 +1,16 @@
 //
-//  nodes.h
+//  node.h
 //
 //  Created by 渡部 心 on 2015/03/24.
 //  Copyright (c) 2015年 渡部 心. All rights reserved.
 //
 
-#ifndef __SLRSceneGraph_nodes__
-#define __SLRSceneGraph_nodes__
+#ifndef __SLRSceneGraph_node__
+#define __SLRSceneGraph_node__
 
 #include <libSLR/defines.h>
-#include "declarations.h"
+#include <libSLR/Core/geometry.h>
+#include "../declarations.h"
 
 namespace SLRSceneGraph {    
     class SLR_SCENEGRAPH_API Node {
@@ -108,6 +109,42 @@ namespace SLRSceneGraph {
     class SLR_SCENEGRAPH_API MediumNode : public Node {
     public:
     };
+    
+    
+    
+    class SLR_SCENEGRAPH_API InfinitesimalPointNode : public SurfaceNode {
+        SLR::Point3D m_position;
+        SLR::Vector3D m_direction;
+        SurfaceMaterialRef m_material;
+        
+        void allocateRawData() override;
+        void setupRawData() override;
+        void terminateRawData() override;
+    public:
+        InfinitesimalPointNode(const SLR::Point3D &p, const SLR::Vector3D &d, const SurfaceMaterialRef &mat);
+        
+        NodeRef copy() const override;
+        
+        void prepareForRendering() override;
+    };
+    
+    
+    
+    class SLR_SCENEGRAPH_API InfiniteSphereNode : public SurfaceNode {
+        SceneWRef m_scene;
+        SpectrumTextureRef m_IBLTex;
+        float m_scale;
+        
+        void allocateRawData() override;
+        void setupRawData() override;
+        void terminateRawData() override;
+    public:
+        InfiniteSphereNode(const SceneWRef &scene, const SpectrumTextureRef &IBLTex, float scale);
+        
+        NodeRef copy() const override { SLRAssert_ShouldNotBeCalled(); return nullptr; }
+        
+        void prepareForRendering() override;
+    };
 }
 
-#endif /* __SLRSceneGraph_nodes__ */
+#endif /* __SLRSceneGraph_node__ */

@@ -1,5 +1,5 @@
 //
-//  medium_materials.hpp
+//  medium_materials.h
 //
 //  Created by 渡部 心 on 2017/02/05.
 //  Copyright (c) 2017年 渡部 心. All rights reserved.

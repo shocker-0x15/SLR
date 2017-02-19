@@ -1,16 +1,19 @@
 //
-//  nodes.cpp
+//  node.cpp
 //
 //  Created by 渡部 心 on 2015/03/24.
 //  Copyright (c) 2015年 渡部 心. All rights reserved.
 //
 
-#include "nodes.h"
+#include "node.h"
 #include <libSLR/MemoryAllocators/ArenaAllocator.h>
 #include <libSLR/Core/surface_object.h>
 #include <libSLR/Core/medium_object.h>
 #include <libSLR/Core/transform.h>
 #include <libSLR/Scene/node.h>
+#include "../textures.h"
+#include "../surface_materials.h"
+#include "Scene.h"
 
 namespace SLRSceneGraph {
     Node::~Node() {
@@ -177,5 +180,67 @@ namespace SLRSceneGraph {
         terminateRawData();
         setupRawData();
         m_node->prepareForRendering();
+    }
+    
+    
+    
+    void InfinitesimalPointNode::allocateRawData() {
+        m_rawData = (SLR::Node*)malloc(sizeof(SLR::InfinitesimalPointNode));
+    }
+    
+    void InfinitesimalPointNode::setupRawData() {
+        new (m_rawData) SLR::InfinitesimalPointNode(m_position, m_direction, m_material->getRaw());
+        m_setup = true;
+    }
+    
+    void InfinitesimalPointNode::terminateRawData() {
+        SLR::InfinitesimalPointNode &raw = *(SLR::InfinitesimalPointNode*)m_rawData;
+        if (m_setup)
+            raw.~InfinitesimalPointNode();
+        m_setup = false;
+    }
+    
+    InfinitesimalPointNode::InfinitesimalPointNode(const SLR::Point3D &p, const SLR::Vector3D &d, const SurfaceMaterialRef &mat) :
+    m_position(p), m_direction(d), m_material(mat) {
+        allocateRawData();
+    }
+    
+    NodeRef InfinitesimalPointNode::copy() const {
+        NodeRef ret = createShared<InfinitesimalPointNode>(m_position, m_direction, m_material);
+        return ret;
+    }
+    
+    void InfinitesimalPointNode::prepareForRendering() {
+        terminateRawData();
+        setupRawData();
+    }
+    
+    
+    
+    void InfiniteSphereNode::allocateRawData() {
+        m_rawData = (SLR::Node*)malloc(sizeof(SLR::InfiniteSphereNode));
+    }
+    
+    void InfiniteSphereNode::setupRawData() {
+        SceneRef scene = m_scene.lock();
+        new (m_rawData) SLR::InfiniteSphereNode(scene->getRaw(), m_IBLTex->getRaw(), m_scale);
+        m_setup = true;
+    }
+    
+    void InfiniteSphereNode::terminateRawData() {
+        SLR::InfiniteSphereNode &raw = *(SLR::InfiniteSphereNode*)m_rawData;
+        if (m_setup)
+            raw.~InfiniteSphereNode();
+        m_setup = false;
+    }
+    
+    InfiniteSphereNode::InfiniteSphereNode(const SceneWRef &scene, const SpectrumTextureRef &IBLTex, float scale) :
+    m_scene(scene), m_IBLTex(IBLTex), m_scale(scale) {
+        allocateRawData();
+    }
+    
+    void InfiniteSphereNode::prepareForRendering() {
+        terminateRawData();
+        setupRawData();
     }
 }

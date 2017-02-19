@@ -5,7 +5,7 @@
 //  Copyright (c) 2016年 渡部 心. All rights reserved.
 //
 
-#include "builtin_math.hpp"
+#include "builtin_math.h"
 #include <libSLR/BasicTypes/Point3D.h>
 #include <libSLR/BasicTypes/Vector3D.h>
 

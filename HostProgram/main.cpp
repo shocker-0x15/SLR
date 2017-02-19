@@ -8,14 +8,14 @@
 #include <thread>
 
 #include <libSLR/defines.h>
-#include <libSLRSceneGraph/declarations.h>
+#include <libSLR/MemoryAllocators/ArenaAllocator.h>
 #include <libSLR/BasicTypes/spectrum_base.h>
 #include <libSLR/Core/renderer.h>
 #include <libSLR/Core/RenderSettings.h>
 #include <libSLR/Scene/Scene.h>
-#include <libSLR/MemoryAllocators/ArenaAllocator.h>
-#include <libSLRSceneGraph/Scene.h>
-#include <libSLRSceneGraph/API.hpp>
+#include <libSLRSceneGraph/declarations.h>
+#include <libSLRSceneGraph/Scene/Scene.h>
+#include <libSLRSceneGraph/API.h>
 
 #include "StopWatch.h"
 

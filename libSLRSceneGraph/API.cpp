@@ -5,41 +5,38 @@
 //  Copyright (c) 2015年 渡部 心. All rights reserved.
 //
 
-#include "API.hpp"
+#include "API.h"
 
 #include <thread>
 
-#include "Parser/SceneParsingDriver.h"
-
-#include <libSLR/BasicTypes/spectrum_library.h>
-#include <libSLR/Core/image_2d.h>
-#include <libSLR/Core/transform.h>
-#include <libSLR/RNG/XORShiftRNG.h>
 #include <libSLR/MemoryAllocators/ArenaAllocator.h>
-#include <libSLR/Scene/Scene.h>
+#include <libSLR/BasicTypes/spectrum_library.h>
+#include <libSLR/Core/transform.h>
+#include <libSLR/Core/image_2d.h>
+#include <libSLR/RNG/XORShiftRNG.h>
 #include <libSLR/SurfaceShape/TriangleSurfaceShape.h>
+#include <libSLR/Scene/Scene.h>
 #include <libSLR/Renderer/DebugRenderer.h>
 #include <libSLR/Renderer/PTRenderer.h>
 #include <libSLR/Renderer/BPTRenderer.h>
 #include <libSLR/Renderer/VolumetricPTRenderer.h>
 #include <libSLR/Renderer/VolumetricBPTRenderer.h>
 
-#include "Parser/BuiltinFunctions/builtin_math.hpp"
-#include "Parser/BuiltinFunctions/builtin_transform.hpp"
-#include "Parser/BuiltinFunctions/builtin_texture.hpp"
-
-#include "nodes.h"
-#include "camera_nodes.h"
-#include "TriangleMeshNode.h"
-#include "InfiniteSphereNode.h"
-#include "InfinitesimalPointNode.h"
-#include "medium_nodes.h"
+#include "textures.h"
+#include "surface_materials.h"
+#include "medium_materials.h"
+#include "Scene/node.h"
+#include "Scene/camera_nodes.h"
+#include "Scene/TriangleMeshNode.h"
+#include "Scene/medium_nodes.h"
 #include "node_constructor.h"
 
+#include "Parser/SceneParsingDriver.h"
+#include "Parser/BuiltinFunctions/builtin_math.h"
+#include "Parser/BuiltinFunctions/builtin_transform.h"
+#include "Parser/BuiltinFunctions/builtin_texture.h"
+
 #include "Helper/image_loader.h"
-#include "textures.hpp"
-#include "surface_materials.hpp"
-#include "medium_materials.hpp"
 
 namespace SLRSceneGraph {
     static bool strToImageStoreMode(const std::string &str, SLR::ImageStoreMode* mode) {

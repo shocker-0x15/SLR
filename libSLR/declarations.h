@@ -273,8 +273,8 @@ namespace SLR {
     
     struct Vertex;
     class TriangleSurfaceShape;
-    class InfiniteSphereSurfaceShape;
     class InfinitesimalPointSurfaceShape;
+    class InfiniteSphereSurfaceShape;
     
     // END: Surface Shape
     // ----------------------------------------------------------------
@@ -285,12 +285,12 @@ namespace SLR {
     // Medium Distribution
     
     class HomogeneousMediumDistribution;
+    class DensityGridMediumDistribution;
+    class SubDensityGridMediumDistribution;
     class AchromaticExtinctionGridMediumDistribution;
     class SubAchromaticExtinctionGridMediumDistribution;
     class GridMediumDistribution;
     class SubGridMediumDistribution;
-    class DensityGridMediumDistribution;
-    class SubDensityGridMediumDistribution;
     
     // END: Medium Distribution
     // ----------------------------------------------------------------
@@ -427,8 +427,8 @@ namespace SLR {
     class Node;
     class InternalNode;
     class ReferenceNode;
-    class InfiniteSphereNode;
     class InfinitesimalPointNode;
+    class InfiniteSphereNode;
     class PerspectiveCameraNode;
     class EquirectangularCameraNode;
     class SurfaceNode;

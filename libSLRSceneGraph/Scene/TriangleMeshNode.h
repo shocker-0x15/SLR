@@ -9,9 +9,9 @@
 #define __SLRSceneGraph_TriangleMeshNode__
 
 #include <libSLR/defines.h>
-#include "declarations.h"
-#include "nodes.h"
 #include <libSLR/Core/geometry.h>
+#include "declarations.h"
+#include "node.h"
 
 namespace SLRSceneGraph {
     // There is a possibility to define a unique vertex format suitable for editing.

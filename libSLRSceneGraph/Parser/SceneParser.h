@@ -1,5 +1,5 @@
 //
-//  SceneParser.hpp
+//  SceneParser.h
 //
 //  Created by 渡部 心 on 2015/12/16.
 //  Copyright (c) 2015年 渡部 心. All rights reserved.
@@ -11,7 +11,7 @@
 #include <libSLR/defines.h>
 #include "../declarations.h"
 
-#include "../Scene.h"
+#include "../Scene/Scene.h"
 
 namespace SLRSceneGraph {
     enum class Type : uint32_t {

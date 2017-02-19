@@ -5,8 +5,8 @@
 //  Copyright © 2016年 渡部 心. All rights reserved.
 //
 
-#include "builtin_texture.hpp"
-#include "../../textures.hpp"
+#include "builtin_texture.h"
+#include "../../textures.h"
 
 namespace SLRSceneGraph {
     namespace BuiltinFunctions {

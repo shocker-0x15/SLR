@@ -5,9 +5,9 @@
 //  Copyright (c) 2017年 渡部 心. All rights reserved.
 //
 
-#include "medium_materials.hpp"
+#include "medium_materials.h"
 #include <libSLR/MediumMaterial/medium_material_headers.h>
-#include "textures.hpp"
+#include "textures.h"
 
 namespace SLRSceneGraph {
     MediumMaterial::~MediumMaterial() {

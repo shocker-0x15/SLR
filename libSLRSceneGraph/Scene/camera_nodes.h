@@ -9,8 +9,8 @@
 #define __SLRSceneGraph_camera_nodes__
 
 #include <libSLR/defines.h>
-#include "declarations.h"
-#include "nodes.h"
+#include "../declarations.h"
+#include "node.h"
 
 namespace SLRSceneGraph {
     class SLR_SCENEGRAPH_API PerspectiveCameraNode : public Node {
@@ -31,6 +31,8 @@ namespace SLRSceneGraph {
         
         void prepareForRendering() override;
     };
+    
+    
     
     class SLR_SCENEGRAPH_API EquirectangularCameraNode : public Node {
         float m_sensitivity;

@@ -5,7 +5,7 @@
 //  Copyright (c) 2015年 渡部 心. All rights reserved.
 //
 
-#include "textures.hpp"
+#include "textures.h"
 #include <libSLR/Texture/texture_headers.h>
 
 namespace SLRSceneGraph {

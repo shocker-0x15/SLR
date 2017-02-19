@@ -1,5 +1,5 @@
 //
-//  API.hpp
+//  API.h
 //
 //  Created by 渡部 心 on 2015/10/06.
 //  Copyright (c) 2015年 渡部 心. All rights reserved.
@@ -9,12 +9,11 @@
 #define __SLRSceneGraph_API__
 
 #include <libSLR/defines.h>
-#include "declarations.h"
-
-#include "Scene.h"
-#include "Parser/SceneParser.hpp"
 #include <libSLR/BasicTypes/spectrum_base.h>
 #include <libSLR/Core/image_2d.h>
+#include "declarations.h"
+#include "Scene/Scene.h"
+#include "Parser/SceneParser.h"
 
 namespace SLRSceneGraph {
     SLR_SCENEGRAPH_API bool readScene(const std::string &filePath, const SceneRef &scene, RenderingContext* context);

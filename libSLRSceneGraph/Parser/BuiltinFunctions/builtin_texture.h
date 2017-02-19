@@ -1,5 +1,5 @@
 //
-//  builtin_texture.hpp
+//  builtin_texture.h
 //
 //  Created by 渡部 心 on 2016/08/20.
 //  Copyright © 2016年 渡部 心. All rights reserved.
@@ -11,7 +11,7 @@
 #include <libSLR/defines.h>
 #include "../../declarations.h"
 
-#include "../SceneParser.hpp"
+#include "../SceneParser.h"
 
 namespace SLRSceneGraph {
     namespace BuiltinFunctions {

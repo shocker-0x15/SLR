@@ -1,5 +1,5 @@
 //
-//  TriangleMeshNode.hpp
+//  TriangleMeshNode.h
 //
 //  Created by 渡部 心 on 2017/01/05.
 //  Copyright (c) 2017年 渡部 心. All rights reserved.

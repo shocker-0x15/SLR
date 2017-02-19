@@ -9,8 +9,8 @@
 #define __SLRSceneGraph_node_constructor__
 
 #include <libSLR/defines.h>
-#include "declarations.h"
 #include <assimp/scene.h>
+#include "declarations.h"
 
 namespace SLRSceneGraph {
     struct SurfaceAttributeTuple {

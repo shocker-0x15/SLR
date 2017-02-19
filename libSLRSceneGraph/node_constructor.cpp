@@ -6,15 +6,15 @@
 //
 
 #include "node_constructor.h"
-#include "TriangleMeshNode.h"
-#include "API.hpp"
-#include "surface_materials.hpp"
-#include "textures.hpp"
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
 #include <libSLR/MemoryAllocators/Allocator.h>
 #include <libSLR/Core/transform.h>
 #include <libSLR/SurfaceShape/TriangleSurfaceShape.h>
+#include "textures.h"
+#include "surface_materials.h"
+#include "Scene/TriangleMeshNode.h"
+#include "API.h"
 
 template <typename RealType>
 inline void makeTangent(RealType nx, RealType ny, RealType nz, RealType* s) {

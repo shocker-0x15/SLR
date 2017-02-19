@@ -5,10 +5,9 @@
 //  Copyright (c) 2015年 渡部 心. All rights reserved.
 //
 
-#include "SceneParser.hpp"
-#include "../API.hpp"
-
+#include "SceneParser.h"
 #include <libSLR/SurfaceShape/TriangleSurfaceShape.h>
+#include "../API.h"
 
 namespace SLRSceneGraph {
     std::ostream &operator<<(std::ostream &out, Type t) {

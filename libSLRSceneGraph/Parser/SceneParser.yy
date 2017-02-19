@@ -13,7 +13,7 @@
 %param { SceneParsingDriver &driver }
 
 %code requires {
-    #include "../API.hpp"
+    #include "../API.h"
 
     #if DEBUG
     #define DSTMT(stmt) stmt;

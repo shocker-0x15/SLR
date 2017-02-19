@@ -5,10 +5,10 @@
 //  Copyright (c) 2015年 渡部 心. All rights reserved.
 //
 
-#include "surface_materials.hpp"
+#include "surface_materials.h"
 #include <libSLR/SurfaceMaterial/surface_material_headers.h>
-#include "textures.hpp"
-#include "Scene.h"
+#include "textures.h"
+#include "Scene/Scene.h"
 
 namespace SLRSceneGraph {
     SurfaceMaterial::~SurfaceMaterial() {
