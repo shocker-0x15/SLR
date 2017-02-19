@@ -8,10 +8,10 @@
 #include "medium_nodes.h"
 #include "../MemoryAllocators/ArenaAllocator.h"
 #include "../Core/medium_material.h"
-#include "../Core/MediumObject.h"
-#include "../Medium/HomogeneousMedium.h"
-#include "../Medium/GridMedium.h"
-#include "../Medium/DensityGridMedium.h"
+#include "../Core/medium_object.h"
+#include "../MediumDistribution/HomogeneousMediumDistribution.h"
+#include "../MediumDistribution/GridMediumDistribution.h"
+#include "../MediumDistribution/DensityGridMediumDistribution.h"
 
 namespace SLR {
     HomogeneousMediumNode::HomogeneousMediumNode(const BoundingBox3D &region, const AssetSpectrum* sigma_s, const AssetSpectrum* sigma_e, const MediumMaterial* material) :

@@ -12,18 +12,17 @@
 #include "Parser/SceneParsingDriver.h"
 
 #include <libSLR/BasicTypes/spectrum_library.h>
-#include <libSLR/Core/Image.h>
-#include <libSLR/Core/Transform.h>
-#include <libSLR/RNGs/XORShiftRNG.h>
+#include <libSLR/Core/image_2d.h>
+#include <libSLR/Core/transform.h>
+#include <libSLR/RNG/XORShiftRNG.h>
 #include <libSLR/MemoryAllocators/ArenaAllocator.h>
-#include <libSLR/Scene/nodes.h>
 #include <libSLR/Scene/Scene.h>
-#include <libSLR/Surface/TriangleMesh.h>
-#include <libSLR/Renderers/DebugRenderer.h>
-#include <libSLR/Renderers/PathTracingRenderer.h>
-#include <libSLR/Renderers/BidirectionalPathTracingRenderer.h>
-#include <libSLR/Renderers/VolumetricPathTracingRenderer.h>
-#include <libSLR/Renderers/VolumetricBPTRenderer.h>
+#include <libSLR/SurfaceShape/TriangleSurfaceShape.h>
+#include <libSLR/Renderer/DebugRenderer.h>
+#include <libSLR/Renderer/PTRenderer.h>
+#include <libSLR/Renderer/BPTRenderer.h>
+#include <libSLR/Renderer/VolumetricPTRenderer.h>
+#include <libSLR/Renderer/VolumetricBPTRenderer.h>
 
 #include "Parser/BuiltinFunctions/builtin_math.hpp"
 #include "Parser/BuiltinFunctions/builtin_transform.hpp"
@@ -1052,7 +1051,7 @@ namespace SLRSceneGraph {
                                                            0, {{"samples", Type::Integer, Element(8)}},
                                                            [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
                                                                uint32_t spp = args.at("samples").raw<TypeMap::Integer>();
-                                                               context.renderingContext->renderer = createUnique<SLR::PathTracingRenderer>(spp);
+                                                               context.renderingContext->renderer = createUnique<SLR::PTRenderer>(spp);
                                                                return Element();
                                                            }
                                                        };
@@ -1063,7 +1062,7 @@ namespace SLRSceneGraph {
                                                            0, {{"samples", Type::Integer, Element(8)}},
                                                            [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
                                                                uint32_t spp = args.at("samples").raw<TypeMap::Integer>();
-                                                               context.renderingContext->renderer = createUnique<SLR::BidirectionalPathTracingRenderer>(spp);
+                                                               context.renderingContext->renderer = createUnique<SLR::BPTRenderer>(spp);
                                                                return Element();
                                                            }
                                                        };
@@ -1074,7 +1073,7 @@ namespace SLRSceneGraph {
                                                            0, {{"samples", Type::Integer, Element(8)}},
                                                            [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
                                                                uint32_t spp = args.at("samples").raw<TypeMap::Integer>();
-                                                               context.renderingContext->renderer = createUnique<SLR::VolumetricPathTracingRenderer>(spp);
+                                                               context.renderingContext->renderer = createUnique<SLR::VolumetricPTRenderer>(spp);
                                                                return Element();
                                                            }
                                                        };

@@ -10,8 +10,8 @@
 
 #include "../defines.h"
 #include "../declarations.h"
-#include "nodes.h"
-#include "../Surface/TriangleMesh.h"
+#include "node.h"
+#include "../SurfaceShape/TriangleSurfaceShape.h"
 
 namespace SLR {
     class SLR_API TriangleMeshNode : public SurfaceNode {

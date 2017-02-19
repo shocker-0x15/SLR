@@ -6,7 +6,7 @@
 //
 
 #include "textures.hpp"
-#include <libSLR/Textures/texture_headers.h>
+#include <libSLR/Texture/texture_headers.h>
 
 namespace SLRSceneGraph {
     Texture2DMapping::Texture2DMapping() {

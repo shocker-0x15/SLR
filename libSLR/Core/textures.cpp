@@ -6,5 +6,5 @@
 //
 
 #include "textures.h"
-#include "Image.h"
+#include "image_2d.h"
 #include "distributions.h"

@@ -7,10 +7,10 @@
 
 #include "nodes.h"
 #include <libSLR/MemoryAllocators/ArenaAllocator.h>
-#include <libSLR/Core/SurfaceObject.h>
-#include <libSLR/Core/MediumObject.h>
-#include <libSLR/Core/Transform.h>
-#include <libSLR/Scene/nodes.h>
+#include <libSLR/Core/surface_object.h>
+#include <libSLR/Core/medium_object.h>
+#include <libSLR/Core/transform.h>
+#include <libSLR/Scene/node.h>
 
 namespace SLRSceneGraph {
     Node::~Node() {

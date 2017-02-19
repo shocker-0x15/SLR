@@ -7,11 +7,11 @@
 
 #include "Scene.h"
 #include "nodes.h"
-#include <libSLR/Core/Transform.h>
+#include <libSLR/Core/transform.h>
 #include <libSLR/Scene/Scene.h>
 #include "InfiniteSphereNode.h"
 
-#include <libSLR/Core/Renderer.h>
+#include <libSLR/Core/renderer.h>
 
 namespace SLRSceneGraph {
     Scene::Scene() : m_envNode(nullptr) {

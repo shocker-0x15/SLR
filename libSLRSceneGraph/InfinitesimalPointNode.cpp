@@ -9,9 +9,9 @@
 #include "textures.hpp"
 #include "surface_materials.hpp"
 #include "medium_nodes.h"
-#include <libSLR/Core/Transform.h>
-#include <libSLR/Core/SurfaceObject.h>
-#include <libSLR/Scene/nodes.h>
+#include <libSLR/Core/transform.h>
+#include <libSLR/Core/surface_object.h>
+#include <libSLR/Scene/node.h>
 
 namespace SLRSceneGraph {
     void InfinitesimalPointNode::allocateRawData() {

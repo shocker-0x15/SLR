@@ -10,7 +10,7 @@
 #include <libSLR/defines.h>
 #include <libSLRSceneGraph/declarations.h>
 #include <libSLR/BasicTypes/spectrum_base.h>
-#include <libSLR/Core/Renderer.h>
+#include <libSLR/Core/renderer.h>
 #include <libSLR/Core/RenderSettings.h>
 #include <libSLR/Scene/Scene.h>
 #include <libSLR/MemoryAllocators/ArenaAllocator.h>

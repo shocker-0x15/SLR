@@ -14,7 +14,7 @@
 #include "Scene.h"
 #include "Parser/SceneParser.hpp"
 #include <libSLR/BasicTypes/spectrum_base.h>
-#include <libSLR/Core/Image.h>
+#include <libSLR/Core/image_2d.h>
 
 namespace SLRSceneGraph {
     SLR_SCENEGRAPH_API bool readScene(const std::string &filePath, const SceneRef &scene, RenderingContext* context);

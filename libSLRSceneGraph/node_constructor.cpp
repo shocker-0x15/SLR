@@ -13,8 +13,8 @@
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
 #include <libSLR/MemoryAllocators/Allocator.h>
-#include <libSLR/Core/Transform.h>
-#include <libSLR/Surface/TriangleMesh.h>
+#include <libSLR/Core/transform.h>
+#include <libSLR/SurfaceShape/TriangleSurfaceShape.h>
 
 template <typename RealType>
 inline void makeTangent(RealType nx, RealType ny, RealType nz, RealType* s) {

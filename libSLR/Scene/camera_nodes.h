@@ -10,7 +10,7 @@
 
 #include "../defines.h"
 #include "../declarations.h"
-#include "nodes.h"
+#include "node.h"
 
 namespace SLR {
     class SLR_API PerspectiveCameraNode : public Node {

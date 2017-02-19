@@ -10,7 +10,7 @@
 
 #include "../defines.h"
 #include "../declarations.h"
-#include "../Core/Accelerator.h"
+#include "../Core/accelerator.h"
 
 namespace SLR {
     class SLR_API StandardBVH : public Accelerator {

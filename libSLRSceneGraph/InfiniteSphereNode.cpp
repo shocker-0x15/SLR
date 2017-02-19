@@ -7,7 +7,7 @@
 
 #include "InfiniteSphereNode.h"
 #include "textures.hpp"
-#include <libSLR/Scene/nodes.h>
+#include <libSLR/Scene/node.h>
 #include "Scene.h"
 
 namespace SLRSceneGraph {

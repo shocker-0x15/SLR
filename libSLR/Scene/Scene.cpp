@@ -8,9 +8,9 @@
 #include "Scene.h"
 #include "../MemoryAllocators/ArenaAllocator.h"
 #include "../Core/distributions.h"
-#include "../Core/Transform.h"
-#include "../Core/cameras.h"
-#include "../Core/light_path_samplers.h"
+#include "../Core/transform.h"
+#include "../Core/camera.h"
+#include "../Core/light_path_sampler.h"
 
 namespace SLR {
     void Scene::build(Allocator* sceneMem) {

@@ -7,8 +7,8 @@
 
 #include "camera_nodes.h"
 #include "../MemoryAllocators/ArenaAllocator.h"
-#include "../Cameras/PerspectiveCamera.h"
-#include "../Cameras/EquirectangularCamera.h"
+#include "../Camera/PerspectiveCamera.h"
+#include "../Camera/EquirectangularCamera.h"
 
 namespace SLR {
     void PerspectiveCameraNode::createRenderingData(Allocator* mem, const Transform* subTF, RenderingData* data) {

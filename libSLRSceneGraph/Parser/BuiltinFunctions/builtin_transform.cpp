@@ -6,7 +6,7 @@
 //
 
 #include "builtin_transform.hpp"
-#include <libSLR/Core/Transform.h>
+#include <libSLR/Core/transform.h>
 
 namespace SLRSceneGraph {
     namespace BuiltinFunctions {

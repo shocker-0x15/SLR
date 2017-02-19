@@ -7,12 +7,12 @@
 
 #include "medium_nodes.h"
 #include "medium_materials.hpp"
-#include <libSLR/Core/Transform.h>
-#include <libSLR/Core/MediumObject.h>
+#include <libSLR/Core/transform.h>
+#include <libSLR/Core/medium_object.h>
 #include <libSLR/Scene/medium_nodes.h>
-#include <libSLR/Medium/HomogeneousMedium.h>
-#include <libSLR/Medium/GridMedium.h>
-#include <libSLR/Medium/DensityGridMedium.h>
+#include <libSLR/MediumDistribution/HomogeneousMediumDistribution.h>
+#include <libSLR/MediumDistribution/GridMediumDistribution.h>
+#include <libSLR/MediumDistribution/DensityGridMediumDistribution.h>
 
 namespace SLRSceneGraph {
     void HomogeneousMediumNode::allocateRawData() {

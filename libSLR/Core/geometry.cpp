@@ -7,10 +7,10 @@
 
 #include "geometry.h"
 
-#include "SurfaceObject.h"
-#include "MediumObject.h"
+#include "surface_object.h"
+#include "medium_object.h"
 #include "../MemoryAllocators/ArenaAllocator.h"
-#include "Transform.h"
+#include "transform.h"
 
 namespace SLR {
     void SurfaceInteraction::getSurfacePoint(SurfacePoint* surfPt) const {

@@ -447,10 +447,10 @@ namespace SLR {
     // ----------------------------------------------------------------
     // Renderer
     
-    class PathTracingRenderer;
-    class BidirectionalPathTracingRenderer;
+    class PTRenderer;
+    class BPTRenderer;
     class AMCMCPPMRenderer;
-    class VolumetricPathTracingRenderer;
+    class VolumetricPTRenderer;
     class VolumetricBPTRenderer;
     
     // END: Renderer

@@ -8,7 +8,7 @@
 #include "SceneParser.hpp"
 #include "../API.hpp"
 
-#include <libSLR/Surface/TriangleMesh.h>
+#include <libSLR/SurfaceShape/TriangleSurfaceShape.h>
 
 namespace SLRSceneGraph {
     std::ostream &operator<<(std::ostream &out, Type t) {

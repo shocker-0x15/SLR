@@ -10,9 +10,9 @@
 
 #include "../defines.h"
 #include "../declarations.h"
-#include "nodes.h"
-#include "SurfaceObject.h"
-#include "MediumObject.h"
+#include "node.h"
+#include "surface_object.h"
+#include "medium_object.h"
 
 namespace SLR {
     class SLR_API Scene {

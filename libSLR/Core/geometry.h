@@ -13,7 +13,7 @@
 #include "../BasicTypes/TexCoord2D.h"
 #include "../BasicTypes/rgb_types.h"
 #include "../BasicTypes/spectrum_types.h"
-#include "Transform.h"
+#include "transform.h"
 
 namespace SLR {
     class SLR_API Interaction {

@@ -6,7 +6,7 @@
 //
 
 #include "medium_materials.hpp"
-#include <libSLR/MediumMaterials/medium_material_headers.h>
+#include <libSLR/MediumMaterial/medium_material_headers.h>
 #include "textures.hpp"
 
 namespace SLRSceneGraph {
