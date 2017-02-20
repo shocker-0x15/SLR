@@ -22,6 +22,7 @@ namespace SLR {
             virtual SampledSpectrum evaluate(const Vector3D &dir_sn, SampledSpectrum* revVal) const = 0;
             virtual float evaluatePDF(const Vector3D &dir_sn, float* revVal = nullptr) const = 0;
         };
+        
         struct EDFProxy : public DDFProxy {
             const EDF* edf;
             EDFQuery query;
@@ -35,6 +36,7 @@ namespace SLR {
                 return edf->evaluatePDF(query, dir_sn);
             }
         };
+        
         struct BSDFProxy : public DDFProxy {
             const BSDF* bsdf;
             BSDFQuery query;
@@ -48,6 +50,7 @@ namespace SLR {
                 return bsdf->evaluatePDF(query, dir_sn, revVal);
             }
         };
+        
         struct IDFProxy : public DDFProxy {
             const IDF* idf;
             

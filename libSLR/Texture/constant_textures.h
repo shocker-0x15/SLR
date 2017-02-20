@@ -23,6 +23,8 @@ namespace SLR {
         RegularConstantContinuousDistribution2D* createIBLImportanceMap() const override;
     };
     
+    
+    
     class SLR_API ConstantFloatTexture : public FloatTexture {
         float m_value;
     public:

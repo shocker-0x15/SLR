@@ -17,6 +17,7 @@ namespace SLRSceneGraph {
         SLR::MediumMaterial* m_rawData;
     public:
         virtual ~MediumMaterial();
+        
         const SLR::MediumMaterial* getRaw() const {
             return m_rawData;
         };
@@ -33,6 +34,7 @@ namespace SLRSceneGraph {
         SLR::EmitterMediumProperty* m_rawData;
     public:
         virtual ~EmitterMediumProperty();
+        
         const SLR::EmitterMediumProperty* getRaw() const {
             return m_rawData;
         };

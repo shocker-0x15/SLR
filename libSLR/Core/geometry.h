@@ -68,6 +68,7 @@ namespace SLR {
         }
         
         void getSurfacePoint(SurfacePoint* surfPt) const;
+        
         InteractionPoint* createInteractionPoint(ArenaAllocator &mem) const override;
     };
     
@@ -99,6 +100,7 @@ namespace SLR {
         }
         
         void getMediumPoint(MediumPoint* medPt) const;
+        
         InteractionPoint* createInteractionPoint(ArenaAllocator &mem) const override;
     };
     
@@ -208,6 +210,7 @@ namespace SLR {
         
         //----------------------------------------------------------------
         // InteractionPoint's methods
+        
         bool isEmitting() const override;
         SampledSpectrum emittance(const WavelengthSamples &wls) const override;
         float evaluateSpatialPDF() const override {
@@ -227,6 +230,8 @@ namespace SLR {
         }
         
         void applyTransform(const StaticTransform &transform) override;
+        
+        // END: InteractionPoint's methods
         //----------------------------------------------------------------
     };
     
@@ -255,6 +260,7 @@ namespace SLR {
         
         //----------------------------------------------------------------
         // InteractionPoint's methods
+        
         bool isEmitting() const override;
         SampledSpectrum emittance(const WavelengthSamples &wls) const override;
         float evaluateSpatialPDF() const override {
@@ -276,6 +282,8 @@ namespace SLR {
         }
         
         void applyTransform(const StaticTransform &transform) override;
+        
+        // END: InteractionPoint's methods
         //----------------------------------------------------------------
     };
     
@@ -341,7 +349,6 @@ namespace SLR {
         virtual BoundingBox3D bounds() const = 0;
         virtual bool contains(const Point3D &p) const = 0;
         virtual bool intersectBoundary(const Ray &ray, float* distToBoundary, bool* enter) const = 0;
-        // The term "majorant" comes from the paper of Residual Ratio Tracking.
         virtual SampledSpectrum extinctionCoefficient(const Point3D &p, const WavelengthSamples &wls) const = 0;
         virtual bool interact(const Ray &ray, float distanceLimit, const WavelengthSamples &wls, LightPathSampler &pathSampler,
                               MediumInteraction* mi, SampledSpectrum* medThroughput, bool* singleWavelength) const = 0;

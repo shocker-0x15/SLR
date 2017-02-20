@@ -30,6 +30,8 @@ namespace SLR {
         RegularConstantContinuousDistribution2D* createIBLImportanceMap() const override;
     };
     
+    
+    
     class SLR_API ImageNormalTexture : public NormalTexture {
         const TiledImage2D* m_data;
         const Texture2DMapping* m_mapping;
@@ -45,6 +47,8 @@ namespace SLR {
             return evaluate(m_mapping->map(medPt));
         }
     };
+    
+    
     
     class SLR_API ImageFloatTexture : public FloatTexture {
         const TiledImage2D* m_data;

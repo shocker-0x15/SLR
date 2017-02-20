@@ -47,7 +47,7 @@ namespace SLR {
     }
     
     bool DensityGridMediumDistribution::interact(const Ray &ray, float distanceLimit, const WavelengthSamples &wls, LightPathSampler &pathSampler,
-                                     MediumInteraction *mi, SampledSpectrum *medThroughput, bool* singleWavelength) const {
+                                                 MediumInteraction *mi, SampledSpectrum *medThroughput, bool* singleWavelength) const {
         SLRAssert(std::isfinite(distanceLimit), "distanceLimit must be a finite value.");
         FreePathSampler &sampler = pathSampler.getFreePathSampler();
         

@@ -26,8 +26,11 @@ namespace SLR {
     
     
     class SLR_API IdealDirectionalEDF : public EDF {
+        Vector3D m_direction;
     public:
-        IdealDirectionalEDF() : EDF(DirectionType::Emission | DirectionType::Delta0D) { }
+        IdealDirectionalEDF(const Vector3D &dir) : EDF(DirectionType::Emission | DirectionType::Delta0D), m_direction(dir) {
+            SLRAssert(m_direction.z > 0, "Z component of the direction must be positive.");
+        }
         
         SampledSpectrum sample(const EDFQuery &query, const EDFSample &smp, EDFQueryResult* result) const override;
         SampledSpectrum evaluate(const EDFQuery &query, const Vector3D &dir) const override {

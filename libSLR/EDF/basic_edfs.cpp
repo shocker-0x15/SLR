@@ -32,9 +32,9 @@ namespace SLR {
     
     
     SampledSpectrum IdealDirectionalEDF::sample(const EDFQuery &query, const EDFSample &smp, EDFQueryResult *result) const {
-        result->dir_sn = Vector3D::Ez;
+        result->dir_sn = m_direction;
         result->dirPDF = 1.0f;
         result->dirType = m_type;
-        return SampledSpectrum::One;
+        return SampledSpectrum::One / m_direction.z;
     }
 }

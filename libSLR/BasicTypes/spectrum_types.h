@@ -74,6 +74,7 @@ namespace SLR {
     class SLR_API ContinuousSpectrumTemplate {
     public:
         virtual ~ContinuousSpectrumTemplate() { }
+        
         virtual RealType calcBounds() const = 0;
         virtual SampledSpectrumTemplate<RealType, N> evaluate(const WavelengthSamplesTemplate<RealType, N> &wls) const = 0;
         virtual ContinuousSpectrumTemplate* createScaledAndOffset(RealType scale, RealType offset) const = 0;
@@ -98,9 +99,7 @@ namespace SLR {
         }
         
         RealType calcBounds() const override;
-        
         SampledSpectrumTemplate<RealType, N> evaluate(const WavelengthSamplesTemplate<RealType, N> &wls) const override;
-        
         ContinuousSpectrumTemplate<RealType, N>* createScaledAndOffset(RealType scale, RealType offset) const override;
     };
 
@@ -127,9 +126,7 @@ namespace SLR {
         }
         
         RealType calcBounds() const override;
-        
         SampledSpectrumTemplate<RealType, N> evaluate(const WavelengthSamplesTemplate<RealType, N> &wls) const override;
-        
         ContinuousSpectrumTemplate<RealType, N>* createScaledAndOffset(RealType scale, RealType offset) const override;
     };
 
@@ -172,9 +169,7 @@ namespace SLR {
         UpsampledContinuousSpectrumTemplate(SpectrumType spType, ColorSpace space, RealType e0, RealType e1, RealType e2);
         
         RealType calcBounds() const override;
-        
         SampledSpectrumTemplate<RealType, N> evaluate(const WavelengthSamplesTemplate<RealType, N> &wls) const override;
-        
         ContinuousSpectrumTemplate<RealType, N>* createScaledAndOffset(RealType scale, RealType offset) const override;
         
         static const RealType MinWavelength;
@@ -276,9 +271,7 @@ namespace SLR {
         RealType calcBounds() const override {
             return m_baseSpectrum.calcBounds() * m_scale + m_offset;
         }
-        
         SampledSpectrumTemplate<RealType, N> evaluate(const WavelengthSamplesTemplate<RealType, N> &wls) const override;
-        
         ContinuousSpectrumTemplate<RealType, N>* createScaledAndOffset(RealType scale, RealType offset) const override;
     };
 

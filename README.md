@@ -42,7 +42,11 @@ SLR consists of the following components.
 * Bump Mapping (Normal Map)
 * Light Types
     * Area (Polygonal) Light
-    * Image Based Environmental Light
+    * Infinitely Distant Image Based Environmental Light
+    * ~~Infinitely Distant Directional Light~~ (TODO)
+* Light Distributions
+    * Diffuse
+    * Ideal Directional
 * Camera Types
     * Perspective Camera with Depth of Field (thin-lens model)
     * Environment (Equirectangular) Camera

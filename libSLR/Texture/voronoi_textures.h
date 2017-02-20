@@ -34,6 +34,8 @@ namespace SLR {
         RegularConstantContinuousDistribution2D* createIBLImportanceMap() const override;
     };
     
+    
+    
     class SLR_API VoronoiNormalTexture : public NormalTexture {
         const Texture3DMapping* m_mapping;
         float m_scale;
@@ -50,6 +52,8 @@ namespace SLR {
             return evaluate(m_mapping->map(medPt) / m_scale);
         }
     };
+    
+    
     
     class SLR_API VoronoiFloatTexture : public FloatTexture {
         const Texture3DMapping* m_mapping;

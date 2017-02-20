@@ -294,6 +294,51 @@ namespace SLR {
     
     // END: Medium Distribution
     // ----------------------------------------------------------------
+
+    
+    
+    // ----------------------------------------------------------------
+    // BSDF
+    
+    class LambertianBRDF;
+    class SpecularBRDF;
+    class SpecularBSDF;
+    class FlippedBSDF;
+    class NullBSDF;
+    class OrenNayerBRDF;
+    class ModifiedWardDurBRDF;
+    class AshikhminShirleyBRDF;
+    class MicrofacetBRDF;
+    class MicrofacetBSDF;
+    class MultiBSDF;
+    
+    // END: BSDF
+    // ----------------------------------------------------------------
+    
+    
+    
+    // ----------------------------------------------------------------
+    // Phase Function
+    
+    class IsotropicPhaseFunction;
+    class HenyeyGreensteinPhaseFunction;
+    class SchlickPhaseFunction;
+    
+    // END: Phase Function
+    // ----------------------------------------------------------------
+    
+    
+    
+    // ----------------------------------------------------------------
+    // EDF
+    
+    class DiffuseEDF;
+    class IdealDirectionalEDF;
+    class IBLEDF;
+    class MultiEDF;
+    
+    // END: EDF
+    // ----------------------------------------------------------------
     
     
     
@@ -359,51 +404,6 @@ namespace SLR {
     class QBVH;
     
     // END: Accelerator
-    // ----------------------------------------------------------------
-    
-    
-    
-    // ----------------------------------------------------------------
-    // BSDF
-    
-    class LambertianBRDF;
-    class SpecularBRDF;
-    class SpecularBSDF;
-    class FlippedBSDF;
-    class NullBSDF;
-    class OrenNayerBRDF;
-    class ModifiedWardDurBRDF;
-    class AshikhminShirleyBRDF;
-    class MicrofacetBRDF;
-    class MicrofacetBSDF;
-    class MultiBSDF;
-    
-    // END: BSDF
-    // ----------------------------------------------------------------
-    
-    
-    
-    // ----------------------------------------------------------------
-    // Phase Function
-    
-    class IsotropicPhaseFunction;
-    class HenyeyGreensteinPhaseFunction;
-    class SchlickPhaseFunction;
-    
-    // END: Phase Function
-    // ----------------------------------------------------------------
-    
-    
-    
-    // ----------------------------------------------------------------
-    // EDF
-    
-    class DiffuseEDF;
-    class IdealDirectionalEDF;
-    class IBLEDF;
-    class MultiEDF;
-    
-    // END: EDF
     // ----------------------------------------------------------------
     
     

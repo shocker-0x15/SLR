@@ -61,7 +61,6 @@ namespace SLR {
         
         uint32_t buildRecursive(ObjInfos &infos, uint32_t start, uint32_t end, uint32_t depth) {
             auto &indices = infos.indices;
-            auto &bboxes = infos.bboxes;
             auto &centroids = infos.centroids;
             
             uint32_t nodeIdx = (uint32_t)m_nodes.size();

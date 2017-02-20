@@ -68,6 +68,13 @@ namespace SLR {
         Matrix4x4 getMatrix4x4() const { return mat; }
         bool isIdentity() const { return mat.isIdentity(); }
         
+        friend StaticTransform invert(const StaticTransform &t) { return StaticTransform(t.matInv, t.mat); }
+        friend StaticTransform transpose(const StaticTransform &t) { return StaticTransform(transpose(t.mat)); }
+        
+        
+        
+        //----------------------------------------------------------------
+        // Transform's methods
         
         bool isStatic() const override { return true; }
         void sample(float time, StaticTransform* tf) const override { *tf = *this; }
@@ -75,10 +82,8 @@ namespace SLR {
         Transform* copy(Allocator* mem) const override;
         BoundingBox3D motionBounds(const BoundingBox3D &bb) const override { return *this * bb; }
         
-        
-        
-        friend StaticTransform invert(const StaticTransform &t) { return StaticTransform(t.matInv, t.mat); }
-        friend StaticTransform transpose(const StaticTransform &t) { return StaticTransform(transpose(t.mat)); }
+        // END: Transform's methods
+        //----------------------------------------------------------------
     };
     
     
@@ -104,7 +109,14 @@ namespace SLR {
             return AnimatedTransform(tf * atf.m_tfBegin, tf * atf.m_tfEnd, atf.m_tBegin, atf.m_tEnd);
         }
         
-        bool isStatic() const override { return m_tfBegin == m_tfEnd; }
+        
+        
+        //----------------------------------------------------------------
+        // Transform's methods
+        
+        bool isStatic() const override {
+            return m_tfBegin == m_tfEnd;
+        }
         
         void sample(float time, StaticTransform* tf) const override {
             if (time <= m_tBegin) {
@@ -125,7 +137,10 @@ namespace SLR {
             *tf = translate(trans) * rotate.toMatrix() * scale;
         }
         
-        bool isChained() const override { return false; }
+        bool isChained() const override {
+            return false;
+        }
+        
         Transform* copy(Allocator* mem) const override;
         
         // FIXME: This sampling-based way does not guarantee to generate the actual bounds.
@@ -141,6 +156,9 @@ namespace SLR {
             }
             return ret;
         }
+        
+        // END: Transform's methods
+        //----------------------------------------------------------------
     };
     
     
@@ -161,6 +179,9 @@ namespace SLR {
         
         void reduce(Allocator* mem, std::vector<Transform*> &reducedTFs) const;
         Transform* reduce(Allocator* mem) const;
+        
+        //----------------------------------------------------------------
+        // Transform's methods
         
         bool isStatic() const override {
             bool ret = true;
@@ -195,7 +216,10 @@ namespace SLR {
             *tf = ret;
         }
         
-        bool isChained() const override { return true; }
+        bool isChained() const override {
+            return true;
+        }
+        
         Transform* copy(Allocator* mem) const override;
         
         BoundingBox3D motionBounds(const BoundingBox3D &bb) const override {
@@ -213,6 +237,9 @@ namespace SLR {
             }
             return ret;
         }
+        
+        // END: Transform's methods
+        //----------------------------------------------------------------
     };
 }
 

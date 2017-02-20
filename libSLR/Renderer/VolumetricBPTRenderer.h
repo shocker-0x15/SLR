@@ -17,18 +17,12 @@
 
 namespace SLR {
     class SLR_API VolumetricBPTRenderer : public Renderer {
-        struct SLR_API DDFQuery {
-            Vector3D dir_sn;
-            Normal3D gNormal_sn;
-            int16_t wlHint;
-            bool adjoint;
-        };
-        
         struct DDFProxy {
             virtual const void* getDDF() const = 0;
             virtual SampledSpectrum evaluate(const Vector3D &dir_sn, SampledSpectrum* revVal) const = 0;
             virtual float evaluatePDF(const Vector3D &dir_sn, float* revVal = nullptr) const = 0;
         };
+        
         struct EDFProxy : public DDFProxy {
             const EDF* edf;
             EDFQuery query;
@@ -42,6 +36,7 @@ namespace SLR {
                 return edf->evaluatePDF(query, dir_sn);
             }
         };
+        
         struct ABDFProxy : public DDFProxy {
             const AbstractBDF* abdf;
             const ABDFQuery* query;
@@ -55,6 +50,7 @@ namespace SLR {
                 return abdf->evaluatePDF(query, dir_sn, revVal);
             }
         };
+        
         struct IDFProxy : public DDFProxy {
             const IDF* idf;
             

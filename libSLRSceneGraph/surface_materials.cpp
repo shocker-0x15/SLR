@@ -115,9 +115,9 @@ namespace SLRSceneGraph {
         m_rawData = new SLR::DiffuseEmitterSurfaceProperty(emittance->getRaw());
     };
     
-    IdealDirectionalEmitterSurfaceProperty::IdealDirectionalEmitterSurfaceProperty(const SpectrumTextureRef &emittance) :
-    m_emittance(emittance) {
-        m_rawData = new SLR::IdealDirectionalEmitterSurfaceProperty(emittance->getRaw());
+    IdealDirectionalEmitterSurfaceProperty::IdealDirectionalEmitterSurfaceProperty(const SpectrumTextureRef &emittance, const SLR::Vector3D &dir) :
+    m_emittance(emittance), m_direction(dir) {
+        m_rawData = new SLR::IdealDirectionalEmitterSurfaceProperty(emittance->getRaw(), dir);
     };
     
     IBLEmitterSurfaceProperty::IBLEmitterSurfaceProperty(const SceneWRef &scene, const SpectrumTextureRef &coeffM, float scale) :
@@ -174,8 +174,8 @@ namespace SLRSceneGraph {
         return createShared<DiffuseEmitterSurfaceProperty>(emittance);
     }
     
-    EmitterSurfacePropertyRef SurfaceMaterial::createIdealDirectionalEmitter(const SpectrumTextureRef &emittance) {
-        return createShared<IdealDirectionalEmitterSurfaceProperty>(emittance);
+    EmitterSurfacePropertyRef SurfaceMaterial::createIdealDirectionalEmitter(const SpectrumTextureRef &emittance, const SLR::Vector3D &dir) {
+        return createShared<IdealDirectionalEmitterSurfaceProperty>(emittance, dir);
     }
     
     SurfaceMaterialRef SurfaceMaterial::createEmitterSurfaceMaterial(const SurfaceMaterialRef &mat, const EmitterSurfacePropertyRef &emit) {

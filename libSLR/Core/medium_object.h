@@ -40,10 +40,16 @@ namespace SLR {
                       VolumetricLightPosQueryResult* lightPosResult, SampledSpectrum* Le0, EDF** edf,
                       EDFQueryResult* edfResult, SampledSpectrum* Le1) const;
         
+        //----------------------------------------------------------------
+        // Light's methods
+        
         SampledSpectrum sample(const LightPosQuery &query, LightPathSampler &pathSampler, ArenaAllocator &mem, LightPosQueryResult** lpResult) const override;
         Ray sampleRay(const LightPosQuery &lightPosQuery, LightPathSampler &pathSampler, const EDFQuery &edfQuery, ArenaAllocator &mem,
                       LightPosQueryResult** lightPosResult, SampledSpectrum* Le0, EDF** edf,
                       EDFQueryResult* edfResult, SampledSpectrum* Le1) const override;
+        
+        // END: Light's methods
+        //----------------------------------------------------------------
     };
     
     
@@ -88,13 +94,19 @@ namespace SLR {
         SingleMediumObject(const MediumDistribution* medium, const MediumMaterial* material) :
         m_medium(medium), m_material(material) {}
         
+        virtual AbstractBDF* createAbstractBDF(const MediumPoint &medPt, const WavelengthSamples &wls, ArenaAllocator &mem) const;
+        
         //----------------------------------------------------------------
         // Object's methods
+        
         BoundingBox3D bounds() const override { return m_medium->bounds(); }
+        
+        // END: Object's methods
         //----------------------------------------------------------------
         
         //----------------------------------------------------------------
         // MediumObject's methods
+        
         bool isEmitting() const override;
         float importance() const override;
         void selectLight(float u, float time, VolumetricLight* light, float* prob) const override;
@@ -116,9 +128,9 @@ namespace SLR {
                       MediumInteraction* mi, SampledSpectrum* medThroughput, bool* singleWavelength) const override;
         SampledSpectrum evaluateTransmittance(Ray &ray, float distanceLimit, const WavelengthSamples &wls, LightPathSampler &pathSampler, bool* singleWavelength) const override;
         void getMediumPoint(const MediumInteraction &mi, MediumPoint* medPt) const override;
-        //----------------------------------------------------------------
         
-        virtual AbstractBDF* createAbstractBDF(const MediumPoint &medPt, const WavelengthSamples &wls, ArenaAllocator &mem) const;
+        // END: MediumObject's methods
+        //----------------------------------------------------------------
     };
     
     
@@ -132,11 +144,15 @@ namespace SLR {
         
         //----------------------------------------------------------------
         // Object's methods
+        
         BoundingBox3D bounds() const override;
+        
+        // END: Object's methods
         //----------------------------------------------------------------
         
         //----------------------------------------------------------------
         // MediumObject's methods
+        
         bool isEmitting() const override;
         float importance() const override;
         void selectLight(float u, float time, VolumetricLight* light, float* prob) const override;
@@ -146,6 +162,8 @@ namespace SLR {
         bool interact(Ray &ray, float distanceLimit, const WavelengthSamples &wls, LightPathSampler &pathSampler,
                       MediumInteraction* mi, SampledSpectrum* medThroughput, bool* singleWavelength) const override;
         SampledSpectrum evaluateTransmittance(Ray &ray, float distanceLimit, const WavelengthSamples &wls, LightPathSampler &pathSampler, bool* singleWavelength) const override;
+        
+        // END: MediumObject's methods
         //----------------------------------------------------------------
         
         void setTransform(const Transform* t) { m_transform = t; }
@@ -163,11 +181,15 @@ namespace SLR {
         
         //----------------------------------------------------------------
         // Object's methods
+        
         BoundingBox3D bounds() const override;
+        
+        // END: Object's methods
         //----------------------------------------------------------------
         
         //----------------------------------------------------------------
         // MediumObject's methods
+        
         bool isEmitting() const override { return m_medObj->isEmitting(); }
         float importance() const override { return m_medObj->importance(); }
         void selectLight(float u, float time, VolumetricLight* light, float* prob) const override {
@@ -179,6 +201,8 @@ namespace SLR {
         bool interact(Ray &ray, float distanceLimit, const WavelengthSamples &wls, LightPathSampler &pathSampler,
                       MediumInteraction* mi, SampledSpectrum* medThroughput, bool* singleWavelength) const override;
         SampledSpectrum evaluateTransmittance(Ray &ray, float distanceLimit, const WavelengthSamples &wls, LightPathSampler &pathSampler, bool* singleWavelength) const override;
+        
+        // END: MediumObject's methods
         //----------------------------------------------------------------
     };
     
@@ -198,11 +222,15 @@ namespace SLR {
         
         //----------------------------------------------------------------
         // Object's methods
+        
         BoundingBox3D bounds() const override;
+        
+        // END: Object's methods
         //----------------------------------------------------------------
         
         //----------------------------------------------------------------
         // MediumObject's methods
+        
         bool isEmitting() const override;
         float importance() const override;
         void selectLight(float u, float time, VolumetricLight* light, float* prob) const override;
@@ -216,6 +244,8 @@ namespace SLR {
         bool interact(Ray &ray, float distanceLimit, const WavelengthSamples &wls, LightPathSampler &pathSampler,
                       MediumInteraction* mi, SampledSpectrum* medThroughput, bool* singleWavelength) const override;
         SampledSpectrum evaluateTransmittance(Ray &ray, float distanceLimit, const WavelengthSamples &wls, LightPathSampler &pathSampler, bool* singleWavelength) const override;
+        
+        // END: MediumObject's methods
         //----------------------------------------------------------------
     };
 }

@@ -40,10 +40,16 @@ namespace SLR {
                       SurfaceLightPosQueryResult* lightPosResult, SampledSpectrum* Le0, EDF** edf,
                       EDFQueryResult* edfResult, SampledSpectrum* Le1) const;
         
+        //----------------------------------------------------------------
+        // Light's methods
+        
         SampledSpectrum sample(const LightPosQuery &query, LightPathSampler &pathSampler, ArenaAllocator &mem, LightPosQueryResult** lpResult) const override;
         Ray sampleRay(const LightPosQuery &lightPosQuery, LightPathSampler &pathSampler, const EDFQuery &edfQuery, ArenaAllocator &mem,
                       LightPosQueryResult** lightPosResult, SampledSpectrum* Le0, EDF** edf,
                       EDFQueryResult* edfResult, SampledSpectrum* Le1) const override;
+        
+        // END: Light's methods
+        //----------------------------------------------------------------
     };
     
     
@@ -90,8 +96,15 @@ namespace SLR {
         SingleSurfaceObject(const SurfaceShape* surf, const SurfaceMaterial* mat) : m_surface(surf), m_material(mat) { }
         virtual ~SingleSurfaceObject() { }
         
+        virtual BSDF* createBSDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem) const;
+        
+        virtual float evaluateAreaPDF(const SurfacePoint& surfPt) const;
+        virtual SampledSpectrum emittance(const SurfacePoint& surfPt, const WavelengthSamples &wls) const;
+        virtual EDF* createEDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem) const;
+        
         //----------------------------------------------------------------
         // Object's methods
+        
         BoundingBox3D bounds() const override { return m_surface->bounds(); }
         BoundingBox3D choppedBounds(BoundingBox3D::Axis chopAxis, float minChopPos, float maxChopPos) const override {
             return m_surface->choppedBounds(chopAxis, minChopPos, maxChopPos);
@@ -99,10 +112,13 @@ namespace SLR {
         void splitBounds(BoundingBox3D::Axis chopAxis, float splitPos, BoundingBox3D* bbox0, BoundingBox3D* bbox1) const override {
             m_surface->splitBounds(chopAxis, splitPos, bbox0, bbox1);
         }
+        
+        // END: Object's methods
         //----------------------------------------------------------------
         
         //----------------------------------------------------------------
         // SurfaceObject's methods
+        
         bool isEmitting() const override;
         float importance() const override;
         void selectLight(float u, float time, SurfaceLight* light, float* prob) const override;
@@ -119,13 +135,9 @@ namespace SLR {
         float costForIntersect() const override { return m_surface->costForIntersect(); }
         bool intersect(Ray &ray, SurfaceInteraction* si) const override;
         void getSurfacePoint(const SurfaceInteraction &si, SurfacePoint* surfPt) const override;
+        
+        // END: SurfaceObject's methods
         //----------------------------------------------------------------
-        
-        virtual BSDF* createBSDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem) const;
-        
-        virtual float evaluateAreaPDF(const SurfacePoint& surfPt) const;
-        virtual SampledSpectrum emittance(const SurfacePoint& surfPt, const WavelengthSamples &wls) const;
-        virtual EDF* createEDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem) const;
     };
     
     
@@ -138,7 +150,10 @@ namespace SLR {
         
         //----------------------------------------------------------------
         // SurfaceObject's methods
+        
         void getSurfacePoint(const SurfaceInteraction &si, SurfacePoint* surfPt) const override;
+        
+        // END: SurfaceObject's methods
         //----------------------------------------------------------------
     };
     
@@ -153,6 +168,7 @@ namespace SLR {
         
         //----------------------------------------------------------------
         // SurfaceObject's methods
+        
         bool isEmitting() const override;
         float importance() const override;
         
@@ -164,13 +180,18 @@ namespace SLR {
                       ArenaAllocator &mem,
                       SurfaceLightPosQueryResult* lightPosResult, SampledSpectrum* Le0, EDF** edf,
                       EDFQueryResult* edfResult, SampledSpectrum* Le1) const override;
+        
+        // END: SurfaceObject's methods
         //----------------------------------------------------------------
         
         //----------------------------------------------------------------
         // SingleSurfaceObject's methods
+        
         BSDF* createBSDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem) const override;
         
         float evaluateAreaPDF(const SurfacePoint& surfPt) const override;
+        
+        // END: SingleSurfaceObject's methods
         //----------------------------------------------------------------
     };
     
@@ -183,13 +204,19 @@ namespace SLR {
     public:
         TransformedSurfaceObject(const SurfaceObject* surfObj, const Transform* transform) : m_surfObj(surfObj), m_transform(transform) { }
         
+        void setTransform(const Transform* t) { m_transform = t; }
+        
         //----------------------------------------------------------------
         // Object's methods
+        
         BoundingBox3D bounds() const override;
+        
+        // END: Object's methods
         //----------------------------------------------------------------
         
         //----------------------------------------------------------------
         // SurfaceObject's methods
+        
         bool isEmitting() const override;
         float importance() const override;
         void selectLight(float u, float time, SurfaceLight* light, float* prob) const override;
@@ -197,9 +224,9 @@ namespace SLR {
         float costForIntersect() const override { return m_surfObj->costForIntersect(); }
         bool contains(const Point3D &p, float time) const override;
         bool intersect(Ray &ray, SurfaceInteraction* si) const override;
-        //----------------------------------------------------------------
         
-        void setTransform(const Transform* t) { m_transform = t; }
+        // END: SurfaceObject's methods
+        //----------------------------------------------------------------
     };
     
     
@@ -216,11 +243,15 @@ namespace SLR {
         
         //----------------------------------------------------------------
         // Object's methods
+        
         BoundingBox3D bounds() const override;
+        
+        // END: Object's methods
         //----------------------------------------------------------------
         
         //----------------------------------------------------------------
         // SurfaceObject's methods
+        
         bool isEmitting() const override;
         float importance() const override;
         void selectLight(float u, float time, SurfaceLight* light, float* prob) const override;
@@ -228,6 +259,8 @@ namespace SLR {
         float costForIntersect() const override;
         bool contains(const Point3D &p, float time) const override;
         bool intersect(Ray &ray, SurfaceInteraction* si) const override;
+        
+        // END: SurfaceObject's methods
         //----------------------------------------------------------------
     };
 }

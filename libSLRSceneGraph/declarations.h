@@ -21,9 +21,42 @@
 #endif
 
 namespace SLRSceneGraph {
-    typedef std::shared_ptr<SLR::Transform> TransformRef;
+    struct SceneParsingDriver;
+    
+    class Statement;
+    typedef std::shared_ptr<Statement> StatementRef;
+    typedef std::shared_ptr<std::vector<StatementRef>> StatementsRef;
+    class Expression;
+    typedef std::shared_ptr<Expression> ExpressionRef;
+    class Term;
+    typedef std::shared_ptr<Term> TermRef;
+    class SingleTerm;
+    typedef std::shared_ptr<SingleTerm> SingleTermRef;
+    class Value;
+    typedef std::shared_ptr<Value> ValueRef;
+    class ArgumentDefinition;
+    typedef std::shared_ptr<ArgumentDefinition> ArgumentDefinitionRef;
+    typedef std::shared_ptr<std::vector<ArgumentDefinitionRef>> ArgumentDefinitionVecRef;
+    class Parameter;
+    typedef std::shared_ptr<Parameter> ParameterRef;
+    typedef std::shared_ptr<std::vector<ParameterRef>> ParameterVecRef;
+    
+    struct ErrorMessage;
+    
+    struct Element;
+    struct ParameterList;
+    typedef std::shared_ptr<ParameterList> ParameterListRef;
+    class Function;
+    struct TypeInfo;
+    
+    class LocalVariables;
+    struct ExecuteContext;
+    
+    
     
     typedef std::shared_ptr<SLR::AssetSpectrum> AssetSpectrumRef;
+    
+    typedef std::shared_ptr<SLR::Transform> TransformRef;
     
     typedef std::shared_ptr<SLR::Image2D> Image2DRef;
     typedef std::shared_ptr<SLR::TiledImage2D> TiledImage2DRef;
@@ -60,14 +93,14 @@ namespace SLRSceneGraph {
     // Nodes
     class Node;
     class InternalNode;
-    class SurfaceObjectNode;
     class ReferenceNode;
+    class SurfaceNode;
+    class MediumNode;
+    class InfinitesimalPointNode;
+    class InfiniteSphereNode;
     class PerspectiveCameraNode;
     class EquirectangularCameraNode;
-    class SurfaceNode;
     class TriangleMeshNode;
-    class InfiniteSphereNode;
-    class MediumNode;
     class HomogeneousMediumNode;
     class GridMediumNode;
     class DensityGridMediumNode;
@@ -75,47 +108,15 @@ namespace SLRSceneGraph {
     typedef std::shared_ptr<InternalNode> InternalNodeRef;
     typedef std::shared_ptr<ReferenceNode> ReferenceNodeRef;
     typedef std::shared_ptr<SurfaceNode> SurfaceNodeRef;
-    typedef std::shared_ptr<TriangleMeshNode> TriangleMeshNodeRef;
-    typedef std::shared_ptr<InfiniteSphereNode> InfiniteSphereNodeRef;
     typedef std::shared_ptr<MediumNode> MediumNodeRef;
-    
-    struct RenderingData;
+    typedef std::shared_ptr<InfiniteSphereNode> InfiniteSphereNodeRef;
+    typedef std::shared_ptr<TriangleMeshNode> TriangleMeshNodeRef;
     
     class Scene;
     typedef std::shared_ptr<Scene> SceneRef;
     typedef std::weak_ptr<Scene> SceneWRef;
     
     struct RenderingContext;
-    struct SceneParsingDriver;
-    
-    class Statement;
-    typedef std::shared_ptr<Statement> StatementRef;
-    typedef std::shared_ptr<std::vector<StatementRef>> StatementsRef;
-    class Expression;
-    typedef std::shared_ptr<Expression> ExpressionRef;
-    class Term;
-    typedef std::shared_ptr<Term> TermRef;
-    class SingleTerm;
-    typedef std::shared_ptr<SingleTerm> SingleTermRef;
-    class Value;
-    typedef std::shared_ptr<Value> ValueRef;
-    class ArgumentDefinition;
-    typedef std::shared_ptr<ArgumentDefinition> ArgumentDefinitionRef;
-    typedef std::shared_ptr<std::vector<ArgumentDefinitionRef>> ArgumentDefinitionVecRef;
-    class Parameter;
-    typedef std::shared_ptr<Parameter> ParameterRef;
-    typedef std::shared_ptr<std::vector<ParameterRef>> ParameterVecRef;
-    
-    struct ErrorMessage;
-    
-    struct Element;
-    struct ParameterList;
-    typedef std::shared_ptr<ParameterList> ParameterListRef;
-    class Function;
-    struct TypeInfo;
-    
-    class LocalVariables;
-    struct ExecuteContext;
 }
 
 #endif /* __SLRSceneGraph_references__ */

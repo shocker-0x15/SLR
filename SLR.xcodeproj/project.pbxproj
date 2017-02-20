@@ -261,14 +261,14 @@
 		4613A17A1E36500600D05AA6 /* Ray.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; name = Ray.h; path = libSLR/BasicTypes/Ray.h; sourceTree = SOURCE_ROOT; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
 		461BDADB1E46FE4A00D97D37 /* medium_materials.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; lineEnding = 0; name = medium_materials.cpp; path = libSLRSceneGraph/medium_materials.cpp; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.cpp; };
 		4634EC3E1B9B60400047AE54 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
-		463810591C21AD0E00211293 /* SceneParser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SceneParser.cpp; path = libSLRSceneGraph/Parser/SceneParser.cpp; sourceTree = "<group>"; };
+		463810591C21AD0E00211293 /* SceneParser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; lineEnding = 0; name = SceneParser.cpp; path = libSLRSceneGraph/Parser/SceneParser.cpp; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.cpp; };
 		464545951E1E2D8E00B4CECD /* Scene.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; lineEnding = 0; name = Scene.cpp; path = libSLR/Scene/Scene.cpp; sourceTree = SOURCE_ROOT; xcLanguageSpecificationIdentifier = xcode.lang.cpp; };
 		464545961E1E2D8E00B4CECD /* Scene.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; name = Scene.h; path = libSLR/Scene/Scene.h; sourceTree = SOURCE_ROOT; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
 		4645459D1E1E315100B4CECD /* TriangleMeshNode.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; lineEnding = 0; name = TriangleMeshNode.cpp; path = libSLR/Scene/TriangleMeshNode.cpp; sourceTree = SOURCE_ROOT; xcLanguageSpecificationIdentifier = xcode.lang.cpp; };
 		4645459E1E1E315100B4CECD /* TriangleMeshNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TriangleMeshNode.h; path = libSLR/Scene/TriangleMeshNode.h; sourceTree = SOURCE_ROOT; };
 		464545A11E1F5EDF00B4CECD /* camera_nodes.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; lineEnding = 0; name = camera_nodes.cpp; path = libSLR/Scene/camera_nodes.cpp; sourceTree = SOURCE_ROOT; xcLanguageSpecificationIdentifier = xcode.lang.cpp; };
 		464545A21E1F5EDF00B4CECD /* camera_nodes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; name = camera_nodes.h; path = libSLR/Scene/camera_nodes.h; sourceTree = SOURCE_ROOT; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
-		464EAAFB1D683DA0000E1C65 /* builtin_math.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = builtin_math.cpp; path = libSLRSceneGraph/Parser/BuiltinFunctions/builtin_math.cpp; sourceTree = "<group>"; };
+		464EAAFB1D683DA0000E1C65 /* builtin_math.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; lineEnding = 0; name = builtin_math.cpp; path = libSLRSceneGraph/Parser/BuiltinFunctions/builtin_math.cpp; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.cpp; };
 		464EAAFF1D6843E6000E1C65 /* builtin_transform.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; lineEnding = 0; name = builtin_transform.cpp; path = libSLRSceneGraph/Parser/BuiltinFunctions/builtin_transform.cpp; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.cpp; };
 		464EAB031D68471C000E1C65 /* builtin_texture.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; lineEnding = 0; name = builtin_texture.cpp; path = libSLRSceneGraph/Parser/BuiltinFunctions/builtin_texture.cpp; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.cpp; };
 		4651F32F1C5673BC0026B8A5 /* Matrix4x4.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; lineEnding = 0; name = Matrix4x4.cpp; path = libSLR/BasicTypes/Matrix4x4.cpp; sourceTree = SOURCE_ROOT; xcLanguageSpecificationIdentifier = xcode.lang.cpp; };
@@ -403,15 +403,15 @@
 		465D8B8C1E59DEAB001B8382 /* medium_nodes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = medium_nodes.h; path = libSLRSceneGraph/Scene/medium_nodes.h; sourceTree = "<group>"; };
 		465D8B8F1E59DEAB001B8382 /* Scene.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Scene.cpp; path = libSLRSceneGraph/Scene/Scene.cpp; sourceTree = "<group>"; };
 		465D8B901E59DEAB001B8382 /* Scene.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Scene.h; path = libSLRSceneGraph/Scene/Scene.h; sourceTree = "<group>"; };
-		465D8B911E59DEAB001B8382 /* TriangleMeshNode.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TriangleMeshNode.cpp; path = libSLRSceneGraph/Scene/TriangleMeshNode.cpp; sourceTree = "<group>"; };
+		465D8B911E59DEAB001B8382 /* TriangleMeshNode.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; lineEnding = 0; name = TriangleMeshNode.cpp; path = libSLRSceneGraph/Scene/TriangleMeshNode.cpp; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.cpp; };
 		465D8B921E59DEAB001B8382 /* TriangleMeshNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TriangleMeshNode.h; path = libSLRSceneGraph/Scene/TriangleMeshNode.h; sourceTree = "<group>"; };
-		465D8BA11E59E318001B8382 /* node.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = node.cpp; path = libSLRSceneGraph/Scene/node.cpp; sourceTree = "<group>"; };
-		465D8BA21E59E318001B8382 /* node.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = node.h; path = libSLRSceneGraph/Scene/node.h; sourceTree = "<group>"; };
+		465D8BA11E59E318001B8382 /* node.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; lineEnding = 0; name = node.cpp; path = libSLRSceneGraph/Scene/node.cpp; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.cpp; };
+		465D8BA21E59E318001B8382 /* node.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; name = node.h; path = libSLRSceneGraph/Scene/node.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
 		465D8BA51E59E459001B8382 /* API.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = API.h; path = libSLRSceneGraph/API.h; sourceTree = "<group>"; };
 		465D8BA71E59E465001B8382 /* textures.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = textures.h; path = libSLRSceneGraph/textures.h; sourceTree = "<group>"; };
-		465D8BA91E59E46B001B8382 /* surface_materials.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = surface_materials.h; path = libSLRSceneGraph/surface_materials.h; sourceTree = "<group>"; };
+		465D8BA91E59E46B001B8382 /* surface_materials.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; name = surface_materials.h; path = libSLRSceneGraph/surface_materials.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
 		465D8BAB1E59E470001B8382 /* medium_materials.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = medium_materials.h; path = libSLRSceneGraph/medium_materials.h; sourceTree = "<group>"; };
-		465D8BAD1E59E488001B8382 /* SceneParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SceneParser.h; path = libSLRSceneGraph/Parser/SceneParser.h; sourceTree = "<group>"; };
+		465D8BAD1E59E488001B8382 /* SceneParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; name = SceneParser.h; path = libSLRSceneGraph/Parser/SceneParser.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
 		465D8BAF1E59E493001B8382 /* builtin_math.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = builtin_math.h; path = libSLRSceneGraph/Parser/BuiltinFunctions/builtin_math.h; sourceTree = "<group>"; };
 		465D8BB01E59E493001B8382 /* builtin_texture.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = builtin_texture.h; path = libSLRSceneGraph/Parser/BuiltinFunctions/builtin_texture.h; sourceTree = "<group>"; };
 		465D8BB11E59E493001B8382 /* builtin_transform.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = builtin_transform.h; path = libSLRSceneGraph/Parser/BuiltinFunctions/builtin_transform.h; sourceTree = "<group>"; };
@@ -907,13 +907,13 @@
 				468F9DC51D7DC7D200DD02BD /* RNG */,
 				4634EBF11B9B529B0047AE54 /* Surface Shape */,
 				4645457F1E16C22100B4CECD /* Medium Distribution */,
+				4634EB9A1B9B529B0047AE54 /* BSDF */,
+				4634EBC51B9B529B0047AE54 /* EDF */,
+				468F9DC01D7C380D00DD02BD /* Phase Function */,
 				4634EC051B9B529B0047AE54 /* Texture */,
 				4634EBF61B9B529B0047AE54 /* Surface Material */,
 				461BDAD41E45E57900D97D37 /* Medium Material */,
 				4634EB8E1B9B529B0047AE54 /* Accelerator */,
-				4634EB9A1B9B529B0047AE54 /* BSDF */,
-				4634EBC51B9B529B0047AE54 /* EDF */,
-				468F9DC01D7C380D00DD02BD /* Phase Function */,
 				4634EBA31B9B529B0047AE54 /* Camera */,
 				464545941E1E2D2F00B4CECD /* Scene */,
 				4634EBDF1B9B529B0047AE54 /* Renderer */,

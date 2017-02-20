@@ -27,6 +27,6 @@ namespace SLR {
     }
     
     EDF* IdealDirectionalEmitterSurfaceProperty::getEDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem, float scale) const {
-        return mem.create<IdealDirectionalEDF>();
+        return mem.create<IdealDirectionalEDF>(m_direction);
     }
 }

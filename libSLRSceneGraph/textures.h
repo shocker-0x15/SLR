@@ -18,6 +18,7 @@ namespace SLRSceneGraph {
     public:
         Texture2DMapping();
         virtual ~Texture2DMapping();
+        
         const SLR::Texture2DMapping* getRaw() const {
             return m_rawData;
         };
@@ -34,6 +35,7 @@ namespace SLRSceneGraph {
     public:
         Texture3DMapping();
         virtual ~Texture3DMapping();
+        
         const SLR::Texture3DMapping* getRaw() const {
             return m_rawData;
         };

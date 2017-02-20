@@ -10,6 +10,7 @@
 
 #include "../defines.h"
 #include "../declarations.h"
+#include "../Core/geometry.h"
 #include "../Core/surface_material.h"
 
 namespace SLR {
@@ -27,9 +28,10 @@ namespace SLR {
     
     class SLR_API IdealDirectionalEmitterSurfaceProperty : public EmitterSurfaceProperty {
         const SpectrumTexture* m_emittance;
+        const Vector3D m_direction;
     public:
-        IdealDirectionalEmitterSurfaceProperty(const SpectrumTexture* emittance) :
-        m_emittance(emittance) {};
+        IdealDirectionalEmitterSurfaceProperty(const SpectrumTexture* emittance, const Vector3D &dir) :
+        m_emittance(emittance), m_direction(dir) {};
         
         SampledSpectrum emittance(const SurfacePoint &surfPt, const WavelengthSamples &wls) const override;
         EDF* getEDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem, float scale = 1.0f) const override;

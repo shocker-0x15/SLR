@@ -16,6 +16,7 @@ namespace SLR {
     class SLR_API Texture2DMapping {
     public:
         virtual ~Texture2DMapping() {}
+        
         virtual Point3D map(const SurfacePoint &surfPt) const {
             TexCoord2D texCoord = surfPt.getTextureCoordinate();
             return Point3D(texCoord.u, texCoord.v, 0.0f);
@@ -28,6 +29,7 @@ namespace SLR {
     class SLR_API Texture3DMapping {
     public:
         virtual ~Texture3DMapping() {}
+        
         virtual Point3D map(const SurfacePoint &surfPt) const {
             TexCoord2D texCoord = surfPt.getTextureCoordinate();
             return Point3D(texCoord.u, texCoord.v, 0.0f);
@@ -42,6 +44,7 @@ namespace SLR {
         float m_scaleX, m_scaleY;
     public:
         OffsetAndScale2DMapping(float ox, float oy, float sx, float sy) : m_offsetX(ox), m_offsetY(oy), m_scaleX(sx), m_scaleY(sy) {}
+        
         Point3D map(const SurfacePoint &surfPt) const override {
             TexCoord2D texCoord = surfPt.getTextureCoordinate();
             return Point3D((texCoord.u + m_offsetX) * m_scaleX,
@@ -62,6 +65,7 @@ namespace SLR {
     public:
         OffsetAndScale3DMapping(float ox, float oy, float oz, float sx, float sy, float sz) :
         m_offsetX(ox), m_offsetY(oy), m_offsetZ(oz), m_scaleX(sx), m_scaleY(sy), m_scaleZ(sz) { }
+        
         Point3D map(const SurfacePoint &surfPt) const override {
             TexCoord2D texCoord = surfPt.getTextureCoordinate();
             return Point3D((texCoord.u + m_offsetX) * m_scaleX,
@@ -79,6 +83,7 @@ namespace SLR {
     class SLR_API WorldPosition3DMapping : public Texture3DMapping {
     public:
         WorldPosition3DMapping() {}
+        
         Point3D map(const SurfacePoint &surfPt) const override {
             return surfPt.getPosition();
         }

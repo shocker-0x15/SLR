@@ -59,7 +59,10 @@ namespace SLR {
         IndependentLightPathSampler() :m_rng() , m_freePathSampler(m_rng) { }
         IndependentLightPathSampler(uint32_t seed) : m_rng(seed), m_freePathSampler(m_rng) { }
         
-        float getTimeSample(float timeBegin, float timeEnd) override { float v = m_rng.getFloat0cTo1o(); return timeBegin * (1 - v) + timeEnd * v; }
+        float getTimeSample(float timeBegin, float timeEnd) override {
+            float v = m_rng.getFloat0cTo1o();
+            return timeBegin * (1 - v) + timeEnd * v;
+        }
         PixelPosition getPixelPositionSample(uint32_t baseX, uint32_t baseY) override { return PixelPosition(baseX + m_rng.getFloat0cTo1o(), baseY + m_rng.getFloat0cTo1o()); }
         float getWavelengthSample() override { return m_rng.getFloat0cTo1o(); }
         float getWLSelectionSample() override { return m_rng.getFloat0cTo1o(); }

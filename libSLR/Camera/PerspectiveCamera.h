@@ -15,7 +15,7 @@
 
 namespace SLR {
     class SLR_API PerspectiveCamera : public Camera {
-        std::unique_ptr<ImageSensor> m_sensor;
+        ImageSensor* m_sensor;
         
         float m_aspect;
         float m_fovY;
@@ -29,11 +29,12 @@ namespace SLR {
         
         friend class PerspectiveIDF;
     public:
-        PerspectiveCamera(float sensitivity,
-                          float aspect, float fovY, float lensRadius, float imgPDist, float objPDist);
+        PerspectiveCamera(float sensitivity, float aspect, float fovY, float lensRadius, float imgPDist, float objPDist);
         ~PerspectiveCamera();
         
-        ImageSensor* getSensor() const override;
+        ImageSensor* getSensor() const override {
+            return m_sensor;
+        }
         
         SampledSpectrum sample(const LensPosQuery &query, const LensPosSample &smp, LensPosQueryResult* result) const override;
         IDF* createIDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem) const override;

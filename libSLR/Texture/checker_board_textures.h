@@ -31,6 +31,8 @@ namespace SLR {
         RegularConstantContinuousDistribution2D* createIBLImportanceMap() const override;
     };
     
+    
+    
     class SLR_API CheckerBoardNormalTexture : public NormalTexture {
         const Texture2DMapping* m_mapping;
         float m_stepWidth;
@@ -49,6 +51,8 @@ namespace SLR {
             return evaluate(m_mapping->map(medPt));
         }
     };
+    
+    
     
     class SLR_API CheckerBoardFloatTexture : public FloatTexture {
         const Texture2DMapping* m_mapping;

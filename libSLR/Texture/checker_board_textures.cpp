@@ -13,6 +13,8 @@ namespace SLR {
         return nullptr;
     }
     
+    
+    
     Normal3D CheckerBoardNormalTexture::evaluate(const Point3D &p) const {
         float halfWidth = m_stepWidth * 0.5f;
         

@@ -692,11 +692,13 @@ namespace SLRSceneGraph {
                                                    else if (type == "ideal directional") {
                                                        const static Function configFunc{
                                                            0, {
-                                                               {"emittance", Type::SpectrumTexture}
+                                                               {"emittance", Type::SpectrumTexture},
+                                                               {"direction", Type::Vector, SLR::Vector3D(0, 0, 1)}
                                                            },
                                                            [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
                                                                SpectrumTextureRef emittance = args.at("emittance").rawRef<TypeMap::SpectrumTexture>();
-                                                               return Element::createFromReference<TypeMap::EmitterSurfaceProperty>(SurfaceMaterial::createIdealDirectionalEmitter(emittance));
+                                                               SLR::Vector3D direction = SLR::normalize(args.at("direction").raw<TypeMap::Vector>());
+                                                               return Element::createFromReference<TypeMap::EmitterSurfaceProperty>(SurfaceMaterial::createIdealDirectionalEmitter(emittance, direction));
                                                            }
                                                        };
                                                        return configFunc(params, context, err);
@@ -982,10 +984,10 @@ namespace SLRSceneGraph {
                                                        for (int j = 0; j < numX; ++j) {
                                                            float purturbX = randomness * (rng.getFloat0cTo1o() - 0.5f);
                                                            float purturbZ = randomness * (rng.getFloat0cTo1o() - 0.5f);
-                                                           Ray ray(Point3D(bounds.minP.x + (bounds.maxP.x - bounds.minP.x) * (j + 0.5f + purturbX) / numX,
+                                                           Ray ray(SLR::Point3D(bounds.minP.x + (bounds.maxP.x - bounds.minP.x) * (j + 0.5f + purturbX) / numX,
                                                                            bounds.maxP.y * 1.5f,
                                                                            bounds.minP.z + (bounds.maxP.z - bounds.minP.z) * (i + 0.5f + purturbZ) / numY),
-                                                                   Vector3D(0, -1, 0), 0.0f);
+                                                                   SLR::Vector3D(0, -1, 0), 0.0f);
                                                            SurfaceInteraction si;
                                                            if (!aggregate->intersect(ray, &si))
                                                                continue;

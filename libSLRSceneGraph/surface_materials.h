@@ -9,6 +9,7 @@
 #define __SLRSceneGraph_surface_materials__
 
 #include <libSLR/defines.h>
+#include <libSLR/Core/geometry.h>
 #include "declarations.h"
 
 namespace SLRSceneGraph {
@@ -17,6 +18,7 @@ namespace SLRSceneGraph {
         SLR::SurfaceMaterial* m_rawData;
     public:
         virtual ~SurfaceMaterial();
+        
         const SLR::SurfaceMaterial* getRaw() const {
             return m_rawData;
         };
@@ -32,7 +34,7 @@ namespace SLRSceneGraph {
         static SurfaceMaterialRef createSummedMaterial(const SurfaceMaterialRef &mat0, const SurfaceMaterialRef &mat1);
         static SurfaceMaterialRef createMixedMaterial(const SurfaceMaterialRef &mat0, const SurfaceMaterialRef &mat1, const FloatTextureRef &factor);
         static EmitterSurfacePropertyRef createDiffuseEmitter(const SpectrumTextureRef &emittance);
-        static EmitterSurfacePropertyRef createIdealDirectionalEmitter(const SpectrumTextureRef &emittance);
+        static EmitterSurfacePropertyRef createIdealDirectionalEmitter(const SpectrumTextureRef &emittance, const SLR::Vector3D &dir);
         static SurfaceMaterialRef createEmitterSurfaceMaterial(const SurfaceMaterialRef &mat, const EmitterSurfacePropertyRef &emit);
     };
     
@@ -43,6 +45,7 @@ namespace SLRSceneGraph {
         SLR::EmitterSurfaceProperty* m_rawData;
     public:
         virtual ~EmitterSurfaceProperty();
+        
         const SLR::EmitterSurfaceProperty* getRaw() const {
             return m_rawData;
         };
@@ -64,6 +67,7 @@ namespace SLRSceneGraph {
         SLR::SVFresnel* m_rawData;
     public:
         virtual ~SVFresnel();
+        
         const SLR::SVFresnel* getRaw() const {
             return m_rawData;
         };
@@ -95,6 +99,7 @@ namespace SLRSceneGraph {
         SLR::SVMicrofacetDistribution* m_rawData;
     public:
         virtual ~SVMicrofacetDistribution();
+        
         const SLR::SVMicrofacetDistribution* getRaw() const {
             return m_rawData;
         };
@@ -195,8 +200,9 @@ namespace SLRSceneGraph {
     
     class SLR_SCENEGRAPH_API IdealDirectionalEmitterSurfaceProperty : public EmitterSurfaceProperty {
         SpectrumTextureRef m_emittance;
+        SLR::Vector3D m_direction;
     public:
-        IdealDirectionalEmitterSurfaceProperty(const SpectrumTextureRef &emittance);
+        IdealDirectionalEmitterSurfaceProperty(const SpectrumTextureRef &emittance, const SLR::Vector3D &dir);
     };
     
     class SLR_SCENEGRAPH_API IBLEmitterSurfaceProperty : public EmitterSurfaceProperty {

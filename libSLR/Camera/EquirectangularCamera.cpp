@@ -12,18 +12,14 @@
 #include "../Core/ImageSensor.h"
 
 namespace SLR {
-    EquirectangularCamera::EquirectangularCamera(float sensitivity,
-                                                 float phiAngle, float thetaAngle) :
+    EquirectangularCamera::EquirectangularCamera(float sensitivity, float phiAngle, float thetaAngle) :
     Camera(nullptr),
     m_phiAngle(phiAngle), m_thetaAngle(thetaAngle) {
-        m_sensor = createUnique<ImageSensor>(sensitivity > 0 ? sensitivity : 1.0f);
+        m_sensor = new ImageSensor(sensitivity > 0 ? sensitivity : 1.0f);
     }
     
     EquirectangularCamera::~EquirectangularCamera() {
-    }
-    
-    ImageSensor* EquirectangularCamera::getSensor() const {
-        return m_sensor.get();
+        delete m_sensor;
     }
     
     SampledSpectrum EquirectangularCamera::sample(const LensPosQuery &query, const LensPosSample &smp, LensPosQueryResult* result) const {

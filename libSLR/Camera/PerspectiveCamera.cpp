@@ -21,14 +21,11 @@ namespace SLR {
         m_opWidth = m_opHeight * m_aspect;
         m_imgPlaneArea = m_opWidth * m_opHeight * std::pow(m_imgPlaneDistance / m_objPlaneDistance, 2);
         
-        m_sensor = createUnique<ImageSensor>(sensitivity > 0 ? sensitivity : (1.0f / (M_PI * lensRadius * lensRadius)));
+        m_sensor = new ImageSensor(sensitivity > 0 ? sensitivity : (1.0f / (M_PI * lensRadius * lensRadius)));
     }
     
     PerspectiveCamera::~PerspectiveCamera() {
-    }
-    
-    ImageSensor* PerspectiveCamera::getSensor() const {
-        return m_sensor.get();
+        delete m_sensor;
     }
     
     SampledSpectrum PerspectiveCamera::sample(const LensPosQuery &query, const LensPosSample &smp, LensPosQueryResult* result) const {
