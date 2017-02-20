@@ -180,7 +180,7 @@ namespace SLR {
         v += v < 0 ? 1.0f : 0.0f;
         uint32_t px = std::min((uint32_t)(m_data->width() * u), m_data->width() - 1);
         uint32_t py = std::min((uint32_t)(m_data->height() * v), m_data->height() - 1);
-        float ret;
+        float ret = 0.0f;
         switch (m_data->format()) {
             case ColorFormat::RGB8x3: {
                 break;

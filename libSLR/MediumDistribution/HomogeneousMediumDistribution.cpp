@@ -7,7 +7,7 @@
 
 #include "HomogeneousMediumDistribution.h"
 
-#include "light_path_sampler.h"
+#include "../Core/light_path_sampler.h"
 
 namespace SLR {
     bool HomogeneousMediumDistribution::interact(const Ray &ray, float distanceLimit, const WavelengthSamples &wls, LightPathSampler &pathSampler,

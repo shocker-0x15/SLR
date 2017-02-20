@@ -10,7 +10,7 @@
 
 #include <libSLR/defines.h>
 #include <libSLR/Core/geometry.h>
-#include "declarations.h"
+#include "../declarations.h"
 #include "node.h"
 
 namespace SLRSceneGraph {

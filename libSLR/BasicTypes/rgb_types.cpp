@@ -58,6 +58,6 @@ namespace SLR {
     template SLR_API RGBTemplate<float> inverseGammaCorrection(const RGBTemplate<float> &s, float gamma);
     template SLR_API RGBTemplate<double> inverseGammaCorrection(const RGBTemplate<double> &s, double gamma);
     
-    template struct SLR_API RGBStorageTemplate<float>;
-    template struct SLR_API RGBStorageTemplate<double>;
+    template class SLR_API RGBStorageTemplate<float>;
+    template class SLR_API RGBStorageTemplate<double>;
 }

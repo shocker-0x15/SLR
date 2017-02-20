@@ -4,17 +4,17 @@ set(libs "Assimp;png;Half;IlmImf;SLR")
 
 file(GLOB libSLRSceneGraph_Sources
      *.h
-     *.hpp
      *.cpp
+     Scene/*.h
+     Scene/*.cpp
+     Parser/BuiltinFunctions/*.h
+     Parser/BuiltinFunctions/*.cpp
+     Parser/*.h
+     Parser/*.cpp
+     Parser/*.hh
+     Parser/*.cc
      Helper/*.h
      Helper/*.cpp
-     Parser/*.h
-     Parser/*.hh
-     Parser/*.hpp
-     Parser/*.cpp
-     Parser/*.cc
-     Parser/BuiltinFunctions/*.hpp
-     Parser/BuiltinFunctions/*.cpp
     )
 file(GLOB libSLRSceneGraph_Sources_excluded
      Parser/main.cpp
@@ -23,10 +23,11 @@ file(GLOB libSLRSceneGraph_Sources_excluded
 set(libSLRSceneGraph_Sources_excluded "${libSLRSceneGraph_Sources_excluded} dummy")
 list(REMOVE_ITEM libSLRSceneGraph_Sources ${libSLRSceneGraph_Sources_excluded})
 
-source_group("SLR Scene Graph" REGULAR_EXPRESSION ".*\.(h|c|hpp|cpp)")
-source_group("SLR Scene Graph\\Helper" REGULAR_EXPRESSION "Helper/.*\.(h|c|hpp|cpp)")
+source_group("SLR Scene Graph"         REGULAR_EXPRESSION        ".*\.(h|c|hpp|cpp)")
+source_group("SLR Scene Graph\\Scene"  REGULAR_EXPRESSION  "Scene/.*\.(h|c|hpp|cpp)")
 source_group("SLR Scene Graph\\Parser" REGULAR_EXPRESSION "Parser/.*\.(h|c|hh|cc|hpp|cpp)")
 source_group("SLR Scene Graph\\Parser\\Builtin Functions" REGULAR_EXPRESSION "Parser/BuiltinFunctions/.*\.(h|c|hpp|cpp)")
+source_group("SLR Scene Graph\\Helper" REGULAR_EXPRESSION "Helper/.*\.(h|c|hpp|cpp)")
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 

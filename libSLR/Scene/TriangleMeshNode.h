@@ -16,15 +16,13 @@
 namespace SLR {
     class SLR_API TriangleMeshNode : public SurfaceNode {
     public:
-        class MaterialGroup {
-            friend class TriangleMeshNode;
-            
+        struct MaterialGroup {
             const SurfaceMaterial* m_material;
             const NormalTexture* m_normalMap;
             const FloatTexture* m_alphaMap;
             std::unique_ptr<TriangleSurfaceShape[]> m_triangles;
             uint32_t m_numTriangles;
-        public:
+
             MaterialGroup() :
             m_material(nullptr), m_normalMap(nullptr), m_alphaMap(nullptr),
             m_triangles(nullptr), m_numTriangles(0) {

@@ -15,8 +15,8 @@ namespace SLR {
 //    template SLR_API const uint32_t WavelengthSamplesTemplate<double, NumSpectralSamples>::NumComponents;
 
     
-    template struct SLR_API ContinuousSpectrumTemplate<float, NumSpectralSamples>;
-    template struct SLR_API ContinuousSpectrumTemplate<double, NumSpectralSamples>;
+    template class SLR_API ContinuousSpectrumTemplate<float, NumSpectralSamples>;
+    template class SLR_API ContinuousSpectrumTemplate<double, NumSpectralSamples>;
 
 
     
@@ -59,8 +59,8 @@ namespace SLR {
         return ret;
     }
     
-    template struct SLR_API RegularContinuousSpectrumTemplate<float, NumSpectralSamples>;
-    template struct SLR_API RegularContinuousSpectrumTemplate<double, NumSpectralSamples>;
+    template class SLR_API RegularContinuousSpectrumTemplate<float, NumSpectralSamples>;
+    template class SLR_API RegularContinuousSpectrumTemplate<double, NumSpectralSamples>;
 
     
     
@@ -104,8 +104,8 @@ namespace SLR {
         return ret;
     }
     
-    template struct SLR_API IrregularContinuousSpectrumTemplate<float, NumSpectralSamples>;
-    template struct SLR_API IrregularContinuousSpectrumTemplate<double, NumSpectralSamples>;
+    template class SLR_API IrregularContinuousSpectrumTemplate<float, NumSpectralSamples>;
+    template class SLR_API IrregularContinuousSpectrumTemplate<double, NumSpectralSamples>;
 
     
     
@@ -316,8 +316,8 @@ namespace SLR {
             return new ScaledAndOffsetUpsampledContinuousSpectrumTemplate<RealType, N>(*this, scale, offset);
     }
     
-    template struct SLR_API UpsampledContinuousSpectrumTemplate<float, NumSpectralSamples>;
-    template struct SLR_API UpsampledContinuousSpectrumTemplate<double, NumSpectralSamples>;
+    template class SLR_API UpsampledContinuousSpectrumTemplate<float, NumSpectralSamples>;
+    template class SLR_API UpsampledContinuousSpectrumTemplate<double, NumSpectralSamples>;
     
     
     
@@ -393,6 +393,6 @@ namespace SLR {
 //    template SLR_API const DiscretizedSpectrumTemplate<double, NumStrataForStorage> DiscretizedSpectrumTemplate<double, NumStrataForStorage>::Inf;
 //    template SLR_API const DiscretizedSpectrumTemplate<double, NumStrataForStorage> DiscretizedSpectrumTemplate<double, NumStrataForStorage>::NaN;
     
-    template struct SLR_API SpectrumStorageTemplate<float, NumStrataForStorage>;
-    template struct SLR_API SpectrumStorageTemplate<double, NumStrataForStorage>;
+    template class SLR_API SpectrumStorageTemplate<float, NumStrataForStorage>;
+    template class SLR_API SpectrumStorageTemplate<double, NumStrataForStorage>;
 }

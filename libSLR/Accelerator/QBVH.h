@@ -83,7 +83,7 @@ namespace SLR {
         
         Children collapseBBVH(const SBVH &baseBBVH, uint32_t grandparent, uint32_t depth) {
             Children ret;
-            const Children invalidChild = {UINT32_MAX};
+            const Children invalidChild = {{UINT32_MAX}};
             
             const SBVH::Node* root = &baseBBVH.m_nodes[grandparent];
             if (root->numLeaves > 0) {

@@ -7,7 +7,7 @@
 
 #include "GridMediumDistribution.h"
 
-#include "light_path_sampler.h"
+#include "../Core/light_path_sampler.h"
 
 namespace SLR {
     bool GridMediumDistribution::subdivide(Allocator* mem, MediumDistribution** fragments, uint32_t* numFragments) const {

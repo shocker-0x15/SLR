@@ -13,7 +13,7 @@
 #include <libSLR/MediumDistribution/HomogeneousMediumDistribution.h>
 #include <libSLR/MediumDistribution/GridMediumDistribution.h>
 #include <libSLR/MediumDistribution/DensityGridMediumDistribution.h>
-#include "medium_materials.h"
+#include "../medium_materials.h"
 
 namespace SLRSceneGraph {
     void HomogeneousMediumNode::allocateRawData() {

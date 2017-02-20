@@ -7,7 +7,7 @@
 
 #include "DensityGridMediumDistribution.h"
 
-#include "light_path_sampler.h"
+#include "../Core/light_path_sampler.h"
 
 namespace SLR {
     float DensityGridMediumDistribution::calcDensity(const Point3D &p) const {
