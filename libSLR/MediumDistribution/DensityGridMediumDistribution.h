@@ -20,7 +20,7 @@ namespace SLR {
         const float* m_density_grid;
         uint32_t m_numX, m_numY, m_numZ;
         
-        float calcDensity(const Point3D &p) const;
+        float calcDensity(const Point3D &param) const;
     public:
         DensityGridMediumDistribution(const BoundingBox3D &region, const AssetSpectrum* base_sigma_s, const AssetSpectrum* base_sigma_e, const float* density_grid,
                                       uint32_t numX, uint32_t numY, uint32_t numZ, float maxExtinctionCoefficient) :
@@ -35,12 +35,13 @@ namespace SLR {
         bool intersectBoundary(const Ray &ray, float* distToBoundary, bool* enter) const override {
             return m_region.intersectBoundary(ray, distToBoundary, enter);
         }
-        SampledSpectrum extinctionCoefficient(const Point3D &p, const WavelengthSamples &wls) const override;
         bool interact(const Ray &ray, float distanceLimit, const WavelengthSamples &wls, LightPathSampler &pathSampler,
                       MediumInteraction* mi, SampledSpectrum* medThroughput, bool* singleWavelength) const override;
         SampledSpectrum evaluateTransmittance(Ray &ray, float distanceLimit, const WavelengthSamples &wls, LightPathSampler &pathSampler,
                                               bool* singleWavelength) const override;
         void getMediumPoint(const MediumInteraction &mi, MediumPoint* medPt) const override;
+        SampledSpectrum getExtinctionCoefficient(const Point3D &param, const WavelengthSamples &wls) const override;
+        SampledSpectrum getAlbedo(const Point3D &param, const WavelengthSamples &wls) const override;
         float volume() const override { return m_region.volume(); }
         void sample(float u0, float u1, float u2, MediumPoint* medPt, float* volumePDF) const override;
         float evaluateVolumePDF(const MediumPoint& medPt) const override;

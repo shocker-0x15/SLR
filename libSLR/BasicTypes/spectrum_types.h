@@ -316,6 +316,12 @@ namespace SLR {
                 vals[i] = values[i] / c.values[i];
             return SampledSpectrumTemplate(vals);
         }
+        SampledSpectrumTemplate safeDivide(const SampledSpectrumTemplate &c) const {
+            RealType vals[N];
+            for (int i = 0; i < N; ++i)
+                vals[i] = c.values[i] > 0 ? values[i] / c.values[i] : 0.0f;
+            return SampledSpectrumTemplate(vals);
+        }
         SampledSpectrumTemplate operator*(RealType s) const {
             RealType vals[N];
             for (int i = 0; i < N; ++i)

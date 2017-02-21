@@ -5,36 +5,10 @@ setRenderSettings("width": 1024, "height": 1024, "brightness": 4.0);
 
 setEnvironment("images/Malibu_Overlook_3k_corrected.exr");
 
-/*
-lightNode = createNode();
-setTransform(lightNode, translate(0.0, 0.999, 0.0));
-diffuseCol = Spectrum(0.9, 0.9, 0.9);
-diffuseTex = SpectrumTexture(diffuseCol);
-scatterMat = createSurfaceMaterial("matte", (diffuseTex,));
-difLightCol = Spectrum("ID": "D65");
-difLightTex = SpectrumTexture(difLightCol);
-emitterMat = createEmitterSurfaceProperty("diffuse", (difLightTex,));
-surfMat = createSurfaceMaterial("emitter", (scatterMat, emitterMat));
-
-lightMesh = createMesh(
-    (
-    ((-0.25, 0, -0.25), (0, -1, 0), (1, 0, 0), (0, 0)), 
-    (( 0.25, 0, -0.25), (0, -1, 0), (1, 0, 0), (1, 0)),
-    (( 0.25, 0,  0.25), (0, -1, 0), (1, 0, 0), (1, 1)),
-    ((-0.25, 0,  0.25), (0, -1, 0), (1, 0, 0), (0, 1))
-    ),
-    (
-    (surfMat, ((0, 1, 2), (0, 2, 3))), 
-    )
-    );
-addChild(lightNode, lightMesh);
-addChild(root, lightNode);
-*/
-
 // Color Checker Materials
 mats = (,);
 for (i = 0; i < 24; ++i) {
-    sp = Spectrum("ID": "ColorChecker", i);
+    sp = Spectrum("Reflectance", "Color Checker", i);
     difTex = SpectrumTexture(sp);
     scatterMat = createSurfaceMaterial("matte", (difTex,));
     addItem(mats, scatterMat);
@@ -60,12 +34,14 @@ addChild(root, colorCheckerMesh);
 
 function sphereMaterial(name, attrs) {
     coeffR = SpectrumTexture(Spectrum("type": "Reflectance", 0.99));
-    eta = SpectrumTexture(Spectrum("ID": "Aluminium", 0));
-    k = SpectrumTexture(Spectrum("ID": "Aluminium", 1));
+    eta = SpectrumTexture(Spectrum("IoR", "Aluminium", 0));
+    k = SpectrumTexture(Spectrum("IoR", "Aluminium", 1));
     return createSurfaceMaterial("metal", (coeffR, eta, k));
 }
 
-sphereNode = load3DModel("models/sphere.assbin", sphereMaterial);
+sphereNode = createNode();
+sphere = load3DModel("models/sphere.assbin", sphereMaterial);
+addChild(sphereNode, sphere);
 setTransform(sphereNode, translate(0, 0.5, 0) * scale(0.4));
 addChild(root, sphereNode);
 
@@ -85,7 +61,9 @@ function PikachuMaterial(name, attrs) {
     return createSurfaceMaterial("Ashikhmin", (difTex, speTex, nxTex, nyTex));
 }
 
-kirbyNode = load3DModel("models/Kirby_Pikachu_Hat/pikachu_hat_corrected.assbin", PikachuMaterial);
+kirbyNode = createNode();
+kirby = load3DModel("models/Kirby_Pikachu_Hat/pikachu_hat_corrected.assbin", PikachuMaterial);
+addChild(kirbyNode, kirby);
 setTransform(kirbyNode, translate(0, -1, 0) * scale(0.5));
 addChild(root, kirbyNode);
 

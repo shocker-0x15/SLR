@@ -16,17 +16,17 @@ namespace SLR {
         Point3D queryPoint = ray.org + ray.distMin * ray.dir;
         FloatSum sampledDistance = ray.distMin;
         
-        SampledSpectrum extCoeff = extinctionCoefficient(queryPoint, wls);
+        Point3D param;
+        m_region.localCoordinates(queryPoint, &param);
+        SampledSpectrum extCoeff = getExtinctionCoefficient(param, wls);
         float distance = -std::log(sampler.getSample()) / extCoeff[wls.selectedLambda];
         SampledSpectrum transmittance = exp(-extCoeff * std::min(distance, distanceLimit - ray.distMin));
         *singleWavelength = false;
         sampledDistance += distance;
         if (sampledDistance < distanceLimit) {
             Point3D p = ray.org + sampledDistance * ray.dir;
-            Point3D param;
-            m_region.localCoordinates(p, &param);
-            *mi = MediumInteraction(ray.time, sampledDistance, p,
-                                    m_sigma_s->evaluate(wls), extCoeff, normalize(ray.dir), param.x, param.y, param.z);
+            
+            *mi = MediumInteraction(ray.time, sampledDistance, p, normalize(ray.dir), param.x, param.y, param.z);
             float distPDF = extCoeff[wls.selectedLambda] * transmittance[wls.selectedLambda];
             *medThroughput = transmittance / distPDF;
             return true;
@@ -39,7 +39,9 @@ namespace SLR {
     SampledSpectrum HomogeneousMediumDistribution::evaluateTransmittance(Ray &ray, float distanceLimit, const WavelengthSamples &wls, SLR::LightPathSampler &pathSampler, bool *singleWavelength) const {
         Point3D queryPoint = ray.org + ray.distMin * ray.dir;
         
-        SampledSpectrum extCoeff = extinctionCoefficient(queryPoint, wls);
+        Point3D param;
+        m_region.localCoordinates(queryPoint, &param);
+        SampledSpectrum extCoeff = getExtinctionCoefficient(param, wls);
         float distance = distanceLimit - ray.distMin;
         SampledSpectrum transmittance = exp(-extCoeff * distance);
         *singleWavelength = false;
@@ -52,6 +54,22 @@ namespace SLR {
         shadingFrame.z = mi.getIncomingDirection();
         shadingFrame.z.makeCoordinateSystem(&shadingFrame.x, &shadingFrame.y);
         *medPt = MediumPoint(mi, false, shadingFrame);
+    }
+    
+    SampledSpectrum HomogeneousMediumDistribution::getExtinctionCoefficient(const Point3D &param, const WavelengthSamples &wls) const {
+        if (param.x < 0 || param.y < 0 || param.z < 0 ||
+            param.x >= 1 || param.y >= 1 || param.z >= 1)
+            return SampledSpectrum::Zero;
+        
+        return m_sigma_e->evaluate(wls);
+    }
+    
+    SampledSpectrum HomogeneousMediumDistribution::getAlbedo(const Point3D &param, const WavelengthSamples &wls) const {
+        if (param.x < 0 || param.y < 0 || param.z < 0 ||
+            param.x >= 1 || param.y >= 1 || param.z >= 1)
+            return SampledSpectrum::Zero;
+        
+        return m_sigma_s->evaluate(wls).safeDivide(m_sigma_e->evaluate(wls));
     }
     
     void HomogeneousMediumDistribution::sample(float u0, float u1, float u2, MediumPoint* medPt, float* volumePDF) const {

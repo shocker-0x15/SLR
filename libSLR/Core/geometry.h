@@ -78,16 +78,13 @@ namespace SLR {
         friend class MediumPoint;
         
         const SingleMediumObject* m_obj;
-        SampledSpectrum m_scatteringCoefficient;
-        SampledSpectrum m_extinctionCoefficient;
         Vector3D m_dirIn;
         float m_u, m_v, m_w;
     public:
         MediumInteraction() : Interaction(0.0f, INFINITY, Point3D::Zero)
         {}
-        MediumInteraction(float time, float dist, const Point3D &p,
-                          const SampledSpectrum &sigma_s, const SampledSpectrum &sigma_e, const Vector3D &dirIn, float u, float v, float w) :
-        Interaction(time, dist, p), m_scatteringCoefficient(sigma_s), m_extinctionCoefficient(sigma_e), m_dirIn(dirIn), m_u(u), m_v(v), m_w(w)
+        MediumInteraction(float time, float dist, const Point3D &p, const Vector3D &dirIn, float u, float v, float w) :
+        Interaction(time, dist, p), m_dirIn(dirIn), m_u(u), m_v(v), m_w(w)
         {}
         
         void setObject(const SingleMediumObject* obj) { m_obj = obj; }
@@ -161,7 +158,7 @@ namespace SLR {
         
         virtual ABDFQuery* createABDFQuery(const Vector3D &dirLocal, int16_t selectedWL, DirectionType dirType, bool reqRev, bool adjoint, ArenaAllocator &mem) const = 0;
         virtual AbstractBDF* createAbstractBDF(const WavelengthSamples &wls, ArenaAllocator &mem) const = 0;
-        virtual SampledSpectrum evaluateInteractance() const = 0;
+        virtual SampledSpectrum evaluateInteractance(const WavelengthSamples &wls) const = 0;
         virtual float calcCosTerm(const Vector3D &vecWorld) const = 0;
         
         virtual void applyTransform(const StaticTransform &transform);
@@ -222,7 +219,7 @@ namespace SLR {
         AbstractBDF* createAbstractBDF(const WavelengthSamples &wls, ArenaAllocator &mem) const override {
             return (AbstractBDF*)createBSDF(wls, mem);
         }
-        SampledSpectrum evaluateInteractance() const override {
+        SampledSpectrum evaluateInteractance(const WavelengthSamples &wls) const override {
             return SampledSpectrum::One;
         }
         float calcCosTerm(const Vector3D &vecWorld) const override {
@@ -243,17 +240,20 @@ namespace SLR {
     
     class SLR_API MediumPoint : public InteractionPoint {
         float m_u, m_v, m_w;
-        SampledSpectrum m_scatteringCoefficient;
-        SampledSpectrum m_extinctionCoefficient;
         const SingleMediumObject* m_obj;
     public:
         MediumPoint() { }
         MediumPoint(const MediumInteraction &mi,
                     bool atInfinity, const ReferenceFrame &shadingFrame) :
-        InteractionPoint(mi.m_p, atInfinity, shadingFrame), m_u(mi.m_u), m_v(mi.m_v), m_w(mi.m_w),
-        m_scatteringCoefficient(mi.m_scatteringCoefficient), m_extinctionCoefficient(mi.m_extinctionCoefficient) { }
+        InteractionPoint(mi.m_p, atInfinity, shadingFrame), m_u(mi.m_u), m_v(mi.m_v), m_w(mi.m_w) { }
         
         void setObject(const SingleMediumObject* obj) { m_obj = obj; }
+        
+        void getMediumParameter(float* u, float* v, float* w) const {
+            *u = m_u;
+            *v = m_v;
+            *w = m_w;
+        }
         
         float evaluateVolumePDF() const;
         BSDF* createPhaseFunction(const WavelengthSamples &wls, ArenaAllocator &mem) const;
@@ -270,13 +270,7 @@ namespace SLR {
         
         ABDFQuery* createABDFQuery(const Vector3D &dirLocal, int16_t selectedWL, DirectionType filter, bool reqRev, bool adjoint, ArenaAllocator &mem) const override;
         AbstractBDF* createAbstractBDF(const WavelengthSamples &wls, ArenaAllocator &mem) const override;
-        SampledSpectrum evaluateInteractance() const override {
-            return m_extinctionCoefficient;
-        }
-        void getMediumCoefficients(SampledSpectrum* sigma_s, SampledSpectrum* sigma_e) const {
-            *sigma_s = m_scatteringCoefficient;
-            *sigma_e = m_extinctionCoefficient;
-        }
+        SampledSpectrum evaluateInteractance(const WavelengthSamples &wls) const override;
         float calcCosTerm(const Vector3D &vecWorld) const override {
             return 1.0f;
         }
@@ -349,12 +343,13 @@ namespace SLR {
         virtual BoundingBox3D bounds() const = 0;
         virtual bool contains(const Point3D &p) const = 0;
         virtual bool intersectBoundary(const Ray &ray, float* distToBoundary, bool* enter) const = 0;
-        virtual SampledSpectrum extinctionCoefficient(const Point3D &p, const WavelengthSamples &wls) const = 0;
         virtual bool interact(const Ray &ray, float distanceLimit, const WavelengthSamples &wls, LightPathSampler &pathSampler,
                               MediumInteraction* mi, SampledSpectrum* medThroughput, bool* singleWavelength) const = 0;
         virtual SampledSpectrum evaluateTransmittance(Ray &ray, float distanceLimit, const WavelengthSamples &wls, LightPathSampler &pathSampler,
                                                       bool* singleWavelength) const = 0;
         virtual void getMediumPoint(const MediumInteraction &mi, MediumPoint* medPt) const = 0;
+        virtual SampledSpectrum getExtinctionCoefficient(const Point3D &param, const WavelengthSamples &wls) const = 0;
+        virtual SampledSpectrum getAlbedo(const Point3D &param, const WavelengthSamples &wls) const = 0;
         virtual float volume() const = 0;
         virtual void sample(float u0, float u1, float u2, MediumPoint* medPt, float* volumePDF) const = 0;
         virtual float evaluateVolumePDF(const MediumPoint& medPt) const = 0;

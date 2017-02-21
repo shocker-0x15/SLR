@@ -62,6 +62,11 @@ namespace SLR {
         RGBTemplate operator-(const RGBTemplate &c) const { return RGBTemplate(r - c.r, g - c.g, b - c.b); }
         RGBTemplate operator*(const RGBTemplate &c) const { return RGBTemplate(r * c.r, g * c.g, b * c.b); }
         RGBTemplate operator/(const RGBTemplate &c) const { return RGBTemplate(r / c.r, g / c.g, b / c.b); }
+        RGBTemplate safeDivide(const RGBTemplate &c) const {
+            return RGBTemplate(c.r > 0.0f ? r / c.r : 0.0f,
+                               c.g > 0.0f ? g / c.g : 0.0f,
+                               c.b > 0.0f ? b / c.b : 0.0f);
+        }
         RGBTemplate operator*(RealType s) const { return RGBTemplate(r * s, g * s, b * s); }
         RGBTemplate operator/(RealType s) const { RealType rc = 1.0f / s; return RGBTemplate(r * rc, g * rc, b * rc); }
         friend inline RGBTemplate operator*(RealType s, const RGBTemplate &c) { return RGBTemplate(s * c.r, s * c.g, s * c.b); }
@@ -125,8 +130,11 @@ namespace SLR {
         const RGBTemplate &evaluate(const RGBSamplesTemplate<RealType> &wls) const {
             return *this;
         }
-        RGBTemplate* createScaled(RealType scale) const {
-            return new RGBTemplate(r * scale, g * scale, b * scale);
+        const float calcBounds() const {
+            return std::max(r, std::max(g, b));
+        }
+        RGBTemplate* createScaledAndOffset(RealType scale, RealType offset) const {
+            return new RGBTemplate(r * scale + offset, g * scale + offset, b * scale + offset);
         }
         //------------------------------------------------
         // Methods for compatibility with DiscretizedSpectrumTemplate

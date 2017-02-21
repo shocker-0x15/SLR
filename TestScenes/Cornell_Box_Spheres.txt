@@ -3,7 +3,6 @@ setRenderer("method": "BPT", ("samples": 16384,));
 setRenderSettings("width": 1024, "height": 768);
 
 CBNode = createNode();
-setTransform(CBNode, translate(0, 0, 0));
 
 // left wall
 diffuseTex = SpectrumTexture(Spectrum(0.75, 0.25, 0.25));
@@ -88,7 +87,7 @@ addChild(CBNode, ceiling);
 // light
 diffuseTex = SpectrumTexture(Spectrum(0.9, 0.9, 0.9));
 scatterMat = createSurfaceMaterial("matte", (diffuseTex,));
-difLightTex = SpectrumTexture(Spectrum("ID": "D65") * 4);
+difLightTex = SpectrumTexture(Spectrum("Illuminant", "D65") * 4);
 emitterMat = createEmitterSurfaceProperty("diffuse", (difLightTex,));
 surfMat = createSurfaceMaterial("emitter", (scatterMat, emitterMat));
 lightMesh = createMesh(
@@ -106,27 +105,29 @@ addChild(CBNode, lightMesh);
 
 addChild(root, CBNode);
 
+leftSphereNode = createNode();
 function leftSphereMat(name, attrs) {
-    eta = SpectrumTexture(Spectrum("ID": "Aluminium", 0));
-    k = SpectrumTexture(Spectrum("ID": "Aluminium", 1));
+    eta = SpectrumTexture(Spectrum("IoR", "Aluminium", 0));
+    k = SpectrumTexture(Spectrum("IoR", "Aluminium", 1));
     return createSurfaceMaterial("metal", (SpectrumTexture(Spectrum("Reflectance", 1.0)), eta, k));
 }
-leftSphereNode = load3DModel("models/sphere.assbin", leftSphereMat);
-setTransform(leftSphereNode, translate(-0.7, 0, -1.05) * 
-                             scale(0.5) * translate(0, 1, 0));
+leftSphere = load3DModel("models/sphere.assbin", leftSphereMat);
+addChild(leftSphereNode, leftSphere);
+setTransform(leftSphereNode, translate(-0.7, 0, -1.05) * scale(0.5) * translate(0, 1, 0));
 addChild(CBNode, leftSphereNode);
 
+rightSphereNode = createNode();
 function rightSphereMat(name, attrs) {
-    etaExt = SpectrumTexture(Spectrum("ID": "Air", 0));
-    etaInt = SpectrumTexture(Spectrum("ID": "Glass_BK7", 0));
+    etaExt = SpectrumTexture(Spectrum("IoR", "Air", 0));
+    etaInt = SpectrumTexture(Spectrum("IoR", "Glass_BK7", 0));
     //alpha_g = 0.01;
     //return createSurfaceMaterial("microfacet glass", (etaExt, etaInt, FloatTexture(alpha_g)));
     coeff = SpectrumTexture(Spectrum("Reflectance", 0.999));
     return createSurfaceMaterial("glass", (coeff, etaExt, etaInt));
 }
-rightSphereNode = load3DModel("models/sphere.assbin", rightSphereMat);
-setTransform(rightSphereNode, translate(0.7, 0, 0) * 
-                              scale(0.5) * translate(0, 1, 0));
+rightSphere = load3DModel("models/sphere.assbin", rightSphereMat);
+addChild(rightSphereNode, rightSphere);
+setTransform(rightSphereNode, translate(0.7, 0, 0) * scale(0.5) * translate(0, 1, 0));
 addChild(CBNode, rightSphereNode);
 
 cameraNode = createNode();

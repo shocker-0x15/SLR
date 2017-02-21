@@ -71,7 +71,7 @@ SLR consists of the following components.
 現状以下の環境で動作を確認しています。  
 I've confirmed that the program runs correctly on the following environment.
 
-* OS X 10.11.6 & Xcode 7.3.1 (Apple LLVM-Clang 7.3.0)
+* OS X 10.12.3 & Xcode 8.2.1 (Apple LLVM-Clang 8.0.0)
 * Windows 8.1 & Visual Studio 2015 (MSVC 14.0, character-encoding conversion required)
 * MacBook Pro Retina Late 2013
 

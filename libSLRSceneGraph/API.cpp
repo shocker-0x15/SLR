@@ -399,61 +399,30 @@ namespace SLRSceneGraph {
                                                        std::string type = args.at("type").raw<TypeMap::String>();
                                                        std::string name = args.at("name").raw<TypeMap::String>();
                                                        auto idx = args.at("idx").raw<TypeMap::Integer>();
+                                                       SpectrumType spType = SpectrumType::Illuminant;
+                                                       SpectrumLibrary::Data data;
+                                                       bool success = true;
                                                        if (type == "Illuminant") {
-                                                           if (SpectrumLibrary::Illuminant::database.count(name) > 0) {
-                                                               if (idx != 0) {
-                                                                   *err = ErrorMessage("Specified index is out of range for this spectrum.");
-                                                                   return Element();
-                                                               }
-                                                               const SpectrumLibrary::Illuminant::Data &data = SpectrumLibrary::Illuminant::database.at(name);
-                                                               if (data.dType == SpectrumLibrary::DistributionType::Regular)
-                                                                   spectrum = Spectrum::create(SpectrumType::Illuminant, data.minLambdas, data.maxLambdas, data.values, data.numSamples);
-                                                               else
-                                                                   spectrum = Spectrum::create(SpectrumType::Illuminant, data.lambdas, data.values, data.numSamples);
-                                                           }
-                                                           else {
-                                                               *err = ErrorMessage("unrecognized spectrum ID.");
-                                                               return Element();
-                                                           }
+                                                           success = SpectrumLibrary::queryIlluminantSpectrum(name, idx, &data);
+                                                           spType = SpectrumType::Illuminant;
                                                        }
                                                        else if (type == "Reflectance") {
-                                                           if (SpectrumLibrary::Reflectance::database.count(name) > 0) {
-                                                               if (idx != 0) {
-                                                                   *err = ErrorMessage("Specified index is out of range for this spectrum.");
-                                                                   return Element();
-                                                               }
-                                                               const SpectrumLibrary::Reflectance::Data &data = SpectrumLibrary::Reflectance::database.at(name);
-                                                               if (data.dType == SpectrumLibrary::DistributionType::Regular)
-                                                                   spectrum = Spectrum::create(SpectrumType::Reflectance, data.minLambdas, data.maxLambdas, data.values, data.numSamples);
-                                                               else
-                                                                   spectrum = Spectrum::create(SpectrumType::Reflectance, data.lambdas, data.values, data.numSamples);
-                                                           }
-                                                           else {
-                                                               *err = ErrorMessage("unrecognized spectrum ID.");
-                                                               return Element();
-                                                           }
+                                                           success = SpectrumLibrary::queryReflectanceSpectrum(name, idx, &data);
+                                                           spType = SpectrumType::Reflectance;
                                                        }
-                                                       else if ("IoR") {
-                                                           if (SpectrumLibrary::IoR::database.count(name) > 0) {
-                                                               if (idx < 0 || idx >= 2) {
-                                                                   *err = ErrorMessage("Specified index is out of range.");
-                                                                   return Element();
-                                                               }
-                                                               const SpectrumLibrary::IoR::Data &IOR = SpectrumLibrary::IoR::database.at(name);
-                                                               const float* values = idx == 0 ? IOR.etas : IOR.ks;
-                                                               if (!values) {
-                                                                   *err = ErrorMessage("This IOR doesn't have the spectrum corresponding to the index specified.");
-                                                                   return Element();
-                                                               }
-                                                               if (IOR.dType == SpectrumLibrary::DistributionType::Regular)
-                                                                   spectrum = Spectrum::create(SpectrumType::IndexOfRefraction, IOR.minLambdas, IOR.maxLambdas, values, IOR.numSamples);
-                                                               else
-                                                                   spectrum = Spectrum::create(SpectrumType::IndexOfRefraction, IOR.lambdas, values, IOR.numSamples);
-                                                           }
-                                                           else {
-                                                               *err = ErrorMessage("unrecognized spectrum ID.");
-                                                               return Element();
-                                                           }
+                                                       else if (type == "IoR") {
+                                                           success = SpectrumLibrary::queryIoRSpectrum(name, idx, &data);
+                                                           spType = SpectrumType::IndexOfRefraction;
+                                                       }
+                                                       if (success) {
+                                                           if (data.dType == SpectrumLibrary::DistributionType::Regular)
+                                                               spectrum = Spectrum::create(spType, data.minLambdas, data.maxLambdas, data.values, data.numSamples);
+                                                           else
+                                                               spectrum = Spectrum::create(spType, data.lambdas, data.values, data.numSamples);
+                                                       }
+                                                       else {
+                                                           *err = ErrorMessage("Spectrum not found.");
+                                                           return Element();
                                                        }
                                                        return Element::createFromReference<TypeMap::Spectrum>(spectrum);
                                                    }

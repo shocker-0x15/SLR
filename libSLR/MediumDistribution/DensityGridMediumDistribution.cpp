@@ -10,9 +10,7 @@
 #include "../Core/light_path_sampler.h"
 
 namespace SLR {
-    float DensityGridMediumDistribution::calcDensity(const Point3D &p) const {
-        Point3D param;
-        m_region.localCoordinates(p, &param);
+    float DensityGridMediumDistribution::calcDensity(const Point3D &param) const {
         if (param.x < 0 || param.y < 0 || param.z < 0 ||
             param.x >= 1 || param.y >= 1 || param.z >= 1)
             return 0.0f;
@@ -61,15 +59,13 @@ namespace SLR {
         sampledDistance += -std::log(sampler.getSample()) / majorant;
         while (sampledDistance < distanceLimit) {
             Point3D queryPoint = ray.org + sampledDistance * ray.dir;
-            float density = calcDensity(queryPoint);
+            Point3D param;
+            m_region.localCoordinates(queryPoint, &param);
+            float density = calcDensity(param);
             SampledSpectrum extCoeff = m_base_sigma_e->evaluate(wls) * density;
             float probRealCollision = extCoeff[wls.selectedLambda] / majorant;
             if (sampler.getSample() < probRealCollision) {
-                Point3D param;
-                m_region.localCoordinates(queryPoint, &param);
-                SampledSpectrum scatCoeff = m_base_sigma_s->evaluate(wls) * density;
-                *mi = MediumInteraction(ray.time, sampledDistance, queryPoint,
-                                        scatCoeff, extCoeff, normalize(ray.dir), param.x, param.y, param.z);
+                *mi = MediumInteraction(ray.time, sampledDistance, queryPoint, normalize(ray.dir), param.x, param.y, param.z);
                 hit = true;
                 extCoeffSelected = extCoeff[wls.selectedLambda];
                 hitDistance = sampledDistance;
@@ -94,7 +90,9 @@ namespace SLR {
                 sampledDistance += -std::log(sampler.getSample()) / majorant;
                 while (sampledDistance < hitDistance) {
                     Point3D queryPoint = ray.org + sampledDistance * ray.dir;
-                    float density = calcDensity(queryPoint);
+                    Point3D param;
+                    m_region.localCoordinates(queryPoint, &param);
+                    float density = calcDensity(param);
                     SampledSpectrum extCoeff = m_base_sigma_e->evaluate(wls) * density;
                     float probRealCollision = (extCoeff[wl] - extCoeff[wls.selectedLambda]) / majorant;
                     trDiff[wl] *= (1.0f - probRealCollision);
@@ -126,7 +124,9 @@ namespace SLR {
             sampledDistance += -std::log(sampler.getSample()) / majorant;
             while (sampledDistance < distanceLimit) {
                 Point3D queryPoint = ray.org + sampledDistance * ray.dir;
-                float density = calcDensity(queryPoint);
+                Point3D param;
+                m_region.localCoordinates(queryPoint, &param);
+                float density = calcDensity(param);
                 SampledSpectrum extCoeff = m_base_sigma_e->evaluate(wls) * density;
                 float probRealCollision = extCoeff[wls.selectedLambda] / majorant;
                 transmittance[wls.selectedLambda] *= (1.0f - probRealCollision);
@@ -139,7 +139,9 @@ namespace SLR {
                 sampledDistance += -std::log(sampler.getSample()) / majorant;
                 while (sampledDistance < distanceLimit) {
                     Point3D queryPoint = ray.org + sampledDistance * ray.dir;
-                    float density = calcDensity(queryPoint);
+                    Point3D param;
+                    m_region.localCoordinates(queryPoint, &param);
+                    float density = calcDensity(param);
                     SampledSpectrum extCoeff = m_base_sigma_e->evaluate(wls) * density;
                     float probRealCollision = extCoeff[wl] / majorant;
                     transmittance[wl] *= (1.0f - probRealCollision);
@@ -151,15 +153,24 @@ namespace SLR {
         return transmittance;
     }
     
-    SampledSpectrum DensityGridMediumDistribution::extinctionCoefficient(const Point3D &p, const WavelengthSamples &wls) const {
-        return m_base_sigma_e->evaluate(wls) * calcDensity(p);
-    }
-    
     void DensityGridMediumDistribution::getMediumPoint(const MediumInteraction &mi, MediumPoint* medPt) const {
         ReferenceFrame shadingFrame;
         shadingFrame.z = mi.getIncomingDirection();
         shadingFrame.z.makeCoordinateSystem(&shadingFrame.x, &shadingFrame.y);
         *medPt = MediumPoint(mi, false, shadingFrame);
+    }
+    
+    SampledSpectrum DensityGridMediumDistribution::getExtinctionCoefficient(const Point3D &param, const WavelengthSamples &wls) const {
+        float density = calcDensity(param);
+        return density * m_base_sigma_e->evaluate(wls);
+    }
+    
+    SampledSpectrum DensityGridMediumDistribution::getAlbedo(const Point3D &param, const WavelengthSamples &wls) const {
+        if (param.x < 0 || param.y < 0 || param.z < 0 ||
+            param.x >= 1 || param.y >= 1 || param.z >= 1)
+            return SampledSpectrum::Zero;
+        
+        return m_base_sigma_s->evaluate(wls).safeDivide(m_base_sigma_e->evaluate(wls));
     }
     
     void DensityGridMediumDistribution::sample(float u0, float u1, float u2, MediumPoint *medPt, float *volumePDF) const {

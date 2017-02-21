@@ -3,15 +3,19 @@ setRenderer("method": "BPT", ("samples": 16384,));
 //setRenderer("method": "debug", (("geometric normal", "shading normal", "shading tangent"),));
 setRenderSettings("width": 1024, "height": 1024, "brightness": 4.0);
 
-CBNode = load3DModel("models/Cornell_box_RB.assbin");
+cornellBoxNode = createNode();
+    cornellBox = load3DModel("models/Cornell_box_RB.assbin");
+    addChild(cornellBoxNode, cornellBox);
+
     lightNode = createNode();
     setTransform(lightNode, translate(0.0, 0.999, 0.0));
         diffuseCol = Spectrum(0.9, 0.9, 0.9);
         diffuseTex = SpectrumTexture(diffuseCol);
         scatterMat = createSurfaceMaterial("matte", (diffuseTex,));
-        difLightCol = Spectrum("ID": "D65");
+        difLightCol = Spectrum("Illuminant", "D65");
         difLightTex = SpectrumTexture(difLightCol);
         emitterMat = createEmitterSurfaceProperty("diffuse", (difLightTex,));
+        //emitterMat = createEmitterSurfaceProperty("ideal directional", (difLightTex, Vector(1, 0.25, 2)));
         surfMat = createSurfaceMaterial("emitter", (scatterMat, emitterMat));
 
         lightMesh = createMesh(
@@ -26,13 +30,13 @@ CBNode = load3DModel("models/Cornell_box_RB.assbin");
             )
             );
         addChild(lightNode, lightMesh);
-    addChild(CBNode, lightNode);
-addChild(root, CBNode);
+    addChild(cornellBoxNode, lightNode);
+addChild(root, cornellBoxNode);
 
 // Color Checker Materials
 mats = (,);
 for (i = 0; i < 24; ++i) {
-    sp = Spectrum("ID": "ColorChecker", i);
+    sp = Spectrum("Reflectance", "Color Checker", i);
     difTex = SpectrumTexture(sp);
     scatterMat = createSurfaceMaterial("matte", (difTex,));
     addItem(mats, scatterMat);
@@ -54,15 +58,7 @@ for (i = 0; i < 24; ++i) {
     addItem(matGroups, (mats[i], ((idxBase + 0, idxBase + 1, idxBase + 2), (idxBase + 0, idxBase + 2, idxBase + 3))));
 }
 colorCheckerMesh = createMesh(vertices, matGroups);
-addChild(CBNode, colorCheckerMesh);
-
-//teapot = load3DModel("models/wt_teapot.assbin");
-//setTransform(teapot, translate(0, -0.5, 0) * scale(0.75));
-//addChild(CBNode, teapot);
-
-//pikachuNode = load3DModel("models/Pikachu_corrected_subdivided.assbin");
-//setTransform(pikachuNode, translate(0, -1, 0) * scale(0.75) * translate(0, 1, 0));
-//addChild(CBNode, pikachuNode);
+addChild(cornellBoxNode, colorCheckerMesh);
 
 cameraNode = createNode();
     camera = createPerspectiveCamera("aspect": 1.0, "fovY": 0.5235987756, "radius": 0.025, 

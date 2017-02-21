@@ -14,7 +14,7 @@ function grassMaterial(name, attrs) {
                          2 * difCol[0], 2 * difCol[1], 2 * difCol[2]);
     r = createSurfaceMaterial("matte", (SpectrumTexture(baseColor * 0.7),));
     tBase = createSurfaceMaterial("matte", (SpectrumTexture(baseColor * 0.3),));
-    t = createSurfaceMaterial("inverse", (tBase,));
+    t = createSurfaceMaterial("flipped", (tBase,));
     return createSurfaceMaterial("sum", (r, t));
 }
 grass = load3DModel("models/grass.assbin", grassMaterial);
@@ -46,9 +46,11 @@ function lowpolyTreeMaterial(name, attrs) {
     nxTex = nyTex = FloatTexture(100.0);
     return createSurfaceMaterial("Ashikhmin", (RdTex, RsTex, nxTex, nyTex));
 }
+lowpolyTreeNode = createNode();
 lowpolyTree = load3DModel("models/lowpoly_tree.assbin", lowpolyTreeMaterial);
-setTransform(lowpolyTree, translate(0.3727, 0.8596, 0.8495) * scale(0.25));
-addChild(root, lowpolyTree);
+addChild(lowpolyTreeNode, lowpolyTree);
+setTransform(lowpolyTreeNode, translate(0.3727, 0.8596, 0.8495) * scale(0.25));
+addChild(root, lowpolyTreeNode);
 
 function toyCarMaterial(name, attrs) {
     difCol = attrs["diffuse color"];
@@ -57,14 +59,16 @@ function toyCarMaterial(name, attrs) {
     nxTex = nyTex = FloatTexture(100.0);
     return createSurfaceMaterial("Ashikhmin", (RdTex, RsTex, nxTex, nyTex));
 }
+toyCarNode = createNode();
 toyCar = load3DModel("models/toycar.assbin", toyCarMaterial);
-setTransform(toyCar, 
+addChild(toyCarNode, toyCar);
+setTransform(toyCarNode, 
              translate(0.0, 0.72593, 1.4) * 
              rotateZ(0.0) * 
              rotateY(105.319 * 3.1415926536 / 180.0) * 
              rotateX(-16.663 * 3.1415926536 / 180.0) *
              scale(0.1));
-addChild(root, toyCar);
+addChild(root, toyCarNode);
 
 cameraNode = createNode();
 camera = createPerspectiveCamera("aspect": 16.0 / 9.0, "fovY": 0.5235987756, "radius": 0.0025, 

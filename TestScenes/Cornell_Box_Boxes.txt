@@ -2,7 +2,10 @@
 setRenderer("method": "BPT", ("samples": 16384,));
 setRenderSettings("width": 1024, "height": 1024);
 
-CBNode = load3DModel("models/Cornell_box_RB.assbin");
+cornellBoxNode = createNode();
+    cornellBox = load3DModel("models/Cornell_box_RB.assbin");
+    addChild(cornellBoxNode, cornellBox);
+
     lightNode = createNode();
     setTransform(lightNode, translate(0.0, 0.999, 0.0));
         diffuseCol = Spectrum(0.9, 0.9, 0.9);
@@ -11,6 +14,7 @@ CBNode = load3DModel("models/Cornell_box_RB.assbin");
         difLightCol = Spectrum("Illuminant", 500);
         difLightTex = SpectrumTexture(difLightCol);
         emitterMat = createEmitterSurfaceProperty("diffuse", (difLightTex,));
+        //emitterMat = createEmitterSurfaceProperty("ideal directional", (difLightTex, Vector(1, 0.25, 2)));
         surfMat = createSurfaceMaterial("emitter", (scatterMat, emitterMat));
 
         lightMesh = createMesh(
@@ -25,26 +29,30 @@ CBNode = load3DModel("models/Cornell_box_RB.assbin");
             )
             );
         addChild(lightNode, lightMesh);
-    addChild(CBNode, lightNode);
-addChild(root, CBNode);
+    addChild(cornellBoxNode, lightNode);
+addChild(root, cornellBoxNode);
 
-function leftBoxMat(name, attrs) {
-    eta = SpectrumTexture(Spectrum("ID": "Titanium", 0));
-    k = SpectrumTexture(Spectrum("ID": "Titanium", 1));
-    return createSurfaceMaterial("metal", (SpectrumTexture(Spectrum("Reflectance", 1.0)), eta, k));
-}
-leftBoxNode = load3DModel("models/box.assbin"/*, leftBoxMat*/);
+leftBoxNode = createNode();
+    function leftBoxMat(name, attrs) {
+        eta = SpectrumTexture(Spectrum("IoR", "Titanium", 0));
+        k = SpectrumTexture(Spectrum("IoR", "Titanium", 1));
+        return createSurfaceMaterial("metal", (SpectrumTexture(Spectrum("Reflectance", 1.0)), eta, k));
+    }
+    leftBox = load3DModel("models/box.assbin", leftBoxMat);
+    addChild(leftBoxNode, leftBox);
 setTransform(leftBoxNode, translate(-0.4, -0.999, -0.4) * rotateY(0.2617993878) * scale(0.25, 0.5, 0.25) * translate(0, 1, 0));
-addChild(CBNode, leftBoxNode);
+addChild(cornellBoxNode, leftBoxNode);
 
-function rightBoxMat(name, attrs) {
-    Rs = SpectrumTexture(Spectrum("Reflectance", 0.5));
-    anisoX = anisoY = FloatTexture(0.1);
-    return createSurfaceMaterial("Ward", (Rs, anisoX, anisoY));
-}
-rightBoxNode = load3DModel("models/box.assbin"/*, rightBoxMat*/);
+rightBoxNode = createNode();
+    function rightBoxMat(name, attrs) {
+        Rs = SpectrumTexture(Spectrum("Reflectance", 0.5));
+        anisoX = anisoY = FloatTexture(0.1);
+        return createSurfaceMaterial("Ward", (Rs, anisoX, anisoY));
+    }
+    rightBox = load3DModel("models/box.assbin", rightBoxMat);
+    addChild(rightBoxNode, rightBox);
 setTransform(rightBoxNode, translate(0.4, -0.999, 0.4) * rotateY(-0.2617993878) * scale(0.25) * translate(0, 1, 0));
-addChild(CBNode, rightBoxNode);
+addChild(cornellBoxNode, rightBoxNode);
 
 cameraNode = createNode();
     camera = createPerspectiveCamera("aspect": 1.0, "fovY": 0.5235987756, "radius": 0.025, 

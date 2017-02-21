@@ -98,11 +98,18 @@ namespace SLR {
         medPt->applyTransform(mi.getAppliedTransform());
     }
     
+    SampledSpectrum SingleMediumObject::extinctionCoefficient(const MediumPoint &medPt, const WavelengthSamples &wls) const {
+        float u, v, w;
+        medPt.getMediumParameter(&u, &v, &w);
+        return m_medium->getExtinctionCoefficient(Point3D(u, v, w), wls);
+    }
+    
     AbstractBDF* SingleMediumObject::createAbstractBDF(const MediumPoint &medPt, const WavelengthSamples &wls, ArenaAllocator &mem) const {
         PhaseFunction* pf = m_material->getPhaseFunction(medPt, wls, mem);
-        SampledSpectrum sigma_s, sigma_e;
-        medPt.getMediumCoefficients(&sigma_s, &sigma_e);
-        return mem.create<VolumetricBSDF>(sigma_s / sigma_e, pf);
+        float u, v, w;
+        medPt.getMediumParameter(&u, &v, &w);
+        SampledSpectrum albedo = m_medium->getAlbedo(Point3D(u, v, w), wls);
+        return mem.create<VolumetricBSDF>(albedo, pf);
     }
     
     

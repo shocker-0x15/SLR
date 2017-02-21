@@ -182,7 +182,7 @@ namespace SLR {
             
             // on Surface: probability: 1.0 or probability density delta function
             // in Medium: probability density: extinction coefficient
-            alpha *= interPt->evaluateInteractance();
+            alpha *= interPt->evaluateInteractance(wls);
             
             // Next Event Estimation (explicit light sampling)
             if (abdf->hasNonDelta()) {

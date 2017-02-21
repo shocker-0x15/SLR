@@ -1,11 +1,12 @@
-setRenderer("method": "PT", ("samples": 512,));
+//setRenderer("method": "PT", ("samples": 512,));
+setRenderer("method": "BPT", ("samples": 512,));
 setRenderSettings("width": 1024, "height": 1024, "brightness": 4.0);
 
 function CornellBoxMaterial(name, attrs) {
     /*
     if (name == "Material.001" || name == "Material.003") {
-        eta = SpectrumTexture(Spectrum("ID": "Titanium", 0));
-        k = SpectrumTexture(Spectrum("ID": "Titanium", 1));
+        eta = SpectrumTexture(Spectrum("IoR", "Titanium", 0));
+        k = SpectrumTexture(Spectrum("IoR", "Titanium", 1));
         return createSurfaceMaterial("metal", (SpectrumTexture(Spectrum("type": "Reflectance", 1.0)), eta, k));
     }
     */
@@ -39,15 +40,19 @@ function PikachuMaterial(name, attrs) {
     return createSurfaceMaterial("Ashikhmin", (difTex, speTex, nxTex, nyTex));
 }
 
-CBNode = load3DModel("models/Cornell_box_RB.assbin", CornellBoxMaterial);
+cornellBoxNode = createNode();
+    cornellBox = load3DModel("models/Cornell_box_RB.assbin");
+    addChild(cornellBoxNode, cornellBox);
+
     lightNode = createNode();
     setTransform(lightNode, translate(0.0, 0.999, 0.0));
         diffuseCol = Spectrum(0.9, 0.9, 0.9);
         diffuseTex = SpectrumTexture(diffuseCol);
         scatterMat = createSurfaceMaterial("matte", (diffuseTex,));
-        difLightCol = Spectrum("ID": "D65");
+        difLightCol = Spectrum("Illuminant", "D65");
         difLightTex = SpectrumTexture(difLightCol);
         emitterMat = createEmitterSurfaceProperty("diffuse", (difLightTex,));
+        //emitterMat = createEmitterSurfaceProperty("ideal directional", (difLightTex, Vector(1, 0.25, 2)));
         surfMat = createSurfaceMaterial("emitter", (scatterMat, emitterMat));
 
         lightMesh = createMesh(
@@ -62,13 +67,13 @@ CBNode = load3DModel("models/Cornell_box_RB.assbin", CornellBoxMaterial);
             )
             );
         addChild(lightNode, lightMesh);
-    addChild(CBNode, lightNode);
-addChild(root, CBNode);
+    addChild(cornellBoxNode, lightNode);
+addChild(root, cornellBoxNode);
 
 // Color Checker Materials
 mats = (,);
 for (i = 0; i < 24; ++i) {
-    sp = Spectrum("ID": "ColorChecker", i);
+    sp = Spectrum("Reflectance", "Color Checker", i);
     difTex = SpectrumTexture(sp);
     scatterMat = createSurfaceMaterial("matte", (difTex,));
     addItem(mats, scatterMat);
@@ -90,15 +95,17 @@ for (i = 0; i < 24; ++i) {
     addItem(matGroups, (mats[i], ((idxBase + 0, idxBase + 1, idxBase + 2), (idxBase + 0, idxBase + 2, idxBase + 3))));
 }
 colorCheckerMesh = createMesh(vertices, matGroups);
-addChild(CBNode, colorCheckerMesh);
+addChild(cornellBoxNode, colorCheckerMesh);
 
-pikachuNode = load3DModel("models/Pikachu_corrected_subdivided.assbin", PikachuMaterial);
+pikachuNode = createNode();
+    pikachu = load3DModel("models/Pikachu_corrected_subdivided.assbin", PikachuMaterial);
+    addChild(pikachuNode, pikachu);
 setTransform(pikachuNode, translate(0, -1, 0) * scale(0.75) * translate(0, 1, 0));
-addChild(CBNode, pikachuNode);
+addChild(cornellBoxNode, pikachuNode);
 
 cameraNode = createNode();
-    camera = createPerspectiveCamera("aspect": 1.0, "fovY": 0.5235987756, "radius": 0.1, 
-                                     "imgDist": 1.0, "objDist": 4.75);
+    camera = createPerspectiveCamera("aspect": 1.0, "fovY": 0.5235987756, "radius": 0.025, 
+                                     "imgDist": 1.0, "objDist": 5);
     addChild(cameraNode, camera);
 setTransform(cameraNode, translate(0, 0, 5) * rotateY(-3.1415926536));
 

@@ -112,6 +112,10 @@ namespace SLR {
         return m_obj->createAbstractBDF(*this, wls, mem);
     }
     
+    SampledSpectrum MediumPoint::evaluateInteractance(const WavelengthSamples &wls) const {
+        return m_obj->extinctionCoefficient(*this, wls);
+    }
+    
     void MediumPoint::applyTransform(const SLR::StaticTransform &transform) {
         InteractionPoint::applyTransform(transform);
     }

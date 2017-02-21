@@ -94,6 +94,7 @@ namespace SLR {
         SingleMediumObject(const MediumDistribution* medium, const MediumMaterial* material) :
         m_medium(medium), m_material(material) {}
         
+        virtual SampledSpectrum extinctionCoefficient(const MediumPoint &medPt, const WavelengthSamples &wls) const;
         virtual AbstractBDF* createAbstractBDF(const MediumPoint &medPt, const WavelengthSamples &wls, ArenaAllocator &mem) const;
         
         //----------------------------------------------------------------
