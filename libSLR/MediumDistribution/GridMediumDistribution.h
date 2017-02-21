@@ -38,9 +38,9 @@ namespace SLR {
                       MediumInteraction* mi, SampledSpectrum* medThroughput, bool* singleWavelength) const override;
         SampledSpectrum evaluateTransmittance(Ray &ray, float distanceLimit, const WavelengthSamples &wls, LightPathSampler &pathSampler,
                                               bool* singleWavelength) const override;
-        void getMediumPoint(const MediumInteraction &mi, MediumPoint* medPt) const override;
-        SampledSpectrum getExtinctionCoefficient(const Point3D &param, const WavelengthSamples &wls) const override;
-        SampledSpectrum getAlbedo(const Point3D &param, const WavelengthSamples &wls) const override;
+        void calculateMediumPoint(const MediumInteraction &mi, MediumPoint* medPt) const override;
+        SampledSpectrum evaluateExtinctionCoefficient(const Point3D &param, const WavelengthSamples &wls) const override;
+        SampledSpectrum evaluateAlbedo(const Point3D &param, const WavelengthSamples &wls) const override;
         float volume() const override { return m_region.volume(); }
         void sample(float u0, float u1, float u2, MediumPoint* medPt, float* volumePDF) const override;
         float evaluateVolumePDF(const MediumPoint& medPt) const override;
@@ -66,9 +66,9 @@ namespace SLR {
                       MediumInteraction* mi, SampledSpectrum* medThroughput, bool* singleWavelength) const override;
         SampledSpectrum evaluateTransmittance(Ray &ray, float distanceLimit, const WavelengthSamples &wls, LightPathSampler &pathSampler,
                                               bool* singleWavelength) const override;
-        void getMediumPoint(const MediumInteraction &mi, MediumPoint* medPt) const override;
-        SampledSpectrum getExtinctionCoefficient(const Point3D &param, const WavelengthSamples &wls) const override;
-        SampledSpectrum getAlbedo(const Point3D &param, const WavelengthSamples &wls) const override;
+        void calculateMediumPoint(const MediumInteraction &mi, MediumPoint* medPt) const override;
+        SampledSpectrum evaluateExtinctionCoefficient(const Point3D &param, const WavelengthSamples &wls) const override;
+        SampledSpectrum evaluateAlbedo(const Point3D &param, const WavelengthSamples &wls) const override;
         float volume() const override { return m_region.volume(); }
         void sample(float u0, float u1, float u2, MediumPoint* medPt, float* volumePDF) const override;
         float evaluateVolumePDF(const MediumPoint& medPt) const override;

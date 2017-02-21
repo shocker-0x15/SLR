@@ -18,7 +18,7 @@ namespace SLR {
         
         Point3D param;
         m_region.localCoordinates(queryPoint, &param);
-        SampledSpectrum extCoeff = getExtinctionCoefficient(param, wls);
+        SampledSpectrum extCoeff = evaluateExtinctionCoefficient(param, wls);
         float distance = -std::log(sampler.getSample()) / extCoeff[wls.selectedLambda];
         SampledSpectrum transmittance = exp(-extCoeff * std::min(distance, distanceLimit - ray.distMin));
         *singleWavelength = false;
@@ -41,7 +41,7 @@ namespace SLR {
         
         Point3D param;
         m_region.localCoordinates(queryPoint, &param);
-        SampledSpectrum extCoeff = getExtinctionCoefficient(param, wls);
+        SampledSpectrum extCoeff = evaluateExtinctionCoefficient(param, wls);
         float distance = distanceLimit - ray.distMin;
         SampledSpectrum transmittance = exp(-extCoeff * distance);
         *singleWavelength = false;
@@ -49,14 +49,14 @@ namespace SLR {
         return transmittance;
     }
     
-    void HomogeneousMediumDistribution::getMediumPoint(const MediumInteraction &mi, MediumPoint* medPt) const {
+    void HomogeneousMediumDistribution::calculateMediumPoint(const MediumInteraction &mi, MediumPoint* medPt) const {
         ReferenceFrame shadingFrame;
         shadingFrame.z = mi.getIncomingDirection();
         shadingFrame.z.makeCoordinateSystem(&shadingFrame.x, &shadingFrame.y);
         *medPt = MediumPoint(mi, false, shadingFrame);
     }
     
-    SampledSpectrum HomogeneousMediumDistribution::getExtinctionCoefficient(const Point3D &param, const WavelengthSamples &wls) const {
+    SampledSpectrum HomogeneousMediumDistribution::evaluateExtinctionCoefficient(const Point3D &param, const WavelengthSamples &wls) const {
         if (param.x < 0 || param.y < 0 || param.z < 0 ||
             param.x >= 1 || param.y >= 1 || param.z >= 1)
             return SampledSpectrum::Zero;
@@ -64,7 +64,7 @@ namespace SLR {
         return m_sigma_e->evaluate(wls);
     }
     
-    SampledSpectrum HomogeneousMediumDistribution::getAlbedo(const Point3D &param, const WavelengthSamples &wls) const {
+    SampledSpectrum HomogeneousMediumDistribution::evaluateAlbedo(const Point3D &param, const WavelengthSamples &wls) const {
         if (param.x < 0 || param.y < 0 || param.z < 0 ||
             param.x >= 1 || param.y >= 1 || param.z >= 1)
             return SampledSpectrum::Zero;

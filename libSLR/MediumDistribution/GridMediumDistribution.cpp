@@ -27,17 +27,17 @@ namespace SLR {
         return SampledSpectrum::Zero;
     }
     
-    void GridMediumDistribution::getMediumPoint(const MediumInteraction &mi, MediumPoint* medPt) const {
+    void GridMediumDistribution::calculateMediumPoint(const MediumInteraction &mi, MediumPoint* medPt) const {
         SLRAssert_NotImplemented();
     }
     
-    SampledSpectrum GridMediumDistribution::getExtinctionCoefficient(const Point3D &param, const WavelengthSamples &wls) const {
+    SampledSpectrum GridMediumDistribution::evaluateExtinctionCoefficient(const Point3D &param, const WavelengthSamples &wls) const {
         SLRAssert_NotImplemented();
         
         return SampledSpectrum::Zero;
     }
     
-    SampledSpectrum GridMediumDistribution::getAlbedo(const Point3D &param, const WavelengthSamples &wls) const {
+    SampledSpectrum GridMediumDistribution::evaluateAlbedo(const Point3D &param, const WavelengthSamples &wls) const {
         SLRAssert_NotImplemented();
         
         return SampledSpectrum::Zero;
@@ -64,17 +64,17 @@ namespace SLR {
         return SampledSpectrum::Zero;
     }
     
-    void SubGridMediumDistribution::getMediumPoint(const MediumInteraction &mi, MediumPoint* medPt) const {
+    void SubGridMediumDistribution::calculateMediumPoint(const MediumInteraction &mi, MediumPoint* medPt) const {
         SLRAssert_NotImplemented();
     }
     
-    SampledSpectrum SubGridMediumDistribution::getExtinctionCoefficient(const Point3D &param, const WavelengthSamples &wls) const {
+    SampledSpectrum SubGridMediumDistribution::evaluateExtinctionCoefficient(const Point3D &param, const WavelengthSamples &wls) const {
         SLRAssert_NotImplemented();
         
         return SampledSpectrum::Zero;
     }
     
-    SampledSpectrum SubGridMediumDistribution::getAlbedo(const Point3D &param, const WavelengthSamples &wls) const {
+    SampledSpectrum SubGridMediumDistribution::evaluateAlbedo(const Point3D &param, const WavelengthSamples &wls) const {
         SLRAssert_NotImplemented();
         
         return SampledSpectrum::Zero;

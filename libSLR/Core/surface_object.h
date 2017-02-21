@@ -78,7 +78,7 @@ namespace SLR {
         virtual float costForIntersect() const = 0;
         virtual bool contains(const Point3D &p, float time) const { return false; }
         virtual bool intersect(Ray &ray, SurfaceInteraction* si) const = 0;
-        virtual void getSurfacePoint(const SurfaceInteraction &si, SurfacePoint* surfPt) const {
+        virtual void calculateSurfacePoint(const SurfaceInteraction &si, SurfacePoint* surfPt) const {
             SLRAssert_ShouldNotBeCalled();
         }
         
@@ -134,7 +134,7 @@ namespace SLR {
         
         float costForIntersect() const override { return m_surface->costForIntersect(); }
         bool intersect(Ray &ray, SurfaceInteraction* si) const override;
-        void getSurfacePoint(const SurfaceInteraction &si, SurfacePoint* surfPt) const override;
+        void calculateSurfacePoint(const SurfaceInteraction &si, SurfacePoint* surfPt) const override;
         
         // END: SurfaceObject's methods
         //----------------------------------------------------------------
@@ -151,7 +151,7 @@ namespace SLR {
         //----------------------------------------------------------------
         // SurfaceObject's methods
         
-        void getSurfacePoint(const SurfaceInteraction &si, SurfacePoint* surfPt) const override;
+        void calculateSurfacePoint(const SurfaceInteraction &si, SurfacePoint* surfPt) const override;
         
         // END: SurfaceObject's methods
         //----------------------------------------------------------------

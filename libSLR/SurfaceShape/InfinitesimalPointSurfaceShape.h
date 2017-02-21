@@ -24,7 +24,7 @@ namespace SLR {
         BoundingBox3D bounds() const override { return m_position; }
         bool preTransformed() const override { return true; }
         bool intersect(const Ray &ray, SurfaceInteraction* si) const override { return false; }
-        void getSurfacePoint(const SurfaceInteraction &si, SurfacePoint* surfPt) const override;
+        void calculateSurfacePoint(const SurfaceInteraction &si, SurfacePoint* surfPt) const override;
         float area() const override { return 0.0f; }
         void sample(float u0, float u1, SurfacePoint* surfPt, float* areaPDF, DirectionType* posType) const override;
         float evaluateAreaPDF(const SurfacePoint& surfPt) const override { return 1.0f; /* delta distribution: \delta(\vx) */ }

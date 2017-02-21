@@ -127,8 +127,8 @@ namespace SLR {
         return true;
     }
     
-    void SingleSurfaceObject::getSurfacePoint(const SurfaceInteraction &si, SurfacePoint* surfPt) const {
-        m_surface->getSurfacePoint(si, surfPt);
+    void SingleSurfaceObject::calculateSurfacePoint(const SurfaceInteraction &si, SurfacePoint* surfPt) const {
+        m_surface->calculateSurfacePoint(si, surfPt);
         surfPt->setObject(this);
         surfPt->applyTransform(si.getAppliedTransform());
     }
@@ -151,8 +151,8 @@ namespace SLR {
     
     
     
-    void BumpSingleSurfaceObject::getSurfacePoint(const SurfaceInteraction &si, SurfacePoint *surfPt) const {
-        SingleSurfaceObject::getSurfacePoint(si, surfPt);
+    void BumpSingleSurfaceObject::calculateSurfacePoint(const SurfaceInteraction &si, SurfacePoint *surfPt) const {
+        SingleSurfaceObject::calculateSurfacePoint(si, surfPt);
         
         const ReferenceFrame &originalFrame = surfPt->getShadingFrame();
         

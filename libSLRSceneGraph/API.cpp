@@ -961,7 +961,7 @@ namespace SLRSceneGraph {
                                                            if (!aggregate->intersect(ray, &si))
                                                                continue;
                                                            SurfacePoint surfPt;
-                                                           si.getSurfacePoint(&surfPt);
+                                                           si.calculateSurfacePoint(&surfPt);
                                                            
                                                            ParameterList params;
                                                            

@@ -13,25 +13,25 @@
 #include "medium_object.h"
 
 namespace SLR {
-    void SurfaceInteraction::getSurfacePoint(SurfacePoint* surfPt) const {
-        m_obj->getSurfacePoint(*this, surfPt);
+    void SurfaceInteraction::calculateSurfacePoint(SurfacePoint* surfPt) const {
+        m_obj->calculateSurfacePoint(*this, surfPt);
     }
     
     InteractionPoint* SurfaceInteraction::createInteractionPoint(ArenaAllocator &mem) const {
         SurfacePoint* surfPt = mem.create<SurfacePoint>();
-        getSurfacePoint(surfPt);
+        calculateSurfacePoint(surfPt);
         return surfPt;
     }
     
     
     
-    void MediumInteraction::getMediumPoint(SLR::MediumPoint *medPt) const {
-        m_obj->getMediumPoint(*this, medPt);
+    void MediumInteraction::calculateMediumPoint(SLR::MediumPoint *medPt) const {
+        m_obj->calculateMediumPoint(*this, medPt);
     }
     
     InteractionPoint* MediumInteraction::createInteractionPoint(ArenaAllocator &mem) const {
         MediumPoint* medPt = mem.create<MediumPoint>();
-        getMediumPoint(medPt);
+        calculateMediumPoint(medPt);
         return medPt;
     }
     
@@ -80,7 +80,7 @@ namespace SLR {
     
     SampledSpectrum MediumPoint::emittance(const WavelengthSamples &wls) const {
         SLRAssert_NotImplemented();
-//        return m_obj->emittance(*this, wls) / evaluateInteractance(); // need to consider dividing by zero.
+//        return m_obj->emittance(*this, wls) / evaluateExtinctionCoefficient(); // need to consider dividing by zero.
         return SampledSpectrum::Zero;
     }
     
@@ -112,7 +112,7 @@ namespace SLR {
         return m_obj->createAbstractBDF(*this, wls, mem);
     }
     
-    SampledSpectrum MediumPoint::evaluateInteractance(const WavelengthSamples &wls) const {
+    SampledSpectrum MediumPoint::evaluateExtinctionCoefficient(const WavelengthSamples &wls) const {
         return m_obj->extinctionCoefficient(*this, wls);
     }
     

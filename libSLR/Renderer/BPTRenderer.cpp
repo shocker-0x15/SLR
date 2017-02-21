@@ -277,7 +277,7 @@ namespace SLR {
         SurfacePoint surfPt;
         float RRProb = 1.0f;
         while (scene->intersect(ray, &si)) {
-            si.getSurfacePoint(&surfPt);
+            si.calculateSurfacePoint(&surfPt);
             
             float dist2 = squaredDistance(vertices.back().surfPt, surfPt);
             Vector3D dirOut_sn = surfPt.toLocal(-ray.dir);

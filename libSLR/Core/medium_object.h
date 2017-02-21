@@ -80,7 +80,7 @@ namespace SLR {
         virtual bool interact(Ray &ray, float distanceLimit, const WavelengthSamples &wls, LightPathSampler &pathSampler,
                               MediumInteraction* mi, SampledSpectrum* medThroughput, bool* singleWavelength) const = 0;
         virtual SampledSpectrum evaluateTransmittance(Ray &ray, float distanceLimit, const WavelengthSamples &wls, LightPathSampler &pathSampler, bool* singleWavelength) const = 0;
-        virtual void getMediumPoint(const MediumInteraction &mi, MediumPoint* medPt) const {
+        virtual void calculateMediumPoint(const MediumInteraction &mi, MediumPoint* medPt) const {
             SLRAssert_ShouldNotBeCalled();
         }
     };
@@ -128,7 +128,7 @@ namespace SLR {
         bool interact(Ray &ray, float distanceLimit, const WavelengthSamples &wls, LightPathSampler &pathSampler,
                       MediumInteraction* mi, SampledSpectrum* medThroughput, bool* singleWavelength) const override;
         SampledSpectrum evaluateTransmittance(Ray &ray, float distanceLimit, const WavelengthSamples &wls, LightPathSampler &pathSampler, bool* singleWavelength) const override;
-        void getMediumPoint(const MediumInteraction &mi, MediumPoint* medPt) const override;
+        void calculateMediumPoint(const MediumInteraction &mi, MediumPoint* medPt) const override;
         
         // END: MediumObject's methods
         //----------------------------------------------------------------

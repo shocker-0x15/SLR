@@ -150,7 +150,7 @@ namespace SLR {
         SurfaceInteraction si;
         if (!scene.intersect(ray, &si))
             return SampledSpectrum::Zero;
-        si.getSurfacePoint(&surfPt);
+        si.calculateSurfacePoint(&surfPt);
         
         Vector3D dirOut_sn = surfPt.toLocal(-ray.dir);
         if (surfPt.isEmitting()) {
@@ -228,7 +228,7 @@ namespace SLR {
             si = SurfaceInteraction();
             if (!scene.intersect(ray, &si))
                 break;
-            si.getSurfacePoint(&surfPt);
+            si.calculateSurfacePoint(&surfPt);
             
             dirOut_sn = surfPt.toLocal(-ray.dir);
             

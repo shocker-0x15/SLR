@@ -153,19 +153,19 @@ namespace SLR {
         return transmittance;
     }
     
-    void DensityGridMediumDistribution::getMediumPoint(const MediumInteraction &mi, MediumPoint* medPt) const {
+    void DensityGridMediumDistribution::calculateMediumPoint(const MediumInteraction &mi, MediumPoint* medPt) const {
         ReferenceFrame shadingFrame;
         shadingFrame.z = mi.getIncomingDirection();
         shadingFrame.z.makeCoordinateSystem(&shadingFrame.x, &shadingFrame.y);
         *medPt = MediumPoint(mi, false, shadingFrame);
     }
     
-    SampledSpectrum DensityGridMediumDistribution::getExtinctionCoefficient(const Point3D &param, const WavelengthSamples &wls) const {
+    SampledSpectrum DensityGridMediumDistribution::evaluateExtinctionCoefficient(const Point3D &param, const WavelengthSamples &wls) const {
         float density = calcDensity(param);
         return density * m_base_sigma_e->evaluate(wls);
     }
     
-    SampledSpectrum DensityGridMediumDistribution::getAlbedo(const Point3D &param, const WavelengthSamples &wls) const {
+    SampledSpectrum DensityGridMediumDistribution::evaluateAlbedo(const Point3D &param, const WavelengthSamples &wls) const {
         if (param.x < 0 || param.y < 0 || param.z < 0 ||
             param.x >= 1 || param.y >= 1 || param.z >= 1)
             return SampledSpectrum::Zero;

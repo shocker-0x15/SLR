@@ -294,7 +294,7 @@ namespace SLR {
             alpha *= medThroughput;
             
             interPt = interact->createInteractionPoint(mem);
-            alpha *= interPt->evaluateInteractance(wls);
+            alpha *= interPt->evaluateExtinctionCoefficient(wls);
             
             float dist2 = squaredDistance(vertices.back().interPt, interPt);
             Vector3D dirOut_sn = interPt->toLocal(-ray.dir);

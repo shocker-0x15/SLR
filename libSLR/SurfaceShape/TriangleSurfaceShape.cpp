@@ -179,7 +179,7 @@ namespace SLR {
         return true;
     }
     
-    void TriangleSurfaceShape::getSurfacePoint(const SurfaceInteraction &si, SurfacePoint* surfPt) const {
+    void TriangleSurfaceShape::calculateSurfacePoint(const SurfaceInteraction &si, SurfacePoint* surfPt) const {
         const Vertex &v0 = *m_v[0];
         const Vertex &v1 = *m_v[1];
         const Vertex &v2 = *m_v[2];

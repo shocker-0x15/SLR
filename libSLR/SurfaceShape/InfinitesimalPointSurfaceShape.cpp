@@ -13,7 +13,7 @@
 #include "../Core/textures.h"
 
 namespace SLR {
-    void InfinitesimalPointSurfaceShape::getSurfacePoint(const SurfaceInteraction &si, SurfacePoint* surfPt) const {
+    void InfinitesimalPointSurfaceShape::calculateSurfacePoint(const SurfaceInteraction &si, SurfacePoint* surfPt) const {
         ReferenceFrame shadingFrame;
         shadingFrame.z = m_direction;
         shadingFrame.z.makeCoordinateSystem(&shadingFrame.x, &shadingFrame.y);

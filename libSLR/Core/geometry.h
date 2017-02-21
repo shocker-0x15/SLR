@@ -67,7 +67,7 @@ namespace SLR {
             *v = m_v;
         }
         
-        void getSurfacePoint(SurfacePoint* surfPt) const;
+        void calculateSurfacePoint(SurfacePoint* surfPt) const;
         
         InteractionPoint* createInteractionPoint(ArenaAllocator &mem) const override;
     };
@@ -96,7 +96,7 @@ namespace SLR {
             *w = m_w;
         }
         
-        void getMediumPoint(MediumPoint* medPt) const;
+        void calculateMediumPoint(MediumPoint* medPt) const;
         
         InteractionPoint* createInteractionPoint(ArenaAllocator &mem) const override;
     };
@@ -158,7 +158,7 @@ namespace SLR {
         
         virtual ABDFQuery* createABDFQuery(const Vector3D &dirLocal, int16_t selectedWL, DirectionType dirType, bool reqRev, bool adjoint, ArenaAllocator &mem) const = 0;
         virtual AbstractBDF* createAbstractBDF(const WavelengthSamples &wls, ArenaAllocator &mem) const = 0;
-        virtual SampledSpectrum evaluateInteractance(const WavelengthSamples &wls) const = 0;
+        virtual SampledSpectrum evaluateExtinctionCoefficient(const WavelengthSamples &wls) const = 0;
         virtual float calcCosTerm(const Vector3D &vecWorld) const = 0;
         
         virtual void applyTransform(const StaticTransform &transform);
@@ -219,7 +219,7 @@ namespace SLR {
         AbstractBDF* createAbstractBDF(const WavelengthSamples &wls, ArenaAllocator &mem) const override {
             return (AbstractBDF*)createBSDF(wls, mem);
         }
-        SampledSpectrum evaluateInteractance(const WavelengthSamples &wls) const override {
+        SampledSpectrum evaluateExtinctionCoefficient(const WavelengthSamples &wls) const override {
             return SampledSpectrum::One;
         }
         float calcCosTerm(const Vector3D &vecWorld) const override {
@@ -270,7 +270,7 @@ namespace SLR {
         
         ABDFQuery* createABDFQuery(const Vector3D &dirLocal, int16_t selectedWL, DirectionType filter, bool reqRev, bool adjoint, ArenaAllocator &mem) const override;
         AbstractBDF* createAbstractBDF(const WavelengthSamples &wls, ArenaAllocator &mem) const override;
-        SampledSpectrum evaluateInteractance(const WavelengthSamples &wls) const override;
+        SampledSpectrum evaluateExtinctionCoefficient(const WavelengthSamples &wls) const override;
         float calcCosTerm(const Vector3D &vecWorld) const override {
             return 1.0f;
         }
@@ -321,7 +321,7 @@ namespace SLR {
         }
         virtual bool preTransformed() const = 0;
         virtual bool intersect(const Ray &ray, SurfaceInteraction* si) const = 0;
-        virtual void getSurfacePoint(const SurfaceInteraction &si, SurfacePoint* surfPt) const = 0;
+        virtual void calculateSurfacePoint(const SurfaceInteraction &si, SurfacePoint* surfPt) const = 0;
         virtual float area() const = 0;
         virtual void sample(float u0, float u1, SurfacePoint* surfPt, float* areaPDF, DirectionType* posType) const = 0;
         virtual float evaluateAreaPDF(const SurfacePoint& surfPt) const = 0;
@@ -347,9 +347,9 @@ namespace SLR {
                               MediumInteraction* mi, SampledSpectrum* medThroughput, bool* singleWavelength) const = 0;
         virtual SampledSpectrum evaluateTransmittance(Ray &ray, float distanceLimit, const WavelengthSamples &wls, LightPathSampler &pathSampler,
                                                       bool* singleWavelength) const = 0;
-        virtual void getMediumPoint(const MediumInteraction &mi, MediumPoint* medPt) const = 0;
-        virtual SampledSpectrum getExtinctionCoefficient(const Point3D &param, const WavelengthSamples &wls) const = 0;
-        virtual SampledSpectrum getAlbedo(const Point3D &param, const WavelengthSamples &wls) const = 0;
+        virtual void calculateMediumPoint(const MediumInteraction &mi, MediumPoint* medPt) const = 0;
+        virtual SampledSpectrum evaluateExtinctionCoefficient(const Point3D &param, const WavelengthSamples &wls) const = 0;
+        virtual SampledSpectrum evaluateAlbedo(const Point3D &param, const WavelengthSamples &wls) const = 0;
         virtual float volume() const = 0;
         virtual void sample(float u0, float u1, float u2, MediumPoint* medPt, float* volumePDF) const = 0;
         virtual float evaluateVolumePDF(const MediumPoint& medPt) const = 0;

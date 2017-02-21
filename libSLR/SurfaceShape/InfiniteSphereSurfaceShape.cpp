@@ -47,7 +47,7 @@ namespace SLR {
         return true;
     }
     
-    void InfiniteSphereSurfaceShape::getSurfacePoint(const SurfaceInteraction &si, SurfacePoint *surfPt) const {
+    void InfiniteSphereSurfaceShape::calculateSurfacePoint(const SurfaceInteraction &si, SurfacePoint *surfPt) const {
         float u, v;
         si.getSurfaceParameter(&u, &v);
         

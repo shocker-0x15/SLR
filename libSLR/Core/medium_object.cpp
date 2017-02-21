@@ -92,8 +92,8 @@ namespace SLR {
         return m_medium->evaluateTransmittance(ray, distanceLimit, wls, pathSampler, singleWavelength);
     }
     
-    void SingleMediumObject::getMediumPoint(const MediumInteraction &mi, MediumPoint* medPt) const {
-        m_medium->getMediumPoint(mi, medPt);
+    void SingleMediumObject::calculateMediumPoint(const MediumInteraction &mi, MediumPoint* medPt) const {
+        m_medium->calculateMediumPoint(mi, medPt);
         medPt->setObject(this);
         medPt->applyTransform(mi.getAppliedTransform());
     }
@@ -101,14 +101,14 @@ namespace SLR {
     SampledSpectrum SingleMediumObject::extinctionCoefficient(const MediumPoint &medPt, const WavelengthSamples &wls) const {
         float u, v, w;
         medPt.getMediumParameter(&u, &v, &w);
-        return m_medium->getExtinctionCoefficient(Point3D(u, v, w), wls);
+        return m_medium->evaluateExtinctionCoefficient(Point3D(u, v, w), wls);
     }
     
     AbstractBDF* SingleMediumObject::createAbstractBDF(const MediumPoint &medPt, const WavelengthSamples &wls, ArenaAllocator &mem) const {
         PhaseFunction* pf = m_material->getPhaseFunction(medPt, wls, mem);
         float u, v, w;
         medPt.getMediumParameter(&u, &v, &w);
-        SampledSpectrum albedo = m_medium->getAlbedo(Point3D(u, v, w), wls);
+        SampledSpectrum albedo = m_medium->evaluateAlbedo(Point3D(u, v, w), wls);
         return mem.create<VolumetricBSDF>(albedo, pf);
     }
     
