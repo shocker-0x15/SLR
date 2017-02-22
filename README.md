@@ -25,10 +25,11 @@ SLR consists of the following components.
     * GGX Microfacet BRDF/BSDF \[Walter2007\] with visible normal sampling \[Heitz2014\]
     * Mixed BSDF
     * ~~Layered BSDF~~ (TODO)
-* Volume Rendering
-    * Homogeneous Media
-    * Heterogeneous Media (trilinear-interpolated grid)
-    * Media enclosed by surfaces
+* Volume Rendering \[Pauly1999, Raab2008, Novák2014\]
+    * Participating Media
+        * Homogeneous Media
+        * Heterogeneous Media (trilinear-interpolated grid)
+        * Media enclosed by surfaces
     * Phase Functions
         * Isotropic
         * Henyey-Greenstein
@@ -50,7 +51,7 @@ SLR consists of the following components.
 * Camera Types
     * Perspective Camera with Depth of Field (thin-lens model)
     * Environment (Equirectangular) Camera
-* Motion Blur Types
+* Motion Blur
     * Camera Motion Blur
     * Object Motion Blur
     * ~~Deformation Blur~~ (TODO)
@@ -85,17 +86,20 @@ It requires the following libraries.
 ##注意 / Note
 モデルデータやテクスチャーを読み込むシーンファイルがありますが、それらアセットはリポジトリには含まれていません。
 
-There are some scene files loading a model data and textures, but those assets are NOT included in this repository.
+There are some scene files loading model data and textures, but those assets are NOT included in this repository.
 
 ##参考文献 / References
 [Ashikhmin2000] "An Anisotropic Phong BRDF Model"  
 [Dammertz2008] "Shallow Bounding Volume Hierarchies for Fast SIMD Ray Tracing of Incoherent Rays"  
 [Hachisuka2011] "Robust Adaptive Photon Tracing Using Photon Path Visibility"  
-[Heitz2014] "Importance Sampling Microfacet-Based BSDFs using the Distribution of Visible Normals"    
+[Heitz2014] "Importance Sampling Microfacet-Based BSDFs using the Distribution of Visible Normals"  
 [Kajiya1986] "THE RENDERING EQUATION"  
 [Meng2015] "Physically Meaningful Rendering using Tristimulus Colours"  
 [Moroder2010] "A New Ward BRDF Model with Bounded Albedo"  
+[Novák2014] "Residual ratio tracking for estimating attenuation in participating media"  
 [Oren1994] "Generalization of Lambert’s Reflectance Model"  
+[Pauly1999] "Robust Monte Carlo Methods for Photorealistic Rendering of Volumetric Effects"  
+[Raab2008] "Unbiased Global Illumination with Participating Media"  
 [Stich2009] "Spatial Splits in Bounding Volume Hierarchies"  
 [Veach1994] "Bidirectional Estimators for Light Transport"  
 [Veach1996] "Non-symmetric Scattering in Light Transport Algorithms"  
@@ -104,4 +108,4 @@ There are some scene files loading a model data and textures, but those assets a
 [Worley1996] "A Cellular Texture Basis Function"  
 
 ----
-2016 [@Shocker_0x15](https://twitter.com/Shocker_0x15)
+2017 [@Shocker_0x15](https://twitter.com/Shocker_0x15)
