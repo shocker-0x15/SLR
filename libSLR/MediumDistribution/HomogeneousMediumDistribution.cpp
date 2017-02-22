@@ -17,7 +17,7 @@ namespace SLR {
         FloatSum sampledDistance = ray.distMin;
         
         Point3D param;
-        m_region.localCoordinates(queryPoint, &param);
+        m_region.calculateLocalCoordinates(queryPoint, &param);
         SampledSpectrum extCoeff = evaluateExtinctionCoefficient(param, wls);
         float distance = -std::log(sampler.getSample()) / extCoeff[wls.selectedLambda];
         SampledSpectrum transmittance = exp(-extCoeff * std::min(distance, distanceLimit - ray.distMin));
@@ -40,7 +40,7 @@ namespace SLR {
         Point3D queryPoint = ray.org + ray.distMin * ray.dir;
         
         Point3D param;
-        m_region.localCoordinates(queryPoint, &param);
+        m_region.calculateLocalCoordinates(queryPoint, &param);
         SampledSpectrum extCoeff = evaluateExtinctionCoefficient(param, wls);
         float distance = distanceLimit - ray.distMin;
         SampledSpectrum transmittance = exp(-extCoeff * distance);

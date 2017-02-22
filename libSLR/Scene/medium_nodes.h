@@ -59,6 +59,22 @@ namespace SLR {
         void createRenderingData(Allocator* mem, const Transform* subTF, RenderingData *data) override;
         void destroyRenderingData(Allocator* mem) override;
     };
+    
+    
+    
+    class SLR_API VacuumMediumNode : public MediumNode {
+        VacuumMediumDistribution* m_medium;
+        MediumMaterial* m_material;
+        
+        SingleMediumObject* m_obj;
+    public:
+        VacuumMediumNode(const BoundingBox3D &region);
+        ~VacuumMediumNode();
+        
+        bool isDirectlyTransformable() const override { return false; }
+        void createRenderingData(Allocator* mem, const Transform* subTF, RenderingData *data) override;
+        void destroyRenderingData(Allocator* mem) override;
+    };
 }
 
 #endif /* __SLR_medium_nodes__ */

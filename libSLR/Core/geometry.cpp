@@ -113,7 +113,7 @@ namespace SLR {
     }
     
     SampledSpectrum MediumPoint::evaluateExtinctionCoefficient(const WavelengthSamples &wls) const {
-        return m_obj->extinctionCoefficient(*this, wls);
+        return m_obj->evaluateExtinctionCoefficient(*this, wls);
     }
     
     void MediumPoint::applyTransform(const SLR::StaticTransform &transform) {

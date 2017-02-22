@@ -98,7 +98,7 @@ namespace SLR {
         medPt->applyTransform(mi.getAppliedTransform());
     }
     
-    SampledSpectrum SingleMediumObject::extinctionCoefficient(const MediumPoint &medPt, const WavelengthSamples &wls) const {
+    SampledSpectrum SingleMediumObject::evaluateExtinctionCoefficient(const MediumPoint &medPt, const WavelengthSamples &wls) const {
         float u, v, w;
         medPt.getMediumParameter(&u, &v, &w);
         return m_medium->evaluateExtinctionCoefficient(Point3D(u, v, w), wls);

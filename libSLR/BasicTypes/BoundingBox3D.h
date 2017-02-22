@@ -92,7 +92,7 @@ namespace SLR {
                     (p.z >= minP.z && p.z < maxP.z));
         }
         
-        void localCoordinates(const Point3DTemplate<RealType> &p, Point3DTemplate<RealType>* param) const {
+        void calculateLocalCoordinates(const Point3DTemplate<RealType> &p, Point3DTemplate<RealType>* param) const {
             *param = (p - minP) / (maxP - minP);
         }
         

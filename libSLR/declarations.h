@@ -238,6 +238,7 @@ namespace SLR {
     class MediumMaterial;
     class EmitterMediumProperty;
     class EmitterMediumMaterial;
+    class NullMediumMaterial;
     
     // Image & Tiled Image
     class Image2D;
@@ -291,6 +292,7 @@ namespace SLR {
     class SubAchromaticExtinctionGridMediumDistribution;
     class GridMediumDistribution;
     class SubGridMediumDistribution;
+    class VacuumMediumDistribution;
     
     // END: Medium Distribution
     // ----------------------------------------------------------------
@@ -437,6 +439,7 @@ namespace SLR {
     class HomogeneousMediumNode;
     class GridMediumNode;
     class DensityGridMediumNode;
+    class VacuumMediumNode;
     class Scene;
     
     // END: Scene

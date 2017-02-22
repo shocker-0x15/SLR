@@ -1,0 +1,116 @@
+// Dusty Cornell Box
+
+//setRenderer("method": "Volumetric PT", ("samples": 16384,));
+setRenderer("method": "Volumetric BPT", ("samples": 16384,));
+setRenderSettings("width": 1024, "height": 1024);
+
+cornellBoxNode = createNode();
+    cornellBox = load3DModel("models/Cornell_box_RB.assbin");
+    addChild(cornellBoxNode, cornellBox);
+
+    lightNode = createNode();
+    setTransform(lightNode, translate(0.0, 0.999, 0.0));
+        diffuseCol = Spectrum(0.9, 0.9, 0.9);
+        diffuseTex = SpectrumTexture(diffuseCol);
+        scatterMat = createSurfaceMaterial("matte", (diffuseTex,));
+        difLightCol = Spectrum("Illuminant", 500);
+        difLightTex = SpectrumTexture(difLightCol);
+        emitterMat = createEmitterSurfaceProperty("diffuse", (difLightTex,));
+        //emitterMat = createEmitterSurfaceProperty("ideal directional", (difLightTex, Vector(1, 0.25, 2)));
+        surfMat = createSurfaceMaterial("emitter", (scatterMat, emitterMat));
+
+        lightMesh = createMesh(
+            (
+            ((-0.25, 0, -0.25), (0, -1, 0), (1, 0, 0), (0, 0)), 
+            (( 0.25, 0, -0.25), (0, -1, 0), (1, 0, 0), (1, 0)),
+            (( 0.25, 0,  0.25), (0, -1, 0), (1, 0, 0), (1, 1)),
+            ((-0.25, 0,  0.25), (0, -1, 0), (1, 0, 0), (0, 1))
+            ),
+            (
+            (surfMat, ((0, 1, 2), (0, 2, 3))), 
+            )
+            );
+        addChild(lightNode, lightMesh);
+    addChild(cornellBoxNode, lightNode);
+addChild(root, cornellBoxNode);
+
+//leftBoxNode = createNode();
+//    function leftBoxMat(name, attrs) {
+//        eta = SpectrumTexture(Spectrum("ID": "Titanium", 0));
+//        k = SpectrumTexture(Spectrum("ID": "Titanium", 1));
+//        return createSurfaceMaterial("metal", (SpectrumTexture(Spectrum("Reflectance", 1.0)), eta, k));
+//    }
+//    leftBox = load3DModel("models/box.assbin"/*, leftBoxMat*/);
+//    addChild(leftBoxNode, leftBox);
+//setTransform(leftBoxNode, translate(-0.4, -0.999, -0.4) * rotateY(0.2617993878) * scale(0.25, 0.5, 0.25) * translate(0, 1, 0));
+//addChild(cornellBoxNode, leftBoxNode);
+//
+//rightBoxNode = createNode();
+//    function rightBoxMat(name, attrs) {
+//        Rs = SpectrumTexture(Spectrum("Reflectance", 0.5));
+//        anisoX = anisoY = FloatTexture(0.1);
+//        return createSurfaceMaterial("Ward", (Rs, anisoX, anisoY));
+//    }
+//    rightBox = load3DModel("models/box.assbin"/*, rightBoxMat*/);
+//    addChild(rightBoxNode, rightBox);
+//setTransform(rightBoxNode, translate(0.4, -0.999, 0.4) * rotateY(-0.2617993878) * scale(0.25) * translate(0, 1, 0));
+//addChild(cornellBoxNode, rightBoxNode);
+
+medMat = createMediumMaterial("isotropic", (,));
+medium0Node = createNode();
+//    medium0 = createHomogeneousMedium(Point(-0.5, -0.5, -0.5), Point(0.5, 0.5, 0.5), 
+//                                      Spectrum((360, 830), (1.0 * 0.25, 1.0 * 0.25)), 
+//                                      Spectrum((360, 830), (2.0 * 0.25, 10.0 * 0.25)), 
+//                                      medMat);
+//    medium0 = createGridMedium(Point(-0.5, -0.5, -0.5), Point(0.5, 0.5, 0.5), 
+//                               Spectrum((360, 830), (1.0 * 0.25, 1.0 * 0.25)), 
+//                               Spectrum((360, 830), (2.0 * 0.25, 10.0 * 0.25)), 
+//                               (1.0, 1.0, 1.0, 1.0, 
+//                                1.0, 1.0, 1.0, 1.0), 
+//                               2, 2, 2, medMat);
+    medium0 = createHomogeneousMedium(Point(-1.0, -1.0, -1.0), Point(1.0, 1.0, 1.0), 
+                                      Spectrum(360, 830, (0.4, 0.4)), 
+                                      Spectrum(360, 830, (0.5, 0.5)), 
+                                      medMat);
+    addChild(medium0Node, medium0);
+//setTransform(medium0Node, rotateY(0.7853981634) * rotateX(0.7853981634));
+addChild(cornellBoxNode, medium0Node);
+
+idolNode = createNode();
+    function idolMat(name, attrs) {
+//        etaExt = SpectrumTexture(Spectrum("ID": "Air", 0));
+//        etaInt = SpectrumTexture(Spectrum("ID": "Glass_BK7", 0));
+//        coeff = SpectrumTexture(Spectrum("Reflectance", 0.999));
+//        return createSurfaceMaterial("glass", (coeff, etaExt, etaInt));
+
+        etaExt = Spectrum("IoR", "Air", 0);
+        etaInt = Spectrum("IoR", "Water", 0);
+        alpha_g = 0.01;
+        surfMat = createSurfaceMaterial("microfacet glass", (SpectrumTexture(etaExt), SpectrumTexture(etaInt), FloatTexture(alpha_g)));
+        normalMap = NormalTexture("voronoi", (0.01, 3.14 / 12));
+        return (surfMat, normalMap);
+    }
+    function idolMeshCallback(name, mesh, minP, maxP) {
+        //sigma_s = Spectrum((360, 830), (1.0, 1.0));
+        //sigma_e = Spectrum((360, 830), (2.0, 10.0));
+        //sigma_s = Spectrum(651.6, 687.8, 724, "space": "Rec709");
+        //sigma_e = Spectrum(724, 724, 724, "space": "Rec709");
+
+        //medMat = createMediumMaterial("isotropic", (,));
+        //medium = createHomogeneousMedium(minP, maxP, sigma_s, sigma_e, medMat);
+        medium = createVacuum(minP, maxP);
+        setInternalMedium(mesh, medium);
+        return true;
+    }
+    idol = load3DModel("models/bunny.assbin", idolMat, idolMeshCallback);
+    addChild(idolNode, idol);
+setTransform(idolNode, translate(0, -1, 0) * scale(1.0));
+addChild(cornellBoxNode, idolNode);
+
+cameraNode = createNode();
+    camera = createPerspectiveCamera("aspect": 1.0, "fovY": 0.5235987756, "radius": 0.025, 
+                                     "imgDist": 1.0, "objDist": 4.5);
+    addChild(cameraNode, camera);
+setTransform(cameraNode, translate(0, 0, 5) * rotateY(-3.1415926536));
+
+addChild(root, cameraNode);

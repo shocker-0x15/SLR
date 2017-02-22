@@ -207,6 +207,8 @@
 		46BF49871BB7303D0036033F /* spectrum_library.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 46BF49861BB7303D0036033F /* spectrum_library.cpp */; };
 		46BF49891BB731CF0036033F /* spectrum_library.h in Headers */ = {isa = PBXBuildFile; fileRef = 46BF49881BB731CF0036033F /* spectrum_library.h */; };
 		46BF49911BB7E7760036033F /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 46BF49901BB7E7760036033F /* main.cpp */; };
+		46BF7DFE1E5DC24A0014E59D /* VacuumMediumDistribution.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 46BF7DFC1E5DC24A0014E59D /* VacuumMediumDistribution.cpp */; };
+		46BF7DFF1E5DC24A0014E59D /* VacuumMediumDistribution.h in Headers */ = {isa = PBXBuildFile; fileRef = 46BF7DFD1E5DC24A0014E59D /* VacuumMediumDistribution.h */; };
 		46BF8CAF1E2263CE00EF8E13 /* medium_nodes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 46BF8CAD1E2263CE00EF8E13 /* medium_nodes.cpp */; };
 		46BF8CB01E2263CE00EF8E13 /* medium_nodes.h in Headers */ = {isa = PBXBuildFile; fileRef = 46BF8CAE1E2263CE00EF8E13 /* medium_nodes.h */; };
 		46BF8CB31E23A72E00EF8E13 /* medium_material.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 46BF8CB11E23A72E00EF8E13 /* medium_material.cpp */; };
@@ -458,6 +460,8 @@
 		46BF49881BB731CF0036033F /* spectrum_library.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = spectrum_library.h; path = libSLR/BasicTypes/spectrum_library.h; sourceTree = SOURCE_ROOT; };
 		46BF49901BB7E7760036033F /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; lineEnding = 0; name = main.cpp; path = HostProgram/main.cpp; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.cpp; };
 		46BF49921BB7EB860036033F /* StopWatch.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = StopWatch.h; path = HostProgram/StopWatch.h; sourceTree = "<group>"; };
+		46BF7DFC1E5DC24A0014E59D /* VacuumMediumDistribution.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = VacuumMediumDistribution.cpp; path = libSLR/MediumDistribution/VacuumMediumDistribution.cpp; sourceTree = SOURCE_ROOT; };
+		46BF7DFD1E5DC24A0014E59D /* VacuumMediumDistribution.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = VacuumMediumDistribution.h; path = libSLR/MediumDistribution/VacuumMediumDistribution.h; sourceTree = SOURCE_ROOT; };
 		46BF8CAD1E2263CE00EF8E13 /* medium_nodes.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; lineEnding = 0; name = medium_nodes.cpp; path = libSLR/Scene/medium_nodes.cpp; sourceTree = SOURCE_ROOT; xcLanguageSpecificationIdentifier = xcode.lang.cpp; };
 		46BF8CAE1E2263CE00EF8E13 /* medium_nodes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = medium_nodes.h; path = libSLR/Scene/medium_nodes.h; sourceTree = SOURCE_ROOT; };
 		46BF8CB11E23A72E00EF8E13 /* medium_material.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = medium_material.cpp; path = libSLR/Core/medium_material.cpp; sourceTree = SOURCE_ROOT; };
@@ -744,6 +748,8 @@
 				465D8ADE1E59D32E001B8382 /* DensityGridMediumDistribution.cpp */,
 				465D8AE11E59D32E001B8382 /* GridMediumDistribution.h */,
 				465D8AE01E59D32E001B8382 /* GridMediumDistribution.cpp */,
+				46BF7DFD1E5DC24A0014E59D /* VacuumMediumDistribution.h */,
+				46BF7DFC1E5DC24A0014E59D /* VacuumMediumDistribution.cpp */,
 			);
 			name = "Medium Distribution";
 			sourceTree = "<group>";
@@ -959,6 +965,7 @@
 				468F9DDD1D8063DA00DD02BD /* Matrix3x3.h in Headers */,
 				465D8B1D1E59D5AC001B8382 /* surface_material_headers.h in Headers */,
 				465D8B751E59DB74001B8382 /* PTRenderer.h in Headers */,
+				46BF7DFF1E5DC24A0014E59D /* VacuumMediumDistribution.h in Headers */,
 				46BF8CB01E2263CE00EF8E13 /* medium_nodes.h in Headers */,
 				465D8AF81E59D3CF001B8382 /* image_textures.h in Headers */,
 				465D8B831E59DC9C001B8382 /* node.h in Headers */,
@@ -1182,6 +1189,7 @@
 				465D8B7A1E59DBA5001B8382 /* VolumetricPTRenderer.cpp in Sources */,
 				466F6CF81BB6CA420056F2FA /* surface_material.cpp in Sources */,
 				468F9DE01D81D98200DD02BD /* ProgressReporter.cpp in Sources */,
+				46BF7DFE1E5DC24A0014E59D /* VacuumMediumDistribution.cpp in Sources */,
 				466F6CFC1BB6CA420056F2FA /* textures.cpp in Sources */,
 				465D8AAC1E59CB88001B8382 /* medium_object.cpp in Sources */,
 				4651F33A1C57AAFD0026B8A5 /* distributions.cpp in Sources */,

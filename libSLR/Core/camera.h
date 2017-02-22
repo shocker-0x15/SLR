@@ -31,6 +31,8 @@ namespace SLR {
         DirectionType posType;
     };
     
+    
+    
     class SLR_API Camera {
     protected:
         const Transform* m_transform;
@@ -50,8 +52,9 @@ namespace SLR {
             // sample a position (We0, spatial importance) on the lens surface of the camera.
             *We0 = sample(lensQuery, lensSample, lensResult);
             *idf = createIDF(lensResult->surfPt, lensQuery.wls, mem);
+            SLRAssert(std::isfinite(lensResult->areaPDF), "areaPDF: unexpected value detected: %f", lensResult->areaPDF);
 
-            // sample a direction (directional importance) from IDF, then create subsequent eye subpath vertices by tracing in the scene.
+            // sample a direction (directional importance) from IDF.
             *We1 = (*idf)->sample(WeSample, WeResult);
             return Ray(lensResult->surfPt.getPosition(), lensResult->surfPt.fromLocal(WeResult->dirLocal), lensQuery.time);
         }

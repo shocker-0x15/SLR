@@ -75,6 +75,23 @@ namespace SLRSceneGraph {
         
         void prepareForRendering() override;
     };
+    
+    
+    
+    class SLR_SCENEGRAPH_API VacuumMediumNode : public MediumNode {
+        SLR::BoundingBox3D m_region;
+        
+        void allocateRawData() override;
+        void setupRawData() override;
+        void terminateRawData() override;
+    public:
+        VacuumMediumNode(const SLR::BoundingBox3D &region);
+        ~VacuumMediumNode();
+        
+        NodeRef copy() const override;
+        
+        void prepareForRendering() override;
+    };
 }
 
 #endif /* __SLRSceneGraph_medium_nodes__ */

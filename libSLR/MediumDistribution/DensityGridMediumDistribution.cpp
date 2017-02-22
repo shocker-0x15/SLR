@@ -60,7 +60,7 @@ namespace SLR {
         while (sampledDistance < distanceLimit) {
             Point3D queryPoint = ray.org + sampledDistance * ray.dir;
             Point3D param;
-            m_region.localCoordinates(queryPoint, &param);
+            m_region.calculateLocalCoordinates(queryPoint, &param);
             float density = calcDensity(param);
             SampledSpectrum extCoeff = m_base_sigma_e->evaluate(wls) * density;
             float probRealCollision = extCoeff[wls.selectedLambda] / majorant;
@@ -91,7 +91,7 @@ namespace SLR {
                 while (sampledDistance < hitDistance) {
                     Point3D queryPoint = ray.org + sampledDistance * ray.dir;
                     Point3D param;
-                    m_region.localCoordinates(queryPoint, &param);
+                    m_region.calculateLocalCoordinates(queryPoint, &param);
                     float density = calcDensity(param);
                     SampledSpectrum extCoeff = m_base_sigma_e->evaluate(wls) * density;
                     float probRealCollision = (extCoeff[wl] - extCoeff[wls.selectedLambda]) / majorant;
@@ -125,7 +125,7 @@ namespace SLR {
             while (sampledDistance < distanceLimit) {
                 Point3D queryPoint = ray.org + sampledDistance * ray.dir;
                 Point3D param;
-                m_region.localCoordinates(queryPoint, &param);
+                m_region.calculateLocalCoordinates(queryPoint, &param);
                 float density = calcDensity(param);
                 SampledSpectrum extCoeff = m_base_sigma_e->evaluate(wls) * density;
                 float probRealCollision = extCoeff[wls.selectedLambda] / majorant;
@@ -140,7 +140,7 @@ namespace SLR {
                 while (sampledDistance < distanceLimit) {
                     Point3D queryPoint = ray.org + sampledDistance * ray.dir;
                     Point3D param;
-                    m_region.localCoordinates(queryPoint, &param);
+                    m_region.calculateLocalCoordinates(queryPoint, &param);
                     float density = calcDensity(param);
                     SampledSpectrum extCoeff = m_base_sigma_e->evaluate(wls) * density;
                     float probRealCollision = extCoeff[wl] / majorant;

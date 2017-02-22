@@ -13,6 +13,7 @@
 #include <libSLR/MediumDistribution/HomogeneousMediumDistribution.h>
 #include <libSLR/MediumDistribution/GridMediumDistribution.h>
 #include <libSLR/MediumDistribution/DensityGridMediumDistribution.h>
+#include <libSLR/MediumDistribution/VacuumMediumDistribution.h>
 #include "../medium_materials.h"
 
 namespace SLRSceneGraph {
@@ -48,13 +49,52 @@ namespace SLRSceneGraph {
     
     
     
+    void DensityGridMediumNode::allocateRawData() {
+        m_rawData = (SLR::Node*)malloc(sizeof(SLR::DensityGridMediumNode));
+    }
+    
+    void DensityGridMediumNode::setupRawData() {
+        new (m_rawData) SLR::DensityGridMediumNode(m_region, m_base_sigma_s.get(), m_base_sigma_e.get(), m_density_grid.get(), m_numX, m_numY, m_numZ, m_material->getRaw());
+        m_setup = true;
+    }
+    
+    void DensityGridMediumNode::terminateRawData() {
+        SLR::DensityGridMediumNode &raw = *(SLR::DensityGridMediumNode*)m_rawData;
+        if (m_setup)
+            raw.~DensityGridMediumNode();
+        m_setup = false;
+    }
+    
+    DensityGridMediumNode::DensityGridMediumNode(const SLR::BoundingBox3D &region, const AssetSpectrumRef &base_sigma_s, const AssetSpectrumRef &base_sigma_e, std::unique_ptr<float[]> &density_grid,
+                                                 uint32_t numX, uint32_t numY, uint32_t numZ, const MediumMaterialRef &material) :
+    m_region(region), m_base_sigma_s(base_sigma_s), m_base_sigma_e(base_sigma_e),
+    m_density_grid(std::move(density_grid)), m_numX(numX), m_numY(numY), m_numZ(numZ), m_material(material) {
+        allocateRawData();
+    }
+    
+    DensityGridMediumNode::~DensityGridMediumNode() {
+        Node::~Node();
+    }
+    
+    NodeRef DensityGridMediumNode::copy() const {
+        SLRAssert_NotImplemented();
+        return nullptr;
+    }
+    
+    void DensityGridMediumNode::prepareForRendering() {
+        terminateRawData();
+        setupRawData();
+    }
+    
+    
+    
     void GridMediumNode::allocateRawData() {
         m_rawData = (SLR::Node*)malloc(sizeof(SLR::GridMediumNode));
     }
     
     void GridMediumNode::setupRawData() {
         SLRAssert_NotImplemented();
-//        new (m_rawData) SLR::GridMediumNode(m_region, m_sigma_s, m_sigma_e, m_numX, m_numY, m_numZ);
+        //        new (m_rawData) SLR::GridMediumNode(m_region, m_sigma_s, m_sigma_e, m_numX, m_numY, m_numZ);
         m_setup = true;
     }
     
@@ -106,39 +146,35 @@ namespace SLRSceneGraph {
     
     
     
-    void DensityGridMediumNode::allocateRawData() {
-        m_rawData = (SLR::Node*)malloc(sizeof(SLR::DensityGridMediumNode));
+    void VacuumMediumNode::allocateRawData() {
+        m_rawData = (SLR::Node*)malloc(sizeof(SLR::VacuumMediumNode));
     }
     
-    void DensityGridMediumNode::setupRawData() {
-        new (m_rawData) SLR::DensityGridMediumNode(m_region, m_base_sigma_s.get(), m_base_sigma_e.get(), m_density_grid.get(), m_numX, m_numY, m_numZ, m_material->getRaw());
+    void VacuumMediumNode::setupRawData() {
+        new (m_rawData) SLR::VacuumMediumNode(m_region);
         m_setup = true;
     }
     
-    void DensityGridMediumNode::terminateRawData() {
-        SLR::DensityGridMediumNode &raw = *(SLR::DensityGridMediumNode*)m_rawData;
+    void VacuumMediumNode::terminateRawData() {
+        SLR::VacuumMediumNode &raw = *(SLR::VacuumMediumNode*)m_rawData;
         if (m_setup)
-            raw.~DensityGridMediumNode();
+            raw.~VacuumMediumNode();
         m_setup = false;
     }
     
-    DensityGridMediumNode::DensityGridMediumNode(const SLR::BoundingBox3D &region, const AssetSpectrumRef &base_sigma_s, const AssetSpectrumRef &base_sigma_e, std::unique_ptr<float[]> &density_grid,
-                                                 uint32_t numX, uint32_t numY, uint32_t numZ, const MediumMaterialRef &material) :
-    m_region(region), m_base_sigma_s(base_sigma_s), m_base_sigma_e(base_sigma_e),
-    m_density_grid(std::move(density_grid)), m_numX(numX), m_numY(numY), m_numZ(numZ), m_material(material) {
+    VacuumMediumNode::VacuumMediumNode(const SLR::BoundingBox3D &region) :
+    m_region(region) {
         allocateRawData();
     }
     
-    DensityGridMediumNode::~DensityGridMediumNode() {
-        Node::~Node();
+    VacuumMediumNode::~VacuumMediumNode() {
     }
     
-    NodeRef DensityGridMediumNode::copy() const {
-        SLRAssert_NotImplemented();
-        return nullptr;
+    NodeRef VacuumMediumNode::copy() const {
+        return createShared<VacuumMediumNode>(m_region);
     }
     
-    void DensityGridMediumNode::prepareForRendering() {
+    void VacuumMediumNode::prepareForRendering() {
         terminateRawData();
         setupRawData();
     }

@@ -91,6 +91,7 @@ namespace SLR {
         *Le0 = sample(transform, lightPosQuery, lightPosSample, lightPosResult);
         *edf = lightPosResult->surfPt.createEDF(lightPosQuery.wls, mem);
         SLRAssert(!std::isnan(lightPosResult->areaPDF)/* && !std::isinf(lightResult)*/, "areaPDF: unexpected value detected: %f", lightPosResult->areaPDF);
+        
         // sample a direction from EDF.
         *Le1 = (*edf)->sample(edfQuery, edfSample, edfResult);
         return Ray(lightPosResult->surfPt.getPosition(), lightPosResult->surfPt.fromLocal(edfResult->dir_sn), lightPosQuery.time, Ray::Epsilon);

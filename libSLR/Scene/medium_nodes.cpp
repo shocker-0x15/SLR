@@ -13,6 +13,7 @@
 #include "../MediumDistribution/HomogeneousMediumDistribution.h"
 #include "../MediumDistribution/GridMediumDistribution.h"
 #include "../MediumDistribution/DensityGridMediumDistribution.h"
+#include "../MediumDistribution/VacuumMediumDistribution.h"
 
 namespace SLR {
     HomogeneousMediumNode::HomogeneousMediumNode(const BoundingBox3D &region, const AssetSpectrum* sigma_s, const AssetSpectrum* sigma_e, const MediumMaterial* material) :
@@ -91,5 +92,26 @@ namespace SLR {
     
     void GridMediumNode::destroyRenderingData(Allocator *mem) {
         
+    }
+    
+    
+    
+    VacuumMediumNode::VacuumMediumNode(const BoundingBox3D &region) {
+        m_medium = new VacuumMediumDistribution(region);
+        m_material = new NullMediumMaterial();
+    }
+    
+    VacuumMediumNode::~VacuumMediumNode() {
+        delete m_material;
+        delete m_medium;
+    }
+    
+    void VacuumMediumNode::createRenderingData(Allocator *mem, const Transform *subTF, RenderingData *data) {
+        m_obj = mem->create<SingleMediumObject>(m_medium, m_material);
+        data->medObjs.push_back(m_obj);
+    }
+    
+    void VacuumMediumNode::destroyRenderingData(Allocator *mem) {
+        mem->destroy(m_obj);
     }
 }

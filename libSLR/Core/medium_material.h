@@ -52,6 +52,23 @@ namespace SLR {
         bool isEmitting() const override { return true; }
         EDF* getEDF(const MediumPoint &medPt, const WavelengthSamples &wls, ArenaAllocator &mem, float scale) const override { return m_emit->getEDF(medPt, wls, mem); }
     };
+    
+    
+    
+    class SLR_API NullMediumMaterial : public MediumMaterial {
+    public:
+        PhaseFunction* getPhaseFunction(const MediumPoint &medPt, const WavelengthSamples &wls, ArenaAllocator &mem, float scale = 1.0f) const override {
+            SLRAssert_ShouldNotBeCalled();
+            return nullptr;
+        }
+        SampledSpectrum emittance(const MediumPoint &medPt, const WavelengthSamples &wls) const override {
+            return SampledSpectrum::Zero;
+        }
+        EDF* getEDF(const MediumPoint &medPt, const WavelengthSamples &wls, ArenaAllocator &mem, float scale = 1.0f) const override {
+            SLRAssert_ShouldNotBeCalled();
+            return nullptr;
+        }
+    };
 }
 
 #endif /* __SLR_medium_material__ */

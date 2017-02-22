@@ -774,6 +774,16 @@ namespace SLRSceneGraph {
                                                    return Element::createFromReference<TypeMap::SurfaceNode>(node);
                                                }
                                                );
+            stack["createVacuum"] =
+            Element::create<TypeMap::Function>(1,
+                                               std::vector<ArgInfo>{{"min", Type::Point}, {"max", Type::Point}},
+                                               [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
+                                                   const auto &minP = args.at("min").raw<TypeMap::Point>();
+                                                   const auto &maxP = args.at("max").raw<TypeMap::Point>();
+                                                   MediumNodeRef mediumNode = createShared<VacuumMediumNode>(SLR::BoundingBox3D(minP, maxP));
+                                                   return Element::createFromReference<TypeMap::MediumNode>(mediumNode);
+                                               }
+                                               );
             stack["createHomogeneousMedium"] =
             Element::create<TypeMap::Function>(1,
                                                std::vector<ArgInfo>{{"min", Type::Point}, {"max", Type::Point}, {"sigma_s", Type::Spectrum}, {"sigma_e", Type::Spectrum}, {"mat", Type::MediumMaterial}},

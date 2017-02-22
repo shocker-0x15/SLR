@@ -39,7 +39,7 @@ namespace SLR {
         virtual SampledSpectrum sample(const LightPosQuery &query, LightPathSampler &pathSampler, ArenaAllocator &mem, LightPosQueryResult** lpResult) const = 0;
         virtual Ray sampleRay(const LightPosQuery &lightPosQuery, LightPathSampler &pathSampler, const EDFQuery &edfQuery, ArenaAllocator &mem,
                               LightPosQueryResult** lightPosResult, SampledSpectrum* Le0, EDF** edf,
-                              EDFQueryResult* edfResult, SampledSpectrum* Le1) const= 0;
+                              EDFQueryResult* edfResult, SampledSpectrum* Le1) const = 0;
     };
     
     
