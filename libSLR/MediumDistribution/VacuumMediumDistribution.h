@@ -24,16 +24,16 @@ namespace SLR {
         
         BoundingBox3D bounds() const override { return m_region; }
         bool contains(const Point3D &p) const override { return m_region.contains(p); }
-        bool intersectBoundary(const Ray &ray, float* distToBoundary, bool* enter) const override {
-            return m_region.intersectBoundary(ray, distToBoundary, enter);
+        bool intersectBoundary(const Ray &ray, const RaySegment &segment, float* distToBoundary, bool* enter) const override {
+            return m_region.intersectBoundary(ray, segment, distToBoundary, enter);
         }
-        bool interact(const Ray &ray, float distanceLimit, const WavelengthSamples &wls, LightPathSampler &pathSampler,
+        bool interact(const Ray &ray, const RaySegment &segment, const WavelengthSamples &wls, LightPathSampler &pathSampler,
                       MediumInteraction* mi, SampledSpectrum* medThroughput, bool* singleWavelength) const override {
             *medThroughput = SampledSpectrum::One;
             *singleWavelength = false;
             return false;
         }
-        SampledSpectrum evaluateTransmittance(Ray &ray, float distanceLimit, const WavelengthSamples &wls, LightPathSampler &pathSampler,
+        SampledSpectrum evaluateTransmittance(const Ray &ray, const RaySegment &segment, const WavelengthSamples &wls, LightPathSampler &pathSampler,
                                               bool* singleWavelength) const override {
             *singleWavelength = false;
             return SampledSpectrum::One;

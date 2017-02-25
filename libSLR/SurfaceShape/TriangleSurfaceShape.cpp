@@ -129,7 +129,7 @@ namespace SLR {
         return true;
     }
     
-    bool TriangleSurfaceShape::intersect(const Ray &ray, SurfaceInteraction* si) const {
+    bool TriangleSurfaceShape::intersect(const Ray &ray, const RaySegment &segment, SurfaceInteraction* si) const {
         const Vertex &v0 = *m_v[0];
         const Vertex &v1 = *m_v[1];
         const Vertex &v2 = *m_v[2];
@@ -156,7 +156,7 @@ namespace SLR {
             return false;
         
         float tt = dot(edge02, q) * invDet;
-        if (tt < ray.distMin || tt > ray.distMax)
+        if (tt < segment.distMin || tt > segment.distMax)
             return false;
         
         float b0 = 1.0f - b1 - b2;

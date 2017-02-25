@@ -51,7 +51,7 @@ namespace SLR {
             BoundingBox3D::Axis rightAxis;
             uint32_t padding;
             
-            uint32_t intersect(const Ray &ray) const {
+            uint32_t intersect(const Ray &ray, const RaySegment &segment) const {
                 const Vector3D invRayDir = ray.dir.reciprocal();
                 
                 __m128 rOrg_x = _mm_set_ps1(ray.org.x);
@@ -61,8 +61,8 @@ namespace SLR {
                 __m128 invRayDir_y = _mm_set_ps1(invRayDir.y);
                 __m128 invRayDir_z = _mm_set_ps1(invRayDir.z);
                 
-                __m128 tNear = _mm_set_ps1(ray.distMin);
-                __m128 tFar = _mm_set_ps1(ray.distMax);
+                __m128 tNear = _mm_set_ps1(segment.distMin);
+                __m128 tFar = _mm_set_ps1(segment.distMax);
                 
                 tNear = _mm_max_ps(_mm_mul_ps(_mm_sub_ps(invRayDir.x > 0.0f ? min_x : max_x, rOrg_x), invRayDir_x), tNear);
                 tNear = _mm_max_ps(_mm_mul_ps(_mm_sub_ps(invRayDir.y > 0.0f ? min_y : max_y, rOrg_y), invRayDir_y), tNear);
@@ -291,9 +291,10 @@ namespace SLR {
             return m_bounds;
         }
         
-        bool intersect(Ray &ray, SurfaceInteraction* si, uint32_t* closestIndex) const override {
+        bool intersect(const Ray &ray, const RaySegment &segment, SurfaceInteraction* si, uint32_t* closestIndex) const override {
             *closestIndex = UINT32_MAX;
             bool dirIsPositive[] = {ray.dir.x >= 0, ray.dir.y >= 0, ray.dir.z >= 0};
+            RaySegment isectRange = segment;
             
             const uint32_t StackSize = 64;
             uint32_t idxStack[StackSize];
@@ -301,7 +302,7 @@ namespace SLR {
             idxStack[depth++] = 0;
             while (depth > 0) {
                 const Node &node = m_nodes[idxStack[--depth]];
-                uint32_t hitFlags = node.intersect(ray);
+                uint32_t hitFlags = node.intersect(ray, isectRange);
                 if (hitFlags == 0)
                     continue;
                 
@@ -330,9 +331,9 @@ namespace SLR {
                     if (!child.isValid() || !child.isLeafNode)
                         continue;
                     for (uint32_t j = 0; j < child.numLeaves; ++j) {
-                        if (m_objLists[child.idx + j]->intersect(ray, si)) {
+                        if (m_objLists[child.idx + j]->intersect(ray, isectRange, si)) {
                             *closestIndex = child.idx + j;
-                            ray.distMax = si->getDistance();
+                            isectRange.distMax = si->getDistance();
                         }
                     }
                 }

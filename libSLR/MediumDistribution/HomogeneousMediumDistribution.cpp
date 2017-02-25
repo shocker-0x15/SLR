@@ -10,23 +10,26 @@
 #include "../Core/light_path_sampler.h"
 
 namespace SLR {
-    bool HomogeneousMediumDistribution::interact(const Ray &ray, float distanceLimit, const WavelengthSamples &wls, LightPathSampler &pathSampler,
+    bool HomogeneousMediumDistribution::interact(const Ray &ray, const RaySegment &segment, const WavelengthSamples &wls, LightPathSampler &pathSampler,
                                                  MediumInteraction* mi, SampledSpectrum* medThroughput, bool* singleWavelength) const {
         FreePathSampler &sampler = pathSampler.getFreePathSampler();
-        Point3D queryPoint = ray.org + ray.distMin * ray.dir;
-        FloatSum sampledDistance = ray.distMin;
         
+        Point3D queryPoint = ray.org + segment.distMin * ray.dir;
         Point3D param;
         m_region.calculateLocalCoordinates(queryPoint, &param);
+        
         SampledSpectrum extCoeff = evaluateExtinctionCoefficient(param, wls);
         float distance = -std::log(sampler.getSample()) / extCoeff[wls.selectedLambda];
-        SampledSpectrum transmittance = exp(-extCoeff * std::min(distance, distanceLimit - ray.distMin));
+        SampledSpectrum transmittance = exp(-extCoeff * std::min(distance, segment.distMax - segment.distMin));
+        
         *singleWavelength = false;
+        FloatSum sampledDistance = segment.distMin;
         sampledDistance += distance;
-        if (sampledDistance < distanceLimit) {
-            Point3D p = ray.org + sampledDistance * ray.dir;
+        if (sampledDistance < segment.distMax) {
+            queryPoint = ray.org + sampledDistance * ray.dir;
+            m_region.calculateLocalCoordinates(queryPoint, &param);
             
-            *mi = MediumInteraction(ray.time, sampledDistance, p, normalize(ray.dir), param.x, param.y, param.z);
+            *mi = MediumInteraction(ray.time, sampledDistance, queryPoint, normalize(ray.dir), param.x, param.y, param.z);
             float distPDF = extCoeff[wls.selectedLambda] * transmittance[wls.selectedLambda];
             *medThroughput = transmittance / distPDF;
             return true;
@@ -36,13 +39,14 @@ namespace SLR {
         return false;
     }
     
-    SampledSpectrum HomogeneousMediumDistribution::evaluateTransmittance(Ray &ray, float distanceLimit, const WavelengthSamples &wls, SLR::LightPathSampler &pathSampler, bool *singleWavelength) const {
-        Point3D queryPoint = ray.org + ray.distMin * ray.dir;
-        
+    SampledSpectrum HomogeneousMediumDistribution::evaluateTransmittance(const Ray &ray, const RaySegment &segment, const WavelengthSamples &wls, SLR::LightPathSampler &pathSampler, 
+                                                                         bool* singleWavelength) const {
+        Point3D queryPoint = ray.org + segment.distMin * ray.dir;
         Point3D param;
         m_region.calculateLocalCoordinates(queryPoint, &param);
+        
         SampledSpectrum extCoeff = evaluateExtinctionCoefficient(param, wls);
-        float distance = distanceLimit - ray.distMin;
+        float distance = segment.distMax - segment.distMin;
         SampledSpectrum transmittance = exp(-extCoeff * distance);
         *singleWavelength = false;
         

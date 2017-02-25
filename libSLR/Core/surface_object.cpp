@@ -26,12 +26,12 @@ namespace SLR {
         return m_obj->sample(m_appliedTransform, query, smp, result);
     }
     
-    Ray SurfaceLight::sampleRay(const LightPosQuery &lightPosQuery, const SurfaceLightPosSample &lightPosSample,
-                                const EDFQuery &edfQuery, const EDFSample &edfSample,
-                                ArenaAllocator &mem,
-                                SurfaceLightPosQueryResult* lightPosResult, SampledSpectrum* Le0, EDF** edf,
-                                EDFQueryResult* edfResult, SampledSpectrum* Le1) const {
-        return m_obj->sampleRay(m_appliedTransform, lightPosQuery, lightPosSample, edfQuery, edfSample, mem, lightPosResult, Le0, edf, edfResult, Le1);
+    void SurfaceLight::sampleRay(const LightPosQuery &lightPosQuery, const SurfaceLightPosSample &lightPosSample,
+                                 const EDFQuery &edfQuery, const EDFSample &edfSample,
+                                 ArenaAllocator &mem,
+                                 SurfaceLightPosQueryResult* lightPosResult, SampledSpectrum* Le0, EDF** edf,
+                                 EDFQueryResult* edfResult, SampledSpectrum* Le1, Ray* ray, float* epsilon) const {
+        m_obj->sampleRay(m_appliedTransform, lightPosQuery, lightPosSample, edfQuery, edfSample, mem, lightPosResult, Le0, edf, edfResult, Le1, ray, epsilon);
     }
     
     SampledSpectrum SurfaceLight::sample(const LightPosQuery &query, LightPathSampler &pathSampler, ArenaAllocator &mem, LightPosQueryResult** lpResult) const {
@@ -40,12 +40,12 @@ namespace SLR {
         return ret;
     }
     
-    Ray SurfaceLight::sampleRay(const LightPosQuery &lightPosQuery, LightPathSampler &pathSampler, const EDFQuery &edfQuery, ArenaAllocator &mem,
-                                LightPosQueryResult** lightPosResult, SampledSpectrum* Le0, EDF** edf,
-                                EDFQueryResult* edfResult, SampledSpectrum* Le1) const {
+    void SurfaceLight::sampleRay(const LightPosQuery &lightPosQuery, LightPathSampler &pathSampler, const EDFQuery &edfQuery, ArenaAllocator &mem,
+                                 LightPosQueryResult** lightPosResult, SampledSpectrum* Le0, EDF** edf,
+                                 EDFQueryResult* edfResult, SampledSpectrum* Le1, Ray* ray, float* epsilon) const {
         *lightPosResult = mem.create<SurfaceLightPosQueryResult>();
-        return sampleRay(lightPosQuery, pathSampler.getSurfaceLightPosSample(), edfQuery, pathSampler.getEDFSample(), mem,
-                         (SurfaceLightPosQueryResult*)*lightPosResult, Le0, edf, edfResult, Le1);
+        sampleRay(lightPosQuery, pathSampler.getSurfaceLightPosSample(), edfQuery, pathSampler.getEDFSample(), mem,
+                  (SurfaceLightPosQueryResult*)*lightPosResult, Le0, edf, edfResult, Le1, ray, epsilon);
     }
     
     
@@ -53,9 +53,10 @@ namespace SLR {
     bool SurfaceObject::testVisibility(const SurfacePoint &shdP, const SurfacePoint &lightP, float time) const {
         SLRAssert(shdP.atInfinity() == false && lightP.atInfinity() == false, "Points must be in finite region.");
         float dist = distance(lightP.getPosition(), shdP.getPosition());
-        Ray ray(shdP.getPosition(), (lightP.getPosition() - shdP.getPosition()) / dist, time, Ray::Epsilon, dist * (1 - Ray::Epsilon));
+        Ray ray(shdP.getPosition(), (lightP.getPosition() - shdP.getPosition()) / dist, time);
+        RaySegment segment(Ray::Epsilon, dist * (1 - Ray::Epsilon));
         SurfaceInteraction si;
-        return !intersect(ray, &si);
+        return !intersect(ray, segment, &si);
     }
     
     
@@ -81,12 +82,12 @@ namespace SLR {
         return m_material->emittance(result->surfPt, query.wls);
     }
     
-    Ray SingleSurfaceObject::sampleRay(const StaticTransform &transform,
-                                       const LightPosQuery &lightPosQuery, const SurfaceLightPosSample &lightPosSample,
-                                       const EDFQuery &edfQuery, const EDFSample &edfSample,
-                                       ArenaAllocator &mem,
-                                       SurfaceLightPosQueryResult *lightPosResult, SampledSpectrum *Le0, EDF **edf,
-                                       EDFQueryResult *edfResult, SampledSpectrum *Le1) const {
+    void SingleSurfaceObject::sampleRay(const StaticTransform &transform,
+                                        const LightPosQuery &lightPosQuery, const SurfaceLightPosSample &lightPosSample,
+                                        const EDFQuery &edfQuery, const EDFSample &edfSample,
+                                        ArenaAllocator &mem,
+                                        SurfaceLightPosQueryResult *lightPosResult, SampledSpectrum *Le0, EDF **edf,
+                                        EDFQueryResult *edfResult, SampledSpectrum *Le1, Ray* ray, float* epsilon) const {
         // sample a position with emittance on the selected light's surface.
         *Le0 = sample(transform, lightPosQuery, lightPosSample, lightPosResult);
         *edf = lightPosResult->surfPt.createEDF(lightPosQuery.wls, mem);
@@ -94,10 +95,11 @@ namespace SLR {
         
         // sample a direction from EDF.
         *Le1 = (*edf)->sample(edfQuery, edfSample, edfResult);
-        return Ray(lightPosResult->surfPt.getPosition(), lightPosResult->surfPt.fromLocal(edfResult->dir_sn), lightPosQuery.time, Ray::Epsilon);
+        *ray = Ray(lightPosResult->surfPt.getPosition(), lightPosResult->surfPt.fromLocal(edfResult->dir_sn), lightPosQuery.time);
+        *epsilon = Ray::Epsilon;
     }
     
-    bool SingleSurfaceObject::intersect(Ray &ray, SurfaceInteraction* si) const {
+    bool SingleSurfaceObject::intersect(const Ray &ray, const RaySegment &segment, SurfaceInteraction* si) const {
 #ifdef DEBUG
         if (Accelerator::traceTraverse) {
             debugPrintf("%s%p, SingleSurfaceObject::intersect()\n",
@@ -105,7 +107,7 @@ namespace SLR {
             Accelerator::traceTraversePrefix += "  ";
         }
 #endif
-        if (!m_surface->intersect(ray, si)) {
+        if (!m_surface->intersect(ray, segment, si)) {
 #ifdef DEBUG
             if (Accelerator::traceTraverse) {
                 debugPrintf("%snot found\n", Accelerator::traceTraversePrefix.c_str());
@@ -120,7 +122,7 @@ namespace SLR {
 #ifdef DEBUG
         if (Accelerator::traceTraverse) {
             debugPrintf("%sfound: %g, %g\n",
-                        Accelerator::traceTraversePrefix.c_str(), ray.distMax, si->getDistance());
+                        Accelerator::traceTraversePrefix.c_str(), segment.distMax, si->getDistance());
             size_t newLength = Accelerator::traceTraversePrefix.length() - 2;
             Accelerator::traceTraversePrefix.resize(newLength);
         }
@@ -227,12 +229,12 @@ namespace SLR {
         return m_material->emittance(result->surfPt, query.wls);
     }
     
-    Ray InfiniteSphereSurfaceObject::sampleRay(const StaticTransform &transform,
-                                               const LightPosQuery &lightPosQuery, const SurfaceLightPosSample &lightPosSample,
-                                               const EDFQuery &edfQuery, const EDFSample &edfSample,
-                                               ArenaAllocator &mem,
-                                               SurfaceLightPosQueryResult *lightPosResult, SampledSpectrum *Le0, EDF **edf,
-                                               EDFQueryResult *edfResult, SampledSpectrum *Le1) const {
+    void InfiniteSphereSurfaceObject::sampleRay(const StaticTransform &transform,
+                                                const LightPosQuery &lightPosQuery, const SurfaceLightPosSample &lightPosSample,
+                                                const EDFQuery &edfQuery, const EDFSample &edfSample,
+                                                ArenaAllocator &mem,
+                                                SurfaceLightPosQueryResult *lightPosResult, SampledSpectrum *Le0, EDF **edf,
+                                                EDFQueryResult *edfResult, SampledSpectrum *Le1, Ray* ray, float* epsilon) const {
         // sample a position with emittance on the selected light's surface.
         *Le0 = sample(transform, lightPosQuery, lightPosSample, lightPosResult);
         *edf = lightPosResult->surfPt.createEDF(lightPosQuery.wls, mem);
@@ -251,7 +253,8 @@ namespace SLR {
         
         float worldRadius = m_scene->getWorldRadius();
         Point3D org = m_scene->getWorldCenter() + 1.1f * worldRadius * lightPosResult->surfPt.getPosition() + worldRadius * (dx * vx + dy * vy);
-        return Ray(org, vz, lightPosQuery.time, 0);
+        *ray = Ray(org, vz, lightPosQuery.time);
+        *epsilon = 0.0f;
     }
     
     BSDF* InfiniteSphereSurfaceObject::createBSDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem) const {
@@ -295,7 +298,7 @@ namespace SLR {
         return m_surfObj->contains(localP, time);
     }
     
-    bool TransformedSurfaceObject::intersect(Ray &ray, SurfaceInteraction* si) const {
+    bool TransformedSurfaceObject::intersect(const Ray &ray, const RaySegment &segment, SurfaceInteraction* si) const {
 #ifdef DEBUG
         if (Accelerator::traceTraverse) {
             debugPrintf("%s%p, TransformedSurfaceObject::intersect()\n",
@@ -307,7 +310,7 @@ namespace SLR {
         StaticTransform sampledTF;
         m_transform->sample(ray.time, &sampledTF);
         localRay = invert(sampledTF) * ray;
-        if (!m_surfObj->intersect(localRay, si)) {
+        if (!m_surfObj->intersect(localRay, segment, si)) {
 #ifdef DEBUG
             if (Accelerator::traceTraverse) {
                 debugPrintf("%snot found\n", Accelerator::traceTraversePrefix.c_str());
@@ -317,12 +320,11 @@ namespace SLR {
 #endif
             return false;
         }
-        ray.distMax = localRay.distMax;
         si->applyTransformFromLeft(sampledTF);
 #ifdef DEBUG
         if (Accelerator::traceTraverse) {
             debugPrintf("%sfound: %g\n",
-                        Accelerator::traceTraversePrefix.c_str(), ray.distMax);
+                        Accelerator::traceTraversePrefix.c_str(), segment.distMax);
             size_t newLength = Accelerator::traceTraversePrefix.length() - 2;
             Accelerator::traceTraversePrefix.resize(newLength);
         }
@@ -395,13 +397,13 @@ namespace SLR {
         Ray probeRay(p, Vector3D::Ex, time);
         SurfaceInteraction si;
         uint32_t closestIndex;
-        bool hit = m_accelerator->intersect(probeRay, &si, &closestIndex);
+        bool hit = m_accelerator->intersect(probeRay, RaySegment(), &si, &closestIndex);
         if (!hit)
             return false;
         return dot(si.getGeometricNormal(), probeRay.dir) >= 0.0f;
     }
     
-    bool SurfaceObjectAggregate::intersect(Ray &ray, SurfaceInteraction* si) const {
+    bool SurfaceObjectAggregate::intersect(const Ray &ray, const RaySegment &segment, SurfaceInteraction* si) const {
 #ifdef DEBUG
         if (Accelerator::traceTraverse) {
             debugPrintf("%s%p, SurfaceObjectAggregate::intersect()\n",
@@ -410,7 +412,7 @@ namespace SLR {
         }
 #endif
         uint32_t objIdx;
-        if (!m_accelerator->intersect(ray, si, &objIdx)) {
+        if (!m_accelerator->intersect(ray, segment, si, &objIdx)) {
 #ifdef DEBUG
             if (Accelerator::traceTraverse) {
                 debugPrintf("%snot found\n", Accelerator::traceTraversePrefix.c_str());
@@ -427,7 +429,7 @@ namespace SLR {
 #ifdef DEBUG
         if (Accelerator::traceTraverse) {
             debugPrintf("%sfound: %g\n",
-                        Accelerator::traceTraversePrefix.c_str(), ray.distMax);
+                        Accelerator::traceTraversePrefix.c_str(), segment.distMax);
             size_t newLength = Accelerator::traceTraversePrefix.length() - 2;
             Accelerator::traceTraversePrefix.resize(newLength);
         }

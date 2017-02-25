@@ -968,7 +968,7 @@ namespace SLRSceneGraph {
                                                                            bounds.minP.z + (bounds.maxP.z - bounds.minP.z) * (i + 0.5f + purturbZ) / numY),
                                                                    SLR::Vector3D(0, -1, 0), 0.0f);
                                                            SurfaceInteraction si;
-                                                           if (!aggregate->intersect(ray, &si))
+                                                           if (!aggregate->intersect(ray, RaySegment(), &si))
                                                                continue;
                                                            SurfacePoint surfPt;
                                                            si.calculateSurfacePoint(&surfPt);

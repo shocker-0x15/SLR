@@ -320,7 +320,7 @@ namespace SLR {
             bbox1->minP[splitAxis] = std::max(bbox1->minP[splitAxis], splitPos);
         }
         virtual bool preTransformed() const = 0;
-        virtual bool intersect(const Ray &ray, SurfaceInteraction* si) const = 0;
+        virtual bool intersect(const Ray &ray, const RaySegment &segment, SurfaceInteraction* si) const = 0;
         virtual void calculateSurfacePoint(const SurfaceInteraction &si, SurfacePoint* surfPt) const = 0;
         virtual float area() const = 0;
         virtual void sample(float u0, float u1, SurfacePoint* surfPt, float* areaPDF, DirectionType* posType) const = 0;
@@ -342,10 +342,10 @@ namespace SLR {
         
         virtual BoundingBox3D bounds() const = 0;
         virtual bool contains(const Point3D &p) const = 0;
-        virtual bool intersectBoundary(const Ray &ray, float* distToBoundary, bool* enter) const = 0;
-        virtual bool interact(const Ray &ray, float distanceLimit, const WavelengthSamples &wls, LightPathSampler &pathSampler,
+        virtual bool intersectBoundary(const Ray &ray, const RaySegment &segment, float* distToBoundary, bool* enter) const = 0;
+        virtual bool interact(const Ray &ray, const RaySegment &segment, const WavelengthSamples &wls, LightPathSampler &pathSampler,
                               MediumInteraction* mi, SampledSpectrum* medThroughput, bool* singleWavelength) const = 0;
-        virtual SampledSpectrum evaluateTransmittance(Ray &ray, float distanceLimit, const WavelengthSamples &wls, LightPathSampler &pathSampler,
+        virtual SampledSpectrum evaluateTransmittance(const Ray &ray, const RaySegment &segment, const WavelengthSamples &wls, LightPathSampler &pathSampler,
                                                       bool* singleWavelength) const = 0;
         virtual void calculateMediumPoint(const MediumInteraction &mi, MediumPoint* medPt) const = 0;
         virtual SampledSpectrum evaluateExtinctionCoefficient(const Point3D &param, const WavelengthSamples &wls) const = 0;

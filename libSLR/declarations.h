@@ -80,6 +80,7 @@ namespace SLR {
     template <typename RealType> struct QuaternionTemplate;
     template <typename RealType> struct TexCoord2DTemplate;
     template <typename RealType> struct RayTemplate;
+    template <typename RealType> struct RaySegmentTemplate;
     template <typename RealType> struct BoundingBox3DTemplate;
     typedef Point3DTemplate<float> Point3D;
     typedef Vector3DTemplate<float> Vector3D;
@@ -92,6 +93,7 @@ namespace SLR {
     typedef QuaternionTemplate<float> Quaternion;
     typedef TexCoord2DTemplate<float> TexCoord2D;
     typedef RayTemplate<float> Ray;
+    typedef RaySegmentTemplate<float> RaySegment;
     typedef BoundingBox3DTemplate<float> BoundingBox3D;
     typedef CompensatedSum<float> FloatSum;
     

@@ -414,9 +414,10 @@ namespace SLR {
             return m_bounds;
         }
         
-        bool intersect(Ray &ray, SurfaceInteraction* si, uint32_t* closestIndex) const override {
+        bool intersect(const Ray &ray, const RaySegment &segment, SurfaceInteraction* si, uint32_t* closestIndex) const override {
             *closestIndex = UINT32_MAX;
             bool dirIsPositive[] = {ray.dir.x >= 0, ray.dir.y >= 0, ray.dir.z >= 0};
+            RaySegment isectRange = segment;
             
             const uint32_t StackSize = 64;
             uint32_t idxStack[StackSize];
@@ -424,7 +425,7 @@ namespace SLR {
             idxStack[depth++] = 0;
             while (depth > 0) {
                 const Node &node = m_nodes[idxStack[--depth]];
-                if (!node.bbox.intersect(ray))
+                if (!node.bbox.intersect(ray, isectRange))
                     continue;
                 if (node.numLeaves == 0) {
                     SLRAssert(depth < StackSize, "SBVH::intersect: stack overflow");
@@ -440,9 +441,9 @@ namespace SLR {
                                         Accelerator::traceTraversePrefix.c_str(), node.offsetFirstLeaf + i);
                         }
 #endif
-                        if (m_objLists[node.offsetFirstLeaf + i]->intersect(ray, si)) {
+                        if (m_objLists[node.offsetFirstLeaf + i]->intersect(ray, isectRange, si)) {
                             *closestIndex = node.offsetFirstLeaf + i;
-                            ray.distMax = si->getDistance();
+                            isectRange.distMax = si->getDistance();
                         }
                     }
                 }

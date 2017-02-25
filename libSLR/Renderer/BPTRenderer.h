@@ -76,9 +76,11 @@ namespace SLR {
             DirectionType sampledType;
             bool lambdaSelected;
             BPTVertex(const SurfacePoint &_surfPt, const DDFProxy* _ddf,
-                      const SampledSpectrum &_alpha, float _cosIn, float _areaPDF, float _RRProb, DirectionType _sampledType, bool _lambdaSelected) :
+                      const SampledSpectrum &_alpha, float _cosIn, float _areaPDF, float _RRProb, 
+                      DirectionType _sampledType, bool _lambdaSelected) :
             surfPt(_surfPt), ddf(_ddf),
-            alpha(_alpha), cosIn(_cosIn), areaPDF(_areaPDF), RRProb(_RRProb), revAreaPDF(NAN), revRRProb(NAN), sampledType(_sampledType), lambdaSelected(_lambdaSelected) {}
+            alpha(_alpha), cosIn(_cosIn), areaPDF(_areaPDF), RRProb(_RRProb), revAreaPDF(NAN), revRRProb(NAN), 
+            sampledType(_sampledType), lambdaSelected(_lambdaSelected) {}
         };
         
         struct Job {
@@ -107,7 +109,7 @@ namespace SLR {
             ProgressReporter* reporter;
             
             void kernel(uint32_t threadID);
-            void generateSubPath(const WavelengthSamples &initWLs, const SampledSpectrum &initAlpha, const Ray &initRay, float dirPDF, DirectionType sampledType,
+            void generateSubPath(const WavelengthSamples &initWLs, const SampledSpectrum &initAlpha, const Ray &initRay, float initEpsilon, float dirPDF, DirectionType sampledType,
                                  float cosLast, bool adjoint, IndependentLightPathSampler &pathSampler, ArenaAllocator &mem);
             float calculateMISWeight(float lExtend1stAreaPDF, float lExtend1stRRProb, float lExtend2ndAreaPDF, float lExtend2ndRRProb,
                                      float eExtend1stAreaPDF, float eExtend1stRRProb, float eExtend2ndAreaPDF, float eExtend2ndRRProb,

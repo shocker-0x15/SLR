@@ -32,8 +32,8 @@ namespace SLR {
         return true;
     }
     
-    bool InfiniteSphereSurfaceShape::intersect(const Ray &ray, SurfaceInteraction *si) const {
-        if (!std::isinf(ray.distMax))
+    bool InfiniteSphereSurfaceShape::intersect(const Ray &ray, const RaySegment &segment, SurfaceInteraction *si) const {
+        if (!std::isinf(segment.distMax))
             return false;
         float theta, phi;
         ray.dir.toPolarYUp(&theta, &phi);

@@ -15,13 +15,14 @@ namespace SLR {
         return true;
     }
     
-    bool GridMediumDistribution::interact(const Ray &ray, float distanceLimit, const WavelengthSamples &wls, LightPathSampler &pathSampler,
+    bool GridMediumDistribution::interact(const Ray &ray, const RaySegment &segment, const WavelengthSamples &wls, LightPathSampler &pathSampler,
                                           MediumInteraction *mi, SampledSpectrum *medThroughput, bool* singleWavelength) const {
         SLRAssert_NotImplemented();
         return false;
     }
     
-    SampledSpectrum GridMediumDistribution::evaluateTransmittance(Ray &ray, float distanceLimit, const WavelengthSamples &wls, SLR::LightPathSampler &pathSampler, bool *singleWavelength) const {
+    SampledSpectrum GridMediumDistribution::evaluateTransmittance(const Ray &ray, const RaySegment &segment, const WavelengthSamples &wls, SLR::LightPathSampler &pathSampler, 
+                                                                  bool* singleWavelength) const {
         SLRAssert_NotImplemented();
         
         return SampledSpectrum::Zero;
@@ -53,13 +54,14 @@ namespace SLR {
     
     
     
-    bool SubGridMediumDistribution::interact(const Ray &ray, float distanceLimit, const WavelengthSamples &wls, LightPathSampler &pathSampler,
+    bool SubGridMediumDistribution::interact(const Ray &ray, const RaySegment &segment, const WavelengthSamples &wls, LightPathSampler &pathSampler,
                                  MediumInteraction *mi, SampledSpectrum *medThroughput, bool* singleWavelength) const {
         SLRAssert_NotImplemented();
         return false;
     }
     
-    SampledSpectrum SubGridMediumDistribution::evaluateTransmittance(Ray &ray, float distanceLimit, const WavelengthSamples &wls, SLR::LightPathSampler &pathSampler, bool *singleWavelength) const {
+    SampledSpectrum SubGridMediumDistribution::evaluateTransmittance(const Ray &ray, const RaySegment &segment, const WavelengthSamples &wls, SLR::LightPathSampler &pathSampler, 
+                                                                     bool* singleWavelength) const {
         SLRAssert_NotImplemented();
         return SampledSpectrum::Zero;
     }

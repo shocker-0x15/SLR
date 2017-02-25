@@ -142,6 +142,7 @@ namespace SLR {
                                                             IndependentLightPathSampler &pathSampler, ArenaAllocator &mem) const {
         WavelengthSamples wls = initWLs;
         Ray ray = initRay;
+        RaySegment segment;
         SampledSpectrum alpha = SampledSpectrum::One;
         float initY = alpha.importance(wls.selectedLambda);
         SampledSpectrumSum sp(SampledSpectrum::Zero);
@@ -152,7 +153,7 @@ namespace SLR {
         bool singleWavelength;
         InteractionPoint* interPt;
         
-        if (!scene.interact(ray, wls, pathSampler, mem, &interact, &medThroughput, &singleWavelength))
+        if (!scene.interact(ray, segment, wls, pathSampler, mem, &interact, &medThroughput, &singleWavelength))
             return SampledSpectrum::Zero;
         
         if (singleWavelength && !wls.lambdaSelected()) {
@@ -162,8 +163,11 @@ namespace SLR {
         alpha *= medThroughput;
         
         interPt = interact->createInteractionPoint(mem);
-        
+        // on Surface: probability: 1.0 or probability density delta function
+        // in Medium: probability density: extinction coefficient
+        alpha *= interPt->evaluateExtinctionCoefficient(wls);
         Vector3D dirOut_local = interPt->toLocal(-ray.dir);
+        
         if (interPt->isEmitting()) {
             EDF* edf = interPt->createEDF(wls, mem);
             SampledSpectrum Le = interPt->emittance(wls) * edf->evaluate(EDFQuery(), dirOut_local);
@@ -179,10 +183,6 @@ namespace SLR {
             
             AbstractBDF* abdf = interPt->createAbstractBDF(wls, mem);
             ABDFQuery* abdfQuery = interPt->createABDFQuery(dirOut_local, wls.selectedLambda, DirectionType::All, false, false, mem);
-            
-            // on Surface: probability: 1.0 or probability density delta function
-            // in Medium: probability density: extinction coefficient
-            alpha *= interPt->evaluateExtinctionCoefficient(wls);
             
             // Next Event Estimation (explicit light sampling)
             if (abdf->hasNonDelta()) {
@@ -209,7 +209,7 @@ namespace SLR {
                     Vector3D shadowDir_sn = interPt->toLocal(shadowDir);
                     
                     EDF* edf = lightPt->createEDF(wls, mem);
-                    SampledSpectrum Le = emittance * edf->evaluate(EDFQuery(), shadowDir_l);
+                    SampledSpectrum Le = lightPt->evaluateExtinctionCoefficient(wls) * emittance * edf->evaluate(EDFQuery(), shadowDir_l);
                     float lightPDF = lightProb * lpResult->spatialPDF();
                     SLRAssert(Le.allFinite(), "Le: unexpected value detected: %s", Le.toString().c_str());
                     
@@ -243,10 +243,11 @@ namespace SLR {
                       "alpha: %s\nlength: %u, cos: %g, dirPDF: %g",
                       alpha.toString().c_str(), pathLength, interPt->calcCosTerm(dirIn), abdfResult->dirPDF);
             
-            ray = Ray(interPt->getPosition(), dirIn, ray.time, Ray::Epsilon); // No need to adding the epsilon for medium.
+            ray = Ray(interPt->getPosition(), dirIn, ray.time); // No need to add the epsilon for medium.
+            segment = RaySegment(Ray::Epsilon);
             
             // find a next intersection point.
-            if (!scene.interact(ray, wls, pathSampler, mem, &interact, &medThroughput, &singleWavelength))
+            if (!scene.interact(ray, segment, wls, pathSampler, mem, &interact, &medThroughput, &singleWavelength))
                 break;
             
             if (singleWavelength && !wls.lambdaSelected()) {
@@ -256,6 +257,7 @@ namespace SLR {
             alpha *= medThroughput;
             
             interPt = interact->createInteractionPoint(mem);
+            alpha *= interPt->evaluateExtinctionCoefficient(wls);
             dirOut_local = interPt->toLocal(-ray.dir);
             
             // implicit light sampling

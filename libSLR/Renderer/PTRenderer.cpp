@@ -141,6 +141,7 @@ namespace SLR {
     SampledSpectrum PTRenderer::Job::contribution(const Scene &scene, const WavelengthSamples &initWLs, const Ray &initRay, IndependentLightPathSampler &pathSampler, ArenaAllocator &mem) const {
         WavelengthSamples wls = initWLs;
         Ray ray = initRay;
+        RaySegment segment;
         SurfacePoint surfPt;
         SampledSpectrum alpha = SampledSpectrum::One;
         float initY = alpha.importance(wls.selectedLambda);
@@ -148,7 +149,7 @@ namespace SLR {
         uint32_t pathLength = 0;
         
         SurfaceInteraction si;
-        if (!scene.intersect(ray, &si))
+        if (!scene.intersect(ray, segment, &si))
             return SampledSpectrum::Zero;
         si.calculateSurfacePoint(&surfPt);
         
@@ -222,11 +223,12 @@ namespace SLR {
                       alpha.toString().c_str(), pathLength, absDot(fsResult.dirLocal, gNorm_sn), fsResult.dirPDF);
             
             Vector3D dirIn = surfPt.fromLocal(fsResult.dirLocal);
-            ray = Ray(surfPt.getPosition(), dirIn, ray.time, Ray::Epsilon);
+            ray = Ray(surfPt.getPosition(), dirIn, ray.time);
+            segment = RaySegment(Ray::Epsilon);
             
             // find a next intersection point.
             si = SurfaceInteraction();
-            if (!scene.intersect(ray, &si))
+            if (!scene.intersect(ray, segment, &si))
                 break;
             si.calculateSurfacePoint(&surfPt);
             

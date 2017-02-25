@@ -99,7 +99,7 @@ namespace SLR {
     }
     
     float VolumetricBSDF::evaluatePDF(const ABDFQuery* query, const Vector3D &dir, float* revPDF) const {
-        PFQuery pfQuery(-query->dirLocal, query->wlHint, query->dirTypeFilter);
+        PFQuery pfQuery(-query->dirLocal, query->wlHint, query->dirTypeFilter, query->requestReverse);
         return m_pf->evaluatePDF(pfQuery, dir, revPDF);
     }
     

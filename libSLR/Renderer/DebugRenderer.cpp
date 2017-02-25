@@ -204,12 +204,13 @@ namespace SLR {
     DebugRenderer::Job::DebugInfo DebugRenderer::Job::contribution(const Scene &scene, const WavelengthSamples &initWLs, const Ray &initRay,
                                                                    IndependentLightPathSampler &pathSampler, ArenaAllocator &mem) const {
         Ray ray = initRay;
+        RaySegment segment;
         SurfacePoint surfPt;
         
         DebugInfo ret;
         
         SurfaceInteraction si;
-        if (!scene.intersect(ray, &si))
+        if (!scene.intersect(ray, segment, &si))
             return DebugInfo();
         si.calculateSurfacePoint(&surfPt);
         ret.surfPt = surfPt;

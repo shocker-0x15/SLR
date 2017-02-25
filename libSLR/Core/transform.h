@@ -47,7 +47,7 @@ namespace SLR {
                             matInv.m01 * n.x + matInv.m11 * n.y + matInv.m21 * n.z,
                             matInv.m02 * n.x + matInv.m12 * n.y + matInv.m22 * n.z);
         }
-        Ray operator*(const Ray &r) const { return Ray(mat * r.org, mat * r.dir, r.time, r.distMin, r.distMax); }
+        Ray operator*(const Ray &r) const { return Ray(mat * r.org, mat * r.dir, r.time); }
         BoundingBox3D operator*(const BoundingBox3D &bb) const {
             BoundingBox3D ret;
             ret.unify(mat * Point3D(bb.minP.x, bb.minP.y, bb.minP.z));

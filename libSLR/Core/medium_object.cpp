@@ -23,12 +23,12 @@ namespace SLR {
         return m_obj->sample(m_appliedTransform, query, smp, result);
     }
     
-    Ray VolumetricLight::sampleRay(const LightPosQuery &lightPosQuery, const VolumetricLightPosSample &lightPosSample,
-                                   const EDFQuery &edfQuery, const EDFSample &edfSample,
-                                   ArenaAllocator &mem,
-                                   VolumetricLightPosQueryResult* lightPosResult, SampledSpectrum* Le0, EDF** edf,
-                                   EDFQueryResult* edfResult, SampledSpectrum* Le1) const {
-        return m_obj->sampleRay(m_appliedTransform, lightPosQuery, lightPosSample, edfQuery, edfSample, mem, lightPosResult, Le0, edf, edfResult, Le1);
+    void VolumetricLight::sampleRay(const LightPosQuery &lightPosQuery, const VolumetricLightPosSample &lightPosSample,
+                                    const EDFQuery &edfQuery, const EDFSample &edfSample,
+                                    ArenaAllocator &mem,
+                                    VolumetricLightPosQueryResult* lightPosResult, SampledSpectrum* Le0, EDF** edf,
+                                    EDFQueryResult* edfResult, SampledSpectrum* Le1, Ray* ray, float* epsilon) const {
+        m_obj->sampleRay(m_appliedTransform, lightPosQuery, lightPosSample, edfQuery, edfSample, mem, lightPosResult, Le0, edf, edfResult, Le1, ray, epsilon);
     }
     
     SampledSpectrum VolumetricLight::sample(const LightPosQuery &query, LightPathSampler &pathSampler, ArenaAllocator &mem, LightPosQueryResult** lpResult) const {
@@ -38,12 +38,12 @@ namespace SLR {
         return ret;
     }
     
-    Ray VolumetricLight::sampleRay(const LightPosQuery &lightPosQuery, LightPathSampler &pathSampler, const EDFQuery &edfQuery, ArenaAllocator &mem,
-                                   LightPosQueryResult** lightPosResult, SampledSpectrum* Le0, EDF** edf,
-                                   EDFQueryResult* edfResult, SampledSpectrum* Le1) const {
+    void VolumetricLight::sampleRay(const LightPosQuery &lightPosQuery, LightPathSampler &pathSampler, const EDFQuery &edfQuery, ArenaAllocator &mem,
+                                    LightPosQueryResult** lightPosResult, SampledSpectrum* Le0, EDF** edf,
+                                    EDFQueryResult* edfResult, SampledSpectrum* Le1, Ray* ray, float* epsilon) const {
         *lightPosResult = mem.create<VolumetricLightPosQueryResult>();
-        return sampleRay(lightPosQuery, pathSampler.getVolumetricLightPosSample(), edfQuery, pathSampler.getEDFSample(), mem,
-                         (VolumetricLightPosQueryResult*)*lightPosResult, Le0, edf, edfResult, Le1);
+        sampleRay(lightPosQuery, pathSampler.getVolumetricLightPosSample(), edfQuery, pathSampler.getEDFSample(), mem,
+                  (VolumetricLightPosQueryResult*)*lightPosResult, Le0, edf, edfResult, Le1, ray, epsilon);
     }
     
     
@@ -67,19 +67,18 @@ namespace SLR {
         return SampledSpectrum::Zero;
     }
     
-    Ray SingleMediumObject::sampleRay(const StaticTransform &transform,
-                                      const LightPosQuery &lightPosQuery, const VolumetricLightPosSample &lightPosSample,
-                                      const EDFQuery &edfQuery, const EDFSample &edfSample,
-                                      ArenaAllocator &mem,
-                                      VolumetricLightPosQueryResult* lightPosResult, SampledSpectrum* Le0, SLR::EDF** edf,
-                                      EDFQueryResult* edfResult, SampledSpectrum* Le1) const {
+    void SingleMediumObject::sampleRay(const StaticTransform &transform,
+                                       const LightPosQuery &lightPosQuery, const VolumetricLightPosSample &lightPosSample,
+                                       const EDFQuery &edfQuery, const EDFSample &edfSample,
+                                       ArenaAllocator &mem,
+                                       VolumetricLightPosQueryResult* lightPosResult, SampledSpectrum* Le0, SLR::EDF** edf,
+                                       EDFQueryResult* edfResult, SampledSpectrum* Le1, Ray* ray, float* epsilon) const {
         SLRAssert_NotImplemented();
-        return Ray();
     }
     
-    bool SingleMediumObject::interact(Ray &ray, float distanceLimit, const WavelengthSamples &wls, LightPathSampler &pathSampler,
+    bool SingleMediumObject::interact(const Ray &ray, const RaySegment &segment, const WavelengthSamples &wls, LightPathSampler &pathSampler,
                                       MediumInteraction* mi, SampledSpectrum* medThroughput, bool* singleWavelength) const {
-        if (!m_medium->interact(ray, distanceLimit, wls, pathSampler, mi, medThroughput, singleWavelength))
+        if (!m_medium->interact(ray, segment, wls, pathSampler, mi, medThroughput, singleWavelength))
             return false;
         mi->setObject(this);
         mi->setLightProb(isEmitting() ? 1.0f : 0.0f);
@@ -87,9 +86,9 @@ namespace SLR {
         return true;
     }
     
-    SampledSpectrum SingleMediumObject::evaluateTransmittance(Ray &ray, float distanceLimit, const WavelengthSamples &wls, LightPathSampler &pathSampler,
+    SampledSpectrum SingleMediumObject::evaluateTransmittance(const Ray &ray, const RaySegment &segment, const WavelengthSamples &wls, LightPathSampler &pathSampler,
                                                               bool* singleWavelength) const {
-        return m_medium->evaluateTransmittance(ray, distanceLimit, wls, pathSampler, singleWavelength);
+        return m_medium->evaluateTransmittance(ray, segment, wls, pathSampler, singleWavelength);
     }
     
     void SingleMediumObject::calculateMediumPoint(const MediumInteraction &mi, MediumPoint* medPt) const {
@@ -140,31 +139,29 @@ namespace SLR {
         return m_medObj->contains(localP, time);
     }
     
-    bool TransformedMediumObject::intersectBoundary(const Ray &ray, float* distToBoundary, bool* enter) const {
+    bool TransformedMediumObject::intersectBoundary(const Ray &ray, const RaySegment &segment, float* distToBoundary, bool* enter) const {
         StaticTransform tf;
         m_transform->sample(ray.time, &tf);
         Ray localRay = invert(tf) * ray;
-        return m_medObj->intersectBoundary(localRay, distToBoundary, enter);
+        return m_medObj->intersectBoundary(localRay, segment, distToBoundary, enter);
     }
     
-    bool TransformedMediumObject::interact(Ray &ray, float distanceLimit, const WavelengthSamples &wls, LightPathSampler &pathSampler,
+    bool TransformedMediumObject::interact(const Ray &ray, const RaySegment &segment, const WavelengthSamples &wls, LightPathSampler &pathSampler,
                                            MediumInteraction* mi, SampledSpectrum* medThroughput, bool* singleWavelength) const {
         StaticTransform tf;
         m_transform->sample(ray.time, &tf);
         Ray localRay = invert(tf) * ray;
-        bool hit = m_medObj->interact(localRay, distanceLimit, wls, pathSampler, mi, medThroughput, singleWavelength);
-        ray.distMin = distanceLimit;
+        bool hit = m_medObj->interact(localRay, segment, wls, pathSampler, mi, medThroughput, singleWavelength);
         if (hit)
             mi->applyTransformFromLeft(tf);
         return hit;
     }
     
-    SampledSpectrum TransformedMediumObject::evaluateTransmittance(Ray &ray, float distanceLimit, const WavelengthSamples &wls, LightPathSampler &pathSampler, bool* singleWavelength) const {
+    SampledSpectrum TransformedMediumObject::evaluateTransmittance(const Ray &ray, const RaySegment &segment, const WavelengthSamples &wls, LightPathSampler &pathSampler, bool* singleWavelength) const {
         StaticTransform tf;
         m_transform->sample(ray.time, &tf);
         Ray localRay = invert(tf) * ray;
-        SampledSpectrum ret = m_medObj->evaluateTransmittance(localRay, distanceLimit, wls, pathSampler, singleWavelength);
-        ray.distMin = distanceLimit;
+        SampledSpectrum ret = m_medObj->evaluateTransmittance(localRay, segment, wls, pathSampler, singleWavelength);
         return ret;
     }
     
@@ -182,10 +179,10 @@ namespace SLR {
         return m_boundary->contains(pInSurf, time);
     }
     
-    bool EnclosedMediumObject::intersectBoundary(const Ray &ray, float* distToBoundary, bool* enter) const {
+    bool EnclosedMediumObject::intersectBoundary(const Ray &ray, const RaySegment &segment, float* distToBoundary, bool* enter) const {
         SurfaceInteraction si;
         Ray r = m_medToSurfTF * ray;
-        bool hit = m_boundary->intersect(r, &si);
+        bool hit = m_boundary->intersect(r, segment, &si);
         if (!hit)
             return false;
         float distToSurf = si.getDistance();
@@ -193,7 +190,7 @@ namespace SLR {
         
         float distToRawMed;
         bool enterToRawMed;
-        hit = m_medObj->intersectBoundary(ray, &distToRawMed, &enterToRawMed);
+        hit = m_medObj->intersectBoundary(ray, segment, &distToRawMed, &enterToRawMed);
         if (!hit)
             return false;
         
@@ -217,13 +214,13 @@ namespace SLR {
         return true;
     }
     
-    bool EnclosedMediumObject::interact(Ray &ray, float distanceLimit, const WavelengthSamples &wls, LightPathSampler &pathSampler,
+    bool EnclosedMediumObject::interact(const Ray &ray, const RaySegment &segment, const WavelengthSamples &wls, LightPathSampler &pathSampler,
                                         MediumInteraction* mi, SampledSpectrum* medThroughput, bool* singleWavelength) const {
-        return m_medObj->interact(ray, distanceLimit, wls, pathSampler, mi, medThroughput, singleWavelength);
+        return m_medObj->interact(ray, segment, wls, pathSampler, mi, medThroughput, singleWavelength);
     }
     
-    SampledSpectrum EnclosedMediumObject::evaluateTransmittance(Ray &ray, float distanceLimit, const WavelengthSamples &wls, LightPathSampler &pathSampler, bool* singleWavelength) const {
-        return m_medObj->evaluateTransmittance(ray, distanceLimit, wls, pathSampler, singleWavelength);
+    SampledSpectrum EnclosedMediumObject::evaluateTransmittance(const Ray &ray, const RaySegment &segment, const WavelengthSamples &wls, LightPathSampler &pathSampler, bool* singleWavelength) const {
+        return m_medObj->evaluateTransmittance(ray, segment, wls, pathSampler, singleWavelength);
     }
     
     
@@ -284,12 +281,14 @@ namespace SLR {
         *prob *= cProb;
     }
     
-    bool MediumObjectAggregate::interact(Ray &ray, float distanceLimit, const WavelengthSamples &wls, LightPathSampler &pathSampler,
+    // TODO: consider overlap volumes, nesting volumes, numerical precision (e.g. volumes that their boundaries are very close each other).
+    bool MediumObjectAggregate::interact(const Ray &ray, const RaySegment &segment, const WavelengthSamples &wls, LightPathSampler &pathSampler,
                                          MediumInteraction* mi, SampledSpectrum* medThroughput, bool* singleWavelength) const {        
         *medThroughput = SampledSpectrum::One;
         *singleWavelength = false;
+        RaySegment isectRange = segment;
         
-        Point3D currentPoint = ray.org + ray.distMin * ray.dir;
+        Point3D currentPoint = ray.org + isectRange.distMin * ray.dir;
         // The following process is logically the same as:
         // curMedia = m_accelerator->queryCurrentMedia(currentPoint);
         const MediumObject* curMedium = nullptr;
@@ -307,7 +306,7 @@ namespace SLR {
             for (int i = 0; i < m_objLists.size(); ++i) {
                 float distToBoundary = INFINITY;
                 bool enter;
-                if (m_objLists[i]->intersectBoundary(ray, &distToBoundary, &enter)) {
+                if (m_objLists[i]->intersectBoundary(ray, isectRange, &distToBoundary, &enter)) {
                     if (distToBoundary < distToNextBoundary) {
                         distToNextBoundary = distToBoundary;
                         objIdx = enter ? i : -1;
@@ -315,7 +314,7 @@ namespace SLR {
                     }
                 }
             }
-            distToNextBoundary = std::min(distToNextBoundary, distanceLimit);
+            distToNextBoundary = std::min(distToNextBoundary, segment.distMax);
             if (curMedium && std::isinf(distToNextBoundary))
                 return false;
             
@@ -323,7 +322,7 @@ namespace SLR {
             if (curMedium) {
                 SampledSpectrum curMedThroughput;
                 bool curSingleWavelength;
-                hit = curMedium->interact(ray, distToNextBoundary, wls, pathSampler, mi, &curMedThroughput, &curSingleWavelength);
+                hit = curMedium->interact(ray, RaySegment(isectRange.distMin, distToNextBoundary), wls, pathSampler, mi, &curMedThroughput, &curSingleWavelength);
                 *medThroughput *= curMedThroughput;
                 *singleWavelength |= curSingleWavelength;
             }
@@ -335,10 +334,10 @@ namespace SLR {
                 return true;
             }
             
-            if (distToNextBoundary == distanceLimit)
+            if (distToNextBoundary == segment.distMax)
                 return false;
             
-            ray.distMin = distToNextBoundary * (1.0f + Ray::Epsilon);
+            isectRange.distMin = distToNextBoundary * (1.0f + Ray::Epsilon);
             curMedium = nextMedium;
         }
         
@@ -346,12 +345,13 @@ namespace SLR {
         return true;
     }
     
-    SampledSpectrum MediumObjectAggregate::evaluateTransmittance(Ray &ray, float distanceLimit, const WavelengthSamples &wls, LightPathSampler &pathSampler,
+    SampledSpectrum MediumObjectAggregate::evaluateTransmittance(const Ray &ray, const RaySegment &segment, const WavelengthSamples &wls, LightPathSampler &pathSampler,
                                                                  bool* singleWavelength) const {
         SampledSpectrum transmittance = SampledSpectrum::One;
         *singleWavelength = false;
+        RaySegment isectRange = segment;
         
-        Point3D currentPoint = ray.org + ray.distMin * ray.dir;
+        Point3D currentPoint = ray.org + isectRange.distMin * ray.dir;
         // The following process is logically the same as:
         // curMedia = m_accelerator->queryCurrentMedia(currentPoint);
         const MediumObject* curMedium = nullptr;
@@ -368,29 +368,29 @@ namespace SLR {
             for (int i = 0; i < m_objLists.size(); ++i) {
                 float distToBoundary = INFINITY;
                 bool enter;
-                if (m_objLists[i]->intersectBoundary(ray, &distToBoundary, &enter)) {
+                if (m_objLists[i]->intersectBoundary(ray, isectRange, &distToBoundary, &enter)) {
                     if (distToBoundary < distToNextBoundary) {
                         distToNextBoundary = distToBoundary;
                         nextMedium = enter ? m_objLists[i] : nullptr;
                     }
                 }
             }
-            distToNextBoundary = std::min(distToNextBoundary, distanceLimit);
+            distToNextBoundary = std::min(distToNextBoundary, segment.distMax);
             if (curMedium && std::isinf(distToNextBoundary))
                 return false;
             
             if (curMedium) {
                 SampledSpectrum curTransmittance;
                 bool curSingleWavelength;
-                curTransmittance = curMedium->evaluateTransmittance(ray, distToNextBoundary, wls, pathSampler, &curSingleWavelength);
+                curTransmittance = curMedium->evaluateTransmittance(ray, RaySegment(isectRange.distMin, distToNextBoundary), wls, pathSampler, &curSingleWavelength);
                 transmittance *= curTransmittance;
                 *singleWavelength |= curSingleWavelength;
             }
             
-            if (distToNextBoundary == distanceLimit)
+            if (distToNextBoundary == segment.distMax)
                 break;
             
-            ray.distMin = distToNextBoundary * (1.0f + Ray::Epsilon);
+            isectRange.distMin = distToNextBoundary * (1.0f + Ray::Epsilon);
             curMedium = nextMedium;
         }
         

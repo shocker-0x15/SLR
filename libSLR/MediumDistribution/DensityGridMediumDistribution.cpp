@@ -44,9 +44,9 @@ namespace SLR {
         return true;
     }
     
-    bool DensityGridMediumDistribution::interact(const Ray &ray, float distanceLimit, const WavelengthSamples &wls, LightPathSampler &pathSampler,
+    bool DensityGridMediumDistribution::interact(const Ray &ray, const RaySegment &segment, const WavelengthSamples &wls, LightPathSampler &pathSampler,
                                                  MediumInteraction *mi, SampledSpectrum *medThroughput, bool* singleWavelength) const {
-        SLRAssert(std::isfinite(distanceLimit), "distanceLimit must be a finite value.");
+        SLRAssert(std::isfinite(segment.distMax), "distanceLimit must be a finite value.");
         FreePathSampler &sampler = pathSampler.getFreePathSampler();
         
         // delta tracking to sample free path.
@@ -54,10 +54,10 @@ namespace SLR {
         *singleWavelength = false;
         bool hit = false;
         float extCoeffSelected = 0.0f;
-        float hitDistance = distanceLimit;
-        FloatSum sampledDistance = ray.distMin;
+        float hitDistance = segment.distMax;
+        FloatSum sampledDistance = segment.distMin;
         sampledDistance += -std::log(sampler.getSample()) / majorant;
-        while (sampledDistance < distanceLimit) {
+        while (sampledDistance < segment.distMax) {
             Point3D queryPoint = ray.org + sampledDistance * ray.dir;
             Point3D param;
             m_region.calculateLocalCoordinates(queryPoint, &param);
@@ -86,7 +86,7 @@ namespace SLR {
             for (int wl = 0; wl < WavelengthSamples::NumComponents; ++wl) {
                 if (wl == wls.selectedLambda)
                     continue;
-                sampledDistance = ray.distMin;
+                sampledDistance = segment.distMin;
                 sampledDistance += -std::log(sampler.getSample()) / majorant;
                 while (sampledDistance < hitDistance) {
                     Point3D queryPoint = ray.org + sampledDistance * ray.dir;
@@ -107,8 +107,9 @@ namespace SLR {
         return hit;
     }
     
-    SampledSpectrum DensityGridMediumDistribution::evaluateTransmittance(Ray &ray, float distanceLimit, const WavelengthSamples &wls, SLR::LightPathSampler &pathSampler, bool *singleWavelength) const {
-        SLRAssert(std::isfinite(distanceLimit), "distanceLimit must be a finite value.");
+    SampledSpectrum DensityGridMediumDistribution::evaluateTransmittance(const Ray &ray, const RaySegment &segment, const WavelengthSamples &wls, SLR::LightPathSampler &pathSampler, 
+                                                                         bool* singleWavelength) const {
+        SLRAssert(std::isfinite(segment.distMax), "distanceLimit must be a finite value.");
         FreePathSampler sampler = pathSampler.getFreePathSampler();
         
         float majorant = majorantExtinctionCoefficient();
@@ -120,9 +121,9 @@ namespace SLR {
             transmittance = SampledSpectrum::Zero;
             transmittance[wls.selectedLambda] = 1.0f;
             
-            FloatSum sampledDistance = ray.distMin;
+            FloatSum sampledDistance = segment.distMin;
             sampledDistance += -std::log(sampler.getSample()) / majorant;
-            while (sampledDistance < distanceLimit) {
+            while (sampledDistance < segment.distMax) {
                 Point3D queryPoint = ray.org + sampledDistance * ray.dir;
                 Point3D param;
                 m_region.calculateLocalCoordinates(queryPoint, &param);
@@ -135,9 +136,9 @@ namespace SLR {
         }
         else {
             for (int wl = 0; wl < WavelengthSamples::NumComponents; ++wl) {
-                FloatSum sampledDistance = ray.distMin;
+                FloatSum sampledDistance = segment.distMin;
                 sampledDistance += -std::log(sampler.getSample()) / majorant;
-                while (sampledDistance < distanceLimit) {
+                while (sampledDistance < segment.distMax) {
                     Point3D queryPoint = ray.org + sampledDistance * ray.dir;
                     Point3D param;
                     m_region.calculateLocalCoordinates(queryPoint, &param);

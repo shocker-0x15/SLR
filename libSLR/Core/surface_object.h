@@ -34,19 +34,19 @@ namespace SLR {
         void setObject(const SingleSurfaceObject* obj) { m_obj = obj; }
         
         SampledSpectrum sample(const LightPosQuery &query, const SurfaceLightPosSample &smp, SurfaceLightPosQueryResult* result) const;
-        Ray sampleRay(const LightPosQuery &lightPosQuery, const SurfaceLightPosSample &lightPosSample,
-                      const EDFQuery &edfQuery, const EDFSample &edfSample,
-                      ArenaAllocator &mem,
-                      SurfaceLightPosQueryResult* lightPosResult, SampledSpectrum* Le0, EDF** edf,
-                      EDFQueryResult* edfResult, SampledSpectrum* Le1) const;
+        void sampleRay(const LightPosQuery &lightPosQuery, const SurfaceLightPosSample &lightPosSample,
+                       const EDFQuery &edfQuery, const EDFSample &edfSample,
+                       ArenaAllocator &mem,
+                       SurfaceLightPosQueryResult* lightPosResult, SampledSpectrum* Le0, EDF** edf,
+                       EDFQueryResult* edfResult, SampledSpectrum* Le1, Ray* ray, float* epsilon) const;
         
         //----------------------------------------------------------------
         // Light's methods
         
         SampledSpectrum sample(const LightPosQuery &query, LightPathSampler &pathSampler, ArenaAllocator &mem, LightPosQueryResult** lpResult) const override;
-        Ray sampleRay(const LightPosQuery &lightPosQuery, LightPathSampler &pathSampler, const EDFQuery &edfQuery, ArenaAllocator &mem,
-                      LightPosQueryResult** lightPosResult, SampledSpectrum* Le0, EDF** edf,
-                      EDFQueryResult* edfResult, SampledSpectrum* Le1) const override;
+        void sampleRay(const LightPosQuery &lightPosQuery, LightPathSampler &pathSampler, const EDFQuery &edfQuery, ArenaAllocator &mem,
+                       LightPosQueryResult** lightPosResult, SampledSpectrum* Le0, EDF** edf,
+                       EDFQueryResult* edfResult, SampledSpectrum* Le1, Ray* ray, float* epsilon) const override;
         
         // END: Light's methods
         //----------------------------------------------------------------
@@ -65,19 +65,18 @@ namespace SLR {
             SLRAssert_ShouldNotBeCalled();
             return SampledSpectrum::Zero;
         }
-        virtual Ray sampleRay(const StaticTransform &transform,
-                              const LightPosQuery &lightPosQuery, const SurfaceLightPosSample &lightPosSample,
-                              const EDFQuery &edfQuery, const EDFSample &edfSample,
-                              ArenaAllocator &mem,
-                              SurfaceLightPosQueryResult* lightPosResult, SampledSpectrum* Le0, EDF** edf,
-                              EDFQueryResult* edfResult, SampledSpectrum* Le1) const {
+        virtual void sampleRay(const StaticTransform &transform,
+                               const LightPosQuery &lightPosQuery, const SurfaceLightPosSample &lightPosSample,
+                               const EDFQuery &edfQuery, const EDFSample &edfSample,
+                               ArenaAllocator &mem,
+                               SurfaceLightPosQueryResult* lightPosResult, SampledSpectrum* Le0, EDF** edf,
+                               EDFQueryResult* edfResult, SampledSpectrum* Le1, Ray* ray, float* epsilon) const {
             SLRAssert_ShouldNotBeCalled();
-            return Ray();
         }
         
         virtual float costForIntersect() const = 0;
         virtual bool contains(const Point3D &p, float time) const { return false; }
-        virtual bool intersect(Ray &ray, SurfaceInteraction* si) const = 0;
+        virtual bool intersect(const Ray &ray, const RaySegment &segment, SurfaceInteraction* si) const = 0;
         virtual void calculateSurfacePoint(const SurfaceInteraction &si, SurfacePoint* surfPt) const {
             SLRAssert_ShouldNotBeCalled();
         }
@@ -125,15 +124,15 @@ namespace SLR {
         
         SampledSpectrum sample(const StaticTransform &transform,
                                const LightPosQuery &query, const SurfaceLightPosSample &smp, SurfaceLightPosQueryResult* result) const override;
-        Ray sampleRay(const StaticTransform &transform,
-                      const LightPosQuery &lightPosQuery, const SurfaceLightPosSample &lightPosSample,
-                      const EDFQuery &edfQuery, const EDFSample &edfSample,
-                      ArenaAllocator &mem,
-                      SurfaceLightPosQueryResult* lightPosResult, SampledSpectrum* Le0, EDF** edf,
-                      EDFQueryResult* edfResult, SampledSpectrum* Le1) const override;
+        void sampleRay(const StaticTransform &transform,
+                       const LightPosQuery &lightPosQuery, const SurfaceLightPosSample &lightPosSample,
+                       const EDFQuery &edfQuery, const EDFSample &edfSample,
+                       ArenaAllocator &mem,
+                       SurfaceLightPosQueryResult* lightPosResult, SampledSpectrum* Le0, EDF** edf,
+                       EDFQueryResult* edfResult, SampledSpectrum* Le1, Ray* ray, float* epsilon) const override;
         
         float costForIntersect() const override { return m_surface->costForIntersect(); }
-        bool intersect(Ray &ray, SurfaceInteraction* si) const override;
+        bool intersect(const Ray &ray, const RaySegment &segment, SurfaceInteraction* si) const override;
         void calculateSurfacePoint(const SurfaceInteraction &si, SurfacePoint* surfPt) const override;
         
         // END: SurfaceObject's methods
@@ -174,12 +173,12 @@ namespace SLR {
         
         SampledSpectrum sample(const StaticTransform &transform,
                                const LightPosQuery &query, const SurfaceLightPosSample &smp, SurfaceLightPosQueryResult* result) const override;
-        Ray sampleRay(const StaticTransform &transform,
-                      const LightPosQuery &lightPosQuery, const SurfaceLightPosSample &lightPosSample,
-                      const EDFQuery &edfQuery, const EDFSample &edfSample,
-                      ArenaAllocator &mem,
-                      SurfaceLightPosQueryResult* lightPosResult, SampledSpectrum* Le0, EDF** edf,
-                      EDFQueryResult* edfResult, SampledSpectrum* Le1) const override;
+        void sampleRay(const StaticTransform &transform,
+                       const LightPosQuery &lightPosQuery, const SurfaceLightPosSample &lightPosSample,
+                       const EDFQuery &edfQuery, const EDFSample &edfSample,
+                       ArenaAllocator &mem,
+                       SurfaceLightPosQueryResult* lightPosResult, SampledSpectrum* Le0, EDF** edf,
+                       EDFQueryResult* edfResult, SampledSpectrum* Le1, Ray* ray, float* epsilon) const override;
         
         // END: SurfaceObject's methods
         //----------------------------------------------------------------
@@ -223,7 +222,7 @@ namespace SLR {
         
         float costForIntersect() const override { return m_surfObj->costForIntersect(); }
         bool contains(const Point3D &p, float time) const override;
-        bool intersect(Ray &ray, SurfaceInteraction* si) const override;
+        bool intersect(const Ray &ray, const RaySegment &segment, SurfaceInteraction* si) const override;
         
         // END: SurfaceObject's methods
         //----------------------------------------------------------------
@@ -258,7 +257,7 @@ namespace SLR {
         
         float costForIntersect() const override;
         bool contains(const Point3D &p, float time) const override;
-        bool intersect(Ray &ray, SurfaceInteraction* si) const override;
+        bool intersect(const Ray &ray, const RaySegment &segment, SurfaceInteraction* si) const override;
         
         // END: SurfaceObject's methods
         //----------------------------------------------------------------
