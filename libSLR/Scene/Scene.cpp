@@ -128,7 +128,7 @@ namespace SLR {
         SurfaceInteraction si;
         if (m_surfaceAggregate->intersect(ray, segment, &si))
             return false;
-        *fractionalVisibility = m_mediumAggregate->evaluateTransmittance(ray, RaySegment(segment.distMin, si.getDistance()), wls, pathSampler, singleWavelength);
+        *fractionalVisibility = m_mediumAggregate->evaluateTransmittance(ray, segment, wls, pathSampler, singleWavelength);
         return true;
     }
     

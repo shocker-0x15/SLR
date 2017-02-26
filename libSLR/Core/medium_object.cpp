@@ -157,7 +157,8 @@ namespace SLR {
         return hit;
     }
     
-    SampledSpectrum TransformedMediumObject::evaluateTransmittance(const Ray &ray, const RaySegment &segment, const WavelengthSamples &wls, LightPathSampler &pathSampler, bool* singleWavelength) const {
+    SampledSpectrum TransformedMediumObject::evaluateTransmittance(const Ray &ray, const RaySegment &segment, const WavelengthSamples &wls, LightPathSampler &pathSampler, 
+                                                                   bool* singleWavelength) const {
         StaticTransform tf;
         m_transform->sample(ray.time, &tf);
         Ray localRay = invert(tf) * ray;
@@ -219,7 +220,8 @@ namespace SLR {
         return m_medObj->interact(ray, segment, wls, pathSampler, mi, medThroughput, singleWavelength);
     }
     
-    SampledSpectrum EnclosedMediumObject::evaluateTransmittance(const Ray &ray, const RaySegment &segment, const WavelengthSamples &wls, LightPathSampler &pathSampler, bool* singleWavelength) const {
+    SampledSpectrum EnclosedMediumObject::evaluateTransmittance(const Ray &ray, const RaySegment &segment, const WavelengthSamples &wls, LightPathSampler &pathSampler, 
+                                                                bool* singleWavelength) const {
         return m_medObj->evaluateTransmittance(ray, segment, wls, pathSampler, singleWavelength);
     }
     
