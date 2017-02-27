@@ -16,7 +16,7 @@
 namespace SLR {
     class SLR_API TriangleMeshNode : public SurfaceNode {
     public:
-        struct MaterialGroup {
+        struct SLR_API MaterialGroup {
             const SurfaceMaterial* m_material;
             const NormalTexture* m_normalMap;
             const FloatTexture* m_alphaMap;

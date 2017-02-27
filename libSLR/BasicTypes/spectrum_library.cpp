@@ -88,7 +88,7 @@ namespace SLR {
             
             
             
-            const std::map<std::string, std::vector<const Data>> database = {
+            const std::map<std::string, std::vector<Data>> database = {
                 {"D65", {D65}},
             };
         }
@@ -409,7 +409,7 @@ namespace SLR {
             
             
             
-            const std::map<std::string, std::vector<const Data>> database = {
+            const std::map<std::string, std::vector<Data>> database = {
                 {"Color Checker", {
                     DarkSkin, LightSkin, BlueSky, Foliage, BlueFlower, BluishGreen,
                     Orange, PurplishBlue, ModerateRed, Purple, YellowGreen, OrangeYellow,
@@ -613,7 +613,7 @@ namespace SLR {
             
             
             
-            const std::map<std::string, std::vector<const Data>> database = {
+            const std::map<std::string, std::vector<Data>> database = {
                 {"Air", {Air_eta}},
                 {"Water", {Water_eta, Water_k}},
                 {"Glass_BK7", {Glass_BK7_eta}},

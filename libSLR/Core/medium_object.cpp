@@ -379,7 +379,7 @@ namespace SLR {
             }
             distToNextBoundary = std::min(distToNextBoundary, segment.distMax);
             if (curMedium && std::isinf(distToNextBoundary))
-                return false;
+                break;
             
             if (curMedium) {
                 SampledSpectrum curTransmittance;

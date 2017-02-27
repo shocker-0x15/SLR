@@ -76,17 +76,6 @@ namespace SLRSceneGraph {
             return false;
         return true;
     }
-
-#ifdef SLR_Platform_Windows_MSVC
-    class FuncGetPathElement {
-        std::string pathPrefix;
-    public:
-        FuncGetPathElement(const std::string &prefix) : pathPrefix(prefix) {}
-        Element operator()(const aiString &str) const {
-            return Element(pathPrefix + std::string(str.C_Str()));
-        }
-    };
-#endif
     
     SLR_SCENEGRAPH_API bool readScene(const std::string &filePath, const SceneRef &scene, RenderingContext* context) {
         TypeInfo::init();

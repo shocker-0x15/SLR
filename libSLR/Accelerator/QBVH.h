@@ -27,8 +27,8 @@ namespace SLR {
             union {
                 uint32_t asUInt;
                 struct {
-                    uint idx : 27;
-                    uint numLeaves : 4;
+                    unsigned int idx : 27;
+                    unsigned int numLeaves : 4;
                     bool isLeafNode : 1;
                 };
             };

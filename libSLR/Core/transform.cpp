@@ -47,25 +47,32 @@ namespace SLR {
             const Transform* child = reducedTFs.back();
             bool mergeable = current->isStatic() || child->isStatic();
             if (mergeable) {
-                mem->destroy(reducedTFs.back());
-                reducedTFs.pop_back();
                 if (current->isStatic() && child->isStatic()) {
                     StaticTransform curSample;
                     current->sample(0.0f, &curSample);
                     StaticTransform childSample;
                     child->sample(0.0f, &childSample);
+                    
+                    mem->destroy(reducedTFs.back());
+                    reducedTFs.pop_back();
                     reducedTFs.push_back((curSample * childSample).copy(mem));
                 }
                 else if (current->isStatic()) {
                     StaticTransform curSample;
                     current->sample(0.0f, &curSample);
                     AnimatedTransform &atf = *(AnimatedTransform*)child;
+                    
+                    mem->destroy(reducedTFs.back());
+                    reducedTFs.pop_back();
                     reducedTFs.push_back((curSample * atf).copy(mem));
                 }
                 else {
+                    AnimatedTransform &atf = *(AnimatedTransform*)current;
                     StaticTransform childSample;
                     child->sample(0.0f, &childSample);
-                    AnimatedTransform &atf = *(AnimatedTransform*)current;
+                    
+                    mem->destroy(reducedTFs.back());
+                    reducedTFs.pop_back();
                     reducedTFs.push_back((atf * childSample).copy(mem));
                 }
             }
