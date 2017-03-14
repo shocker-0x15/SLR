@@ -23,7 +23,7 @@ namespace SLRSceneGraph {
         };
         
         static MediumMaterialRef createIsotropic();
-//        static MediumMaterialRef createHenyeyGreenstein(const FloatTextureRef &g);
+        static MediumMaterialRef createHenyeyGreenstein(const FloatTextureRef &g);
 //        static MediumMaterialRef createSchlick(const FloatTextureRef &g);
     };
     
@@ -54,6 +54,14 @@ namespace SLRSceneGraph {
     class SLR_SCENEGRAPH_API IsotropicScatteringMediumMaterial : public MediumMaterial {
     public:
         IsotropicScatteringMediumMaterial();
+    };
+    
+    
+    
+    class SLR_SCENEGRAPH_API HenyeyGreensteinScatteringMediumMaterial : public MediumMaterial {
+        FloatTextureRef m_g;
+    public:
+        HenyeyGreensteinScatteringMediumMaterial(const FloatTextureRef &g);
     };
 }
 

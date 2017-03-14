@@ -54,7 +54,7 @@ namespace SLRSceneGraph {
     }
     
     void DensityGridMediumNode::setupRawData() {
-        new (m_rawData) SLR::DensityGridMediumNode(m_region, m_base_sigma_s.get(), m_base_sigma_e.get(), m_density_grid.get(), m_numX, m_numY, m_numZ, m_material->getRaw());
+        new (m_rawData) SLR::DensityGridMediumNode(m_region, m_base_sigma_s.get(), m_base_sigma_e.get(), m_density_grid, m_numX, m_numY, m_numZ, m_material->getRaw());
         m_setup = true;
     }
     
@@ -65,10 +65,10 @@ namespace SLRSceneGraph {
         m_setup = false;
     }
     
-    DensityGridMediumNode::DensityGridMediumNode(const SLR::BoundingBox3D &region, const AssetSpectrumRef &base_sigma_s, const AssetSpectrumRef &base_sigma_e, std::unique_ptr<float[]> &density_grid,
-                                                 uint32_t numX, uint32_t numY, uint32_t numZ, const MediumMaterialRef &material) :
+    DensityGridMediumNode::DensityGridMediumNode(const SLR::BoundingBox3D &region, const AssetSpectrumRef &base_sigma_s, const AssetSpectrumRef &base_sigma_e, 
+                                                 std::vector<std::vector<float>> &&density_grid, uint32_t numX, uint32_t numY, uint32_t numZ, const MediumMaterialRef &material) :
     m_region(region), m_base_sigma_s(base_sigma_s), m_base_sigma_e(base_sigma_e),
-    m_density_grid(std::move(density_grid)), m_numX(numX), m_numY(numY), m_numZ(numZ), m_material(material) {
+    m_density_grid(density_grid), m_numX(numX), m_numY(numY), m_numZ(numZ), m_material(material) {
         allocateRawData();
     }
     

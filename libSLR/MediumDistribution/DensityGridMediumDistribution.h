@@ -17,16 +17,23 @@ namespace SLR {
         BoundingBox3D m_region;
         const AssetSpectrum* m_base_sigma_s;
         const AssetSpectrum* m_base_sigma_e;
-        const float* m_density_grid;
+        const float** m_density_grid;
         uint32_t m_numX, m_numY, m_numZ;
         
         float calcDensity(const Point3D &param) const;
     public:
-        DensityGridMediumDistribution(const BoundingBox3D &region, const AssetSpectrum* base_sigma_s, const AssetSpectrum* base_sigma_e, const float* density_grid,
+        DensityGridMediumDistribution(const BoundingBox3D &region, const AssetSpectrum* base_sigma_s, const AssetSpectrum* base_sigma_e, const std::vector<std::vector<float>> &density_grid,
                                       uint32_t numX, uint32_t numY, uint32_t numZ, float maxExtinctionCoefficient) :
         MediumDistribution(maxExtinctionCoefficient),
-        m_region(region), m_base_sigma_s(base_sigma_s), m_base_sigma_e(base_sigma_e), m_density_grid(density_grid), 
-        m_numX(numX), m_numY(numY), m_numZ(numZ) { }
+        m_region(region), m_base_sigma_s(base_sigma_s), m_base_sigma_e(base_sigma_e), 
+        m_numX(numX), m_numY(numY), m_numZ(numZ) {
+            m_density_grid = new const float*[m_numZ];
+            for (int z = 0; z < m_numZ; ++z)
+                m_density_grid[z] = density_grid[z].data();
+        }
+        ~DensityGridMediumDistribution() {
+            delete m_density_grid;
+        }
         
         bool subdivide(Allocator* mem, MediumDistribution** fragments, uint32_t* numFragments) const override;
         

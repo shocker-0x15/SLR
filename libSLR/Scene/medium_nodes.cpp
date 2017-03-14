@@ -36,14 +36,14 @@ namespace SLR {
     
     
     
-    DensityGridMediumNode::DensityGridMediumNode(const BoundingBox3D &region, const AssetSpectrum* base_sigma_s, const AssetSpectrum* base_sigma_e, const float* density_grid,
-                                                 uint32_t numX, uint32_t numY, uint32_t numZ, const MediumMaterial* material) :
+    DensityGridMediumNode::DensityGridMediumNode(const BoundingBox3D &region, const AssetSpectrum* base_sigma_s, const AssetSpectrum* base_sigma_e, 
+                                                 const std::vector<std::vector<float>> &density_grid, uint32_t numX, uint32_t numY, uint32_t numZ, const MediumMaterial* material) :
     m_material(material) {
         float maxDensity = -INFINITY;
         for (int z = 0; z < numZ; ++z) {
             for (int y = 0; y < numY; ++y) {
                 for (int x = 0; x < numX; ++x) {
-                    maxDensity = std::max(maxDensity, density_grid[numX * numY * z + numX * y + x]);
+                    maxDensity = std::max(maxDensity, density_grid[z][numX * y + x]);
                 }
             }
         }

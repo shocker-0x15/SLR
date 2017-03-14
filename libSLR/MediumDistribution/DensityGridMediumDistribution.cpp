@@ -27,15 +27,14 @@ namespace SLR {
         float wuy = param.y;
         float wlz = 1 - param.z;
         float wuz = param.z;
-        const uint32_t zPlaneSize = m_numX * m_numY;
-        float density = (m_density_grid[zPlaneSize * lz + m_numX * ly + lx] * wlz * wly * wlx +
-                         m_density_grid[zPlaneSize * lz + m_numX * ly + ux] * wlz * wly * wux +
-                         m_density_grid[zPlaneSize * lz + m_numX * uy + lx] * wlz * wuy * wlx +
-                         m_density_grid[zPlaneSize * lz + m_numX * uy + ux] * wlz * wuy * wux +
-                         m_density_grid[zPlaneSize * uz + m_numX * ly + lx] * wuz * wly * wlx +
-                         m_density_grid[zPlaneSize * uz + m_numX * ly + ux] * wuz * wly * wux +
-                         m_density_grid[zPlaneSize * uz + m_numX * uy + lx] * wuz * wuy * wlx +
-                         m_density_grid[zPlaneSize * uz + m_numX * uy + ux] * wuz * wuy * wux);
+        float density = (m_density_grid[lz][m_numX * ly + lx] * wlz * wly * wlx +
+                         m_density_grid[lz][m_numX * ly + ux] * wlz * wly * wux +
+                         m_density_grid[lz][m_numX * uy + lx] * wlz * wuy * wlx +
+                         m_density_grid[lz][m_numX * uy + ux] * wlz * wuy * wux +
+                         m_density_grid[uz][m_numX * ly + lx] * wuz * wly * wlx +
+                         m_density_grid[uz][m_numX * ly + ux] * wuz * wly * wux +
+                         m_density_grid[uz][m_numX * uy + lx] * wuz * wuy * wlx +
+                         m_density_grid[uz][m_numX * uy + ux] * wuz * wuy * wux);
         return density;
     }
     

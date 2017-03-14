@@ -36,7 +36,17 @@ namespace SLRSceneGraph {
     
     
     
+    HenyeyGreensteinScatteringMediumMaterial::HenyeyGreensteinScatteringMediumMaterial(const FloatTextureRef &g) : m_g(g) {
+        m_rawData = new SLR::HenyeyGreensteinScatteringMediumMaterial(m_g->getRaw());
+    }
+    
+    
+    
     MediumMaterialRef MediumMaterial::createIsotropic() {
         return createShared<IsotropicScatteringMediumMaterial>();
+    }
+    
+    MediumMaterialRef MediumMaterial::createHenyeyGreenstein(const FloatTextureRef &g) {
+        return createShared<HenyeyGreensteinScatteringMediumMaterial>(g);
     }
 }

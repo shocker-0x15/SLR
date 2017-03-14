@@ -16,11 +16,16 @@
 namespace SLRSceneGraph {
     namespace BuiltinFunctions {
         namespace Math {
+            extern const Element abs;
             extern const Element min;
             extern const Element max;
             extern const Element clamp;
             extern const Element sqrt;
             extern const Element pow;
+            extern const Element exp;
+            extern const Element ln;
+            extern const Element log2;
+            extern const Element log10;
             extern const Element sin;
             extern const Element cos;
             extern const Element tan;

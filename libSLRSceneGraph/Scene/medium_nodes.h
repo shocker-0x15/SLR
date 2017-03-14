@@ -37,7 +37,7 @@ namespace SLRSceneGraph {
         SLR::BoundingBox3D m_region;
         AssetSpectrumRef m_base_sigma_s;
         AssetSpectrumRef m_base_sigma_e;
-        std::unique_ptr<float[]> m_density_grid;
+        std::vector<std::vector<float>> m_density_grid;
         uint32_t m_numX, m_numY, m_numZ;
         MediumMaterialRef m_material;
         
@@ -45,8 +45,8 @@ namespace SLRSceneGraph {
         void setupRawData() override;
         void terminateRawData() override;
     public:
-        DensityGridMediumNode(const SLR::BoundingBox3D &region, const AssetSpectrumRef &base_sigma_s, const AssetSpectrumRef &base_sigma_e, std::unique_ptr<float[]> &density_grid,
-                              uint32_t numX, uint32_t numY, uint32_t numZ, const MediumMaterialRef &material);
+        DensityGridMediumNode(const SLR::BoundingBox3D &region, const AssetSpectrumRef &base_sigma_s, const AssetSpectrumRef &base_sigma_e, 
+                              std::vector<std::vector<float>> &&density_grid, uint32_t numX, uint32_t numY, uint32_t numZ, const MediumMaterialRef &material);
         ~DensityGridMediumNode();
         
         NodeRef copy() const override;

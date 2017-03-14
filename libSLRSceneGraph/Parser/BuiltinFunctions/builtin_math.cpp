@@ -13,6 +13,12 @@
 namespace SLRSceneGraph {
     namespace BuiltinFunctions {
         namespace Math {
+            const Element abs = Element::create<TypeMap::Function>(1,
+                                                                   std::vector<ArgInfo>{{"x", Type::RealNumber}},
+                                                                   [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
+                                                                       float x = args.at("x").raw<TypeMap::RealNumber>();
+                                                                       return Element(std::fabs(x));
+                                                                   });
             const Element min = Element::create<TypeMap::Function>(1,
                                                                    std::vector<ArgInfo>{{"x0", Type::RealNumber}, {"x1", Type::RealNumber}},
                                                                    [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
@@ -48,6 +54,30 @@ namespace SLRSceneGraph {
                                                                        float e = args.at("e").raw<TypeMap::RealNumber>();
                                                                        return Element(std::pow(x, e));
                                                                    });
+            const Element exp = Element::create<TypeMap::Function>(1,
+                                                                   std::vector<ArgInfo>{{"x", Type::RealNumber}},
+                                                                   [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
+                                                                       float x = args.at("x").raw<TypeMap::RealNumber>();
+                                                                       return Element(std::exp(x));
+                                                                   });
+            const Element ln = Element::create<TypeMap::Function>(1,
+                                                                  std::vector<ArgInfo>{{"x", Type::RealNumber}},
+                                                                  [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
+                                                                      float x = args.at("x").raw<TypeMap::RealNumber>();
+                                                                      return Element(std::log(x));
+                                                                  });
+            const Element log2 = Element::create<TypeMap::Function>(1,
+                                                                    std::vector<ArgInfo>{{"x", Type::RealNumber}},
+                                                                    [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
+                                                                        float x = args.at("x").raw<TypeMap::RealNumber>();
+                                                                        return Element(std::log2(x));
+                                                                    });
+            const Element log10 = Element::create<TypeMap::Function>(1,
+                                                                     std::vector<ArgInfo>{{"x", Type::RealNumber}},
+                                                                     [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
+                                                                         float x = args.at("x").raw<TypeMap::RealNumber>();
+                                                                         return Element(std::log10(x));
+                                                                     });
             const Element sin = Element::create<TypeMap::Function>(1,
                                                                    std::vector<ArgInfo>{{"x", Type::RealNumber}},
                                                                    [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {

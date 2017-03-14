@@ -36,8 +36,8 @@ namespace SLR {
         
         SingleMediumObject* m_obj;
     public:
-        DensityGridMediumNode(const BoundingBox3D &region, const AssetSpectrum* base_sigma_s, const AssetSpectrum* base_sigma_e, const float* density_grid,
-                              uint32_t numX, uint32_t numY, uint32_t numZ, const MediumMaterial* material);
+        DensityGridMediumNode(const BoundingBox3D &region, const AssetSpectrum* base_sigma_s, const AssetSpectrum* base_sigma_e, 
+                              const std::vector<std::vector<float>> &density_grid, uint32_t numX, uint32_t numY, uint32_t numZ, const MediumMaterial* material);
         ~DensityGridMediumNode();
         
         bool isDirectlyTransformable() const override { return false; }

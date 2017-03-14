@@ -218,10 +218,16 @@ namespace SLRSceneGraph {
                                                }
                                                );
             
+            stack["abs"] = BuiltinFunctions::Math::abs;
             stack["min"] = BuiltinFunctions::Math::min;
+            stack["max"] = BuiltinFunctions::Math::max;
             stack["clamp"] = BuiltinFunctions::Math::clamp;
             stack["sqrt"] = BuiltinFunctions::Math::sqrt;
             stack["pow"] = BuiltinFunctions::Math::pow;
+            stack["exp"] = BuiltinFunctions::Math::exp;
+            stack["ln"] = BuiltinFunctions::Math::ln;
+            stack["log2"] = BuiltinFunctions::Math::log2;
+            stack["log10"] = BuiltinFunctions::Math::log10;
             stack["sin"] = BuiltinFunctions::Math::sin;
             stack["cos"] = BuiltinFunctions::Math::cos;
             stack["tan"] = BuiltinFunctions::Math::tan;
@@ -680,6 +686,16 @@ namespace SLRSceneGraph {
                                                        };
                                                        return configFunc(params, context, err);
                                                    }
+                                                   else if (type == "Henyey-Greenstein") {
+                                                       const static Function configFunc{
+                                                           0, {{"g", Type::FloatTexture}},
+                                                           [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
+                                                               FloatTextureRef g = args.at("g").rawRef<TypeMap::FloatTexture>();
+                                                               return Element::createFromReference<TypeMap::MediumMaterial>(MediumMaterial::createHenyeyGreenstein(g));
+                                                           }
+                                                       };
+                                                       return configFunc(params, context, err);
+                                                   }
                                                    *err = ErrorMessage("Specified material type is invalid.");
                                                    return Element();
                                                }
@@ -810,18 +826,25 @@ namespace SLRSceneGraph {
                                                        uint32_t numX = args.at("numX").raw<TypeMap::Integer>();
                                                        uint32_t numY = args.at("numY").raw<TypeMap::Integer>();
                                                        uint32_t numZ = args.at("numZ").raw<TypeMap::Integer>();
-                                                       SLRAssert(numX * numY * numZ == density_grid.numUnnamed(), "The number of elements of density_grid and specified grid dimensions do not match.");
-                                                       std::unique_ptr<float[]> densityArray(new float[numX * numY * numZ]);
+                                                       SLRAssert(numZ == density_grid.numUnnamed(), "The number of z-slices of density_grid and specified grid z dimension do not match.");
+                                                       std::vector<std::vector<float>> densityArray;
+                                                       densityArray.resize(numZ);
                                                        for (int z = 0; z < numZ; ++z) {
+                                                           const ParameterList &zSlice = density_grid(z).raw<TypeMap::Tuple>();
+                                                           SLRAssert(numY * numX == zSlice.numUnnamed(), "The number of elements of a z-slice of density_grid and specified grid x dimension times y dimension do not match.");
+                                                           std::vector<float> zSliceArray;
+                                                           zSliceArray.resize(numY * numX);
                                                            for (int y = 0; y < numY; ++y) {
                                                                for (int x = 0; x < numX; ++x) {
-                                                                   uint32_t linearIdx = numX * numY * z + numX * y + x;
-                                                                   densityArray[linearIdx] = density_grid(linearIdx).raw<TypeMap::RealNumber>();
+                                                                   float density = zSlice(numX * y + x).asRaw<TypeMap::RealNumber>();
+                                                                   zSliceArray[numX * y + x] = density;
                                                                }
                                                            }
+                                                           densityArray[z] = std::move(zSliceArray);
                                                        }
                                                        MediumMaterialRef mat = args.at("mat").rawRef<TypeMap::MediumMaterial>();
-                                                       MediumNodeRef mediumNode = createShared<DensityGridMediumNode>(SLR::BoundingBox3D(minP, maxP), base_sigma_s, base_sigma_e, densityArray, numX, numY, numZ, mat);
+                                                       MediumNodeRef mediumNode = createShared<DensityGridMediumNode>(SLR::BoundingBox3D(minP, maxP), base_sigma_s, base_sigma_e, 
+                                                                                                                      std::move(densityArray), numX, numY, numZ, mat);
                                                        return Element::createFromReference<TypeMap::MediumNode>(mediumNode);
                                                    },
                                                    [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
