@@ -120,6 +120,7 @@ namespace SLR {
     typedef DiscreteDistribution1DTemplate<float> DiscreteDistribution1D;
     typedef RegularConstantContinuousDistribution1DTemplate<float> RegularConstantContinuousDistribution1D;
     typedef RegularConstantContinuousDistribution2DTemplate<float> RegularConstantContinuousDistribution2D;
+    template <typename ReturnRealType> class MultiOctaveImprovedPerlinNoise3DGenerator;
     
     // Transform
     class Transform;
@@ -360,6 +361,7 @@ namespace SLR {
     class VoronoiSpectrumTexture;
     class VoronoiNormalTexture;
     class VoronoiFloatTexture;
+    class PerlinNoiseFloatTexture;
     
     // END: Texture
     // ----------------------------------------------------------------

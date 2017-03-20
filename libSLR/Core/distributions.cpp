@@ -272,4 +272,123 @@ namespace SLR {
     
     template class SLR_API RegularConstantContinuousDistribution2DTemplate<float>;
     template class SLR_API RegularConstantContinuousDistribution2DTemplate<double>;
+    
+    
+    
+    template <typename RealType>
+    RealType MultiOctaveImprovedPerlinNoise3DGenerator<RealType>::gradient(uint32_t hash, RealType xu, RealType yu, RealType zu) {
+        switch (hash & 0xF) {
+            case 0x0: return  xu + yu;
+            case 0x1: return -xu + yu;
+            case 0x2: return  xu - yu;
+            case 0x3: return -xu - yu;
+            case 0x4: return  xu + zu;
+            case 0x5: return -xu + zu;
+            case 0x6: return  xu - zu;
+            case 0x7: return -xu - zu;
+            case 0x8: return  yu + zu;
+            case 0x9: return -yu + zu;
+            case 0xA: return  yu - zu;
+            case 0xB: return -yu - zu;
+            case 0xC: return  yu + xu;
+            case 0xD: return -yu + zu;
+            case 0xE: return  yu - xu;
+            case 0xF: return -yu - zu;
+            default: return 0; // never happens
+        }
+    }
+    
+    template <typename RealType>
+    RealType MultiOctaveImprovedPerlinNoise3DGenerator<RealType>::primaryPerlinNoise(RealType x, RealType y, RealType z) const {
+        // If we have any repeat on, change the coordinates to their "local" repetitions.
+        if (m_repeat > 0) {
+            x = std::fmod(x, m_repeat);
+            y = std::fmod(y, m_repeat);
+            z = std::fmod(z, m_repeat);
+            if (x < 0)
+                x += m_repeat;
+            if (y < 0)
+                y += m_repeat;
+            if (z < 0)
+                z += m_repeat;
+        }
+        
+        const auto fade = [](RealType t) {
+            // Fade function as defined by Ken Perlin.
+            // This eases coordinate values so that they will "ease" towards integral values.
+            // This ends up smoothing the final output.
+            // 6t^5 - 15t^4 + 10t^3
+            return t * t * t * (t * (t * 6 - 15) + 10);
+        };
+        
+        // Calculate the "unit cube" that the point asked will be located in.
+        // The left bound is ( |_x_|,|_y_|,|_z_| ) and the right bound is that plus 1. 
+        // Next we calculate the location (from 0.0 to 1.0) in that cube.
+        // We also fade the location to smooth the result.
+        int32_t xi = (int32_t)std::floor(x) & 255;
+        int32_t yi = (int32_t)std::floor(y) & 255;
+        int32_t zi = (int32_t)std::floor(z) & 255;
+        RealType xu = x - std::floor(x);
+        RealType yu = y - std::floor(y);
+        RealType zu = z - std::floor(z);
+        SLRAssert(xu >= 0 && xu <= 1 && yu >= 0 && yu <= 1 && zu >= 0 && zu <= 1, "xu, yu, zu must be in the unit cube [0, 1]^3.");
+        RealType u = fade(xu);
+        RealType v = fade(yu);
+        RealType w = fade(zu);
+        
+        const auto inc = [this](int32_t num) {
+            ++num;
+            if (m_repeat > 0)
+                num %= m_repeat;
+            return num;
+        };
+        
+        uint8_t lll, llu, lul, luu, ull, ulu, uul, uuu;
+        lll = PermutationTable[PermutationTable[PermutationTable[    xi ] +     yi ] +     zi ];
+        llu = PermutationTable[PermutationTable[PermutationTable[    xi ] +     yi ] + inc(zi)];
+        lul = PermutationTable[PermutationTable[PermutationTable[    xi ] + inc(yi)] +     zi ];
+        luu = PermutationTable[PermutationTable[PermutationTable[    xi ] + inc(yi)] + inc(zi)];
+        ull = PermutationTable[PermutationTable[PermutationTable[inc(xi)] +     yi ] +     zi ];
+        ulu = PermutationTable[PermutationTable[PermutationTable[inc(xi)] +     yi ] + inc(zi)];
+        uul = PermutationTable[PermutationTable[PermutationTable[inc(xi)] + inc(yi)] +     zi ];
+        uuu = PermutationTable[PermutationTable[PermutationTable[inc(xi)] + inc(yi)] + inc(zi)];
+        
+        const auto lerp = [](RealType v0, RealType v1, RealType t) {
+            return v0 * (1 - t) + v1 * t;
+        };
+        
+        // The gradient function calculates the dot product between a pseudorandom gradient vector and 
+        // the vector from the input coordinate to the 8 surrounding points in its unit cube.
+        // This is all then lerped together as a sort of weighted average based on the faded (u,v,w) values we made earlier.
+        RealType _llValue = lerp(gradient(lll, xu, yu, zu), gradient(ull, xu - 1, yu, zu), u);
+        RealType _ulValue = lerp(gradient(lul, xu, yu - 1, zu), gradient(uul, xu - 1, yu - 1, zu), u);
+        RealType __lValue = lerp(_llValue, _ulValue, v);
+        
+        RealType _luValue = lerp(gradient(llu, xu, yu, zu - 1), gradient(ulu, xu - 1, yu, zu - 1), u);
+        RealType _uuValue = lerp(gradient(luu, xu, yu - 1, zu - 1), gradient(uuu, xu - 1, yu - 1, zu - 1), u);
+        RealType __uValue = lerp(_luValue, _uuValue, v);
+        
+        // For convenience we bound it to 0 - 1 (theoretical min/max before is -1 - 1)
+        RealType ret = (lerp(__lValue, __uValue, w) + 1) / 2;
+        SLRAssert(ret >= 0 && ret <= 1.0f, "Return value is invalid.");
+        return ret;
+    }
+    
+    template <typename RealType>
+    RealType MultiOctaveImprovedPerlinNoise3DGenerator<RealType>::evaluate(RealType x, RealType y, RealType z) const {
+        RealType total = 0;
+        RealType frequency = m_initialFrequency;
+        RealType amplitude = m_initialAmplitude;
+        for (int i = 0; i < m_numOctaves; ++i) {
+            total += primaryPerlinNoise(x * frequency, y * frequency, z * frequency) * amplitude;
+            
+            amplitude *= m_persistence;
+            frequency *= m_frequencyMultiplier;
+        }
+        
+        return total;
+    }
+    
+    template class SLR_API MultiOctaveImprovedPerlinNoise3DGenerator<float>;
+    template class SLR_API MultiOctaveImprovedPerlinNoise3DGenerator<double>;
 }

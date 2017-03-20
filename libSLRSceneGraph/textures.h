@@ -178,6 +178,22 @@ namespace SLRSceneGraph {
     public:
         VoronoiFloatTexture(const Texture3DMappingRef &mapping, float scale, float valueScale, bool flat);
     };
+    
+    
+    class SLR_SCENEGRAPH_API PerlinNoiseFloatTexture : public FloatTexture {
+        Texture3DMappingRef m_mapping;
+        uint32_t m_numOctaves;
+        float m_initialFrequency;
+        float m_supValueOrInitialAmplitude;
+        bool m_supSpecified;
+        float m_frequencyMultiplier;
+        float m_persistence;
+        int32_t m_repeat;
+    public:
+        PerlinNoiseFloatTexture(const Texture3DMappingRef &mapping, 
+                                uint32_t numOctaves, float initialFrequency, float supValueOrInitialAmplitude, bool supSpecified, 
+                                float frequencyMultiplier, float persistence, int32_t repeat);
+    };
 }
 
 #endif /* __SLRSceneGraph_textures__ */

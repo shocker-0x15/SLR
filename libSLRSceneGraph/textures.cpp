@@ -101,4 +101,14 @@ namespace SLRSceneGraph {
     m_mapping(mapping), m_scale(scale) {
         m_rawData = new SLR::VoronoiFloatTexture(mapping->getRaw(), scale, valueScale, flat);
     }
+    
+    PerlinNoiseFloatTexture::PerlinNoiseFloatTexture(const Texture3DMappingRef &mapping, 
+                                                     uint32_t numOctaves, float initialFrequency, float supValueOrInitialAmplitude, bool supSpecified, 
+                                                     float frequencyMultiplier, float persistence, int32_t repeat) : 
+    m_numOctaves(numOctaves), 
+    m_initialFrequency(initialFrequency), m_supValueOrInitialAmplitude(supValueOrInitialAmplitude), m_supSpecified(supSpecified), 
+    m_frequencyMultiplier(frequencyMultiplier), m_persistence(persistence), m_repeat(repeat) {
+        m_rawData = new SLR::PerlinNoiseFloatTexture(mapping->getRaw(), numOctaves, initialFrequency, supValueOrInitialAmplitude, supSpecified, 
+                                                     frequencyMultiplier, persistence, repeat);
+    }
 }

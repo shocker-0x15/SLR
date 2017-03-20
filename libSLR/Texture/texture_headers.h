@@ -12,5 +12,6 @@
 #include "image_textures.h"
 #include "checker_board_textures.h"
 #include "voronoi_textures.h"
+#include "perlin_noise_textures.h"
 
 #endif /* __SLR_texture_headers__ */

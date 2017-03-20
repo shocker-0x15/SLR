@@ -15,6 +15,8 @@
 		4613A17B1E36500600D05AA6 /* Ray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4613A1791E36500600D05AA6 /* Ray.cpp */; };
 		4613A17C1E36500600D05AA6 /* Ray.h in Headers */ = {isa = PBXBuildFile; fileRef = 4613A17A1E36500600D05AA6 /* Ray.h */; };
 		461BDADD1E46FE4A00D97D37 /* medium_materials.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 461BDADB1E46FE4A00D97D37 /* medium_materials.cpp */; };
+		4625C9F81E7AF985005479E3 /* perlin_noise_textures.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4625C9F61E7AF985005479E3 /* perlin_noise_textures.cpp */; };
+		4625C9F91E7AF985005479E3 /* perlin_noise_textures.h in Headers */ = {isa = PBXBuildFile; fileRef = 4625C9F71E7AF985005479E3 /* perlin_noise_textures.h */; };
 		4638105B1C21AD0E00211293 /* SceneParser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 463810591C21AD0E00211293 /* SceneParser.cpp */; };
 		464545971E1E2D8E00B4CECD /* Scene.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 464545951E1E2D8E00B4CECD /* Scene.cpp */; };
 		464545981E1E2D8E00B4CECD /* Scene.h in Headers */ = {isa = PBXBuildFile; fileRef = 464545961E1E2D8E00B4CECD /* Scene.h */; };
@@ -262,6 +264,8 @@
 		4613A1791E36500600D05AA6 /* Ray.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Ray.cpp; path = libSLR/BasicTypes/Ray.cpp; sourceTree = SOURCE_ROOT; };
 		4613A17A1E36500600D05AA6 /* Ray.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; name = Ray.h; path = libSLR/BasicTypes/Ray.h; sourceTree = SOURCE_ROOT; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
 		461BDADB1E46FE4A00D97D37 /* medium_materials.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; lineEnding = 0; name = medium_materials.cpp; path = libSLRSceneGraph/medium_materials.cpp; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.cpp; };
+		4625C9F61E7AF985005479E3 /* perlin_noise_textures.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = perlin_noise_textures.cpp; path = libSLR/Texture/perlin_noise_textures.cpp; sourceTree = SOURCE_ROOT; };
+		4625C9F71E7AF985005479E3 /* perlin_noise_textures.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = perlin_noise_textures.h; path = libSLR/Texture/perlin_noise_textures.h; sourceTree = SOURCE_ROOT; };
 		4634EC3E1B9B60400047AE54 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		463810591C21AD0E00211293 /* SceneParser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; lineEnding = 0; name = SceneParser.cpp; path = libSLRSceneGraph/Parser/SceneParser.cpp; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.cpp; };
 		464545951E1E2D8E00B4CECD /* Scene.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; lineEnding = 0; name = Scene.cpp; path = libSLR/Scene/Scene.cpp; sourceTree = SOURCE_ROOT; xcLanguageSpecificationIdentifier = xcode.lang.cpp; };
@@ -734,6 +738,8 @@
 				465D8AEA1E59D3CF001B8382 /* checker_board_textures.cpp */,
 				465D8AF21E59D3CF001B8382 /* voronoi_textures.h */,
 				465D8AF11E59D3CF001B8382 /* voronoi_textures.cpp */,
+				4625C9F71E7AF985005479E3 /* perlin_noise_textures.h */,
+				4625C9F61E7AF985005479E3 /* perlin_noise_textures.cpp */,
 			);
 			name = Texture;
 			path = Textures;
@@ -994,6 +1000,7 @@
 				465D8B4B1E59D9A3001B8382 /* MultiEDF.h in Headers */,
 				465D8AD71E59D1B0001B8382 /* InfiniteSphereSurfaceShape.h in Headers */,
 				466F6CEE1BB6CA420056F2FA /* geometry.h in Headers */,
+				4625C9F91E7AF985005479E3 /* perlin_noise_textures.h in Headers */,
 				466F6D081BB6CA740056F2FA /* ThreadPool.h in Headers */,
 				465D8AE91E59D32E001B8382 /* HomogeneousMediumDistribution.h in Headers */,
 				465D8B491E59D9A3001B8382 /* IBLEDF.h in Headers */,
@@ -1177,6 +1184,7 @@
 				465D8A961E58F819001B8382 /* spectrum_base.cpp in Sources */,
 				468F9DDC1D8063DA00DD02BD /* Matrix3x3.cpp in Sources */,
 				464545971E1E2D8E00B4CECD /* Scene.cpp in Sources */,
+				4625C9F81E7AF985005479E3 /* perlin_noise_textures.cpp in Sources */,
 				465D8A7C1E58E278001B8382 /* Normal3D.cpp in Sources */,
 				465D8A921E58F667001B8382 /* spectrum_types.cpp in Sources */,
 				465D8AD61E59D1B0001B8382 /* InfiniteSphereSurfaceShape.cpp in Sources */,
