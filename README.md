@@ -1,4 +1,4 @@
-#SLR: 
+# SLR: 
 
 ![SLR](README_TOP.png)  
 IBL image: [sIBL Archive](http://www.hdrlabs.com/sibl/archive.html)  
@@ -12,7 +12,7 @@ SLR consists of the following components.
 * libSLRSceneGraph - シーン管理・読み込み機能 / scene managing & loading
 * HostProgram
 
-##特徴 / Features
+## 特徴 / Features
 * Full Spectral Rendering (Monte Carlo Spectral Sampling)  
   (For RGB resources, RGB->Spectrum conversion is performed using Meng-Simon's method \[Meng2015\].)
 * RGB Rendering
@@ -69,7 +69,7 @@ SLR consists of the following components.
 * Correct handling of non-symmetric scattering due to shading normals \[Veach1996, 1997\]
 * SLR Custom Language (C/Python-like syntax) for flexible scene description
 
-##動作環境 / Confirmed Environment
+## 動作環境 / Confirmed Environment
 現状以下の環境で動作を確認しています。  
 I've confirmed that the program runs correctly on the following environment.
 
@@ -84,12 +84,12 @@ It requires the following libraries.
 * libpng 1.6
 * assimp 3.2
 
-##注意 / Note
+## 注意 / Note
 モデルデータやテクスチャーを読み込むシーンファイルがありますが、それらアセットはリポジトリには含まれていません。
 
 There are some scene files loading model data and textures, but those assets are NOT included in this repository.
 
-##参考文献 / References
+## 参考文献 / References
 [Ashikhmin2000] "An Anisotropic Phong BRDF Model"  
 [Dammertz2008] "Shallow Bounding Volume Hierarchies for Fast SIMD Ray Tracing of Incoherent Rays"  
 [Hachisuka2011] "Robust Adaptive Photon Tracing Using Photon Path Visibility"  
