@@ -144,7 +144,7 @@ namespace SLR {
         RaySegment segment;
         SurfacePoint surfPt;
         SampledSpectrum alpha = SampledSpectrum::One;
-        float initY = alpha.importance(wls.selectedLambda);
+        float initY = alpha.importance(wls.selectedLambdaIndex);
         SampledSpectrumSum sp(SampledSpectrum::Zero);
         uint32_t pathLength = 0;
         
@@ -168,7 +168,7 @@ namespace SLR {
                 break;
             Normal3D gNorm_sn = surfPt.getLocalGeometricNormal();
             BSDF* bsdf = surfPt.createBSDF(wls, mem);
-            BSDFQuery fsQuery(dirOut_sn, gNorm_sn, wls.selectedLambda);
+            BSDFQuery fsQuery(dirOut_sn, gNorm_sn, wls.selectedLambdaIndex);
             
             // Next Event Estimation (explicit light sampling)
             if (bsdf->hasNonDelta()) {
@@ -213,9 +213,9 @@ namespace SLR {
             SampledSpectrum fs = bsdf->sample(fsQuery, pathSampler.getBSDFSample(), &fsResult);
             if (fs == SampledSpectrum::Zero || fsResult.dirPDF == 0.0f)
                 break;
-            if (fsResult.sampledType.isDispersive()) {
+            if (fsResult.sampledType.isDispersive() && !wls.wavelengthSelected()) {
                 fsResult.dirPDF /= WavelengthSamples::NumComponents;
-                wls.flags |= WavelengthSamples::LambdaIsSelected;
+                wls.flags |= WavelengthSamples::WavelengthIsSelected;
             }
             alpha *= fs * absDot(fsResult.dirLocal, gNorm_sn) / fsResult.dirPDF;
             SLRAssert(alpha.allFinite(),
@@ -256,7 +256,7 @@ namespace SLR {
                 break;
             
             // Russian roulette
-            float continueProb = std::min(alpha.importance(wls.selectedLambda) / initY, 1.0f);
+            float continueProb = std::min(alpha.importance(wls.selectedLambdaIndex) / initY, 1.0f);
             if (pathSampler.getPathTerminationSample() < continueProb)
                 alpha /= continueProb;
             else

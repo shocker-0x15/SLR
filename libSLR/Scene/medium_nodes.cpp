@@ -39,16 +39,7 @@ namespace SLR {
     DensityGridMediumNode::DensityGridMediumNode(const BoundingBox3D &region, const AssetSpectrum* base_sigma_s, const AssetSpectrum* base_sigma_e, 
                                                  const std::vector<std::vector<float>> &density_grid, uint32_t numX, uint32_t numY, uint32_t numZ, const MediumMaterial* material) :
     m_material(material) {
-        float maxDensity = -INFINITY;
-        for (int z = 0; z < numZ; ++z) {
-            for (int y = 0; y < numY; ++y) {
-                for (int x = 0; x < numX; ++x) {
-                    maxDensity = std::max(maxDensity, density_grid[z][numX * y + x]);
-                }
-            }
-        }
-        float maxExtinctionCoefficient = base_sigma_e->calcBounds() * maxDensity;
-        m_medium = new DensityGridMediumDistribution(region, base_sigma_s, base_sigma_e, density_grid, numX, numY, numZ, maxExtinctionCoefficient);
+        m_medium = new DensityGridMediumDistribution(region, base_sigma_s, base_sigma_e, density_grid, numX, numY, numZ);
     }
     
     DensityGridMediumNode::~DensityGridMediumNode() {
@@ -69,17 +60,7 @@ namespace SLR {
     GridMediumNode::GridMediumNode(const BoundingBox3D &region, const AssetSpectrum** sigma_s_grid, const AssetSpectrum** sigma_e_grid,
                                    uint32_t numX, uint32_t numY, uint32_t numZ, const MediumMaterial* material) :
     m_material(material) {
-        float maxExtinctionCoefficient = -INFINITY;
-        for (int z = 0; z < numZ; ++z) {
-            const AssetSpectrum* zSlice = sigma_e_grid[z];
-            for (int y = 0; y < numY; ++y) {
-                for (int x = 0; x < numX; ++x) {
-                    const AssetSpectrum* spectrum = zSlice + numX * y + x;
-                    maxExtinctionCoefficient = std::max(maxExtinctionCoefficient, spectrum->calcBounds());
-                }
-            }
-        }
-        m_medium = new GridMediumDistribution(region, sigma_s_grid, sigma_e_grid, numX, numY, numZ, maxExtinctionCoefficient);
+        m_medium = new GridMediumDistribution(region, sigma_s_grid, sigma_e_grid, numX, numY, numZ);
     }
     
     GridMediumNode::~GridMediumNode() {

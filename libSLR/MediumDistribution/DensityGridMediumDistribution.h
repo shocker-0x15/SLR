@@ -14,6 +14,7 @@
 
 namespace SLR {
     class DensityGridMediumDistribution : public MediumDistribution {
+        std::array<float, NumStrataForStorage> m_majorantExtinctionCoefficient;
         BoundingBox3D m_region;
         const AssetSpectrum* m_base_sigma_s;
         const AssetSpectrum* m_base_sigma_e;
@@ -23,16 +24,33 @@ namespace SLR {
         float calcDensity(const Point3D &param) const;
     public:
         DensityGridMediumDistribution(const BoundingBox3D &region, const AssetSpectrum* base_sigma_s, const AssetSpectrum* base_sigma_e, const std::vector<std::vector<float>> &density_grid,
-                                      uint32_t numX, uint32_t numY, uint32_t numZ, float maxExtinctionCoefficient) :
-        MediumDistribution(maxExtinctionCoefficient),
+                                      uint32_t numX, uint32_t numY, uint32_t numZ) :
         m_region(region), m_base_sigma_s(base_sigma_s), m_base_sigma_e(base_sigma_e), 
         m_numX(numX), m_numY(numY), m_numZ(numZ) {
             m_density_grid = new const float*[m_numZ];
             for (int z = 0; z < m_numZ; ++z)
                 m_density_grid[z] = density_grid[z].data();
+            
+            float maxDensity = -INFINITY;
+            for (int z = 0; z < numZ; ++z) {
+                for (int y = 0; y < numY; ++y) {
+                    for (int x = 0; x < numX; ++x) {
+                        maxDensity = std::max(maxDensity, m_density_grid[z][numX * y + x]);
+                    }
+                }
+            }
+            m_base_sigma_e->calcBounds(NumStrataForStorage, m_majorantExtinctionCoefficient.data());
+            for (int i = 0; i < NumStrataForStorage; ++i)
+                m_majorantExtinctionCoefficient[i] *= maxDensity;
         }
         ~DensityGridMediumDistribution() {
             delete m_density_grid;
+        }
+        
+        float majorantExtinctionCoefficientAtWavelength(float wl) const override {
+            int index = (wl - WavelengthLowBound) / (WavelengthHighBound - WavelengthLowBound) * NumStrataForStorage;
+            index = std::clamp(index, 0, (int)NumStrataForStorage - 1);
+            return m_majorantExtinctionCoefficient[index];
         }
         
         bool subdivide(Allocator* mem, MediumDistribution** fragments, uint32_t* numFragments) const override;

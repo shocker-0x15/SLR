@@ -48,54 +48,57 @@ namespace SLR {
         SLRAssert(std::isfinite(segment.distMax), "distanceLimit must be a finite value.");
         FreePathSampler &sampler = pathSampler.getFreePathSampler();
         
+        SampledSpectrum base_sigma_e = m_base_sigma_e->evaluate(wls);
+        
         // delta tracking to sample free path.
-        float majorant = majorantExtinctionCoefficient();
+        float majorantSelected = majorantExtinctionCoefficientAtWavelength(wls.selectedWavelength());
         *singleWavelength = false;
         bool hit = false;
         float extCoeffSelected = 0.0f;
         float hitDistance = segment.distMax;
         FloatSum sampledDistance = segment.distMin;
-        sampledDistance += -std::log(sampler.getSample()) / majorant;
+        sampledDistance += -std::log(sampler.getSample()) / majorantSelected;
         while (sampledDistance < segment.distMax) {
             Point3D queryPoint = ray.org + sampledDistance * ray.dir;
             Point3D param;
             m_region.calculateLocalCoordinates(queryPoint, &param);
             float density = calcDensity(param);
-            SampledSpectrum extCoeff = m_base_sigma_e->evaluate(wls) * density;
-            float probRealCollision = extCoeff[wls.selectedLambda] / majorant;
+            SampledSpectrum extCoeff = base_sigma_e * density;
+            float probRealCollision = extCoeff[wls.selectedLambdaIndex] / majorantSelected;
             if (sampler.getSample() < probRealCollision) {
                 *mi = MediumInteraction(ray.time, sampledDistance, queryPoint, normalize(ray.dir), param.x, param.y, param.z);
                 hit = true;
-                extCoeffSelected = extCoeff[wls.selectedLambda];
+                extCoeffSelected = extCoeff[wls.selectedLambdaIndex];
                 hitDistance = sampledDistance;
                 break;
             }
-            sampledDistance += -std::log(sampler.getSample()) / majorant;
+            sampledDistance += -std::log(sampler.getSample()) / majorantSelected;
             
             // TODO: handle out of boundary.
         }
         
         // estimate Monte Carlo throughput T(s, wl_j)/p(s, wl_i) by ratio tracking.
-        if (wls.lambdaSelected()) {
+        if (wls.wavelengthSelected()) {
             *medThroughput = SampledSpectrum::Zero;
-            (*medThroughput)[wls.selectedLambda] = 1.0f;
+            (*medThroughput)[wls.selectedLambdaIndex] = 1.0f;
         }
         else {
             SampledSpectrum trDiff = SampledSpectrum::One;
             for (int wl = 0; wl < WavelengthSamples::NumComponents; ++wl) {
-                if (wl == wls.selectedLambda)
+                if (wl == wls.selectedLambdaIndex)
                     continue;
+                float majorantWL = majorantExtinctionCoefficientAtWavelength(wls[wl]);
                 sampledDistance = segment.distMin;
-                sampledDistance += -std::log(sampler.getSample()) / majorant;
+                sampledDistance += -std::log(sampler.getSample()) / majorantWL;
                 while (sampledDistance < hitDistance) {
                     Point3D queryPoint = ray.org + sampledDistance * ray.dir;
                     Point3D param;
                     m_region.calculateLocalCoordinates(queryPoint, &param);
                     float density = calcDensity(param);
-                    SampledSpectrum extCoeff = m_base_sigma_e->evaluate(wls) * density;
-                    float probRealCollision = (extCoeff[wl] - extCoeff[wls.selectedLambda]) / majorant;
+                    SampledSpectrum extCoeff = base_sigma_e * density;
+                    float probRealCollision = (extCoeff[wl] - extCoeff[wls.selectedLambdaIndex]) / majorantWL;
                     trDiff[wl] *= (1.0f - probRealCollision);
-                    sampledDistance += -std::log(sampler.getSample()) / majorant;
+                    sampledDistance += -std::log(sampler.getSample()) / majorantWL;
                 }
             }
             *medThroughput = trDiff;
@@ -111,41 +114,44 @@ namespace SLR {
         SLRAssert(std::isfinite(segment.distMax), "distanceLimit must be a finite value.");
         FreePathSampler sampler = pathSampler.getFreePathSampler();
         
-        float majorant = majorantExtinctionCoefficient();
+        SampledSpectrum base_sigma_e = m_base_sigma_e->evaluate(wls);
+        
         *singleWavelength = false;
         
         // estimate transmittance by ratio tracking.
         SampledSpectrum transmittance = SampledSpectrum::One;
-        if (wls.lambdaSelected()) {
+        if (wls.wavelengthSelected()) {
             transmittance = SampledSpectrum::Zero;
-            transmittance[wls.selectedLambda] = 1.0f;
+            transmittance[wls.selectedLambdaIndex] = 1.0f;
             
+            float majorantSelected = majorantExtinctionCoefficientAtWavelength(wls.selectedWavelength());
             FloatSum sampledDistance = segment.distMin;
-            sampledDistance += -std::log(sampler.getSample()) / majorant;
+            sampledDistance += -std::log(sampler.getSample()) / majorantSelected;
             while (sampledDistance < segment.distMax) {
                 Point3D queryPoint = ray.org + sampledDistance * ray.dir;
                 Point3D param;
                 m_region.calculateLocalCoordinates(queryPoint, &param);
                 float density = calcDensity(param);
-                SampledSpectrum extCoeff = m_base_sigma_e->evaluate(wls) * density;
-                float probRealCollision = extCoeff[wls.selectedLambda] / majorant;
-                transmittance[wls.selectedLambda] *= (1.0f - probRealCollision);
-                sampledDistance += -std::log(sampler.getSample()) / majorant;
+                SampledSpectrum extCoeff = base_sigma_e * density;
+                float probRealCollision = extCoeff[wls.selectedLambdaIndex] / majorantSelected;
+                transmittance[wls.selectedLambdaIndex] *= (1.0f - probRealCollision);
+                sampledDistance += -std::log(sampler.getSample()) / majorantSelected;
             }
         }
         else {
             for (int wl = 0; wl < WavelengthSamples::NumComponents; ++wl) {
+                float majorantWL = majorantExtinctionCoefficientAtWavelength(wls[wl]);
                 FloatSum sampledDistance = segment.distMin;
-                sampledDistance += -std::log(sampler.getSample()) / majorant;
+                sampledDistance += -std::log(sampler.getSample()) / majorantWL;
                 while (sampledDistance < segment.distMax) {
                     Point3D queryPoint = ray.org + sampledDistance * ray.dir;
                     Point3D param;
                     m_region.calculateLocalCoordinates(queryPoint, &param);
                     float density = calcDensity(param);
-                    SampledSpectrum extCoeff = m_base_sigma_e->evaluate(wls) * density;
-                    float probRealCollision = extCoeff[wl] / majorant;
+                    SampledSpectrum extCoeff = base_sigma_e * density;
+                    float probRealCollision = extCoeff[wl] / majorantWL;
                     transmittance[wl] *= (1.0f - probRealCollision);
-                    sampledDistance += -std::log(sampler.getSample()) / majorant;
+                    sampledDistance += -std::log(sampler.getSample()) / majorantWL;
                 }
             }
         }

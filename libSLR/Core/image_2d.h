@@ -22,8 +22,10 @@ namespace SLR {
         RGBA8x4,
         RGBA16Fx4,
         Gray8,
+#ifdef Use_Spectral_Representation
         uvs16Fx3,
         uvsA16Fx4,
+#endif
         Num
     };
     
@@ -37,8 +39,10 @@ namespace SLR {
     struct SLR_API RGB_8x4 { uint8_t r, g, b, dummy; };
     struct SLR_API RGBA8x4  { uint8_t r, g, b, a; };
     struct SLR_API RGBA16Fx4 { half r, g, b, a; };
+#ifdef Use_Spectral_Representation
     struct SLR_API uvs16Fx3 { half u, v, s; };
     struct SLR_API uvsA16Fx4 { half u, v, s, a; };
+#endif
     struct SLR_API Gray8 { uint8_t v; };
     
     extern SLR_API const size_t sizesOfColorFormats[(uint32_t)ColorFormat::Num];

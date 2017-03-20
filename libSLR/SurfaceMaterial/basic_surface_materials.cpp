@@ -40,7 +40,7 @@ namespace SLR {
         SampledSpectrum coeff = m_coeff->evaluate(surfPt, wls);
         SampledSpectrum etaExt = m_etaExt->evaluate(surfPt, wls);
         SampledSpectrum etaInt = m_etaInt->evaluate(surfPt, wls);
-        return mem.create<SpecularBSDF>(scale * coeff, etaExt, etaInt, !wls.lambdaSelected());
+        return mem.create<SpecularBSDF>(scale * coeff, etaExt, etaInt, !wls.wavelengthSelected());
     }
     
     

@@ -114,7 +114,7 @@ namespace SLR {
                 // initialize working area for the current pixel.
                 curPx = p.x;
                 curPy = p.y;
-                wlHint = wls.selectedLambda;
+                wlHint = wls.selectedLambdaIndex;
                 eyeVertices.clear();
                 lightVertices.clear();
                 
@@ -212,7 +212,7 @@ namespace SLR {
                         
                         connectionTerm *= visibility;
                         if (singleWavelength || lVtx.lambdaSelected || eVtx.lambdaSelected)
-                            connectionTerm[wls.selectedLambda] *= WavelengthSamples::NumComponents;
+                            connectionTerm[wls.selectedLambdaIndex] *= WavelengthSamples::NumComponents;
                         
                         // ----------------------------------------------------------------
                         
@@ -305,8 +305,8 @@ namespace SLR {
         
         float RRProb = 1.0f;
         while (scene->interact(ray, segment, wls, pathSampler, mem, &interact, &medThroughput, &singleWavelength)) {
-            if (singleWavelength && !wls.lambdaSelected())
-                wls.flags |= WavelengthSamples::LambdaIsSelected;
+            if (singleWavelength && !wls.wavelengthSelected())
+                wls.flags |= WavelengthSamples::WavelengthIsSelected;
             alpha *= medThroughput;
             
             interPt = interact->createInteractionPoint(mem);
@@ -316,11 +316,11 @@ namespace SLR {
             Vector3D dirOut_sn = interPt->toLocal(-ray.dir);
             float cosOut = interPt->calcCosTerm(-ray.dir);
             AbstractBDF* abdf = interPt->createAbstractBDF(wls, mem);
-            ABDFQuery* abdfQuery = interPt->createABDFQuery(dirOut_sn, wls.selectedLambda, DirectionType::All, true, adjoint, mem);
+            ABDFQuery* abdfQuery = interPt->createABDFQuery(dirOut_sn, wls.selectedLambdaIndex, DirectionType::All, true, adjoint, mem);
             
             float spatialPDF = dirPDF * cosOut / dist2;
             vertices.emplace_back(interPt, mem.create<ABDFProxy>(abdf, abdfQuery), alpha, cosOut, 
-                                  spatialPDF, RRProb, sampledType, wls.lambdaSelected());
+                                  spatialPDF, RRProb, sampledType, wls.wavelengthSelected());
             
             // implicit path (zero light subpath vertices, s = 0)
             if (!adjoint && interPt->isEmitting()) {
@@ -340,8 +340,8 @@ namespace SLR {
                     SLRAssert(contribution.allFinite() && !contribution.hasMinus(),
                               "Unexpected value detected: %s\n"
                               "pix: (%f, %f)", contribution.toString().c_str(), curPx, curPy);
-                    if (wls.lambdaSelected())
-                        contribution[wls.selectedLambda] *= WavelengthSamples::NumComponents;
+                    if (wls.wavelengthSelected())
+                        contribution[wls.selectedLambdaIndex] *= WavelengthSamples::NumComponents;
                     sensor->add(curPx, curPy, wls, contribution);
                 }
             }
@@ -355,8 +355,8 @@ namespace SLR {
             SampledSpectrum abdfValue = abdf->sample(abdfQuery, pathSampler, mem, &abdfResult);
             if (abdfValue == SampledSpectrum::Zero || abdfResult->dirPDF == 0.0f)
                 break;
-            if (abdfResult->sampledType.isDispersive())
-                wls.flags |= WavelengthSamples::LambdaIsSelected;
+            if (abdfResult->sampledType.isDispersive() && !wls.wavelengthSelected())
+                wls.flags |= WavelengthSamples::WavelengthIsSelected;
             Vector3D vecIn = interPt->fromLocal(abdfResult->dirLocal);
             float cosIn = interPt->calcCosTerm(vecIn);
             SampledSpectrum weight = abdfValue * (cosIn / abdfResult->dirPDF);

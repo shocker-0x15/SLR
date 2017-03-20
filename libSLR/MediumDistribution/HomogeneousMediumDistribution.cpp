@@ -19,7 +19,7 @@ namespace SLR {
         m_region.calculateLocalCoordinates(queryPoint, &param);
         
         SampledSpectrum extCoeff = evaluateExtinctionCoefficient(param, wls);
-        float distance = -std::log(sampler.getSample()) / extCoeff[wls.selectedLambda];
+        float distance = -std::log(sampler.getSample()) / extCoeff[wls.selectedLambdaIndex];
         SampledSpectrum transmittance = exp(-extCoeff * std::min(distance, segment.distMax - segment.distMin));
         
         *singleWavelength = false;
@@ -30,12 +30,12 @@ namespace SLR {
             m_region.calculateLocalCoordinates(queryPoint, &param);
             
             *mi = MediumInteraction(ray.time, sampledDistance, queryPoint, normalize(ray.dir), param.x, param.y, param.z);
-            float distPDF = extCoeff[wls.selectedLambda] * transmittance[wls.selectedLambda];
+            float distPDF = extCoeff[wls.selectedLambdaIndex] * transmittance[wls.selectedLambdaIndex];
             *medThroughput = transmittance / distPDF;
             return true;
         }
         
-        *medThroughput = transmittance / transmittance[wls.selectedLambda];
+        *medThroughput = transmittance / transmittance[wls.selectedLambdaIndex];
         return false;
     }
     

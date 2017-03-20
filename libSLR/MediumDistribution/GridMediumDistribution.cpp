@@ -51,42 +51,4 @@ namespace SLR {
     float GridMediumDistribution::evaluateVolumePDF(const MediumPoint &medPt) const {
         return 1.0f / volume();
     }
-    
-    
-    
-    bool SubGridMediumDistribution::interact(const Ray &ray, const RaySegment &segment, const WavelengthSamples &wls, LightPathSampler &pathSampler,
-                                 MediumInteraction *mi, SampledSpectrum *medThroughput, bool* singleWavelength) const {
-        SLRAssert_NotImplemented();
-        return false;
-    }
-    
-    SampledSpectrum SubGridMediumDistribution::evaluateTransmittance(const Ray &ray, const RaySegment &segment, const WavelengthSamples &wls, SLR::LightPathSampler &pathSampler, 
-                                                                     bool* singleWavelength) const {
-        SLRAssert_NotImplemented();
-        return SampledSpectrum::Zero;
-    }
-    
-    void SubGridMediumDistribution::calculateMediumPoint(const MediumInteraction &mi, MediumPoint* medPt) const {
-        SLRAssert_NotImplemented();
-    }
-    
-    SampledSpectrum SubGridMediumDistribution::evaluateExtinctionCoefficient(const Point3D &param, const WavelengthSamples &wls) const {
-        SLRAssert_NotImplemented();
-        
-        return SampledSpectrum::Zero;
-    }
-    
-    SampledSpectrum SubGridMediumDistribution::evaluateAlbedo(const Point3D &param, const WavelengthSamples &wls) const {
-        SLRAssert_NotImplemented();
-        
-        return SampledSpectrum::Zero;
-    }
-    
-    void SubGridMediumDistribution::sample(float u0, float u1, float u2, MediumPoint *medPt, float *volumePDF) const {
-        SLRAssert_NotImplemented();
-    }
-    
-    float SubGridMediumDistribution::evaluateVolumePDF(const MediumPoint &medPt) const {
-        return 1.0f / volume();
-    }
 }

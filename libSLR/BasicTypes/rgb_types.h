@@ -18,27 +18,41 @@ namespace SLR {
     template <typename RealType>
     struct SLR_API RGBSamplesTemplate {
         enum Flag : uint16_t {
-            LambdaIsSelected = 0x01,
+            WavelengthIsSelected = 0x01,
         };
-        uint16_t selectedLambda;
+        RealType lambdas[3];
+        uint16_t selectedLambdaIndex;
         uint16_t flags;
         static const uint32_t NumComponents;
         
-        RGBSamplesTemplate() : selectedLambda(0), flags(0) { }
-        RGBSamplesTemplate(const RGBSamplesTemplate &wls) {
-            selectedLambda = wls.selectedLambda;
+        RGBSamplesTemplate() : lambdas{0, 1, 2}, selectedLambdaIndex(0), flags(0) { }
+        RGBSamplesTemplate(const RGBSamplesTemplate &wls) : lambdas{0, 1, 2} {
+            selectedLambdaIndex = wls.selectedLambdaIndex;
             flags = wls.flags;
         }
         
-        bool lambdaSelected() const {
-            return (flags & LambdaIsSelected) != 0;
+        RealType &operator[](uint32_t index) {
+            SLRAssert(index < 3, "\"index\" is out of range [0, %u].", 2);
+            return lambdas[index];
+        }
+        RealType operator[](uint32_t index) const {
+            SLRAssert(index < 3, "\"index\" is out of range [0, %u].", 2);
+            return lambdas[index];
+        }
+        
+        bool wavelengthSelected() const {
+            return (flags & WavelengthIsSelected) != 0;
+        }
+        
+        RealType selectedWavelength() const {
+            return lambdas[selectedLambdaIndex];
         }
         
         static RGBSamplesTemplate createWithEqualOffsets(RealType offset, RealType uLambda, RealType* PDF) {
             SLRAssert(offset >= 0 && offset < 1, "\"offset\" must be in range [0, 1).");
             SLRAssert(uLambda >= 0 && uLambda < 1, "\"uLambda\" must be in range [0, 1).");
             RGBSamplesTemplate ret;
-            ret.selectedLambda = std::min(uint16_t(3 * uLambda), uint16_t(2));
+            ret.selectedLambdaIndex = std::min(uint16_t(3 * uLambda), uint16_t(2));
             ret.flags = 0;
             *PDF = 1;
             return ret;
@@ -95,6 +109,9 @@ namespace SLR {
         bool hasNonZero() const { return r != 0.0f || g != 0.0f || b != 0.0f; }
         bool hasNaN() const { using std::isnan; return isnan(r) || isnan(g) || isnan(b); }
         bool hasInf() const { using std::isinf; return isinf(r) || isinf(g) || isinf(b); }
+        bool allFinite() const {
+            return !hasNaN() && !hasInf();
+        }
         
         RealType luminance(RGBColorSpace space = RGBColorSpace::sRGB) const {
             switch(space) {
@@ -130,8 +147,11 @@ namespace SLR {
         const RGBTemplate &evaluate(const RGBSamplesTemplate<RealType> &wls) const {
             return *this;
         }
-        const float calcBounds() const {
-            return std::max(r, std::max(g, b));
+        const void calcBounds(uint32_t numBins, float* bounds) const {
+            SLRAssert(numBins == 3, "numBins must be 3 in RGB rendering mode.");
+            bounds[0] = r;
+            bounds[1] = g;
+            bounds[2] = b;
         }
         RGBTemplate* createScaledAndOffset(RealType scale, RealType offset) const {
             return new RGBTemplate(r * scale + offset, g * scale + offset, b * scale + offset);

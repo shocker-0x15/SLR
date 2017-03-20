@@ -35,26 +35,27 @@ namespace SLR {
     template <typename RealType> struct RGBSamplesTemplate;
     template <typename RealType> struct RGBTemplate;
     template <typename RealType> class RGBStorageTemplate;
-    template <typename RealType, uint32_t N> class ContinuousSpectrumTemplate;
-    template <typename RealType, uint32_t N> class RegularContinuousSpectrumTemplate;
-    template <typename RealType, uint32_t N> class IrregularContinuousSpectrumTemplate;
-    template <typename RealType, uint32_t N> class UpsampledContinuousSpectrumTemplate;
-    template <typename RealType, uint32_t N> class ScaledAndOffsetUpsampledContinuousSpectrumTemplate;
-    template <typename RealType, uint32_t N> struct WavelengthSamplesTemplate;
-    template <typename RealType, uint32_t N> struct SampledSpectrumTemplate;
-    template <typename RealType, uint32_t N> struct DiscretizedSpectrumTemplate;
-    template <typename RealType, uint32_t numStrata> class SpectrumStorageTemplate;
+    template <typename RealType, uint32_t NumSpectralSamples> class ContinuousSpectrumTemplate;
+    template <typename RealType, uint32_t NumSpectralSamples> class RegularContinuousSpectrumTemplate;
+    template <typename RealType, uint32_t NumSpectralSamples> class IrregularContinuousSpectrumTemplate;
+    template <typename RealType, uint32_t NumSpectralSamples> class UpsampledContinuousSpectrumTemplate;
+    template <typename RealType, uint32_t NumSpectralSamples> class ScaledAndOffsetUpsampledContinuousSpectrumTemplate;
+    template <typename RealType, uint32_t NumSpectralSamples> struct WavelengthSamplesTemplate;
+    template <typename RealType, uint32_t NumSpectralSamples> struct SampledSpectrumTemplate;
+    template <typename RealType, uint32_t NumStrataForStorage> struct DiscretizedSpectrumTemplate;
+    template <typename RealType, uint32_t NumStrataForStorage> class SpectrumStorageTemplate;
     // FIXME: Current code is inconsistent with respect to float precision.
     typedef float SpectrumFloat;
-    typedef RGBTemplate<SpectrumFloat> RGBAssetSpectrum;
+#ifdef Use_Spectral_Representation
     const static uint32_t NumSpectralSamples = 16;
     const static uint32_t NumStrataForStorage = 16;
+    
     typedef ContinuousSpectrumTemplate<SpectrumFloat, NumSpectralSamples> ContinuousSpectrum;
     typedef RegularContinuousSpectrumTemplate<SpectrumFloat, NumSpectralSamples> RegularContinuousSpectrum;
     typedef IrregularContinuousSpectrumTemplate<SpectrumFloat, NumSpectralSamples> IrregularContinuousSpectrum;
     typedef UpsampledContinuousSpectrumTemplate<SpectrumFloat, NumSpectralSamples> UpsampledContinuousSpectrum;
     typedef ScaledAndOffsetUpsampledContinuousSpectrumTemplate<SpectrumFloat, NumSpectralSamples> ScaledAndOffsetUpsampledContinuousSpectrum;
-#ifdef Use_Spectral_Representation
+    
     typedef WavelengthSamplesTemplate<SpectrumFloat, NumSpectralSamples> WavelengthSamples;
     typedef SampledSpectrumTemplate<SpectrumFloat, NumSpectralSamples> SampledSpectrum;
     typedef DiscretizedSpectrumTemplate<SpectrumFloat, NumStrataForStorage> DiscretizedSpectrum;
@@ -62,6 +63,11 @@ namespace SLR {
     
     typedef ContinuousSpectrum AssetSpectrum;
 #else
+    const static uint32_t NumSpectralSamples = 3;
+    const static uint32_t NumStrataForStorage = 3;
+    
+    typedef RGBTemplate<SpectrumFloat> RGBAssetSpectrum;
+    
     typedef RGBSamplesTemplate<SpectrumFloat> WavelengthSamples;
     typedef RGBTemplate<SpectrumFloat> SampledSpectrum;
     typedef RGBTemplate<SpectrumFloat> DiscretizedSpectrum;
@@ -290,11 +296,8 @@ namespace SLR {
     
     class HomogeneousMediumDistribution;
     class DensityGridMediumDistribution;
-    class SubDensityGridMediumDistribution;
     class AchromaticExtinctionGridMediumDistribution;
-    class SubAchromaticExtinctionGridMediumDistribution;
     class GridMediumDistribution;
-    class SubGridMediumDistribution;
     class VacuumMediumDistribution;
     
     // END: Medium Distribution

@@ -12,7 +12,10 @@
 
 namespace SLR {
     const size_t sizesOfColorFormats[(uint32_t)ColorFormat::Num] = {
-        sizeof(RGB8x3), sizeof(RGB_8x4), sizeof(RGBA8x4), sizeof(RGBA16Fx4), sizeof(Gray8), sizeof(uvs16Fx3), sizeof(uvsA16Fx4)
+        sizeof(RGB8x3), sizeof(RGB_8x4), sizeof(RGBA8x4), sizeof(RGBA16Fx4), sizeof(Gray8),
+#ifdef Use_Spectral_Representation
+        sizeof(uvs16Fx3), sizeof(uvsA16Fx4)
+#endif
     };
     
     
@@ -106,6 +109,7 @@ namespace SLR {
                 memcpy(avg, &ret, sizeof(ret));
                 break;
             }
+#ifdef Use_Spectral_Representation
             case ColorFormat::uvs16Fx3: {
                 FloatSum sumR(0), sumG(0), sumB(0);
                 uvs16Fx3 pix;
@@ -299,6 +303,7 @@ namespace SLR {
                 memcpy(avg, &ret, sizeof(ret));
                 break;
             }
+#endif
             case ColorFormat::Gray8: {
                 SLRAssert_NotImplemented();
                 break;

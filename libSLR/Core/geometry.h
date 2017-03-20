@@ -331,12 +331,11 @@ namespace SLR {
     
     class SLR_API MediumDistribution {
     protected:
-        float m_maxExtinctionCoefficient;
     public:
-        MediumDistribution(float maxExtinctionCoefficient) : m_maxExtinctionCoefficient(maxExtinctionCoefficient) { }
+        MediumDistribution() { }
         virtual ~MediumDistribution() { }
-        
-        float majorantExtinctionCoefficient() const { return m_maxExtinctionCoefficient; };
+
+        virtual float majorantExtinctionCoefficientAtWavelength(float wl) const = 0;
         
         virtual bool subdivide(Allocator* mem, MediumDistribution** fragments, uint32_t* numFragments) const = 0;
         

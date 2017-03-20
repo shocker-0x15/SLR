@@ -20,41 +20,63 @@ namespace SLR {
 
 
     
-    template <typename RealType, uint32_t N>
-    RealType RegularContinuousSpectrumTemplate<RealType, N>::calcBounds() const {
-        RealType maxValue = -INFINITY;
-        for (int i = 0; i < numSamples; ++i)
-            maxValue = std::max(maxValue, values[i]);
-        return maxValue;
+    template <typename RealType, uint32_t NumSpectralSamples>
+    void RegularContinuousSpectrumTemplate<RealType, NumSpectralSamples>::calcBounds(uint32_t numBins, RealType* bounds) const {
+        const RealType BinWidth = (WavelengthHighBound - WavelengthLowBound) / numBins;
+        const RealType SampleInterval = (m_maxLambda - m_minLambda) / (m_numSamples - 1);
+        
+        for (int binIdx = 0; binIdx < numBins; ++binIdx) {
+            RealType wlLowInBin = WavelengthLowBound + BinWidth * binIdx;
+            RealType wlHighInBin = WavelengthLowBound + BinWidth * (binIdx + 1);
+            
+            int lowestWlIdxInBin = std::max(0, (int)((wlLowInBin - m_minLambda) / SampleInterval) + 1);
+            int highestWlIdxInBin = std::min((int)(m_numSamples - 1), (int)((wlHighInBin - m_minLambda) / SampleInterval));
+            int highestWlIdxOutBin = std::max(0, lowestWlIdxInBin - 1);
+            int lowestWlIdxOutBin = std::min((int)(m_numSamples - 1), highestWlIdxInBin + 1);
+            RealType lerpParamAtLowBoundary = (wlLowInBin - (m_minLambda + highestWlIdxOutBin * SampleInterval)) / SampleInterval;
+            RealType lerpParamAtHighBoundary = (wlHighInBin - (m_minLambda + highestWlIdxInBin * SampleInterval)) / SampleInterval;
+            
+            RealType maxValue = -INFINITY;
+            RealType lerpedValueAtLow = m_values[highestWlIdxOutBin] * (1 - lerpParamAtLowBoundary) + m_values[lowestWlIdxInBin] * lerpParamAtLowBoundary;
+            maxValue = std::max(maxValue, lerpedValueAtLow);
+            for (int wlIdx = lowestWlIdxInBin; wlIdx <= highestWlIdxInBin; ++wlIdx)
+                maxValue = std::max(maxValue, m_values[wlIdx]);
+            RealType lerpedValueAtHigh = m_values[highestWlIdxInBin] * (1 - lerpParamAtHighBoundary) + m_values[lowestWlIdxOutBin] * lerpParamAtHighBoundary;
+            maxValue = std::max(maxValue, lerpedValueAtHigh);
+            
+            bounds[binIdx] = maxValue;
+        }
     }
     
-    template <typename RealType, uint32_t N>
-    SampledSpectrumTemplate<RealType, N> RegularContinuousSpectrumTemplate<RealType, N>::evaluate(const WavelengthSamplesTemplate<RealType, N> &wls) const {
-        SampledSpectrumTemplate<RealType, N> ret(0.0f);
-        for (int i = 0; i < WavelengthSamplesTemplate<RealType, N>::NumComponents; ++i) {
-            RealType binF = (wls[i] - minLambda) / (maxLambda - minLambda) * (numSamples - 1);
+    template <typename RealType, uint32_t NumSpectralSamples>
+    SampledSpectrumTemplate<RealType, NumSpectralSamples> 
+    RegularContinuousSpectrumTemplate<RealType, NumSpectralSamples>::evaluate(const WavelengthSamplesTemplate<RealType, NumSpectralSamples> &wls) const {
+        SampledSpectrumTemplate<RealType, NumSpectralSamples> ret(0.0f);
+        for (int i = 0; i < WavelengthSamplesTemplate<RealType, NumSpectralSamples>::NumComponents; ++i) {
+            RealType binF = (wls[i] - m_minLambda) / (m_maxLambda - m_minLambda) * (m_numSamples - 1);
             if (binF <= 0.0f) {
-                ret[i] = values[0];
+                ret[i] = m_values[0];
                 continue;
             }
-            else if (binF >= numSamples - 1) {
-                ret[i] = values[numSamples - 1];
+            else if (binF >= m_numSamples - 1) {
+                ret[i] = m_values[m_numSamples - 1];
                 continue;
             }
             int32_t bin = int32_t(binF);
-            SLRAssert(bin >= 0 && bin < numSamples - 1, "invalid bin index.");
+            SLRAssert(bin >= 0 && bin < m_numSamples - 1, "invalid bin index.");
             RealType t = binF - bin;
-            ret[i] = (1 - t) * values[bin] + t * values[bin + 1];
+            ret[i] = (1 - t) * m_values[bin] + t * m_values[bin + 1];
         }
         return ret;
     }
     
-    template <typename RealType, uint32_t N>
-    ContinuousSpectrumTemplate<RealType, N>* RegularContinuousSpectrumTemplate<RealType, N>::createScaledAndOffset(RealType scale, RealType offset) const {
-        RealType* sValues = new RealType[numSamples];
-        for (int i = 0; i < numSamples; ++i)
-            sValues[i] = scale * values[i] + offset;
-        ContinuousSpectrumTemplate<RealType, N>* ret = new RegularContinuousSpectrumTemplate(minLambda, maxLambda, sValues, numSamples);
+    template <typename RealType, uint32_t NumSpectralSamples>
+    ContinuousSpectrumTemplate<RealType, NumSpectralSamples>* 
+    RegularContinuousSpectrumTemplate<RealType, NumSpectralSamples>::createScaledAndOffset(RealType scale, RealType offset) const {
+        RealType* sValues = new RealType[m_numSamples];
+        for (int i = 0; i < m_numSamples; ++i)
+            sValues[i] = scale * m_values[i] + offset;
+        ContinuousSpectrumTemplate<RealType, NumSpectralSamples>* ret = new RegularContinuousSpectrumTemplate(m_minLambda, m_maxLambda, sValues, m_numSamples);
         delete[] sValues;
         return ret;
     }
@@ -64,42 +86,88 @@ namespace SLR {
 
     
     
-    template <typename RealType, uint32_t N>
-    RealType IrregularContinuousSpectrumTemplate<RealType, N>::calcBounds() const {
-        RealType maxValue = -INFINITY;
-        for (int i = 0; i < numSamples; ++i)
-            maxValue = std::max(maxValue, values[i]);
-        return maxValue;
+    template <typename RealType, uint32_t NumSpectralSamples>
+    void IrregularContinuousSpectrumTemplate<RealType, NumSpectralSamples>::calcBounds(uint32_t numBins, RealType* bounds) const {
+        const RealType BinWidth = (WavelengthHighBound - WavelengthLowBound) / numBins;
+        
+        int lastWlIdx = 0;
+        for (int binIdx = 0; binIdx < numBins; ++binIdx) {
+            RealType wlLowInBin = WavelengthLowBound + BinWidth * binIdx;
+            RealType wlHighInBin = WavelengthLowBound + BinWidth * (binIdx + 1);
+            
+            int highestWlIdxOutBin = 0;
+            for (int wlIdx = lastWlIdx; wlIdx < m_numSamples - 1; ++wlIdx) {
+                if (m_lambdas[wlIdx + 1] >= wlLowInBin) {
+                    highestWlIdxOutBin = wlIdx;
+                    lastWlIdx = wlIdx;
+                    break;
+                }
+            }
+            RealType highestWlOutBin = m_lambdas[highestWlIdxOutBin];
+            int lowestWlIdxInBin = std::min((int)m_numSamples - 1, highestWlIdxOutBin + 1);
+            RealType lowestWlInBin = m_lambdas[lowestWlIdxInBin];
+            
+            int highestWlIdxInBin = 0;
+            for (int wlIdx = lastWlIdx; wlIdx < m_numSamples - 1; ++wlIdx) {
+                if (m_lambdas[wlIdx + 1] >= wlHighInBin) {
+                    highestWlIdxInBin = wlIdx;
+                    lastWlIdx = wlIdx;
+                    break;
+                }
+            }
+            RealType highestWlInBin = m_lambdas[highestWlIdxInBin];
+            int lowestWlIdxOutBin = std::min((int)(m_numSamples - 1), highestWlIdxInBin + 1);
+            RealType lowestWlOutBin = m_lambdas[lowestWlIdxOutBin]; 
+            
+            RealType lerpParamAtLowBoundary = (wlLowInBin - highestWlOutBin) / (lowestWlInBin - highestWlOutBin);
+            RealType lerpParamAtHighBoundary = (wlHighInBin - highestWlInBin) / (lowestWlOutBin - highestWlInBin);
+            if (lowestWlIdxInBin == highestWlIdxOutBin)
+                lerpParamAtLowBoundary = 0.0f;
+            if (highestWlIdxInBin == lowestWlIdxOutBin)
+                lerpParamAtHighBoundary = 0.0f;
+            
+            RealType maxValue = -INFINITY;
+            RealType lerpedValueAtLow = m_values[highestWlIdxOutBin] * (1 - lerpParamAtLowBoundary) + m_values[lowestWlIdxInBin] * lerpParamAtLowBoundary;
+            maxValue = std::max(maxValue, lerpedValueAtLow);
+            for (int wlIdx = lowestWlIdxInBin; wlIdx <= highestWlIdxInBin; ++wlIdx)
+                maxValue = std::max(maxValue, m_values[wlIdx]);
+            RealType lerpedValueAtHigh = m_values[highestWlIdxInBin] * (1 - lerpParamAtHighBoundary) + m_values[lowestWlIdxOutBin] * lerpParamAtHighBoundary;
+            maxValue = std::max(maxValue, lerpedValueAtHigh);
+            
+            bounds[binIdx] = maxValue;
+        }
     }
     
-    template <typename RealType, uint32_t N>
-    SampledSpectrumTemplate<RealType, N> IrregularContinuousSpectrumTemplate<RealType, N>::evaluate(const WavelengthSamplesTemplate<RealType, N> &wls) const {
-        SampledSpectrumTemplate<RealType, N> ret(0.0f);
+    template <typename RealType, uint32_t NumSpectralSamples>
+    SampledSpectrumTemplate<RealType, NumSpectralSamples> 
+    IrregularContinuousSpectrumTemplate<RealType, NumSpectralSamples>::evaluate(const WavelengthSamplesTemplate<RealType, NumSpectralSamples> &wls) const {
+        SampledSpectrumTemplate<RealType, NumSpectralSamples> ret(0.0f);
         uint32_t searchBase = 0;
-        for (int i = 0; i < WavelengthSamplesTemplate<RealType, N>::NumComponents; ++i) {
-            int32_t lowIdx = std::max((int32_t)std::distance(lambdas, std::lower_bound(lambdas + searchBase, lambdas + numSamples, wls[i])) - 1, 0);
+        for (int i = 0; i < WavelengthSamplesTemplate<RealType, NumSpectralSamples>::NumComponents; ++i) {
+            int32_t lowIdx = std::max((int32_t)std::distance(m_lambdas, std::lower_bound(m_lambdas + searchBase, m_lambdas + m_numSamples, wls[i])) - 1, 0);
             searchBase = lowIdx;
-            if (lowIdx >= numSamples - 1) {
-                ret[i] = values[numSamples - 1];
+            if (lowIdx >= m_numSamples - 1) {
+                ret[i] = m_values[m_numSamples - 1];
                 continue;
             }
-            RealType t = (wls[i] - lambdas[lowIdx]) / (lambdas[lowIdx + 1] - lambdas[lowIdx]);
+            RealType t = (wls[i] - m_lambdas[lowIdx]) / (m_lambdas[lowIdx + 1] - m_lambdas[lowIdx]);
             if (t <= 0.0f) {
-                ret[i] = values[0];
+                ret[i] = m_values[0];
                 continue;
             }
             SLRAssert(t >= 0 && t <= 1, "invalid interpolation coefficient.");
-            ret[i] = (1 - t) * values[lowIdx] + t * values[lowIdx + 1];
+            ret[i] = (1 - t) * m_values[lowIdx] + t * m_values[lowIdx + 1];
         }
         return ret;
     }
     
-    template <typename RealType, uint32_t N>
-    ContinuousSpectrumTemplate<RealType, N>* IrregularContinuousSpectrumTemplate<RealType, N>::createScaledAndOffset(RealType scale, RealType offset) const {
-        RealType* sValues = new RealType[numSamples];
-        for (int i = 0; i < numSamples; ++i)
-            sValues[i] = scale * values[i] + offset;
-        ContinuousSpectrumTemplate<RealType, N>* ret = new IrregularContinuousSpectrumTemplate(lambdas, sValues, numSamples);
+    template <typename RealType, uint32_t NumSpectralSamples>
+    ContinuousSpectrumTemplate<RealType, NumSpectralSamples>* 
+    IrregularContinuousSpectrumTemplate<RealType, NumSpectralSamples>::createScaledAndOffset(RealType scale, RealType offset) const {
+        RealType* sValues = new RealType[m_numSamples];
+        for (int i = 0; i < m_numSamples; ++i)
+            sValues[i] = scale * m_values[i] + offset;
+        ContinuousSpectrumTemplate<RealType, NumSpectralSamples>* ret = new IrregularContinuousSpectrumTemplate(m_lambdas, sValues, m_numSamples);
         delete[] sValues;
         return ret;
     }
@@ -109,8 +177,8 @@ namespace SLR {
 
     
     
-    template <typename RealType, uint32_t N>
-    void UpsampledContinuousSpectrumTemplate<RealType, N>::computeAdjacents(RealType u, RealType v) {
+    template <typename RealType, uint32_t NumSpectralSamples>
+    void UpsampledContinuousSpectrumTemplate<RealType, NumSpectralSamples>::computeAdjacents(RealType u, RealType v) {
         u = std::clamp<RealType>(u, 0.0f, GridWidth);
         v = std::clamp<RealType>(v, 0.0f, GridHeight);
         
@@ -181,8 +249,8 @@ namespace SLR {
         SLRAssert((m_adjIndices && 0xFF) != UINT8_MAX, "Adjacent points must be selected at this point.");
     }
     
-    template <typename RealType, uint32_t N>
-    UpsampledContinuousSpectrumTemplate<RealType, N>::UpsampledContinuousSpectrumTemplate(SpectrumType spType, ColorSpace space, RealType e0, RealType e1, RealType e2) {
+    template <typename RealType, uint32_t NumSpectralSamples>
+    UpsampledContinuousSpectrumTemplate<RealType, NumSpectralSamples>::UpsampledContinuousSpectrumTemplate(SpectrumType spType, ColorSpace space, RealType e0, RealType e1, RealType e2) {
         RealType x, y, brightness;
         switch (space) {
             case ColorSpace::sRGB_NonLinear: {
@@ -245,28 +313,8 @@ namespace SLR {
         computeAdjacents(uv[0], uv[1]);
     }
     
-    template <typename RealType, uint32_t N>
-    RealType UpsampledContinuousSpectrumTemplate<RealType, N>::calcBounds() const {
-        uint8_t adjIndices[4];
-        adjIndices[0] = (m_adjIndices >> 0) & 0xFF;
-        adjIndices[1] = (m_adjIndices >> 8) & 0xFF;
-        adjIndices[2] = (m_adjIndices >> 16) & 0xFF;
-        adjIndices[3] = (m_adjIndices >> 24) & 0xFF;
-        
-        int numAdjacents = (adjIndices[3] != UINT8_MAX) ? 4 : 3;
-        
-        RealType maxValue = -INFINITY;
-        for (int i = 0; i < numAdjacents; ++i) {
-            const RealType* spectrum = spectrum_data_points[adjIndices[i]].spectrum;
-            for (int j = 0; j < NumWavelengthSamples; ++j)
-                maxValue = std::max<RealType>(maxValue, spectrum[j]);
-        }
-        
-        return maxValue * m_scale;
-    }
-    
-    template <typename RealType, uint32_t N>
-    SampledSpectrumTemplate<RealType, N> UpsampledContinuousSpectrumTemplate<RealType, N>::evaluate(const WavelengthSamplesTemplate<RealType, N> &wls) const {
+    template <typename RealType, uint32_t NumSpectralSamples>
+    void UpsampledContinuousSpectrumTemplate<RealType, NumSpectralSamples>::calcBounds(uint32_t numBins, RealType* bounds) const {
         uint8_t adjIndices[4];
         adjIndices[0] = (m_adjIndices >> 0) & 0xFF;
         adjIndices[1] = (m_adjIndices >> 8) & 0xFF;
@@ -289,15 +337,79 @@ namespace SLR {
             numAdjacents = 3;
         }
         
-        SampledSpectrumTemplate<RealType, N> ret(0.0);
-        for (int i = 0; i < WavelengthSamplesTemplate<RealType, N>::NumComponents; ++i) {
+        const RealType BinWidth = (WavelengthHighBound - WavelengthLowBound) / numBins;
+        const RealType SampleInterval = (MaxWavelength - MinWavelength) / (NumWavelengthSamples - 1);
+        
+        for (int binIdx = 0; binIdx < numBins; ++binIdx) {
+            RealType wlLowInBin = WavelengthLowBound + BinWidth * binIdx;
+            RealType wlHighInBin = WavelengthLowBound + BinWidth * (binIdx + 1);
+            
+            int lowestWlIdxInBin = std::max(0, (int)((wlLowInBin - MinWavelength) / SampleInterval) + 1);
+            int highestWlIdxInBin = std::min((int)(NumWavelengthSamples - 1), (int)((wlHighInBin - MinWavelength) / SampleInterval));
+            int highestWlIdxOutBin = std::max(0, lowestWlIdxInBin - 1);
+            int lowestWlIdxOutBin = std::min((int)(NumWavelengthSamples - 1), highestWlIdxInBin + 1);
+            RealType lerpParamAtLowBoundary = (wlLowInBin - (MinWavelength + highestWlIdxOutBin * SampleInterval)) / SampleInterval;
+            RealType lerpParamAtHighBoundary = (wlHighInBin - (MinWavelength + highestWlIdxInBin * SampleInterval)) / SampleInterval;
+            
+            RealType maxValue = -INFINITY;
+            RealType lerpedValueAtLow = 0;
+            for (int i = 0; i < numAdjacents; ++i) {
+                const RealType* spectrum = spectrum_data_points[adjIndices[i]].spectrum;
+                lerpedValueAtLow += weights[i] * (spectrum[highestWlIdxOutBin] * (1 - lerpParamAtLowBoundary) + spectrum[lowestWlIdxInBin] * lerpParamAtLowBoundary);
+            }
+            maxValue = std::max(maxValue, lerpedValueAtLow);
+            for (int wlIdx = lowestWlIdxInBin; wlIdx <= highestWlIdxInBin; ++wlIdx) {
+                RealType value = 0;
+                for (int i = 0; i < numAdjacents; ++i) {
+                    const RealType* spectrum = spectrum_data_points[adjIndices[i]].spectrum;
+                    lerpedValueAtLow += weights[i] * spectrum[wlIdx];
+                }
+                maxValue = std::max(maxValue, value);
+            }
+            RealType lerpedValueAtHigh = 0;
+            for (int i = 0; i < numAdjacents; ++i) {
+                const RealType* spectrum = spectrum_data_points[adjIndices[i]].spectrum;
+                lerpedValueAtHigh += weights[i] * (spectrum[highestWlIdxInBin] * (1 - lerpParamAtHighBoundary) + spectrum[lowestWlIdxOutBin] * lerpParamAtHighBoundary);
+            }
+            maxValue = std::max(maxValue, lerpedValueAtHigh);
+            
+            bounds[binIdx] = maxValue;
+        }
+    }
+    
+    template <typename RealType, uint32_t NumSpectralSamples>
+    SampledSpectrumTemplate<RealType, NumSpectralSamples> 
+    UpsampledContinuousSpectrumTemplate<RealType, NumSpectralSamples>::evaluate(const WavelengthSamplesTemplate<RealType, NumSpectralSamples> &wls) const {
+        uint8_t adjIndices[4];
+        adjIndices[0] = (m_adjIndices >> 0) & 0xFF;
+        adjIndices[1] = (m_adjIndices >> 8) & 0xFF;
+        adjIndices[2] = (m_adjIndices >> 16) & 0xFF;
+        adjIndices[3] = (m_adjIndices >> 24) & 0xFF;
+        
+        int numAdjacents;
+        float weights[4];
+        if (adjIndices[3] != UINT8_MAX) {
+            weights[0] = (1 - m_s) * (1 - m_t);
+            weights[1] = m_s * (1 - m_t);
+            weights[2] = (1 - m_s) * m_t;
+            weights[3] = m_s * m_t;
+            numAdjacents = 4;
+        }
+        else {
+            weights[0] = m_s;
+            weights[1] = m_t;
+            weights[2] = 1.0f - m_s - m_t;
+            numAdjacents = 3;
+        }
+        
+        SampledSpectrumTemplate<RealType, NumSpectralSamples> ret(0.0);
+        for (int i = 0; i < WavelengthSamplesTemplate<RealType, NumSpectralSamples>::NumComponents; ++i) {
             RealType lambda = wls[i];
             RealType p = (lambda - MinWavelength) / (MaxWavelength - MinWavelength);
             SLRAssert(p >= 0 && p <= 1, "Wavelength is out of valid range.");
             RealType sBinF = p * (NumWavelengthSamples - 1);
-            uint32_t sBin = (uint32_t)sBinF;
-            uint32_t sBinNext = (sBin + 1 < NumWavelengthSamples) ? (sBin + 1) : (NumWavelengthSamples - 1);
-            SLRAssert(sBin < NumWavelengthSamples && sBinNext < NumWavelengthSamples, "Spectrum bin index is out of range.");
+            uint32_t sBin = std::min((uint32_t)sBinF, NumWavelengthSamples - 1);
+            uint32_t sBinNext = std::min(sBin + 1, NumWavelengthSamples - 1);
             RealType t = sBinF - sBin;
             for (int j = 0; j < numAdjacents; ++j) {
                 const RealType* spectrum = spectrum_data_points[adjIndices[j]].spectrum;
@@ -308,12 +420,13 @@ namespace SLR {
         return ret * m_scale;
     }
     
-    template <typename RealType, uint32_t N>
-    ContinuousSpectrumTemplate<RealType, N>* UpsampledContinuousSpectrumTemplate<RealType, N>::createScaledAndOffset(RealType scale, RealType offset) const {
+    template <typename RealType, uint32_t NumSpectralSamples>
+    ContinuousSpectrumTemplate<RealType, NumSpectralSamples>* 
+    UpsampledContinuousSpectrumTemplate<RealType, NumSpectralSamples>::createScaledAndOffset(RealType scale, RealType offset) const {
         if (scale > 0 && offset == 0)
             return new UpsampledContinuousSpectrumTemplate(m_adjIndices, m_s, m_t, this->m_scale * scale);
         else
-            return new ScaledAndOffsetUpsampledContinuousSpectrumTemplate<RealType, N>(*this, scale, offset);
+            return new ScaledAndOffsetUpsampledContinuousSpectrumTemplate<RealType, NumSpectralSamples>(*this, scale, offset);
     }
     
     template class SLR_API UpsampledContinuousSpectrumTemplate<float, NumSpectralSamples>;
@@ -321,13 +434,15 @@ namespace SLR {
     
     
     
-    template <typename RealType, uint32_t N>
-    SampledSpectrumTemplate<RealType, N> ScaledAndOffsetUpsampledContinuousSpectrumTemplate<RealType, N>::evaluate(const WavelengthSamplesTemplate<RealType, N> &wls) const {
-        return m_baseSpectrum.evaluate(wls) * m_scale + SampledSpectrumTemplate<RealType, N>(m_offset);
+    template <typename RealType, uint32_t NumSpectralSamples>
+    SampledSpectrumTemplate<RealType, NumSpectralSamples> 
+    ScaledAndOffsetUpsampledContinuousSpectrumTemplate<RealType, NumSpectralSamples>::evaluate(const WavelengthSamplesTemplate<RealType, NumSpectralSamples> &wls) const {
+        return m_baseSpectrum.evaluate(wls) * m_scale + SampledSpectrumTemplate<RealType, NumSpectralSamples>(m_offset);
     }
     
-    template <typename RealType, uint32_t N>
-    ContinuousSpectrumTemplate<RealType, N>* ScaledAndOffsetUpsampledContinuousSpectrumTemplate<RealType, N>::createScaledAndOffset(RealType scale, RealType offset) const {
+    template <typename RealType, uint32_t NumSpectralSamples>
+    ContinuousSpectrumTemplate<RealType, NumSpectralSamples>* 
+    ScaledAndOffsetUpsampledContinuousSpectrumTemplate<RealType, NumSpectralSamples>::createScaledAndOffset(RealType scale, RealType offset) const {
         // (spectrum * scale0 + offset0) * scale1 + offset1 = spectrum * (scale0 * scale1) + (offset0 * scale1 + offset1)
         return new ScaledAndOffsetUpsampledContinuousSpectrumTemplate(m_baseSpectrum, m_scale * scale, m_offset * scale + offset);
     }
@@ -350,20 +465,20 @@ namespace SLR {
 //    template SLR_API const SampledSpectrumTemplate<double, NumSpectralSamples> SampledSpectrumTemplate<double, NumSpectralSamples>::Inf;
 //    template SLR_API const SampledSpectrumTemplate<double, NumSpectralSamples> SampledSpectrumTemplate<double, NumSpectralSamples>::NaN;
     
-    template <typename RealType, uint32_t N>
-    SampledSpectrumTemplate<RealType, N> sqrt(const SampledSpectrumTemplate<RealType, N> &value) {
-        SampledSpectrumTemplate<RealType, N> ret;
-        for (int i = 0; i < N; ++i)
+    template <typename RealType, uint32_t NumSpectralSamples>
+    SampledSpectrumTemplate<RealType, NumSpectralSamples> sqrt(const SampledSpectrumTemplate<RealType, NumSpectralSamples> &value) {
+        SampledSpectrumTemplate<RealType, NumSpectralSamples> ret;
+        for (int i = 0; i < NumSpectralSamples; ++i)
             ret[i] = std::sqrt(value[i]);
         return ret;
     }
     template SLR_API SampledSpectrumTemplate<float, NumSpectralSamples> sqrt(const SampledSpectrumTemplate<float, NumSpectralSamples> &value);
     template SLR_API SampledSpectrumTemplate<double, NumSpectralSamples> sqrt(const SampledSpectrumTemplate<double, NumSpectralSamples> &value);
     
-    template <typename RealType, uint32_t N>
-    SampledSpectrumTemplate<RealType, N> exp(const SampledSpectrumTemplate<RealType, N> &value) {
-        SampledSpectrumTemplate<RealType, N> ret;
-        for (int i = 0; i < N; ++i)
+    template <typename RealType, uint32_t NumSpectralSamples>
+    SampledSpectrumTemplate<RealType, NumSpectralSamples> exp(const SampledSpectrumTemplate<RealType, NumSpectralSamples> &value) {
+        SampledSpectrumTemplate<RealType, NumSpectralSamples> ret;
+        for (int i = 0; i < NumSpectralSamples; ++i)
             ret[i] = std::exp(value[i]);
         return ret;
     }

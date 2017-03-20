@@ -40,6 +40,7 @@ SLR consists of the following components.
     * Procedural
         * Checkerboard (color & normal & float)
         * Cell Noise \[Worley1996\] like Voronoi diagram (color & normal & float)
+        * Improved Perlin Noise \[Perlin2002\] (float)
 * Bump Mapping (Normal Map)
 * Light Types
     * Area (Polygonal) Light
@@ -99,6 +100,7 @@ There are some scene files loading model data and textures, but those assets are
 [Novák2014] "Residual ratio tracking for estimating attenuation in participating media"  
 [Oren1994] "Generalization of Lambert’s Reflectance Model"  
 [Pauly1999] "Robust Monte Carlo Methods for Photorealistic Rendering of Volumetric Effects"  
+[Perlin2002] "Improving Noise"  
 [Raab2008] "Unbiased Global Illumination with Participating Media"  
 [Stich2009] "Spatial Splits in Bounding Volume Hierarchies"  
 [Veach1994] "Bidirectional Estimators for Light Transport"  

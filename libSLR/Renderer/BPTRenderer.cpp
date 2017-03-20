@@ -114,7 +114,7 @@ namespace SLR {
                 // initialize working area for the current pixel.
                 curPx = p.x;
                 curPy = p.y;
-                wlHint = wls.selectedLambda;
+                wlHint = wls.selectedLambdaIndex;
                 eyeVertices.clear();
                 lightVertices.clear();
                 
@@ -207,7 +207,7 @@ namespace SLR {
                             continue;
                         
                         if (lVtx.lambdaSelected || eVtx.lambdaSelected)
-                            connectionTerm[wls.selectedLambda] *= WavelengthSamples::NumComponents;
+                            connectionTerm[wls.selectedLambdaIndex] *= WavelengthSamples::NumComponents;
                         
                         // ----------------------------------------------------------------
                         
@@ -304,11 +304,11 @@ namespace SLR {
             Normal3D gNorm_sn = surfPt.getLocalGeometricNormal();
             float cosOut = surfPt.calcCosTerm(-ray.dir);
             BSDF* bsdf = surfPt.createBSDF(wls, mem);
-            BSDFQuery fsQuery(dirOut_sn, gNorm_sn, wls.selectedLambda, DirectionType::All, true, adjoint);
+            BSDFQuery fsQuery(dirOut_sn, gNorm_sn, wls.selectedLambdaIndex, DirectionType::All, true, adjoint);
             
             float areaPDF = dirPDF * cosOut / dist2;
             vertices.emplace_back(surfPt, mem.create<BSDFProxy>(bsdf, fsQuery), alpha, cosOut, 
-                                  areaPDF, RRProb, sampledType, wls.lambdaSelected());
+                                  areaPDF, RRProb, sampledType, wls.wavelengthSelected());
             
             // implicit path (zero light subpath vertices, s = 0)
             if (!adjoint && surfPt.isEmitting()) {
@@ -328,8 +328,8 @@ namespace SLR {
                     SLRAssert(contribution.allFinite() && !contribution.hasMinus(),
                               "Unexpected value detected: %s\n"
                               "pix: (%f, %f)", contribution.toString().c_str(), curPx, curPy);
-                    if (wls.lambdaSelected())
-                        contribution[wls.selectedLambda] *= WavelengthSamples::NumComponents;
+                    if (wls.wavelengthSelected())
+                        contribution[wls.selectedLambdaIndex] *= WavelengthSamples::NumComponents;
                     sensor->add(curPx, curPy, wls, contribution);
                 }
             }
@@ -343,8 +343,8 @@ namespace SLR {
             SampledSpectrum fs = bsdf->sample(fsQuery, pathSampler.getBSDFSample(), &fsResult);
             if (fs == SampledSpectrum::Zero || fsResult.dirPDF == 0.0f)
                 break;
-            if (fsResult.sampledType.isDispersive())
-                wls.flags |= WavelengthSamples::LambdaIsSelected;
+            if (fsResult.sampledType.isDispersive() && !wls.wavelengthSelected())
+                wls.flags |= WavelengthSamples::WavelengthIsSelected;
             Vector3D vecIn = surfPt.fromLocal(fsResult.dirLocal);
             float cosIn = surfPt.calcCosTerm(vecIn);
             SampledSpectrum weight = fs * (cosIn / fsResult.dirPDF);

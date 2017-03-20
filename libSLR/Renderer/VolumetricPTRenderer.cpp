@@ -144,7 +144,7 @@ namespace SLR {
         Ray ray = initRay;
         RaySegment segment;
         SampledSpectrum alpha = SampledSpectrum::One;
-        float initY = alpha.importance(wls.selectedLambda);
+        float initY = alpha.importance(wls.selectedLambdaIndex);
         SampledSpectrumSum sp(SampledSpectrum::Zero);
         uint32_t pathLength = 0;
         
@@ -156,9 +156,9 @@ namespace SLR {
         if (!scene.interact(ray, segment, wls, pathSampler, mem, &interact, &medThroughput, &singleWavelength))
             return SampledSpectrum::Zero;
         
-        if (singleWavelength && !wls.lambdaSelected()) {
-            medThroughput[wls.selectedLambda] *= WavelengthSamples::NumComponents;
-            wls.flags |= WavelengthSamples::LambdaIsSelected;
+        if (singleWavelength && !wls.wavelengthSelected()) {
+            medThroughput[wls.selectedLambdaIndex] *= WavelengthSamples::NumComponents;
+            wls.flags |= WavelengthSamples::WavelengthIsSelected;
         }
         alpha *= medThroughput;
         
@@ -182,7 +182,7 @@ namespace SLR {
                 break;
             
             AbstractBDF* abdf = interPt->createAbstractBDF(wls, mem);
-            ABDFQuery* abdfQuery = interPt->createABDFQuery(dirOut_local, wls.selectedLambda, DirectionType::All, false, false, mem);
+            ABDFQuery* abdfQuery = interPt->createABDFQuery(dirOut_local, wls.selectedLambdaIndex, DirectionType::All, false, false, mem);
             
             // Next Event Estimation (explicit light sampling)
             if (abdf->hasNonDelta()) {
@@ -200,8 +200,8 @@ namespace SLR {
                 InteractionPoint* lightPt = lpResult->getInteractionPoint();
                 SampledSpectrum visibility;
                 if (scene.testVisibility(interPt, lightPt, ray.time, wls, pathSampler, &visibility, &singleWavelength)) {
-                    if (singleWavelength && !wls.lambdaSelected())
-                        visibility[wls.selectedLambda] *= WavelengthSamples::NumComponents;
+                    if (singleWavelength && !wls.wavelengthSelected())
+                        visibility[wls.selectedLambdaIndex] *= WavelengthSamples::NumComponents;
                     
                     float dist2;
                     Vector3D shadowDir = lightPt->getDirectionFrom(interPt->getPosition(), &dist2);
@@ -233,9 +233,9 @@ namespace SLR {
             SampledSpectrum abdfValue = abdf->sample(abdfQuery, pathSampler, mem, &abdfResult);
             if (abdfValue == SampledSpectrum::Zero || abdfResult->dirPDF == 0.0f)
                 break;
-            if (abdfResult->sampledType.isDispersive()) {
+            if (abdfResult->sampledType.isDispersive() && !wls.wavelengthSelected()) {
                 abdfResult->dirPDF /= WavelengthSamples::NumComponents;
-                wls.flags |= WavelengthSamples::LambdaIsSelected;
+                wls.flags |= WavelengthSamples::WavelengthIsSelected;
             }
             Vector3D dirIn = interPt->fromLocal(abdfResult->dirLocal);
             alpha *= abdfValue * interPt->calcCosTerm(dirIn) / abdfResult->dirPDF;
@@ -250,9 +250,9 @@ namespace SLR {
             if (!scene.interact(ray, segment, wls, pathSampler, mem, &interact, &medThroughput, &singleWavelength))
                 break;
             
-            if (singleWavelength && !wls.lambdaSelected()) {
-                medThroughput[wls.selectedLambda] *= WavelengthSamples::NumComponents;
-                wls.flags |= WavelengthSamples::LambdaIsSelected;
+            if (singleWavelength && !wls.wavelengthSelected()) {
+                medThroughput[wls.selectedLambdaIndex] *= WavelengthSamples::NumComponents;
+                wls.flags |= WavelengthSamples::WavelengthIsSelected;
             }
             alpha *= medThroughput;
             
@@ -282,7 +282,7 @@ namespace SLR {
                 break;
             
             // Russian roulette
-            float continueProb = std::min(alpha.importance(wls.selectedLambda) / initY, 1.0f);
+            float continueProb = std::min(alpha.importance(wls.selectedLambdaIndex) / initY, 1.0f);
             if (pathSampler.getPathTerminationSample() < continueProb)
                 alpha /= continueProb;
             else

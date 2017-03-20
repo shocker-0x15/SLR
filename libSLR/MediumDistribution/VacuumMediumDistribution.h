@@ -18,7 +18,11 @@ namespace SLR {
         
     public:
         VacuumMediumDistribution(const BoundingBox3D &region) :
-        MediumDistribution(0.0f), m_region(region) { }
+        m_region(region) { }
+        
+        float majorantExtinctionCoefficientAtWavelength(float wl) const override {
+            return 0.0f;
+        }
         
         bool subdivide(Allocator* mem, MediumDistribution** fragments, uint32_t* numFragments) const override { return false; }
         

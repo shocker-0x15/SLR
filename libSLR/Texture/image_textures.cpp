@@ -108,6 +108,7 @@ namespace SLR {
                     luminance = 0.222485f * avg.r + 0.716905f * avg.g + 0.060610f * avg.b;
                     break;
                 }
+#ifdef Use_Spectral_Representation
                 case ColorFormat::uvs16Fx3: {
                     uvs16Fx3 avg = *(uvs16Fx3*)data;
                     float uvs[3] = {avg.u, avg.v, avg.s};
@@ -124,6 +125,7 @@ namespace SLR {
                     luminance = 0.222485f * rgb[0] + 0.716905f * rgb[1] + 0.060610f * rgb[2];
                     break;
                 }
+#endif
                 default:
                     return 0.0f;
             }
@@ -199,11 +201,13 @@ namespace SLR {
                 ret = data.v / 255.0f;
                 break;
             }
+#ifdef Use_Spectral_Representation
             case ColorFormat::uvsA16Fx4: {
                 const uvsA16Fx4 &data = m_data->get<uvsA16Fx4>(px, py);
                 ret = data.a;
                 break;
             }
+#endif
             default:
                 break;
         }

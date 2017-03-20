@@ -42,7 +42,7 @@ namespace SLR {
         float weightInternal(const BSDFQuery &query) const override;
         SampledSpectrum getBaseColorInternal(DirectionType flags) const override;
     public:
-        MicrofacetBSDF(const SampledSpectrum &etaExt, const SampledSpectrum &etaInt, bool dispersive, const MicrofacetDistribution* D) :
+        MicrofacetBSDF(const SampledSpectrum &etaExt, const SampledSpectrum &etaInt, const MicrofacetDistribution* D) :
         BSDF(DirectionType::Reflection | DirectionType::Transmission | DirectionType::HighFreq),
         m_F(etaExt, etaInt), m_D(D) { }
     };
