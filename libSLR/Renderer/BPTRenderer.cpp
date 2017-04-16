@@ -217,7 +217,7 @@ namespace SLR {
                         // calculate the 1st and 2nd subpath extending PDFs and probabilities.
                         // They can't be stored in advance because they depend on the connection.
                         
-                        float lExtend1stAreaPDF, lExtend1stRRProb, lExtend2ndAreaPDF, lExtend2ndRRProb;
+                        float lExtend1stAreaPDF, lExtend1stRRProb, lExtend2ndAreaPDF = 0.0f, lExtend2ndRRProb = 0.0f;
                         {
                             lExtend1stAreaPDF = lExtend1stDirPDF * cosEyeEnd / connectDist2;
                             lExtend1stRRProb = s > 1 ? std::min((lDDF * cosLightEnd / lExtend1stDirPDF).importance(wlHint), 1.0f) : 1.0f;
@@ -230,7 +230,7 @@ namespace SLR {
                                 lExtend2ndRRProb = std::min((eRevDDF * eVtx.cosIn / lExtend2ndDirPDF).importance(wlHint), 1.0f);
                             }
                         }
-                        float eExtend1stAreaPDF, eExtend1stRRProb, eExtend2ndAreaPDF, eExtend2ndRRProb;
+                        float eExtend1stAreaPDF, eExtend1stRRProb, eExtend2ndAreaPDF = 0.0f, eExtend2ndRRProb = 0.0f;
                         {
                             eExtend1stAreaPDF = eExtend1stDirPDF * cosLightEnd / connectDist2;
                             eExtend1stRRProb = t > 1 ? std::min((eDDF * cosEyeEnd / eExtend1stDirPDF).importance(wlHint), 1.0f) : 1.0f;

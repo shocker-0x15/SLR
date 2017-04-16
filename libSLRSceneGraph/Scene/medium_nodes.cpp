@@ -72,10 +72,6 @@ namespace SLRSceneGraph {
         allocateRawData();
     }
     
-    DensityGridMediumNode::~DensityGridMediumNode() {
-        Node::~Node();
-    }
-    
     NodeRef DensityGridMediumNode::copy() const {
         SLRAssert_NotImplemented();
         return nullptr;
@@ -175,6 +171,43 @@ namespace SLRSceneGraph {
     }
     
     void VacuumMediumNode::prepareForRendering() {
+        terminateRawData();
+        setupRawData();
+    }
+    
+    
+    
+    void CloudMediumNode::allocateRawData() {
+        m_rawData = (SLR::Node*)malloc(sizeof(SLR::DensityGridMediumNode));
+    }
+    
+    void CloudMediumNode::setupRawData() {
+        new (m_rawData) SLR::CloudMediumNode(m_region, m_featureScale, m_density, m_rngSeed, m_material->getRaw());
+        m_setup = true;
+    }
+    
+    void CloudMediumNode::terminateRawData() {
+        SLR::CloudMediumNode &raw = *(SLR::CloudMediumNode*)m_rawData;
+        if (m_setup)
+            raw.~CloudMediumNode();
+        m_setup = false;
+    }
+    
+    CloudMediumNode::CloudMediumNode(const SLR::BoundingBox3D &region, float featureScale, float density, uint32_t rngSeed, const MediumMaterialRef &material) :
+    m_region(region), m_featureScale(featureScale), m_density(density), m_rngSeed(rngSeed), m_material(material) {
+        allocateRawData();
+    }
+    
+    CloudMediumNode::~CloudMediumNode() {
+        Node::~Node();
+    }
+    
+    NodeRef CloudMediumNode::copy() const {
+        SLRAssert_NotImplemented();
+        return nullptr;
+    }
+    
+    void CloudMediumNode::prepareForRendering() {
         terminateRawData();
         setupRawData();
     }

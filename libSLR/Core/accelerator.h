@@ -21,7 +21,7 @@ namespace SLR {
         
         virtual BoundingBox3D bounds() const = 0;
         
-        virtual bool intersect(const Ray &ray, const RaySegment &segment, SurfaceInteraction* si, uint32_t* closestIndex) const = 0;
+        virtual bool intersect(const Ray &ray, const RaySegment &segment, SurfaceInteraction* si, const SurfaceObject** closestObject) const = 0;
         
         static bool traceTraverse;
         static std::string traceTraversePrefix;

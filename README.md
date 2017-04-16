@@ -28,7 +28,10 @@ SLR consists of the following components.
 * Volume Rendering \[Pauly1999, Raab2008, Novák2014\]
     * Participating Media
         * Homogeneous Media
-        * Heterogeneous Media (trilinear-interpolated grid)
+        * Heterogeneous Media
+            * Trilinear-interpolated Grid
+            * ~~Procedurally-generated Clouds~~ (TODO)
+            * Free Path Sampling is accelerated by Super-voxels \[Szirmay-Kalos2011\]
         * Media enclosed by surfaces
     * Phase Functions
         * Isotropic
@@ -42,7 +45,7 @@ SLR consists of the following components.
         * Cell Noise \[Worley1996\] like Voronoi diagram (color & normal & float)
         * Improved Perlin Noise \[Perlin2002\] (float)
 * Bump Mapping (Normal Map)
-* Light Types
+* Light Source Types
     * Area (Polygonal) Light
     * Infinitely Distant Image Based Environmental Light
     * ~~Infinitely Distant Directional Light~~ (TODO)
@@ -65,7 +68,7 @@ SLR consists of the following components.
     * Path Tracing \[Kajiya1986\] with MIS (+ volumetric variant)
     * Bidirectional Path Tracing \[Veach1994, 1997\] (+ volumetric variant)
     * ~~Adaptive MCMC Progressive Photon Mapping~~ \[Hachisuka2011\]  
-(has been dropped from current SLR implementation.)
+      (has been dropped from current SLR implementation.)
 * Correct handling of non-symmetric scattering due to shading normals \[Veach1996, 1997\]
 * SLR Custom Language (C/Python-like syntax) for flexible scene description
 
@@ -73,7 +76,7 @@ SLR consists of the following components.
 現状以下の環境で動作を確認しています。  
 I've confirmed that the program runs correctly on the following environment.
 
-* OS X 10.12.3 & Xcode 8.2.1 (Apple LLVM-Clang 8.0.0)
+* OS X 10.12.4 & Xcode 8.3.1 (Apple LLVM-Clang 8.1.0)
 * Windows 8.1 & Visual Studio 2015 (MSVC 14.0, character-encoding conversion required)
 * MacBook Pro Retina Late 2013
 
@@ -102,6 +105,7 @@ There are some scene files loading model data and textures, but those assets are
 [Pauly1999] "Robust Monte Carlo Methods for Photorealistic Rendering of Volumetric Effects"  
 [Perlin2002] "Improving Noise"  
 [Raab2008] "Unbiased Global Illumination with Participating Media"  
+[Szirmay-Kalos2011] "Free Path Sampling in High Resolution Inhomogeneous Participating Media"  
 [Stich2009] "Spatial Splits in Bounding Volume Hierarchies"  
 [Veach1994] "Bidirectional Estimators for Light Transport"  
 [Veach1996] "Non-symmetric Scattering in Light Transport Algorithms"  

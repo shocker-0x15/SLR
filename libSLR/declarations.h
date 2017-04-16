@@ -299,6 +299,7 @@ namespace SLR {
     class AchromaticExtinctionGridMediumDistribution;
     class GridMediumDistribution;
     class VacuumMediumDistribution;
+    class CloudMediumDistribution;
     
     // END: Medium Distribution
     // ----------------------------------------------------------------
@@ -447,6 +448,7 @@ namespace SLR {
     class GridMediumNode;
     class DensityGridMediumNode;
     class VacuumMediumNode;
+    class CloudMediumNode;
     class Scene;
     
     // END: Scene

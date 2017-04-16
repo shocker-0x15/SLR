@@ -199,6 +199,8 @@
 		468F9DDD1D8063DA00DD02BD /* Matrix3x3.h in Headers */ = {isa = PBXBuildFile; fileRef = 468F9DDB1D8063DA00DD02BD /* Matrix3x3.h */; };
 		468F9DE01D81D98200DD02BD /* ProgressReporter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 468F9DDE1D81D98200DD02BD /* ProgressReporter.cpp */; };
 		468F9DE11D81D98200DD02BD /* ProgressReporter.h in Headers */ = {isa = PBXBuildFile; fileRef = 468F9DDF1D81D98200DD02BD /* ProgressReporter.h */; };
+		46AED1A91E841C4F0073A343 /* CloudMediumDistribution.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 46AED1A71E841C4F0073A343 /* CloudMediumDistribution.cpp */; };
+		46AED1AA1E841C4F0073A343 /* CloudMediumDistribution.h in Headers */ = {isa = PBXBuildFile; fileRef = 46AED1A81E841C4F0073A343 /* CloudMediumDistribution.h */; };
 		46B9589B1BDCD2B300A915DE /* location.hh in Headers */ = {isa = PBXBuildFile; fileRef = 46B958921BDCD2B300A915DE /* location.hh */; };
 		46B9589C1BDCD2B300A915DE /* position.hh in Headers */ = {isa = PBXBuildFile; fileRef = 46B958931BDCD2B300A915DE /* position.hh */; };
 		46B9589F1BDCD2B300A915DE /* SceneParser.tab.cc in Sources */ = {isa = PBXBuildFile; fileRef = 46B958961BDCD2B300A915DE /* SceneParser.tab.cc */; };
@@ -451,6 +453,8 @@
 		468F9DDB1D8063DA00DD02BD /* Matrix3x3.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; name = Matrix3x3.h; path = libSLR/BasicTypes/Matrix3x3.h; sourceTree = SOURCE_ROOT; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
 		468F9DDE1D81D98200DD02BD /* ProgressReporter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ProgressReporter.cpp; path = libSLR/Core/ProgressReporter.cpp; sourceTree = SOURCE_ROOT; };
 		468F9DDF1D81D98200DD02BD /* ProgressReporter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ProgressReporter.h; path = libSLR/Core/ProgressReporter.h; sourceTree = SOURCE_ROOT; };
+		46AED1A71E841C4F0073A343 /* CloudMediumDistribution.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = CloudMediumDistribution.cpp; path = libSLR/MediumDistribution/CloudMediumDistribution.cpp; sourceTree = SOURCE_ROOT; };
+		46AED1A81E841C4F0073A343 /* CloudMediumDistribution.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CloudMediumDistribution.h; path = libSLR/MediumDistribution/CloudMediumDistribution.h; sourceTree = SOURCE_ROOT; };
 		46B958921BDCD2B300A915DE /* location.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = location.hh; path = libSLRSceneGraph/Parser/location.hh; sourceTree = "<group>"; };
 		46B958931BDCD2B300A915DE /* position.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = position.hh; path = libSLRSceneGraph/Parser/position.hh; sourceTree = "<group>"; };
 		46B958941BDCD2B300A915DE /* SceneLexer.l */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.lex; name = SceneLexer.l; path = libSLRSceneGraph/Parser/SceneLexer.l; sourceTree = "<group>"; };
@@ -756,6 +760,8 @@
 				465D8AE01E59D32E001B8382 /* GridMediumDistribution.cpp */,
 				46BF7DFD1E5DC24A0014E59D /* VacuumMediumDistribution.h */,
 				46BF7DFC1E5DC24A0014E59D /* VacuumMediumDistribution.cpp */,
+				46AED1A81E841C4F0073A343 /* CloudMediumDistribution.h */,
+				46AED1A71E841C4F0073A343 /* CloudMediumDistribution.cpp */,
 			);
 			name = "Medium Distribution";
 			sourceTree = "<group>";
@@ -1022,6 +1028,7 @@
 				465D8A6D1E58E127001B8382 /* Allocator.h in Headers */,
 				465D8A871E58E2BE001B8382 /* TexCoord2D.h in Headers */,
 				465D8AA71E59CAE8001B8382 /* camera.h in Headers */,
+				46AED1AA1E841C4F0073A343 /* CloudMediumDistribution.h in Headers */,
 				465D8B311E59D8FA001B8382 /* AshikhminShirleyBRDF.h in Headers */,
 				466F6CF21BB6CA420056F2FA /* ImageSensor.h in Headers */,
 				466F6CFD1BB6CA420056F2FA /* textures.h in Headers */,
@@ -1223,6 +1230,7 @@
 				465D8A9E1E59CA25001B8382 /* transform.cpp in Sources */,
 				465D8B481E59D9A3001B8382 /* IBLEDF.cpp in Sources */,
 				465D8AB21E59CBF8001B8382 /* random_number_generator.cpp in Sources */,
+				46AED1A91E841C4F0073A343 /* CloudMediumDistribution.cpp in Sources */,
 				465D8A901E58F667001B8382 /* rgb_types.cpp in Sources */,
 				466F6CF61BB6CA420056F2FA /* RenderSettings.cpp in Sources */,
 				46BF8CB31E23A72E00EF8E13 /* medium_material.cpp in Sources */,

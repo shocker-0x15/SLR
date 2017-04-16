@@ -254,7 +254,7 @@ namespace SLR {
             uint32_t objIdx = lightIndices[i];
             const MediumObject* light = objs[objIdx];
             m_lightList[i] = light;
-            m_objToLightMap[objIdx] = i;
+            m_objToLightMap[light] = i;
         }
     }
     
@@ -304,20 +304,20 @@ namespace SLR {
             float distToNextBoundary = INFINITY;
             // The following process is logically the same as:
             // nextMedium = m_accelerator->queryNextMedia(ray, &distToNextBoundary);
-            uint32_t objIdx = -1;
             for (int i = 0; i < m_objLists.size(); ++i) {
                 float distToBoundary = INFINITY;
                 bool enter;
                 if (m_objLists[i]->intersectBoundary(ray, isectRange, &distToBoundary, &enter)) {
                     if (distToBoundary < distToNextBoundary) {
                         distToNextBoundary = distToBoundary;
-                        objIdx = enter ? i : -1;
                         nextMedium = enter ? m_objLists[i] : nullptr;
                     }
                 }
             }
+            if (curMedium && nextMedium)
+                curMedium = nullptr;
             distToNextBoundary = std::min(distToNextBoundary, segment.distMax);
-            if (curMedium && std::isinf(distToNextBoundary))
+            if (std::isinf(distToNextBoundary))
                 return false;
             
             bool hit = false;
@@ -329,8 +329,8 @@ namespace SLR {
                 *singleWavelength |= curSingleWavelength;
             }
             if (hit) {
-                if (m_objToLightMap.count(objIdx) > 0) {
-                    uint32_t lightIdx = m_objToLightMap.at(objIdx);
+                if (m_objToLightMap.count(curMedium) > 0) {
+                    uint32_t lightIdx = m_objToLightMap.at(curMedium);
                     mi->setLightProb(m_lightDist1D->evaluatePMF(lightIdx) * mi->getLightProb());
                 }
                 return true;
@@ -377,9 +377,11 @@ namespace SLR {
                     }
                 }
             }
+            if (curMedium && nextMedium)
+                curMedium = nullptr;
             distToNextBoundary = std::min(distToNextBoundary, segment.distMax);
-            if (curMedium && std::isinf(distToNextBoundary))
-                break;
+            if (std::isinf(distToNextBoundary))
+                return false;
             
             if (curMedium) {
                 SampledSpectrum curTransmittance;

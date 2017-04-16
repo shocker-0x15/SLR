@@ -233,7 +233,7 @@ namespace SLR {
     class SLR_API SurfaceObjectAggregate : public SurfaceObject {
         Accelerator* m_accelerator;
         const SurfaceObject** m_lightList;
-        std::map<uint32_t, uint32_t> m_objToLightMap;
+        std::map<const SurfaceObject*, uint32_t> m_objToLightMap;
         uint32_t m_numLights;
         DiscreteDistribution1D* m_lightDist1D;
     public:

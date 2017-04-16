@@ -152,6 +152,7 @@ namespace SLR {
         RealType m_initialAmplitude;
         RealType m_frequencyMultiplier;
         RealType m_persistence;
+        RealType m_supValue;
         int32_t m_repeat;
         
     public:
@@ -162,16 +163,27 @@ namespace SLR {
         m_frequencyMultiplier(frequencyMultiplier), m_persistence(persistence), m_repeat(repeat) {
             if (supSpecified) {
                 RealType amplitude = 1.0f;
-                RealType supValue = 0; // used for normalizing result to 0.0 - 1.0
+                RealType tempSupValue = 0;
                 for (int i = 0; i < m_numOctaves; ++i) {                
-                    supValue += amplitude;
+                    tempSupValue += amplitude;
                     amplitude *= m_persistence;
                 }
-                m_initialAmplitude = supValueOrInitialAmplitude / supValue;   
+                m_initialAmplitude = supValueOrInitialAmplitude / tempSupValue;
+                m_supValue = supValueOrInitialAmplitude;
             }
             else {
                 m_initialAmplitude = supValueOrInitialAmplitude;
+                RealType amplitude = m_initialAmplitude;
+                m_supValue = 0;
+                for (int i = 0; i < m_numOctaves; ++i) {                
+                    m_supValue += amplitude;
+                    amplitude *= m_persistence;
+                }
             }
+        }
+        
+        RealType getSupValue() const {
+            return m_supValue;
         }
         
         RealType evaluate(RealType x, RealType y, RealType z) const;

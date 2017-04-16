@@ -94,6 +94,11 @@ namespace SLR {
     }
     
     template <typename RealType>
+    inline Point3DTemplate<RealType> clamp(const Point3DTemplate<RealType> &p, const Point3DTemplate<RealType> &minP, const Point3DTemplate<RealType> &maxP) {
+        return max(min(p, maxP), minP);
+    }
+    
+    template <typename RealType>
     inline RealType sqDistance(const Point3DTemplate<RealType> &p1, const Point3DTemplate<RealType> &p2) {
         return (p2 - p1).sqLength();
     }
