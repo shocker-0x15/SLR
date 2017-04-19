@@ -9,6 +9,9 @@
 
 #include "../Core/light_path_sampler.h"
 
+#define UseSuperVoxels
+#define UseRatioTracking
+
 namespace SLR {
     float DensityGridMediumDistribution::calcDensityInSuperVoxels(const Point3D &param) const {
         if (param.x < 0 || param.y < 0 || param.z < 0 ||
@@ -35,7 +38,7 @@ namespace SLR {
                          m_superVoxels[m_svNumX * m_svNumY * uz + m_svNumX * ly + ux] * wuz * wly * wux +
                          m_superVoxels[m_svNumX * m_svNumY * uz + m_svNumX * uy + lx] * wuz * wuy * wlx +
                          m_superVoxels[m_svNumX * m_svNumY * uz + m_svNumX * uy + ux] * wuz * wuy * wux);
-        return density;
+        return density + m_maximumDifferences[(m_svNumX - 1) * (m_svNumY - 1) * lz + (m_svNumX - 1) * ly + lx];
     };
     
     void DensityGridMediumDistribution::setupSuperVoxels() {
@@ -44,70 +47,112 @@ namespace SLR {
         m_svNumZ = std::max(m_numZ / 16, 4u);
         
         m_superVoxels = new float[m_svNumX * m_svNumY * m_svNumZ];
-        float* maximumDifferences = new float[m_svNumX * m_svNumY * m_svNumZ];
-        std::fill(maximumDifferences, maximumDifferences + m_svNumX * m_svNumY * m_svNumZ, 0);
+        const uint32_t LengthOfCompensationCells = (m_svNumX - 1) * (m_svNumY - 1) * (m_svNumZ - 1);
+        m_maximumDifferences = new float[LengthOfCompensationCells];
+        float* maximumDifferences = new float[LengthOfCompensationCells];
+        std::fill(m_maximumDifferences, m_maximumDifferences + LengthOfCompensationCells, 0.0f);
+        std::fill(maximumDifferences, maximumDifferences + LengthOfCompensationCells, 0.0f);
         m_superVoxelWidth = (m_region.maxP - m_region.minP) / Vector3D(m_svNumX - 1, m_svNumY - 1, m_svNumZ - 1);
         
         // initialize super voxel values by original values evaluated at the corners of super voxels.
-        for (int iz = 0; iz < m_svNumZ; ++iz) {
-            float pz = (float)iz / (m_svNumZ - 1);
-            for (int iy = 0; iy < m_svNumY; ++iy) {
-                float py = (float)iy / (m_svNumY - 1); 
-                for (int ix = 0; ix < m_svNumX; ++ix) {
-                    float px = (float)ix / (m_svNumX - 1);
-                    uint32_t idx = iz * m_svNumY * m_svNumX + iy * m_svNumX + ix;
+        for (int siz = 0; siz < m_svNumZ; ++siz) {
+            float pz = (float)siz / (m_svNumZ - 1);
+            for (int siy = 0; siy < m_svNumY; ++siy) {
+                float py = (float)siy / (m_svNumY - 1); 
+                for (int six = 0; six < m_svNumX; ++six) {
+                    float px = (float)six / (m_svNumX - 1);
+                    uint32_t idx = siz * m_svNumY * m_svNumX + siy * m_svNumX + six;
                     m_superVoxels[idx] = calcDensity(Point3D(px, py, pz));
                 }
             }
         }
 
-        // evaluate maximum differences in neighbor cells for every grid points.
-        for (int iz = 0; iz < m_numZ; ++iz) {
-            float pz = (float)iz / (m_numZ - 1);
-            uint32_t cellZ = std::min((uint32_t)((m_svNumZ - 1) * pz), m_svNumZ - 2);
-            for (int iy = 0; iy < m_numY; ++iy) {
-                float py = (float)iy / (m_numY - 1);
-                uint32_t cellY = std::min((uint32_t)((m_svNumY - 1) * py), m_svNumY - 2);
-                for (int ix = 0; ix < m_numX; ++ix) {
-                    float px = (float)ix / (m_numX - 1);
-                    uint32_t cellX = std::min((uint32_t)((m_svNumX - 1) * px), m_svNumX - 2);
-                    float actualDensity = calcDensity(Point3D(px, py, pz));
-                    float coarseDensity = calcDensityInSuperVoxels(Point3D(px, py, pz));
-                    float diff = actualDensity - coarseDensity;
+        // calculate maximum difference for each super voxel to make sure that 
+        // the majorant extinction in the super voxel is upper bounding.
+        for (int svCellZ = 0; svCellZ < m_svNumZ - 1; ++svCellZ) {
+            float lpz = (float)svCellZ / (m_svNumZ - 1);
+            float upz = (float)(svCellZ + 1) / (m_svNumZ - 1);
+            uint32_t liz = (uint32_t)std::floor(lpz * (m_numZ - 1));
+            uint32_t uiz = (uint32_t)std::ceil(upz * (m_numZ - 1));
+            
+            for (int svCellY = 0; svCellY < m_svNumY - 1; ++svCellY) {
+                float lpy = (float)svCellY / (m_svNumY - 1);
+                float upy = (float)(svCellY + 1) / (m_svNumY - 1);
+                uint32_t liy = (uint32_t)std::floor(lpy * (m_numY - 1));
+                uint32_t uiy = (uint32_t)std::ceil(upy * (m_numY - 1));
+                
+                for (int svCellX = 0; svCellX < m_svNumX - 1; ++svCellX) {
+                    float lpx = (float)svCellX / (m_svNumX - 1);
+                    float upx = (float)(svCellX + 1) / (m_svNumX - 1);
+                    uint32_t lix = (uint32_t)std::floor(lpx * (m_numX - 1));
+                    uint32_t uix = (uint32_t)std::ceil(upx * (m_numX - 1));
                     
-                    // scatter the difference to 8 neighbor grid points.
-                    for (int nz = 0; nz < 2; ++nz) {
-                        int siz = cellZ + nz;
-                        if (siz < 0 || siz > m_svNumZ - 1)
-                            continue;
-                        for (int ny = 0; ny < 2; ++ny) {
-                            int siy = cellY + ny;
-                            if (siy < 0 || siy > m_svNumY - 1)
-                                continue;
-                            for (int nx = 0; nx < 2; ++nx) {
-                                int six = cellX + nx;
-                                if (six < 0 || six > m_svNumX - 1)
-                                    continue;                                
-                                float &maxDiff = maximumDifferences[m_svNumX * m_svNumY * siz + m_svNumX * siy + six];
+                    float maxDiff = 0;
+                    for (int iz = liz; iz <= uiz; ++iz) {
+                        float pz = (float)iz / (m_numZ - 1);
+                        for (int iy = liy; iy <= uiy; ++iy) {
+                            float py = (float)iy / (m_numY - 1);
+                            for (int ix = lix; ix <= uix; ++ix) {
+                                float px = (float)ix / (m_numX - 1);
+                                Point3D p(px, py, pz);
+                                float actualDensity = calcDensity(p);
+                                float coarseDensity = calcDensityInSuperVoxels(p);
+                                float diff = actualDensity - coarseDensity;
                                 maxDiff = std::max(maxDiff, diff);
                             }
                         }
                     }
+                    
+                    uint32_t svCellIndex = (m_svNumX - 1) * (m_svNumY - 1) * svCellZ + (m_svNumX - 1) * svCellY + svCellX;
+                    maximumDifferences[svCellIndex] = maxDiff;
+                    SLRAssert(svCellIndex < LengthOfCompensationCells, "Invalid index.");
+                    SLRAssert(maxDiff >= 0, "maximum difference must be greater than or equal to 0.");
                 }
             }
         }
-        
-        // add the maximum differences to super voxel values so that the values correctly upper bounds real density values.
-        for (int iz = 0; iz < m_svNumZ; ++iz) {
-            for (int iy = 0; iy < m_svNumY; ++iy) { 
-                for (int ix = 0; ix < m_svNumX; ++ix) {
-                    uint32_t idx = iz * m_svNumY * m_svNumX + iy * m_svNumX + ix;
-                    m_superVoxels[idx] += maximumDifferences[idx];
-//                    m_superVoxels[idx] = std::min(m_superVoxels[idx], maxDensity);
-                }
-            }
-        }
+
+        std::copy(maximumDifferences, maximumDifferences + LengthOfCompensationCells, m_maximumDifferences);
         delete[] maximumDifferences;
+
+//        // sanity check
+//        for (int siz = 0; siz < m_svNumZ; ++siz) {
+//            float pz = (float)siz / (m_svNumZ - 1);
+//            for (int siy = 0; siy < m_svNumY; ++siy) {
+//                float py = (float)siy / (m_svNumY - 1); 
+//                for (int six = 0; six < m_svNumX; ++six) {
+//                    float px = (float)six / (m_svNumX - 1);
+//                    float coarseDensity = calcDensityInSuperVoxels(Point3D(px, py, pz));
+//                    if (coarseDensity < 0.0f)
+//                        printf("%g at (%g, %g, %g)\n", coarseDensity, px, py, pz);
+//                }
+//            }
+//        }
+//        FloatSum avgRatio = 0;
+//        uint32_t numValidPoints = 0;
+//        for (int iz = 0; iz < m_numZ * 4; ++iz) {
+//            float pz = (float)iz / (m_numZ * 4 - 1);
+//            for (int iy = 0; iy < m_numY * 4; ++iy) {
+//                float py = (float)iy / (m_numY * 4 - 1);
+//                for (int ix = 0; ix < m_numX * 4; ++ix) {
+//                    float px = (float)ix / (m_numX * 4 - 1);
+//                    Point3D param(px, py, pz);
+//                    float actualDensity = calcDensity(param);
+//                    float coarseDensity = calcDensityInSuperVoxels(param);
+//                    if (actualDensity > coarseDensity || (coarseDensity == 0.0f && actualDensity > 0))
+//                        printf("%g, %g / %g at (%g, %g, %g)\n", actualDensity / coarseDensity, actualDensity, coarseDensity, 
+//                               param.x * (m_svNumX - 1), param.y * (m_svNumY - 1), param.z * (m_svNumZ - 1));
+//                    if (coarseDensity > 0.0f) {
+//                        avgRatio += actualDensity / coarseDensity;
+//                        ++numValidPoints;
+//                    }
+////                    SLRAssert(actualDensity <= coarseDensity, 
+////                              "The value in the super voxel must be equal or greater than the actual value.\n"
+////                              "%g / %g, %g", actualDensity, coarseDensity, actualDensity / coarseDensity);
+//                }
+//            }
+//        }
+//        printf("Avg Ratio: %g\n", avgRatio / numValidPoints);
+//        printf("");
     }
     
     bool DensityGridMediumDistribution::traverseSuperVoxels(const Ray &ray, const RaySegment &segment, FreePathSampler &sampler, float base_sigma_e, 
@@ -151,6 +196,8 @@ namespace SLR {
                          epInUnitCube.x * epInUnitCube.z * dxz + 
                          epInUnitCube.y * epInUnitCube.z * dyz + 
                          epInUnitCube.x * dx + epInUnitCube.y * dy + epInUnitCube.z * dz + density000);
+            float maximumDifference = m_maximumDifferences[(m_svNumX - 1) * (m_svNumY - 1) * cellIndices[2] + (m_svNumX - 1) * cellIndices[1] + cellIndices[0]];
+            coeffs[0] += maximumDifference;
         };
         
         // find a distance at which scattering occurs by regula falsi method.
@@ -225,6 +272,7 @@ namespace SLR {
             exitDistance = max_t[steppingAxis];
             exitPoint = ray.org + exitDistance * ray.dir;
             polyCoeff(entryPoint, exitPoint, superVoxel, coeffs);
+            
             exitOpticalDepth += (exitDistance - entryDistance) * base_sigma_e * (coeffs[0] + coeffs[1] / 2 + coeffs[2] / 3 + coeffs[3] / 4);
             if (exitOpticalDepth >= sampledOpticalDepth)
                 break;
@@ -306,6 +354,7 @@ namespace SLR {
         
         SampledSpectrum base_sigma_e = m_base_sigma_e->evaluate(wls);
         
+#if defined(UseSuperVoxels)
         // initialize 3D DDA process.
         const uint32_t MaxVoxelIndices[3] = {m_svNumX - 2, m_svNumY - 2, m_svNumZ - 2};
         Point3D initialPoint = ray.org + segment.distMin * ray.dir;
@@ -355,7 +404,6 @@ namespace SLR {
                 m_region.calculateLocalCoordinates(queryPoint, &param);
                 float extCoeff = base_sigma_e[wls.selectedLambdaIndex] * calcDensity(param);
                 float probRealCollision = extCoeff / majorantAtScattering;
-//                printf("%g, %g\n", probRealCollision, majorantAtScatteringPoint);
                 SLRAssert(probRealCollision <= 1.0f, "Real extinction coefficient exceeds the majorant: %g > %g", extCoeff, majorantAtScattering);
                 if (sampler.getSample() < probRealCollision) {
                     hit = true;
@@ -414,64 +462,64 @@ namespace SLR {
             *medThroughput /= extCoeffAtScattering;
         
         return hit;
+#else
+        // delta tracking to sample free path.
+        float majorantSelected = majorantExtinctionCoefficientAtWavelength(wls.selectedWavelength());
+        *singleWavelength = false;
+        bool hit = false;
+        float extCoeffAtScattering = 0.0f;
+        FloatSum sampledDistance = segment.distMin;
+        sampledDistance += -std::log(sampler.getSample()) / majorantSelected;
+        while (sampledDistance < segment.distMax) {
+            Point3D queryPoint = ray.org + sampledDistance * ray.dir;
+            Point3D param;
+            m_region.calculateLocalCoordinates(queryPoint, &param);
+            float density = calcDensity(param);
+            float extCoeff = base_sigma_e[wls.selectedLambdaIndex] * density;
+            float probRealCollision = extCoeff / majorantSelected;
+            if (sampler.getSample() < probRealCollision) {
+                *mi = MediumInteraction(ray.time, sampledDistance, queryPoint, normalize(ray.dir), param.x, param.y, param.z);
+                hit = true;
+                extCoeffAtScattering = extCoeff;
+                break;
+            }
+            sampledDistance += -std::log(sampler.getSample()) / majorantSelected;
+            
+            // TODO: handle out of boundary.
+        }
         
+        // estimate Monte Carlo throughput T(s, wl_j)/p(s, wl_i) by ratio tracking.
+        if (wls.wavelengthSelected()) {
+            *medThroughput = SampledSpectrum::Zero;
+            (*medThroughput)[wls.selectedLambdaIndex] = 1.0f;
+        }
+        else {
+            float hitDistance = std::min(sampledDistance.result, segment.distMax);
+            SampledSpectrum mcThroughput = SampledSpectrum::One;
+            for (int wl = 0; wl < WavelengthSamples::NumComponents; ++wl) {
+                if (wl == wls.selectedLambdaIndex)
+                    continue;
+                float majorantWL = majorantExtinctionCoefficientAtWavelength(wls[wl]);
+                sampledDistance = segment.distMin;
+                sampledDistance += -std::log(sampler.getSample()) / majorantWL;
+                while (sampledDistance < hitDistance) {
+                    Point3D queryPoint = ray.org + sampledDistance * ray.dir;
+                    Point3D param;
+                    m_region.calculateLocalCoordinates(queryPoint, &param);
+                    float density = calcDensity(param);
+                    SampledSpectrum extCoeff = base_sigma_e * density;
+                    float probRealCollision = (extCoeff[wl] - extCoeff[wls.selectedLambdaIndex]) / majorantWL;
+                    mcThroughput[wl] *= (1.0f - probRealCollision);
+                    sampledDistance += -std::log(sampler.getSample()) / majorantWL;
+                }
+            }
+            *medThroughput = mcThroughput;
+        }
+        if (hit)
+            *medThroughput /= extCoeffAtScattering;
         
-//        // delta tracking to sample free path.
-//        float majorantSelected = majorantExtinctionCoefficientAtWavelength(wls.selectedWavelength());
-//        *singleWavelength = false;
-//        bool hit = false;
-//        float extCoeffAtScattering = 0.0f;
-//        FloatSum sampledDistance = segment.distMin;
-//        sampledDistance += -std::log(sampler.getSample()) / majorantSelected;
-//        while (sampledDistance < segment.distMax) {
-//            Point3D queryPoint = ray.org + sampledDistance * ray.dir;
-//            Point3D param;
-//            m_region.calculateLocalCoordinates(queryPoint, &param);
-//            float density = calcDensity(param);
-//            float extCoeff = base_sigma_e[wls.selectedLambdaIndex] * density;
-//            float probRealCollision = extCoeff / majorantSelected;
-//            if (sampler.getSample() < probRealCollision) {
-//                *mi = MediumInteraction(ray.time, sampledDistance, queryPoint, normalize(ray.dir), param.x, param.y, param.z);
-//                hit = true;
-//                extCoeffAtScattering = extCoeff;
-//                break;
-//            }
-//            sampledDistance += -std::log(sampler.getSample()) / majorantSelected;
-//            
-//            // TODO: handle out of boundary.
-//        }
-//        
-//        // estimate Monte Carlo throughput T(s, wl_j)/p(s, wl_i) by ratio tracking.
-//        if (wls.wavelengthSelected()) {
-//            *medThroughput = SampledSpectrum::Zero;
-//            (*medThroughput)[wls.selectedLambdaIndex] = 1.0f;
-//        }
-//        else {
-//            float hitDistance = std::min(sampledDistance.result, segment.distMax);
-//            SampledSpectrum mcThroughput = SampledSpectrum::One;
-//            for (int wl = 0; wl < WavelengthSamples::NumComponents; ++wl) {
-//                if (wl == wls.selectedLambdaIndex)
-//                    continue;
-//                float majorantWL = majorantExtinctionCoefficientAtWavelength(wls[wl]);
-//                sampledDistance = segment.distMin;
-//                sampledDistance += -std::log(sampler.getSample()) / majorantWL;
-//                while (sampledDistance < hitDistance) {
-//                    Point3D queryPoint = ray.org + sampledDistance * ray.dir;
-//                    Point3D param;
-//                    m_region.calculateLocalCoordinates(queryPoint, &param);
-//                    float density = calcDensity(param);
-//                    SampledSpectrum extCoeff = base_sigma_e * density;
-//                    float probRealCollision = (extCoeff[wl] - extCoeff[wls.selectedLambdaIndex]) / majorantWL;
-//                    mcThroughput[wl] *= (1.0f - probRealCollision);
-//                    sampledDistance += -std::log(sampler.getSample()) / majorantWL;
-//                }
-//            }
-//            *medThroughput = mcThroughput;
-//        }
-//        if (hit)
-//            *medThroughput /= extCoeffAtScattering;
-//        
-//        return hit;
+        return hit;
+#endif
     }
     
     SampledSpectrum DensityGridMediumDistribution::evaluateTransmittance(const Ray &ray, const RaySegment &segment, const WavelengthSamples &wls, SLR::LightPathSampler &pathSampler, 
@@ -481,6 +529,7 @@ namespace SLR {
         
         SampledSpectrum base_sigma_e = m_base_sigma_e->evaluate(wls);
         
+#if defined(UseSuperVoxels)
         // initialize 3D DDA process.
         const uint32_t MaxVoxelIndices[3] = {m_svNumX - 2, m_svNumY - 2, m_svNumZ - 2};
         Point3D initialPoint = ray.org + segment.distMin * ray.dir;
@@ -512,33 +561,9 @@ namespace SLR {
             }
         }
 
-        
-        const auto estimateByDeltaTracking = [&, this](int wl) {
-            int32_t superVoxel[] = {initSuperVoxel[0], initSuperVoxel[1], initSuperVoxel[2]};
-            float max_t[] = {initMax_t[0], initMax_t[1], initMax_t[2]};
-            
-            float sampledDistance = segment.distMin;
-            while (sampledDistance < segment.distMax) {
-                float majorantAtScattering;
-                bool tentativeHit = traverseSuperVoxels(ray, RaySegment(sampledDistance, segment.distMax), sampler, base_sigma_e[wl], 
-                                                        step, delta_t, outsideIndices,  
-                                                        max_t, superVoxel, 
-                                                        &sampledDistance, &majorantAtScattering);
-                if (tentativeHit) {
-                    Point3D queryPoint = ray.org + sampledDistance * ray.dir;
-                    Point3D param;
-                    m_region.calculateLocalCoordinates(queryPoint, &param);
-                    SampledSpectrum extCoeff = base_sigma_e * calcDensity(param);
-                    float probRealCollision = extCoeff[wl] / majorantAtScattering;
-                    if (sampler.getSample() < probRealCollision)
-                        return 0.0f;
-                }
-            }
-            
-            return 1.0f;
-        };
-        
-        const auto estimateByRatioTracking = [&, this](int wl) {
+#   if defined(UseRatioTracking)
+        // Ratio Tracking
+        const auto estimateTransmittance = [&, this](int wl) {
             float transmittance = 1.0f;
             int32_t superVoxel[] = {initSuperVoxel[0], initSuperVoxel[1], initSuperVoxel[2]};
             float max_t[] = {initMax_t[0], initMax_t[1], initMax_t[2]};
@@ -572,63 +597,95 @@ namespace SLR {
             
             return transmittance;
         };
-        
-//        const auto estimateByDeltaTracking = [&, this](int wl) {
-//            float majorantWL = majorantExtinctionCoefficientAtWavelength(wls[wl]);
-//            FloatSum sampledDistance = segment.distMin;
-//            sampledDistance += -std::log(sampler.getSample()) / majorantWL;
-//            while (sampledDistance < segment.distMax) {
-//                Point3D queryPoint = ray.org + sampledDistance * ray.dir;
-//                Point3D param;
-//                m_region.calculateLocalCoordinates(queryPoint, &param);
-//                float density = calcDensity(param);
-//                float extCoeff = base_sigma_e[wl] * density;
-//                float probRealCollision = extCoeff / majorantWL;
-//                if (sampler.getSample() < probRealCollision)
-//                    return 0.0f;
-//                sampledDistance += -std::log(sampler.getSample()) / majorantWL;
-//            }
-//            
-//            return 1.0f;
-//        };
-//        
-//        const auto estimateByRatioTracking = [&, this](int wl) {
-//            float transmittance = 1.0f;
-//            float majorantWL = majorantExtinctionCoefficientAtWavelength(wls[wl]);
-//            FloatSum sampledDistance = segment.distMin;
-//            sampledDistance += -std::log(sampler.getSample()) / majorantWL;
-//            while (sampledDistance < segment.distMax) {
-//                Point3D queryPoint = ray.org + sampledDistance * ray.dir;
-//                Point3D param;
-//                m_region.calculateLocalCoordinates(queryPoint, &param);
-//                float density = calcDensity(param);
-//                float extCoeff = base_sigma_e[wl] * density;
-//                float probRealCollision = extCoeff / majorantWL;
-//                transmittance *= (1.0f - probRealCollision);
-//                
-//                const float RRThreshold = 0.1f; 
-//                if (transmittance < RRThreshold) {
-//                    if (sampler.getSample() < transmittance)
-//                        transmittance = 1.0f;
-//                    else
-//                        return 0.0f;
-//                }
-//                
-//                sampledDistance += -std::log(sampler.getSample()) / majorantWL;
-//            }
-//            
-//            return transmittance;
-//        };
+#   else
+        // Delta Tracking
+        const auto estimateTransmittance = [&, this](int wl) {
+            int32_t superVoxel[] = {initSuperVoxel[0], initSuperVoxel[1], initSuperVoxel[2]};
+            float max_t[] = {initMax_t[0], initMax_t[1], initMax_t[2]};
+            
+            float sampledDistance = segment.distMin;
+            while (sampledDistance < segment.distMax) {
+                float majorantAtScattering;
+                bool tentativeHit = traverseSuperVoxels(ray, RaySegment(sampledDistance, segment.distMax), sampler, base_sigma_e[wl], 
+                                                        step, delta_t, outsideIndices,  
+                                                        max_t, superVoxel, 
+                                                        &sampledDistance, &majorantAtScattering);
+                if (tentativeHit) {
+                    Point3D queryPoint = ray.org + sampledDistance * ray.dir;
+                    Point3D param;
+                    m_region.calculateLocalCoordinates(queryPoint, &param);
+                    SampledSpectrum extCoeff = base_sigma_e * calcDensity(param);
+                    float probRealCollision = extCoeff[wl] / majorantAtScattering;
+                    if (sampler.getSample() < probRealCollision)
+                        return 0.0f;
+                }
+            }
+            
+            return 1.0f;
+        };
+#   endif
+#else
+#   if defined(UseRatioTracking)
+        // Ratio Tracking
+        const auto estimateTransmittance = [&, this](int wl) {
+            float transmittance = 1.0f;
+            float majorantWL = majorantExtinctionCoefficientAtWavelength(wls[wl]);
+            FloatSum sampledDistance = segment.distMin;
+            sampledDistance += -std::log(sampler.getSample()) / majorantWL;
+            while (sampledDistance < segment.distMax) {
+                Point3D queryPoint = ray.org + sampledDistance * ray.dir;
+                Point3D param;
+                m_region.calculateLocalCoordinates(queryPoint, &param);
+                float density = calcDensity(param);
+                float extCoeff = base_sigma_e[wl] * density;
+                float probRealCollision = extCoeff / majorantWL;
+                transmittance *= (1.0f - probRealCollision);
+                
+                const float RRThreshold = 0.1f; 
+                if (transmittance < RRThreshold) {
+                    if (sampler.getSample() < transmittance)
+                        transmittance = 1.0f;
+                    else
+                        return 0.0f;
+                }
+                
+                sampledDistance += -std::log(sampler.getSample()) / majorantWL;
+            }
+            
+            return transmittance;
+        };
+#   else
+        // Delta Tracking
+        const auto estimateTransmittance = [&, this](int wl) {
+            float majorantWL = majorantExtinctionCoefficientAtWavelength(wls[wl]);
+            FloatSum sampledDistance = segment.distMin;
+            sampledDistance += -std::log(sampler.getSample()) / majorantWL;
+            while (sampledDistance < segment.distMax) {
+                Point3D queryPoint = ray.org + sampledDistance * ray.dir;
+                Point3D param;
+                m_region.calculateLocalCoordinates(queryPoint, &param);
+                float density = calcDensity(param);
+                float extCoeff = base_sigma_e[wl] * density;
+                float probRealCollision = extCoeff / majorantWL;
+                if (sampler.getSample() < probRealCollision)
+                    return 0.0f;
+                sampledDistance += -std::log(sampler.getSample()) / majorantWL;
+            }
+            
+            return 1.0f;
+        };
+#   endif
+#endif
         
         // estimate transmittance by ratio tracking.
         *singleWavelength = false;
         SampledSpectrum transmittance = SampledSpectrum::Zero;
         if (wls.wavelengthSelected()) {
-            transmittance[wls.selectedLambdaIndex] = estimateByRatioTracking(wls.selectedLambdaIndex);
+            transmittance[wls.selectedLambdaIndex] = estimateTransmittance(wls.selectedLambdaIndex);
         }
         else {
             for (int wl = 0; wl < WavelengthSamples::NumComponents; ++wl)
-                transmittance[wl] = estimateByRatioTracking(wl);
+                transmittance[wl] = estimateTransmittance(wl);
         }
         
         return transmittance;

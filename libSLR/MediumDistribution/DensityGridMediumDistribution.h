@@ -22,6 +22,7 @@ namespace SLR {
         uint32_t m_numX, m_numY, m_numZ;
         
         float* m_superVoxels;
+        float* m_maximumDifferences;
         uint32_t m_svNumX, m_svNumY, m_svNumZ;
         Vector3D m_superVoxelWidth;
         
@@ -57,8 +58,9 @@ namespace SLR {
             setupSuperVoxels();
         }
         ~DensityGridMediumDistribution() {
-            delete m_superVoxels;
-            delete m_density_grid;
+            delete[] m_maximumDifferences;
+            delete[] m_superVoxels;
+            delete[] m_density_grid;
         }
         
         float majorantExtinctionCoefficientAtWavelength(float wl) const override {
