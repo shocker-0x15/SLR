@@ -18,6 +18,7 @@ namespace SLR {
         BoundingBox3D m_region;
         const AssetSpectrum* m_base_sigma_s;
         const AssetSpectrum* m_base_sigma_e;
+        float m_maxDensity;
         const float** m_density_grid;
         uint32_t m_numX, m_numY, m_numZ;
         
@@ -43,17 +44,17 @@ namespace SLR {
             for (int z = 0; z < m_numZ; ++z)
                 m_density_grid[z] = density_grid[z].data();
             
-            float maxDensity = -INFINITY;
+            m_maxDensity = -INFINITY;
             for (int z = 0; z < numZ; ++z) {
                 for (int y = 0; y < numY; ++y) {
                     for (int x = 0; x < numX; ++x) {
-                        maxDensity = std::max(maxDensity, m_density_grid[z][numX * y + x]);
+                        m_maxDensity = std::max(m_maxDensity, m_density_grid[z][numX * y + x]);
                     }
                 }
             }
             m_base_sigma_e->calcBounds(NumStrataForStorage, m_majorantExtinctionCoefficient.data());
             for (int i = 0; i < NumStrataForStorage; ++i)
-                m_majorantExtinctionCoefficient[i] *= maxDensity;
+                m_majorantExtinctionCoefficient[i] *= m_maxDensity;
             
             setupSuperVoxels();
         }

@@ -38,7 +38,8 @@ namespace SLR {
                          m_superVoxels[m_svNumX * m_svNumY * uz + m_svNumX * ly + ux] * wuz * wly * wux +
                          m_superVoxels[m_svNumX * m_svNumY * uz + m_svNumX * uy + lx] * wuz * wuy * wlx +
                          m_superVoxels[m_svNumX * m_svNumY * uz + m_svNumX * uy + ux] * wuz * wuy * wux);
-        return density + m_maximumDifferences[(m_svNumX - 1) * (m_svNumY - 1) * lz + (m_svNumX - 1) * ly + lx];
+        uint32_t diffCellIdx = (m_svNumX - 1) * (m_svNumY - 1) * std::min(lz, m_svNumZ - 2) + (m_svNumX - 1) * std::min(ly, m_svNumY - 2) + std::min(lx, m_svNumX - 2);
+        return density + m_maximumDifferences[diffCellIdx];
     };
     
     void DensityGridMediumDistribution::setupSuperVoxels() {
@@ -54,7 +55,8 @@ namespace SLR {
         std::fill(maximumDifferences, maximumDifferences + LengthOfCompensationCells, 0.0f);
         m_superVoxelWidth = (m_region.maxP - m_region.minP) / Vector3D(m_svNumX - 1, m_svNumY - 1, m_svNumZ - 1);
         
-        // initialize super voxel values by original values evaluated at the corners of super voxels.
+        // JP: スーパーボクセルの角においてオリジナルの値を評価してスーパーボクセルの値を初期化する。
+        // EN: initialize super voxel values by original values evaluated at the corners of super voxels.
         for (int siz = 0; siz < m_svNumZ; ++siz) {
             float pz = (float)siz / (m_svNumZ - 1);
             for (int siy = 0; siy < m_svNumY; ++siy) {
@@ -67,8 +69,10 @@ namespace SLR {
             }
         }
 
-        // calculate maximum difference for each super voxel to make sure that 
-        // the majorant extinction in the super voxel is upper bounding.
+        // JP: 各スーパーボクセルにおける最大の差を計算して、スーパーボクセル中のmajorant extinctionが
+        //     upper-boundingになるようにする。
+        // EN: calculate maximum difference for each super voxel to make sure that 
+        //     the majorant extinction in the super voxel is upper bounding.
         for (int svCellZ = 0; svCellZ < m_svNumZ - 1; ++svCellZ) {
             float lpz = (float)svCellZ / (m_svNumZ - 1);
             float upz = (float)(svCellZ + 1) / (m_svNumZ - 1);
@@ -94,11 +98,48 @@ namespace SLR {
                             float py = (float)iy / (m_numY - 1);
                             for (int ix = lix; ix <= uix; ++ix) {
                                 float px = (float)ix / (m_numX - 1);
-                                Point3D p(px, py, pz);
-                                float actualDensity = calcDensity(p);
-                                float coarseDensity = calcDensityInSuperVoxels(p);
-                                float diff = actualDensity - coarseDensity;
-                                maxDiff = std::max(maxDiff, diff);
+                                if (iz > liz && iz < uiz && iy > liy && iy < uiy && ix > lix && ix < uix) {
+                                    // JP: オリジナルの値のサンプル点における差を計算する。
+                                    // EN: calculate the difference at the sampling point of original values. 
+                                    Point3D p(px, py, pz);
+                                    float actualDensity = m_density_grid[iz][m_numX * iy + ix];
+                                    float coarseDensity = calcDensityInSuperVoxels(p);
+                                    float diff = actualDensity - coarseDensity;
+                                    maxDiff = std::max(maxDiff, diff);   
+                                }
+                                else {
+                                    // JP: 補間されたオリジナルの値がスーパーボクセル境界でスーパーボクセルの値を超える可能性がある。
+                                    // EN: There is a possibility that an interpolated original value exceeds that of super voxel values at super voxel boundaries.
+                                    int zBase = iz;
+                                    int yBase = iy;
+                                    int xBase = ix;
+                                    int numZIterations = (iz > liz && iz < uiz) ? 1 : 2;
+                                    int numYIterations = (iy > liy && iy < uiy) ? 1 : 2;
+                                    int numXIterations = (ix > lix && ix < uix) ? 1 : 2;
+                                    if (numZIterations == 2)
+                                        zBase = iz == liz ? liz : uiz - 1;
+                                    if (numYIterations == 2)
+                                        yBase = iy == liy ? liy : uiy - 1;
+                                    if (numXIterations == 2)
+                                        xBase = ix == lix ? lix : uix - 1;
+                                    for (int diz = 0; diz < numZIterations; ++diz) {
+                                        int iiz = zBase + diz;
+                                        float ppz = std::clamp((float)iiz / (m_numZ - 1), lpz, upz);
+                                        for (int diy = 0; diy < numYIterations; ++diy) {
+                                            int iiy = yBase + diy;
+                                            float ppy = std::clamp((float)iiy / (m_numY - 1), lpy, upy);
+                                            for (int dix = 0; dix < numXIterations; ++dix) {
+                                                int iix = xBase + dix;
+                                                float ppx = std::clamp((float)iix / (m_numX - 1), lpx, upx);
+                                                Point3D p(ppx, ppy, ppz);
+                                                float actualDensity = calcDensity(p);
+                                                float coarseDensity = calcDensityInSuperVoxels(p);
+                                                float diff = actualDensity - coarseDensity;
+                                                maxDiff = std::max(maxDiff, diff);
+                                            }
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
@@ -115,6 +156,7 @@ namespace SLR {
         delete[] maximumDifferences;
 
 //        // sanity check
+//        printf("start sanity check.\n");
 //        for (int siz = 0; siz < m_svNumZ; ++siz) {
 //            float pz = (float)siz / (m_svNumZ - 1);
 //            for (int siy = 0; siy < m_svNumY; ++siy) {
@@ -127,6 +169,7 @@ namespace SLR {
 //                }
 //            }
 //        }
+//        FloatSum avgNaiveRatio = 0;
 //        FloatSum avgRatio = 0;
 //        uint32_t numValidPoints = 0;
 //        for (int iz = 0; iz < m_numZ * 4; ++iz) {
@@ -141,8 +184,13 @@ namespace SLR {
 //                    if (actualDensity > coarseDensity || (coarseDensity == 0.0f && actualDensity > 0))
 //                        printf("%g, %g / %g at (%g, %g, %g)\n", actualDensity / coarseDensity, actualDensity, coarseDensity, 
 //                               param.x * (m_svNumX - 1), param.y * (m_svNumY - 1), param.z * (m_svNumZ - 1));
+//                    avgNaiveRatio += actualDensity / m_maxDensity;
 //                    if (coarseDensity > 0.0f) {
 //                        avgRatio += actualDensity / coarseDensity;
+//                        ++numValidPoints;
+//                    }
+//                    else if (coarseDensity == 0.0f && actualDensity == 0.0f) {
+//                        avgRatio += 1;
 //                        ++numValidPoints;
 //                    }
 ////                    SLRAssert(actualDensity <= coarseDensity, 
@@ -151,7 +199,7 @@ namespace SLR {
 //                }
 //            }
 //        }
-//        printf("Avg Ratio: %g\n", avgRatio / numValidPoints);
+//        printf("Avg Ratio: %g, (%g)\n", avgRatio / numValidPoints, avgNaiveRatio / (m_numZ * m_numY * m_numX * 64));
 //        printf("");
     }
     
@@ -159,7 +207,8 @@ namespace SLR {
                                                             const int32_t step[3], const float delta_t[3], const int32_t outsideIndices[3],   
                                                             float max_t[3], int32_t superVoxel[3], 
                                                             float* sampledDistance, float* majorantAtScattering) const {
-        // compute polynomial coefficients.
+        // JP: 多項式の係数を求める。
+        // EN: compute polynomial coefficients.
         const auto polyCoeff = [this](const Point3D &entryPoint, const Point3D &exitPoint, const int32_t cellIndices[3], float coeffs[4]) {
             float density000 = m_superVoxels[m_svNumX * m_svNumY * (cellIndices[2] + 0) + m_svNumX * (cellIndices[1] + 0) + (cellIndices[0] + 0)];
             float density100 = m_superVoxels[m_svNumX * m_svNumY * (cellIndices[2] + 0) + m_svNumX * (cellIndices[1] + 0) + (cellIndices[0] + 1)];
@@ -200,7 +249,8 @@ namespace SLR {
             coeffs[0] += maximumDifference;
         };
         
-        // find a distance at which scattering occurs by regula falsi method.
+        // JP: 散乱が起こる距離をregular falsi法を使って求める。
+        // EN: find a distance at which scattering occurs by regula falsi method.
         const auto solvePolyInt = [](float base_sigma_e, const float coeffs[4], float entryDistance, float exitDistance, float entryOpticalDepth, float exitOpticalDepth, float sampledOpticalDepth, 
                                      float* sampledDistance, float* distParamInSuperVoxel) {
             float paramLow = 0.0f;
