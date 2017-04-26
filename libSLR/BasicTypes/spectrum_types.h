@@ -11,6 +11,7 @@
 #include "../defines.h"
 #include "../declarations.h"
 #include "spectrum_base.h"
+#include "rgb_types.h"
 #include "CompensatedSum.h"
 
 namespace SLR {
@@ -81,7 +82,11 @@ namespace SLR {
         
         virtual void calcBounds(uint32_t numBins, RealType* bounds) const = 0;
         virtual SampledSpectrumTemplate<RealType, NumSpectralSamples> evaluate(const WavelengthSamplesTemplate<RealType, NumSpectralSamples> &wls) const = 0;
+        virtual void evaluate(const RealType* wavelengths, uint32_t numSamples, RealType* values) const = 0;
+        virtual void convertToXYZ(RealType XYZ[3]) const = 0;
         virtual ContinuousSpectrumTemplate* createScaledAndOffset(RealType scale, RealType offset) const = 0;
+        
+        RGBTemplate<RealType> convertToRGB(SpectrumType spType) const;
     };
     
     
@@ -104,6 +109,8 @@ namespace SLR {
         
         void calcBounds(uint32_t numBins, RealType* bounds) const override;
         SampledSpectrumTemplate<RealType, NumSpectralSamples> evaluate(const WavelengthSamplesTemplate<RealType, NumSpectralSamples> &wls) const override;
+        void evaluate(const RealType* wavelengths, uint32_t numSamples, RealType* values) const override;
+        void convertToXYZ(RealType XYZ[3]) const override;
         ContinuousSpectrumTemplate<RealType, NumSpectralSamples>* createScaledAndOffset(RealType scale, RealType offset) const override;
     };
 
@@ -131,6 +138,8 @@ namespace SLR {
         
         void calcBounds(uint32_t numBins, RealType* bounds) const override;
         SampledSpectrumTemplate<RealType, NumSpectralSamples> evaluate(const WavelengthSamplesTemplate<RealType, NumSpectralSamples> &wls) const override;
+        void evaluate(const RealType* wavelengths, uint32_t numSamples, RealType* values) const override;
+        void convertToXYZ(RealType XYZ[3]) const override;
         ContinuousSpectrumTemplate<RealType, NumSpectralSamples>* createScaledAndOffset(RealType scale, RealType offset) const override;
     };
 
@@ -174,6 +183,8 @@ namespace SLR {
         
         void calcBounds(uint32_t numBins, RealType* bounds) const override;
         SampledSpectrumTemplate<RealType, NumSpectralSamples> evaluate(const WavelengthSamplesTemplate<RealType, NumSpectralSamples> &wls) const override;
+        void evaluate(const RealType* wavelengths, uint32_t numSamples, RealType* values) const override;
+        void convertToXYZ(RealType XYZ[3]) const override;
         ContinuousSpectrumTemplate<RealType, NumSpectralSamples>* createScaledAndOffset(RealType scale, RealType offset) const override;
         
         static const RealType MinWavelength;
@@ -281,6 +292,8 @@ namespace SLR {
         
         void calcBounds(uint32_t numBins, RealType* bounds) const override;
         SampledSpectrumTemplate<RealType, NumSpectralSamples> evaluate(const WavelengthSamplesTemplate<RealType, NumSpectralSamples> &wls) const override;
+        void evaluate(const RealType* wavelengths, uint32_t numSamples, RealType* values) const override;
+        void convertToXYZ(RealType XYZ[3]) const override;
         ContinuousSpectrumTemplate<RealType, NumSpectralSamples>* createScaledAndOffset(RealType scale, RealType offset) const override;
     };
 

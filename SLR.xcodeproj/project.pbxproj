@@ -10,6 +10,13 @@
 		4602E8961BC2D8EF00EC16FA /* API.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4602E8941BC2D8EF00EC16FA /* API.cpp */; };
 		4602E8B01BC40E8700EC16FA /* surface_materials.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4602E8AC1BC40E8700EC16FA /* surface_materials.cpp */; };
 		4602E8B21BC40E8700EC16FA /* textures.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4602E8AE1BC40E8700EC16FA /* textures.cpp */; };
+		460A1B271EAE3633000C1A26 /* AnalyticSkySpectrumTexture.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 460A1B251EAE3633000C1A26 /* AnalyticSkySpectrumTexture.cpp */; };
+		460A1B281EAE3633000C1A26 /* AnalyticSkySpectrumTexture.h in Headers */ = {isa = PBXBuildFile; fileRef = 460A1B261EAE3633000C1A26 /* AnalyticSkySpectrumTexture.h */; };
+		460A1B2F1EAE3795000C1A26 /* ArHosekSkyModel.c in Sources */ = {isa = PBXBuildFile; fileRef = 460A1B2A1EAE3795000C1A26 /* ArHosekSkyModel.c */; };
+		460A1B301EAE3795000C1A26 /* ArHosekSkyModel.h in Headers */ = {isa = PBXBuildFile; fileRef = 460A1B2B1EAE3795000C1A26 /* ArHosekSkyModel.h */; };
+		460A1B311EAE3795000C1A26 /* ArHosekSkyModelData_CIEXYZ.h in Headers */ = {isa = PBXBuildFile; fileRef = 460A1B2C1EAE3795000C1A26 /* ArHosekSkyModelData_CIEXYZ.h */; };
+		460A1B321EAE3795000C1A26 /* ArHosekSkyModelData_RGB.h in Headers */ = {isa = PBXBuildFile; fileRef = 460A1B2D1EAE3795000C1A26 /* ArHosekSkyModelData_RGB.h */; };
+		460A1B331EAE3795000C1A26 /* ArHosekSkyModelData_Spectral.h in Headers */ = {isa = PBXBuildFile; fileRef = 460A1B2E1EAE3795000C1A26 /* ArHosekSkyModelData_Spectral.h */; };
 		460A201C1D6029C700870E0F /* StandardBVH.h in Headers */ = {isa = PBXBuildFile; fileRef = 460A201B1D6029C700870E0F /* StandardBVH.h */; };
 		460A201E1D6029EC00870E0F /* QBVH.h in Headers */ = {isa = PBXBuildFile; fileRef = 460A201D1D6029EC00870E0F /* QBVH.h */; };
 		4613A17B1E36500600D05AA6 /* Ray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4613A1791E36500600D05AA6 /* Ray.cpp */; };
@@ -259,6 +266,13 @@
 		4602E8941BC2D8EF00EC16FA /* API.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; lineEnding = 0; name = API.cpp; path = libSLRSceneGraph/API.cpp; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.cpp; };
 		4602E8AC1BC40E8700EC16FA /* surface_materials.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; lineEnding = 0; name = surface_materials.cpp; path = libSLRSceneGraph/surface_materials.cpp; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.cpp; };
 		4602E8AE1BC40E8700EC16FA /* textures.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = textures.cpp; path = libSLRSceneGraph/textures.cpp; sourceTree = "<group>"; };
+		460A1B251EAE3633000C1A26 /* AnalyticSkySpectrumTexture.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AnalyticSkySpectrumTexture.cpp; path = libSLR/Texture/AnalyticSkySpectrumTexture.cpp; sourceTree = SOURCE_ROOT; };
+		460A1B261EAE3633000C1A26 /* AnalyticSkySpectrumTexture.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AnalyticSkySpectrumTexture.h; path = libSLR/Texture/AnalyticSkySpectrumTexture.h; sourceTree = SOURCE_ROOT; };
+		460A1B2A1EAE3795000C1A26 /* ArHosekSkyModel.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = ArHosekSkyModel.c; path = libSLR/External/AnalyticSkyDomeRadiance/ArHosekSkyModel.c; sourceTree = SOURCE_ROOT; };
+		460A1B2B1EAE3795000C1A26 /* ArHosekSkyModel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ArHosekSkyModel.h; path = libSLR/External/AnalyticSkyDomeRadiance/ArHosekSkyModel.h; sourceTree = SOURCE_ROOT; };
+		460A1B2C1EAE3795000C1A26 /* ArHosekSkyModelData_CIEXYZ.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ArHosekSkyModelData_CIEXYZ.h; path = libSLR/External/AnalyticSkyDomeRadiance/ArHosekSkyModelData_CIEXYZ.h; sourceTree = SOURCE_ROOT; };
+		460A1B2D1EAE3795000C1A26 /* ArHosekSkyModelData_RGB.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ArHosekSkyModelData_RGB.h; path = libSLR/External/AnalyticSkyDomeRadiance/ArHosekSkyModelData_RGB.h; sourceTree = SOURCE_ROOT; };
+		460A1B2E1EAE3795000C1A26 /* ArHosekSkyModelData_Spectral.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ArHosekSkyModelData_Spectral.h; path = libSLR/External/AnalyticSkyDomeRadiance/ArHosekSkyModelData_Spectral.h; sourceTree = SOURCE_ROOT; };
 		460A201B1D6029C700870E0F /* StandardBVH.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; name = StandardBVH.h; path = libSLR/Accelerator/StandardBVH.h; sourceTree = SOURCE_ROOT; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
 		460A201D1D6029EC00870E0F /* QBVH.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = QBVH.h; path = libSLR/Accelerator/QBVH.h; sourceTree = SOURCE_ROOT; };
 		4613A1791E36500600D05AA6 /* Ray.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Ray.cpp; path = libSLR/BasicTypes/Ray.cpp; sourceTree = SOURCE_ROOT; };
@@ -501,6 +515,26 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		460A1B291EAE376F000C1A26 /* External */ = {
+			isa = PBXGroup;
+			children = (
+				460A1B341EAE37BB000C1A26 /* Analytic Sky Dome Radiance */,
+			);
+			name = External;
+			sourceTree = "<group>";
+		};
+		460A1B341EAE37BB000C1A26 /* Analytic Sky Dome Radiance */ = {
+			isa = PBXGroup;
+			children = (
+				460A1B2B1EAE3795000C1A26 /* ArHosekSkyModel.h */,
+				460A1B2C1EAE3795000C1A26 /* ArHosekSkyModelData_CIEXYZ.h */,
+				460A1B2D1EAE3795000C1A26 /* ArHosekSkyModelData_RGB.h */,
+				460A1B2E1EAE3795000C1A26 /* ArHosekSkyModelData_Spectral.h */,
+				460A1B2A1EAE3795000C1A26 /* ArHosekSkyModel.c */,
+			);
+			name = "Analytic Sky Dome Radiance";
+			sourceTree = "<group>";
+		};
 		461BDAD41E45E57900D97D37 /* Medium Material */ = {
 			isa = PBXGroup;
 			children = (
@@ -740,6 +774,8 @@
 				465D8AF11E59D3CF001B8382 /* voronoi_textures.cpp */,
 				4625C9F71E7AF985005479E3 /* perlin_noise_textures.h */,
 				4625C9F61E7AF985005479E3 /* perlin_noise_textures.cpp */,
+				460A1B261EAE3633000C1A26 /* AnalyticSkySpectrumTexture.h */,
+				460A1B251EAE3633000C1A26 /* AnalyticSkySpectrumTexture.cpp */,
 			);
 			name = Texture;
 			path = Textures;
@@ -913,6 +949,7 @@
 				466F6CAF1BB6B34E0056F2FA /* defines.h */,
 				465D8A981E58F92F001B8382 /* declarations.h */,
 				46EA72A81D59F22B00738511 /* debugPrintf.cpp */,
+				460A1B291EAE376F000C1A26 /* External */,
 				4634EBD41B9B529B0047AE54 /* Memory Allocators */,
 				4634EB901B9B529B0047AE54 /* Basic Types */,
 				4634EBA81B9B529B0047AE54 /* Core */,
@@ -941,6 +978,7 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				460A1B331EAE3795000C1A26 /* ArHosekSkyModelData_Spectral.h in Headers */,
 				465D8B731E59DB74001B8382 /* BPTRenderer.h in Headers */,
 				46D16E6C1D283E36009C241C /* SBVH.h in Headers */,
 				466F6CD31BB6CA070056F2FA /* Quaternion.h in Headers */,
@@ -996,6 +1034,7 @@
 				465D8AAD1E59CB88001B8382 /* medium_object.h in Headers */,
 				465D8A991E58F92F001B8382 /* declarations.h in Headers */,
 				4613A17C1E36500600D05AA6 /* Ray.h in Headers */,
+				460A1B321EAE3795000C1A26 /* ArHosekSkyModelData_RGB.h in Headers */,
 				465D8A811E58E278001B8382 /* Vector3D.h in Headers */,
 				465D8B4B1E59D9A3001B8382 /* MultiEDF.h in Headers */,
 				465D8AD71E59D1B0001B8382 /* InfiniteSphereSurfaceShape.h in Headers */,
@@ -1005,7 +1044,10 @@
 				465D8AE91E59D32E001B8382 /* HomogeneousMediumDistribution.h in Headers */,
 				465D8B491E59D9A3001B8382 /* IBLEDF.h in Headers */,
 				466F6CF91BB6CA420056F2FA /* surface_material.h in Headers */,
+				460A1B311EAE3795000C1A26 /* ArHosekSkyModelData_CIEXYZ.h in Headers */,
+				460A1B281EAE3633000C1A26 /* AnalyticSkySpectrumTexture.h in Headers */,
 				465D8B101E59D5AC001B8382 /* basic_emitter_surface_properties.h in Headers */,
+				460A1B301EAE3795000C1A26 /* ArHosekSkyModel.h in Headers */,
 				465D8B4F1E59D9C6001B8382 /* basic_phase_functions.h in Headers */,
 				465D8A7D1E58E278001B8382 /* Normal3D.h in Headers */,
 				465D8B571E59DA49001B8382 /* PerspectiveCamera.h in Headers */,
@@ -1171,6 +1213,7 @@
 				465D8AE61E59D32E001B8382 /* GridMediumDistribution.cpp in Sources */,
 				465D8B541E59DA49001B8382 /* EquirectangularCamera.cpp in Sources */,
 				465D8B561E59DA49001B8382 /* PerspectiveCamera.cpp in Sources */,
+				460A1B2F1EAE3795000C1A26 /* ArHosekSkyModel.c in Sources */,
 				465D8A821E58E278001B8382 /* Vector4D.cpp in Sources */,
 				465D8A801E58E278001B8382 /* Vector3D.cpp in Sources */,
 				465D8B721E59DB74001B8382 /* BPTRenderer.cpp in Sources */,
@@ -1237,6 +1280,7 @@
 				465D8B381E59D8FA001B8382 /* MultiBSDF.cpp in Sources */,
 				465D8B741E59DB74001B8382 /* PTRenderer.cpp in Sources */,
 				465D8AF71E59D3CF001B8382 /* image_textures.cpp in Sources */,
+				460A1B271EAE3633000C1A26 /* AnalyticSkySpectrumTexture.cpp in Sources */,
 				465D8ACA1E59D192001B8382 /* LinearCongruentialRNG.cpp in Sources */,
 				465D8A861E58E2BE001B8382 /* TexCoord2D.cpp in Sources */,
 				465D8A6E1E58E127001B8382 /* ArenaAllocator.cpp in Sources */,

@@ -41,6 +41,7 @@ SLR consists of the following components.
         * Checkerboard (color & normal & float)
         * Cell Noise \[Worley1996\] like Voronoi diagram (color & normal & float)
         * Improved Perlin Noise \[Perlin2002\] (float)
+        * Analytic Sky Texture \[Hosek2012\] (color)
 * Bump Mapping (Normal Map)
 * Light Types
     * Area (Polygonal) Light
@@ -94,6 +95,7 @@ There are some scene files loading model data and textures, but those assets are
 [Dammertz2008] "Shallow Bounding Volume Hierarchies for Fast SIMD Ray Tracing of Incoherent Rays"  
 [Hachisuka2011] "Robust Adaptive Photon Tracing Using Photon Path Visibility"  
 [Heitz2014] "Importance Sampling Microfacet-Based BSDFs using the Distribution of Visible Normals"  
+[Hosek2012] "An Analytic Model for Full Spectral Sky-Dome Radiance"  
 [Kajiya1986] "THE RENDERING EQUATION"  
 [Meng2015] "Physically Meaningful Rendering using Tristimulus Colours"  
 [Moroder2010] "A New Ward BRDF Model with Bounded Albedo"  

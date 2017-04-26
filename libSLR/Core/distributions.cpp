@@ -136,6 +136,9 @@ namespace SLR {
     
     
     
+    template class SLR_API ContinuousDistribution1DTemplate<float>;
+    template class SLR_API ContinuousDistribution1DTemplate<double>;
+    
     template <typename RealType>
     RegularConstantContinuousDistribution1DTemplate<RealType>::RegularConstantContinuousDistribution1DTemplate(uint32_t numValues, const std::function<RealType(uint32_t)> &pickFunc) :
     m_numValues(numValues) {
@@ -151,9 +154,11 @@ namespace SLR {
             m_CDF[i + 1] = sum;
         }
         m_integral = sum;
-        for (int i = 0; i < m_numValues; ++i) {
-            m_PDF[i] /= sum;
-            m_CDF[i + 1] /= sum;
+        if (m_integral > 0) {
+            for (int i = 0; i < m_numValues; ++i) {
+                m_PDF[i] /= sum;
+                m_CDF[i + 1] /= sum;
+            }   
         }
     };
     
@@ -201,6 +206,9 @@ namespace SLR {
     
     
     
+    template class SLR_API ContinuousDistribution2DTemplate<float>;
+    template class SLR_API ContinuousDistribution2DTemplate<double>;
+    
     template <typename RealType>
     RegularConstantContinuousDistribution2DTemplate<RealType>::RegularConstantContinuousDistribution2DTemplate(uint32_t numD1, uint32_t numD2, const std::function<RealType(uint32_t, uint32_t)> &pickFunc) :
     m_num1DDists(numD2) {
@@ -237,28 +245,45 @@ namespace SLR {
     };
     
     template <typename RealType>
-    void RegularConstantContinuousDistribution2DTemplate<RealType>::exportBMP(const std::string &filename, float gamma) const {
+    void RegularConstantContinuousDistribution2DTemplate<RealType>::exportBMP(const std::string &filename, bool logScale, float gamma) const {
         uint32_t width = m_1DDists[0].numValues();
         uint32_t height = m_num1DDists;
         uint32_t byteWidth = width * 3 + width % 4;
         uint8_t* data = (uint8_t*)malloc(height * byteWidth);
         
+        float minValue = INFINITY;
         float maxValue = -INFINITY;
         for (int i = 0; i < height; ++i) {
             const RealType* PDF = m_1DDists[i].PDF();
             float ratio = m_top1DDist->PDF()[i];
             for (int j = 0; j < width; ++j) {
                 float value = ratio * PDF[j];
-                if (value > maxValue)
-                    maxValue = value;
+                if (logScale)
+                    value = std::log(value);
+                if (std::isfinite(value)) {
+                    minValue = std::min(minValue, value);
+                    maxValue = std::max(maxValue, value);   
+                }
             }
         }
         for (int i = 0; i < height; ++i) {
             const RealType* PDF = m_1DDists[i].PDF();
             float ratio = m_top1DDist->PDF()[i];
             for (int j = 0; j < width; ++j) {
-                float value = std::pow(ratio * PDF[j] / maxValue, 1.0f / gamma);
-                uint8_t pixVal = uint8_t(value * 255);
+                float value = ratio * PDF[j];
+                if (logScale) {
+                    value = std::log(value);
+                    if (std::isfinite(value)) {
+                        value = (value - minValue) / (maxValue - minValue);
+                    }
+                    else {
+                        value = 0;
+                    }
+                }
+                else {
+                    value /= maxValue;
+                }
+                uint8_t pixVal = uint8_t(std::pow(value, 1.0f / gamma) * 255);
                 
                 uint32_t idx = (height - i - 1) * byteWidth + 3 * j;
                 data[idx + 0] = pixVal;

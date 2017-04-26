@@ -194,6 +194,17 @@ namespace SLRSceneGraph {
                                 uint32_t numOctaves, float initialFrequency, float supValueOrInitialAmplitude, bool supSpecified, 
                                 float frequencyMultiplier, float persistence, int32_t repeat);
     };
+    
+    
+    class SLR_SCENEGRAPH_API AnalyticSkySpectrumTexture : public SpectrumTexture {
+        Texture2DMappingRef m_mapping;
+        float m_solarElevation;
+        float m_turbidity;
+        AssetSpectrumRef m_groundAlbedo;
+    public:
+        AnalyticSkySpectrumTexture(const Texture2DMappingRef &mapping, 
+                                   float soloarElevation, float turbidity, const AssetSpectrumRef &groundAlbedo);
+    };
 }
 
 #endif /* __SLRSceneGraph_textures__ */

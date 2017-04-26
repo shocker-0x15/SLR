@@ -21,7 +21,7 @@ namespace SLR {
         return mem.create<IBLEDF>(m_scene->getWorldDiscArea());
     }
     
-    RegularConstantContinuousDistribution2D* IBLEmitterSurfaceProperty::createIBLImportanceMap() const {
+    ContinuousDistribution2D* IBLEmitterSurfaceProperty::createIBLImportanceMap() const {
         return m_coeffM->createIBLImportanceMap();
     }
 }

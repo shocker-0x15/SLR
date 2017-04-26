@@ -117,6 +117,11 @@ inline void* SLR_memalign(size_t size, size_t alignment) {
 #   define SLR_getcwd(size, buf) getcwd(buf, size)
 #endif
 
+template <typename T, size_t size>
+constexpr size_t lengthof(const T (&array)[size]) {
+    return size;
+}
+
 namespace std {
     template <typename T>
     inline T clamp(const T &v, const T &min, const T &max) {

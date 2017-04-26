@@ -160,7 +160,7 @@ namespace SLR {
     
     class SLR_API InfiniteSphereSurfaceObject : public SingleSurfaceObject {
         const Scene* m_scene;
-        const RegularConstantContinuousDistribution2D* m_dist;
+        const ContinuousDistribution2D* m_dist;
     public:
         InfiniteSphereSurfaceObject(const Scene* scene, const IBLEmitterSurfaceProperty* emitter);
         ~InfiniteSphereSurfaceObject();

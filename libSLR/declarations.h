@@ -66,14 +66,20 @@ namespace SLR {
     const static uint32_t NumSpectralSamples = 3;
     const static uint32_t NumStrataForStorage = 3;
     
-    typedef RGBTemplate<SpectrumFloat> RGBAssetSpectrum;
+    typedef ContinuousSpectrumTemplate<SpectrumFloat, NumSpectralSamples> ContinuousSpectrum;
+    typedef RegularContinuousSpectrumTemplate<SpectrumFloat, NumSpectralSamples> RegularContinuousSpectrum;
+    typedef IrregularContinuousSpectrumTemplate<SpectrumFloat, NumSpectralSamples> IrregularContinuousSpectrum;
+    typedef UpsampledContinuousSpectrumTemplate<SpectrumFloat, NumSpectralSamples> UpsampledContinuousSpectrum;
+    typedef ScaledAndOffsetUpsampledContinuousSpectrumTemplate<SpectrumFloat, NumSpectralSamples> ScaledAndOffsetUpsampledContinuousSpectrum;
+    
+    typedef RGBTemplate<SpectrumFloat> RGBSpectrum;
     
     typedef RGBSamplesTemplate<SpectrumFloat> WavelengthSamples;
     typedef RGBTemplate<SpectrumFloat> SampledSpectrum;
     typedef RGBTemplate<SpectrumFloat> DiscretizedSpectrum;
     typedef RGBStorageTemplate<SpectrumFloat> SpectrumStorage;
     
-    typedef RGBAssetSpectrum AssetSpectrum;
+    typedef RGBSpectrum AssetSpectrum;
 #endif
     typedef CompensatedSum<SampledSpectrum> SampledSpectrumSum;
     
@@ -121,10 +127,14 @@ namespace SLR {
     
     // Distribution
     template <typename RealType> class DiscreteDistribution1DTemplate;
+    template <typename RealType> class ContinuousDistribution1DTemplate;
     template <typename RealType> class RegularConstantContinuousDistribution1DTemplate;
+    template <typename RealType> class ContinuousDistribution2DTemplate;
     template <typename RealType> class RegularConstantContinuousDistribution2DTemplate;
     typedef DiscreteDistribution1DTemplate<float> DiscreteDistribution1D;
+    typedef ContinuousDistribution1DTemplate<float> ContinuousDistribution1D;
     typedef RegularConstantContinuousDistribution1DTemplate<float> RegularConstantContinuousDistribution1D;
+    typedef ContinuousDistribution2DTemplate<float> ContinuousDistribution2D;
     typedef RegularConstantContinuousDistribution2DTemplate<float> RegularConstantContinuousDistribution2D;
     template <typename ReturnRealType> class MultiOctaveImprovedPerlinNoise3DGenerator;
     
@@ -365,6 +375,7 @@ namespace SLR {
     class VoronoiNormalTexture;
     class VoronoiFloatTexture;
     class PerlinNoiseFloatTexture;
+    class AnalyticSkySpectrumTexture;
     
     // END: Texture
     // ----------------------------------------------------------------

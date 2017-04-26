@@ -103,6 +103,25 @@ namespace SLRSceneGraph {
                                                            };
                                                            return configFunc(params, context, err);
                                                        }
+                                                       else if (procedure == "sky") {
+                                                           const static Function configFunc{
+                                                               0, {
+                                                                   {"solar elevation", Type::RealNumber},
+                                                                   {"turbidity", Type::RealNumber},
+                                                                   {"ground albedo", Type::Spectrum},
+                                                                   {"mapping", Type::Texture2DMapping, tex2DMapSharedInstance}                                                                                        
+                                                               },
+                                                               [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
+                                                                   float solarElevation = args.at("solar elevation").raw<TypeMap::RealNumber>();
+                                                                   float turbidity = args.at("turbidity").raw<TypeMap::RealNumber>();
+                                                                   AssetSpectrumRef groundAlbedo = args.at("ground albedo").rawRef<TypeMap::Spectrum>(); 
+                                                                   const auto &mapping = args.at("mapping").rawRef<TypeMap::Texture2DMapping>();
+                                                                   SpectrumTextureRef rawRef = createShared<AnalyticSkySpectrumTexture>(mapping, solarElevation, turbidity, groundAlbedo);
+                                                                   return Element::createFromReference<TypeMap::SpectrumTexture>(rawRef);
+                                                               }
+                                                           };
+                                                           return configFunc(params, context, err);
+                                                       }
                                                        *err = ErrorMessage("Specified procedure is invalid.");
                                                        return Element();
                                                    }

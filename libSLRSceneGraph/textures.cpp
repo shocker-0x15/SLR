@@ -105,10 +105,16 @@ namespace SLRSceneGraph {
     PerlinNoiseFloatTexture::PerlinNoiseFloatTexture(const Texture3DMappingRef &mapping, 
                                                      uint32_t numOctaves, float initialFrequency, float supValueOrInitialAmplitude, bool supSpecified, 
                                                      float frequencyMultiplier, float persistence, int32_t repeat) : 
-    m_numOctaves(numOctaves), 
+    m_mapping(mapping), m_numOctaves(numOctaves), 
     m_initialFrequency(initialFrequency), m_supValueOrInitialAmplitude(supValueOrInitialAmplitude), m_supSpecified(supSpecified), 
     m_frequencyMultiplier(frequencyMultiplier), m_persistence(persistence), m_repeat(repeat) {
         m_rawData = new SLR::PerlinNoiseFloatTexture(mapping->getRaw(), numOctaves, initialFrequency, supValueOrInitialAmplitude, supSpecified, 
                                                      frequencyMultiplier, persistence, repeat);
+    }
+    
+    AnalyticSkySpectrumTexture::AnalyticSkySpectrumTexture(const Texture2DMappingRef &mapping, 
+                                                           float soloarElevation, float turbidity, const AssetSpectrumRef &groundAlbedo) : 
+    m_mapping(mapping), m_solarElevation(soloarElevation), m_turbidity(turbidity), m_groundAlbedo(groundAlbedo) {
+        m_rawData = new SLR::AnalyticSkySpectrumTexture(soloarElevation, turbidity, groundAlbedo.get(), mapping->getRaw());
     }
 }

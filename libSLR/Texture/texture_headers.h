@@ -13,5 +13,6 @@
 #include "checker_board_textures.h"
 #include "voronoi_textures.h"
 #include "perlin_noise_textures.h"
+#include "AnalyticSkySpectrumTexture.h"
 
 #endif /* __SLR_texture_headers__ */

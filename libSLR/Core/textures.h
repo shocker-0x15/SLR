@@ -100,7 +100,7 @@ namespace SLR {
         
         virtual SampledSpectrum evaluate(const SurfacePoint &surfPt, const WavelengthSamples &wls) const = 0;
         virtual SampledSpectrum evaluate(const MediumPoint &medPt, const WavelengthSamples &wls) const = 0;
-        virtual RegularConstantContinuousDistribution2D* createIBLImportanceMap() const = 0;
+        virtual ContinuousDistribution2D* createIBLImportanceMap() const = 0;
     };
     
     class SLR_API NormalTexture {

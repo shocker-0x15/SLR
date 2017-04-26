@@ -8,7 +8,7 @@
 #include "checker_board_textures.h"
 
 namespace SLR {
-    RegularConstantContinuousDistribution2D* CheckerBoardSpectrumTexture::createIBLImportanceMap() const {
+    ContinuousDistribution2D* CheckerBoardSpectrumTexture::createIBLImportanceMap() const {
         SLRAssert_NotImplemented();
         return nullptr;
     }

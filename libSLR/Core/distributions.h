@@ -94,7 +94,15 @@ namespace SLR {
     
     
     template <typename RealType>
-    class SLR_API RegularConstantContinuousDistribution1DTemplate {
+    class SLR_API ContinuousDistribution1DTemplate {
+    public:
+        virtual ~ContinuousDistribution1DTemplate() { }
+        virtual RealType sample(RealType u, RealType* PDF) const = 0;
+        virtual RealType evaluatePDF(RealType smp) const = 0;
+    };
+    
+    template <typename RealType>
+    class SLR_API RegularConstantContinuousDistribution1DTemplate : public ContinuousDistribution1DTemplate<RealType> {
         RealType* m_PDF;
         RealType* m_CDF;
         RealType m_integral;
@@ -107,8 +115,9 @@ namespace SLR {
             delete[] m_CDF;
         };
         
-        RealType sample(RealType u, RealType* PDF) const;
-        RealType evaluatePDF(RealType smp) const;
+        RealType sample(RealType u, RealType* PDF) const override;
+        RealType evaluatePDF(RealType smp) const override;
+        
         RealType integral() const { return m_integral; };
         uint32_t numValues() const { return m_numValues; };
         const RealType* PDF() const { return m_PDF; };
@@ -117,22 +126,31 @@ namespace SLR {
     
     
     template <typename RealType>
-    class SLR_API RegularConstantContinuousDistribution2DTemplate {
+    class SLR_API ContinuousDistribution2DTemplate {
+    public:
+        virtual ~ContinuousDistribution2DTemplate() { }
+        virtual void sample(RealType u0, RealType u1, RealType* d0, RealType* d1, RealType* PDF) const = 0;
+        virtual RealType evaluatePDF(RealType d0, RealType d1) const = 0;
+    };
+    
+    template <typename RealType>
+    class SLR_API RegularConstantContinuousDistribution2DTemplate : public ContinuousDistribution2DTemplate<RealType> {
         RegularConstantContinuousDistribution1DTemplate<RealType>* m_1DDists;
         uint32_t m_num1DDists;
         RealType m_integral;
         RegularConstantContinuousDistribution1DTemplate<RealType>* m_top1DDist;
     public:
-        RegularConstantContinuousDistribution2DTemplate(uint32_t numD1, uint32_t numD2, const std::function<RealType(uint32_t, uint32_t)> &pickFunc);;
+        RegularConstantContinuousDistribution2DTemplate(uint32_t numD1, uint32_t numD2, const std::function<RealType(uint32_t, uint32_t)> &pickFunc);
         ~RegularConstantContinuousDistribution2DTemplate() {
             free(m_1DDists);
             delete m_top1DDist;
         };
         
-        void sample(RealType u0, RealType u1, RealType* d0, RealType* d1, RealType* PDF) const;
-        RealType evaluatePDF(RealType d0, RealType d1) const;
+        void sample(RealType u0, RealType u1, RealType* d0, RealType* d1, RealType* PDF) const override;
+        RealType evaluatePDF(RealType d0, RealType d1) const override;
+        
         RealType integral() const { return m_integral; };
-        void exportBMP(const std::string &filename, float gamma = 1.0f) const;
+        void exportBMP(const std::string &filename, bool logScale = false, float gamma = 1.0f) const;
     };
     
     
