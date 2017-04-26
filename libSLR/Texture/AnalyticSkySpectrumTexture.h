@@ -25,6 +25,7 @@ namespace SLR {
         static const float RadianceScale;
 #endif
         
+        float m_solarRadius;
         float m_solarElevation;
         float m_turbidity;
         const AssetSpectrum* m_groundAlbedo;
@@ -35,7 +36,7 @@ namespace SLR {
 #endif
         const Texture2DMapping* m_mapping;
     public:
-        AnalyticSkySpectrumTexture(float solarElevation, float turbidity, const AssetSpectrum* groundAlbedo, const Texture2DMapping* mapping);
+        AnalyticSkySpectrumTexture(float solarRadius, float solarElevation, float turbidity, const AssetSpectrum* groundAlbedo, const Texture2DMapping* mapping);
         ~AnalyticSkySpectrumTexture();
         
         SampledSpectrum evaluate(const Point3D &p, const WavelengthSamples &wls) const;

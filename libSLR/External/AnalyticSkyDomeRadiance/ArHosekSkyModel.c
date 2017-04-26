@@ -811,6 +811,6 @@ double arhosekskymodel_solar_radiance(
             wavelength
             );
     
-    return  direct_radiance;
+    return  direct_radiance + inscattered_radiance;
 }
 

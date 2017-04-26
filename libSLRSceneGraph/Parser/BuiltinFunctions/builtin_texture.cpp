@@ -109,14 +109,16 @@ namespace SLRSceneGraph {
                                                                    {"solar elevation", Type::RealNumber},
                                                                    {"turbidity", Type::RealNumber},
                                                                    {"ground albedo", Type::Spectrum},
+                                                                   {"solar radius", Type::RealNumber, 0.5f * 0.51f * M_PI / 180},
                                                                    {"mapping", Type::Texture2DMapping, tex2DMapSharedInstance}                                                                                        
                                                                },
                                                                [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
                                                                    float solarElevation = args.at("solar elevation").raw<TypeMap::RealNumber>();
                                                                    float turbidity = args.at("turbidity").raw<TypeMap::RealNumber>();
-                                                                   AssetSpectrumRef groundAlbedo = args.at("ground albedo").rawRef<TypeMap::Spectrum>(); 
+                                                                   AssetSpectrumRef groundAlbedo = args.at("ground albedo").rawRef<TypeMap::Spectrum>();
+                                                                   float solarRadius = args.at("solar radius").raw<TypeMap::RealNumber>();
                                                                    const auto &mapping = args.at("mapping").rawRef<TypeMap::Texture2DMapping>();
-                                                                   SpectrumTextureRef rawRef = createShared<AnalyticSkySpectrumTexture>(mapping, solarElevation, turbidity, groundAlbedo);
+                                                                   SpectrumTextureRef rawRef = createShared<AnalyticSkySpectrumTexture>(mapping, solarRadius, solarElevation, turbidity, groundAlbedo);
                                                                    return Element::createFromReference<TypeMap::SpectrumTexture>(rawRef);
                                                                }
                                                            };

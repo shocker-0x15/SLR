@@ -3,6 +3,9 @@ setRenderer("method": "BPT", ("samples": 16384,));
 //setRenderer("method": "debug", (("geometric normal", "shading normal", "shading tangent"),));
 setRenderSettings("width": 1024, "height": 1024, "brightness": 4.0);
 
+//groundAlbedo = Spectrum(0.1, 0.1, 0.1);
+//envTex = SpectrumTexture("sky", (0.9 * 3.1415926536 / 2, 2, groundAlbedo));
+//setEnvironment(envTex, 30);
 setEnvironment("images/Malibu_Overlook_3k_corrected.exr");
 
 // Color Checker Materials
@@ -75,3 +78,4 @@ setTransform(cameraNode, translate(0, 0, 5) * rotateY(3.1415926536));
 
 addChild(root, cameraNode);
 setTransform(root, rotateY(1.2));
+//setTransform(root, rotateY(-0.15));

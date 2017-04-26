@@ -23,18 +23,22 @@ namespace SLR {
     const float AnalyticSkySpectrumTexture::RadianceScale = 0.010828553542f;
 #endif
     
-    AnalyticSkySpectrumTexture::AnalyticSkySpectrumTexture(float solarElevation, float turbidity, const AssetSpectrum* groundAlbedo, const Texture2DMapping* mapping) :
-    m_solarElevation(solarElevation), m_turbidity(turbidity), m_groundAlbedo(groundAlbedo), m_mapping(mapping) {
+    AnalyticSkySpectrumTexture::AnalyticSkySpectrumTexture(float solarRadius, float solarElevation, float turbidity, const AssetSpectrum* groundAlbedo, const Texture2DMapping* mapping) :
+    m_solarRadius(std::min(solarRadius, (float)M_PI / 2)), m_solarElevation(solarElevation), m_turbidity(turbidity), m_groundAlbedo(groundAlbedo), m_mapping(mapping) {
 #ifdef Use_Spectral_Representation
         float albedo[NumChannels];
         groundAlbedo->evaluate(SampledWavelengths, NumChannels, albedo);
-        for (int i = 0; i < NumChannels; ++i)
+        for (int i = 0; i < NumChannels; ++i) {
             m_skyModelStates[i] = arhosekskymodelstate_alloc_init(solarElevation, turbidity, albedo[i]);
+            m_skyModelStates[i]->solar_radius = m_solarRadius;
+        }
 #else
         float albedo[NumChannels];
         groundAlbedo->getRGB(albedo);
-        for (int i = 0; i < NumChannels; ++i)
+        for (int i = 0; i < NumChannels; ++i) {
             m_skyModelStates[i] = arhosek_rgb_skymodelstate_alloc_init(turbidity, albedo[i], solarElevation);
+            m_skyModelStates[i]->solar_radius = m_solarRadius;
+        }
 #endif
     }
     

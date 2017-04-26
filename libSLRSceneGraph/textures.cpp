@@ -113,8 +113,8 @@ namespace SLRSceneGraph {
     }
     
     AnalyticSkySpectrumTexture::AnalyticSkySpectrumTexture(const Texture2DMappingRef &mapping, 
-                                                           float soloarElevation, float turbidity, const AssetSpectrumRef &groundAlbedo) : 
+                                                           float solarRadius, float soloarElevation, float turbidity, const AssetSpectrumRef &groundAlbedo) : 
     m_mapping(mapping), m_solarElevation(soloarElevation), m_turbidity(turbidity), m_groundAlbedo(groundAlbedo) {
-        m_rawData = new SLR::AnalyticSkySpectrumTexture(soloarElevation, turbidity, groundAlbedo.get(), mapping->getRaw());
+        m_rawData = new SLR::AnalyticSkySpectrumTexture(solarRadius, soloarElevation, turbidity, groundAlbedo.get(), mapping->getRaw());
     }
 }
