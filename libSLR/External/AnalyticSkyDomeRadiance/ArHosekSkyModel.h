@@ -436,6 +436,14 @@ double arhosek_tristim_skymodel_radiance(
         int                     channel
         );
 
+//   sun only
+double arhosekskymodel_direct_radiance(
+        ArHosekSkyModelState      * state,
+        double                      theta,
+        double                      gamma,
+        double                      wavelength
+        );
+
 //   Delivers the complete function: sky + sun, including limb darkening.
 //   Please read the above description before using this - there are several
 //   caveats!

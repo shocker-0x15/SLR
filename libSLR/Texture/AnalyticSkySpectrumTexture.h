@@ -17,6 +17,8 @@ extern "C" {
 
 namespace SLR {
     class SLR_API AnalyticSkySpectrumTexture : public SpectrumTexture {
+        class SunDiscContinuousDistribution2D;
+        
 #ifdef Use_Spectral_Representation
         static const uint32_t NumChannels;
         static const float SampledWavelengths[11];
@@ -35,6 +37,11 @@ namespace SLR {
         ArHosekSkyModelState* m_skyModelStates[3];
 #endif
         const Texture2DMapping* m_mapping;
+        
+        Vector3D m_sunDirection;
+        mutable ContinuousDistribution2D* m_distribution;
+        mutable SunDiscContinuousDistribution2D* m_sunDiscDistribution;
+        mutable RegularConstantContinuousDistribution2D* m_skyDomeDistribution;
     public:
         AnalyticSkySpectrumTexture(float solarRadius, float solarElevation, float turbidity, const AssetSpectrum* groundAlbedo, const Texture2DMapping* mapping);
         ~AnalyticSkySpectrumTexture();
@@ -46,7 +53,7 @@ namespace SLR {
         SampledSpectrum evaluate(const MediumPoint &medPt, const WavelengthSamples &wls) const override {
             return evaluate(m_mapping->map(medPt), wls);
         }
-        ContinuousDistribution2D* createIBLImportanceMap() const override;
+        const ContinuousDistribution2D* createIBLImportanceMap() const override;
     };
 }
 

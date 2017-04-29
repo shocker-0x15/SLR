@@ -14,9 +14,9 @@
 
 namespace SLR {
     class SLR_API MultiBSDF : public BSDF {
-#define maxNumElems 4
+        static const uint32_t MaxNumElems = 4;
         uint32_t m_numComponents;
-        const BSDF* m_BSDFs[maxNumElems];
+        const BSDF* m_BSDFs[MaxNumElems];
         
         SampledSpectrum sampleInternalNoRev(const BSDFQuery &query, float uComponent, const float uDir[2], BSDFQueryResult *result) const;
         SampledSpectrum sampleInternalWithRev(const BSDFQuery &query, float uComponent, const float uDir[2], BSDFQueryResult *result) const;

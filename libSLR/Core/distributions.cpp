@@ -87,6 +87,26 @@ namespace SLR {
     
     
     template <typename RealType>
+    DiscreteDistribution1DTemplate<RealType>::DiscreteDistribution1DTemplate(const RealType* values, size_t numValues) {
+        m_numValues = (uint32_t)numValues;
+        m_PMF = new RealType[m_numValues];
+        m_CDF = new RealType[m_numValues + 1];
+        std::memcpy(m_PMF, values, sizeof(RealType) * m_numValues);
+        
+        CompensatedSum<RealType> sum(0);
+        m_CDF[0] = 0;
+        for (int i = 0; i < m_numValues; ++i) {
+            sum += m_PMF[i];
+            m_CDF[i + 1] = sum;
+        }
+        m_integral = sum;
+        for (int i = 0; i < m_numValues; ++i) {
+            m_PMF[i] /= m_integral;
+            m_CDF[i + 1] /= m_integral;
+        }
+    }
+    
+    template <typename RealType>
     DiscreteDistribution1DTemplate<RealType>::DiscreteDistribution1DTemplate(const std::vector<RealType> &values) {
         m_numValues = (uint32_t)values.size();
         m_PMF = new RealType[m_numValues];
@@ -104,7 +124,7 @@ namespace SLR {
             m_PMF[i] /= m_integral;
             m_CDF[i + 1] /= m_integral;
         }
-    };
+    }
     
     template <typename RealType>
     uint32_t DiscreteDistribution1DTemplate<RealType>::sample(RealType u, RealType* prob) const {
@@ -297,6 +317,48 @@ namespace SLR {
     
     template class SLR_API RegularConstantContinuousDistribution2DTemplate<float>;
     template class SLR_API RegularConstantContinuousDistribution2DTemplate<double>;
+    
+    template <typename RealType>
+    MultiContinuousDistribution2DTemplate<RealType>::MultiContinuousDistribution2DTemplate(const ContinuousDistribution2DTemplate<RealType>** dists, const RealType* importances, uint32_t numDists) : 
+    m_selectDist(DiscreteDistribution1DTemplate<RealType>(importances, numDists)) {
+        SLRAssert(numDists <= MaxNumDist2Ds, "Number of distributions is limited to %u", MaxNumDist2Ds);
+        for (int i = 0; i < numDists; ++i)
+            m_dist2Ds[i] = dists[i];
+        for (int i = numDists; i < MaxNumDist2Ds; ++i)
+            m_dist2Ds[i] = nullptr;
+    }
+    
+    template <typename RealType>
+    void MultiContinuousDistribution2DTemplate<RealType>::sample(RealType u0, RealType u1, RealType* d0, RealType* d1, RealType* PDF) const {
+        SLRAssert(u0 >= 0 && u0 < 1, "\"u0\" must be in range [0, 1).");
+        SLRAssert(u1 >= 0 && u1 < 1, "\"u1\" must be in range [0, 1).");
+        RealType selectProb;
+        uint32_t selIdx = m_selectDist.sample(u0, &selectProb, &u0); 
+        
+        m_dist2Ds[selIdx]->sample(u0, u1, d0, d1, PDF);
+        *PDF *= selectProb;
+        
+        for (int i = 0; i < m_selectDist.numValues(); ++i) {
+            if (i == selIdx)
+                continue;
+            *PDF += m_selectDist.evaluatePMF(i) * m_dist2Ds[i]->evaluatePDF(*d0, *d1);
+        }
+    };
+    
+    template <typename RealType>
+    RealType MultiContinuousDistribution2DTemplate<RealType>::evaluatePDF(RealType d0, RealType d1) const {
+        SLRAssert(d0 >= 0 && d0 < 1.0, "\"d0\" is out of range [0, 1)");
+        SLRAssert(d1 >= 0 && d1 < 1.0, "\"d1\" is out of range [0, 1)");
+        
+        RealType retPDF = 0;
+        for (int i = 0; i < m_selectDist.numValues(); ++i)
+            retPDF += m_selectDist.evaluatePMF(i) * m_dist2Ds[i]->evaluatePDF(d0, d1);
+        
+        return retPDF;
+    };
+    
+    template class SLR_API MultiContinuousDistribution2DTemplate<float>;
+    template class SLR_API MultiContinuousDistribution2DTemplate<double>;
     
     
     

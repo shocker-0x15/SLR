@@ -106,6 +106,12 @@ namespace SLR {
     struct SLR_API ReferenceFrame {
         Vector3D x, y, z;
         
+        ReferenceFrame() { }
+        ReferenceFrame(const Vector3D &t, const Vector3D &b, const Vector3D &n) : x(t), y(b), z(n) { }
+        ReferenceFrame(const Vector3D &zz) : z(zz) {
+            z.makeCoordinateSystem(&x, &y);
+        }
+        
         Vector3D toLocal(const Vector3D &v) const { return Vector3D(dot(x, v), dot(y, v), dot(z, v)); }
         Vector3D fromLocal(const Vector3D &v) const {
             // assume orthonormal basis

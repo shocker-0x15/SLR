@@ -131,11 +131,13 @@ namespace SLR {
     template <typename RealType> class RegularConstantContinuousDistribution1DTemplate;
     template <typename RealType> class ContinuousDistribution2DTemplate;
     template <typename RealType> class RegularConstantContinuousDistribution2DTemplate;
+    template <typename RealType> class MultiContinuousDistribution2DTemplate;
     typedef DiscreteDistribution1DTemplate<float> DiscreteDistribution1D;
     typedef ContinuousDistribution1DTemplate<float> ContinuousDistribution1D;
     typedef RegularConstantContinuousDistribution1DTemplate<float> RegularConstantContinuousDistribution1D;
     typedef ContinuousDistribution2DTemplate<float> ContinuousDistribution2D;
     typedef RegularConstantContinuousDistribution2DTemplate<float> RegularConstantContinuousDistribution2D;
+    typedef MultiContinuousDistribution2DTemplate<float> MultiContinuousDistribution2D;
     template <typename ReturnRealType> class MultiOctaveImprovedPerlinNoise3DGenerator;
     
     // Transform

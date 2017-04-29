@@ -75,20 +75,25 @@ namespace SLR {
         RealType m_integral;
         uint32_t m_numValues;
     public:
+        DiscreteDistribution1DTemplate() : m_PMF(nullptr), m_CDF(nullptr) { }
+        DiscreteDistribution1DTemplate(const RealType* values, size_t numValues);
         DiscreteDistribution1DTemplate(const std::vector<RealType> &values);
         ~DiscreteDistribution1DTemplate() {
-            delete[] m_PMF;
-            delete[] m_CDF;
-        };
+            if (m_PMF)
+                delete[] m_PMF;
+            if (m_CDF)
+                delete[] m_CDF;
+        }
         
         uint32_t sample(RealType u, RealType* prob) const;
         uint32_t sample(RealType u, RealType* prob, RealType* remapped) const;
         RealType evaluatePMF(uint32_t idx) const {
             SLRAssert(idx >= 0 && idx < m_numValues, "\"idx\" is out of range [0, %u)", m_numValues);
             return m_PMF[idx];
-        };
+        }
         
-        RealType integral() const { return m_integral; };
+        RealType integral() const { return m_integral; }
+        uint32_t numValues() const { return m_numValues; }
     };
     
     
@@ -99,6 +104,7 @@ namespace SLR {
         virtual ~ContinuousDistribution1DTemplate() { }
         virtual RealType sample(RealType u, RealType* PDF) const = 0;
         virtual RealType evaluatePDF(RealType smp) const = 0;
+        virtual RealType integral() const = 0;
     };
     
     template <typename RealType>
@@ -113,14 +119,14 @@ namespace SLR {
         ~RegularConstantContinuousDistribution1DTemplate() {
             delete[] m_PDF;
             delete[] m_CDF;
-        };
+        }
         
         RealType sample(RealType u, RealType* PDF) const override;
         RealType evaluatePDF(RealType smp) const override;
+        RealType integral() const override { return m_integral; }
         
-        RealType integral() const { return m_integral; };
-        uint32_t numValues() const { return m_numValues; };
-        const RealType* PDF() const { return m_PDF; };
+        uint32_t numValues() const { return m_numValues; }
+        const RealType* PDF() const { return m_PDF; }
     };
     
     
@@ -144,13 +150,24 @@ namespace SLR {
         ~RegularConstantContinuousDistribution2DTemplate() {
             free(m_1DDists);
             delete m_top1DDist;
-        };
+        }
         
         void sample(RealType u0, RealType u1, RealType* d0, RealType* d1, RealType* PDF) const override;
         RealType evaluatePDF(RealType d0, RealType d1) const override;
-        
-        RealType integral() const { return m_integral; };
+
         void exportBMP(const std::string &filename, bool logScale = false, float gamma = 1.0f) const;
+    };
+    
+    template <typename RealType>
+    class SLR_API MultiContinuousDistribution2DTemplate : public ContinuousDistribution2DTemplate<RealType> {
+        static const uint32_t MaxNumDist2Ds = 4;
+        DiscreteDistribution1DTemplate<RealType> m_selectDist;
+        const ContinuousDistribution2DTemplate<RealType>* m_dist2Ds[MaxNumDist2Ds];
+    public:
+        MultiContinuousDistribution2DTemplate(const ContinuousDistribution2DTemplate<RealType>** dists, const RealType* importances, uint32_t numDists);
+        
+        void sample(RealType u0, RealType u1, RealType* d0, RealType* d1, RealType* PDF) const override;
+        RealType evaluatePDF(RealType d0, RealType d1) const override;
     };
     
     

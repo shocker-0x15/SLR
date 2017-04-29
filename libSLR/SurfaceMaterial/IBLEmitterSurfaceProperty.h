@@ -24,7 +24,7 @@ namespace SLR {
         SampledSpectrum emittance(const SurfacePoint &surfPt, const WavelengthSamples &wls) const override;
         EDF* getEDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem, float scale = 1.0f) const override;
         
-        ContinuousDistribution2D* createIBLImportanceMap() const;
+        const ContinuousDistribution2D* createIBLImportanceMap() const;
     };
 }
 

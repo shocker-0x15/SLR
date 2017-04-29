@@ -28,7 +28,7 @@ namespace SLR {
         SampledSpectrum evaluate(const MediumPoint &medPt, const WavelengthSamples &wls) const override {
             return evaluate(m_mapping->map(medPt), wls);
         }
-        ContinuousDistribution2D* createIBLImportanceMap() const override;
+        const ContinuousDistribution2D* createIBLImportanceMap() const override;
     };
     
     

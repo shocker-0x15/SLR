@@ -10,6 +10,41 @@
 #include "../Core/distributions.h"
 
 namespace SLR {
+    class AnalyticSkySpectrumTexture::SunDiscContinuousDistribution2D : public ContinuousDistribution2D {
+        ReferenceFrame m_sunDirFrame;
+        float m_cosSunRadius;
+    public:
+        SunDiscContinuousDistribution2D(const Vector3D &sunDirection, float sunRadius) : 
+        m_sunDirFrame(sunDirection), m_cosSunRadius(std::cos(sunRadius)) { }
+        
+        void sample(float u0, float u1, float* d0, float* d1, float* PDF) const override {
+            SLRAssert(u0 >= 0 && u0 < 1, "\"u0\" must be in range [0, 1).");
+            SLRAssert(u1 >= 0 && u1 < 1, "\"u1\" must be in range [0, 1).");
+            Vector3D dir = uniformSampleCone(u0, u1, m_cosSunRadius);
+            dir = m_sunDirFrame.fromLocal(dir);
+            float theta, phi;
+            dir.toPolarYUp(&theta, &phi);
+            
+            *d0 = phi / (2 * M_PI);
+            *d1 = theta / M_PI;
+            
+            // convert PDF w.r.t solid angle to texture space.
+            *PDF = 1.0f / (2 * M_PI * (1 - m_cosSunRadius)) * (2 * M_PI * M_PI * std::sin(theta));
+        }
+        
+        float evaluatePDF(float d0, float d1) const override {
+            float phi = d0 * 2 * M_PI;
+            float theta = d1 * M_PI;
+            Vector3D dir = Vector3D::fromPolarYUp(phi, theta);
+            dir = m_sunDirFrame.toLocal(dir);
+            
+            if (dir.z >= m_cosSunRadius)
+                return 1.0f / (2 * M_PI * (1 - m_cosSunRadius)) * (2 * M_PI * M_PI * std::sin(theta));
+            else
+                return 0.0f;
+        }
+    };
+    
 #ifdef Use_Spectral_Representation
     const uint32_t AnalyticSkySpectrumTexture::NumChannels = 11;
     const float AnalyticSkySpectrumTexture::SampledWavelengths[11] = {
@@ -23,8 +58,11 @@ namespace SLR {
     const float AnalyticSkySpectrumTexture::RadianceScale = 0.010828553542f;
 #endif
     
+    
+    
     AnalyticSkySpectrumTexture::AnalyticSkySpectrumTexture(float solarRadius, float solarElevation, float turbidity, const AssetSpectrum* groundAlbedo, const Texture2DMapping* mapping) :
-    m_solarRadius(std::min(solarRadius, (float)M_PI / 2)), m_solarElevation(solarElevation), m_turbidity(turbidity), m_groundAlbedo(groundAlbedo), m_mapping(mapping) {
+    m_solarRadius(std::min(solarRadius, (float)M_PI / 2)), m_solarElevation(solarElevation), m_turbidity(turbidity), m_groundAlbedo(groundAlbedo), m_mapping(mapping), 
+    m_distribution(nullptr) {
 #ifdef Use_Spectral_Representation
         float albedo[NumChannels];
         groundAlbedo->evaluate(SampledWavelengths, NumChannels, albedo);
@@ -40,9 +78,20 @@ namespace SLR {
             m_skyModelStates[i]->solar_radius = m_solarRadius;
         }
 #endif
+        m_sunDirection = Vector3D::fromPolarYUp(M_PI, M_PI / 2 - m_solarElevation);
     }
     
     AnalyticSkySpectrumTexture::~AnalyticSkySpectrumTexture() {
+        if (m_distribution) {
+#ifdef Use_Spectral_Representation
+            delete m_distribution;
+            delete m_skyDomeDistribution;
+            delete m_sunDiscDistribution;
+#else
+            delete m_distribution;
+#endif
+        }
+        
         for (int i = 0; i < NumChannels; ++i)
             arhosekskymodelstate_free(m_skyModelStates[i]);
     }
@@ -52,8 +101,7 @@ namespace SLR {
         if (theta >= M_PI / 2)
             return SampledSpectrum::Zero;
         Vector3D viewVec = Vector3D::fromPolarYUp(2 * M_PI * p.x, theta);
-        Vector3D solarVec = Vector3D::fromPolarYUp(M_PI, M_PI / 2 - m_solarElevation);
-        float gamma = std::acos(std::clamp(dot(viewVec, solarVec), -1.0f, 1.0f));
+        float gamma = std::acos(std::clamp(dot(viewVec, m_sunDirection), -1.0f, 1.0f));
         
 #ifdef Use_Spectral_Representation
         float sampledValues[NumChannels];
@@ -78,27 +126,25 @@ namespace SLR {
         return ret;
     }
     
-    ContinuousDistribution2D* AnalyticSkySpectrumTexture::createIBLImportanceMap() const {        
+    const ContinuousDistribution2D* AnalyticSkySpectrumTexture::createIBLImportanceMap() const {
+        if (m_distribution) {
+            delete m_distribution;
+        }
+        
         const uint32_t mapWidth = 1024;
         const uint32_t mapHeight = 512;
-        std::function<float(uint32_t, uint32_t)> pickFunc = [this, &mapWidth, &mapHeight](uint32_t x, uint32_t y) -> float {
+        FloatSum accSkyDomeEnergy = 0.0f;
+        std::function<float(uint32_t, uint32_t)> pickFunc = [this, &mapWidth, &mapHeight, &accSkyDomeEnergy](uint32_t x, uint32_t y) -> float {
             float theta = M_PI * (y + 0.5f) / mapHeight;
             if (theta >= M_PI / 2)
                 return 0.0f;
             Vector3D viewVec = Vector3D::fromPolarYUp(2 * M_PI * (x + 0.5f) / mapWidth, theta);
-            Vector3D solarVec = Vector3D::fromPolarYUp(M_PI, M_PI / 2 - m_solarElevation);
-            float gamma = std::acos(std::clamp(dot(viewVec, solarVec), -1.0f, 1.0f));
+            float gamma = std::acos(std::clamp(dot(viewVec, m_sunDirection), -1.0f, 1.0f));
             
 #ifdef Use_Spectral_Representation
             float sampledValues[NumChannels];
-            if (gamma < m_skyModelStates[0]->solar_radius) {
-                for (int i = 0; i < NumChannels; ++i)
-                    sampledValues[i] = arhosekskymodel_solar_radiance(m_skyModelStates[i], theta, gamma, SampledWavelengths[i]);
-            }
-            else {
-                for (int i = 0; i < NumChannels; ++i)
-                    sampledValues[i] = arhosekskymodel_radiance(m_skyModelStates[i], theta, gamma, SampledWavelengths[i]);
-            }
+            for (int i = 0; i < NumChannels; ++i)
+                sampledValues[i] = arhosekskymodel_radiance(m_skyModelStates[i], theta, gamma, SampledWavelengths[i]);
             
             RegularContinuousSpectrum spectrum(SampledWavelengths[0], SampledWavelengths[NumChannels - 1], sampledValues, NumChannels);
             
@@ -119,12 +165,64 @@ namespace SLR {
             float luminance = spectrum.luminance();
 #endif
             SLRAssert(std::isfinite(luminance), "Invalid area average value.");
-            return std::sin(M_PI * (y + 0.5f) / mapHeight) * luminance;
+            float contribution = std::sin(M_PI * (y + 0.5f) / mapHeight) * luminance;
+            accSkyDomeEnergy += contribution;
+            
+            return contribution;
         };
+     
+        m_skyDomeDistribution = new RegularConstantContinuousDistribution2D(mapWidth, mapHeight, pickFunc);
+//        m_skyDomeDistribution->exportBMP("distribution.bmp", true);
         
-        RegularConstantContinuousDistribution2D* ret = new RegularConstantContinuousDistribution2D(mapWidth, mapHeight, pickFunc);
-//        ret->exportBMP("distribution.bmp", true);
+#ifdef Use_Spectral_Representation
+        const uint32_t NumRadiusSamples = 5;
+        const uint32_t NumAngularSamples = 12;
+        ReferenceFrame sunDirFrame(m_sunDirection);
+        FloatSum sunDiscEnergy = 0.0f;
+        for (int ir = 0; ir < NumRadiusSamples; ++ir) {
+            float r = m_solarRadius * std::sqrt((ir + 0.5f) / NumRadiusSamples);
+            float rLow = m_solarRadius * std::sqrt((float)ir / NumRadiusSamples);
+            float rHigh = m_solarRadius * std::sqrt((float)(ir + 1) / NumRadiusSamples);
+            float rWidth = rHigh - rLow;
+            for (int ia = 0; ia < NumAngularSamples; ++ia) {
+                float a = 2 * M_PI * (ia + 0.5f) / NumAngularSamples;
+                float solidAngle = rWidth * (2 * M_PI / NumAngularSamples) * 0.5f * (rHigh + rLow);
+                
+                Vector3D viewVecLocal = Vector3D::fromPolarZUp(a, r); 
+                Vector3D viewVec = sunDirFrame.fromLocal(viewVecLocal);
+                float theta = std::acos(std::clamp(viewVec.y, -1.0f, 1.0f));
+                float gamma = std::acos(std::clamp(dot(viewVec, m_sunDirection), -1.0f, 1.0f));
+                SLRAssert(gamma < m_solarRadius, "Invalid.");
+                
+                float sampledValues[NumChannels];
+                for (int i = 0; i < NumChannels; ++i)
+                    sampledValues[i] = arhosekskymodel_direct_radiance(m_skyModelStates[i], theta, gamma, SampledWavelengths[i]);
+                
+                RegularContinuousSpectrum spectrum(SampledWavelengths[0], SampledWavelengths[NumChannels - 1], sampledValues, NumChannels);
+                
+                SpectrumStorage yStorage;
+                const uint32_t NumWLDetailSampling = 5;
+                for (int i = 0; i < NumWLDetailSampling; ++i) {
+                    float wlPDF;
+                    WavelengthSamples wls = WavelengthSamples::createWithEqualOffsets(0.5f, (float)i / NumWLDetailSampling, &wlPDF);
+                    yStorage.add(wls, spectrum.evaluate(wls) / wlPDF);
+                }
+                
+                float luminance = yStorage.getValue().result.luminance() / NumWLDetailSampling;
+                
+                sunDiscEnergy += solidAngle * luminance; 
+            }
+        }
+        float skyDomeEnergy = accSkyDomeEnergy * (2 * M_PI / mapWidth * M_PI / mapHeight);
+        m_sunDiscDistribution = new SunDiscContinuousDistribution2D(m_sunDirection, m_solarRadius);
         
-        return ret;
+        std::array<const ContinuousDistribution2D*, 2> dists{m_skyDomeDistribution, m_sunDiscDistribution};
+        std::array<float, 2> importances{skyDomeEnergy, sunDiscEnergy};
+        m_distribution = new MultiContinuousDistribution2D(dists.data(), importances.data(), dists.size());
+#else
+        m_distribution = m_skyDomeDistribution;
+#endif
+        
+        return m_distribution;
     }
 }

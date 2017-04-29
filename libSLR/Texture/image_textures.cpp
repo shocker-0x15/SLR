@@ -78,7 +78,7 @@ namespace SLR {
         return ret;
     }
     
-    ContinuousDistribution2D* ImageSpectrumTexture::createIBLImportanceMap() const {
+    const ContinuousDistribution2D* ImageSpectrumTexture::createIBLImportanceMap() const {
         uint32_t mapWidth = m_data->width() / 4;
         uint32_t mapHeight = m_data->height() / 4;
         float deltaX = m_data->width() / mapWidth;

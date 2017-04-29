@@ -13,13 +13,13 @@ namespace SLR {
     void MultiBSDF::add(const BSDF *bsdf) {
         if (!bsdf)
             return;
-        SLRAssert(m_numComponents < maxNumElems, "Number of MultiBSDF elements exceeds the limit: %u", maxNumElems);
+        SLRAssert(m_numComponents < MaxNumElems, "Number of MultiBSDF elements exceeds the limit: %u", MaxNumElems);
         m_type |= bsdf->m_type;
         m_BSDFs[m_numComponents++] = bsdf;
     }
     
     SampledSpectrum MultiBSDF::sampleInternalNoRev(const BSDFQuery &query, float uComponent, const float uDir[2], BSDFQueryResult *result) const {
-        float weights[maxNumElems];
+        float weights[MaxNumElems];
         for (int i = 0; i < m_numComponents; ++i)
             weights[i] = m_BSDFs[i]->weight(query);
         
@@ -60,7 +60,7 @@ namespace SLR {
     }
     
     SampledSpectrum MultiBSDF::sampleInternalWithRev(const BSDFQuery &query, float uComponent, const float uDir[2], BSDFQueryResult *result) const {
-        float weights[maxNumElems];
+        float weights[MaxNumElems];
         for (int i = 0; i < m_numComponents; ++i)
             weights[i] = m_BSDFs[i]->weight(query);
         
@@ -83,7 +83,7 @@ namespace SLR {
         Vector3D revDirIn = result->dirLocal;
         std::swap(revQuery.dirLocal, revDirIn);
         revQuery.adjoint ^= true;
-        float revWeights[maxNumElems];
+        float revWeights[MaxNumElems];
         FloatSum sumRevWeights = 0;
         for (int i = 0; i < m_numComponents; ++i) {
             revWeights[i] = m_BSDFs[i]->weight(revQuery);
@@ -147,7 +147,7 @@ namespace SLR {
     
     float MultiBSDF::evaluatePDFInternalNoRev(const BSDFQuery &query, const Vector3D &dirOut, float* revPDF) const {
         FloatSum sumWeights = 0.0f;
-        float weights[maxNumElems];
+        float weights[MaxNumElems];
         for (int i = 0; i < m_numComponents; ++i) {
             weights[i] = m_BSDFs[i]->weight(query);
             sumWeights += weights[i];
@@ -173,8 +173,8 @@ namespace SLR {
         
         FloatSum sumWeights = 0.0f;
         FloatSum sumRevWeights = 0.0f;
-        float weights[maxNumElems];
-        float revWeights[maxNumElems];
+        float weights[MaxNumElems];
+        float revWeights[MaxNumElems];
         for (int i = 0; i < m_numComponents; ++i) {
             weights[i] = m_BSDFs[i]->weight(query);
             sumWeights += weights[i];

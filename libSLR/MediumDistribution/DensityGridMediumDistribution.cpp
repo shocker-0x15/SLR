@@ -160,9 +160,7 @@ namespace SLR {
     }
     
     void DensityGridMediumDistribution::calculateMediumPoint(const MediumInteraction &mi, MediumPoint* medPt) const {
-        ReferenceFrame shadingFrame;
-        shadingFrame.z = mi.getIncomingDirection();
-        shadingFrame.z.makeCoordinateSystem(&shadingFrame.x, &shadingFrame.y);
+        ReferenceFrame shadingFrame(mi.getIncomingDirection());
         *medPt = MediumPoint(mi, false, shadingFrame);
     }
     

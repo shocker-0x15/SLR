@@ -14,18 +14,12 @@
 
 namespace SLR {
     void InfinitesimalPointSurfaceShape::calculateSurfacePoint(const SurfaceInteraction &si, SurfacePoint* surfPt) const {
-        ReferenceFrame shadingFrame;
-        shadingFrame.z = m_direction;
-        shadingFrame.z.makeCoordinateSystem(&shadingFrame.x, &shadingFrame.y);
-        
+        ReferenceFrame shadingFrame(m_direction);        
         *surfPt = SurfacePoint(si, false, shadingFrame, shadingFrame.x);
     }
     
     void InfinitesimalPointSurfaceShape::sample(float u0, float u1, SurfacePoint* surfPt, float* areaPDF, DirectionType* posType) const {
-        ReferenceFrame shadingFrame;
-        shadingFrame.z = m_direction;
-        shadingFrame.z.makeCoordinateSystem(&shadingFrame.x, &shadingFrame.y);
-        
+        ReferenceFrame shadingFrame(m_direction);
         *surfPt = SurfacePoint(m_position,
                                false,
                                shadingFrame,

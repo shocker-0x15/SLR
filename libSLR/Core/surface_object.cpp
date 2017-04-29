@@ -166,7 +166,7 @@ namespace SLR {
         Vector3D b = normalize(originalFrame.fromLocal(bLocal));
         Vector3D n = normalize(originalFrame.fromLocal(nLocal));
         
-        ReferenceFrame bumpFrame{t, b, n};
+        ReferenceFrame bumpFrame(t, b, n);
         surfPt->setShadingFrame(bumpFrame);
     }
     
@@ -180,7 +180,6 @@ namespace SLR {
     }
     
     InfiniteSphereSurfaceObject::~InfiniteSphereSurfaceObject() {
-        delete m_dist;
         delete m_material;
         delete m_surface;
     }

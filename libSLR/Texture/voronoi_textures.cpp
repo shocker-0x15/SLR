@@ -89,7 +89,7 @@ namespace SLR {
 #endif
     }
     
-    ContinuousDistribution2D* VoronoiSpectrumTexture::createIBLImportanceMap() const {
+    const ContinuousDistribution2D* VoronoiSpectrumTexture::createIBLImportanceMap() const {
         SLRAssert_NotImplemented();
         return nullptr;
     }

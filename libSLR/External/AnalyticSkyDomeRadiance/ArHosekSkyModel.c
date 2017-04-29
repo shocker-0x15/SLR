@@ -788,6 +788,23 @@ double arhosekskymodel_solar_radiance_internal2(
     return direct_radiance;
 }
 
+double arhosekskymodel_direct_radiance(
+        ArHosekSkyModelState      * state,
+        double                      theta,
+        double                      gamma,
+        double                      wavelength
+        )
+{
+    double  direct_radiance =
+        arhosekskymodel_solar_radiance_internal2(
+            state,
+            wavelength,
+            ((MATH_PI/2.0)-theta),
+            gamma
+            );
+    return  direct_radiance;
+}
+
 double arhosekskymodel_solar_radiance(
         ArHosekSkyModelState  * state,
         double                  theta, 

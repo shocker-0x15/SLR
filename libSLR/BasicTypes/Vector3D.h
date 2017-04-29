@@ -66,6 +66,9 @@ namespace SLR {
             }
             *vy = cross(*this, *vx);
         }
+        static Vector3DTemplate fromPolarZUp(RealType phi, RealType theta) {
+            return Vector3DTemplate(std::sin(phi) * std::sin(theta), std::cos(phi) * std::sin(theta), std::cos(theta));
+        }
         static Vector3DTemplate fromPolarYUp(RealType phi, RealType theta) {
             return Vector3DTemplate(-std::sin(phi) * std::sin(theta), std::cos(theta), std::cos(phi) * std::sin(theta));
         }
