@@ -1028,6 +1028,22 @@ namespace SLRSceneGraph {
                                                    return Element::createFromReference<TypeMap::Node>(rawRef);
                                                }
                                                );
+            stack["createEquirectangularCamera"] =
+            Element::create<TypeMap::Function>(1,
+                                               std::vector<ArgInfo>{
+                                                   {"sensitivity", Type::RealNumber, Element(0.0)},
+                                                   {"phi", Type::RealNumber},
+                                                   {"theta", Type::RealNumber}
+                                               },
+                                               [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
+                                                   float sensitivity = args.at("sensitivity").raw<TypeMap::RealNumber>();
+                                                   float phi = args.at("phi").raw<TypeMap::RealNumber>();
+                                                   float theta = args.at("theta").raw<TypeMap::RealNumber>();
+                                                   
+                                                   NodeRef rawRef = createShared<EquirectangularCameraNode>(sensitivity, phi, theta);
+                                                   return Element::createFromReference<TypeMap::Node>(rawRef);
+                                               }
+                                               );
             stack["setRenderer"] =
             Element::create<TypeMap::Function>(1,
                                                std::vector<ArgInfo>{

@@ -40,13 +40,13 @@ SLR consists of the following components.
     * Procedural
         * Checkerboard (color & normal & float)
         * Cell Noise \[Worley1996\] like Voronoi diagram (color & normal & float)
-        * Improved Perlin Noise \[Perlin2002\] (float)
-        * Analytic Sky Texture \[Hosek2012\] (color)
+        * Improved Perlin Noise \[Perlin2002\] (float & normal)
 * Bump Mapping (Normal Map)
 * Light Types
     * Area (Polygonal) Light
     * Infinitely Distant Image Based Environmental Light
     * ~~Infinitely Distant Directional Light~~ (TODO)
+    * Analytic Sky Dome & Sun \[Hosek2012\]
 * Light Distributions
     * Diffuse
     * Ideal Directional

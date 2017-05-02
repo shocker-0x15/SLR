@@ -28,6 +28,7 @@ namespace SLR {
             m_transform->sample(query.time, &staticTF);
         
         Normal3D geometricNormal = staticTF * Normal3D(0, 0, 1);
+        SLRAssert(geometricNormal.length() < 1.01f, "Transform applied to camera can not include scaling.");
         
         ReferenceFrame shadingFrame;
         shadingFrame.z = (Vector3D)geometricNormal;
@@ -56,8 +57,8 @@ namespace SLR {
     
     
     SampledSpectrum EquirectangularIDF::sample(const IDFSample &smp, IDFQueryResult *result) const {
-        float phi = m_cam.m_phiAngle * smp.uDir[0];
-        float theta = m_cam.m_thetaAngle * smp.uDir[1];
+        float phi = m_cam.m_phiAngle * (smp.uDir[0] - 0.5f);
+        float theta = 0.5f * M_PI + m_cam.m_thetaAngle * (smp.uDir[1] - 0.5f);
         result->dirLocal = Vector3D::fromPolarYUp(phi, theta);
         float sinTheta = (1.0f - result->dirLocal.y * result->dirLocal.y);
         result->dirPDF = 1.0f / (m_cam.m_phiAngle * m_cam.m_thetaAngle * sinTheta);
@@ -69,6 +70,9 @@ namespace SLR {
     SampledSpectrum EquirectangularIDF::evaluate(const Vector3D &dirIn) const {
         float phi, theta;
         dirIn.toPolarYUp(&theta, &phi);
+        if (phi > M_PI)
+            phi -= 2 * M_PI;
+        theta -= 0.5f * M_PI;
         bool valid = (phi >= -m_cam.m_phiAngle * 0.5f && phi < m_cam.m_phiAngle * 0.5f &&
                       theta >= -m_cam.m_thetaAngle * 0.5f && theta < m_cam.m_thetaAngle * 0.5f);
         return valid ? SampledSpectrum::One : SampledSpectrum::Zero;
@@ -77,6 +81,9 @@ namespace SLR {
     float EquirectangularIDF::evaluatePDF(const Vector3D &dirIn) const {
         float phi, theta;
         dirIn.toPolarYUp(&theta, &phi);
+        if (phi > M_PI)
+            phi -= 2 * M_PI;
+        theta -= 0.5f * M_PI;
         bool valid = (phi >= -m_cam.m_phiAngle * 0.5f && phi < m_cam.m_phiAngle * 0.5f &&
                       theta >= -m_cam.m_thetaAngle * 0.5f && theta < m_cam.m_thetaAngle * 0.5f);
         float sinTheta = (1.0f - dirIn.y * dirIn.y);
@@ -87,8 +94,11 @@ namespace SLR {
     void EquirectangularIDF::calculatePixel(const Vector3D &dirIn, float* hitPx, float* hitPy) const {
         float phi, theta;
         dirIn.toPolarYUp(&theta, &phi);
-        float smpX = phi / m_cam.m_phiAngle;
-        float smpY = theta / m_cam.m_thetaAngle;
+        if (phi > M_PI)
+            phi -= 2 * M_PI;
+        theta -= 0.5f * M_PI;
+        float smpX = phi / m_cam.m_phiAngle + 0.5f;
+        float smpY = theta / m_cam.m_thetaAngle + 0.5f;
         *hitPx = smpX * m_cam.m_sensor->width();
         *hitPy = smpY * m_cam.m_sensor->height();
     }

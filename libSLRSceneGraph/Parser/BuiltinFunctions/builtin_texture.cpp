@@ -178,6 +178,33 @@ namespace SLRSceneGraph {
                                                            };
                                                            return configFunc(params, context, err);
                                                        }
+                                                       else if (procedure == "perlin") {
+                                                           const static Function configFunc{
+                                                               0, {
+                                                                   {"thetaMax", Type::RealNumber, Element(M_PI / 6)},
+                                                                   {"octaves", Type::Integer},
+                                                                   {"init freq phi", Type::RealNumber},
+                                                                   {"init freq theta", Type::RealNumber},
+                                                                   {"freq mul", Type::RealNumber},
+                                                                   {"persistence", Type::RealNumber},
+                                                                   {"repeat", Type::Integer},
+                                                                   {"mapping", Type::Texture3DMapping, worldPos3DMapSharedInstance}                                                                                        
+                                                               },
+                                                               [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
+                                                                   float thetaMax = args.at("thetaMax").raw<TypeMap::RealNumber>();
+                                                                   uint32_t numOctaves = args.at("octaves").raw<TypeMap::Integer>();
+                                                                   float initFreqPhi = args.at("init freq phi").raw<TypeMap::RealNumber>();
+                                                                   float initFreqTheta = args.at("init freq theta").raw<TypeMap::RealNumber>();
+                                                                   float freqMul = args.at("freq mul").raw<TypeMap::RealNumber>();
+                                                                   float persistence = args.at("persistence").raw<TypeMap::RealNumber>();
+                                                                   int32_t repeat = args.at("repeat").raw<TypeMap::Integer>();
+                                                                   const auto &mapping = args.at("mapping").rawRef<TypeMap::Texture3DMapping>();
+                                                                   NormalTextureRef rawRef = createShared<PerlinNoiseNormalTexture>(mapping, thetaMax, numOctaves, initFreqPhi, initFreqTheta, freqMul, persistence, repeat);
+                                                                   return Element::createFromReference<TypeMap::NormalTexture>(rawRef);
+                                                               }
+                                                           };
+                                                           return configFunc(params, context, err);
+                                                       }
                                                        *err = ErrorMessage("Specified procedure is invalid.");
                                                        return Element();
                                                    }

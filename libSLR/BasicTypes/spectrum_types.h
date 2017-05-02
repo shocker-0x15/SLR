@@ -532,6 +532,12 @@ namespace SLR {
     SampledSpectrumTemplate<RealType, NumSpectralSamples>::NaN = SampledSpectrumTemplate<RealType, NumSpectralSamples>(std::numeric_limits<RealType>::quiet_NaN());
     
     template <typename RealType, uint32_t NumSpectralSamples>
+    SLR_API SampledSpectrumTemplate<RealType, NumSpectralSamples> min(const SampledSpectrumTemplate<RealType, NumSpectralSamples> &value, RealType minValue);
+    
+    template <typename RealType, uint32_t NumSpectralSamples>
+    SLR_API SampledSpectrumTemplate<RealType, NumSpectralSamples> max(const SampledSpectrumTemplate<RealType, NumSpectralSamples> &value, RealType maxValue);
+    
+    template <typename RealType, uint32_t NumSpectralSamples>
     SLR_API SampledSpectrumTemplate<RealType, NumSpectralSamples> sqrt(const SampledSpectrumTemplate<RealType, NumSpectralSamples> &value);
     
     template <typename RealType, uint32_t NumSpectralSamples>

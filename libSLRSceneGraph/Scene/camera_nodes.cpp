@@ -68,6 +68,7 @@ namespace SLRSceneGraph {
     }
     
     void EquirectangularCameraNode::prepareForRendering() {
-        new (m_rawData) SLR::EquirectangularCameraNode(m_sensitivity, m_phiAngle, m_thetaAngle);
+        terminateRawData();
+        setupRawData();
     }
 }

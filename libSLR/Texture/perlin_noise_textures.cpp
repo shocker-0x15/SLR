@@ -11,6 +11,15 @@
 #include "../RNG/LinearCongruentialRNG.h"
 
 namespace SLR {
+    Normal3D PerlinNoiseNormalTexture::evaluate(const Point3D &p) const {
+        float phi = 2 * M_PI * m_generator[0].evaluate(p.x, p.y, p.z);
+        float theta = m_thetaMax * m_generator[1].evaluate(p.x, p.y, p.z);
+        
+        return Normal3D::fromPolarZUp(phi, theta);
+    }
+    
+    
+    
     float PerlinNoiseFloatTexture::evaluate(const Point3D &p) const {
         return m_generator.evaluate(p.x, p.y, p.z);
     }

@@ -68,6 +68,20 @@ namespace SLR {
             }
             *bitangent = cross(*this, *tangent);
         }
+        static Normal3DTemplate fromPolarZUp(RealType phi, RealType theta) {
+            return Normal3DTemplate(std::cos(phi) * std::sin(theta), std::sin(phi) * std::sin(theta), std::cos(theta));
+        }
+        static Normal3DTemplate fromPolarYUp(RealType phi, RealType theta) {
+            return Normal3DTemplate(-std::sin(phi) * std::sin(theta), std::cos(theta), std::cos(phi) * std::sin(theta));
+        }
+        void toPolarZUp(RealType* theta, RealType* phi) const {
+            *theta = std::acos(std::clamp(z, (RealType)-1.0, (RealType)1.0));
+            *phi = std::fmod((RealType)(std::atan2(y, x) + 2 * M_PI), (RealType)(2 * M_PI));
+        }
+        void toPolarYUp(RealType* theta, RealType* phi) const {
+            *theta = std::acos(std::clamp(y, (RealType)-1.0, (RealType)1.0));
+            *phi = std::fmod((RealType)(std::atan2(-x, z) + 2 * M_PI), (RealType)(2 * M_PI));
+        }
         
         RealType maxValue() const { using std::fmax; return fmax(x, fmax(y, z)); }
         RealType minValue() const { using std::fmin; return fmin(x, fmin(y, z)); }

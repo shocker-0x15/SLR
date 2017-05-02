@@ -182,6 +182,12 @@ namespace SLR {
     
     
     template <typename RealType>
+    SLR_API RGBTemplate<RealType> min(const RGBTemplate<RealType> &value, RealType minValue);
+    
+    template <typename RealType>
+    SLR_API RGBTemplate<RealType> max(const RGBTemplate<RealType> &value, RealType maxValue);
+    
+    template <typename RealType>
     SLR_API RGBTemplate<RealType> sqrt(const RGBTemplate<RealType> &value);
     
     template <typename RealType>

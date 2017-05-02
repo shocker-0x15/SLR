@@ -14,6 +14,29 @@
 #include "../Core/distributions.h"
 
 namespace SLR {
+    class SLR_API PerlinNoiseNormalTexture : public NormalTexture {
+        const Texture3DMapping* m_mapping;
+        float m_thetaMax;
+        MultiOctaveImprovedPerlinNoise3DGenerator<float> m_generator[2];
+    public:
+        PerlinNoiseNormalTexture(const Texture3DMapping* mapping, float thetaMax, 
+                                 uint32_t numOctaves, float initialFrequencyPhi, float initialFrequencyTheta, 
+                                 float frequencyMultiplier, float persistence, int32_t repeat) :  
+        m_mapping(mapping), m_thetaMax(thetaMax), 
+        m_generator{{numOctaves, initialFrequencyPhi, 1.0f, true, frequencyMultiplier, persistence, repeat}, 
+                    {numOctaves, initialFrequencyTheta, 1.0f, true, frequencyMultiplier, persistence, repeat}} { }
+        
+        Normal3D evaluate(const Point3D &p) const;
+        Normal3D evaluate(const SurfacePoint &surfPt) const override {
+            return evaluate(m_mapping->map(surfPt));
+        }
+        Normal3D evaluate(const MediumPoint &medPt) const override {
+            return evaluate(m_mapping->map(medPt));
+        }
+    };
+    
+    
+    
     class SLR_API PerlinNoiseFloatTexture : public FloatTexture {
         const Texture3DMapping* m_mapping;
         MultiOctaveImprovedPerlinNoise3DGenerator<float> m_generator;

@@ -725,6 +725,26 @@ namespace SLR {
 //    template SLR_API const SampledSpectrumTemplate<double, NumSpectralSamples> SampledSpectrumTemplate<double, NumSpectralSamples>::NaN;
     
     template <typename RealType, uint32_t NumSpectralSamples>
+    SampledSpectrumTemplate<RealType, NumSpectralSamples> min(const SampledSpectrumTemplate<RealType, NumSpectralSamples> &value, RealType minValue) {
+        SampledSpectrumTemplate<RealType, NumSpectralSamples> ret;
+        for (int i = 0; i < NumSpectralSamples; ++i)
+            ret[i] = std::min(value[i], minValue);
+        return ret;
+    }
+    template SLR_API SampledSpectrumTemplate<float, NumSpectralSamples> min(const SampledSpectrumTemplate<float, NumSpectralSamples> &value, float minValue);
+    template SLR_API SampledSpectrumTemplate<double, NumSpectralSamples> min(const SampledSpectrumTemplate<double, NumSpectralSamples> &value, double minValue);
+    
+    template <typename RealType, uint32_t NumSpectralSamples>
+    SampledSpectrumTemplate<RealType, NumSpectralSamples> max(const SampledSpectrumTemplate<RealType, NumSpectralSamples> &value, RealType maxValue) {
+        SampledSpectrumTemplate<RealType, NumSpectralSamples> ret;
+        for (int i = 0; i < NumSpectralSamples; ++i)
+            ret[i] = std::max(value[i], maxValue);
+        return ret;
+    }
+    template SLR_API SampledSpectrumTemplate<float, NumSpectralSamples> max(const SampledSpectrumTemplate<float, NumSpectralSamples> &value, float maxValue);
+    template SLR_API SampledSpectrumTemplate<double, NumSpectralSamples> max(const SampledSpectrumTemplate<double, NumSpectralSamples> &value, double maxValue);
+    
+    template <typename RealType, uint32_t NumSpectralSamples>
     SampledSpectrumTemplate<RealType, NumSpectralSamples> sqrt(const SampledSpectrumTemplate<RealType, NumSpectralSamples> &value) {
         SampledSpectrumTemplate<RealType, NumSpectralSamples> ret;
         for (int i = 0; i < NumSpectralSamples; ++i)

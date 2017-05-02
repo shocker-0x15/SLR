@@ -376,6 +376,7 @@ namespace SLR {
     class VoronoiSpectrumTexture;
     class VoronoiNormalTexture;
     class VoronoiFloatTexture;
+    class PerlinNoiseNormalTexture;
     class PerlinNoiseFloatTexture;
     class AnalyticSkySpectrumTexture;
     

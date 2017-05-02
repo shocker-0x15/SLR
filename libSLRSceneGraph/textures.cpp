@@ -102,6 +102,17 @@ namespace SLRSceneGraph {
         m_rawData = new SLR::VoronoiFloatTexture(mapping->getRaw(), scale, valueScale, flat);
     }
     
+    PerlinNoiseNormalTexture::PerlinNoiseNormalTexture(const Texture3DMappingRef &mapping, float thetaMax, 
+                                                       uint32_t numOctaves, float initialFrequencyPhi, float initialFrequencyTheta, 
+                                                       float frequencyMultiplier, float persistence, int32_t repeat) : 
+    m_mapping(mapping), m_thetaMax(thetaMax),  
+    m_numOctaves(numOctaves), m_initialFrequencyPhi(initialFrequencyPhi), m_initialFrequencyTheta(initialFrequencyTheta), 
+    m_frequencyMultiplier(frequencyMultiplier), m_persistence(persistence), m_repeat(repeat) {
+        m_rawData = new SLR::PerlinNoiseNormalTexture(mapping->getRaw(), thetaMax, 
+                                                      numOctaves, initialFrequencyPhi, initialFrequencyTheta, 
+                                                      frequencyMultiplier, persistence, repeat);
+    }
+    
     PerlinNoiseFloatTexture::PerlinNoiseFloatTexture(const Texture3DMappingRef &mapping, 
                                                      uint32_t numOctaves, float initialFrequency, float supValueOrInitialAmplitude, bool supSpecified, 
                                                      float frequencyMultiplier, float persistence, int32_t repeat) : 

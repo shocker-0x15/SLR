@@ -67,10 +67,14 @@ namespace SLR {
             *vy = cross(*this, *vx);
         }
         static Vector3DTemplate fromPolarZUp(RealType phi, RealType theta) {
-            return Vector3DTemplate(std::sin(phi) * std::sin(theta), std::cos(phi) * std::sin(theta), std::cos(theta));
+            return Vector3DTemplate(std::cos(phi) * std::sin(theta), std::sin(phi) * std::sin(theta), std::cos(theta));
         }
         static Vector3DTemplate fromPolarYUp(RealType phi, RealType theta) {
             return Vector3DTemplate(-std::sin(phi) * std::sin(theta), std::cos(theta), std::cos(phi) * std::sin(theta));
+        }
+        void toPolarZUp(RealType* theta, RealType* phi) const {
+            *theta = std::acos(std::clamp(z, (RealType)-1.0, (RealType)1.0));
+            *phi = std::fmod((RealType)(std::atan2(y, x) + 2 * M_PI), (RealType)(2 * M_PI));
         }
         void toPolarYUp(RealType* theta, RealType* phi) const {
             *theta = std::acos(std::clamp(y, (RealType)-1.0, (RealType)1.0));

@@ -180,6 +180,22 @@ namespace SLRSceneGraph {
     };
     
     
+    class SLR_SCENEGRAPH_API PerlinNoiseNormalTexture : public NormalTexture {
+        Texture3DMappingRef m_mapping;
+        float m_thetaMax;
+        uint32_t m_numOctaves;
+        float m_initialFrequencyPhi;
+        float m_initialFrequencyTheta;
+        float m_frequencyMultiplier;
+        float m_persistence;
+        int32_t m_repeat;
+    public:
+        PerlinNoiseNormalTexture(const Texture3DMappingRef &mapping, float thetaMax, 
+                                 uint32_t numOctaves, float initialFrequencyPhi, float initialFrequencyTheta, 
+                                 float frequencyMultiplier, float persistence, int32_t repeat);
+    };
+    
+    
     class SLR_SCENEGRAPH_API PerlinNoiseFloatTexture : public FloatTexture {
         Texture3DMappingRef m_mapping;
         uint32_t m_numOctaves;

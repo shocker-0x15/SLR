@@ -121,7 +121,8 @@ namespace SLR {
             spectrum[i] = RadianceScale * arhosek_tristim_skymodel_radiance(m_skyModelStates[i], theta, gamma, i);
 #endif
         SampledSpectrum ret = spectrum.evaluate(wls);
-        SLRAssert(!ret.hasMinus() && ret.allFinite(), "Invalid vaue.");
+        ret = max(ret, 0.0f);
+        SLRAssert(ret.allFinite(), "Invalid vaue.");
         
         return ret;
     }
