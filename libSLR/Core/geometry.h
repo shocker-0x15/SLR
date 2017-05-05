@@ -289,6 +289,18 @@ namespace SLR {
     
     
     
+    struct SLR_API Vertex {
+        Point3D position;
+        Normal3D normal;
+        Tangent3D tangent;
+        TexCoord2D texCoord;
+        
+        Vertex() { }
+        Vertex(const Point3D &pos, const Normal3D &norm, const Tangent3D &tang, const TexCoord2D &tc) : position(pos), normal(norm), tangent(tang), texCoord(tc) { }
+    };
+    
+    
+    
     class SLR_API SurfaceShape {
     public:
         virtual ~SurfaceShape() { }

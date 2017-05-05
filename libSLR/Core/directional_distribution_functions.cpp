@@ -212,41 +212,69 @@ namespace SLR {
     
     
     
-    float GGX::sample(float u0, float u1, Normal3D* m, float* normalPDF) const {
-        float theta_m = std::atan(m_alpha_g * std::sqrt(u0 / (1 - u0)));
+    float BerryMicrofacetDistribution::sample(float u0, float u1, Normal3D *m, float *normalPDF) const {
+        float alpha2 = m_alpha_g * m_alpha_g;
+        float cosTheta_m = std::sqrt((1 - std::pow(alpha2, 1 - u0)) / (1 - alpha2));
+        float theta_m = std::acos(cosTheta_m);
         float phi_m = 2 * M_PI * u1;
         *m = Normal3D(std::sin(theta_m) * std::cos(phi_m), std::sin(theta_m) * std::sin(phi_m), std::cos(theta_m));
         
-        //        float chi = m->z > 0 ? 1 : 0;
-        float cosTheta_m = m->z;
-        float tanTheta_m = std::tan(theta_m);
-        float ret = m_alpha_g * m_alpha_g / (M_PI * std::pow(cosTheta_m, 4) * std::pow(m_alpha_g * m_alpha_g + tanTheta_m * tanTheta_m, 2));
+        float ret = (alpha2 - 1) / (M_PI * std::log(alpha2)) / (1 + (alpha2 - 1) * cosTheta_m * cosTheta_m);
         *normalPDF = ret * m->z;
         
         return ret;
     }
     
-    float GGX::evaluate(const Normal3D &m) const {
+    float BerryMicrofacetDistribution::evaluate(const Normal3D &m) const {
         if (m.z <= 0)
             return 0.0f;
-        float theta_m = std::acos(m.z);
+        float alpha2 = m_alpha_g * m_alpha_g;
         float cosTheta_m = m.z;
-        float tanTheta_m = std::tan(theta_m);
-        return m_alpha_g * m_alpha_g / (M_PI * std::pow(cosTheta_m, 4) * std::pow(m_alpha_g * m_alpha_g + tanTheta_m * tanTheta_m, 2));
+        return (alpha2 - 1) / (M_PI * std::log(alpha2)) / (1 + (alpha2 - 1) * cosTheta_m * cosTheta_m);
     }
     
-    float GGX::evaluatePDF(const Normal3D &m) const {
+    float BerryMicrofacetDistribution::evaluatePDF(const Normal3D &m) const {
+        return evaluate(m) * m.z;
+    }
+    
+    float BerryMicrofacetDistribution::evaluateSmithG1(const Vector3D &v, const Normal3D &m) const {
+        SLRAssert_NotImplemented();
+        return 0.0f;
+    }
+    
+    
+    
+    float GGXMicrofacetDistribution::sample(float u0, float u1, Normal3D* m, float* normalPDF) const {
+        // sample slopes
+        float tiltFactor = std::sqrt(u1 / (1 - u1));
+        float slope_x = m_alpha_gx * tiltFactor * std::cos(2 * M_PI * u0);
+        float slope_y = m_alpha_gy * tiltFactor * std::sin(2 * M_PI * u0);
+
+        *m = Normal3D(-slope_x, -slope_y, 1.0f).normalize();
+        
+        float temp = m->x * m->x / (m_alpha_gx * m_alpha_gx) + m->y * m->y / (m_alpha_gy * m_alpha_gy) + m->z * m->z;
+        float ret = 1.0f / (M_PI * m_alpha_gx * m_alpha_gy * temp * temp);
+        *normalPDF = ret * m->z;
+        
+        return ret;
+    }
+    
+    float GGXMicrofacetDistribution::evaluate(const Normal3D &m) const {
+        if (m.z <= 0)
+            return 0.0f;
+        float temp = m.x * m.x / (m_alpha_gx * m_alpha_gx) + m.y * m.y / (m_alpha_gy * m_alpha_gy) + m.z * m.z;
+        return 1.0f / (M_PI * m_alpha_gx * m_alpha_gy * temp * temp);
+    }
+    
+    float GGXMicrofacetDistribution::evaluatePDF(const Normal3D &m) const {
         return evaluate(m) * m.z;
     }
     
     // References
     // Importance Sampling Microfacet-Based BSDFs using the Distribution of Visible Normals
-    float GGX::sample(const Vector3D &v, float u0, float u1, Normal3D* m, float* normalPDF) const {
-        float alpha_gx = m_alpha_g;
-        float alpha_gy = m_alpha_g;
-        
+    float GGXMicrofacetDistribution::sample(const Vector3D &v, float u0, float u1, Normal3D* m, float* normalPDF) const {        
         // stretch the input vector
-        Vector3D sv = Vector3D(alpha_gx * v.x, alpha_gy * v.y, v.z).normalize();
+        Vector3D sv = Vector3D(m_alpha_gx * v.x, m_alpha_gy * v.y, v.z).normalize();
         float theta_sv = std::acos(sv.z);
         float phi_sv = std::atan2(sv.y, sv.x);
         if (sv.z > 0.99999f) {
@@ -300,8 +328,8 @@ namespace SLR {
         slope_x = tmp;
         
         // unstretch
-        slope_x *= alpha_gx;
-        slope_y *= alpha_gy;
+        slope_x *= m_alpha_gx;
+        slope_y *= m_alpha_gy;
         
         *m = normalize(Normal3D(-slope_x, -slope_y, 1));
         float D = evaluate(*m);
@@ -310,13 +338,48 @@ namespace SLR {
         return D;
     }
     
-    float GGX::evaluatePDF(const Vector3D &v, const Normal3D &m) const {
+    float GGXMicrofacetDistribution::evaluatePDF(const Vector3D &v, const Normal3D &m) const {
         return evaluateSmithG1(v, m) * absDot(v, m) * evaluate(m) / std::abs(v.z);
     }
     
-    float GGX::evaluateSmithG1(const Vector3D &v, const Normal3D &m) const {
+    float GGXMicrofacetDistribution::evaluateSmithG1(const Vector3D &v, const Normal3D &m) const {
+        float sinTheta_v_alpha_go = std::sqrt(v.x * v.x * m_alpha_gx * m_alpha_gx + v.y * v.y * m_alpha_gy * m_alpha_gy);
         float chi = (dot(v, m) / v.z) > 0 ? 1 : 0;
-        float theta_v = std::acos(std::clamp(v.z, -1.0f, 1.0f));
-        return chi * 2 / (1 + std::sqrt(1 + std::pow(m_alpha_g * std::tan(theta_v), 2)));
+        float cosTheta_v = v.z;
+        return chi * 2 / (1 + std::sqrt(1 + std::pow(sinTheta_v_alpha_go / cosTheta_v, 2)));
+    }
+    
+    
+    
+    float GTRMicrofacetDistribution::sample(float u0, float u1, Normal3D *m, float *normalPDF) const {
+        float alpha2 = m_alpha_g * m_alpha_g;
+        float alpha2Powered = std::pow(alpha2, 1 - m_gamma);
+        float cosTheta_m = std::sqrt((1 - std::pow(alpha2Powered * (1 - u0) + u0, 1 / (1 - m_gamma))) / (1 - alpha2));
+        float theta_m = std::acos(cosTheta_m);
+        float phi_m = 2 * M_PI * u1;
+        *m = Normal3D(std::sin(theta_m) * std::cos(phi_m), std::sin(theta_m) * std::sin(phi_m), std::cos(theta_m));
+        
+        float ret = (m_gamma - 1) * (alpha2 - 1) / (M_PI * (1 - alpha2Powered)) / std::pow(1 + (alpha2 - 1) * cosTheta_m * cosTheta_m, m_gamma);
+        *normalPDF = ret * m->z;
+        
+        return ret;
+    }
+    
+    float GTRMicrofacetDistribution::evaluate(const Normal3D &m) const {
+        if (m.z <= 0)
+            return 0.0f;
+        float alpha2 = m_alpha_g * m_alpha_g;
+        float alpha2Powered = std::pow(alpha2, 1 - m_gamma);
+        float cosTheta_m = m.z;
+        return (m_gamma - 1) * (alpha2 - 1) / (M_PI * (1 - alpha2Powered)) / std::pow(1 + (alpha2 - 1) * cosTheta_m * cosTheta_m, m_gamma);
+    }
+    
+    float GTRMicrofacetDistribution::evaluatePDF(const Normal3D &m) const {
+        return evaluate(m) * m.z;
+    }
+    
+    float GTRMicrofacetDistribution::evaluateSmithG1(const Vector3D &v, const Normal3D &m) const {
+        SLRAssert_NotImplemented();
+        return 0.0f;
     }
 }

@@ -16,6 +16,8 @@ extern "C" {
 }
 
 namespace SLR {
+    // References
+    // An Analytic Model for Full Spectral Sky-Dome Radiance
     class SLR_API AnalyticSkySpectrumTexture : public SpectrumTexture {
         class SunDiscContinuousDistribution2D;
         

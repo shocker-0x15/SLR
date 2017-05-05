@@ -78,7 +78,7 @@ namespace SLR {
                 53.0553, 53.6035, 54.1516, 54.6998, 55.248, 55.7961, 56.3443, 56.8924,
                 57.4406, 57.7278, 58.015, 58.3022, 58.5894, 58.8765, 59.1637, 59.4509,
                 59.7381, 60.0253, 60.3125
-            };
+            }; // Total Energy: 40822.0307
             const Data D65 = {
                 DistributionType::Regular,
                 531, 300.0f, 830.0f,
@@ -86,10 +86,20 @@ namespace SLR {
                 D65_values
             };
             
+            const float E_values[] = {
+                77.0227, 77.0227
+            }; // Each energy is set so that the total energy matches that of D65. 
+            const Data E = {
+                DistributionType::Regular,
+                2, 300.0f, 830.0f,
+                nullptr,
+                E_values
+            };
+            
             
             
             const std::map<std::string, std::vector<Data>> database = {
-                {"D65", {D65}},
+                {"D65", {D65}}, {"E", {E}},
             };
         }
         

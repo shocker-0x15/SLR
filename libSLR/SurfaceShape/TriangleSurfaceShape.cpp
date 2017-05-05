@@ -11,16 +11,40 @@
 #include "../Core/distributions.h"
 #include "../Core/surface_object.h"
 #include "../Core/textures.h"
+#include "../Scene/TriangleMeshNode.h"
 
 namespace SLR {
+    TriangleSurfaceShape::TriangleSurfaceShape(const MaterialGroupInTriangleMesh* matGroup, uint32_t index) :
+    m_matGroup(matGroup), m_index(index) {
+        Vertex** v = m_matGroup->vertexReferences.get() + m_index;
+        
+        const Vertex &v0 = *v[0];
+        const Vertex &v1 = *v[1];
+        const Vertex &v2 = *v[2];
+        
+        Vector3D dP0 = v0.position - v2.position;
+        Vector3D dP1 = v1.position - v2.position;
+        TexCoord2D dTC0 = v0.texCoord - v2.texCoord;
+        TexCoord2D dTC1 = v1.texCoord - v2.texCoord;
+        float detTC = dTC0.u * dTC1.v - dTC0.v * dTC1.u;
+        if (detTC != 0)
+            m_texCoord0Dir = normalize((1.0f / detTC) * Vector3D(dTC1.v * dP0.x - dTC0.v * dP1.x,
+                                                                 dTC1.v * dP0.y - dTC0.v * dP1.y,
+                                                                 dTC1.v * dP0.z - dTC0.v * dP1.z));
+        else
+            m_texCoord0Dir = normalize(dP0);
+    }
+    
     BoundingBox3D TriangleSurfaceShape::bounds() const {
-        return BoundingBox3D(m_v[0]->position).unify(m_v[1]->position).unify(m_v[2]->position);
+        Vertex** v = m_matGroup->vertexReferences.get() + m_index;
+        return BoundingBox3D(v[0]->position).unify(v[1]->position).unify(v[2]->position);
     }
     
     BoundingBox3D TriangleSurfaceShape::choppedBounds(BoundingBox3D::Axis chopAxis, float minChopPos, float maxChopPos) const {
+        Vertex** v = m_matGroup->vertexReferences.get() + m_index;
         const float chopPos[2] = {minChopPos, maxChopPos};
         
-        Point3D p[3] = {m_v[0]->position, m_v[1]->position, m_v[2]->position};
+        Point3D p[3] = {v[0]->position, v[1]->position, v[2]->position};
         std::sort(p, p + 3, [chopAxis](const Point3D &pa, const Point3D &pb) { return pa[chopAxis] < pb[chopAxis]; });
         float minPos = p[0][chopAxis];
         float maxPos = p[2][chopAxis];
@@ -74,7 +98,9 @@ namespace SLR {
     }
     
     void TriangleSurfaceShape::splitBounds(BoundingBox3D::Axis splitAxis, float splitPos, BoundingBox3D* bbox0, BoundingBox3D* bbox1) const {
-        Point3D p[3] = {m_v[0]->position, m_v[1]->position, m_v[2]->position};
+        Vertex** v = m_matGroup->vertexReferences.get() + m_index;
+        
+        Point3D p[3] = {v[0]->position, v[1]->position, v[2]->position};
         std::sort(p, p + 3, [splitAxis](const Point3D &pa, const Point3D &pb) { return pa[splitAxis] < pb[splitAxis]; });
         float minPos = p[0][splitAxis];
         float maxPos = p[2][splitAxis];
@@ -130,9 +156,11 @@ namespace SLR {
     }
     
     bool TriangleSurfaceShape::intersect(const Ray &ray, const RaySegment &segment, SurfaceInteraction* si) const {
-        const Vertex &v0 = *m_v[0];
-        const Vertex &v1 = *m_v[1];
-        const Vertex &v2 = *m_v[2];
+        Vertex** v = m_matGroup->vertexReferences.get() + m_index;
+        
+        const Vertex &v0 = *v[0];
+        const Vertex &v1 = *v[1];
+        const Vertex &v2 = *v[2];
         
         Vector3D edge01 = v1.position - v0.position;
         Vector3D edge02 = v2.position - v0.position;
@@ -163,8 +191,8 @@ namespace SLR {
         TexCoord2D texCoord = b0 * v0.texCoord + b1 * v1.texCoord + b2 * v2.texCoord;
         // Check if an alpha value at the intersection point is zero or not.
         // If zero, intersection doesn't occur.
-        if (m_alphaTex) {
-            if (m_alphaTex->evaluate(texCoord) == 0.0f)
+        if (m_matGroup->alphaMap) {
+            if (m_matGroup->alphaMap->evaluate(texCoord) == 0.0f)
                 return false;
         }
         
@@ -180,26 +208,15 @@ namespace SLR {
     }
     
     void TriangleSurfaceShape::calculateSurfacePoint(const SurfaceInteraction &si, SurfacePoint* surfPt) const {
-        const Vertex &v0 = *m_v[0];
-        const Vertex &v1 = *m_v[1];
-        const Vertex &v2 = *m_v[2];
+        Vertex** v = m_matGroup->vertexReferences.get() + m_index;
+        
+        const Vertex &v0 = *v[0];
+        const Vertex &v1 = *v[1];
+        const Vertex &v2 = *v[2];
+        
         float b0, b1;
         si.getSurfaceParameter(&b0, &b1);
         float b2 = 1.0f - b0 - b1;
-        
-        // TODO: It might be preferable to explicitly calculate this direction from texture coordinates at the setup time and add an attribute to Triangle.
-        Vector3D texCoord0Dir;
-        Vector3D dP0 = v0.position - v2.position;
-        Vector3D dP1 = v1.position - v2.position;
-        TexCoord2D dTC0 = v0.texCoord - v2.texCoord;
-        TexCoord2D dTC1 = v1.texCoord - v2.texCoord;
-        float detTC = dTC0.u * dTC1.v - dTC0.v * dTC1.u;
-        if (detTC != 0)
-            texCoord0Dir = normalize((1.0f / detTC) * Vector3D(dTC1.v * dP0.x - dTC0.v * dP1.x,
-                                                               dTC1.v * dP0.y - dTC0.v * dP1.y,
-                                                               dTC1.v * dP0.z - dTC0.v * dP1.z));
-        else
-            texCoord0Dir = normalize(dP0);
         
         ReferenceFrame shadingFrame;
         shadingFrame.z = normalize(b0 * v0.normal + b1 * v1.normal + b2 * v2.normal);
@@ -211,34 +228,29 @@ namespace SLR {
             shadingFrame.x = normalize(shadingFrame.x - dotNT * shadingFrame.z);
         shadingFrame.y = cross(shadingFrame.z, shadingFrame.x);
         
-        *surfPt = SurfacePoint(si, false, shadingFrame, texCoord0Dir);
+        *surfPt = SurfacePoint(si, false, shadingFrame, m_texCoord0Dir);
     }
     
     float TriangleSurfaceShape::area() const {
-        const Point3D &p0 = m_v[0]->position;
-        const Point3D &p1 = m_v[1]->position;
-        const Point3D &p2 = m_v[2]->position;
+        Vertex** v = m_matGroup->vertexReferences.get() + m_index;
+        
+        const Point3D &p0 = v[0]->position;
+        const Point3D &p1 = v[1]->position;
+        const Point3D &p2 = v[2]->position;
         return 0.5f * cross(p1 - p0, p2 - p0).length();
     }
     
     void TriangleSurfaceShape::sample(float u0, float u1, SurfacePoint* surfPt, float* areaPDF, DirectionType* posType) const {
+        Vertex** v = m_matGroup->vertexReferences.get() + m_index;
+        
         //    const SurfaceMaterial* mat = m_mat;
         float b0, b1, b2;
         uniformSampleTriangle(u0, u1, &b0, &b1);
         b2 = 1.0f - b0 - b1;
         
-        const Vertex v0 = *m_v[0];
-        const Vertex v1 = *m_v[1];
-        const Vertex v2 = *m_v[2];
-
-        Vector3D dP0 = v0.position - v2.position;
-        Vector3D dP1 = v1.position - v2.position;
-        TexCoord2D dTC0 = v0.texCoord - v2.texCoord;
-        TexCoord2D dTC1 = v1.texCoord - v2.texCoord;
-        float invDetTC = 1.0f / (dTC0.u * dTC1.v - dTC0.v * dTC1.u);
-        Vector3D texCoord0Dir = invDetTC * Vector3D(dTC1.v * dP0.x - dTC0.v * dP1.x,
-                                                    dTC1.v * dP0.y - dTC0.v * dP1.y,
-                                                    dTC1.v * dP0.z - dTC0.v * dP1.z);
+        const Vertex &v0 = *v[0];
+        const Vertex &v1 = *v[1];
+        const Vertex &v2 = *v[2];
         
         ReferenceFrame shadingFrame;
         shadingFrame.z = normalize(b0 * v0.normal + b1 * v1.normal + b2 * v2.normal);
@@ -251,7 +263,7 @@ namespace SLR {
                                cross(v1.position - v0.position, v2.position - v0.position).normalize(),
                                b0, b1,
                                b0 * v0.texCoord + b1 * v1.texCoord + b2 * v2.texCoord,
-                               texCoord0Dir
+                               m_texCoord0Dir
                                );
         *areaPDF = 1.0f / area();
         *posType = DirectionType::LowFreq;

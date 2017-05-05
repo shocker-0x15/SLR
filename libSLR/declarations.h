@@ -154,6 +154,7 @@ namespace SLR {
     class InteractionPoint;
     class SurfacePoint;
     class MediumPoint;
+    struct Vertex;
     class SurfaceShape;
     class MediumDistribution;
     
@@ -196,7 +197,9 @@ namespace SLR {
     class FresnelConductor;
     class FresnelDielectric;
     class MicrofacetDistribution;
-    class GGX;
+    class BerryMicrofacetDistribution;
+    class GGXMicrofacetDistribution;
+    class GTRMicrofacetDistribution;
     
     // Object
     struct LightPosQuery;
@@ -253,7 +256,9 @@ namespace SLR {
     class SVFresnelConductor;
     class SVFresnelDielectric;
     class SVMicrofacetDistribution;
-    class SVGGX;
+    class BerrySVMicrofacetDistribution;
+    class GGXSVMicrofacetDistribution;
+    class GTRSVMicrofacetDistribution;
     
     // Medium Material
     class MediumMaterial;
@@ -293,7 +298,6 @@ namespace SLR {
     // ----------------------------------------------------------------
     // Surface Shape
     
-    struct Vertex;
     class TriangleSurfaceShape;
     class InfinitesimalPointSurfaceShape;
     class InfiniteSphereSurfaceShape;
@@ -330,6 +334,8 @@ namespace SLR {
     class AshikhminShirleyBRDF;
     class MicrofacetBRDF;
     class MicrofacetBSDF;
+    class DisneyBRDF;
+    class DisneyBSDF;
     class MultiBSDF;
     
     // END: BSDF
@@ -396,6 +402,8 @@ namespace SLR {
     class AshikhminShirleyReflectionSurfaceMaterial;
     class MicrofacetReflectionSurfaceMaterial;
     class MicrofacetScatteringSurfaceMaterial;
+    class DisneyReflectionSurfaceMaterial;
+    class DisneyScatteringSurfaceMaterial;
     class SummedSurfaceMaterial;
     class MixedSurfaceMaterial;
     class DiffuseEmitterSurfaceProperty;
@@ -455,6 +463,7 @@ namespace SLR {
     class PerspectiveCameraNode;
     class EquirectangularCameraNode;
     class SurfaceNode;
+    struct MaterialGroupInTriangleMesh;
     class TriangleMeshNode;
     class MediumNode;
     class HomogeneousMediumNode;

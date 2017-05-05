@@ -461,16 +461,33 @@ namespace SLR {
         virtual float evaluate(const Normal3D &m) const = 0;
         virtual float evaluatePDF(const Normal3D &m) const = 0;
         
-        virtual float sample(const Vector3D &v, float u0, float u1, Normal3D* m, float* normalPDF) const = 0;
-        virtual float evaluatePDF(const Vector3D &v, const Normal3D &m) const = 0;
+        virtual float sample(const Vector3D &v, float u0, float u1, Normal3D* m, float* normalPDF) const {
+            return sample(u0, u1, m, normalPDF);
+        }
+        virtual float evaluatePDF(const Vector3D &v, const Normal3D &m) const {
+            return evaluatePDF(m);
+        }
         
         virtual float evaluateSmithG1(const Vector3D &v, const Normal3D &m) const = 0;
     };
     
-    class SLR_API GGX : public MicrofacetDistribution {
+    class SLR_API BerryMicrofacetDistribution : public MicrofacetDistribution {
         float m_alpha_g;
     public:
-        GGX(float alpha_g) : m_alpha_g(alpha_g) {}
+        BerryMicrofacetDistribution(float alpha_g) : m_alpha_g(alpha_g) { }
+        
+        float sample(float u0, float u1, Normal3D* m, float* normalPDF) const override;
+        float evaluate(const Normal3D &m) const override;
+        float evaluatePDF(const Normal3D &m) const override;
+        
+        float evaluateSmithG1(const Vector3D &v, const Normal3D &m) const override;
+    };
+    
+    // GGX: Ground Glass X (a.k.a. Trowbridge-Reitz)
+    class SLR_API GGXMicrofacetDistribution : public MicrofacetDistribution {
+        float m_alpha_gx, m_alpha_gy;
+    public:
+        GGXMicrofacetDistribution(float alpha_gx, float alpha_gy) : m_alpha_gx(alpha_gx), m_alpha_gy(alpha_gy) { }
         
         float sample(float u0, float u1, Normal3D* m, float* normalPDF) const override;
         float evaluate(const Normal3D &m) const override;
@@ -478,6 +495,22 @@ namespace SLR {
         
         float sample(const Vector3D &v, float u0, float u1, Normal3D* m, float* normalPDF) const override;
         float evaluatePDF(const Vector3D &v, const Normal3D &m) const override;
+        
+        float evaluateSmithG1(const Vector3D &v, const Normal3D &m) const override;
+    };
+    
+    // GTR: Generalized Trowbridge-Reitz
+    // gamma 1 is equivalent to the Berry distribution.
+    // gamma 2 is equivalent to the GGX distribution. 
+    class SLR_API GTRMicrofacetDistribution : public MicrofacetDistribution {
+        float m_gamma;
+        float m_alpha_g;
+    public:
+        GTRMicrofacetDistribution(float gamma, float alpha_g) : m_gamma(gamma), m_alpha_g(alpha_g) { }
+        
+        float sample(float u0, float u1, Normal3D* m, float* normalPDF) const override;
+        float evaluate(const Normal3D &m) const override;
+        float evaluatePDF(const Normal3D &m) const override;
         
         float evaluateSmithG1(const Vector3D &v, const Normal3D &m) const override;
     };

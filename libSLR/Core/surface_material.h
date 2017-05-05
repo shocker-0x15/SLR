@@ -118,10 +118,11 @@ namespace SLR {
         virtual MicrofacetDistribution* getMicrofacetDistribution(const SurfacePoint &surfPt, ArenaAllocator &mem) const = 0;
     };
     
-    class SLR_API SVGGX : public SVMicrofacetDistribution {
-        const FloatTexture* m_alpha_g;
+    class SLR_API GGXSVMicrofacetDistribution : public SVMicrofacetDistribution {
+        const FloatTexture* m_alpha_gx;
+        const FloatTexture* m_alpha_gy;
     public:
-        SVGGX(const FloatTexture* alpha_g) : m_alpha_g(alpha_g) { }
+        GGXSVMicrofacetDistribution(const FloatTexture* alpha_gx, const FloatTexture* alpha_gy) : m_alpha_gx(alpha_gx), m_alpha_gy(alpha_gy) { }
         
         MicrofacetDistribution* getMicrofacetDistribution(const SurfacePoint &surfPt, ArenaAllocator &mem) const override;
     };

@@ -28,8 +28,8 @@ namespace SLRSceneGraph {
         static SurfaceMaterialRef createGlass(const SpectrumTextureRef &coeff, const SpectrumTextureRef &etaExt, const SpectrumTextureRef &etaInt);
         static SurfaceMaterialRef createModifiedWardDur(const SpectrumTextureRef &reflectance, const FloatTextureRef &anisoX, const FloatTextureRef &anisoY);
         static SurfaceMaterialRef createAshikhminShirley(const SpectrumTextureRef &Rd, const SpectrumTextureRef &Rs, const FloatTextureRef &nx, const FloatTextureRef &ny);
-        static SurfaceMaterialRef createMicrofacetMetal(const SpectrumTextureRef &eta, const SpectrumTextureRef &k, const FloatTextureRef &alpha_g);
-        static SurfaceMaterialRef createMicrofacetGlass(const SpectrumTextureRef &etaExt, const SpectrumTextureRef &etaInt, const FloatTextureRef &alpha_g);
+        static SurfaceMaterialRef createMicrofacetMetal(const SpectrumTextureRef &eta, const SpectrumTextureRef &k, const FloatTextureRef &alpha_gx, const FloatTextureRef &alpha_gy);
+        static SurfaceMaterialRef createMicrofacetGlass(const SpectrumTextureRef &etaExt, const SpectrumTextureRef &etaInt, const FloatTextureRef &alpha_gx, const FloatTextureRef &alpha_gy);
         static SurfaceMaterialRef createFlippedMaterial(const SurfaceMaterialRef &baseMat);
         static SurfaceMaterialRef createSummedMaterial(const SurfaceMaterialRef &mat0, const SurfaceMaterialRef &mat1);
         static SurfaceMaterialRef createMixedMaterial(const SurfaceMaterialRef &mat0, const SurfaceMaterialRef &mat1, const FloatTextureRef &factor);
@@ -94,6 +94,7 @@ namespace SLRSceneGraph {
     
     
     
+    // Spatially Varying Microfacet Distribution
     class SLR_SCENEGRAPH_API SVMicrofacetDistribution {
     protected:
         SLR::SVMicrofacetDistribution* m_rawData;
@@ -105,10 +106,11 @@ namespace SLRSceneGraph {
         };
     };
     
-    class SLR_SCENEGRAPH_API SVGGX : public SVMicrofacetDistribution {
-        FloatTextureRef m_alpha_g;
+    class SLR_SCENEGRAPH_API GGXSVMicrofacetDistribution : public SVMicrofacetDistribution {
+        FloatTextureRef m_alpha_gx;
+        FloatTextureRef m_alpha_gy;
     public:
-        SVGGX(const FloatTextureRef &alpha_g);
+        GGXSVMicrofacetDistribution(const FloatTextureRef &alpha_gx, const FloatTextureRef &alpha_gy);
     };
     
     

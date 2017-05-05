@@ -4,8 +4,14 @@
 setRenderer("method": "Volumetric BPT", ("samples": 16384,));
 setRenderSettings("width": 1024, "height": 1024);
 
+function CBMat(name, attrs) {
+//    if (name == "Material.002")
+//        return createSurfaceMaterial("matte", (SpectrumTexture(Spectrum(0.5, 0.5, 0.5)),));
+    return;
+}
+
 cornellBoxNode = createNode();
-    cornellBox = load3DModel("models/Cornell_box_RB.assbin");
+    cornellBox = load3DModel("models/Cornell_box_RB.assbin", CBMat);
     addChild(cornellBoxNode, cornellBox);
 
     lightNode = createNode();
@@ -57,24 +63,31 @@ addChild(root, cornellBoxNode);
 //addChild(cornellBoxNode, rightBoxNode);
 
 //medMat = createMediumMaterial("isotropic", (,));
-//medium0Node = createNode();
-////    medium0 = createHomogeneousMedium(Point(-0.5, -0.5, -0.5), Point(0.5, 0.5, 0.5), 
-////                                      Spectrum((360, 830), (1.0 * 0.25, 1.0 * 0.25)), 
-////                                      Spectrum((360, 830), (2.0 * 0.25, 10.0 * 0.25)), 
-////                                      medMat);
-////    medium0 = createGridMedium(Point(-0.5, -0.5, -0.5), Point(0.5, 0.5, 0.5), 
-////                               Spectrum((360, 830), (1.0 * 0.25, 1.0 * 0.25)), 
-////                               Spectrum((360, 830), (2.0 * 0.25, 10.0 * 0.25)), 
-////                               (1.0, 1.0, 1.0, 1.0, 
-////                                1.0, 1.0, 1.0, 1.0), 
-////                               2, 2, 2, medMat);
+medMat = createMediumMaterial("Henyey-Greenstein", (FloatTexture(0.8),));
+medium0Node = createNode();
+//    medium0 = createHomogeneousMedium(Point(-0.5, -0.5, -0.5), Point(0.5, 0.5, 0.5), 
+//                                      Spectrum((360, 830), (1.0 * 0.25, 1.0 * 0.25)), 
+//                                      Spectrum((360, 830), (2.0 * 0.25, 10.0 * 0.25)), 
+//                                      medMat);
+//    medium0 = createGridMedium(Point(-0.5, -0.5, -0.5), Point(0.5, 0.5, 0.5), 
+//                               Spectrum((360, 830), (1.0 * 0.25, 1.0 * 0.25)), 
+//                               Spectrum((360, 830), (2.0 * 0.25, 10.0 * 0.25)), 
+//                               ((1.0, 1.0, 1.0, 1.0), 
+//                                (1.0, 1.0, 1.0, 1.0)), 
+//                               2, 2, 2, medMat);
 //    medium0 = createHomogeneousMedium(Point(-1.0, -1.0, -1.0), Point(1.0, 1.0, 1.0), 
 //                                      Spectrum(360, 830, (0.4, 0.4)), 
 //                                      Spectrum(360, 830, (0.5, 0.5)), 
 //                                      medMat);
-//    addChild(medium0Node, medium0);
-////setTransform(medium0Node, rotateY(0.7853981634) * rotateX(0.7853981634));
-//addChild(cornellBoxNode, medium0Node);
+//    medium0 = createCloudMedium(Point(-0.5, -0.5, -0.5), Point(0.5, 0.5, 0.5), 
+//                                1.0, 4.0, 1461287313, medMat);
+    medium0 = createGridMedium(Point(-0.5, -0.5, -0.5), Point(0.5, 0.5, 0.5), 
+                               Spectrum((360, 830), (0.09, 0.09)), 
+                               Spectrum((360, 830), (0.1, 0.1)), 
+                               "Cloud0_256x256x256.vdg", medMat);
+    addChild(medium0Node, medium0);
+//setTransform(medium0Node, rotateY(0.7853981634) * rotateX(0.7853981634));
+addChild(cornellBoxNode, medium0Node);
 
 idolNode = createNode();
     function idolMat(name, attrs) {
@@ -93,19 +106,19 @@ idolNode = createNode();
     function idolMeshCallback(name, mesh, minP, maxP) {
         //sigma_s = Spectrum((360, 830), (1.0, 1.0));
         //sigma_e = Spectrum((360, 830), (2.0, 10.0));
-        sigma_s = Spectrum(651.6, 687.8, 724, "space": "Rec709") * 0.01;
-        sigma_e = Spectrum(724, 724, 724, "space": "Rec709") * 0.01;
+        //sigma_s = Spectrum(651.6, 687.8, 724, "space": "Rec709");
+        //sigma_e = Spectrum(724, 724, 724, "space": "Rec709");
 
-        medMat = createMediumMaterial("isotropic", (,));
-        medium = createHomogeneousMedium(minP, maxP, sigma_s, sigma_e, medMat);
-        //medium = createVacuum(minP, maxP);
+        //medMat = createMediumMaterial("isotropic", (,));
+        //medium = createHomogeneousMedium(minP, maxP, sigma_s, sigma_e, medMat);
+        medium = createVacuum(minP, maxP);
         setInternalMedium(mesh, medium);
         return true;
     }
     idol = load3DModel("models/bunny.assbin", idolMat, idolMeshCallback);
     addChild(idolNode, idol);
 setTransform(idolNode, translate(0, -1, 0) * scale(1.0));
-addChild(cornellBoxNode, idolNode);
+//addChild(cornellBoxNode, idolNode);
 
 cameraNode = createNode();
     camera = createPerspectiveCamera("aspect": 1.0, "fovY": 0.5235987756, "radius": 0.025, 

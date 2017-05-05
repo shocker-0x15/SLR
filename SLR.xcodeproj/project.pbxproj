@@ -17,6 +17,8 @@
 		460A1B311EAE3795000C1A26 /* ArHosekSkyModelData_CIEXYZ.h in Headers */ = {isa = PBXBuildFile; fileRef = 460A1B2C1EAE3795000C1A26 /* ArHosekSkyModelData_CIEXYZ.h */; };
 		460A1B321EAE3795000C1A26 /* ArHosekSkyModelData_RGB.h in Headers */ = {isa = PBXBuildFile; fileRef = 460A1B2D1EAE3795000C1A26 /* ArHosekSkyModelData_RGB.h */; };
 		460A1B331EAE3795000C1A26 /* ArHosekSkyModelData_Spectral.h in Headers */ = {isa = PBXBuildFile; fileRef = 460A1B2E1EAE3795000C1A26 /* ArHosekSkyModelData_Spectral.h */; };
+		460A1B371EBA3F8E000C1A26 /* disney_bsdfs.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 460A1B351EBA3F8E000C1A26 /* disney_bsdfs.cpp */; };
+		460A1B381EBA3F8E000C1A26 /* disney_bsdfs.h in Headers */ = {isa = PBXBuildFile; fileRef = 460A1B361EBA3F8E000C1A26 /* disney_bsdfs.h */; };
 		460A201C1D6029C700870E0F /* StandardBVH.h in Headers */ = {isa = PBXBuildFile; fileRef = 460A201B1D6029C700870E0F /* StandardBVH.h */; };
 		460A201E1D6029EC00870E0F /* QBVH.h in Headers */ = {isa = PBXBuildFile; fileRef = 460A201D1D6029EC00870E0F /* QBVH.h */; };
 		4613A17B1E36500600D05AA6 /* Ray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4613A1791E36500600D05AA6 /* Ray.cpp */; };
@@ -273,6 +275,8 @@
 		460A1B2C1EAE3795000C1A26 /* ArHosekSkyModelData_CIEXYZ.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ArHosekSkyModelData_CIEXYZ.h; path = libSLR/External/AnalyticSkyDomeRadiance/ArHosekSkyModelData_CIEXYZ.h; sourceTree = SOURCE_ROOT; };
 		460A1B2D1EAE3795000C1A26 /* ArHosekSkyModelData_RGB.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ArHosekSkyModelData_RGB.h; path = libSLR/External/AnalyticSkyDomeRadiance/ArHosekSkyModelData_RGB.h; sourceTree = SOURCE_ROOT; };
 		460A1B2E1EAE3795000C1A26 /* ArHosekSkyModelData_Spectral.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ArHosekSkyModelData_Spectral.h; path = libSLR/External/AnalyticSkyDomeRadiance/ArHosekSkyModelData_Spectral.h; sourceTree = SOURCE_ROOT; };
+		460A1B351EBA3F8E000C1A26 /* disney_bsdfs.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = disney_bsdfs.cpp; path = libSLR/BSDF/disney_bsdfs.cpp; sourceTree = SOURCE_ROOT; };
+		460A1B361EBA3F8E000C1A26 /* disney_bsdfs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = disney_bsdfs.h; path = libSLR/BSDF/disney_bsdfs.h; sourceTree = SOURCE_ROOT; };
 		460A201B1D6029C700870E0F /* StandardBVH.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; name = StandardBVH.h; path = libSLR/Accelerator/StandardBVH.h; sourceTree = SOURCE_ROOT; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
 		460A201D1D6029EC00870E0F /* QBVH.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = QBVH.h; path = libSLR/Accelerator/QBVH.h; sourceTree = SOURCE_ROOT; };
 		4613A1791E36500600D05AA6 /* Ray.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Ray.cpp; path = libSLR/BasicTypes/Ray.cpp; sourceTree = SOURCE_ROOT; };
@@ -605,6 +609,8 @@
 				465D8B241E59D8FA001B8382 /* AshikhminShirleyBRDF.cpp */,
 				465D8B3D1E59D93A001B8382 /* microfacet_bsdfs.h */,
 				465D8B3C1E59D93A001B8382 /* microfacet_bsdfs.cpp */,
+				460A1B361EBA3F8E000C1A26 /* disney_bsdfs.h */,
+				460A1B351EBA3F8E000C1A26 /* disney_bsdfs.cpp */,
 				465D8B2D1E59D8FA001B8382 /* MultiBSDF.h */,
 				465D8B2C1E59D8FA001B8382 /* MultiBSDF.cpp */,
 			);
@@ -1028,6 +1034,7 @@
 				465D8ADD1E59D1E3001B8382 /* TriangleSurfaceShape.h in Headers */,
 				466F6CCE1BB6CA070056F2FA /* CompensatedSum.h in Headers */,
 				46BF8CB41E23A72E00EF8E13 /* medium_material.h in Headers */,
+				460A1B381EBA3F8E000C1A26 /* disney_bsdfs.h in Headers */,
 				465D8B651E59DABF001B8382 /* DebugRenderer.h in Headers */,
 				466F6CEC1BB6CA420056F2FA /* distributions.h in Headers */,
 				465D8B7B1E59DBA5001B8382 /* VolumetricPTRenderer.h in Headers */,
@@ -1272,6 +1279,7 @@
 				465D8B461E59D9A3001B8382 /* basic_edfs.cpp in Sources */,
 				465D8AC21E59CEF3001B8382 /* image_2d.cpp in Sources */,
 				465D8AAE1E59CB88001B8382 /* surface_object.cpp in Sources */,
+				460A1B371EBA3F8E000C1A26 /* disney_bsdfs.cpp in Sources */,
 				464545A31E1F5EDF00B4CECD /* camera_nodes.cpp in Sources */,
 				465D8B301E59D8FA001B8382 /* AshikhminShirleyBRDF.cpp in Sources */,
 				4645459F1E1E315100B4CECD /* TriangleMeshNode.cpp in Sources */,

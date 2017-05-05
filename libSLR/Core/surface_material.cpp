@@ -26,7 +26,8 @@ namespace SLR {
     
     
     
-    MicrofacetDistribution* SVGGX::getMicrofacetDistribution(const SurfacePoint &surfPt, ArenaAllocator &mem) const {
-        return mem.create<GGX>(m_alpha_g->evaluate(surfPt.getTextureCoordinate()));
+    MicrofacetDistribution* GGXSVMicrofacetDistribution::getMicrofacetDistribution(const SurfacePoint &surfPt, ArenaAllocator &mem) const {
+        return mem.create<GGXMicrofacetDistribution>(m_alpha_gx->evaluate(surfPt.getTextureCoordinate()), 
+                                                     m_alpha_gy->evaluate(surfPt.getTextureCoordinate()));
     }
 }

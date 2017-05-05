@@ -12,24 +12,14 @@
 #include "../declarations.h"
 #include "../Core/geometry.h"
 
-namespace SLR {
-    struct SLR_API Vertex {
-        Point3D position;
-        Normal3D normal;
-        Tangent3D tangent;
-        TexCoord2D texCoord;
-        
-        Vertex() { }
-        Vertex(const Point3D &pos, const Normal3D &norm, const Tangent3D &tang, const TexCoord2D &tc) : position(pos), normal(norm), tangent(tang), texCoord(tc) { }
-    };
-    
+namespace SLR {    
     class SLR_API TriangleSurfaceShape : public SurfaceShape {
-        const Vertex* m_v[3];
-        const FloatTexture* m_alphaTex;
+        const MaterialGroupInTriangleMesh* m_matGroup;
+        uint32_t m_index;
+        Vector3D m_texCoord0Dir;
     public:
-        TriangleSurfaceShape() : m_v{nullptr, nullptr, nullptr}, m_alphaTex(nullptr) { }
-        TriangleSurfaceShape(const Vertex* v0, const Vertex* v1, const Vertex* v2, const FloatTexture* aTex) :
-        m_v{v0, v1, v2}, m_alphaTex(aTex) { }
+        TriangleSurfaceShape() : m_matGroup(nullptr), m_index(UINT32_MAX) { }
+        TriangleSurfaceShape(const MaterialGroupInTriangleMesh* matGroup, uint32_t index);
         
         // TODO: consider a better cost value.
         float costForIntersect() const override { return 1.0f; }

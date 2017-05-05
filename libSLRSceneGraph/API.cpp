@@ -416,7 +416,7 @@ namespace SLRSceneGraph {
                                                                spectrum = Spectrum::create(spType, data.lambdas, data.values, data.numSamples);
                                                        }
                                                        else {
-                                                           *err = ErrorMessage("Spectrum not found.");
+                                                           *err = ErrorMessage("Spectrum %s not found.", name.c_str());
                                                            return Element();
                                                        }
                                                        return Element::createFromReference<TypeMap::Spectrum>(spectrum);
@@ -551,13 +551,14 @@ namespace SLRSceneGraph {
                                                        const static Function configFunc{
                                                            0, {
                                                                {"eta", Type::SpectrumTexture}, {"k", Type::SpectrumTexture},
-                                                               {"alpha_g", Type::FloatTexture}
+                                                               {"alpha_gx", Type::FloatTexture}, {"alpha_gy", Type::FloatTexture}
                                                            },
                                                            [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
                                                                SpectrumTextureRef eta = args.at("eta").rawRef<TypeMap::SpectrumTexture>();
                                                                SpectrumTextureRef k = args.at("k").rawRef<TypeMap::SpectrumTexture>();
-                                                               FloatTextureRef alpha_g = args.at("alpha_g").rawRef<TypeMap::FloatTexture>();
-                                                               return Element::createFromReference<TypeMap::SurfaceMaterial>(SurfaceMaterial::createMicrofacetMetal(eta, k, alpha_g));
+                                                               FloatTextureRef alpha_gx = args.at("alpha_gx").rawRef<TypeMap::FloatTexture>();
+                                                               FloatTextureRef alpha_gy = args.at("alpha_gy").rawRef<TypeMap::FloatTexture>();
+                                                               return Element::createFromReference<TypeMap::SurfaceMaterial>(SurfaceMaterial::createMicrofacetMetal(eta, k, alpha_gx, alpha_gy));
                                                            }
                                                        };
                                                        return configFunc(params, context, err);
@@ -566,13 +567,14 @@ namespace SLRSceneGraph {
                                                        const static Function configFunc{
                                                            0, {
                                                                {"etaExt", Type::SpectrumTexture}, {"etaInt", Type::SpectrumTexture},
-                                                               {"alpha_g", Type::FloatTexture}
+                                                               {"alpha_gx", Type::FloatTexture}, {"alpha_gy", Type::FloatTexture}
                                                            },
                                                            [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
                                                                SpectrumTextureRef etaExt = args.at("etaExt").rawRef<TypeMap::SpectrumTexture>();
                                                                SpectrumTextureRef etaInt = args.at("etaInt").rawRef<TypeMap::SpectrumTexture>();
-                                                               FloatTextureRef alpha_g = args.at("alpha_g").rawRef<TypeMap::FloatTexture>();
-                                                               return Element::createFromReference<TypeMap::SurfaceMaterial>(SurfaceMaterial::createMicrofacetGlass(etaExt, etaInt, alpha_g));
+                                                               FloatTextureRef alpha_gx = args.at("alpha_gx").rawRef<TypeMap::FloatTexture>();
+                                                               FloatTextureRef alpha_gy = args.at("alpha_gy").rawRef<TypeMap::FloatTexture>();
+                                                               return Element::createFromReference<TypeMap::SurfaceMaterial>(SurfaceMaterial::createMicrofacetGlass(etaExt, etaInt, alpha_gx, alpha_gy));
                                                            }
                                                        };
                                                        return configFunc(params, context, err);
