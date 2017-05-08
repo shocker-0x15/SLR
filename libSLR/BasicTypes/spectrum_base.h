@@ -53,6 +53,11 @@ namespace SLR {
     //}
     
     template <typename RealType>
+    inline float sRGB_to_Luminance(const RealType r, const RealType g, const RealType b) {
+        return 0.2126729 * r + 0.7151522 * g + 0.0721750 * b;
+    }
+    
+    template <typename RealType>
     inline void sRGB_to_XYZ(const RealType rgb[3], RealType xyz[3]) {
         xyz[0] = 0.4124564 * rgb[0] + 0.3575761 * rgb[1] + 0.1804375 * rgb[2];
         xyz[1] = 0.2126729 * rgb[0] + 0.7151522 * rgb[1] + 0.0721750 * rgb[2];
@@ -81,20 +86,6 @@ namespace SLR {
     }
     
     template <typename RealType>
-    inline void sRGB_D50_to_XYZ(const RealType rgb[3], RealType xyz[3]) {
-        xyz[0] = 0.4850 * rgb[0] + 0.3489 * rgb[1] + 0.1303 * rgb[2];
-        xyz[1] = 0.2501 * rgb[0] + 0.6978 * rgb[1] + 0.0521 * rgb[2];
-        xyz[2] = 0.0227 * rgb[0] + 0.1163 * rgb[1] + 0.6862 * rgb[2];
-    }
-    
-    template <typename RealType>
-    inline void XYZ_to_sRGB_D50(const RealType xyz[3], RealType rgb[3]) {
-        rgb[0] = 2.7556 * xyz[0] - 1.3071 * xyz[1] - 0.4239 * xyz[2];
-        rgb[1] = -0.9934 * xyz[0] + 1.9227 * xyz[1] + 0.0426 * xyz[2];
-        rgb[2] = 0.0771 * xyz[0] - 0.2826 * xyz[1] + 1.4642 * xyz[2];
-    }
-    
-    template <typename RealType>
     inline void XYZ_to_xyY(const RealType xyz[3], RealType xyY[3]) {
         RealType b = xyz[0] + xyz[1] + xyz[2];
         if (b == 0) {
@@ -115,13 +106,21 @@ namespace SLR {
         xyz[2] = (1.0f - xyY[0] - xyY[1]) * b;
     }
     
+#if SLR_Color_System_is_based_on == SLR_Color_System_CIE_1931_2deg
     static const float WavelengthLowBound = 360.0f;
     static const float WavelengthHighBound = 830.0f;
     static const uint32_t NumCMFSamples = 471;
     
-    extern const float xbar_2deg[NumCMFSamples];
-    extern const float ybar_2deg[NumCMFSamples];
-    extern const float zbar_2deg[NumCMFSamples];
+    extern const float xbar_CIE1931_2deg[NumCMFSamples];
+    extern const float ybar_CIE1931_2deg[NumCMFSamples];
+    extern const float zbar_CIE1931_2deg[NumCMFSamples];
+#elif SLR_Color_System_is_based_on == SLR_Color_System_CIE_1964_10deg
+
+#elif SLR_Color_System_is_based_on == SLR_Color_System_CIE_2012_2deg
+
+#elif SLR_Color_System_is_based_on == SLR_Color_System_CIE_2012_10deg
+    
+#endif
 
     
     

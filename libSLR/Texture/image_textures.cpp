@@ -20,7 +20,7 @@ namespace SLR {
         uint32_t py = std::min((uint32_t)(m_data->height() * v), m_data->height() - 1);
         SampledSpectrum ret;
         switch (m_data->format()) {
-#ifdef Use_Spectral_Representation
+#ifdef SLR_Use_Spectral_Representation
             case ColorFormat::uvs16Fx3: {
                 const uvs16Fx3 &data = m_data->get<uvs16Fx3>(px, py);
                 ret = UpsampledContinuousSpectrum(data.u, data.v, data.s / UpsampledContinuousSpectrum::EqualEnergyReflectance).evaluate(wls);
@@ -90,31 +90,31 @@ namespace SLR {
             switch (m_data->format()) {
                 case ColorFormat::RGB8x3: {
                     RGB8x3 avg = *(RGB8x3*)data;
-                    luminance = 0.222485f * avg.r + 0.716905f * avg.g + 0.060610f * avg.b;
+                    luminance = sRGB_to_Luminance(avg.r, avg.g, avg.b);
                     break;
                 }
                 case ColorFormat::RGB_8x4: {
                     RGB_8x4 avg = *(RGB_8x4*)data;
-                    luminance = 0.222485f * avg.r + 0.716905f * avg.g + 0.060610f * avg.b;
+                    luminance = sRGB_to_Luminance(avg.r, avg.g, avg.b);
                     break;
                 }
                 case ColorFormat::RGBA8x4: {
                     RGBA8x4 avg = *(RGBA8x4*)data;
-                    luminance = 0.222485f * avg.r + 0.716905f * avg.g + 0.060610f * avg.b;
+                    luminance = sRGB_to_Luminance(avg.r, avg.g, avg.b);
                     break;
                 }
                 case ColorFormat::RGBA16Fx4: {
                     RGBA16Fx4 avg = *(RGBA16Fx4*)data;
-                    luminance = 0.222485f * avg.r + 0.716905f * avg.g + 0.060610f * avg.b;
+                    luminance = sRGB_to_Luminance(avg.r, avg.g, avg.b);
                     break;
                 }
-#ifdef Use_Spectral_Representation
+#ifdef SLR_Use_Spectral_Representation
                 case ColorFormat::uvs16Fx3: {
                     uvs16Fx3 avg = *(uvs16Fx3*)data;
                     float uvs[3] = {avg.u, avg.v, avg.s};
                     float rgb[3];
                     UpsampledContinuousSpectrum::uvs_to_sRGB(m_data->spectrumType(), uvs, rgb);
-                    luminance = 0.222485f * rgb[0] + 0.716905f * rgb[1] + 0.060610f * rgb[2];
+                    luminance = sRGB_to_Luminance(rgb[0], rgb[1], rgb[2]);
                     break;
                 }
                 case ColorFormat::uvsA16Fx4: {
@@ -122,7 +122,7 @@ namespace SLR {
                     float uvs[3] = {avg.u, avg.v, avg.s};
                     float rgb[3];
                     UpsampledContinuousSpectrum::uvs_to_sRGB(m_data->spectrumType(), uvs, rgb);
-                    luminance = 0.222485f * rgb[0] + 0.716905f * rgb[1] + 0.060610f * rgb[2];
+                    luminance = sRGB_to_Luminance(rgb[0], rgb[1], rgb[2]);
                     break;
                 }
 #endif
@@ -201,7 +201,7 @@ namespace SLR {
                 ret = data.v / 255.0f;
                 break;
             }
-#ifdef Use_Spectral_Representation
+#ifdef SLR_Use_Spectral_Representation
             case ColorFormat::uvsA16Fx4: {
                 const uvsA16Fx4 &data = m_data->get<uvsA16Fx4>(px, py);
                 ret = data.a;

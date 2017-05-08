@@ -28,14 +28,21 @@ namespace SLR {
         float m_clearCoat;
         float m_clearCoatGloss;
         
+        float m_baseColorLuminance;
+        GGXMicrofacetDistribution* m_base_D;
+        BerryMicrofacetDistribution* m_clearcoat_D;
+        GGXMicrofacetDistribution* m_clearcoat_forG;
+        
         SampledSpectrum sampleInternal(const BSDFQuery &query, float uComponent, const float uDir[2], BSDFQueryResult* result) const override;
         SampledSpectrum evaluateInternal(const BSDFQuery &query, const Vector3D &dir, SampledSpectrum* rev_fs) const override;
         float evaluatePDFInternal(const BSDFQuery &query, const Vector3D &dir, float* revPDF) const override;
         float weightInternal(const BSDFQuery &query) const override;
         SampledSpectrum getBaseColorInternal(DirectionType flags) const override;
     public:
-        DisneyBRDF() :
-        BSDF(DirectionType::Reflection | DirectionType::HighFreq) { }
+        DisneyBRDF(const SampledSpectrum &baseColor, float baseColorLuminance, 
+                   float subsurface, float metallic, float specular, float specularTint, float roughness, float anisotropic, 
+                   float sheen, float sheenTint, float clearCoat, float clearCoatGloss);
+        ~DisneyBRDF();
     };
     
     

@@ -66,7 +66,7 @@ namespace SLR {
     }
     
     float OrenNayerBRDF::weightInternal(const BSDFQuery &query) const {
-        return m_R.luminance();
+        return m_R.importance(query.wlHint);
     }
     
     SampledSpectrum OrenNayerBRDF::getBaseColorInternal(DirectionType flags) const {

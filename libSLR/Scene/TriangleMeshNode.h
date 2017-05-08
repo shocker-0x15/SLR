@@ -25,7 +25,7 @@ namespace SLR {
         
         MaterialGroupInTriangleMesh() :
         material(nullptr), normalMap(nullptr), alphaMap(nullptr),
-        numTriangles(0) {
+        triangles(nullptr), numTriangles(0) {
         }
         ~MaterialGroupInTriangleMesh();
         

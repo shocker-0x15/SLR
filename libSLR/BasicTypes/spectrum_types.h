@@ -538,6 +538,11 @@ namespace SLR {
     SLR_API SampledSpectrumTemplate<RealType, NumSpectralSamples> max(const SampledSpectrumTemplate<RealType, NumSpectralSamples> &value, RealType maxValue);
     
     template <typename RealType, uint32_t NumSpectralSamples>
+    SLR_API SampledSpectrumTemplate<RealType, NumSpectralSamples> lerp(const SampledSpectrumTemplate<RealType, NumSpectralSamples> &v0, 
+                                                                       const SampledSpectrumTemplate<RealType, NumSpectralSamples> &v1, 
+                                                                       RealType t);
+    
+    template <typename RealType, uint32_t NumSpectralSamples>
     SLR_API SampledSpectrumTemplate<RealType, NumSpectralSamples> sqrt(const SampledSpectrumTemplate<RealType, NumSpectralSamples> &value);
     
     template <typename RealType, uint32_t NumSpectralSamples>
@@ -718,23 +723,23 @@ namespace SLR {
         static std::unique_ptr<float[]> zbar;
         static float integralCMF;
         
-        static void init() {
+        static void init() {            
             xbar = std::unique_ptr<float[]>(new float[NumStrataForStorage]);
             ybar = std::unique_ptr<float[]>(new float[NumStrataForStorage]);
             zbar = std::unique_ptr<float[]>(new float[NumStrataForStorage]);
             
             uint32_t sBin = 0;
             float nextP = float(sBin + 1) / NumStrataForStorage;
-            float xSum = 0, xPrev = xbar_2deg[0];
-            float ySum = 0, yPrev = ybar_2deg[0];
-            float zSum = 0, zPrev = zbar_2deg[0];
+            float xSum = 0, xPrev = xbarReference[0];
+            float ySum = 0, yPrev = ybarReference[0];
+            float zSum = 0, zPrev = zbarReference[0];
             const float interval = 1;// nm
             for (int i = 1; i < NumCMFSamples; ++i) {
                 float curP = float(i) / (NumCMFSamples - 1);
                 float width = interval;
-                float xCur = xbar_2deg[i];
-                float yCur = ybar_2deg[i];
-                float zCur = zbar_2deg[i];
+                float xCur = xbarReference[i];
+                float yCur = ybarReference[i];
+                float zCur = zbarReference[i];
                 if (curP >= nextP) {
                     width = (curP - nextP) * (WavelengthHighBound - WavelengthLowBound);
                     float t = 1 - width / interval;

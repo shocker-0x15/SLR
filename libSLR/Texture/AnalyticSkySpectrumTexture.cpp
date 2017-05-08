@@ -45,7 +45,7 @@ namespace SLR {
         }
     };
     
-#ifdef Use_Spectral_Representation
+#ifdef SLR_Use_Spectral_Representation
     const uint32_t AnalyticSkySpectrumTexture::NumChannels = 11;
     const float AnalyticSkySpectrumTexture::SampledWavelengths[11] = {
         320.0f, 360.0f, 400.0f, 440.0f, 
@@ -63,7 +63,7 @@ namespace SLR {
     AnalyticSkySpectrumTexture::AnalyticSkySpectrumTexture(float solarRadius, float solarElevation, float turbidity, const AssetSpectrum* groundAlbedo, const Texture2DMapping* mapping) :
     m_solarRadius(std::min(solarRadius, (float)M_PI / 2)), m_solarElevation(solarElevation), m_turbidity(turbidity), m_groundAlbedo(groundAlbedo), m_mapping(mapping), 
     m_distribution(nullptr) {
-#ifdef Use_Spectral_Representation
+#ifdef SLR_Use_Spectral_Representation
         float albedo[NumChannels];
         groundAlbedo->evaluate(SampledWavelengths, NumChannels, albedo);
         for (int i = 0; i < NumChannels; ++i) {
@@ -83,7 +83,7 @@ namespace SLR {
     
     AnalyticSkySpectrumTexture::~AnalyticSkySpectrumTexture() {
         if (m_distribution) {
-#ifdef Use_Spectral_Representation
+#ifdef SLR_Use_Spectral_Representation
             delete m_distribution;
             delete m_skyDomeDistribution;
             delete m_sunDiscDistribution;
@@ -103,7 +103,7 @@ namespace SLR {
         Vector3D viewVec = Vector3D::fromPolarYUp(2 * M_PI * p.x, theta);
         float gamma = std::acos(std::clamp(dot(viewVec, m_sunDirection), -1.0f, 1.0f));
         
-#ifdef Use_Spectral_Representation
+#ifdef SLR_Use_Spectral_Representation
         float sampledValues[NumChannels];
         if (gamma < m_skyModelStates[0]->solar_radius) {
             for (int i = 0; i < NumChannels; ++i)
@@ -142,7 +142,7 @@ namespace SLR {
             Vector3D viewVec = Vector3D::fromPolarYUp(2 * M_PI * (x + 0.5f) / mapWidth, theta);
             float gamma = std::acos(std::clamp(dot(viewVec, m_sunDirection), -1.0f, 1.0f));
             
-#ifdef Use_Spectral_Representation
+#ifdef SLR_Use_Spectral_Representation
             float sampledValues[NumChannels];
             for (int i = 0; i < NumChannels; ++i)
                 sampledValues[i] = arhosekskymodel_radiance(m_skyModelStates[i], theta, gamma, SampledWavelengths[i]);
@@ -175,7 +175,7 @@ namespace SLR {
         m_skyDomeDistribution = new RegularConstantContinuousDistribution2D(mapWidth, mapHeight, pickFunc);
 //        m_skyDomeDistribution->exportBMP("distribution.bmp", true);
         
-#ifdef Use_Spectral_Representation
+#ifdef SLR_Use_Spectral_Representation
         const uint32_t NumRadiusSamples = 5;
         const uint32_t NumAngularSamples = 12;
         ReferenceFrame sunDirFrame(m_sunDirection);

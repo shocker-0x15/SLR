@@ -22,7 +22,7 @@ namespace SLR {
         RGBA8x4,
         RGBA16Fx4,
         Gray8,
-#ifdef Use_Spectral_Representation
+#ifdef SLR_Use_Spectral_Representation
         uvs16Fx3,
         uvsA16Fx4,
 #endif
@@ -39,7 +39,7 @@ namespace SLR {
     struct SLR_API RGB_8x4 { uint8_t r, g, b, dummy; };
     struct SLR_API RGBA8x4  { uint8_t r, g, b, a; };
     struct SLR_API RGBA16Fx4 { half r, g, b, a; };
-#ifdef Use_Spectral_Representation
+#ifdef SLR_Use_Spectral_Representation
     struct SLR_API uvs16Fx3 { half u, v, s; };
     struct SLR_API uvsA16Fx4 { half u, v, s, a; };
 #endif
@@ -133,7 +133,7 @@ namespace SLR {
                 case ColorFormat::RGB8x3:
                     switch (mode) {
                         case ImageStoreMode::AsIs:
-#ifdef Use_Spectral_Representation
+#ifdef SLR_Use_Spectral_Representation
                             m_colorFormat = ColorFormat::uvs16Fx3;
                             convertFunc = [this, &linearData, &spType](int32_t x, int32_t y) {
                                 const RGB8x3 &val = *((RGB8x3*)linearData + m_width * y + x);
@@ -178,7 +178,7 @@ namespace SLR {
                 case ColorFormat::RGB_8x4:
                     switch (mode) {
                         case ImageStoreMode::AsIs:
-#ifdef Use_Spectral_Representation
+#ifdef SLR_Use_Spectral_Representation
                             m_colorFormat = ColorFormat::uvs16Fx3;
                             convertFunc = [this, &linearData, &spType](int32_t x, int32_t y) {
                                 const RGB_8x4 &val = *((RGB_8x4*)linearData + m_width * y + x);
@@ -223,7 +223,7 @@ namespace SLR {
                 case ColorFormat::RGBA8x4:
                     switch (mode) {
                         case ImageStoreMode::AsIs:
-#ifdef Use_Spectral_Representation
+#ifdef SLR_Use_Spectral_Representation
                             m_colorFormat = ColorFormat::uvsA16Fx4;
                             convertFunc = [this, &linearData, &spType](int32_t x, int32_t y) {
                                 const RGBA8x4 &val = *((RGBA8x4*)linearData + m_width * y + x);
@@ -268,7 +268,7 @@ namespace SLR {
                 case ColorFormat::RGBA16Fx4:
                     switch (mode) {
                         case ImageStoreMode::AsIs:
-#ifdef Use_Spectral_Representation
+#ifdef SLR_Use_Spectral_Representation
                             m_colorFormat = ColorFormat::uvsA16Fx4;
                             convertFunc = [this, &linearData, &spType](int32_t x, int32_t y) {
                                 const RGBA16Fx4 &val = *((RGBA16Fx4*)linearData + m_width * y + x);

@@ -81,7 +81,7 @@ namespace SLR {
             rng.getFloat0cTo1o() * m_brightness,
             rng.getFloat0cTo1o() * m_brightness
         };
-#ifdef Use_Spectral_Representation
+#ifdef SLR_Use_Spectral_Representation
         UpsampledContinuousSpectrum spectrum(SpectrumType::Reflectance, ColorSpace::sRGB_NonLinear, rgb[0], rgb[1], rgb[2]);
         return spectrum.evaluate(wls);
 #else

@@ -46,7 +46,7 @@ namespace SLR {
     template <typename RealType, uint32_t NumStrataForStorage> class SpectrumStorageTemplate;
     // FIXME: Current code is inconsistent with respect to float precision.
     typedef float SpectrumFloat;
-#ifdef Use_Spectral_Representation
+#ifdef SLR_Use_Spectral_Representation
     const static uint32_t NumSpectralSamples = 16;
     const static uint32_t NumStrataForStorage = 16;
     

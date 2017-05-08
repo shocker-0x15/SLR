@@ -15,6 +15,7 @@ namespace SLR {
 //    template SLR_API const uint32_t WavelengthSamplesTemplate<double, NumSpectralSamples>::NumComponents;
 
     
+    
     template<typename RealType, uint32_t NumSpectralSamples>
     RGBTemplate<RealType> ContinuousSpectrumTemplate<RealType, NumSpectralSamples>::convertToRGB(SpectrumType spType) const {
         RealType XYZ[3];
@@ -128,18 +129,18 @@ namespace SLR {
         while (true) {
             RealType xbarValue, ybarValue, zbarValue;
             if (curWL == WavelengthLowBound + curCMFIdx * CMFBinWidth) {
-                xbarValue = xbar_2deg[curCMFIdx];
-                ybarValue = ybar_2deg[curCMFIdx];
-                zbarValue = zbar_2deg[curCMFIdx];
+                xbarValue = xbarReference[curCMFIdx];
+                ybarValue = ybarReference[curCMFIdx];
+                zbarValue = zbarReference[curCMFIdx];
                 ++curCMFIdx;
             }
             else {
                 uint32_t idx = std::min(uint32_t((curWL - WavelengthLowBound) / CMFBinWidth), NumCMFSamples - 1);
                 RealType CMFBaseWL = WavelengthLowBound + idx * CMFBinWidth;
                 RealType t = (curWL - CMFBaseWL) / CMFBinWidth;
-                xbarValue = (1 - t) * xbar_2deg[idx] + t * xbar_2deg[idx + 1];
-                ybarValue = (1 - t) * ybar_2deg[idx] + t * ybar_2deg[idx + 1];
-                zbarValue = (1 - t) * zbar_2deg[idx] + t * zbar_2deg[idx + 1];
+                xbarValue = (1 - t) * xbarReference[idx] + t * xbarReference[idx + 1];
+                ybarValue = (1 - t) * ybarReference[idx] + t * ybarReference[idx + 1];
+                zbarValue = (1 - t) * zbarReference[idx] + t * zbarReference[idx + 1];
             }
             
             RealType value;
@@ -294,7 +295,7 @@ namespace SLR {
     }
     
     template <typename RealType, uint32_t NumSpectralSamples>
-    void IrregularContinuousSpectrumTemplate<RealType, NumSpectralSamples>::convertToXYZ(RealType XYZ[3]) const {
+    void IrregularContinuousSpectrumTemplate<RealType, NumSpectralSamples>::convertToXYZ(RealType XYZ[3]) const {  
         const RealType CMFBinWidth = (WavelengthHighBound - WavelengthLowBound) / (NumCMFSamples - 1);
         uint32_t curCMFIdx = 0;
         uint32_t baseIdx = 0;
@@ -306,18 +307,18 @@ namespace SLR {
         while (true) {
             RealType xbarValue, ybarValue, zbarValue;
             if (curWL == WavelengthLowBound + curCMFIdx * CMFBinWidth) {
-                xbarValue = xbar_2deg[curCMFIdx];
-                ybarValue = ybar_2deg[curCMFIdx];
-                zbarValue = zbar_2deg[curCMFIdx];
+                xbarValue = xbarReference[curCMFIdx];
+                ybarValue = ybarReference[curCMFIdx];
+                zbarValue = zbarReference[curCMFIdx];
                 ++curCMFIdx;
             }
             else {
                 uint32_t idx = std::min(uint32_t((curWL - WavelengthLowBound) / CMFBinWidth), NumCMFSamples - 1);
                 RealType CMFBaseWL = WavelengthLowBound + idx * CMFBinWidth;
                 RealType t = (curWL - CMFBaseWL) / CMFBinWidth;
-                xbarValue = (1 - t) * xbar_2deg[idx] + t * xbar_2deg[idx + 1];
-                ybarValue = (1 - t) * ybar_2deg[idx] + t * ybar_2deg[idx + 1];
-                zbarValue = (1 - t) * zbar_2deg[idx] + t * zbar_2deg[idx + 1];
+                xbarValue = (1 - t) * xbarReference[idx] + t * xbarReference[idx + 1];
+                ybarValue = (1 - t) * ybarReference[idx] + t * ybarReference[idx + 1];
+                zbarValue = (1 - t) * zbarReference[idx] + t * zbarReference[idx + 1];
             }
             
             RealType value;
@@ -745,6 +746,20 @@ namespace SLR {
     template SLR_API SampledSpectrumTemplate<double, NumSpectralSamples> max(const SampledSpectrumTemplate<double, NumSpectralSamples> &value, double maxValue);
     
     template <typename RealType, uint32_t NumSpectralSamples>
+    SampledSpectrumTemplate<RealType, NumSpectralSamples> lerp(const SampledSpectrumTemplate<RealType, NumSpectralSamples> &v0, 
+                                                               const SampledSpectrumTemplate<RealType, NumSpectralSamples> &v1, 
+                                                               RealType t) {
+//        return v0 + (v1 - v0) * t; // N adds, N muls, N adds = 2N adds, N muls
+        return (1 - t) * v0 + t * v1; // 1 add, N muls, N muls, N adds = N+1 adds, 2N muls + good precision
+    }
+    template SLR_API SampledSpectrumTemplate<float, NumSpectralSamples> lerp(const SampledSpectrumTemplate<float, NumSpectralSamples> &v0, 
+                                                                             const SampledSpectrumTemplate<float, NumSpectralSamples> &v1, 
+                                                                             float t);
+    template SLR_API SampledSpectrumTemplate<double, NumSpectralSamples> lerp(const SampledSpectrumTemplate<double, NumSpectralSamples> &v0, 
+                                                                              const SampledSpectrumTemplate<double, NumSpectralSamples> &v1, 
+                                                                              double t);
+    
+    template <typename RealType, uint32_t NumSpectralSamples>
     SampledSpectrumTemplate<RealType, NumSpectralSamples> sqrt(const SampledSpectrumTemplate<RealType, NumSpectralSamples> &value) {
         SampledSpectrumTemplate<RealType, NumSpectralSamples> ret;
         for (int i = 0; i < NumSpectralSamples; ++i)
@@ -764,6 +779,7 @@ namespace SLR {
     template SLR_API SampledSpectrumTemplate<float, NumSpectralSamples> exp(const SampledSpectrumTemplate<float, NumSpectralSamples> &value);
     template SLR_API SampledSpectrumTemplate<double, NumSpectralSamples> exp(const SampledSpectrumTemplate<double, NumSpectralSamples> &value);
 
+    
     
     template struct DiscretizedSpectrumTemplate<float, NumStrataForStorage>;
 //    template SLR_API const uint32_t DiscretizedSpectrumTemplate<float, NumStrataForStorage>::NumStrata;
@@ -786,6 +802,8 @@ namespace SLR {
 //    template SLR_API const DiscretizedSpectrumTemplate<double, NumStrataForStorage> DiscretizedSpectrumTemplate<double, NumStrataForStorage>::One;
 //    template SLR_API const DiscretizedSpectrumTemplate<double, NumStrataForStorage> DiscretizedSpectrumTemplate<double, NumStrataForStorage>::Inf;
 //    template SLR_API const DiscretizedSpectrumTemplate<double, NumStrataForStorage> DiscretizedSpectrumTemplate<double, NumStrataForStorage>::NaN;
+    
+    
     
     template class SLR_API SpectrumStorageTemplate<float, NumStrataForStorage>;
     template class SLR_API SpectrumStorageTemplate<double, NumStrataForStorage>;

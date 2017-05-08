@@ -15,6 +15,7 @@ namespace SLR {
 //    template SLR_API const uint32_t RGBSamplesTemplate<double>::NumComponents;
 
 
+    
     template struct SLR_API RGBTemplate<float>;
 //    template SLR_API const uint32_t RGBTemplate<float>::NumComponents;
 //    template SLR_API const RGBTemplate<float> RGBTemplate<float>::Zero;
@@ -45,6 +46,13 @@ namespace SLR {
     template SLR_API RGBTemplate<double> max(const RGBTemplate<double> &value, double maxValue);
     
     template <typename RealType>
+    RGBTemplate<RealType> lerp(const RGBTemplate<RealType> &v0, const RGBTemplate<RealType> &v1, RealType t) {
+        return (1 - t) * v0 + t * v1;
+    }
+    template SLR_API RGBTemplate<float> lerp(const RGBTemplate<float> &v0, const RGBTemplate<float> &v1, float t);
+    template SLR_API RGBTemplate<double> lerp(const RGBTemplate<double> &v0, const RGBTemplate<double> &v1, double t);
+    
+    template <typename RealType>
     RGBTemplate<RealType> sqrt(const RGBTemplate<RealType> &value) {
         return RGBTemplate<RealType>(std::sqrt(value.r), std::sqrt(value.g), std::sqrt(value.b));
     }
@@ -71,6 +79,8 @@ namespace SLR {
     }
     template SLR_API RGBTemplate<float> inverseGammaCorrection(const RGBTemplate<float> &s, float gamma);
     template SLR_API RGBTemplate<double> inverseGammaCorrection(const RGBTemplate<double> &s, double gamma);
+    
+    
     
     template class SLR_API RGBStorageTemplate<float>;
     template class SLR_API RGBStorageTemplate<double>;

@@ -21,7 +21,7 @@ namespace SLR {
     class SLR_API AnalyticSkySpectrumTexture : public SpectrumTexture {
         class SunDiscContinuousDistribution2D;
         
-#ifdef Use_Spectral_Representation
+#ifdef SLR_Use_Spectral_Representation
         static const uint32_t NumChannels;
         static const float SampledWavelengths[11];
 #else
@@ -33,7 +33,7 @@ namespace SLR {
         float m_solarElevation;
         float m_turbidity;
         const AssetSpectrum* m_groundAlbedo;
-#ifdef Use_Spectral_Representation
+#ifdef SLR_Use_Spectral_Representation
         ArHosekSkyModelState* m_skyModelStates[11];
 #else
         ArHosekSkyModelState* m_skyModelStates[3];

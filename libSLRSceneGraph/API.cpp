@@ -1220,7 +1220,7 @@ namespace SLRSceneGraph {
     namespace Spectrum {
         using namespace SLR;
         
-#ifdef Use_Spectral_Representation
+#ifdef SLR_Use_Spectral_Representation
         SLR_SCENEGRAPH_API AssetSpectrumRef create(SpectrumType spType, ColorSpace space, SpectrumFloat e0, SpectrumFloat e1, SpectrumFloat e2) {
             return createShared<UpsampledContinuousSpectrum>(spType, space, e0, e1, e2);
         }

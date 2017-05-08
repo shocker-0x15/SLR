@@ -17,8 +17,8 @@
 namespace SLR {
     void MaterialGroupInTriangleMesh::setTriangles(std::unique_ptr<Vertex*[]> &_vertexReferences, uint32_t _numTriangles) {
         vertexReferences = std::move(_vertexReferences);
-        triangles = new TriangleSurfaceShape[numTriangles];
         numTriangles = _numTriangles;
+        triangles = new TriangleSurfaceShape[_numTriangles];
         for (int i = 0; i < numTriangles; ++i) {
             new (triangles + i) TriangleSurfaceShape(this, 3 * i);
         }

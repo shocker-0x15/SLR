@@ -343,10 +343,9 @@ namespace SLR {
     }
     
     float GGXMicrofacetDistribution::evaluateSmithG1(const Vector3D &v, const Normal3D &m) const {
-        float sinTheta_v_alpha_go = std::sqrt(v.x * v.x * m_alpha_gx * m_alpha_gx + v.y * v.y * m_alpha_gy * m_alpha_gy);
         float chi = (dot(v, m) / v.z) > 0 ? 1 : 0;
-        float cosTheta_v = v.z;
-        return chi * 2 / (1 + std::sqrt(1 + std::pow(sinTheta_v_alpha_go / cosTheta_v, 2)));
+        float tanTheta_v_alpha_go_2 = (v.x * v.x * m_alpha_gx * m_alpha_gx + v.y * v.y * m_alpha_gy * m_alpha_gy) / (v.z * v.z);
+        return chi * 2 / (1 + std::sqrt(1 + tanTheta_v_alpha_go_2));
     }
     
     

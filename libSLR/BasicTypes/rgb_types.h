@@ -116,7 +116,7 @@ namespace SLR {
         RealType luminance(RGBColorSpace space = RGBColorSpace::sRGB) const {
             switch(space) {
                 case RGBColorSpace::sRGB:
-                    return 0.222485 * r + 0.716905 * g + 0.060610 * b;
+                    return sRGB_to_Luminance(r, g, b);
             }
             return 0.0f;
         }
@@ -186,6 +186,9 @@ namespace SLR {
     
     template <typename RealType>
     SLR_API RGBTemplate<RealType> max(const RGBTemplate<RealType> &value, RealType maxValue);
+    
+    template <typename RealType>
+    SLR_API RGBTemplate<RealType> lerp(const RGBTemplate<RealType> &v0, const RGBTemplate<RealType> &v1, RealType t);
     
     template <typename RealType>
     SLR_API RGBTemplate<RealType> sqrt(const RGBTemplate<RealType> &value);

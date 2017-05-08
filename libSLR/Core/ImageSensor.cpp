@@ -168,7 +168,7 @@ namespace SLR {
                 RGB[1] = RGB[1] < 0.0f ? 0.0f : RGB[1];
                 RGB[2] = RGB[2] < 0.0f ? 0.0f : RGB[2];
                 
-                float Y = 0.222485 * RGB[0] + 0.716905 * RGB[1] + 0.060610 * RGB[2];
+                float Y = sRGB_to_Luminance(RGB[0], RGB[1], RGB[2]);
                 float scaleY = Y != 0 ? (1.0f - std::exp(-Y)) / Y : 0.0f;
                 RGB[0] = std::min(scaleY * RGB[0], 1.0f);
                 RGB[1] = std::min(scaleY * RGB[1], 1.0f);

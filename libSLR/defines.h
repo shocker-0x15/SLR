@@ -164,6 +164,30 @@ std::unique_ptr<T> createUnique(ArgTypes&&... args) {
     return std::unique_ptr<T>(new T(std::forward<ArgTypes>(args)...));
 }
 
-#define Use_Spectral_Representation
+#define SLR_Color_System_CIE_1931_2deg  0
+#define SLR_Color_System_CIE_1964_10deg 1
+#define SLR_Color_System_CIE_2012_2deg  2
+#define SLR_Color_System_CIE_2012_10deg 3
+
+#define SLR_Color_System_is_based_on SLR_Color_System_CIE_1931_2deg
+#define SLR_Use_Spectral_Representation
+
+#if SLR_Color_System_is_based_on == SLR_Color_System_CIE_1931_2deg
+#   define xbarReference xbar_CIE1931_2deg
+#   define ybarReference ybar_CIE1931_2deg
+#   define zbarReference zbar_CIE1931_2deg
+#elif SLR_Color_System_is_based_on == SLR_Color_System_CIE_1964_10deg
+#   define xbarReference xbar_CIE1964_10deg
+#   define ybarReference ybar_CIE1964_10deg
+#   define zbarReference zbar_CIE1964_10deg
+#elif SLR_Color_System_is_based_on == SLR_Color_System_CIE_2012_2deg
+#   define xbarReference xbar_CIE2012_2deg
+#   define ybarReference ybar_CIE2012_2deg
+#   define zbarReference zbar_CIE2012_2deg
+#elif SLR_Color_System_is_based_on == SLR_Color_System_CIE_2012_10deg
+#   define xbarReference xbar_CIE2012_10deg
+#   define ybarReference ybar_CIE2012_10deg
+#   define zbarReference zbar_CIE2012_10deg
+#endif
 
 #endif /* __SLR_defines__ */
