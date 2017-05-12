@@ -22,7 +22,7 @@ SLR consists of the following components.
     * Oren-Nayer BRDF \[Oren1994\]
     * Improved Ward-Dür BRDF \[Moroder2010\]
     * Ashikhmin-Shirley BRDF \[Ashikhmin2000\]
-    * GGX Microfacet BRDF/BSDF \[Walter2007\] with visible normal sampling \[Heitz2014\]
+    * GGX Microfacet BRDF/BSDF \[Walter2007\] with visible normal sampling \[Heitz2017\]
     * Disney BRDF/~~BSDF~~ (TODO) \[Burley2012, Burley2015\]
     * Mixed BSDF
     * ~~Layered BSDF~~ (TODO)
@@ -97,7 +97,7 @@ There are some scene files loading model data and textures, but those assets are
 [Burley2015] "Extending the Disney BRDF to a BSDF with Integrated Subsurface Scattering"  
 [Dammertz2008] "Shallow Bounding Volume Hierarchies for Fast SIMD Ray Tracing of Incoherent Rays"  
 [Hachisuka2011] "Robust Adaptive Photon Tracing Using Photon Path Visibility"  
-[Heitz2014] "Importance Sampling Microfacet-Based BSDFs using the Distribution of Visible Normals"  
+[Heitz2017] "A Simpler and Exact Sampling Routine for the GGX Distribution of Visible Normals"  
 [Hosek2012] "An Analytic Model for Full Spectral Sky-Dome Radiance"  
 [Kajiya1986] "THE RENDERING EQUATION"  
 [Meng2015] "Physically Meaningful Rendering using Tristimulus Colours"  

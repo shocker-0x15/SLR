@@ -704,10 +704,15 @@ namespace SLRSceneGraph {
                                                );
             stack["createMesh"] =
             Element::create<TypeMap::Function>(1,
-                                               std::vector<ArgInfo>{{"vertices", Type::Tuple}, {"matGroups", Type::Tuple}},
+                                               std::vector<ArgInfo>{
+                                                   {"vertices", Type::Tuple},
+                                                   {"matGroups", Type::Tuple},
+                                                   {"axisForRadialTangent", Type::Integer, -1}
+                                               },
                                                [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
                                                    const std::vector<Element> &vertices = args.at("vertices").raw<TypeMap::Tuple>().unnamed;
                                                    const std::vector<Element> &matGroups = args.at("matGroups").raw<TypeMap::Tuple>().unnamed;
+                                                   int32_t axisForRadialTangent = args.at("axisForRadialTangent").raw<TypeMap::Integer>();
                                                    
                                                    TriangleMeshNode::MaterialGroup resultMatGroup;
                                                    
@@ -762,8 +767,12 @@ namespace SLRSceneGraph {
                                                        sigMatGroup.perform<uint32_t>(procMatGroup, matGroups[i].raw<TypeMap::Tuple>(), 0, err);
                                                        if (err->error)
                                                            return Element();
-                                                       mesh->addTriangles(resultMatGroup.material, resultMatGroup.normalMap, resultMatGroup.alphaMap, std::move(resultMatGroup.triangles));
+                                                       mesh->addMaterialGroup(resultMatGroup.material, resultMatGroup.normalMap, resultMatGroup.alphaMap, std::move(resultMatGroup.triangles));
                                                    }
+                                                   
+                                                   if (axisForRadialTangent < -1 || axisForRadialTangent > 2)
+                                                       axisForRadialTangent = -1;
+                                                   mesh->setAxisForRadialTangent(axisForRadialTangent);
                                                    
                                                    return Element::createFromReference<TypeMap::SurfaceNode>(mesh);
                                                }

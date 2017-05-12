@@ -32,8 +32,8 @@ namespace SLR {
 
     
     
-    TriangleMeshNode::TriangleMeshNode(uint32_t numVertices, uint32_t numMatGroups, bool onlyForBoundary) : 
-    m_numVertices(numVertices), m_numMatGroups(numMatGroups), m_onlyForBoundary(onlyForBoundary) {
+    TriangleMeshNode::TriangleMeshNode(uint32_t numVertices, uint32_t numMatGroups, bool onlyForBoundary, int8_t axisForRadialTangent) : 
+    m_numVertices(numVertices), m_numMatGroups(numMatGroups), m_onlyForBoundary(onlyForBoundary), m_axisForRadialTangent(axisForRadialTangent) {
         m_vertices = new Vertex[m_numVertices];
         m_matGroups = new MaterialGroupInTriangleMesh[m_numMatGroups];
         for (int i = 0; i < m_numMatGroups; ++i)
@@ -59,17 +59,17 @@ namespace SLR {
             data->surfObjs.resize(objBaseIdx + numObjects);
         
         // apply transform
-        StaticTransform transform;
         if (subTF) {
             SLRAssert(subTF->isStatic(), "Transformation given to TriangleMeshNode must be static.");
-            subTF->sample(0.0f, &transform);
+            subTF->sample(0.0f, &m_appliedTransform);
         }
-        if (!transform.isIdentity()) {
+        m_appliedTFIsIdentity = m_appliedTransform.isIdentity();
+        if (!m_appliedTFIsIdentity) {
             for (int i = 0; i < m_numVertices; ++i) {
                 Vertex &v = m_vertices[i];
-                v.position = transform * v.position;
-                v.normal = normalize(transform * v.normal);
-                v.tangent = normalize(transform * v.tangent);
+                v.position = m_appliedTransform * v.position;
+                v.normal = normalize(m_appliedTransform * v.normal);
+                v.tangent = normalize(m_appliedTransform * v.tangent);
                 v.texCoord = v.texCoord;
             }
         }
@@ -109,7 +109,7 @@ namespace SLR {
             m_boundarySurfObj = mem->create<SurfaceObjectAggregate>(m_objs);
             m_enclosedMedObj = mem->create<EnclosedMediumObject>(subData.medObjs[0], m_boundarySurfObj,
                                                                  m_mediumTransform ? *(StaticTransform*)m_mediumTransform : StaticTransform());
-            if (subTF && !transform.isIdentity()) {
+            if (subTF && !m_appliedTFIsIdentity) {
                 m_TFMedObj = mem->create<TransformedMediumObject>(m_enclosedMedObj, m_mediumTransform);
                 data->medObjs.push_back(m_TFMedObj);
             }

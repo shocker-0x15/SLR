@@ -21,7 +21,7 @@ namespace SLRSceneGraph {
     }
     
     void TriangleMeshNode::setupRawData() {
-        new (m_rawData) SLR::TriangleMeshNode((uint32_t)m_vertices.size(), (uint32_t)m_matGroups.size(), m_onlyForBoundary);
+        new (m_rawData) SLR::TriangleMeshNode((uint32_t)m_vertices.size(), (uint32_t)m_matGroups.size(), m_onlyForBoundary, m_axisForRadialTangent);
         
         SLR::TriangleMeshNode &raw = *(SLR::TriangleMeshNode*)getRaw();
         
@@ -79,8 +79,8 @@ namespace SLRSceneGraph {
         return m_vertices.size() - 1;
     }
     
-    void TriangleMeshNode::addTriangles(const SurfaceMaterialRef &mat, const NormalTextureRef &normalMap, const FloatTextureRef &alphaMap,
-                                        const std::vector<Triangle> &&triangles) {
+    void TriangleMeshNode::addMaterialGroup(const SurfaceMaterialRef &mat, const NormalTextureRef &normalMap, const FloatTextureRef &alphaMap,
+                                            const std::vector<Triangle> &&triangles) {
         m_matGroups.emplace_back();
         MaterialGroup &matGroup = m_matGroups.back();
         matGroup.material = mat;

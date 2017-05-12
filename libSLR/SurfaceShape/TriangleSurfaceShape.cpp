@@ -220,12 +220,31 @@ namespace SLR {
         
         ReferenceFrame shadingFrame;
         shadingFrame.z = normalize(b0 * v0.normal + b1 * v1.normal + b2 * v2.normal);
-        shadingFrame.x = normalize(b0 * v0.tangent + b1 * v1.tangent + b2 * v2.tangent);
-        // guarantee the orthogonality between the normal and tangent.
-        // Orthogonality break might be caused by barycentric interpolation?
-        float dotNT = dot(shadingFrame.z, shadingFrame.x);
-        if (std::fabs(dotNT) >= 0.01f)
-            shadingFrame.x = normalize(shadingFrame.x - dotNT * shadingFrame.z);
+        int8_t axisForRadialTangent = m_matGroup->parent->getAxisForRadialTangent(); 
+        if (axisForRadialTangent == -1) {
+            shadingFrame.x = normalize(b0 * v0.tangent + b1 * v1.tangent + b2 * v2.tangent);
+            // guarantee the orthogonality between the normal and tangent.
+            // Orthogonality break might be caused by barycentric interpolation?
+            float dotNT = dot(shadingFrame.z, shadingFrame.x);
+            if (std::fabs(dotNT) >= 0.01f)
+                shadingFrame.x = normalize(shadingFrame.x - dotNT * shadingFrame.z);
+        }
+        else {
+            const StaticTransform &appliedTF = m_matGroup->parent->getAppliedTransform();
+            Point3D p = invert(appliedTF) * (b0 * v0.position + b1 * v1.position + b2 * v2.position);
+            if (axisForRadialTangent == 0) {
+                float dist = std::sqrt(p.y * p.y + p.z * p.z);
+                shadingFrame.x = dist > 0 ? Vector3D(0, -p.z, p.y) / dist : Vector3D(0, 1, 0);
+            }
+            else if (axisForRadialTangent == 1) {
+                float dist = std::sqrt(p.x * p.x + p.z * p.z);
+                shadingFrame.x = dist > 0 ? Vector3D(-p.z, 0, p.x) / dist : Vector3D(0, 0, 1);
+            }
+            else {
+                float dist = std::sqrt(p.x * p.x + p.y * p.y);
+                shadingFrame.x = dist > 0 ? Vector3D(-p.y, p.x, 0) / dist : Vector3D(1, 0, 0);
+            }
+        }
         shadingFrame.y = cross(shadingFrame.z, shadingFrame.x);
         
         *surfPt = SurfacePoint(si, false, shadingFrame, m_texCoord0Dir);
@@ -254,7 +273,31 @@ namespace SLR {
         
         ReferenceFrame shadingFrame;
         shadingFrame.z = normalize(b0 * v0.normal + b1 * v1.normal + b2 * v2.normal);
-        shadingFrame.x = normalize(b0 * v0.tangent + b1 * v1.tangent + b2 * v2.tangent);
+        int8_t axisForRadialTangent = m_matGroup->parent->getAxisForRadialTangent();
+        if (axisForRadialTangent == -1) {
+            shadingFrame.x = normalize(b0 * v0.tangent + b1 * v1.tangent + b2 * v2.tangent);
+            // guarantee the orthogonality between the normal and tangent.
+            // Orthogonality break might be caused by barycentric interpolation?
+            float dotNT = dot(shadingFrame.z, shadingFrame.x);
+            if (std::fabs(dotNT) >= 0.01f)
+                shadingFrame.x = normalize(shadingFrame.x - dotNT * shadingFrame.z);   
+        }
+        else {
+            const StaticTransform &appliedTF = m_matGroup->parent->getAppliedTransform();
+            Point3D p = invert(appliedTF) * (b0 * v0.position + b1 * v1.position + b2 * v2.position);
+            if (axisForRadialTangent == 0) {
+                float dist = std::sqrt(p.y * p.y + p.z * p.z);
+                shadingFrame.x = dist > 0 ? Vector3D(0, -p.z, p.y) / dist : Vector3D(0, 1, 0);
+            }
+            else if (axisForRadialTangent == 1) {
+                float dist = std::sqrt(p.x * p.x + p.z * p.z);
+                shadingFrame.x = dist > 0 ? Vector3D(-p.z, 0, p.x) / dist : Vector3D(0, 0, 1);
+            }
+            else {
+                float dist = std::sqrt(p.x * p.x + p.y * p.y);
+                shadingFrame.x = dist > 0 ? Vector3D(-p.y, p.x, 0) / dist : Vector3D(1, 0, 0);
+            }
+        }
         shadingFrame.y = cross(shadingFrame.z, shadingFrame.x);
         
         *surfPt = SurfacePoint(b0 * v0.position + b1 * v1.position + b2 * v2.position,

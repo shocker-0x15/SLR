@@ -21,15 +21,22 @@ namespace SLRSceneGraph {
         material(mat), normalMap(norm), alphaMap(alpha) {}
     };
     
+    struct MeshAttributeTuple {
+        bool render;
+        int8_t axisForRadialTangent;
+        MeshAttributeTuple(bool _render, int8_t _axisForRadialTangent) : 
+        render(_render), axisForRadialTangent(_axisForRadialTangent) { }
+    };
+    
     typedef std::function<SurfaceAttributeTuple(const aiMaterial*, const std::string &, SLR::Allocator*)> CreateMaterialFunction;
     SurfaceAttributeTuple createMaterialDefaultFunction(const aiMaterial* aiMat, const std::string &pathPrefix, SLR::Allocator* mem);
     SurfaceAttributeTuple createMaterialFunction(const Function &userMatProc, ExecuteContext &context, ErrorMessage* err,
                                                  const aiMaterial* aiMat, const std::string &pathPrefix, SLR::Allocator* mem);
     
-    typedef std::function<bool(const std::string &, const TriangleMeshNodeRef &, const SLR::Point3D &, const SLR::Point3D &)> MeshCallback;
-    bool meshCallbackDefaultFunction(const std::string &name, const TriangleMeshNodeRef &mesh, const SLR::Point3D &minP, const SLR::Point3D &maxP);
-    bool meshCallbackFunction(const Function &meshProc, ExecuteContext &context, ErrorMessage* err,
-                              const std::string &name, const TriangleMeshNodeRef &mesh, const SLR::Point3D &minP, const SLR::Point3D &maxP);
+    typedef std::function<MeshAttributeTuple(const std::string &, const TriangleMeshNodeRef &, const SLR::Point3D &, const SLR::Point3D &)> MeshCallback;
+    MeshAttributeTuple meshCallbackDefaultFunction(const std::string &name, const TriangleMeshNodeRef &mesh, const SLR::Point3D &minP, const SLR::Point3D &maxP);
+    MeshAttributeTuple meshCallbackFunction(const Function &meshProc, ExecuteContext &context, ErrorMessage* err,
+                                            const std::string &name, const TriangleMeshNodeRef &mesh, const SLR::Point3D &minP, const SLR::Point3D &maxP);
     
     SLR_SCENEGRAPH_API void construct(const std::string &filePath, InternalNodeRef &nodeOut,
                                       const CreateMaterialFunction &materialFunc = createMaterialDefaultFunction,

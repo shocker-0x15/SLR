@@ -129,12 +129,8 @@ namespace SLR {
         for (int ly = 0; ly < numPixelY; ++ly) {
             for (int lx = 0; lx < numPixelX; ++lx) {
                 float time = pathSampler.getTimeSample(timeStart, timeEnd);
-                PixelPosition p = pathSampler.getPixelPositionSample(basePixelX + lx, basePixelY + ly);
-                
-//                if (basePixelX + lx == 1032 && basePixelY + ly == 744) {
-//                    Accelerator::traceTraverse = true;
-//                    printf("");
-//                }
+//                PixelPosition p = pathSampler.getPixelPositionSample(basePixelX + lx, basePixelY + ly);
+                PixelPosition p = PixelPosition(basePixelX + lx + 0.5f, basePixelY + ly + 0.5f);
                 
                 float selectWLPDF;
                 WavelengthSamples wls = WavelengthSamples::createWithEqualOffsets(pathSampler.getWavelengthSample(), pathSampler.getWLSelectionSample(), &selectWLPDF);

@@ -92,12 +92,14 @@ namespace SLRSceneGraph {
                 const aiVector3D &p = mesh->mVertices[face.mIndices[0]];
                 bbox.unify(SLR::Point3D(p.x, p.y, p.z));
             }
-            surfMesh->addTriangles(surfMat, normalMap, alphaMap, std::move(meshIndices));
+            surfMesh->addMaterialGroup(surfMat, normalMap, alphaMap, std::move(meshIndices));
+            
+            MeshAttributeTuple meshAttr = meshCallback(surfMesh->getName(), surfMesh, bbox.minP, bbox.maxP);
             
             surfMesh->setName(mesh->mName.C_Str());
-            
-            bool render = meshCallback(surfMesh->getName(), surfMesh, bbox.minP, bbox.maxP);
-            surfMesh->useOnlyForBoundary(!render);
+
+            surfMesh->useOnlyForBoundary(!meshAttr.render);
+            surfMesh->setAxisForRadialTangent(meshAttr.axisForRadialTangent);
             
             nodeOut->addChildNode(surfMesh);
         }
@@ -275,12 +277,12 @@ namespace SLRSceneGraph {
         return createMaterialDefaultFunction(aiMat, pathPrefix, mem);
     }
     
-    bool meshCallbackDefaultFunction(const std::string &name, const TriangleMeshNodeRef &mesh, const SLR::Point3D &minP, const SLR::Point3D &maxP) {
-        return true;
+    MeshAttributeTuple meshCallbackDefaultFunction(const std::string &name, const TriangleMeshNodeRef &mesh, const SLR::Point3D &minP, const SLR::Point3D &maxP) {
+        return MeshAttributeTuple(true, -1);
     }
     
-    bool meshCallbackFunction(const Function &meshProc, ExecuteContext &context, ErrorMessage* err,
-                              const std::string &name, const TriangleMeshNodeRef &mesh, const SLR::Point3D &minP, const SLR::Point3D &maxP) {
+    MeshAttributeTuple meshCallbackFunction(const Function &meshProc, ExecuteContext &context, ErrorMessage* err,
+                                            const std::string &name, const TriangleMeshNodeRef &mesh, const SLR::Point3D &minP, const SLR::Point3D &maxP) {
         Element elName = Element::create<TypeMap::String>(name);
         Element elMesh = Element::createFromReference<TypeMap::SurfaceNode>(mesh);
         Element elMinP = Element::create<TypeMap::Point>(minP);
@@ -299,7 +301,23 @@ namespace SLRSceneGraph {
         }
         
         if (result.type == Type::Bool) {
-            return result.asRaw<TypeMap::Bool>();
+            return MeshAttributeTuple(result.asRaw<TypeMap::Bool>(), -1);
+        }
+        else if (result.type == Type::Tuple) {
+            const ParameterList &returnedValues = result.asRaw<TypeMap::Tuple>();
+            const Element &elRender = returnedValues(0);
+            const Element &elAxisForRadialTangent = returnedValues(1);
+            if (elRender.type == Type::Bool) {
+                bool render = elRender.raw<TypeMap::Bool>();
+                int32_t axisForRadialTangent = -1;
+                if (elAxisForRadialTangent.type == Type::Integer) {
+                    axisForRadialTangent = elAxisForRadialTangent.raw<TypeMap::Integer>();
+                    if (axisForRadialTangent < -1 || axisForRadialTangent > 2)
+                        axisForRadialTangent = -1;
+                }
+                
+                return MeshAttributeTuple(render, axisForRadialTangent);
+            }
         }
         
         printf("User defined mesh callback function is invalid, fall back to the default function.\n");

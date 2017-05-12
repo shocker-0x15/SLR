@@ -34,16 +34,20 @@ namespace SLR {
     
     
     
-    class SLR_API TriangleMeshNode : public SurfaceNode {
+    class SLR_API TriangleMeshNode : public SurfaceNode {        
         Vertex* m_vertices;
         uint32_t m_numVertices;
         MaterialGroupInTriangleMesh* m_matGroups;
         uint32_t m_numMatGroups;
+        // Should these be the member of SurfaceNode?
         bool m_onlyForBoundary;
+        int8_t m_axisForRadialTangent; // 0:X, 1:Y, 2:Z
+        bool m_appliedTFIsIdentity;
+        StaticTransform m_appliedTransform;
         
         std::vector<SurfaceObject*> m_objs;
     public:
-        TriangleMeshNode(uint32_t numVertices, uint32_t numMatGroups, bool onlyForBoundary);
+        TriangleMeshNode(uint32_t numVertices, uint32_t numMatGroups, bool onlyForBoundary, int8_t axisForRadialTangent);
         ~TriangleMeshNode();
         
         Vertex* getVertexArray() {
@@ -51,6 +55,15 @@ namespace SLR {
         }
         MaterialGroupInTriangleMesh* getMaterialGroupArray() {
             return m_matGroups;
+        }
+        int8_t getAxisForRadialTangent() const {
+            return m_axisForRadialTangent;
+        }
+        bool appliedTransformIsIdentity() const {
+            return m_appliedTFIsIdentity;
+        }
+        const StaticTransform &getAppliedTransform() const {
+            return m_appliedTransform;
         }
         
         bool isDirectlyTransformable() const override { return true; }

@@ -36,6 +36,7 @@ namespace SLRSceneGraph {
         std::vector<Vertex> m_vertices;
         std::vector<MaterialGroup> m_matGroups;
         bool m_onlyForBoundary;
+        int8_t m_axisForRadialTangent; // -1: don't use radial tangent, 0:X, 1:Y, 2:Z
         
         void allocateRawData() override;
         void setupRawData() override;
@@ -44,9 +45,13 @@ namespace SLRSceneGraph {
         TriangleMeshNode();
         
         uint64_t addVertex(const SLR::Vertex &v);
-        void addTriangles(const SurfaceMaterialRef &mat, const NormalTextureRef &normalMap, const FloatTextureRef &alphaMap, const std::vector<Triangle> &&triangles);
+        void addMaterialGroup(const SurfaceMaterialRef &mat, const NormalTextureRef &normalMap, const FloatTextureRef &alphaMap, 
+                              const std::vector<Triangle> &&triangles);
         void useOnlyForBoundary(bool b) {
             m_onlyForBoundary = b;
+        }
+        void setAxisForRadialTangent(int8_t axisForRadialTangent) {
+            m_axisForRadialTangent = axisForRadialTangent;
         }
         
         NodeRef copy() const override;
