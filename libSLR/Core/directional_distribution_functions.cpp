@@ -278,9 +278,12 @@ namespace SLR {
         Vector3D sv = normalize(Vector3D(m_alpha_gx * v.x, m_alpha_gy * v.y, v.z));
         
         // orthonormal basis
-        // TODO: seems possible to improve performance.
-        Vector3D T1 = (sv.z < 0.9999f) ? normalize(cross(sv, Vector3D::Ez)) : Vector3D::Ex;
-        Vector3D T2 = cross(T1, sv);
+//        Vector3D T1 = (sv.z < 0.9999f) ? normalize(cross(sv, Vector3D::Ez)) : Vector3D::Ex;
+//        Vector3D T2 = cross(T1, sv);
+        float distIn2D = std::sqrt(sv.x * sv.x + sv.y * sv.y);
+        float recDistIn2D = 1.0f / distIn2D;
+        Vector3D T1 = (sv.z < 0.9999f) ? Vector3D(sv.y * recDistIn2D, -sv.x * recDistIn2D, 0) : Vector3D::Ex;
+        Vector3D T2 = Vector3D(T1.y * sv.z, -T1.x * sv.z, distIn2D);
         
         // sample point with polar coordinates (r, phi)
         float a = 1.0f / (1.0f + sv.z);
