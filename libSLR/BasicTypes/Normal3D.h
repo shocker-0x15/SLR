@@ -57,16 +57,15 @@ namespace SLR {
             z *= rcpLength;
             return *this;
         }
+        
+        // References
+        // Building an Orthonormal Basis, Revisited
         void makeCoordinateSystem(Vector3DTemplate<RealType>* tangent, Vector3DTemplate<RealType>* bitangent) const {
-            if (std::fabs(x) > std::fabs(y)) {
-                float invLen = 1.0f / std::sqrt(x * x + z * z);
-                *tangent = Vector3DTemplate<RealType>(-z * invLen, 0.0f, x * invLen);
-            }
-            else {
-                float invLen = 1.0f / std::sqrt(y * y + z * z);
-                *tangent = Vector3DTemplate<RealType>(0.0f, z * invLen, -y * invLen);
-            }
-            *bitangent = cross(*this, *tangent);
+            RealType sign = z >= 0.0f ? 1.0f : -1.0f;
+            const RealType a = -1.0f / (sign + z);
+            const RealType b = x * y * a;
+            *tangent = Vector3DTemplate<RealType>(1.0f + sign * x * x * a, sign * b, -sign * x);
+            *bitangent = Vector3DTemplate<RealType>(b, sign + y * y * a, -y);
         }
         static Normal3DTemplate fromPolarZUp(RealType phi, RealType theta) {
             return Normal3DTemplate(std::cos(phi) * std::sin(theta), std::sin(phi) * std::sin(theta), std::cos(theta));

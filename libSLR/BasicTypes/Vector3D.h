@@ -55,16 +55,15 @@ namespace SLR {
             return *this /= length;
         }
         Vector3DTemplate reciprocal() const { return Vector3DTemplate(1.0f / x, 1.0f / y, 1.0f / z); }
+        
+        // References
+        // Building an Orthonormal Basis, Revisited
         void makeCoordinateSystem(Vector3DTemplate<RealType>* vx, Vector3DTemplate<RealType>* vy) const {
-            if (std::fabs(x) > std::fabs(y)) {
-                float invLen = 1.0f / std::sqrt(x * x + z * z);
-                *vx = Vector3DTemplate<RealType>(-z * invLen, 0.0f, x * invLen);
-            }
-            else {
-                float invLen = 1.0f / std::sqrt(y * y + z * z);
-                *vx = Vector3DTemplate<RealType>(0.0f, z * invLen, -y * invLen);
-            }
-            *vy = cross(*this, *vx);
+            RealType sign = z >= 0.0f ? 1.0f : -1.0f;
+            const RealType a = -1.0f / (sign + z);
+            const RealType b = x * y * a;
+            *vx = Vector3DTemplate<RealType>(1.0f + sign * x * x * a, sign * b, -sign * x);
+            *vy = Vector3DTemplate<RealType>(b, sign + y * y * a, -y);
         }
         static Vector3DTemplate fromPolarZUp(RealType phi, RealType theta) {
             return Vector3DTemplate(std::cos(phi) * std::sin(theta), std::sin(phi) * std::sin(theta), std::cos(theta));

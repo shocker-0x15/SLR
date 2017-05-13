@@ -278,6 +278,7 @@ namespace SLR {
         Vector3D sv = normalize(Vector3D(m_alpha_gx * v.x, m_alpha_gy * v.y, v.z));
         
         // orthonormal basis
+        // TODO: seems possible to improve performance.
         Vector3D T1 = (sv.z < 0.9999f) ? normalize(cross(sv, Vector3D::Ez)) : Vector3D::Ex;
         Vector3D T2 = cross(T1, sv);
         

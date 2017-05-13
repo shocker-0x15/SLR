@@ -104,11 +104,12 @@ namespace SLR {
     
     
     struct SLR_API ReferenceFrame {
-        Vector3D x, y, z;
+        Vector3D x, y;
+        Normal3D z;
         
         ReferenceFrame() { }
-        ReferenceFrame(const Vector3D &t, const Vector3D &b, const Vector3D &n) : x(t), y(b), z(n) { }
-        ReferenceFrame(const Vector3D &zz) : z(zz) {
+        ReferenceFrame(const Vector3D &t, const Vector3D &b, const Normal3D &n) : x(t), y(b), z(n) { }
+        ReferenceFrame(const Normal3D &zz) : z(zz) {
             z.makeCoordinateSystem(&x, &y);
         }
         
