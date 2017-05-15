@@ -15,6 +15,7 @@
 namespace SLR {
     // References
     // Physically-Based Shading at Disney
+    // BRDF Explorer
     class SLR_API DisneyBRDF : public BSDF {
         SampledSpectrum m_baseColor;
         float m_subsurface;

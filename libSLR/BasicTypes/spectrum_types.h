@@ -232,6 +232,8 @@ namespace SLR {
             if (b == 0)
                 xy[0] = xy[1] = 1.0f / 3.0;
             xy_to_uv(xy, uvs);
+            // Dividing by EqualEnergyReflectance easily makes s value reach the half-type limit with a typical b value.
+            // So, do not divide.
             uvs[2] = b;// / Upsampling::EqualEnergyReflectance;
         }
         
@@ -730,16 +732,16 @@ namespace SLR {
             
             uint32_t sBin = 0;
             float nextP = float(sBin + 1) / NumStrataForStorage;
-            float xSum = 0, xPrev = xbarReference[0];
-            float ySum = 0, yPrev = ybarReference[0];
-            float zSum = 0, zPrev = zbarReference[0];
+            float xSum = 0, xPrev = xbarReferenceValues[0];
+            float ySum = 0, yPrev = ybarReferenceValues[0];
+            float zSum = 0, zPrev = zbarReferenceValues[0];
             const float interval = 1;// nm
             for (int i = 1; i < NumCMFSamples; ++i) {
                 float curP = float(i) / (NumCMFSamples - 1);
                 float width = interval;
-                float xCur = xbarReference[i];
-                float yCur = ybarReference[i];
-                float zCur = zbarReference[i];
+                float xCur = xbarReferenceValues[i];
+                float yCur = ybarReferenceValues[i];
+                float zCur = zbarReferenceValues[i];
                 if (curP >= nextP) {
                     width = (curP - nextP) * (WavelengthHighBound - WavelengthLowBound);
                     float t = 1 - width / interval;

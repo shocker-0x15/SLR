@@ -23,15 +23,15 @@ namespace SLR {
         for (int i = 0; i < m_numComponents; ++i)
             weights[i] = m_BSDFs[i]->weight(query);
         
-        float sumWeights, base;
-        uint32_t idx = sampleDiscrete(weights, &sumWeights, &base, m_numComponents, uComponent);
+        float tempProb;
+        float sumWeights;
+        uint32_t idx = sampleDiscrete(weights, m_numComponents, uComponent, &tempProb, &sumWeights, &uComponent);
         const BSDF* selectedBSDF = m_BSDFs[idx];
         if (sumWeights == 0.0f) {
             result->dirPDF = 0.0f;
             return SampledSpectrum::Zero;
         }
         
-        uComponent = (uComponent * sumWeights - base) / weights[idx];
         SampledSpectrum value = selectedBSDF->sampleInternal(query, uComponent, uDir, result);
         result->dirPDF *= weights[idx];
         if (result->dirPDF == 0.0f) {
@@ -64,21 +64,22 @@ namespace SLR {
         for (int i = 0; i < m_numComponents; ++i)
             weights[i] = m_BSDFs[i]->weight(query);
         
-        float sumWeights, base;
-        uint32_t idx = sampleDiscrete(weights, &sumWeights, &base, m_numComponents, uComponent);
+        float tempProb;
+        float sumWeights;
+        uint32_t idx = sampleDiscrete(weights, m_numComponents, uComponent, &tempProb, &sumWeights, &uComponent);
         const BSDF* selectedBSDF = m_BSDFs[idx];
         if (sumWeights == 0.0f) {
             result->dirPDF = 0.0f;
             return SampledSpectrum::Zero;
         }
         
-        uComponent = (uComponent * sumWeights - base) / weights[idx];
         SampledSpectrum value = selectedBSDF->sampleInternal(query, uComponent, uDir, result);
         if (result->dirPDF == 0.0f) {
             result->dirPDF = 0.0f;
             return SampledSpectrum::Zero;
         }
         
+        // calculate quantities for reverse probabilities.
         BSDFQuery revQuery = query;// mQuery?
         Vector3D revDirIn = result->dirLocal;
         std::swap(revQuery.dirLocal, revDirIn);
@@ -122,7 +123,7 @@ namespace SLR {
     }
     
     SampledSpectrum MultiBSDF::evaluateInternal(const BSDFQuery &query, const Vector3D &dirOut, SampledSpectrum* rev_fs) const {
-        if (rev_fs) {
+        if (query.requestReverse) {
             SampledSpectrum retValue = SampledSpectrum::Zero;
             *rev_fs = SampledSpectrum::Zero;
             for (int i = 0; i < m_numComponents; ++i) {

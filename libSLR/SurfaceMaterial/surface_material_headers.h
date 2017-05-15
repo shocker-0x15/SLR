@@ -12,6 +12,7 @@
 #include "ModifiedWardDurReflectionSurfaceMaterial.h"
 #include "AshikhminShirleyReflectionSurfaceMaterial.h"
 #include "microfacet_surface_materials.h"
+#include "disney_surface_materials.h"
 #include "SummedSurfaceMaterial.h"
 #include "MixedSurfaceMaterial.h"
 

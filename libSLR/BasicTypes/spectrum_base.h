@@ -107,13 +107,13 @@ namespace SLR {
     }
     
 #if SLR_Color_System_is_based_on == SLR_Color_System_CIE_1931_2deg
-    static const float WavelengthLowBound = 360.0f;
-    static const float WavelengthHighBound = 830.0f;
+    static const SpectrumFloat WavelengthLowBound = 360.0f;
+    static const SpectrumFloat WavelengthHighBound = 830.0f;
     static const uint32_t NumCMFSamples = 471;
     
-    extern const float xbar_CIE1931_2deg[NumCMFSamples];
-    extern const float ybar_CIE1931_2deg[NumCMFSamples];
-    extern const float zbar_CIE1931_2deg[NumCMFSamples];
+    extern const SpectrumFloat xbar_CIE1931_2deg[NumCMFSamples];
+    extern const SpectrumFloat ybar_CIE1931_2deg[NumCMFSamples];
+    extern const SpectrumFloat zbar_CIE1931_2deg[NumCMFSamples];
 #elif SLR_Color_System_is_based_on == SLR_Color_System_CIE_1964_10deg
 
 #elif SLR_Color_System_is_based_on == SLR_Color_System_CIE_2012_2deg
@@ -125,6 +125,7 @@ namespace SLR {
     
     
     extern SLR_API SpectrumFloat integralCMF;
+    extern SLR_API std::unique_ptr<ContinuousSpectrum> ybarSpectrum;
     SLR_API void initSpectrum();
 }
 

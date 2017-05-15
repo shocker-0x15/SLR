@@ -314,7 +314,7 @@ namespace SLR {
             BSDFQuery mQuery = query;
             mQuery.dirTypeFilter &= sideTest(query.gNormalLocal, query.dirLocal, dir);
             if (!matches(mQuery.dirTypeFilter)) {
-                if (rev_fs)
+                if (query.requestReverse)
                     *rev_fs = SampledSpectrum::Zero;
                 return SampledSpectrum::Zero;
             }
@@ -327,7 +327,7 @@ namespace SLR {
                       fs_sn.toString().c_str(), snCorrection, query.wlHint,
                       query.dirLocal.toString().c_str(), dir.toString().c_str(), query.gNormalLocal.toString().c_str());
             
-            if (rev_fs)
+            if (query.requestReverse)
                 *rev_fs *= snCorrection;
             return fs_sn * snCorrection;
         }
@@ -480,6 +480,14 @@ namespace SLR {
         float evaluate(const Normal3D &m) const override;
         float evaluatePDF(const Normal3D &m) const override;
         
+        // These are needed for the case where a class variable is declared as a derived class.
+        float sample(const Vector3D &v, float u0, float u1, Normal3D* m, float* normalPDF) const override {
+            return MicrofacetDistribution::sample(v, u0, u1, m, normalPDF);
+        }
+        float evaluatePDF(const Vector3D &v, const Normal3D &m) const override {
+            return MicrofacetDistribution::evaluatePDF(v, m);
+        }
+        
         float evaluateSmithG1(const Vector3D &v, const Normal3D &m) const override;
     };
     
@@ -511,6 +519,14 @@ namespace SLR {
         float sample(float u0, float u1, Normal3D* m, float* normalPDF) const override;
         float evaluate(const Normal3D &m) const override;
         float evaluatePDF(const Normal3D &m) const override;
+        
+        // These are needed for the case where a class variable is declared as a derived class.
+        float sample(const Vector3D &v, float u0, float u1, Normal3D* m, float* normalPDF) const override {
+            return MicrofacetDistribution::sample(v, u0, u1, m, normalPDF);
+        }
+        float evaluatePDF(const Vector3D &v, const Normal3D &m) const override {
+            return MicrofacetDistribution::evaluatePDF(v, m);
+        }
         
         float evaluateSmithG1(const Vector3D &v, const Normal3D &m) const override;
     };

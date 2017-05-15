@@ -32,7 +32,7 @@ namespace SLR {
     template SLR_API float sRGB_degamma(float value);
     template SLR_API double sRGB_degamma(double value);
     
-    const float xbar_CIE1931_2deg[] = {
+    const SpectrumFloat xbar_CIE1931_2deg[] = {
         0.0001299, 0.000145847, 0.000163802, 0.000184004, 0.00020669, 0.0002321, 0.000260728, 0.000293075,
         0.000329388, 0.000369914, 0.0004149, 0.000464159, 0.000518986, 0.000581854, 0.000655235, 0.0007416,
         0.00084503, 0.000964527, 0.001094949, 0.001231154, 0.001368, 0.00150205, 0.001642328, 0.001802382,
@@ -94,7 +94,7 @@ namespace SLR {
         1.9055E-06, 1.77651E-06, 1.65622E-06, 1.54402E-06, 1.43944E-06, 1.34198E-06, 1.25114E-06
     };
     
-    const float ybar_CIE1931_2deg[] = {
+    const SpectrumFloat ybar_CIE1931_2deg[] = {
         0.000003917, 4.39358E-06, 4.9296E-06, 5.53214E-06, 6.20825E-06, 0.000006965, 7.81322E-06, 8.76734E-06,
         9.83984E-06, 1.10432E-05, 0.00001239, 1.38864E-05, 1.55573E-05, 1.7443E-05, 1.95838E-05, 0.00002202,
         2.48397E-05, 2.80413E-05, 3.1531E-05, 3.52152E-05, 0.000039, 4.28264E-05, 4.69146E-05, 5.15896E-05,
@@ -156,7 +156,7 @@ namespace SLR {
         6.8811E-07, 6.4153E-07, 5.9809E-07, 5.57575E-07, 5.19808E-07, 4.84612E-07, 4.5181E-07
     };
     
-    const float zbar_CIE1931_2deg[] = {
+    const SpectrumFloat zbar_CIE1931_2deg[] = {
         0.0006061, 0.000680879, 0.000765146, 0.000860012, 0.000966593, 0.001086, 0.001220586, 0.001372729,
         0.001543579, 0.001734286, 0.001946, 0.002177777, 0.002435809, 0.002731953, 0.003078064, 0.003486,
         0.003975227, 0.00454088, 0.00515832, 0.005802907, 0.006450001, 0.007083216, 0.007745488, 0.008501152,
@@ -219,6 +219,7 @@ namespace SLR {
     };
     
     SpectrumFloat integralCMF;
+    std::unique_ptr<ContinuousSpectrum> ybarSpectrum;
     
     SLR_API void initSpectrum() {
         DiscretizedSpectrum::init();
@@ -227,5 +228,7 @@ namespace SLR {
         for (int i = 1; i < NumCMFSamples; ++i)
             cum += (ybar_CIE1931_2deg[i - 1] + ybar_CIE1931_2deg[i]) * 1 * 0.5;
         integralCMF = cum;
+        
+        ybarSpectrum = createUnique<RegularContinuousSpectrum>(WavelengthLowBound, WavelengthHighBound, ybarReferenceValues, NumCMFSamples);
     }
 }

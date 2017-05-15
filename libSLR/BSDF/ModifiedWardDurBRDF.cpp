@@ -41,7 +41,7 @@ namespace SLR {
     
     SampledSpectrum ModifiedWardDurBRDF::evaluateInternal(const BSDFQuery &query, const Vector3D &dir, SampledSpectrum* rev_fs) const {
         if (dir.z * query.dirLocal.z <= 0) {
-            if (rev_fs)
+            if (query.requestReverse)
                 *rev_fs = SampledSpectrum::Zero;
             return SampledSpectrum::Zero;
         }
@@ -53,7 +53,7 @@ namespace SLR {
         float numerator = std::exp(-(hx_ax * hx_ax + hy_ay * hy_ay) / (dotHN * dotHN));
         float denominator = 4 * M_PI * m_anisoX * m_anisoY * dotHI * dotHI * dotHN * dotHN * dotHN * dotHN;
         SampledSpectrum fs = m_R * numerator / denominator;
-        if (rev_fs)
+        if (query.requestReverse)
             *rev_fs = fs;
         return fs;
     }

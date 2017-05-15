@@ -28,12 +28,12 @@ namespace SLR {
     SampledSpectrum LambertianBRDF::evaluateInternal(const BSDFQuery &query, const Vector3D &dir, SampledSpectrum* rev_fs) const {
         if (query.dirLocal.z * dir.z <= 0.0f) {
             SampledSpectrum fs = SampledSpectrum::Zero;
-            if (rev_fs)
+            if (query.requestReverse)
                 *rev_fs = fs;
             return fs;
         }
         SampledSpectrum fs = m_R / M_PI;
-        if (rev_fs)
+        if (query.requestReverse)
             *rev_fs = fs;
         return fs;
     }
@@ -72,7 +72,7 @@ namespace SLR {
     }
     
     SampledSpectrum SpecularBRDF::evaluateInternal(const BSDFQuery &query, const Vector3D &dir, SampledSpectrum* rev_fs) const {
-        if (rev_fs)
+        if (query.requestReverse)
             *rev_fs = SampledSpectrum::Zero;
         return SampledSpectrum::Zero;
     }
@@ -150,7 +150,7 @@ namespace SLR {
     }
     
     SampledSpectrum SpecularBSDF::evaluateInternal(const BSDFQuery &query, const Vector3D &dir, SampledSpectrum* rev_fs) const {
-        if (rev_fs)
+        if (query.requestReverse)
             *rev_fs = SampledSpectrum::Zero;
         return SampledSpectrum::Zero;
     }

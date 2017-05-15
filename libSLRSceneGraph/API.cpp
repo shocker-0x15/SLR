@@ -579,6 +579,45 @@ namespace SLRSceneGraph {
                                                        };
                                                        return configFunc(params, context, err);
                                                    }
+                                                   else if (type == "disney reflection") {
+                                                       const static Function configFunc{
+                                                           0, {
+                                                               {"baseColor", Type::SpectrumTexture},
+                                                               {"subsurface", Type::FloatTexture, Element::createFromReference<TypeMap::FloatTexture>(createShared<ConstantFloatTexture>(0.0f))}, 
+                                                               {"metallic", Type::FloatTexture, Element::createFromReference<TypeMap::FloatTexture>(createShared<ConstantFloatTexture>(0.0f))}, 
+                                                               {"specular", Type::FloatTexture, Element::createFromReference<TypeMap::FloatTexture>(createShared<ConstantFloatTexture>(0.5f))}, 
+                                                               {"specularTint", Type::FloatTexture, Element::createFromReference<TypeMap::FloatTexture>(createShared<ConstantFloatTexture>(0.0f))}, 
+                                                               {"roughness", Type::FloatTexture, Element::createFromReference<TypeMap::FloatTexture>(createShared<ConstantFloatTexture>(0.5f))}, 
+                                                               {"anisotropic", Type::FloatTexture, Element::createFromReference<TypeMap::FloatTexture>(createShared<ConstantFloatTexture>(0.0f))}, 
+                                                               {"sheen", Type::FloatTexture, Element::createFromReference<TypeMap::FloatTexture>(createShared<ConstantFloatTexture>(0.0f))}, 
+                                                               {"sheenTint", Type::FloatTexture, Element::createFromReference<TypeMap::FloatTexture>(createShared<ConstantFloatTexture>(0.5f))}, 
+                                                               {"clearcoat", Type::FloatTexture, Element::createFromReference<TypeMap::FloatTexture>(createShared<ConstantFloatTexture>(0.0f))}, 
+                                                               {"clearcoatGloss", Type::FloatTexture, Element::createFromReference<TypeMap::FloatTexture>(createShared<ConstantFloatTexture>(1.0f))}, 
+                                                           },
+                                                           [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
+                                                               SpectrumTextureRef baseColor = args.at("baseColor").rawRef<TypeMap::SpectrumTexture>();
+                                                               FloatTextureRef subsurface = args.at("subsurface").rawRef<TypeMap::FloatTexture>();
+                                                               FloatTextureRef metallic = args.at("metallic").rawRef<TypeMap::FloatTexture>();
+                                                               FloatTextureRef specular = args.at("specular").rawRef<TypeMap::FloatTexture>();
+                                                               FloatTextureRef specularTint = args.at("specularTint").rawRef<TypeMap::FloatTexture>();
+                                                               FloatTextureRef roughness = args.at("roughness").rawRef<TypeMap::FloatTexture>();
+                                                               FloatTextureRef anisotropic = args.at("anisotropic").rawRef<TypeMap::FloatTexture>();
+                                                               FloatTextureRef sheen = args.at("sheen").rawRef<TypeMap::FloatTexture>();
+                                                               FloatTextureRef sheenTint = args.at("sheenTint").rawRef<TypeMap::FloatTexture>();
+                                                               FloatTextureRef clearcoat = args.at("clearcoat").rawRef<TypeMap::FloatTexture>();
+                                                               FloatTextureRef clearcoatGloss = args.at("clearcoatGloss").rawRef<TypeMap::FloatTexture>();
+                                                               
+                                                               SurfaceMaterialRef ret = SurfaceMaterial::createDisneyReflection(
+                                                                                            baseColor, 
+                                                                                            subsurface, metallic, specular, specularTint, 
+                                                                                            roughness, anisotropic, sheen, sheenTint, 
+                                                                                            clearcoat, clearcoatGloss);
+                                                               
+                                                               return Element::createFromReference<TypeMap::SurfaceMaterial>(ret);
+                                                           }
+                                                       };
+                                                       return configFunc(params, context, err);
+                                                   }
                                                    else if (type == "flipped") {
                                                        const static Function configFunc{
                                                            0, {

@@ -87,18 +87,18 @@ namespace SLR {
             float revVDotHV = std::fabs(result->dirLocal.z);
             float revSpecularWeight = iRs + (1 - iRs) * std::pow(1.0f - revVDotHV, 5);
             float revTransmissionTerm = 1 - std::pow(1 - revVDotHV * 0.5f, 5);
-            float revDiffuseWeght = 28 * iRd / 23 * (1 - iRs) * revTransmissionTerm * revTransmissionTerm;
-            float revSumWeights = revSpecularWeight + revDiffuseWeght;
+            float revDiffuseWeight = 28 * iRd / 23 * (1 - iRs) * revTransmissionTerm * revTransmissionTerm;
+            float revSumWeights = revSpecularWeight + revDiffuseWeight;
             
             result->reverse.value = fs;
-            result->reverse.dirPDF = (revSpecularDirPDF * revSpecularWeight + revDiffuseDirPDF * revDiffuseWeght) / revSumWeights;
+            result->reverse.dirPDF = (revSpecularDirPDF * revSpecularWeight + revDiffuseDirPDF * revDiffuseWeight) / revSumWeights;
         }
         return fs;
     }
     
     SampledSpectrum AshikhminShirleyBRDF::evaluateInternal(const BSDFQuery &query, const Vector3D &dir, SampledSpectrum* rev_fs) const {
         if (dir.z * query.dirLocal.z <= 0) {
-            if (rev_fs)
+            if (query.requestReverse)
                 *rev_fs = SampledSpectrum::Zero;
             return SampledSpectrum::Zero;
         }
@@ -113,7 +113,7 @@ namespace SLR {
                                       (1.0f - std::pow(1.0f - std::fabs(dir.z) / 2, 5))
                                       );
         SampledSpectrum fs = specular_fs + diffuse_fs;
-        if (rev_fs)
+        if (query.requestReverse)
             *rev_fs = fs;
         return fs;
     }

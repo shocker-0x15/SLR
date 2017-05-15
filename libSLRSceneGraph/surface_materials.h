@@ -30,6 +30,10 @@ namespace SLRSceneGraph {
         static SurfaceMaterialRef createAshikhminShirley(const SpectrumTextureRef &Rd, const SpectrumTextureRef &Rs, const FloatTextureRef &nx, const FloatTextureRef &ny);
         static SurfaceMaterialRef createMicrofacetMetal(const SpectrumTextureRef &eta, const SpectrumTextureRef &k, const FloatTextureRef &alpha_gx, const FloatTextureRef &alpha_gy);
         static SurfaceMaterialRef createMicrofacetGlass(const SpectrumTextureRef &etaExt, const SpectrumTextureRef &etaInt, const FloatTextureRef &alpha_gx, const FloatTextureRef &alpha_gy);
+        static SurfaceMaterialRef createDisneyReflection(const SpectrumTextureRef &baseColor, 
+                                                         const FloatTextureRef &subsurface, const FloatTextureRef &metallic, const FloatTextureRef &specular, const FloatTextureRef &specularTint, 
+                                                         const FloatTextureRef &roughness, const FloatTextureRef &anisotropic, const FloatTextureRef &sheen, const FloatTextureRef &sheenTint, 
+                                                         const FloatTextureRef &clearCoat, const FloatTextureRef &clearCoatGloss);
         static SurfaceMaterialRef createFlippedMaterial(const SurfaceMaterialRef &baseMat);
         static SurfaceMaterialRef createSummedMaterial(const SurfaceMaterialRef &mat0, const SurfaceMaterialRef &mat1);
         static SurfaceMaterialRef createMixedMaterial(const SurfaceMaterialRef &mat0, const SurfaceMaterialRef &mat1, const FloatTextureRef &factor);
@@ -175,6 +179,25 @@ namespace SLRSceneGraph {
         SVMicrofacetDistributionRef m_D;
     public:
         MicrofacetScatteringSurfaceMaterial(const SpectrumTextureRef &etaExt, const SpectrumTextureRef &etaInt, const SVMicrofacetDistributionRef &D);
+    };
+    
+    class SLR_SCENEGRAPH_API DisneyReflectionSurfaceMaterial : public SurfaceMaterial {
+        SpectrumTextureRef m_baseColor;
+        FloatTextureRef m_subsurface;
+        FloatTextureRef m_metallic;
+        FloatTextureRef m_specular;
+        FloatTextureRef m_specularTint;
+        FloatTextureRef m_roughness;
+        FloatTextureRef m_anisotropic;
+        FloatTextureRef m_sheen;
+        FloatTextureRef m_sheenTint;
+        FloatTextureRef m_clearCoat;
+        FloatTextureRef m_clearCoatGloss;
+    public:
+        DisneyReflectionSurfaceMaterial(const SpectrumTextureRef &baseColor, 
+                                        const FloatTextureRef &subsurface, const FloatTextureRef &metallic, const FloatTextureRef &specular, const FloatTextureRef &specularTint, 
+                                        const FloatTextureRef &roughness, const FloatTextureRef &anisotropic, const FloatTextureRef &sheen, const FloatTextureRef &sheenTint, 
+                                        const FloatTextureRef &clearCoat, const FloatTextureRef &clearCoatGloss);
     };
     
     class SLR_SCENEGRAPH_API SummedSurfaceMaterial : public SurfaceMaterial {

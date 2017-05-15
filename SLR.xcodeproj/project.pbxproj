@@ -24,6 +24,8 @@
 		4613A17B1E36500600D05AA6 /* Ray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4613A1791E36500600D05AA6 /* Ray.cpp */; };
 		4613A17C1E36500600D05AA6 /* Ray.h in Headers */ = {isa = PBXBuildFile; fileRef = 4613A17A1E36500600D05AA6 /* Ray.h */; };
 		461BDADD1E46FE4A00D97D37 /* medium_materials.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 461BDADB1E46FE4A00D97D37 /* medium_materials.cpp */; };
+		462346291EC8A79C00BC2C4A /* disney_surface_materials.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 462346271EC8A79C00BC2C4A /* disney_surface_materials.cpp */; };
+		4623462A1EC8A79C00BC2C4A /* disney_surface_materials.h in Headers */ = {isa = PBXBuildFile; fileRef = 462346281EC8A79C00BC2C4A /* disney_surface_materials.h */; };
 		4625C9F81E7AF985005479E3 /* perlin_noise_textures.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4625C9F61E7AF985005479E3 /* perlin_noise_textures.cpp */; };
 		4625C9F91E7AF985005479E3 /* perlin_noise_textures.h in Headers */ = {isa = PBXBuildFile; fileRef = 4625C9F71E7AF985005479E3 /* perlin_noise_textures.h */; };
 		4638105B1C21AD0E00211293 /* SceneParser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 463810591C21AD0E00211293 /* SceneParser.cpp */; };
@@ -282,6 +284,8 @@
 		4613A1791E36500600D05AA6 /* Ray.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Ray.cpp; path = libSLR/BasicTypes/Ray.cpp; sourceTree = SOURCE_ROOT; };
 		4613A17A1E36500600D05AA6 /* Ray.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; name = Ray.h; path = libSLR/BasicTypes/Ray.h; sourceTree = SOURCE_ROOT; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
 		461BDADB1E46FE4A00D97D37 /* medium_materials.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; lineEnding = 0; name = medium_materials.cpp; path = libSLRSceneGraph/medium_materials.cpp; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.cpp; };
+		462346271EC8A79C00BC2C4A /* disney_surface_materials.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = disney_surface_materials.cpp; path = libSLR/SurfaceMaterial/disney_surface_materials.cpp; sourceTree = SOURCE_ROOT; };
+		462346281EC8A79C00BC2C4A /* disney_surface_materials.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = disney_surface_materials.h; path = libSLR/SurfaceMaterial/disney_surface_materials.h; sourceTree = SOURCE_ROOT; };
 		4625C9F61E7AF985005479E3 /* perlin_noise_textures.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = perlin_noise_textures.cpp; path = libSLR/Texture/perlin_noise_textures.cpp; sourceTree = SOURCE_ROOT; };
 		4625C9F71E7AF985005479E3 /* perlin_noise_textures.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = perlin_noise_textures.h; path = libSLR/Texture/perlin_noise_textures.h; sourceTree = SOURCE_ROOT; };
 		4634EC3E1B9B60400047AE54 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
@@ -315,8 +319,8 @@
 		465D8A891E58E2CB001B8382 /* BoundingBox3D.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = BoundingBox3D.h; path = libSLR/BasicTypes/BoundingBox3D.h; sourceTree = SOURCE_ROOT; };
 		465D8A8C1E58F667001B8382 /* rgb_types.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = rgb_types.cpp; path = libSLR/BasicTypes/rgb_types.cpp; sourceTree = SOURCE_ROOT; };
 		465D8A8D1E58F667001B8382 /* rgb_types.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = rgb_types.h; path = libSLR/BasicTypes/rgb_types.h; sourceTree = SOURCE_ROOT; };
-		465D8A8E1E58F667001B8382 /* spectrum_types.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = spectrum_types.cpp; path = libSLR/BasicTypes/spectrum_types.cpp; sourceTree = SOURCE_ROOT; };
-		465D8A8F1E58F667001B8382 /* spectrum_types.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = spectrum_types.h; path = libSLR/BasicTypes/spectrum_types.h; sourceTree = SOURCE_ROOT; };
+		465D8A8E1E58F667001B8382 /* spectrum_types.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; lineEnding = 0; name = spectrum_types.cpp; path = libSLR/BasicTypes/spectrum_types.cpp; sourceTree = SOURCE_ROOT; xcLanguageSpecificationIdentifier = xcode.lang.cpp; };
+		465D8A8F1E58F667001B8382 /* spectrum_types.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; name = spectrum_types.h; path = libSLR/BasicTypes/spectrum_types.h; sourceTree = SOURCE_ROOT; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
 		465D8A941E58F819001B8382 /* spectrum_base.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = spectrum_base.cpp; path = libSLR/BasicTypes/spectrum_base.cpp; sourceTree = SOURCE_ROOT; };
 		465D8A951E58F819001B8382 /* spectrum_base.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = spectrum_base.h; path = libSLR/BasicTypes/spectrum_base.h; sourceTree = SOURCE_ROOT; };
 		465D8A981E58F92F001B8382 /* declarations.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = declarations.h; path = libSLR/declarations.h; sourceTree = SOURCE_ROOT; };
@@ -458,7 +462,7 @@
 		466F6C5A1BB6B2C30056F2FA /* bmp_exporter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = bmp_exporter.cpp; path = libSLR/Helper/bmp_exporter.cpp; sourceTree = SOURCE_ROOT; };
 		466F6C5B1BB6B2C30056F2FA /* bmp_exporter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = bmp_exporter.h; path = libSLR/Helper/bmp_exporter.h; sourceTree = SOURCE_ROOT; };
 		466F6C5F1BB6B2C30056F2FA /* ThreadPool.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ThreadPool.h; path = libSLR/Helper/ThreadPool.h; sourceTree = SOURCE_ROOT; };
-		466F6CAF1BB6B34E0056F2FA /* defines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = defines.h; path = libSLR/defines.h; sourceTree = SOURCE_ROOT; };
+		466F6CAF1BB6B34E0056F2FA /* defines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; name = defines.h; path = libSLR/defines.h; sourceTree = SOURCE_ROOT; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
 		466F6CC71BB6C9C10056F2FA /* libSLR.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = libSLR.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
 		466F6D0D1BB6CB3A0056F2FA /* libSLRSceneGraph.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = libSLRSceneGraph.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
 		466F6D161BB6CB4E0056F2FA /* node_constructor.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; lineEnding = 0; name = node_constructor.cpp; path = libSLRSceneGraph/node_constructor.cpp; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.cpp; };
@@ -753,6 +757,8 @@
 				465D8AFC1E59D5AC001B8382 /* AshikhminShirleyReflectionSurfaceMaterial.cpp */,
 				465D8B051E59D5AC001B8382 /* microfacet_surface_materials.h */,
 				465D8B041E59D5AC001B8382 /* microfacet_surface_materials.cpp */,
+				462346281EC8A79C00BC2C4A /* disney_surface_materials.h */,
+				462346271EC8A79C00BC2C4A /* disney_surface_materials.cpp */,
 				465D8B0B1E59D5AC001B8382 /* SummedSurfaceMaterial.h */,
 				465D8B0A1E59D5AC001B8382 /* SummedSurfaceMaterial.cpp */,
 				465D8B071E59D5AC001B8382 /* MixedSurfaceMaterial.h */,
@@ -1071,6 +1077,7 @@
 				465D8A6D1E58E127001B8382 /* Allocator.h in Headers */,
 				465D8A871E58E2BE001B8382 /* TexCoord2D.h in Headers */,
 				465D8AA71E59CAE8001B8382 /* camera.h in Headers */,
+				4623462A1EC8A79C00BC2C4A /* disney_surface_materials.h in Headers */,
 				465D8B311E59D8FA001B8382 /* AshikhminShirleyBRDF.h in Headers */,
 				466F6CF21BB6CA420056F2FA /* ImageSensor.h in Headers */,
 				466F6CFD1BB6CA420056F2FA /* textures.h in Headers */,
@@ -1219,6 +1226,7 @@
 				465D8B7E1E59DBAE001B8382 /* VolumetricBPTRenderer.cpp in Sources */,
 				465D8AE61E59D32E001B8382 /* GridMediumDistribution.cpp in Sources */,
 				465D8B541E59DA49001B8382 /* EquirectangularCamera.cpp in Sources */,
+				462346291EC8A79C00BC2C4A /* disney_surface_materials.cpp in Sources */,
 				465D8B561E59DA49001B8382 /* PerspectiveCamera.cpp in Sources */,
 				460A1B2F1EAE3795000C1A26 /* ArHosekSkyModel.c in Sources */,
 				465D8A821E58E278001B8382 /* Vector4D.cpp in Sources */,

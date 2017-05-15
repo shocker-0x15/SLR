@@ -156,11 +156,10 @@ namespace SLR {
         float importances[3] = {m_surfaceAggregate->importance(), m_mediumAggregate->importance(), 0.0f};
         if (m_envSphere)
             importances[2] = m_envSphere->importance();
-        float sumImportances, base;
-        uint32_t idx = sampleDiscrete(importances, &sumImportances, &base, 3, u);
+        float prob1st;
+        float sumImportances;
+        uint32_t idx = sampleDiscrete(importances, 3, u, &prob1st, &sumImportances, &u);
         
-        float prob1st = importances[idx] / sumImportances;
-        u = (u * sumImportances - base) / importances[idx];
         switch (idx) {
             case 0: {
                 SurfaceLight* surfLight = mem.create<SurfaceLight>();

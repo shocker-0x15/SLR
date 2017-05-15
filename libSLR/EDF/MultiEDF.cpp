@@ -20,10 +20,12 @@ namespace SLR {
         for (int i = 0; i < m_numComponents; ++i)
             weights[i] = m_EDFs[i]->weight(query);
         
-        float sumWeights, base;
-        uint32_t idx = sampleDiscrete(weights, &sumWeights, &base, m_numComponents, smp.uComponent);
+        float tempProb, tempRemapped;
+        float sumWeights;
+        uint32_t idx = sampleDiscrete(weights, m_numComponents, smp.uComponent, &tempProb, &sumWeights, &tempRemapped);
         EDF* selectedEDF = m_EDFs[idx];
         
+        // TODO: add the sampleInternal interface as in BSDF.
         SampledSpectrum value = selectedEDF->sample(query, smp, result);
         result->dirPDF *= weights[idx];
         

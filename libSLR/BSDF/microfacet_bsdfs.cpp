@@ -45,7 +45,7 @@ namespace SLR {
     
     SampledSpectrum MicrofacetBRDF::evaluateInternal(const BSDFQuery &query, const Vector3D &dir, SampledSpectrum* rev_fs) const {
         if (dir.z * query.dirLocal.z <= 0) {
-            if (rev_fs)
+            if (query.requestReverse)
                 *rev_fs = SampledSpectrum::Zero;
             return SampledSpectrum::Zero;
         }
@@ -64,7 +64,7 @@ namespace SLR {
         SLRAssert(fs.allFinite(), "fs: %s, F: %s, G, %g, D: %g, wlIdx: %u, qDir: %s, dir: %s",
                   fs.toString().c_str(), F.toString().c_str(), G, D, query.wlHint, query.dirLocal.toString().c_str(), dir.toString().c_str());
         
-        if (rev_fs)
+        if (query.requestReverse)
             *rev_fs = fs;
         return fs;
     }
@@ -214,7 +214,7 @@ namespace SLR {
             SLRAssert(fs.allFinite(), "fs: %s, F: %s, G, %g, D: %g, wlIdx: %u, qDir: %s, dir: %s",
                       fs.toString().c_str(), F.toString().c_str(), G, D, query.wlHint, query.dirLocal.toString().c_str(), dir.toString().c_str());
             
-            if (rev_fs)
+            if (query.requestReverse)
                 *rev_fs = fs;
             return fs;
         }
@@ -241,12 +241,12 @@ namespace SLR {
             SLRAssert(ret.allFinite(), "fs: %s, wlIdx: %u, qDir: %s, dir: %s",
                       ret.toString().c_str(), query.wlHint, query.dirLocal.toString().c_str(), dir.toString().c_str());
             
-            if (rev_fs)
+            if (query.requestReverse)
                 *rev_fs = ret;
             return ret;
         }
         
-        if (rev_fs)
+        if (query.requestReverse)
             *rev_fs = SampledSpectrum::Zero;
         return SampledSpectrum::Zero;
     }

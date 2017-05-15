@@ -37,7 +37,7 @@ namespace SLR {
     SampledSpectrum OrenNayerBRDF::evaluateInternal(const BSDFQuery &query, const Vector3D &dir, SampledSpectrum* rev_fs) const {
         if (query.dirLocal.z * dir.z <= 0.0f) {
             SampledSpectrum fs = SampledSpectrum::Zero;
-            if (rev_fs)
+            if (query.requestReverse)
                 *rev_fs = fs;
             return fs;
         }
@@ -49,7 +49,7 @@ namespace SLR {
         float tanBeta = std::min(absTanThetaI, absTanThetaO);
         float cos_dAzimuth = (dir.x * query.dirLocal.x + dir.y * query.dirLocal.y) / (sinThetaI * sinThetaO);
         SampledSpectrum fs = m_R * ((m_A + m_B * std::max(0.0f, cos_dAzimuth) * sinAlpha * tanBeta) / M_PI);
-        if (rev_fs)
+        if (query.requestReverse)
             *rev_fs = fs;
         return fs;
     }

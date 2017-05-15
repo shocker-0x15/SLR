@@ -12,24 +12,32 @@
 
 namespace SLR {
     template <typename RealType>
-    uint32_t sampleDiscrete(const RealType* importances, RealType* sumImportances, RealType* base, uint32_t numImportances, RealType u) {
+    uint32_t sampleDiscrete(const RealType* importances, uint32_t numImportances, RealType u, 
+                            RealType* prob, RealType* sumImportances, RealType* remapped) {
         CompensatedSum<RealType> sum(0);
         for (int i = 0; i < numImportances; ++i)
             sum += importances[i];
-        *sumImportances = sum.result;
+        *sumImportances = sum;
         
-        RealType su = u * sum.result;
+        RealType base = 0;
+        RealType su = u * sum;
         CompensatedSum<RealType> cum(0);
         for (int i = 0; i < numImportances; ++i) {
-            *base = cum.result;
+            base = cum;
             cum += importances[i];
-            if (su < cum.result)
+            if (su < cum.result) {
+                *prob = importances[i] / sum;
+                *remapped = (su - base) / importances[i];
                 return i;
+            }
         }
+        *prob = importances[0] / sum;
         return 0;
     }
-    template SLR_API uint32_t sampleDiscrete(const float* importances, float* sumImportances, float* base, uint32_t numImportances, float u);
-    template SLR_API uint32_t sampleDiscrete(const double* importances, double* sumImportances, double* base, uint32_t numImportances, double u);
+    template SLR_API uint32_t sampleDiscrete(const float* importances, uint32_t numImportances, float u, 
+                                             float* prob, float* sumImportances, float* remapped);
+    template SLR_API uint32_t sampleDiscrete(const double* importances, uint32_t numImportances, double u, 
+                                             double* prob, double* sumImportances, double* remapped);
     
     
     

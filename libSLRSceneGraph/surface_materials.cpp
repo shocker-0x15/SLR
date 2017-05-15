@@ -98,6 +98,19 @@ namespace SLRSceneGraph {
         m_rawData = new SLR::MicrofacetScatteringSurfaceMaterial(etaExt->getRaw(), etaInt->getRaw(), D->getRaw());
     }
     
+    DisneyReflectionSurfaceMaterial::DisneyReflectionSurfaceMaterial(const SpectrumTextureRef &baseColor, 
+                                                                     const FloatTextureRef &subsurface, const FloatTextureRef &metallic, const FloatTextureRef &specular, const FloatTextureRef &specularTint, 
+                                                                     const FloatTextureRef &roughness, const FloatTextureRef &anisotropic, const FloatTextureRef &sheen, const FloatTextureRef &sheenTint, 
+                                                                     const FloatTextureRef &clearCoat, const FloatTextureRef &clearCoatGloss) :
+    m_baseColor(baseColor), 
+    m_subsurface(subsurface), m_metallic(metallic), m_specular(specular), m_specularTint(specularTint), m_roughness(roughness), m_anisotropic(anisotropic), 
+    m_sheen(sheen), m_sheenTint(sheenTint), m_clearCoat(clearCoat), m_clearCoatGloss(clearCoatGloss) {
+        m_rawData = new SLR::DisneyReflectionSurfaceMaterial(m_baseColor->getRaw(), 
+                                                             m_subsurface->getRaw(), m_metallic->getRaw(), m_specular->getRaw(), m_specularTint->getRaw(), 
+                                                             m_roughness->getRaw(), m_anisotropic->getRaw(), m_sheen->getRaw(), m_sheenTint->getRaw(), 
+                                                             m_clearCoat->getRaw(), m_clearCoatGloss->getRaw());
+    }
+    
     SummedSurfaceMaterial::SummedSurfaceMaterial(const SurfaceMaterialRef &m0, const SurfaceMaterialRef &m1) :
     m_mat0(m0), m_mat1(m1) {
         m_rawData = new SLR::SummedSurfaceMaterial(m0->getRaw(), m1->getRaw());
@@ -156,6 +169,16 @@ namespace SLRSceneGraph {
     SurfaceMaterialRef SurfaceMaterial::createMicrofacetGlass(const SpectrumTextureRef &etaExt, const SpectrumTextureRef &etaInt, const FloatTextureRef &alpha_gx, const FloatTextureRef &alpha_gy) {
         SVMicrofacetDistributionRef dist = createShared<GGXSVMicrofacetDistribution>(alpha_gx, alpha_gy);
         return createShared<MicrofacetScatteringSurfaceMaterial>(etaExt, etaInt, dist);
+    }
+    
+    SurfaceMaterialRef SurfaceMaterial::createDisneyReflection(const SpectrumTextureRef &baseColor, 
+                                                               const FloatTextureRef &subsurface, const FloatTextureRef &metallic, const FloatTextureRef &specular, const FloatTextureRef &specularTint, 
+                                                               const FloatTextureRef &roughness, const FloatTextureRef &anisotropic, const FloatTextureRef &sheen, const FloatTextureRef &sheenTint, 
+                                                               const FloatTextureRef &clearCoat, const FloatTextureRef &clearCoatGloss) {
+        return createShared<DisneyReflectionSurfaceMaterial>(baseColor, 
+                                                             subsurface, metallic, specular, specularTint, 
+                                                             roughness, anisotropic, sheen, sheenTint, 
+                                                             clearCoat, clearCoatGloss);
     }
     
     SurfaceMaterialRef SurfaceMaterial::createFlippedMaterial(const SurfaceMaterialRef &baseMat) {

@@ -129,18 +129,18 @@ namespace SLR {
         while (true) {
             RealType xbarValue, ybarValue, zbarValue;
             if (curWL == WavelengthLowBound + curCMFIdx * CMFBinWidth) {
-                xbarValue = xbarReference[curCMFIdx];
-                ybarValue = ybarReference[curCMFIdx];
-                zbarValue = zbarReference[curCMFIdx];
+                xbarValue = xbarReferenceValues[curCMFIdx];
+                ybarValue = ybarReferenceValues[curCMFIdx];
+                zbarValue = zbarReferenceValues[curCMFIdx];
                 ++curCMFIdx;
             }
             else {
                 uint32_t idx = std::min(uint32_t((curWL - WavelengthLowBound) / CMFBinWidth), NumCMFSamples - 1);
                 RealType CMFBaseWL = WavelengthLowBound + idx * CMFBinWidth;
                 RealType t = (curWL - CMFBaseWL) / CMFBinWidth;
-                xbarValue = (1 - t) * xbarReference[idx] + t * xbarReference[idx + 1];
-                ybarValue = (1 - t) * ybarReference[idx] + t * ybarReference[idx + 1];
-                zbarValue = (1 - t) * zbarReference[idx] + t * zbarReference[idx + 1];
+                xbarValue = (1 - t) * xbarReferenceValues[idx] + t * xbarReferenceValues[idx + 1];
+                ybarValue = (1 - t) * ybarReferenceValues[idx] + t * ybarReferenceValues[idx + 1];
+                zbarValue = (1 - t) * zbarReferenceValues[idx] + t * zbarReferenceValues[idx + 1];
             }
             
             RealType value;
@@ -307,18 +307,18 @@ namespace SLR {
         while (true) {
             RealType xbarValue, ybarValue, zbarValue;
             if (curWL == WavelengthLowBound + curCMFIdx * CMFBinWidth) {
-                xbarValue = xbarReference[curCMFIdx];
-                ybarValue = ybarReference[curCMFIdx];
-                zbarValue = zbarReference[curCMFIdx];
+                xbarValue = xbarReferenceValues[curCMFIdx];
+                ybarValue = ybarReferenceValues[curCMFIdx];
+                zbarValue = zbarReferenceValues[curCMFIdx];
                 ++curCMFIdx;
             }
             else {
                 uint32_t idx = std::min(uint32_t((curWL - WavelengthLowBound) / CMFBinWidth), NumCMFSamples - 1);
                 RealType CMFBaseWL = WavelengthLowBound + idx * CMFBinWidth;
                 RealType t = (curWL - CMFBaseWL) / CMFBinWidth;
-                xbarValue = (1 - t) * xbarReference[idx] + t * xbarReference[idx + 1];
-                ybarValue = (1 - t) * ybarReference[idx] + t * ybarReference[idx + 1];
-                zbarValue = (1 - t) * zbarReference[idx] + t * zbarReference[idx + 1];
+                xbarValue = (1 - t) * xbarReferenceValues[idx] + t * xbarReferenceValues[idx + 1];
+                ybarValue = (1 - t) * ybarReferenceValues[idx] + t * ybarReferenceValues[idx + 1];
+                zbarValue = (1 - t) * zbarReferenceValues[idx] + t * zbarReferenceValues[idx + 1];
             }
             
             RealType value;
