@@ -244,6 +244,7 @@ namespace SLR {
                 float dist = std::sqrt(p.x * p.x + p.y * p.y);
                 shadingFrame.x = dist > 0 ? Vector3D(-p.y, p.x, 0) / dist : Vector3D(1, 0, 0);
             }
+            shadingFrame.x = appliedTF * shadingFrame.x;
         }
         shadingFrame.y = cross(shadingFrame.z, shadingFrame.x);
         
@@ -297,6 +298,7 @@ namespace SLR {
                 float dist = std::sqrt(p.x * p.x + p.y * p.y);
                 shadingFrame.x = dist > 0 ? Vector3D(-p.y, p.x, 0) / dist : Vector3D(1, 0, 0);
             }
+            shadingFrame.x = appliedTF * shadingFrame.x;
         }
         shadingFrame.y = cross(shadingFrame.z, shadingFrame.x);
         

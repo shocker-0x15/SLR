@@ -9,6 +9,8 @@
 
 #include <libSLR/Texture/texture_headers.h>
 
+#include "images.h"
+
 namespace SLRSceneGraph {
     Texture2DMapping::Texture2DMapping() {
         m_rawData = new SLR::Texture2DMapping;
@@ -57,19 +59,19 @@ namespace SLRSceneGraph {
         m_rawData = new SLR::ConstantFloatTexture(value);
     }
     
-    ImageSpectrumTexture::ImageSpectrumTexture(const Texture2DMappingRef &mapping, const TiledImage2DRef &image) :
+    ImageSpectrumTexture::ImageSpectrumTexture(const Texture2DMappingRef &mapping, const Image2DRef &image) :
     m_mapping(mapping), m_data(image) {
-        m_rawData = new SLR::ImageSpectrumTexture(image.get(), mapping->getRaw());
+        m_rawData = new SLR::ImageSpectrumTexture(image->getRaw(), mapping->getRaw());
     }
     
-    ImageNormalTexture::ImageNormalTexture(const Texture2DMappingRef &mapping, const TiledImage2DRef &image) :
+    ImageNormalTexture::ImageNormalTexture(const Texture2DMappingRef &mapping, const Image2DRef &image) :
     m_mapping(mapping), m_data(image) {
-        m_rawData = new SLR::ImageNormalTexture(image.get(), mapping->getRaw());
+        m_rawData = new SLR::ImageNormalTexture(image->getRaw(), mapping->getRaw());
     }
     
-    ImageFloatTexture::ImageFloatTexture(const Texture2DMappingRef &mapping, const TiledImage2DRef &image) :
+    ImageFloatTexture::ImageFloatTexture(const Texture2DMappingRef &mapping, const Image2DRef &image) :
     m_mapping(mapping), m_data(image) {
-        m_rawData = new SLR::ImageFloatTexture(image.get(), mapping->getRaw());
+        m_rawData = new SLR::ImageFloatTexture(image->getRaw(), mapping->getRaw());
     }
     
     CheckerBoardSpectrumTexture::CheckerBoardSpectrumTexture(const Texture2DMappingRef &mapping, const AssetSpectrumRef &v0, const AssetSpectrumRef &v1) :

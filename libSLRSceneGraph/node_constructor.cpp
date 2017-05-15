@@ -12,6 +12,7 @@
 #include <libSLR/MemoryAllocators/Allocator.h>
 #include <libSLR/Core/transform.h>
 #include <libSLR/SurfaceShape/TriangleSurfaceShape.h>
+#include "images.h"
 #include "textures.h"
 #include "surface_materials.h"
 #include "Scene/TriangleMeshNode.h"
@@ -127,7 +128,7 @@ namespace SLRSceneGraph {
         
         SpectrumTextureRef diffuseTex;
         if (aiMat->Get(AI_MATKEY_TEXTURE_DIFFUSE(0), strValue) == aiReturn_SUCCESS) {
-            TiledImage2DRef image = Image::createTiledImage((pathPrefix + strValue.C_Str()).c_str(), mem, ImageStoreMode::AsIs, SpectrumType::Reflectance);
+            Image2DRef image = createImage2D((pathPrefix + strValue.C_Str()).c_str(), ImageStoreMode::AsIs, SpectrumType::Reflectance, false);
             diffuseTex = createShared<ImageSpectrumTexture>(mapping, image);
         }
         else if (aiMat->Get(AI_MATKEY_COLOR_DIFFUSE, color, nullptr) == aiReturn_SUCCESS) {
@@ -143,13 +144,13 @@ namespace SLRSceneGraph {
         
         NormalTextureRef normalTex;
         if (aiMat->Get(AI_MATKEY_TEXTURE_DISPLACEMENT(0), strValue) == aiReturn_SUCCESS) {
-            TiledImage2DRef image = Image::createTiledImage((pathPrefix + strValue.C_Str()).c_str(), mem, ImageStoreMode::NormalTexture, SpectrumType::Reflectance);
+            Image2DRef image = createImage2D((pathPrefix + strValue.C_Str()).c_str(), ImageStoreMode::NormalTexture, SpectrumType::Reflectance, false);
             normalTex = createShared<ImageNormalTexture>(mapping, image);
         }
         
         FloatTextureRef alphaTex;
         if (aiMat->Get(AI_MATKEY_TEXTURE_OPACITY(0), strValue) == aiReturn_SUCCESS) {
-            TiledImage2DRef image = Image::createTiledImage((pathPrefix + strValue.C_Str()).c_str(), mem, ImageStoreMode::AlphaTexture, SpectrumType::Reflectance);
+            Image2DRef image = createImage2D((pathPrefix + strValue.C_Str()).c_str(), ImageStoreMode::AlphaTexture, SpectrumType::Reflectance, false);
             alphaTex = createShared<ImageFloatTexture>(mapping, image);
         }
         

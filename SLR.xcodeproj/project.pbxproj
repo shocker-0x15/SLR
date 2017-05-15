@@ -26,6 +26,8 @@
 		461BDADD1E46FE4A00D97D37 /* medium_materials.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 461BDADB1E46FE4A00D97D37 /* medium_materials.cpp */; };
 		462346291EC8A79C00BC2C4A /* disney_surface_materials.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 462346271EC8A79C00BC2C4A /* disney_surface_materials.cpp */; };
 		4623462A1EC8A79C00BC2C4A /* disney_surface_materials.h in Headers */ = {isa = PBXBuildFile; fileRef = 462346281EC8A79C00BC2C4A /* disney_surface_materials.h */; };
+		4623462D1ECA0D8300BC2C4A /* images.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4623462B1ECA0D8300BC2C4A /* images.cpp */; };
+		4623462E1ECA0D8300BC2C4A /* images.h in Headers */ = {isa = PBXBuildFile; fileRef = 4623462C1ECA0D8300BC2C4A /* images.h */; };
 		4625C9F81E7AF985005479E3 /* perlin_noise_textures.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4625C9F61E7AF985005479E3 /* perlin_noise_textures.cpp */; };
 		4625C9F91E7AF985005479E3 /* perlin_noise_textures.h in Headers */ = {isa = PBXBuildFile; fileRef = 4625C9F71E7AF985005479E3 /* perlin_noise_textures.h */; };
 		4638105B1C21AD0E00211293 /* SceneParser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 463810591C21AD0E00211293 /* SceneParser.cpp */; };
@@ -286,6 +288,8 @@
 		461BDADB1E46FE4A00D97D37 /* medium_materials.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; lineEnding = 0; name = medium_materials.cpp; path = libSLRSceneGraph/medium_materials.cpp; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.cpp; };
 		462346271EC8A79C00BC2C4A /* disney_surface_materials.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = disney_surface_materials.cpp; path = libSLR/SurfaceMaterial/disney_surface_materials.cpp; sourceTree = SOURCE_ROOT; };
 		462346281EC8A79C00BC2C4A /* disney_surface_materials.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = disney_surface_materials.h; path = libSLR/SurfaceMaterial/disney_surface_materials.h; sourceTree = SOURCE_ROOT; };
+		4623462B1ECA0D8300BC2C4A /* images.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = images.cpp; path = libSLRSceneGraph/images.cpp; sourceTree = "<group>"; };
+		4623462C1ECA0D8300BC2C4A /* images.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = images.h; path = libSLRSceneGraph/images.h; sourceTree = "<group>"; };
 		4625C9F61E7AF985005479E3 /* perlin_noise_textures.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = perlin_noise_textures.cpp; path = libSLR/Texture/perlin_noise_textures.cpp; sourceTree = SOURCE_ROOT; };
 		4625C9F71E7AF985005479E3 /* perlin_noise_textures.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = perlin_noise_textures.h; path = libSLR/Texture/perlin_noise_textures.h; sourceTree = SOURCE_ROOT; };
 		4634EC3E1B9B60400047AE54 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
@@ -859,6 +863,8 @@
 			isa = PBXGroup;
 			children = (
 				465D8A9A1E58F9A7001B8382 /* declarations.h */,
+				4623462C1ECA0D8300BC2C4A /* images.h */,
+				4623462B1ECA0D8300BC2C4A /* images.cpp */,
 				465D8BA71E59E465001B8382 /* textures.h */,
 				4602E8AE1BC40E8700EC16FA /* textures.cpp */,
 				465D8BA91E59E46B001B8382 /* surface_materials.h */,
@@ -1109,6 +1115,7 @@
 				465D8BB31E59E493001B8382 /* builtin_texture.h in Headers */,
 				465D8BA61E59E459001B8382 /* API.h in Headers */,
 				466F6D231BB6CB4E0056F2FA /* node_constructor.h in Headers */,
+				4623462E1ECA0D8300BC2C4A /* images.h in Headers */,
 				465D8BAA1E59E46B001B8382 /* surface_materials.h in Headers */,
 				46B9589B1BDCD2B300A915DE /* location.hh in Headers */,
 				46B958A21BDCD2B300A915DE /* stack.hh in Headers */,
@@ -1320,6 +1327,7 @@
 				46B958A41BDCD83D00A915DE /* SceneLexer.yy.cpp in Sources */,
 				465D8B931E59DEAB001B8382 /* camera_nodes.cpp in Sources */,
 				4602E8961BC2D8EF00EC16FA /* API.cpp in Sources */,
+				4623462D1ECA0D8300BC2C4A /* images.cpp in Sources */,
 				466F6D341BB6D7A00056F2FA /* image_loader.cpp in Sources */,
 				465D8B991E59DEAB001B8382 /* medium_nodes.cpp in Sources */,
 				461BDADD1E46FE4A00D97D37 /* medium_materials.cpp in Sources */,

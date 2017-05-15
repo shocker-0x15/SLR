@@ -96,6 +96,7 @@ namespace SLRSceneGraph {
     };
     
     
+    
     class SLR_SCENEGRAPH_API ConstantSpectrumTexture : public SpectrumTexture {
         AssetSpectrumRef m_value;
     public:
@@ -109,26 +110,28 @@ namespace SLRSceneGraph {
     };
     
     
+    
     class SLR_SCENEGRAPH_API ImageSpectrumTexture : public SpectrumTexture {
         Texture2DMappingRef m_mapping;
-        TiledImage2DRef m_data;
+        Image2DRef m_data;
     public:
-        ImageSpectrumTexture(const Texture2DMappingRef &mapping, const TiledImage2DRef &image);
+        ImageSpectrumTexture(const Texture2DMappingRef &mapping, const Image2DRef &image);
     };
     
     class SLR_SCENEGRAPH_API ImageNormalTexture : public NormalTexture {
         Texture2DMappingRef m_mapping;
-        TiledImage2DRef m_data;
+        Image2DRef m_data;
     public:
-        ImageNormalTexture(const Texture2DMappingRef &mapping, const TiledImage2DRef &image);
+        ImageNormalTexture(const Texture2DMappingRef &mapping, const Image2DRef &image);
     };
     
     class SLR_SCENEGRAPH_API ImageFloatTexture : public FloatTexture {
         Texture2DMappingRef m_mapping;
-        TiledImage2DRef m_data;
+        Image2DRef m_data;
     public:
-        ImageFloatTexture(const Texture2DMappingRef &mapping, const TiledImage2DRef &image);
+        ImageFloatTexture(const Texture2DMappingRef &mapping, const Image2DRef &image);
     };
+    
     
     
     class SLR_SCENEGRAPH_API CheckerBoardSpectrumTexture : public SpectrumTexture {
@@ -152,6 +155,7 @@ namespace SLRSceneGraph {
     public:
         CheckerBoardFloatTexture(const Texture2DMappingRef &mapping, float v0, float v1);
     };
+    
     
     
     class SLR_SCENEGRAPH_API VoronoiSpectrumTexture : public SpectrumTexture {
@@ -180,6 +184,7 @@ namespace SLRSceneGraph {
     };
     
     
+    
     class SLR_SCENEGRAPH_API PerlinNoiseNormalTexture : public NormalTexture {
         Texture3DMappingRef m_mapping;
         float m_thetaMax;
@@ -195,7 +200,6 @@ namespace SLRSceneGraph {
                                  float frequencyMultiplier, float persistence, int32_t repeat);
     };
     
-    
     class SLR_SCENEGRAPH_API PerlinNoiseFloatTexture : public FloatTexture {
         Texture3DMappingRef m_mapping;
         uint32_t m_numOctaves;
@@ -210,6 +214,7 @@ namespace SLRSceneGraph {
                                 uint32_t numOctaves, float initialFrequency, float supValueOrInitialAmplitude, bool supSpecified, 
                                 float frequencyMultiplier, float persistence, int32_t repeat);
     };
+    
     
     
     class SLR_SCENEGRAPH_API AnalyticSkySpectrumTexture : public SpectrumTexture {

@@ -22,6 +22,7 @@
 #include <libSLR/Renderer/VolumetricPTRenderer.h>
 #include <libSLR/Renderer/VolumetricBPTRenderer.h>
 
+#include "images.h"
 #include "textures.h"
 #include "surface_materials.h"
 #include "medium_materials.h"
@@ -35,8 +36,6 @@
 #include "Parser/BuiltinFunctions/builtin_math.h"
 #include "Parser/BuiltinFunctions/builtin_transform.h"
 #include "Parser/BuiltinFunctions/builtin_texture.h"
-
-#include "Helper/image_loader.h"
 
 namespace SLRSceneGraph {
     static bool strToImageStoreMode(const std::string &str, SLR::ImageStoreMode* mode) {
@@ -453,16 +452,13 @@ namespace SLRSceneGraph {
                                                        *err = ErrorMessage("Specified image store mode is invalid.");
                                                        return Element();
                                                    }
-                                                   SLR::SpectrumType type;
-                                                   if (!strToSpectrumType(typeStr, &type)) {
+                                                   SLR::SpectrumType spType;
+                                                   if (!strToSpectrumType(typeStr, &spType)) {
                                                        *err = ErrorMessage("Specified spectrum type is invalid.");
                                                        return Element();
                                                    }
                                                    
-                                                   // TODO: ?? make a memory allocator selectable.
-                                                   SLR::DefaultAllocator &defMem = SLR::DefaultAllocator::instance();
-                                                   TiledImage2DRef image = Image::createTiledImage(path.c_str(), &defMem, mode, type);
-                                                   return Element::createFromReference<TypeMap::Image2D>(image);
+                                                   return Element::createFromReference<TypeMap::Image2D>(createImage2D(path, mode, spType, false));
                                                }
                                                );
             
@@ -1219,10 +1215,8 @@ namespace SLRSceneGraph {
                                                    [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
                                                        std::string path = context.absFileDirPath + args.at("path").raw<TypeMap::String>();
                                                        float scale = args.at("scale").raw<TypeMap::RealNumber>();
-                                                       SLR::DefaultAllocator &defMem = SLR::DefaultAllocator::instance();
                                                        
-                                                       // TODO: make memory allocator selectable.
-                                                       TiledImage2DRef img = Image::createTiledImage(path, &defMem, SLR::ImageStoreMode::AsIs, SLR::SpectrumType::Illuminant);
+                                                       Image2DRef img = createImage2D(path, SLR::ImageStoreMode::AsIs, SLR::SpectrumType::Illuminant, false);
                                                        const Texture2DMappingRef &mapping = Texture2DMapping::sharedInstanceRef();
                                                        SpectrumTextureRef IBLTex = createShared<ImageSpectrumTexture>(mapping, img);
                                                        std::weak_ptr<Scene> sceneWRef = context.scene;
@@ -1332,36 +1326,4 @@ namespace SLRSceneGraph {
         }
 #endif
     } // namespace Spectrum
-    
-    namespace Image {
-        using namespace SLR;
-        std::map<std::string, Image2DRef> s_imageDB;
-        
-        SLR_SCENEGRAPH_API std::shared_ptr<SLR::TiledImage2D> createTiledImage(const std::string &filepath, SLR::Allocator *mem, SLR::ImageStoreMode mode, SLR::SpectrumType spType, bool gammaCorrection) {
-            if (s_imageDB.count(filepath) > 0) {
-                return std::static_pointer_cast<SLR::TiledImage2D>(s_imageDB[filepath]);
-            }
-            else {
-                uint64_t requiredSize;
-                bool imgSuccess;
-                uint32_t width, height;
-                ::ColorFormat colorFormat;
-                imgSuccess = getImageInfo(filepath, &width, &height, &requiredSize, &colorFormat);
-                SLRAssert(imgSuccess, "Error occured during getting image information.\n%s", filepath.c_str());
-                
-                void* linearData = malloc(requiredSize);
-                imgSuccess = loadImage(filepath, (uint8_t*)linearData, gammaCorrection);
-                SLRAssert(imgSuccess, "failed to load the image\n%s", filepath.c_str());
-                
-                SLR::ColorFormat internalFormat = (SLR::ColorFormat)colorFormat;
-                TiledImage2D* texData = new SLR::TiledImage2D(linearData, width, height, internalFormat, mem, mode, spType);
-                free(linearData);
-                
-                std::shared_ptr<TiledImage2D> ret = std::shared_ptr<SLR::TiledImage2D>(texData);
-                s_imageDB[filepath] = ret;
-                return ret;
-            }
-        };
-
-    } // namespace Image
 }

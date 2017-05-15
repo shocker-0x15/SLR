@@ -58,8 +58,9 @@ namespace SLRSceneGraph {
     
     typedef std::shared_ptr<SLR::Transform> TransformRef;
     
-    typedef std::shared_ptr<SLR::Image2D> Image2DRef;
-    typedef std::shared_ptr<SLR::TiledImage2D> TiledImage2DRef;
+    class Image2D;
+    
+    typedef std::shared_ptr<Image2D> Image2DRef;
     
     class Texture2DMapping;
     class Texture3DMapping;

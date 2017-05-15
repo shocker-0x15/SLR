@@ -60,7 +60,7 @@ namespace SLR {
     public:
         Image2D() { }
         Image2D(uint32_t w, uint32_t h, ColorFormat fmt, SpectrumType spType) : m_width(w), m_height(h), m_colorFormat(fmt), m_spType(spType) { }
-        ~Image2D() { }
+        virtual ~Image2D() { }
         
         template <typename ColFmt>
         const ColFmt &get(uint32_t x, uint32_t y) const { return *(const ColFmt*)getInternal(x, y); }

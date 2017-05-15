@@ -14,10 +14,10 @@
 
 namespace SLR {
     class SLR_API ImageSpectrumTexture : public SpectrumTexture {
-        const TiledImage2D* m_data;
+        const Image2D* m_data;
         const Texture2DMapping* m_mapping;
     public:
-        ImageSpectrumTexture(const TiledImage2D* image, const Texture2DMapping* mapping) :
+        ImageSpectrumTexture(const Image2D* image, const Texture2DMapping* mapping) :
         m_data(image), m_mapping(mapping) { }
         
         SampledSpectrum evaluate(const Point3D &p, const WavelengthSamples &wls) const;
@@ -33,10 +33,10 @@ namespace SLR {
     
     
     class SLR_API ImageNormalTexture : public NormalTexture {
-        const TiledImage2D* m_data;
+        const Image2D* m_data;
         const Texture2DMapping* m_mapping;
     public:
-        ImageNormalTexture(const TiledImage2D* image, const Texture2DMapping* mapping) :
+        ImageNormalTexture(const Image2D* image, const Texture2DMapping* mapping) :
         m_data(image), m_mapping(mapping) { }
         
         Normal3D evaluate(const Point3D &p) const ;
@@ -51,10 +51,10 @@ namespace SLR {
     
     
     class SLR_API ImageFloatTexture : public FloatTexture {
-        const TiledImage2D* m_data;
+        const Image2D* m_data;
         const Texture2DMapping* m_mapping;
     public:
-        ImageFloatTexture(const TiledImage2D* image, const Texture2DMapping* mapping) :
+        ImageFloatTexture(const Image2D* image, const Texture2DMapping* mapping) :
         m_data(image), m_mapping(mapping) { }
         
         float evaluate(const Point3D &p) const;
