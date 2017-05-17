@@ -13,6 +13,14 @@ namespace SLR {
         return nullptr;
     }
     
+    void CheckerBoardSpectrumTexture::generateLuminanceChannel() {
+        float XYZ[3];
+        m_values[0]->convertToXYZ(XYZ);
+        m_luminances[0] = XYZ[1];
+        m_values[1]->convertToXYZ(XYZ);
+        m_luminances[1] = XYZ[1];
+    }
+    
     
     
     Normal3D CheckerBoardNormalTexture::evaluate(const Point3D &p) const {
@@ -42,5 +50,5 @@ namespace SLR {
         }
         
         return normalize(Normal3D(uComp, vComp, 1.0f));
-    }    
+    }
 }

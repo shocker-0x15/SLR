@@ -208,6 +208,60 @@ namespace SLRSceneGraph {
                                                }
                                                );
             
+            stack["HSVtoRGB"] =
+            Element::create<TypeMap::Function>(1,
+                                               std::vector<ArgInfo>{{"H", Type::RealNumber}, {"S", Type::RealNumber}, {"V", Type::RealNumber}},
+                                               [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
+                                                   auto H = args.at("H").raw<TypeMap::RealNumber>();
+                                                   auto S = args.at("S").raw<TypeMap::RealNumber>();
+                                                   auto V = args.at("V").raw<TypeMap::RealNumber>();
+                                                   
+                                                   float R = V;
+                                                   float G = V;
+                                                   float B = V;
+                                                   if (S > 0.0f) {
+                                                       H *= 6.0f;
+                                                       int i = (int)H;
+                                                       float f = H - (float)i;
+                                                       switch (i) {
+                                                           case 0:
+                                                               G *= 1 - S * (1 - f);
+                                                               B *= 1 - S;
+                                                               break;
+                                                           case 1:
+                                                               R *= 1 - S * f;
+                                                               B *= 1 - S;
+                                                               break;
+                                                           case 2:
+                                                               R *= 1 - S;
+                                                               B *= 1 - S * (1 - f);
+                                                               break;
+                                                           case 3:
+                                                               R *= 1 - S;
+                                                               G *= 1 - S * f;
+                                                               break;
+                                                           case 4:
+                                                               R *= 1 - S * (1 - f);
+                                                               G *= 1 - S;
+                                                               break;
+                                                           case 5:
+                                                               G *= 1 - S;
+                                                               B *= 1 - S * f;
+                                                               break;
+                                                           default:
+                                                               break;
+                                                       }
+                                                   }
+                                                   
+                                                   ParameterListRef rgbTuple = createShared<ParameterList>();
+                                                   rgbTuple->add("", Element(R));
+                                                   rgbTuple->add("", Element(G));
+                                                   rgbTuple->add("", Element(B));
+                                                   
+                                                   return Element::createFromReference<TypeMap::Tuple>(rgbTuple);
+                                               }
+                                               );
+            
             stack["random"] =
             Element::create<TypeMap::Function>(1,
                                                std::vector<ArgInfo>{},

@@ -23,12 +23,12 @@ namespace SLR {
 #ifdef SLR_Use_Spectral_Representation
             case ColorFormat::uvs16Fx3: {
                 const uvs16Fx3 &data = m_data->get<uvs16Fx3>(px, py);
-                ret = UpsampledContinuousSpectrum(data.u, data.v, data.s / UpsampledContinuousSpectrum::EqualEnergyReflectance).evaluate(wls);
+                ret = UpsampledContinuousSpectrum(data.u, data.v, data.s / UPSAMPLED_CONTINOUS_SPECTRUM_SCALE_FACTOR).evaluate(wls);
                 break;
             }
             case ColorFormat::uvsA16Fx4: {
                 const uvsA16Fx4 &data = m_data->get<uvsA16Fx4>(px, py);
-                ret = UpsampledContinuousSpectrum(data.u, data.v, data.s / UpsampledContinuousSpectrum::EqualEnergyReflectance).evaluate(wls);
+                ret = UpsampledContinuousSpectrum(data.u, data.v, data.s / UPSAMPLED_CONTINOUS_SPECTRUM_SCALE_FACTOR).evaluate(wls);
                 break;
             }
             case ColorFormat::Gray8: {
@@ -68,6 +68,67 @@ namespace SLR {
             case ColorFormat::Gray8: {
                 const Gray8 &data = m_data->get<Gray8>(px, py);
                 ret.r = ret.g = ret.b = data.v / 255.0f;
+                break;
+            }
+#endif
+            default:
+                SLRAssert(false, "Image data format is unknown.");
+                break;
+        }
+        return ret;
+    }
+    
+    float ImageSpectrumTexture::evaluateLuminance(const Point3D &p) const {
+        float u = std::fmod(p.x, 1.0f);
+        float v = std::fmod(p.y, 1.0f);
+        u += u < 0 ? 1.0f : 0.0f;
+        v += v < 0 ? 1.0f : 0.0f;
+        uint32_t px = std::min((uint32_t)(m_data->width() * u), m_data->width() - 1);
+        uint32_t py = std::min((uint32_t)(m_data->height() * v), m_data->height() - 1);
+        
+        float ret = 0.0f;
+        switch (m_data->format()) {
+#ifdef SLR_Use_Spectral_Representation
+            case ColorFormat::uvs16Fx3: {
+                const uvs16Fx3 &data = m_data->get<uvs16Fx3>(px, py);
+                float uvs[] = {data.u, data.v, data.s / (float)UPSAMPLED_CONTINOUS_SPECTRUM_SCALE_FACTOR};
+                ret = UpsampledContinuousSpectrum::uvs_to_luminance(uvs);
+            }
+            case ColorFormat::uvsA16Fx4: {
+                const uvsA16Fx4 &data = m_data->get<uvsA16Fx4>(px, py);
+                float uvs[] = {data.u, data.v, data.s / (float)UPSAMPLED_CONTINOUS_SPECTRUM_SCALE_FACTOR};
+                ret = UpsampledContinuousSpectrum::uvs_to_luminance(uvs);
+                break;
+            }
+            case ColorFormat::Gray8: {
+                const Gray8 &data = m_data->get<Gray8>(px, py);
+                ret = data.v / 255.0f;
+                break;
+            }
+#else
+            case ColorFormat::RGB8x3: {
+                const RGB8x3 &data = m_data->get<RGB8x3>(px, py);
+                return sRGB_to_Luminance(data.r / 255.0f, data.g / 255.0f, data.b / 255.0f);
+                break;
+            }
+            case ColorFormat::RGB_8x4: {
+                const RGB_8x4 &data = m_data->get<RGB_8x4>(px, py);
+                return sRGB_to_Luminance(data.r / 255.0f, data.g / 255.0f, data.b / 255.0f);
+                break;
+            }
+            case ColorFormat::RGBA8x4: {
+                const RGBA8x4 &data = m_data->get<RGBA8x4>(px, py);
+                return sRGB_to_Luminance(data.r / 255.0f, data.g / 255.0f, data.b / 255.0f);
+                break;
+            }
+            case ColorFormat::RGBA16Fx4: {
+                const RGBA16Fx4 &data = m_data->get<RGBA16Fx4>(px, py);
+                return sRGB_to_Luminance(data.r, data.g, data.b);
+                break;
+            }
+            case ColorFormat::Gray8: {
+                const Gray8 &data = m_data->get<Gray8>(px, py);
+                ret = data.v / 255.0f;
                 break;
             }
 #endif

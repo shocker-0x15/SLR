@@ -140,7 +140,7 @@ namespace SLR {
                                 float RGB[3] = {val.r / 255.0f, val.g / 255.0f, val.b / 255.0f};
                                 float uvs[3];
                                 UpsampledContinuousSpectrum::sRGB_to_uvs(spType, RGB, uvs);
-                                uvs16Fx3 storedVal{(half)uvs[0], (half)uvs[1], (half)uvs[2]};
+                                uvs16Fx3 storedVal{(half)uvs[0], (half)uvs[1], (half)(uvs[2] * UPSAMPLED_CONTINOUS_SPECTRUM_SCALE_FACTOR)};
                                 SLRAssert(std::isfinite((float)storedVal.u) &&
                                           std::isfinite((float)storedVal.v) &&
                                           std::isfinite((float)storedVal.s), "Invalid value.");
@@ -185,7 +185,7 @@ namespace SLR {
                                 float RGB[3] = {val.r / 255.0f, val.g / 255.0f, val.b / 255.0f};
                                 float uvs[3];
                                 UpsampledContinuousSpectrum::sRGB_to_uvs(spType, RGB, uvs);
-                                uvs16Fx3 storedVal{(half)uvs[0], (half)uvs[1], (half)uvs[2]};
+                                uvs16Fx3 storedVal{(half)uvs[0], (half)uvs[1], (half)(uvs[2] * UPSAMPLED_CONTINOUS_SPECTRUM_SCALE_FACTOR)};
                                 SLRAssert(storedVal.u.isFinite() &&
                                           storedVal.v.isFinite() &&
                                           storedVal.s.isFinite(), "Invalid value.");
@@ -230,7 +230,7 @@ namespace SLR {
                                 float RGB[3] = {val.r / 255.0f, val.g / 255.0f, val.b / 255.0f};
                                 float uvs[3];
                                 UpsampledContinuousSpectrum::sRGB_to_uvs(spType, RGB, uvs);
-                                uvsA16Fx4 storedVal{(half)uvs[0], (half)uvs[1], (half)uvs[2], (half)(val.a / 255.0f)};
+                                uvsA16Fx4 storedVal{(half)uvs[0], (half)uvs[1], (half)(uvs[2] * UPSAMPLED_CONTINOUS_SPECTRUM_SCALE_FACTOR), (half)(val.a / 255.0f)};
                                 SLRAssert(storedVal.u.isFinite() && storedVal.v.isFinite() && storedVal.s.isFinite() &&
                                           storedVal.a.isFinite() && (float)storedVal.a >= 0,
                                           "Invalid value: %g, %g, %g, %g", (float)storedVal.u, (float)storedVal.v, (float)storedVal.s, (float)storedVal.a);
@@ -279,7 +279,7 @@ namespace SLR {
                                 RGB[2] = std::max(RGB[2], 0.0f);
                                 SLRAssert(val.a > 0.0f, "Invalid alpha value.");
                                 UpsampledContinuousSpectrum::sRGB_to_uvs(spType, RGB, uvs);
-                                uvsA16Fx4 storedVal{(half)uvs[0], (half)uvs[1], (half)uvs[2], (half)val.a};
+                                uvsA16Fx4 storedVal{(half)uvs[0], (half)uvs[1], (half)(uvs[2] * UPSAMPLED_CONTINOUS_SPECTRUM_SCALE_FACTOR), (half)val.a};
                                 SLRAssert(storedVal.u.isFinite() && storedVal.v.isFinite() && storedVal.s.isFinite() &&
                                           storedVal.a.isFinite() && (float)storedVal.a >= 0,
                                           "Invalid value: %g, %g, %g, %g", (float)storedVal.u, (float)storedVal.v, (float)storedVal.s, (float)storedVal.a);

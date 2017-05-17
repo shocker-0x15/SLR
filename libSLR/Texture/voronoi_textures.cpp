@@ -89,6 +89,22 @@ namespace SLR {
 #endif
     }
     
+    float VoronoiSpectrumTexture::evaluateLuminance(const Point3D &p) const {
+        float closestDistance;
+        uint32_t hash;
+        uint32_t fpIdx;
+        evaluateVoronoi(p, &closestDistance, &hash, &fpIdx);
+        
+        LinearCongruentialRNG rng(hash + fpIdx);
+        float rgb[3] = {
+            rng.getFloat0cTo1o() * m_brightness,
+            rng.getFloat0cTo1o() * m_brightness,
+            rng.getFloat0cTo1o() * m_brightness
+        };
+        
+        return sRGB_to_Luminance(rgb[0], rgb[1], rgb[2]);
+    }
+    
     const ContinuousDistribution2D* VoronoiSpectrumTexture::createIBLImportanceMap() const {
         SLRAssert_NotImplemented();
         return nullptr;

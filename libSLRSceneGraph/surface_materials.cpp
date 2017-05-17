@@ -175,6 +175,9 @@ namespace SLRSceneGraph {
                                                                const FloatTextureRef &subsurface, const FloatTextureRef &metallic, const FloatTextureRef &specular, const FloatTextureRef &specularTint, 
                                                                const FloatTextureRef &roughness, const FloatTextureRef &anisotropic, const FloatTextureRef &sheen, const FloatTextureRef &sheenTint, 
                                                                const FloatTextureRef &clearCoat, const FloatTextureRef &clearCoatGloss) {
+        bool chYGenerated = baseColor->generateLuminanceChannel();
+        if (!chYGenerated)
+            return nullptr;
         return createShared<DisneyReflectionSurfaceMaterial>(baseColor, 
                                                              subsurface, metallic, specular, specularTint, 
                                                              roughness, anisotropic, sheen, sheenTint, 

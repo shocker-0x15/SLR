@@ -27,6 +27,13 @@ namespace SLR {
         SampledSpectrum evaluate(const MediumPoint &medPt, const WavelengthSamples &wls) const override {
             return evaluate(m_mapping->map(medPt), wls);
         }
+        float evaluateLuminance(const Point3D &p) const;
+        float evaluateLuminance(const SurfacePoint &surfPt) const override {
+            return evaluateLuminance(m_mapping->map(surfPt));
+        }
+        float evaluateLuminance(const MediumPoint &medPt) const override {
+            return evaluateLuminance(m_mapping->map(medPt));
+        }
         const ContinuousDistribution2D* createIBLImportanceMap() const override;
     };
     

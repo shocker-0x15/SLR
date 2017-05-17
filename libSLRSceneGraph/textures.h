@@ -73,6 +73,8 @@ namespace SLRSceneGraph {
         const SLR::SpectrumTexture* getRaw() const {
             return m_rawData;
         };
+        
+        virtual bool generateLuminanceChannel() = 0;
     };
     
     class SLR_SCENEGRAPH_API NormalTexture {
@@ -101,6 +103,8 @@ namespace SLRSceneGraph {
         AssetSpectrumRef m_value;
     public:
         ConstantSpectrumTexture(const AssetSpectrumRef &value);
+        
+        bool generateLuminanceChannel() override;
     };
     
     class SLR_SCENEGRAPH_API ConstantFloatTexture : public FloatTexture {
@@ -116,6 +120,8 @@ namespace SLRSceneGraph {
         Image2DRef m_data;
     public:
         ImageSpectrumTexture(const Texture2DMappingRef &mapping, const Image2DRef &image);
+        
+        bool generateLuminanceChannel() override { return true; }
     };
     
     class SLR_SCENEGRAPH_API ImageNormalTexture : public NormalTexture {
@@ -139,6 +145,8 @@ namespace SLRSceneGraph {
         AssetSpectrumRef m_values[2];
     public:
         CheckerBoardSpectrumTexture(const Texture2DMappingRef &mapping, const AssetSpectrumRef &v0, const AssetSpectrumRef &v1);
+        
+        bool generateLuminanceChannel() override;
     };
     
     class SLR_SCENEGRAPH_API CheckerBoardNormalTexture : public NormalTexture {
@@ -164,6 +172,8 @@ namespace SLRSceneGraph {
         float m_brightness;
     public:
         VoronoiSpectrumTexture(const Texture3DMappingRef &mapping, float scale, float brightness);
+        
+        bool generateLuminanceChannel() override { return true; }
     };
     
     class SLR_SCENEGRAPH_API VoronoiNormalTexture : public NormalTexture {
@@ -226,6 +236,8 @@ namespace SLRSceneGraph {
     public:
         AnalyticSkySpectrumTexture(const Texture2DMappingRef &mapping, 
                                    float solarRadius, float soloarElevation, float turbidity, const AssetSpectrumRef &groundAlbedo);
+        
+        bool generateLuminanceChannel() override { return false; }
     };
 }
 

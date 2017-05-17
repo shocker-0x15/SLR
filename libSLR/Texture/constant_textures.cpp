@@ -7,9 +7,15 @@
 
 #include "constant_textures.h"
 
-namespace SLR {    
+namespace SLR {
     const ContinuousDistribution2D* ConstantSpectrumTexture::createIBLImportanceMap() const {
         SLRAssert_NotImplemented();
         return nullptr;
-    }    
+    }
+    
+    void ConstantSpectrumTexture::generateLuminanceChannel() {
+        float XYZ[3];
+        m_value->convertToXYZ(XYZ);
+        m_luminance = XYZ[1];
+    }
 }

@@ -1,0 +1,163 @@
+//setRenderer("method": "PT", ("samples": 16384,));
+setRenderer("method": "BPT", ("samples": 16384,));
+//setRenderer("method": "debug", (("geometric normal", "shading normal", "shading tangent"),));
+setRenderSettings("width": 1024, "height": 1024);
+
+CBNode = createNode();
+setTransform(CBNode, translate(0, 0, 0));
+
+// left wall
+diffuseTex = SpectrumTexture(Spectrum(0.75, 0.25, 0.25));
+surfMat = createSurfaceMaterial("matte", (diffuseTex,));
+leftWall = createMesh(
+  (
+    ((-1.0,   0,  1.0), (1, 0, 0), (0, 0, -1), (0, 0)), 
+    ((-1.0,   0, -1.0), (1, 0, 0), (0, 0, -1), (1, 0)), 
+    ((-1.0, 2.0, -1.0), (1, 0, 0), (0, 0, -1), (1, 1)), 
+    ((-1.0, 2.0,  1.0), (1, 0, 0), (0, 0, -1), (0, 1))
+  ), 
+  (
+    (surfMat, ((0, 1, 2), (0, 2, 3))),
+  )
+);
+addChild(CBNode, leftWall);
+
+// right wall
+diffuseTex = SpectrumTexture(Spectrum(0.25, 0.25, 0.75));
+surfMat = createSurfaceMaterial("matte", (diffuseTex,));
+rightWall = createMesh(
+  (
+    ((1.0,   0, -1.0), (-1, 0, 0), (0, 0, 1), (0, 0)), 
+    ((1.0,   0,  1.0), (-1, 0, 0), (0, 0, 1), (1, 0)), 
+    ((1.0, 2.0,  1.0), (-1, 0, 0), (0, 0, 1), (1, 1)), 
+    ((1.0, 2.0, -1.0), (-1, 0, 0), (0, 0, 1), (0, 1))
+  ), 
+  (
+    (surfMat, ((0, 1, 2), (0, 2, 3))),
+  )
+);
+addChild(CBNode, rightWall);
+
+// floor
+diffuseTex = SpectrumTexture("checker board", (Spectrum("type": "Reflectance", 0.05), 
+                                               Spectrum("type": "Reflectance", 0.75)));
+surfMat = createSurfaceMaterial("matte", (diffuseTex,));
+floor = createMesh(
+  (
+    ((-1.0, 0,  1.0), (0, 1, 0), (1, 0, 0), ( 0,  0)), 
+    (( 1.0, 0,  1.0), (0, 1, 0), (1, 0, 0), (10,  0)), 
+    (( 1.0, 0, -1.0), (0, 1, 0), (1, 0, 0), (10, 10)), 
+    ((-1.0, 0, -1.0), (0, 1, 0), (1, 0, 0), ( 0, 10))
+  ), 
+  (
+    (surfMat, ((0, 1, 2), (0, 2, 3))),
+  )
+);
+addChild(CBNode, floor);
+
+// inner wall
+diffuseTex = SpectrumTexture(Spectrum(0.75, 0.75, 0.75));
+surfMat = createSurfaceMaterial("matte", (diffuseTex,));
+innerWall = createMesh(
+  (
+    ((-1.0,   0, -1.0), (0, 0, 1), (1, 0, 0), (0, 1)), 
+    (( 1.0,   0, -1.0), (0, 0, 1), (1, 0, 0), (1, 1)), 
+    (( 1.0, 2.0, -1.0), (0, 0, 1), (1, 0, 0), (1, 0)), 
+    ((-1.0, 2.0, -1.0), (0, 0, 1), (1, 0, 0), (0, 0))
+  ), 
+  (
+    (surfMat, ((0, 1, 2), (0, 2, 3))),
+  )
+);
+addChild(CBNode, innerWall);
+
+// Color Checker colored boxes
+for (i = 0; i < 24; ++i) {
+    function boxMat(name, attrs) {
+        sp = Spectrum("Reflectance", "Color Checker", i);
+        difTex = SpectrumTexture(sp);
+        return createSurfaceMaterial("matte", (difTex,));
+    }
+
+    box = load3DModel("models/box.assbin", boxMat);
+    boxTFNode = createNode();
+    addChild(boxTFNode, box);
+    setTransform(boxTFNode, translate(2 * (i + 0.05) / 24.0 - 1, 0.01, -0.9 + random() * 0.2) * 
+                            scale(0.9 / 24, 1.98 * 0.5, 0.1 * 0.5) * 
+                            translate(1, 1, 0));
+    addChild(CBNode, boxTFNode);
+}
+
+// ceiling
+diffuseTex = SpectrumTexture(Spectrum(0.75, 0.75, 0.75));
+surfMat = createSurfaceMaterial("matte", (diffuseTex,));
+ceiling = createMesh(
+  (
+    ((-1.0, 2.0, -1.0), (0, -1, 0), (1, 0, 0), (0, 0)), 
+    (( 1.0, 2.0, -1.0), (0, -1, 0), (1, 0, 0), (1, 0)), 
+    (( 1.0, 2.0,  1.0), (0, -1, 0), (1, 0, 0), (1, 1)), 
+    ((-1.0, 2.0,  1.0), (0, -1, 0), (1, 0, 0), (0, 1))
+  ), 
+  (
+    (surfMat, ((0, 1, 2), (0, 2, 3))),
+  )
+);
+addChild(CBNode, ceiling);
+
+// light
+diffuseTex = SpectrumTexture(Spectrum(0.9, 0.9, 0.9));
+scatterMat = createSurfaceMaterial("matte", (diffuseTex,));
+difLightTex = SpectrumTexture(Spectrum("Illuminant", "D65") * 4);
+emitterMat = createEmitterSurfaceProperty("diffuse", (difLightTex,));
+surfMat = createSurfaceMaterial("emitter", (scatterMat, emitterMat));
+lightMesh = createMesh(
+  (
+    ((-0.25, 1.999, -0.25), (0, -1, 0), (1, 0, 0), (0, 0)), 
+    (( 0.25, 1.999, -0.25), (0, -1, 0), (1, 0, 0), (1, 0)),
+    (( 0.25, 1.999,  0.25), (0, -1, 0), (1, 0, 0), (1, 1)),
+    ((-0.25, 1.999,  0.25), (0, -1, 0), (1, 0, 0), (0, 1))
+  ),
+  (
+    (surfMat, ((0, 1, 2), (0, 2, 3))),
+  )
+);
+addChild(CBNode, lightMesh);
+
+addChild(root, CBNode);
+
+function cylinderMat(name, attrs) {
+    eta = SpectrumTexture(Spectrum("IoR", "Titanium", 0));
+    k = SpectrumTexture(Spectrum("IoR", "Titanium", 1));
+    alpha_gx = FloatTexture(0.02);
+    alpha_gy = FloatTexture(0.2);
+    return createSurfaceMaterial("microfacet metal", (eta, k, alpha_gx, alpha_gy));
+
+//    return createSurfaceMaterial("disney reflection", 
+//                                 ("baseColor": SpectrumTexture(Spectrum(0.8, 0.5, 0.1)),
+//                                  "subsurface": FloatTexture(0.0), 
+//                                  "metallic": FloatTexture(0.0), 
+//                                  "specular": FloatTexture(0.0), 
+//                                  "specularTint": FloatTexture(0.0), 
+//                                  "roughness": FloatTexture(0.5), 
+//                                  "anisotropic": FloatTexture(0.0), 
+//                                  "sheen": FloatTexture(0.0), 
+//                                  "sheenTint": FloatTexture(0.0), 
+//                                  "clearcoat": FloatTexture(0.0), 
+//                                  "clearcoatGloss": FloatTexture(0.0)));
+}
+function cylinderMeshFunc(name, mesh, minP, maxP) {
+    return (true, 1); // value 1 means override tangent vectors by radial vectors around the local Y axis.
+}
+cylinderNode = load3DModel("models/cylinder.assbin", cylinderMat, cylinderMeshFunc);
+cylinderTFNode = createNode();
+addChild(cylinderTFNode, cylinderNode);
+setTransform(cylinderTFNode, scale(0.333) * translate(0, 1, 0));
+addChild(CBNode, cylinderTFNode);
+
+cameraNode = createNode();
+camera = createPerspectiveCamera("aspect": 1.0, "fovY": 0.7, "radius": 0.0, 
+                                 "imgDist": 1.0, "objDist": 4.5);
+addChild(cameraNode, camera);
+setTransform(cameraNode, translate(0, 1.5, 1.5) * rotateX(-35 * 3.14159265 / 180) * rotateY(-3.1415926536));
+
+addChild(root, cameraNode);

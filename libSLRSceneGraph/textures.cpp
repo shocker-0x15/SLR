@@ -55,6 +55,12 @@ namespace SLRSceneGraph {
         m_rawData = new SLR::ConstantSpectrumTexture(value.get());
     }
     
+    bool ConstantSpectrumTexture::generateLuminanceChannel() {
+        SLR::ConstantSpectrumTexture &raw = *(SLR::ConstantSpectrumTexture*)m_rawData;
+        raw.generateLuminanceChannel();
+        return true;
+    }
+    
     ConstantFloatTexture::ConstantFloatTexture(float value) : m_value(value) {
         m_rawData = new SLR::ConstantFloatTexture(value);
     }
@@ -77,6 +83,12 @@ namespace SLRSceneGraph {
     CheckerBoardSpectrumTexture::CheckerBoardSpectrumTexture(const Texture2DMappingRef &mapping, const AssetSpectrumRef &v0, const AssetSpectrumRef &v1) :
     m_mapping(mapping), m_values{v0, v1} {
         m_rawData = new SLR::CheckerBoardSpectrumTexture(mapping->getRaw(), v0.get(), v1.get());
+    }
+    
+    bool CheckerBoardSpectrumTexture::generateLuminanceChannel() {
+        SLR::CheckerBoardSpectrumTexture &raw = *(SLR::CheckerBoardSpectrumTexture*)m_rawData;
+        raw.generateLuminanceChannel();
+        return true;
     }
     
     CheckerBoardNormalTexture::CheckerBoardNormalTexture(const Texture2DMappingRef &mapping, float stepWidth, bool reverse) :

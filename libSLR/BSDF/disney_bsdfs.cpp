@@ -39,11 +39,15 @@ namespace SLR {
         Vector3D dirL;
         Vector3D dirV = entering ? query.dirLocal : -query.dirLocal;
         
-//        SampledSpectrum tintColor = m_baseColorLuminance > 0 ? m_baseColor / m_baseColorLuminance : SampledSpectrum::One;
+        float expectedFresnelH = std::pow(1 - dirV.z, 5);
+        SampledSpectrum tintColor = m_baseColorLuminance > 0 ? m_baseColor / m_baseColorLuminance : SampledSpectrum::One;
         float iBaseColor = m_baseColor.importance(query.wlHint);
+        float iSpecularColor = lerp(SampledSpectrum::One, tintColor, m_specularTint).importance(query.wlHint);
+        float iSpecularF0 = 0.08f * m_specular * iSpecularColor * (1 - m_metallic) + iBaseColor * m_metallic;
+        
         float diffuseWeight = iBaseColor * (1 - m_metallic);
-        float specularWeight = 0.08f * m_specular * (1 - m_metallic) + iBaseColor * m_metallic;
-        float clearCoatWeight = 0.25f * m_clearCoat;
+        float specularWeight = iSpecularF0 * (1 - expectedFresnelH) + 1.0f * expectedFresnelH;
+        float clearCoatWeight = 0.25f * m_clearCoat * (0.04f * (1 - expectedFresnelH) + 1.0f * expectedFresnelH);
         
         float weights[] = {diffuseWeight, specularWeight, clearCoatWeight};
         float probSelection;
@@ -74,7 +78,7 @@ namespace SLR {
             
             fs = evaluateInternal(query, result->dirLocal, &rev_fs);
         }
-        else if (component == 1) { // 
+        else if (component == 1) { 
             result->sampledType = DirectionType::Reflection | DirectionType::HighFreq;
             
             // sample based on the base specular microfacet distribution.
@@ -133,9 +137,11 @@ namespace SLR {
                           specularDirPDF * specularWeight + 
                           clearCoatDirPDF * clearCoatWeight) / sumWeights;
         if (query.requestReverse) {
-            float revDiffuseWeight = iBaseColor * (1 - m_metallic);
-            float revSpecularWeight = 0.08f * m_specular * (1 - m_metallic) + iBaseColor * m_metallic;
-            float revClearCoatWeight = 0.25f * m_clearCoat;
+            float revExpectedFresnelH = std::pow(1 - dirL.z, 5);
+            
+            float revDiffuseWeight = diffuseWeight;
+            float revSpecularWeight = iSpecularF0 * (1 - revExpectedFresnelH) + 1.0f * revExpectedFresnelH;
+            float revClearCoatWeight = 0.25f * m_clearCoat * (0.04f * (1 - revExpectedFresnelH) + 1.0f * revExpectedFresnelH);
             float revSumWeights = revDiffuseWeight + revSpecularWeight + revClearCoatWeight;
             
             result->reverse.value = fs;
@@ -167,8 +173,9 @@ namespace SLR {
         
         // tintColor is calculated by normalizing luminance component of the baseColor.
         SampledSpectrum tintColor = m_baseColorLuminance > 0 ? m_baseColor / m_baseColorLuminance : SampledSpectrum::One;
-        SampledSpectrum specularColor = lerp(0.08f * m_specular * lerp(SampledSpectrum::One, tintColor, m_specularTint), m_baseColor, m_metallic);
+        SampledSpectrum specularColor = lerp(SampledSpectrum::One, tintColor, m_specularTint);
         SampledSpectrum sheenColor = lerp(SampledSpectrum::One, tintColor, m_sheenTint);
+        SampledSpectrum specularF0Color = lerp(0.08f * m_specular * specularColor, m_baseColor, m_metallic);
         
         // Base - Diffuse Term
         // go from 1 at normal incidence to 0.5 at grazing and mix in diffuse retro-reflection based on roughness.
@@ -187,7 +194,7 @@ namespace SLR {
         // Base - Specular Term
         float base_D = m_base_D->evaluate(m);
         float base_G = m_base_D->evaluateSmithG1(dirL, m) * m_base_D->evaluateSmithG1(dirV, m);
-        SampledSpectrum base_F = lerp(specularColor, SampledSpectrum::One, fresnelH); // grazing specular is always achromatic.
+        SampledSpectrum base_F = lerp(specularF0Color, SampledSpectrum::One, fresnelH); // grazing specular is always achromatic.
         
         // Base - Sheen Term
         // stronger at grazing angle, primarily intended for cloth.
@@ -212,6 +219,12 @@ namespace SLR {
     }
     
     float DisneyBRDF::evaluatePDFInternal(const BSDFQuery &query, const Vector3D &dir, float* revPDF) const {
+        if (dir.z * query.dirLocal.z <= 0) {
+            if (query.requestReverse)
+                *revPDF = 0.0f;
+            return 0.0f;
+        }
+        
         bool entering = query.dirLocal.z >= 0.0f;
         Vector3D dirL = entering ? dir : -dir;
         Vector3D dirV = entering ? query.dirLocal : -query.dirLocal;
@@ -219,12 +232,17 @@ namespace SLR {
         Normal3D m = halfVector(dirL, dirV);
         float dotHV = dot(dirV, m);
         float commonPDFTerm = 1.0f / (4 * dotHV);
-        
+                
+        float expectedFresnelH = std::pow(1 - dirV.z, 5);
+        SampledSpectrum tintColor = m_baseColorLuminance > 0 ? m_baseColor / m_baseColorLuminance : SampledSpectrum::One;
         float iBaseColor = m_baseColor.importance(query.wlHint);
+        float iSpecularColor = lerp(SampledSpectrum::One, tintColor, m_specularTint).importance(query.wlHint);
+        float iSpecularF0 = 0.08f * m_specular * iSpecularColor * (1 - m_metallic) + iBaseColor * m_metallic;
         
         float diffuseWeight = iBaseColor * (1 - m_metallic);
-        float specularWeight = 0.08f * m_specular * (1 - m_metallic) + iBaseColor * m_metallic;
-        float clearCoatWeight = 0.25f * m_clearCoat;
+        float specularWeight = iSpecularF0 * (1 - expectedFresnelH) + 1.0f * expectedFresnelH;
+        float clearCoatWeight = 0.25f * m_clearCoat * (0.04f * (1 - expectedFresnelH) + 1.0f * expectedFresnelH);
+        
         float sumWeights = diffuseWeight + specularWeight + clearCoatWeight;
         
         float diffuseDirPDF = dirL.z / M_PI;
@@ -232,9 +250,11 @@ namespace SLR {
         float clearCoatDirPDF = commonPDFTerm * m_clearcoat_D->evaluatePDF(dirV, m);
         
         if (query.requestReverse) {
-            float revDiffuseWeight = iBaseColor * (1 - m_metallic);
-            float revSpecularWeight = 0.08f * m_specular * (1 - m_metallic) + iBaseColor * m_metallic;
-            float revClearCoatWeight = 0.25f * m_clearCoat;
+            float revExpectedFresnelH = std::pow(1 - dirL.z, 5);
+            
+            float revDiffuseWeight = diffuseWeight;
+            float revSpecularWeight = iSpecularF0 * (1 - revExpectedFresnelH) + 1.0f * revExpectedFresnelH;
+            float revClearCoatWeight = 0.25f * m_clearCoat * (0.04f * (1 - revExpectedFresnelH) + 1.0f * revExpectedFresnelH);
             float revSumWeights = revDiffuseWeight + revSpecularWeight + revClearCoatWeight;
             
             float revDiffuseDirPDF = dirV.z / M_PI;

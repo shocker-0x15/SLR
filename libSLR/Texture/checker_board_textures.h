@@ -16,6 +16,7 @@ namespace SLR {
     class SLR_API CheckerBoardSpectrumTexture : public SpectrumTexture {
         const Texture2DMapping* m_mapping;
         const AssetSpectrum* m_values[2];
+        float m_luminances[2];
     public:
         CheckerBoardSpectrumTexture(const Texture2DMapping* mapping, const AssetSpectrum* v0, const AssetSpectrum* v1) : m_mapping(mapping), m_values{v0, v1} { }
         
@@ -28,7 +29,18 @@ namespace SLR {
         SampledSpectrum evaluate(const MediumPoint &medPt, const WavelengthSamples &wls) const override {
             return evaluate(m_mapping->map(medPt), wls);
         }
+        float evaluateLuminance(const Point3D &p) const {
+            return m_luminances[((int)(p.x * 2) + (int)(p.y * 2)) % 2];
+        }
+        float evaluateLuminance(const SurfacePoint &surfPt) const override {
+            return evaluateLuminance(m_mapping->map(surfPt));
+        }
+        float evaluateLuminance(const MediumPoint &medPt) const override {
+            return evaluateLuminance(m_mapping->map(medPt));
+        }
         const ContinuousDistribution2D* createIBLImportanceMap() const override;
+        
+        void generateLuminanceChannel();
     };
     
     

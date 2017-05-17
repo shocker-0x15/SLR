@@ -665,7 +665,103 @@ namespace SLR {
     
     template <typename RealType, uint32_t NumSpectralSamples>
     void UpsampledContinuousSpectrumTemplate<RealType, NumSpectralSamples>::convertToXYZ(RealType XYZ[3]) const {
-        SLRAssert_NotImplemented();
+        RealType values[NumWavelengthSamples];
+        
+        uint8_t adjIndices[4];
+        adjIndices[0] = (m_adjIndices >> 0) & 0xFF;
+        adjIndices[1] = (m_adjIndices >> 8) & 0xFF;
+        adjIndices[2] = (m_adjIndices >> 16) & 0xFF;
+        adjIndices[3] = (m_adjIndices >> 24) & 0xFF;
+        
+        int numAdjacents;
+        float weights[4];
+        if (adjIndices[3] != UINT8_MAX) {
+            weights[0] = (1 - m_s) * (1 - m_t);
+            weights[1] = m_s * (1 - m_t);
+            weights[2] = (1 - m_s) * m_t;
+            weights[3] = m_s * m_t;
+            numAdjacents = 4;
+        }
+        else {
+            weights[0] = m_s;
+            weights[1] = m_t;
+            weights[2] = 1.0f - m_s - m_t;
+            numAdjacents = 3;
+        }
+        
+        for (int i = 0; i < NumWavelengthSamples; ++i) {
+            values[i] = 0;
+            for (int j = 0; j < numAdjacents; ++j) {
+                const RealType* spectrum = spectrum_data_points[adjIndices[j]].spectrum;
+                values[i] += weights[j] * spectrum[i];
+            }
+            values[i] *= m_scale;
+        }
+        
+        const RealType CMFBinWidth = (WavelengthHighBound - WavelengthLowBound) / (NumCMFSamples - 1);
+        const RealType binWidth = (MaxWavelength - MinWavelength) / (NumWavelengthSamples - 1);
+        uint32_t curCMFIdx = 0;
+        uint32_t baseIdx = 0;
+        RealType curWL = WavelengthLowBound;
+        RealType prev_xbarVal = 0, prev_ybarVal = 0, prev_zbarVal = 0;
+        RealType prevValue = 0;
+        RealType halfWidth = 0;
+        CompensatedSum<RealType> X(0), Y(0), Z(0);
+        while (true) {
+            RealType xbarValue, ybarValue, zbarValue;
+            if (curWL == WavelengthLowBound + curCMFIdx * CMFBinWidth) {
+                xbarValue = xbarReferenceValues[curCMFIdx];
+                ybarValue = ybarReferenceValues[curCMFIdx];
+                zbarValue = zbarReferenceValues[curCMFIdx];
+                ++curCMFIdx;
+            }
+            else {
+                uint32_t idx = std::min(uint32_t((curWL - WavelengthLowBound) / CMFBinWidth), NumCMFSamples - 1);
+                RealType CMFBaseWL = WavelengthLowBound + idx * CMFBinWidth;
+                RealType t = (curWL - CMFBaseWL) / CMFBinWidth;
+                xbarValue = (1 - t) * xbarReferenceValues[idx] + t * xbarReferenceValues[idx + 1];
+                ybarValue = (1 - t) * ybarReferenceValues[idx] + t * ybarReferenceValues[idx + 1];
+                zbarValue = (1 - t) * zbarReferenceValues[idx] + t * zbarReferenceValues[idx + 1];
+            }
+            
+            RealType value;
+            if (curWL < MinWavelength) {
+                value = values[0];
+            }
+            else if (curWL > MaxWavelength) {
+                value = values[NumWavelengthSamples - 1];
+            }
+            else if (curWL == MinWavelength + baseIdx * binWidth) {
+                value = values[baseIdx];
+                ++baseIdx;
+            }
+            else {
+                uint32_t idx = std::min(uint32_t((curWL - MinWavelength) / binWidth), NumWavelengthSamples - 1);
+                RealType baseWL = MinWavelength + idx * binWidth;
+                RealType t = (curWL - baseWL) / binWidth;
+                value = (1 - t) * values[idx] + t * values[idx + 1];
+            }
+            
+            RealType avgValue = (prevValue + value) * 0.5f;
+            X += avgValue * (prev_xbarVal + xbarValue) * halfWidth;
+            Y += avgValue * (prev_ybarVal + ybarValue) * halfWidth;
+            Z += avgValue * (prev_zbarVal + zbarValue) * halfWidth;
+            
+            prev_xbarVal = xbarValue;
+            prev_ybarVal = ybarValue;
+            prev_zbarVal = zbarValue;
+            prevValue = value;
+            RealType prevWL = curWL;
+            curWL = std::min(WavelengthLowBound + curCMFIdx * CMFBinWidth,
+                             baseIdx < NumWavelengthSamples ? (MinWavelength + baseIdx * binWidth) : INFINITY);
+            halfWidth = (curWL - prevWL) * 0.5f;
+            
+            if (curCMFIdx == NumCMFSamples)
+                break;
+        }
+        XYZ[0] = X / integralCMF;
+        XYZ[1] = Y / integralCMF;
+        XYZ[2] = Z / integralCMF;
     }
     
     template <typename RealType, uint32_t NumSpectralSamples>

@@ -15,12 +15,17 @@
 namespace SLR {
     class SLR_API ConstantSpectrumTexture : public SpectrumTexture {
         const AssetSpectrum* m_value;
+        float m_luminance;
     public:
-        ConstantSpectrumTexture(const AssetSpectrum* value) : m_value(value) { }
+        ConstantSpectrumTexture(const AssetSpectrum* value) : m_value(value), m_luminance(NAN) { }
         
         SampledSpectrum evaluate(const SurfacePoint &surfPt, const WavelengthSamples &wls) const override { return m_value->evaluate(wls); }
         SampledSpectrum evaluate(const MediumPoint &medPt, const WavelengthSamples &wls) const override { return m_value->evaluate(wls); }
+        float evaluateLuminance(const SurfacePoint &surfPt) const override { return m_luminance; }
+        float evaluateLuminance(const MediumPoint &medPt) const override { return m_luminance; }
         const ContinuousDistribution2D* createIBLImportanceMap() const override;
+        
+        void generateLuminanceChannel();
     };
     
     

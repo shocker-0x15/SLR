@@ -145,6 +145,14 @@ namespace SLR {
 
     
     
+    // JP: これは理想的には不要である。
+    //     環境テクスチャーをuvs16Fx3(uvsA16Fx4)フォーマットに変換して保持する際に、典型的な値の場合、変換後のsの値が容易にhalf floatの限界に達するため、
+    //     適当なスケール値をかけて小さな値にする。
+    // EN: This is not ideally needed.
+    //     When converting an environment texture into uvs16Fx3 (uvsA16Fx4) format and holding it, 
+    //     a resulting s value from a typical value easily reaches the limit of half float therefore make it small by multiplying an appropriate scaling value.  
+#define UPSAMPLED_CONTINOUS_SPECTRUM_SCALE_FACTOR (0.009355121400914532) // corresponds to cancel dividing by EqualEnergyReflectance.
+    
     // References
     // Physically Meaningful Rendering using Tristimulus Colours
     template <typename RealType, uint32_t NumSpectralSamples>
@@ -232,15 +240,13 @@ namespace SLR {
             if (b == 0)
                 xy[0] = xy[1] = 1.0f / 3.0;
             xy_to_uv(xy, uvs);
-            // Dividing by EqualEnergyReflectance easily makes s value reach the half-type limit with a typical b value.
-            // So, do not divide.
-            uvs[2] = b;// / Upsampling::EqualEnergyReflectance;
+            uvs[2] = b / EqualEnergyReflectance;
         }
         
         static inline void uvs_to_sRGB(SpectrumType spType, const RealType uvs[3], RealType rgb[3]) {
             RealType xy[2];
             uv_to_xy(uvs, xy);
-            RealType b = uvs[2];// * Upsampling::EqualEnergyReflectance;
+            RealType b = uvs[2] * EqualEnergyReflectance;
             RealType XYZ[3];
             XYZ[0] = xy[0] * b;
             XYZ[1] = xy[1] * b;
@@ -258,6 +264,13 @@ namespace SLR {
                 default:
                     break;
             }
+        }
+        
+        static inline float uvs_to_luminance(const RealType uvs[3]) {
+            RealType xy[2];
+            uv_to_xy(uvs, xy);
+            RealType b = uvs[2] * EqualEnergyReflectance;
+            return xy[1] * b;
         }
     };
     
