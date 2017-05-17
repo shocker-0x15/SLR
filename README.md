@@ -23,7 +23,7 @@ SLR consists of the following components.
     * Improved Ward-Dür BRDF \[Moroder2010\]
     * Ashikhmin-Shirley BRDF \[Ashikhmin2000\]
     * GGX Microfacet BRDF/BSDF \[Walter2007\] with visible normal sampling \[Heitz2017\]
-    * Disney BRDF/~~BSDF~~ (TODO) \[Burley2012, Burley2015\]
+    * Disney principled BRDF/~~BSDF~~ (TODO) \[Burley2012, Burley2015\]
     * Mixed BSDF
     * ~~Layered BSDF~~ (TODO)
 * Volume Rendering \[Pauly1999, Raab2008, Novák2014\]

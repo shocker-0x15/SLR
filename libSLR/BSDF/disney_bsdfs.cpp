@@ -272,10 +272,18 @@ namespace SLR {
     }
     
     float DisneyBRDF::weightInternal(const SLR::BSDFQuery &query) const {        
+        bool entering = query.dirLocal.z >= 0.0f;
+        Vector3D dirV = entering ? query.dirLocal : -query.dirLocal;
+        
+        float expectedFresnelH = std::pow(1 - dirV.z, 5);
+        SampledSpectrum tintColor = m_baseColorLuminance > 0 ? m_baseColor / m_baseColorLuminance : SampledSpectrum::One;
         float iBaseColor = m_baseColor.importance(query.wlHint);
+        float iSpecularColor = lerp(SampledSpectrum::One, tintColor, m_specularTint).importance(query.wlHint);
+        float iSpecularF0 = 0.08f * m_specular * iSpecularColor * (1 - m_metallic) + iBaseColor * m_metallic;
+        
         float diffuseWeight = iBaseColor * (1 - m_metallic);
-        float specularWeight = 0.08f * m_specular * (1 - m_metallic) + iBaseColor * m_metallic;
-        float clearCoatWeight = 0.25f * m_clearCoat;
+        float specularWeight = iSpecularF0 * (1 - expectedFresnelH) + 1.0f * expectedFresnelH;
+        float clearCoatWeight = 0.25f * m_clearCoat * (0.04f * (1 - expectedFresnelH) + 1.0f * expectedFresnelH);
         
         return diffuseWeight + specularWeight + clearCoatWeight;
     }
