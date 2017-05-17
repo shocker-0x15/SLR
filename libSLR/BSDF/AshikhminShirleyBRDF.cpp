@@ -21,10 +21,14 @@ namespace SLR {
         
         float specularDirPDF, diffuseDirPDF;
         float revSpecularDirPDF, revDiffuseDirPDF;
+        float dotHV;
+        float commonTerm;
         SampledSpectrum fs;
         if (uComponent * sumWeights < specularWeight) {
             result->sampledType = DirectionType::Reflection | DirectionType::HighFreq;
             
+            // JP: ハーフベクトルをサンプルして、最終的な方向サンプルを生成する。
+            // EN: sample a half vector, then generate a resulting direction sample based on it.
             float quad = 2 * M_PI * uDir[1];
             float phi_h = std::atan2(std::sqrt(m_nu + 1) * std::sin(quad), std::sqrt(m_nv + 1) * std::cos(quad));
             float cosphi = std::cos(phi_h);
@@ -39,49 +43,47 @@ namespace SLR {
                 return SampledSpectrum::Zero;
             }
             
-            float dotHV = dot(halfv, query.dirLocal);
+            dotHV = dot(halfv, query.dirLocal);
             float exp = (m_nu * halfv.x * halfv.x + m_nv * halfv.y * halfv.y) / (1 - halfv.z * halfv.z);
-            float commonTerm = std::sqrt((m_nu + 1) * (m_nv + 1)) / (8 * M_PI * dotHV) * std::pow(std::fabs(halfv.z), exp);
-            SampledSpectrum F = m_Rs + (SampledSpectrum::One - m_Rs) * std::pow(1.0f - dotHV, 5);
+            commonTerm = std::sqrt((m_nu + 1) * (m_nv + 1)) / (8 * M_PI * dotHV) * std::pow(std::fabs(halfv.z), exp);
             specularDirPDF = commonTerm;
             revSpecularDirPDF = specularDirPDF;
-            SampledSpectrum specular_fs = commonTerm / std::fmax(std::fabs(query.dirLocal.z), std::fabs(result->dirLocal.z)) * F;
             
-            // calculate PDF to generate the result direction by sampling from diffuse component.
+            // JP: ディフューズ要素からサンプル方向を生成する確率密度を計算する。
+            // EN: calculate PDF to generate the result direction by sampling from diffuse component.
             diffuseDirPDF = std::fabs(result->dirLocal.z) / M_PI;
             revDiffuseDirPDF = std::fabs(query.dirLocal.z) / M_PI;
-            SampledSpectrum diffuse_fs = (28 * m_Rd / (23 * M_PI) * (SampledSpectrum::One - m_Rs) *
-                                          (1.0f - std::pow(1.0f - std::fabs(query.dirLocal.z) / 2, 5)) *
-                                          (1.0f - std::pow(1.0f - std::fabs(result->dirLocal.z) / 2, 5))
-                                          );
-            
-            fs = specular_fs + diffuse_fs;
         }
         else {
             result->sampledType = DirectionType::Reflection | DirectionType::LowFreq;
             
+            // JP: コサイン分布から方向サンプルを生成する。
+            // EN: generate a direction sample from the cosine distribution.
             result->dirLocal = cosineSampleHemisphere(uDir[0], uDir[1]);
             diffuseDirPDF = result->dirLocal.z / M_PI;
             revDiffuseDirPDF = std::fabs(query.dirLocal.z) / M_PI;
             result->dirLocal.z *= dot(query.dirLocal, query.gNormalLocal) > 0 ? 1 : -1;
-            SampledSpectrum diffuse_fs = (28 * m_Rd / (23 * M_PI) * (SampledSpectrum::One - m_Rs) *
-                                          (1.0f - std::pow(1.0f - std::fabs(query.dirLocal.z) / 2, 5)) *
-                                          (1.0f - std::pow(1.0f - std::fabs(result->dirLocal.z) / 2, 5))
-                                          );
             
-            // calculate PDF to generate the result direction by sampling from specular component.
             Vector3D halfv = halfVector(query.dirLocal, result->dirLocal);
-            float dotHV = dot(halfv, query.dirLocal);
+            
+            // JP: スペキュラー要素からサンプル方向を生成する確率密度を計算する。
+            // EN: calculate PDF to generate the result direction by sampling from specular component.
+            dotHV = dot(halfv, query.dirLocal);
             float exp = (m_nu * halfv.x * halfv.x + m_nv * halfv.y * halfv.y) / (1 - halfv.z * halfv.z);
-            float commonTerm = std::sqrt((m_nu + 1) * (m_nv + 1)) / (8 * M_PI * dotHV) * std::pow(std::fabs(halfv.z), exp);
-            SampledSpectrum F = m_Rs + (SampledSpectrum::One - m_Rs) * std::pow(1.0f - dotHV, 5);
+            commonTerm = std::sqrt((m_nu + 1) * (m_nv + 1)) / (8 * M_PI * dotHV) * std::pow(std::fabs(halfv.z), exp);
             specularDirPDF = commonTerm;
             revSpecularDirPDF = specularDirPDF;
-            SampledSpectrum specular_fs = commonTerm / std::fmax(std::fabs(query.dirLocal.z), std::fabs(result->dirLocal.z)) * F;
-            
-            fs = specular_fs + diffuse_fs;
         }
+        SampledSpectrum diffuse_fs = (28 * m_Rd / (23 * M_PI) * (SampledSpectrum::One - m_Rs) *
+                                      (1.0f - std::pow(1.0f - std::fabs(query.dirLocal.z) / 2, 5)) *
+                                      (1.0f - std::pow(1.0f - std::fabs(result->dirLocal.z) / 2, 5))
+                                      );
+        SampledSpectrum F = m_Rs + (SampledSpectrum::One - m_Rs) * std::pow(1.0f - dotHV, 5);
+        SampledSpectrum specular_fs = commonTerm / std::fmax(std::fabs(query.dirLocal.z), std::fabs(result->dirLocal.z)) * F;
         
+        fs = specular_fs + diffuse_fs;
+        
+        // PDF based on the single-sample model MIS.
         result->dirPDF = (specularDirPDF * specularWeight + diffuseDirPDF * diffuseWeght) / sumWeights;
         if (query.requestReverse) {
             float revVDotHV = std::fabs(result->dirLocal.z);

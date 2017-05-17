@@ -23,6 +23,8 @@ namespace SLR {
         for (int i = 0; i < m_numComponents; ++i)
             weights[i] = m_BSDFs[i]->weight(query);
         
+        // JP: 各BSDFのウェイトに基づいて方向のサンプルを行うBSDFを選択する。
+        // EN: Based on the weight of each BSDF, select a BSDF from which direction sampling.
         float tempProb;
         float sumWeights;
         uint32_t idx = sampleDiscrete(weights, m_numComponents, uComponent, &tempProb, &sumWeights, &uComponent);
@@ -32,6 +34,8 @@ namespace SLR {
             return SampledSpectrum::Zero;
         }
         
+        // JP: 選択したBSDFから方向をサンプリングする。
+        // EN: sample a direction from the selected BSDF.
         SampledSpectrum value = selectedBSDF->sampleInternal(query, uComponent, uDir, result);
         result->dirPDF *= weights[idx];
         if (result->dirPDF == 0.0f) {
@@ -39,6 +43,8 @@ namespace SLR {
             return SampledSpectrum::Zero;
         }
         
+        // JP: サンプルした方向に関するBSDFの値の合計と、single-sample model MISに基づいた確率密度を計算する。
+        // EN: calculate the total of BSDF values and a PDF based on the single-sample model MIS for the sampled direction.
         if (!result->sampledType.isDelta()) {
             for (int i = 0; i < m_numComponents; ++i) {
                 if (i != idx && m_BSDFs[i]->matches(query.dirTypeFilter))
@@ -64,6 +70,8 @@ namespace SLR {
         for (int i = 0; i < m_numComponents; ++i)
             weights[i] = m_BSDFs[i]->weight(query);
         
+        // JP: 各BSDFのウェイトに基づいて方向のサンプルを行うBSDFを選択する。
+        // EN: Based on the weight of each BSDF, select a BSDF from which direction sampling.
         float tempProb;
         float sumWeights;
         uint32_t idx = sampleDiscrete(weights, m_numComponents, uComponent, &tempProb, &sumWeights, &uComponent);
@@ -73,13 +81,16 @@ namespace SLR {
             return SampledSpectrum::Zero;
         }
         
+        // JP: 選択したBSDFから方向をサンプリングする。
+        // EN: sample a direction from the selected BSDF.
         SampledSpectrum value = selectedBSDF->sampleInternal(query, uComponent, uDir, result);
         if (result->dirPDF == 0.0f) {
             result->dirPDF = 0.0f;
             return SampledSpectrum::Zero;
         }
         
-        // calculate quantities for reverse probabilities.
+        // JP: 逆方向の確率密度を求めるための諸量を計算する。
+        // EN: calculate quantities for reverse probability density.
         BSDFQuery revQuery = query;// mQuery?
         Vector3D revDirIn = result->dirLocal;
         std::swap(revQuery.dirLocal, revDirIn);
@@ -94,6 +105,8 @@ namespace SLR {
         result->dirPDF *= weights[idx];
         result->reverse.dirPDF *= revWeights[idx];
         
+        // JP: サンプルした方向に関するBSDFの値の合計と、single-sample model MISに基づいた確率密度を計算する。
+        // EN: calculate the total of BSDF values and a PDF based on the single-sample model MIS for the sampled direction.
         if (!result->sampledType.isDelta()) {
             for (int i = 0; i < m_numComponents; ++i) {
                 float revPDF;

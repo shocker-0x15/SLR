@@ -738,6 +738,8 @@ namespace SLR {
         static std::unique_ptr<float[]> zbar;
         static float integralCMF;
         
+        // JP: 離散化された等色関数の初期化を行う。
+        // EN: initialize discretized color matching functions.
         static void init() {            
             xbar = std::unique_ptr<float[]>(new float[NumStrataForStorage]);
             ybar = std::unique_ptr<float[]>(new float[NumStrataForStorage]);

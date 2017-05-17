@@ -51,12 +51,14 @@ namespace SLR {
                                ArenaAllocator &mem, 
                                LensPosQueryResult* lensResult, SampledSpectrum* We0, IDF** idf, 
                                IDFQueryResult* WeResult, SampledSpectrum* We1, Ray* ray, float* epsilon) const {
-            // sample a position (We0, spatial importance) on the lens surface of the camera.
+            // JP: レンズ面上の位置(We0, 位置に関するimportance)をサンプルする。
+            // EN: sample a position (We0, spatial importance) on the lens surface of the camera.
             *We0 = sample(lensQuery, lensSample, lensResult);
             *idf = createIDF(lensResult->surfPt, lensQuery.wls, mem);
             SLRAssert(std::isfinite(lensResult->areaPDF), "areaPDF: unexpected value detected: %f", lensResult->areaPDF);
 
-            // sample a direction (directional importance) from IDF.
+            // JP: IDFから方向(方向に関するimportance)をサンプルする。
+            // EN: sample a direction (directional importance) from IDF.
             *We1 = (*idf)->sample(WeSample, WeResult);
             *ray = Ray(lensResult->surfPt.getPosition(), lensResult->surfPt.fromLocal(WeResult->dirLocal), lensQuery.time);
             *epsilon = 0.0f;

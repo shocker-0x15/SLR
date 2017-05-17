@@ -212,7 +212,7 @@ namespace SLR {
         float evaluateAreaPDF() const;
         BSDF* createBSDF(const WavelengthSamples &wls, ArenaAllocator &mem) const;
         
-        //----------------------------------------------------------------
+        // ----------------------------------------------------------------
         // InteractionPoint's methods
         
         bool isEmitting() const override;
@@ -236,7 +236,7 @@ namespace SLR {
         void applyTransform(const StaticTransform &transform) override;
         
         // END: InteractionPoint's methods
-        //----------------------------------------------------------------
+        // ----------------------------------------------------------------
     };
     
     inline float squaredDistance(const SurfacePoint &p0, const SurfacePoint &p1) {
@@ -265,7 +265,7 @@ namespace SLR {
         float evaluateVolumePDF() const;
         BSDF* createPhaseFunction(const WavelengthSamples &wls, ArenaAllocator &mem) const;
         
-        //----------------------------------------------------------------
+        // ----------------------------------------------------------------
         // InteractionPoint's methods
         
         bool isEmitting() const override;
@@ -285,7 +285,7 @@ namespace SLR {
         void applyTransform(const StaticTransform &transform) override;
         
         // END: InteractionPoint's methods
-        //----------------------------------------------------------------
+        // ----------------------------------------------------------------
     };
     
     

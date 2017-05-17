@@ -240,6 +240,8 @@ namespace SLR {
     template <typename RealType>
     RegularConstantContinuousDistribution2DTemplate<RealType>::RegularConstantContinuousDistribution2DTemplate(uint32_t numD1, uint32_t numD2, const std::function<RealType(uint32_t, uint32_t)> &pickFunc) :
     m_num1DDists(numD2) {
+        // JP: まず各行に関するDistribution1Dを作成する。
+        // EN: First, create Distribution1D's for every rows.
         m_1DDists = (RegularConstantContinuousDistribution1DTemplate<RealType>*)malloc(sizeof(RegularConstantContinuousDistribution1DTemplate<RealType>) * numD2);
         CompensatedSum<RealType> sum(0);
         for (int i = 0; i < numD2; ++i) {
@@ -248,6 +250,9 @@ namespace SLR {
             sum += m_1DDists[i].integral();
         }
         m_integral = sum;
+        
+        // JP: 各行の積分値を用いてDistribution1Dを作成する。
+        // EN: create a Distribution1D using integral values of each row.
         auto pickFuncTop = [this](uint32_t idx) { return m_1DDists[idx].integral(); };
         m_top1DDist = new RegularConstantContinuousDistribution1DTemplate<RealType>(numD2, pickFuncTop);
         SLRAssert(std::isfinite(m_integral), "invalid integral value.");
@@ -272,6 +277,7 @@ namespace SLR {
         return m_top1DDist->evaluatePDF(d1) * m_1DDists[idx1D].evaluatePDF(d0);
     };
     
+    // For debug visualization.
     template <typename RealType>
     void RegularConstantContinuousDistribution2DTemplate<RealType>::exportBMP(const std::string &filename, bool logScale, float gamma) const {
         uint32_t width = m_1DDists[0].numValues();

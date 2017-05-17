@@ -88,12 +88,14 @@ namespace SLR {
                                         ArenaAllocator &mem,
                                         SurfaceLightPosQueryResult *lightPosResult, SampledSpectrum *Le0, EDF **edf,
                                         EDFQueryResult *edfResult, SampledSpectrum *Le1, Ray* ray, float* epsilon) const {
-        // sample a position with emittance on the selected light's surface.
+        // JP: 光源面上の位置を放射発散度とともにサンプルする。
+        // EN: sample a position with emittance on the light's surface.
         *Le0 = sample(transform, lightPosQuery, lightPosSample, lightPosResult);
         *edf = lightPosResult->surfPt.createEDF(lightPosQuery.wls, mem);
         SLRAssert(!std::isnan(lightPosResult->areaPDF)/* && !std::isinf(lightResult)*/, "areaPDF: unexpected value detected: %f", lightPosResult->areaPDF);
         
-        // sample a direction from EDF.
+        // JP: EDFから方向とその値をサンプルする。
+        // EN: sample a direction from EDF with its value.
         *Le1 = (*edf)->sample(edfQuery, edfSample, edfResult);
         *ray = Ray(lightPosResult->surfPt.getPosition(), lightPosResult->surfPt.fromLocal(edfResult->dir_sn), lightPosQuery.time);
         *epsilon = Ray::Epsilon;
@@ -159,6 +161,8 @@ namespace SLR {
         
         const ReferenceFrame &originalFrame = surfPt->getShadingFrame();
         
+        // JP: 法線マップに従ってシェーディングフレームを変更する。
+        // EN: perturb the shading frame according to the normal map.
         Vector3D nLocal = m_normalMap->evaluate(*surfPt);
         Vector3D tLocal = Vector3D::Ex - dot(nLocal, Vector3D::Ex) * nLocal;
         Vector3D bLocal = Vector3D::Ey - dot(nLocal, Vector3D::Ey) * nLocal;
@@ -195,6 +199,8 @@ namespace SLR {
     
     SampledSpectrum InfiniteSphereSurfaceObject::sample(const StaticTransform &transform,
                                                         const LightPosQuery &query, const SurfaceLightPosSample &smp, SurfaceLightPosQueryResult* result) const {
+        // JP: テクスチャー空間からサンプルする。
+        // EN: sample from texture space.
         float uvPDF;
         float theta, phi;
         m_dist->sample(smp.uPos[0], smp.uPos[1], &phi, &theta, &uvPDF);
@@ -222,6 +228,8 @@ namespace SLR {
                                       );
         result->surfPt.setObject(this);
         result->surfPt.applyTransform(transform);
+        // JP: テクスチャー空間中のPDFを面積に関するものに変換する。
+        // EN: convert the PDF in texture space to one with respect to area.
         // The true value is: lim_{l to inf} uvPDF / (2 * M_PI * M_PI * std::sin(theta)) / l^2
         result->areaPDF = uvPDF / (2 * M_PI * M_PI * std::sin(theta));
         result->posType = DirectionType::LowFreq;
@@ -234,15 +242,20 @@ namespace SLR {
                                                 ArenaAllocator &mem,
                                                 SurfaceLightPosQueryResult *lightPosResult, SampledSpectrum *Le0, EDF **edf,
                                                 EDFQueryResult *edfResult, SampledSpectrum *Le1, Ray* ray, float* epsilon) const {
-        // sample a position with emittance on the selected light's surface.
+        // JP: 光源面上の位置を放射発散度とともにサンプルする。
+        // EN: sample a position with emittance on the light's surface.
         *Le0 = sample(transform, lightPosQuery, lightPosSample, lightPosResult);
         *edf = lightPosResult->surfPt.createEDF(lightPosQuery.wls, mem);
         SLRAssert(!std::isnan(lightPosResult->areaPDF)/* && !std::isinf(lightResult)*/, "areaPDF: unexpected value detected: %f", lightPosResult->areaPDF);
         
-        // sample a direction from EDF.
-        // Sampled directions for a certain sampled position (on the infinite sphere) must be parallel,
-        // but be able to reach any position in the scene.
-        // Therefore, it requires modification to ray's origin.
+        // JP: EDFから方向とその値をサンプルする。
+        //     (無限に大きいの球上の)ある点からサンプルされるあらゆる方向は平行にならなければならないが、
+        //     一方でシーン中のあらゆる点に到達できる必要がある。
+        //     そのためレイの原点を修正する必要がある。
+        // EN: sample a direction from EDF with its value.
+        //     All the sampled directions for a certain position (on the infinite sphere) must be parallel,
+        //     but be able to reach any position in the scene.
+        //     Therefore, it requires modification to ray's origin.
         *Le1 = (*edf)->sample(edfQuery, edfSample, edfResult);
         Vector3D vx, vy;
         Vector3D vz = lightPosResult->surfPt.fromLocal(edfResult->dir_sn);
@@ -250,6 +263,8 @@ namespace SLR {
         float dx, dy;
         concentricSampleDisk(edfSample.uDir[0], edfSample.uDir[1], &dx, &dy);
         
+        // JP: シーンのバウンディングスフィアの大円中からサンプルする。
+        // EN: sample within a great circle of the bounding sphere of the scene.
         float worldRadius = m_scene->getWorldRadius();
         Point3D org = m_scene->getWorldCenter() + 1.1f * worldRadius * lightPosResult->surfPt.getPosition() + worldRadius * (dx * vx + dy * vy);
         *ray = Ray(org, vz, lightPosQuery.time);

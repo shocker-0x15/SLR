@@ -189,8 +189,9 @@ namespace SLR {
         
         float b0 = 1.0f - b1 - b2;
         TexCoord2D texCoord = b0 * v0.texCoord + b1 * v1.texCoord + b2 * v2.texCoord;
-        // Check if an alpha value at the intersection point is zero or not.
-        // If zero, intersection doesn't occur.
+        
+        // JP: 交叉点のアルファ値がゼロかどうかチェックする。ゼロの場合交叉は起こらない。
+        // EN: Check if an alpha value at the intersection point is zero or not. If zero, intersection doesn't occur.
         if (m_matGroup->alphaMap) {
             if (m_matGroup->alphaMap->evaluate(texCoord) == 0.0f)
                 return false;
@@ -223,13 +224,10 @@ namespace SLR {
         int8_t axisForRadialTangent = m_matGroup->parent->getAxisForRadialTangent(); 
         if (axisForRadialTangent == -1) {
             shadingFrame.x = normalize(b0 * v0.tangent + b1 * v1.tangent + b2 * v2.tangent);
-            // guarantee the orthogonality between the normal and tangent.
-            // Orthogonality break might be caused by barycentric interpolation?
-            float dotNT = dot(shadingFrame.z, shadingFrame.x);
-            if (std::fabs(dotNT) >= 0.01f)
-                shadingFrame.x = normalize(shadingFrame.x - dotNT * shadingFrame.z);
         }
         else {
+            // JP: 接線ベクトルを衝突点のローカル座標に基づいて生成する。
+            // EN: generate a tangent vector based on the local coordinates of the intersection point.
             const StaticTransform &appliedTF = m_matGroup->parent->getAppliedTransform();
             Point3D p = invert(appliedTF) * (b0 * v0.position + b1 * v1.position + b2 * v2.position);
             if (axisForRadialTangent == 0) {
@@ -246,6 +244,13 @@ namespace SLR {
             }
             shadingFrame.x = appliedTF * shadingFrame.x;
         }
+        // JP: 法線と接線が直交することを保証する。
+        //     直交性の消失は重心座標補間によっておこる？
+        // EN: guarantee the orthogonality between the normal and tangent.
+        //     Orthogonality break might be caused by barycentric interpolation?
+        float dotNT = dot(shadingFrame.z, shadingFrame.x);
+        if (std::fabs(dotNT) >= 0.01f)
+            shadingFrame.x = normalize(shadingFrame.x - dotNT * shadingFrame.z);
         shadingFrame.y = cross(shadingFrame.z, shadingFrame.x);
         
         *surfPt = SurfacePoint(si, false, shadingFrame, m_texCoord0Dir);
@@ -276,14 +281,11 @@ namespace SLR {
         shadingFrame.z = normalize(b0 * v0.normal + b1 * v1.normal + b2 * v2.normal);
         int8_t axisForRadialTangent = m_matGroup->parent->getAxisForRadialTangent();
         if (axisForRadialTangent == -1) {
-            shadingFrame.x = normalize(b0 * v0.tangent + b1 * v1.tangent + b2 * v2.tangent);
-            // guarantee the orthogonality between the normal and tangent.
-            // Orthogonality break might be caused by barycentric interpolation?
-            float dotNT = dot(shadingFrame.z, shadingFrame.x);
-            if (std::fabs(dotNT) >= 0.01f)
-                shadingFrame.x = normalize(shadingFrame.x - dotNT * shadingFrame.z);   
+            shadingFrame.x = normalize(b0 * v0.tangent + b1 * v1.tangent + b2 * v2.tangent);   
         }
         else {
+            // JP: 接線ベクトルを衝突点のローカル座標に基づいて生成する。
+            // EN: generate a tangent vector based on the local coordinates of the intersection point.
             const StaticTransform &appliedTF = m_matGroup->parent->getAppliedTransform();
             Point3D p = invert(appliedTF) * (b0 * v0.position + b1 * v1.position + b2 * v2.position);
             if (axisForRadialTangent == 0) {
@@ -300,6 +302,13 @@ namespace SLR {
             }
             shadingFrame.x = appliedTF * shadingFrame.x;
         }
+        // JP: 法線と接線が直交することを保証する。
+        //     直交性の消失は重心座標補間によっておこる？
+        // EN: guarantee the orthogonality between the normal and tangent.
+        //     Orthogonality break might be caused by barycentric interpolation?
+        float dotNT = dot(shadingFrame.z, shadingFrame.x);
+        if (std::fabs(dotNT) >= 0.01f)
+            shadingFrame.x = normalize(shadingFrame.x - dotNT * shadingFrame.z);
         shadingFrame.y = cross(shadingFrame.z, shadingFrame.x);
         
         *surfPt = SurfacePoint(b0 * v0.position + b1 * v1.position + b2 * v2.position,

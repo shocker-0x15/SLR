@@ -40,7 +40,7 @@ namespace SLR {
                        SurfaceLightPosQueryResult* lightPosResult, SampledSpectrum* Le0, EDF** edf,
                        EDFQueryResult* edfResult, SampledSpectrum* Le1, Ray* ray, float* epsilon) const;
         
-        //----------------------------------------------------------------
+        // ----------------------------------------------------------------
         // Light's methods
         
         SampledSpectrum sample(const LightPosQuery &query, LightPathSampler &pathSampler, ArenaAllocator &mem, LightPosQueryResult** lpResult) const override;
@@ -49,7 +49,7 @@ namespace SLR {
                        EDFQueryResult* edfResult, SampledSpectrum* Le1, Ray* ray, float* epsilon) const override;
         
         // END: Light's methods
-        //----------------------------------------------------------------
+        // ----------------------------------------------------------------
     };
     
     
@@ -101,7 +101,7 @@ namespace SLR {
         virtual SampledSpectrum emittance(const SurfacePoint& surfPt, const WavelengthSamples &wls) const;
         virtual EDF* createEDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem) const;
         
-        //----------------------------------------------------------------
+        // ----------------------------------------------------------------
         // Object's methods
         
         BoundingBox3D bounds() const override { return m_surface->bounds(); }
@@ -113,9 +113,9 @@ namespace SLR {
         }
         
         // END: Object's methods
-        //----------------------------------------------------------------
+        // ----------------------------------------------------------------
         
-        //----------------------------------------------------------------
+        // ----------------------------------------------------------------
         // SurfaceObject's methods
         
         bool isEmitting() const override;
@@ -136,7 +136,7 @@ namespace SLR {
         void calculateSurfacePoint(const SurfaceInteraction &si, SurfacePoint* surfPt) const override;
         
         // END: SurfaceObject's methods
-        //----------------------------------------------------------------
+        // ----------------------------------------------------------------
     };
     
     
@@ -147,13 +147,13 @@ namespace SLR {
         BumpSingleSurfaceObject(const SurfaceShape* surf, const SurfaceMaterial* mat, const NormalTexture* normalMap) :
         SingleSurfaceObject(surf, mat), m_normalMap(normalMap) { }
         
-        //----------------------------------------------------------------
+        // ----------------------------------------------------------------
         // SurfaceObject's methods
         
         void calculateSurfacePoint(const SurfaceInteraction &si, SurfacePoint* surfPt) const override;
         
         // END: SurfaceObject's methods
-        //----------------------------------------------------------------
+        // ----------------------------------------------------------------
     };
     
     
@@ -165,7 +165,7 @@ namespace SLR {
         InfiniteSphereSurfaceObject(const Scene* scene, const IBLEmitterSurfaceProperty* emitter);
         ~InfiniteSphereSurfaceObject();
         
-        //----------------------------------------------------------------
+        // ----------------------------------------------------------------
         // SurfaceObject's methods
         
         bool isEmitting() const override;
@@ -181,9 +181,9 @@ namespace SLR {
                        EDFQueryResult* edfResult, SampledSpectrum* Le1, Ray* ray, float* epsilon) const override;
         
         // END: SurfaceObject's methods
-        //----------------------------------------------------------------
+        // ----------------------------------------------------------------
         
-        //----------------------------------------------------------------
+        // ----------------------------------------------------------------
         // SingleSurfaceObject's methods
         
         BSDF* createBSDF(const SurfacePoint &surfPt, const WavelengthSamples &wls, ArenaAllocator &mem) const override;
@@ -191,7 +191,7 @@ namespace SLR {
         float evaluateAreaPDF(const SurfacePoint& surfPt) const override;
         
         // END: SingleSurfaceObject's methods
-        //----------------------------------------------------------------
+        // ----------------------------------------------------------------
     };
     
     
@@ -205,15 +205,15 @@ namespace SLR {
         
         void setTransform(const Transform* t) { m_transform = t; }
         
-        //----------------------------------------------------------------
+        // ----------------------------------------------------------------
         // Object's methods
         
         BoundingBox3D bounds() const override;
         
         // END: Object's methods
-        //----------------------------------------------------------------
+        // ----------------------------------------------------------------
         
-        //----------------------------------------------------------------
+        // ----------------------------------------------------------------
         // SurfaceObject's methods
         
         bool isEmitting() const override;
@@ -225,7 +225,7 @@ namespace SLR {
         bool intersect(const Ray &ray, const RaySegment &segment, SurfaceInteraction* si) const override;
         
         // END: SurfaceObject's methods
-        //----------------------------------------------------------------
+        // ----------------------------------------------------------------
     };
     
     
@@ -240,15 +240,15 @@ namespace SLR {
         SurfaceObjectAggregate(std::vector<SurfaceObject*> &objs);
         ~SurfaceObjectAggregate();
         
-        //----------------------------------------------------------------
+        // ----------------------------------------------------------------
         // Object's methods
         
         BoundingBox3D bounds() const override;
         
         // END: Object's methods
-        //----------------------------------------------------------------
+        // ----------------------------------------------------------------
         
-        //----------------------------------------------------------------
+        // ----------------------------------------------------------------
         // SurfaceObject's methods
         
         bool isEmitting() const override;
@@ -260,7 +260,7 @@ namespace SLR {
         bool intersect(const Ray &ray, const RaySegment &segment, SurfaceInteraction* si) const override;
         
         // END: SurfaceObject's methods
-        //----------------------------------------------------------------
+        // ----------------------------------------------------------------
     };
 }
 

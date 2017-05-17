@@ -14,7 +14,8 @@
 #include "CompensatedSum.h"
 
 namespace SLR {
-    // just for compatibility with spectral representation build.
+    // JP: スペクトラルレンダリングビルドとの互換性をとるためだけにある。
+    // EN: just for compatibility with spectral rendering build.
     template <typename RealType>
     struct SLR_API RGBSamplesTemplate {
         enum Flag : uint16_t {
@@ -60,6 +61,8 @@ namespace SLR {
     };
     template <typename RealType>
     const uint32_t RGBSamplesTemplate<RealType>::NumComponents = 3;
+    
+    
     
     template <typename RealType>
     struct RGBTemplate {
@@ -142,27 +145,38 @@ namespace SLR {
             return str;
         }
         
-        //------------------------------------------------
+        // ----------------------------------------------------------------
         // Methods for compatibility with ContinuousSpectrumTemplate
-        const RGBTemplate &evaluate(const RGBSamplesTemplate<RealType> &wls) const {
-            return *this;
-        }
+        
         const void calcBounds(uint32_t numBins, float* bounds) const {
             SLRAssert(numBins == 3, "numBins must be 3 in RGB rendering mode.");
             bounds[0] = r;
             bounds[1] = g;
             bounds[2] = b;
         }
+        const RGBTemplate &evaluate(const RGBSamplesTemplate<RealType> &wls) const {
+            return *this;
+        }
+        void convertToXYZ(RealType XYZ[3]) const {
+            RealType RGB[3] = {r, g, b};
+            sRGB_to_XYZ(RGB, XYZ);
+        }
         RGBTemplate* createScaledAndOffset(RealType scale, RealType offset) const {
             return new RGBTemplate(r * scale + offset, g * scale + offset, b * scale + offset);
         }
-        //------------------------------------------------
+        
+        // ----------------------------------------------------------------
+        
+        
+        // ----------------------------------------------------------------
         // Methods for compatibility with DiscretizedSpectrumTemplate
+        
         bool hasMinus() const {
             return r < 0 || g < 0 || b < 0;
         }
         static void init() { };
-        //------------------------------------------------
+        
+        // ----------------------------------------------------------------
         
         static const RGBTemplate Zero;
         static const RGBTemplate One;

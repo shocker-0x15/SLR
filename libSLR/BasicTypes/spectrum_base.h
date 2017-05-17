@@ -126,7 +126,10 @@ namespace SLR {
     
     extern SLR_API SpectrumFloat integralCMF;
     extern SLR_API std::unique_ptr<ContinuousSpectrum> ybarSpectrum;
-    SLR_API void initSpectrum();
+    
+    // JP: 色システムの初期化を行う。このライブラリを使う前に呼ぶ必要がある。
+    // EN: initialize the color system. It is required to call this before using this library.
+    SLR_API void initializeColorSystem();
 }
 
 #endif /* __SLR_spectrum_base__ */

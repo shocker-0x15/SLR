@@ -9,6 +9,8 @@
 
 namespace SLR {
     SampledSpectrum ModifiedWardDurBRDF::sampleInternal(const BSDFQuery &query, float uComponent, const float uDir[2], BSDFQueryResult *result) const {
+        // JP: ハーフベクトルをサンプルして、最終的な方向サンプルを生成する。
+        // EN: sample a half vector, then generate a resulting direction sample based on it.
         float quad = 2 * M_PI * uDir[1];
         float phi_h = std::atan2(m_anisoY * std::sin(quad), m_anisoX * std::cos(quad));
         float cosphi_ax = std::cos(phi_h) / m_anisoX;

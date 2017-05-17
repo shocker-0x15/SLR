@@ -68,7 +68,8 @@ namespace SLR {
             
             tpStart = std::chrono::system_clock::now();
             
-            // calculate AABBs and a cost of leaf node from all the primitives.
+            // JP: 範囲中のプリミティブからAABBと、それらをひとつのリーフノードに収める場合のコストを計算する。
+            // EN: calculate AABBs and the cost of making primitives a single leaf node in the range.
             BoundingBox3D parentBB;
             BoundingBox3D parentCentroidBB;
             float leafNodeCost = 0.0f;

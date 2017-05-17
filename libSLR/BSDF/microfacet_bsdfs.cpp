@@ -12,6 +12,8 @@ namespace SLR {
         bool entering = query.dirLocal.z >= 0.0f;
         int32_t sign = entering ? 1 : -1;
         
+        // JP: ハーフベクトルをサンプルして、最終的な方向サンプルを生成する。
+        // EN: sample a half vector, then generate a resulting direction sample based on it.
         Normal3D m;
         float mPDF;
         float D = m_D->sample(sign * query.dirLocal, uDir[0], uDir[1], &m, &mPDF);
@@ -116,6 +118,8 @@ namespace SLR {
         const SampledSpectrum &eEnter = entering ? m_F.etaExt() : m_F.etaInt();
         const SampledSpectrum &eExit = entering ? m_F.etaInt() : m_F.etaExt();
         
+        // JP: ハーフベクトルをサンプルする。
+        // EN: sample a half vector.
         Normal3D m;
         float mPDF;
         float D = m_D->sample(sign * query.dirLocal, uDir[0], uDir[1], &m, &mPDF);
@@ -125,6 +129,8 @@ namespace SLR {
             return SampledSpectrum::Zero;
         }
         
+        // JP: サンプルしたハーフベクトルからフレネル項の値を計算して、反射か透過を選択する。
+        // EN: calculate the Fresnel term using the sampled half vector, then select reflection or transmission.
         SampledSpectrum F = m_F.evaluate(dotHV);
         float reflectProb = F.importance(query.wlHint);
         if (query.dirTypeFilter.isReflection())
@@ -132,6 +138,8 @@ namespace SLR {
         if (query.dirTypeFilter.isTransmission())
             reflectProb = 0.0f;
         if (uComponent < reflectProb) {
+            // JP: 最終的な方向サンプルを生成する。
+            // EN: calculate a resulting direction.
             result->dirLocal = 2 * dotHV * m - query.dirLocal;
             if (result->dirLocal.z * query.dirLocal.z <= 0) {
                 result->dirPDF = 0.0f;
@@ -154,6 +162,8 @@ namespace SLR {
             return fs;
         }
         else {
+            // JP: 最終的な方向サンプルを生成する。
+            // EN: calculate a resulting direction.
             float recRelIOR = eEnter[query.wlHint] / eExit[query.wlHint];
             float innerRoot = 1 + recRelIOR * recRelIOR * (dotHV * dotHV - 1);
             if (innerRoot < 0) {
@@ -170,6 +180,8 @@ namespace SLR {
             result->dirPDF = commonPDFTerm * mPDF * eExit[query.wlHint] * eExit[query.wlHint] * std::fabs(dotHL);
             result->sampledType = DirectionType::Transmission | DirectionType::HighFreq;
             
+            // JP: マイクロファセットBSDFの各項の値を波長成分ごとに計算する。
+            // EN: calculate the value of each term of the microfacet BSDF for each wavelength component.
             SampledSpectrum ret = SampledSpectrum::Zero;
             for (int wlIdx = 0; wlIdx < SampledSpectrum::NumComponents; ++wlIdx) {
                 Normal3D m_wl = normalize(-(eEnter[wlIdx] * query.dirLocal + eExit[wlIdx] * result->dirLocal));

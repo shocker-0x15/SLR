@@ -30,7 +30,7 @@ int main(int argc, const char * argv[]) {
     std::time_t ctimeLaunch = system_clock::to_time_t(system_clock::now());
     printf("%s\n", std::ctime(&ctimeLaunch));
     
-    SLR::initSpectrum();
+    SLR::initializeColorSystem();
     
     StopWatch stopwatch;
     

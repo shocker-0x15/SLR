@@ -117,6 +117,12 @@ inline void* SLR_memalign(size_t size, size_t alignment) {
 #   define SLR_getcwd(size, buf) getcwd(buf, size)
 #endif
 
+
+
+// ----------------------------------------------------------------
+// JP: よく使用される基礎的な関数の定義。
+// EN: define fundamental functions often used.
+
 template <typename T, size_t size>
 constexpr size_t lengthof(const T (&array)[size]) {
     return size;
@@ -164,13 +170,29 @@ std::unique_ptr<T> createUnique(ArgTypes&&... args) {
     return std::unique_ptr<T>(new T(std::forward<ArgTypes>(args)...));
 }
 
+// END: define fundamental functions often used.
+// ----------------------------------------------------------------
+
+
+
 #define SLR_Color_System_CIE_1931_2deg  0
 #define SLR_Color_System_CIE_1964_10deg 1
 #define SLR_Color_System_CIE_2012_2deg  2
 #define SLR_Color_System_CIE_2012_10deg 3
 
+
+
+// ----------------------------------------------------------------
+// JP: 機能スイッチやパラメター
+// EN: Feature Switches and Parameters
+
 #define SLR_Color_System_is_based_on SLR_Color_System_CIE_1931_2deg
 #define SLR_Use_Spectral_Representation
+
+// END: Feature Switches and Parameters
+// ----------------------------------------------------------------
+
+
 
 #if SLR_Color_System_is_based_on == SLR_Color_System_CIE_1931_2deg
 #   define xbarReferenceValues xbar_CIE1931_2deg

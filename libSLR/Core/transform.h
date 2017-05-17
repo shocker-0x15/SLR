@@ -73,7 +73,7 @@ namespace SLR {
         
         
         
-        //----------------------------------------------------------------
+        // ----------------------------------------------------------------
         // Transform's methods
         
         bool isStatic() const override { return true; }
@@ -83,7 +83,7 @@ namespace SLR {
         BoundingBox3D motionBounds(const BoundingBox3D &bb) const override { return *this * bb; }
         
         // END: Transform's methods
-        //----------------------------------------------------------------
+        // ----------------------------------------------------------------
     };
     
     
@@ -111,7 +111,7 @@ namespace SLR {
         
         
         
-        //----------------------------------------------------------------
+        // ----------------------------------------------------------------
         // Transform's methods
         
         bool isStatic() const override {
@@ -158,7 +158,7 @@ namespace SLR {
         }
         
         // END: Transform's methods
-        //----------------------------------------------------------------
+        // ----------------------------------------------------------------
     };
     
     
@@ -180,7 +180,7 @@ namespace SLR {
         void reduce(Allocator* mem, std::vector<Transform*> &reducedTFs) const;
         Transform* reduce(Allocator* mem) const;
         
-        //----------------------------------------------------------------
+        // ----------------------------------------------------------------
         // Transform's methods
         
         bool isStatic() const override {
@@ -239,7 +239,7 @@ namespace SLR {
         }
         
         // END: Transform's methods
-        //----------------------------------------------------------------
+        // ----------------------------------------------------------------
     };
 }
 

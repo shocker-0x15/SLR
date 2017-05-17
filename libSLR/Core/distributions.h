@@ -19,6 +19,8 @@ namespace SLR {
     template <typename RealType>
     SLR_API RealType evaluateProbability(const RealType* importances, uint32_t numImportances, uint32_t idx);
     
+    
+    
     template <typename RealType>
     SLR_API void concentricSampleDisk(RealType u0, RealType u1, RealType* dx, RealType* dy);
     

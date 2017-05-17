@@ -60,12 +60,18 @@ namespace SLR {
         if (component == 0) {
             result->sampledType = DirectionType::Reflection | DirectionType::LowFreq;
             
-            // sample based on cosine distribution.
+            // ----------------------------------------------------------------
+            // JP: コサイン分布からサンプルする。
+            // EN: sample based on cosine distribution.
             dirL = cosineSampleHemisphere(uDir[0], uDir[1]);
             result->dirLocal = entering ? dirL : -dirL;
             diffuseDirPDF = dirL.z / M_PI;
             revDiffuseDirPDF = dirV.z / M_PI;
+            // ----------------------------------------------------------------
             
+            // ----------------------------------------------------------------
+            // JP: 同じ方向サンプルを別の要素からサンプルする確率密度を求める。
+            // EN: calculate PDFs to generate the sampled direction from the other distributions.
             Normal3D m = halfVector(dirL, dirV);
             float dotHV = dot(dirV, m);
             float commonPDFTerm = 1.0f / (4 * dotHV);
@@ -75,13 +81,14 @@ namespace SLR {
             
             clearCoatDirPDF = commonPDFTerm * m_clearcoat_D->evaluatePDF(dirV, m);
             revClearCoatDirPDF = commonPDFTerm * m_clearcoat_D->evaluatePDF(dirL, m);
-            
-            fs = evaluateInternal(query, result->dirLocal, &rev_fs);
+            // ----------------------------------------------------------------
         }
         else if (component == 1) { 
             result->sampledType = DirectionType::Reflection | DirectionType::HighFreq;
             
-            // sample based on the base specular microfacet distribution.
+            // ----------------------------------------------------------------
+            // JP: ベーススペキュラー層のマイクロファセット分布からサンプルする。
+            // EN: sample based on the base specular microfacet distribution.
             Normal3D m;
             float mPDF;
             m_base_D->sample(dirV, uDir[0], uDir[1], &m, &mPDF);
@@ -95,22 +102,26 @@ namespace SLR {
             float commonPDFTerm = 1.0f / (4 * dotHV);
             specularDirPDF = commonPDFTerm * mPDF;
             revSpecularDirPDF = commonPDFTerm * m_base_D->evaluatePDF(dirL, m);
+            // ----------------------------------------------------------------
             
+            // ----------------------------------------------------------------
+            // JP: 同じ方向サンプルを別の要素からサンプルする確率密度を求める。
+            // EN: calculate PDFs to generate the sampled direction from the other distributions.
             diffuseDirPDF = dirL.z / M_PI;
             revDiffuseDirPDF = dirV.z / M_PI;
             
             clearCoatDirPDF = commonPDFTerm * m_clearcoat_D->evaluatePDF(dirV, m);
             revClearCoatDirPDF = commonPDFTerm * m_clearcoat_D->evaluatePDF(dirL, m);
-            
-            fs = evaluateInternal(query, result->dirLocal, &rev_fs);
+            // ----------------------------------------------------------------
         }
         else {
             result->sampledType = DirectionType::Reflection | DirectionType::HighFreq;
             
-            // sample based on the clear coat microfacet distribution.
+            // ----------------------------------------------------------------
+            // JP: クリアコート層のマイクロファセット分布からサンプルする。
+            // EN: sample based on the clear coat microfacet distribution.
             Normal3D m;
             float mPDF;
-            
             m_clearcoat_D->sample(dirV, uDir[0], uDir[1], &m, &mPDF);
             float dotHV = dot(dirV, m);
             float commonPDFTerm = 1.0f / (4 * dotHV);
@@ -123,16 +134,21 @@ namespace SLR {
             }
             clearCoatDirPDF = commonPDFTerm * mPDF;
             revClearCoatDirPDF = commonPDFTerm * m_clearcoat_D->evaluatePDF(dirL, m);
+            // ----------------------------------------------------------------
             
+            // ----------------------------------------------------------------
+            // JP: 同じ方向サンプルを別の要素からサンプルする確率密度を求める。
+            // EN: calculate PDFs to generate the sampled direction from the other distributions.
             diffuseDirPDF = dirL.z / M_PI;
             revDiffuseDirPDF = dirV.z / M_PI;
             
             specularDirPDF = commonPDFTerm * m_base_D->evaluatePDF(dirV, m);
             revSpecularDirPDF = commonPDFTerm * m_base_D->evaluatePDF(dirL, m);
-            
-            fs = evaluateInternal(query, result->dirLocal, &rev_fs);
+            // ----------------------------------------------------------------
         }
+        fs = evaluateInternal(query, result->dirLocal, &rev_fs);
         
+        // PDF based on the single-sample model MIS.
         result->dirPDF = (diffuseDirPDF * diffuseWeight + 
                           specularDirPDF * specularWeight + 
                           clearCoatDirPDF * clearCoatWeight) / sumWeights;

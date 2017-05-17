@@ -480,7 +480,8 @@ namespace SLR {
         float evaluate(const Normal3D &m) const override;
         float evaluatePDF(const Normal3D &m) const override;
         
-        // These are needed for the case where a class variable is declared as a derived class.
+        // JP: これらはクラス変数が派生クラスとして宣言される場合に必要となる。
+        // EN: These are needed for the case where a class variable is declared as a derived class.
         float sample(const Vector3D &v, float u0, float u1, Normal3D* m, float* normalPDF) const override {
             return MicrofacetDistribution::sample(v, u0, u1, m, normalPDF);
         }
@@ -520,7 +521,8 @@ namespace SLR {
         float evaluate(const Normal3D &m) const override;
         float evaluatePDF(const Normal3D &m) const override;
         
-        // These are needed for the case where a class variable is declared as a derived class.
+        // JP: これらはクラス変数が派生クラスとして宣言される場合に必要となる。
+        // EN: These are needed for the case where a class variable is declared as a derived class.
         float sample(const Vector3D &v, float u0, float u1, Normal3D* m, float* normalPDF) const override {
             return MicrofacetDistribution::sample(v, u0, u1, m, normalPDF);
         }

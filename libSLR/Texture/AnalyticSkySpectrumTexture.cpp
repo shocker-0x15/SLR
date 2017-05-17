@@ -132,6 +132,8 @@ namespace SLR {
             delete m_distribution;
         }
         
+        // JP: 天空光の輝度分布と合計エネルギーを計算する。
+        // EN: calculate the luminance distribution of the sky dome and its total energy.
         const uint32_t mapWidth = 1024;
         const uint32_t mapHeight = 512;
         FloatSum accSkyDomeEnergy = 0.0f;
@@ -176,6 +178,8 @@ namespace SLR {
 //        m_skyDomeDistribution->exportBMP("distribution.bmp", true);
         
 #ifdef SLR_Use_Spectral_Representation
+        // JP: 太陽のディスクのエネルギーを計算する。
+        // EN: calculate energy from the sun disc.
         const uint32_t NumRadiusSamples = 5;
         const uint32_t NumAngularSamples = 12;
         ReferenceFrame sunDirFrame(m_sunDirection);
@@ -221,6 +225,7 @@ namespace SLR {
         std::array<float, 2> importances{skyDomeEnergy, sunDiscEnergy};
         m_distribution = new MultiContinuousDistribution2D(dists.data(), importances.data(), dists.size());
 #else
+        printf("WARNING: Sun disc is not supported in RGB rendering.");
         m_distribution = m_skyDomeDistribution;
 #endif
         
