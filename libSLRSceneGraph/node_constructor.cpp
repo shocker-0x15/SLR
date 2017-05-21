@@ -157,17 +157,6 @@ namespace SLRSceneGraph {
         return SurfaceAttributeTuple(mat, normalTex, alphaTex);
     }
     
-#ifdef SLR_Platform_Windows_MSVC
-    class FuncGetPathElement {
-        std::string pathPrefix;
-    public:
-        FuncGetPathElement(const std::string &prefix) : pathPrefix(prefix) {}
-        Element operator()(const aiString &str) const {
-            return Element(pathPrefix + std::string(str.C_Str()));
-        }
-    };
-#endif
-    
     SurfaceAttributeTuple createMaterialFunction(const Function &userMatProc, ExecuteContext &context, ErrorMessage* err,
                                                  const aiMaterial* aiMat, const std::string &pathPrefix, SLR::Allocator* mem) {
         using namespace SLR;
@@ -179,13 +168,9 @@ namespace SLRSceneGraph {
         Element matAttrs = Element::create<TypeMap::Tuple>();
         
         auto &attrs = matAttrs.raw<TypeMap::Tuple>();
-#ifdef SLR_Platform_Windows_MSVC
-        FuncGetPathElement getPathElement{ pathPrefix };
-#else
         auto getPathElement = [&pathPrefix](const aiString &str) {
             return Element::create<TypeMap::String>(pathPrefix + std::string(str.C_Str()));
         };
-#endif
         auto getRGBElement = [](const float* RGB) {
             ParameterListRef values = createShared<ParameterList>();
             values->add("", Element(RGB[0]));

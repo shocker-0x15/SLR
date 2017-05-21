@@ -7,7 +7,7 @@ file(GLOB HostProgram_Sources
      StopWatch.h
     )
 
-source_group("Host Program" REGULAR_EXPRESSION ".*\.(h|c|hpp|cpp)")
+source_group("" REGULAR_EXPRESSION ".*\.(h|c|hpp|cpp)")
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 

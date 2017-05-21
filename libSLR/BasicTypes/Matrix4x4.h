@@ -47,13 +47,6 @@ namespace SLR {
         Matrix4x4Template(const Vector3DTemplate<RealType> &col0, const Vector3DTemplate<RealType> &col1, const Vector3DTemplate<RealType> &col2) : c0(col0, 0.0f), c1(col1, 0.0f), c2(col2, 0.0f), c3(Vector4DTemplate<RealType>::Ew) { }
         CONSTEXPR_CONSTRUCTOR Matrix4x4Template(const Vector4DTemplate<RealType> &col0, const Vector4DTemplate<RealType> &col1, const Vector4DTemplate<RealType> &col2, const Vector4DTemplate<RealType> &col3) :
         c0(col0), c1(col1), c2(col2), c3(col3)
-#ifdef SLR_Platform_Windows_MSVC
-        ,// without these extra initialization, an error occurs at least with VS2015.
-        m00(col0.x), m10(col0.y), m20(col0.z), m30(col0.w),
-        m01(col1.x), m11(col1.y), m21(col1.z), m31(col1.w),
-        m02(col2.x), m12(col2.y), m22(col2.z), m32(col2.w),
-        m03(col3.x), m13(col3.y), m23(col3.z), m33(col3.w)
-#endif
         { }
         
         Matrix4x4Template operator+() const { return *this; }

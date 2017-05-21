@@ -779,6 +779,13 @@ namespace SLR {
     
     
     template <typename RealType, uint32_t NumSpectralSamples>
+    void ScaledAndOffsetUpsampledContinuousSpectrumTemplate<RealType, NumSpectralSamples>::calcBounds(uint32_t numBins, RealType* bounds) const {
+        m_baseSpectrum.calcBounds(numBins, bounds);
+        for (int i = 0; i < numBins; ++i)
+            bounds[i] = bounds[i] * m_scale + m_offset;
+    }
+    
+    template <typename RealType, uint32_t NumSpectralSamples>
     SampledSpectrumTemplate<RealType, NumSpectralSamples> 
     ScaledAndOffsetUpsampledContinuousSpectrumTemplate<RealType, NumSpectralSamples>::evaluate(const WavelengthSamplesTemplate<RealType, NumSpectralSamples> &wls) const {
         return m_baseSpectrum.evaluate(wls) * m_scale + SampledSpectrumTemplate<RealType, NumSpectralSamples>(m_offset);

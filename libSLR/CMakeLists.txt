@@ -5,6 +5,8 @@ set(libs "Half")
 file(GLOB libSLR_Sources
      *.h
      *.cpp
+     External/AnalyticSkyDomeRadiance/*.h
+     External/AnalyticSkyDomeRadiance/*.c
      MemoryAllocators/*.h
      MemoryAllocators/*.cpp
      BasicTypes/*.h
@@ -48,24 +50,25 @@ file(GLOB libSLR_Sources_excluded
     )
 list(REMOVE_ITEM libSLR_Sources ${libSLR_Sources_excluded})
 
-source_group("SLR"                      REGULAR_EXPRESSION                    ".*\.(h|c|hpp|cpp)")
-source_group("SLR\\Memory Allocators"   REGULAR_EXPRESSION   "MemoryAllocators/.*\.(h|c|hpp|cpp)")
-source_group("SLR\\Basic Types"         REGULAR_EXPRESSION         "BasicTypes/.*\.(h|c|hpp|cpp)")
-source_group("SLR\\Core"                REGULAR_EXPRESSION               "Core/.*\.(h|c|hpp|cpp)")
-source_group("SLR\\RNG"                 REGULAR_EXPRESSION                "RNG/.*\.(h|c|hpp|cpp)")
-source_group("SLR\\Surface Shape"       REGULAR_EXPRESSION       "SurfaceShape/.*\.(h|c|hpp|cpp)")
-source_group("SLR\\Medium Distribution" REGULAR_EXPRESSION "MediumDistribution/.*\.(h|c|hpp|cpp)")
-source_group("SLR\\BSDF"                REGULAR_EXPRESSION               "BSDF/.*\.(h|c|hpp|cpp)")
-source_group("SLR\\EDF"                 REGULAR_EXPRESSION                "EDF/.*\.(h|c|hpp|cpp)")
-source_group("SLR\\Phase Function"      REGULAR_EXPRESSION      "PhaseFunction/.*\.(h|c|hpp|cpp)")
-source_group("SLR\\Texture"             REGULAR_EXPRESSION            "Texture/.*\.(h|c|hpp|cpp)")
-source_group("SLR\\Surface Material"    REGULAR_EXPRESSION    "SurfaceMaterial/.*\.(h|c|hpp|cpp)")
-source_group("SLR\\Medium Material"     REGULAR_EXPRESSION     "MediumMaterial/.*\.(h|c|hpp|cpp)")
-source_group("SLR\\Accelerator"         REGULAR_EXPRESSION        "Accelerator/.*\.(h|c|hpp|cpp)")
-source_group("SLR\\Camera"              REGULAR_EXPRESSION             "Camera/.*\.(h|c|hpp|cpp)")
-source_group("SLR\\Scene"               REGULAR_EXPRESSION              "Scene/.*\.(h|c|hpp|cpp)")
-source_group("SLR\\Renderer"            REGULAR_EXPRESSION           "Renderer/.*\.(h|c|hpp|cpp)")
-source_group("SLR\\Helper"              REGULAR_EXPRESSION             "Helper/.*\.(h|c|hpp|cpp)")
+source_group(""                    REGULAR_EXPRESSION                    ".*\.(h|c|hpp|cpp)")
+source_group("External\\Analytic Sky Dome Radiance"   REGULAR_EXPRESSION   "External/AnalyticSkyDomeRadiance/.*\.(h|c|hpp|cpp)")
+source_group("Memory Allocators"   REGULAR_EXPRESSION   "MemoryAllocators/.*\.(h|c|hpp|cpp)")
+source_group("Basic Types"         REGULAR_EXPRESSION         "BasicTypes/.*\.(h|c|hpp|cpp)")
+source_group("Core"                REGULAR_EXPRESSION               "Core/.*\.(h|c|hpp|cpp)")
+source_group("RNG"                 REGULAR_EXPRESSION                "RNG/.*\.(h|c|hpp|cpp)")
+source_group("Surface Shape"       REGULAR_EXPRESSION       "SurfaceShape/.*\.(h|c|hpp|cpp)")
+source_group("Medium Distribution" REGULAR_EXPRESSION "MediumDistribution/.*\.(h|c|hpp|cpp)")
+source_group("BSDF"                REGULAR_EXPRESSION               "BSDF/.*\.(h|c|hpp|cpp)")
+source_group("EDF"                 REGULAR_EXPRESSION                "EDF/.*\.(h|c|hpp|cpp)")
+source_group("Phase Function"      REGULAR_EXPRESSION      "PhaseFunction/.*\.(h|c|hpp|cpp)")
+source_group("Texture"             REGULAR_EXPRESSION            "Texture/.*\.(h|c|hpp|cpp)")
+source_group("Surface Material"    REGULAR_EXPRESSION    "SurfaceMaterial/.*\.(h|c|hpp|cpp)")
+source_group("Medium Material"     REGULAR_EXPRESSION     "MediumMaterial/.*\.(h|c|hpp|cpp)")
+source_group("Accelerator"         REGULAR_EXPRESSION        "Accelerator/.*\.(h|c|hpp|cpp)")
+source_group("Camera"              REGULAR_EXPRESSION             "Camera/.*\.(h|c|hpp|cpp)")
+source_group("Scene"               REGULAR_EXPRESSION              "Scene/.*\.(h|c|hpp|cpp)")
+source_group("Renderer"            REGULAR_EXPRESSION           "Renderer/.*\.(h|c|hpp|cpp)")
+source_group("Helper"              REGULAR_EXPRESSION             "Helper/.*\.(h|c|hpp|cpp)")
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 

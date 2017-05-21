@@ -845,15 +845,6 @@ namespace SLR {
     
     
     template <typename RealType, uint32_t NumSpectralSamples>
-    void ScaledAndOffsetUpsampledContinuousSpectrumTemplate<RealType, NumSpectralSamples>::calcBounds(uint32_t numBins, RealType* bounds) const {
-        m_baseSpectrum.calcBounds(numBins, bounds);
-        for (int i = 0; i < numBins; ++i)
-            bounds[i] = bounds[i] * m_scale + m_offset; 
-    }
-    
-    
-    
-    template <typename RealType, uint32_t NumSpectralSamples>
     const typename UpsampledContinuousSpectrumTemplate<RealType, NumSpectralSamples>::spectrum_grid_cell_t
     UpsampledContinuousSpectrumTemplate<RealType, NumSpectralSamples>::spectrum_grid[] = {
         { 0, 5, { 148, 110, 0, 12, 111, UINT8_MAX }},

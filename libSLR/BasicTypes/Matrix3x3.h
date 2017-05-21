@@ -35,12 +35,6 @@ namespace SLR {
         m02(array[6]), m12(array[7]), m22(array[8]) { }
         CONSTEXPR_CONSTRUCTOR Matrix3x3Template(const Vector3DTemplate<RealType> &col0, const Vector3DTemplate<RealType> &col1, const Vector3DTemplate<RealType> &col2) :
         c0(col0), c1(col1), c2(col2)
-#ifdef SLR_Platform_Windows_MSVC
-        ,// without these extra initialization, an error occurs at least with VS2015.
-        m00(col0.x), m10(col0.y), m20(col0.z),
-        m01(col1.x), m11(col1.y), m21(col1.z),
-        m02(col2.x), m12(col2.y), m22(col2.z)
-#endif
         { }
         
         Matrix3x3Template operator+() const { return *this; }

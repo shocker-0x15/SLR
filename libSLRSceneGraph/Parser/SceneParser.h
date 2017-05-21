@@ -245,25 +245,6 @@ namespace SLRSceneGraph {
         typedef std::function<Element(const std::map<std::string, Element> &, ExecuteContext &, ErrorMessage*)> Procedure;
     private:
         
-		// workaround: MSVC(VS2015 Update1) fails to compile the 3rd constructor.
-#ifdef SLR_Platform_Windows_MSVC
-		const uint32_t m_depth;
-		const std::vector<std::vector<ArgInfo>> m_signatures;
-		std::vector<Procedure> m_nativeProcs;
-		const std::vector<StatementRef> m_stmts;
-
-		static Element NoOpProcedure(const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) { SLRAssert_NotImplemented(); return Element(); };
-	public:
-		Function(uint32_t depth, const std::vector<ArgInfo> &sig, const StatementRef &stmt = nullptr) :
-			m_depth(depth), m_signatures{ sig }, m_nativeProcs{ NoOpProcedure }, m_stmts{ stmt } { }
-		Function(uint32_t depth, const std::vector<ArgInfo> &sig, const Procedure &proc) :
-			m_depth(depth), m_signatures{ sig }, m_nativeProcs{ proc }, m_stmts{ nullptr } { }
-		Function(uint32_t depth, const std::vector<std::vector<ArgInfo>> &sigs, const std::vector<Procedure> &procs) :
-			m_depth(depth), m_signatures{ sigs }, m_stmts{ m_signatures.size(), nullptr } {
-			for (int i = 0; i < procs.size(); ++i)
-				m_nativeProcs.push_back(procs[i]);
-		}
-#else
         const uint32_t m_depth;
         const std::vector<std::vector<ArgInfo>> m_signatures;
         const std::vector<Procedure> m_nativeProcs;
@@ -277,7 +258,6 @@ namespace SLRSceneGraph {
         m_depth(depth), m_signatures{sig}, m_nativeProcs{proc}, m_stmts{nullptr} { }
         Function(uint32_t depth, const std::vector<std::vector<ArgInfo>> &sigs, const std::vector<Procedure> &procs) :
         m_depth(depth), m_signatures{sigs}, m_nativeProcs{procs}, m_stmts{m_signatures.size(), nullptr} { }
-#endif
         
         Element operator()(const ParameterList &params, ExecuteContext &context, ErrorMessage* errMsg) const;
         
