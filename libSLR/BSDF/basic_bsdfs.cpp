@@ -14,7 +14,7 @@ namespace SLR {
         result->dirLocal = cosineSampleHemisphere(uDir[0], uDir[1]);
         result->dirPDF = result->dirLocal.z / M_PI;
         result->sampledType = m_type;
-        result->dirLocal.z *= dot(query.dirLocal, query.gNormalLocal) > 0 ? 1 : -1;
+        result->dirLocal.z *= query.dirLocal.z > 0 ? 1 : -1;
         SampledSpectrum fs = m_R / M_PI;
 //        if (dot(result->dirLocal, query.gNormal_sn) < 0)
 //            fs = SampledSpectrum::Zero;
@@ -84,7 +84,10 @@ namespace SLR {
     }
     
     float SpecularBRDF::weightInternal(const BSDFQuery &query) const {
-        return m_coeffR.importance(query.wlHint) * m_fresnel.evaluate(query.dirLocal.z).importance(query.wlHint);
+        float ret = (m_coeffR * m_fresnel.evaluate(query.dirLocal.z)).importance(query.wlHint);
+        float snCorrection = query.adjoint ? std::fabs(dot(Vector3D(-query.dirLocal.x, -query.dirLocal.y, query.dirLocal.z), query.gNormalLocal) / 
+                                                       query.dirLocal.z) : 1;
+        return ret * snCorrection;
     }
     
     SampledSpectrum SpecularBRDF::getBaseColorInternal(DirectionType flags) const {

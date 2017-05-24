@@ -228,6 +228,8 @@
 		46BF8CB01E2263CE00EF8E13 /* medium_nodes.h in Headers */ = {isa = PBXBuildFile; fileRef = 46BF8CAE1E2263CE00EF8E13 /* medium_nodes.h */; };
 		46BF8CB31E23A72E00EF8E13 /* medium_material.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 46BF8CB11E23A72E00EF8E13 /* medium_material.cpp */; };
 		46BF8CB41E23A72E00EF8E13 /* medium_material.h in Headers */ = {isa = PBXBuildFile; fileRef = 46BF8CB21E23A72E00EF8E13 /* medium_material.h */; };
+		46CAEB651ED2052A00D3F1A7 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 46CAEB641ED2052A00D3F1A7 /* main.cpp */; };
+		46CAEB6E1ED5C90C00D3F1A7 /* bsdf_tests.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 46CAEB6D1ED5C90C00D3F1A7 /* bsdf_tests.cpp */; };
 		46D16E6C1D283E36009C241C /* SBVH.h in Headers */ = {isa = PBXBuildFile; fileRef = 46D16E6B1D283E36009C241C /* SBVH.h */; };
 		46EA72A91D59F22B00738511 /* debugPrintf.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 46EA72A81D59F22B00738511 /* debugPrintf.cpp */; };
 /* End PBXBuildFile section */
@@ -254,9 +256,25 @@
 			remoteGlobalIDString = 466F6CC61BB6C9C10056F2FA;
 			remoteInfo = libSLR;
 		};
+		46CAEB6A1ED2055900D3F1A7 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 46FFDDF51B9B258400E47537 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 466F6CC61BB6C9C10056F2FA;
+			remoteInfo = SLR;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
+		46CAEB601ED2052A00D3F1A7 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = /usr/share/man/man1/;
+			dstSubfolderSpec = 0;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 1;
+		};
 		46FFDDFB1B9B258400E47537 /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
@@ -496,6 +514,9 @@
 		46BF8CAE1E2263CE00EF8E13 /* medium_nodes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = medium_nodes.h; path = libSLR/Scene/medium_nodes.h; sourceTree = SOURCE_ROOT; };
 		46BF8CB11E23A72E00EF8E13 /* medium_material.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = medium_material.cpp; path = libSLR/Core/medium_material.cpp; sourceTree = SOURCE_ROOT; };
 		46BF8CB21E23A72E00EF8E13 /* medium_material.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = medium_material.h; path = libSLR/Core/medium_material.h; sourceTree = SOURCE_ROOT; };
+		46CAEB621ED2052A00D3F1A7 /* SLR_Test */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = SLR_Test; sourceTree = BUILT_PRODUCTS_DIR; };
+		46CAEB641ED2052A00D3F1A7 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
+		46CAEB6D1ED5C90C00D3F1A7 /* bsdf_tests.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = bsdf_tests.cpp; sourceTree = "<group>"; };
 		46D16E6B1D283E36009C241C /* SBVH.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SBVH.h; path = libSLR/Accelerator/SBVH.h; sourceTree = SOURCE_ROOT; };
 		46D7E0841BC8F58900AFF96F /* Makefile */ = {isa = PBXFileReference; explicitFileType = text; fileEncoding = 4; name = Makefile; path = libSLRSceneGraph/Parser/Makefile; sourceTree = "<group>"; usesTabs = 1; };
 		46EA72A81D59F22B00738511 /* debugPrintf.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = debugPrintf.cpp; path = libSLR/debugPrintf.cpp; sourceTree = SOURCE_ROOT; };
@@ -511,6 +532,13 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		466F6D0A1BB6CB3A0056F2FA /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		46CAEB5F1ED2052A00D3F1A7 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -920,6 +948,15 @@
 			name = RNG;
 			sourceTree = "<group>";
 		};
+		46CAEB631ED2052A00D3F1A7 /* SLR_Test */ = {
+			isa = PBXGroup;
+			children = (
+				46CAEB641ED2052A00D3F1A7 /* main.cpp */,
+				46CAEB6D1ED5C90C00D3F1A7 /* bsdf_tests.cpp */,
+			);
+			path = SLR_Test;
+			sourceTree = "<group>";
+		};
 		46D7E0831BC8F57A00AFF96F /* Parser */ = {
 			isa = PBXGroup;
 			children = (
@@ -947,6 +984,7 @@
 				46FFDDFF1B9B258400E47537 /* SLR */,
 				466F6C061BB6B0920056F2FA /* SLR Scene Graph */,
 				466F6C071BB6B0AF0056F2FA /* Host Program */,
+				46CAEB631ED2052A00D3F1A7 /* SLR_Test */,
 				46FFDDFE1B9B258400E47537 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -957,6 +995,7 @@
 				46FFDDFD1B9B258400E47537 /* HostProgram */,
 				466F6CC71BB6C9C10056F2FA /* libSLR.dylib */,
 				466F6D0D1BB6CB3A0056F2FA /* libSLRSceneGraph.dylib */,
+				46CAEB621ED2052A00D3F1A7 /* SLR_Test */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -1164,6 +1203,24 @@
 			productReference = 466F6D0D1BB6CB3A0056F2FA /* libSLRSceneGraph.dylib */;
 			productType = "com.apple.product-type.library.dynamic";
 		};
+		46CAEB611ED2052A00D3F1A7 /* SLR_Test */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 46CAEB691ED2052A00D3F1A7 /* Build configuration list for PBXNativeTarget "SLR_Test" */;
+			buildPhases = (
+				46CAEB5E1ED2052A00D3F1A7 /* Sources */,
+				46CAEB5F1ED2052A00D3F1A7 /* Frameworks */,
+				46CAEB601ED2052A00D3F1A7 /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				46CAEB6B1ED2055900D3F1A7 /* PBXTargetDependency */,
+			);
+			name = SLR_Test;
+			productName = SLR_Test;
+			productReference = 46CAEB621ED2052A00D3F1A7 /* SLR_Test */;
+			productType = "com.apple.product-type.tool";
+		};
 		46FFDDFC1B9B258400E47537 /* HostProgram */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 46FFDE041B9B258400E47537 /* Build configuration list for PBXNativeTarget "HostProgram" */;
@@ -1198,6 +1255,10 @@
 					466F6D0C1BB6CB3A0056F2FA = {
 						CreatedOnToolsVersion = 6.2;
 					};
+					46CAEB611ED2052A00D3F1A7 = {
+						CreatedOnToolsVersion = 8.3.2;
+						ProvisioningStyle = Automatic;
+					};
 					46FFDDFC1B9B258400E47537 = {
 						CreatedOnToolsVersion = 6.2;
 					};
@@ -1218,6 +1279,7 @@
 				466F6CC61BB6C9C10056F2FA /* SLR */,
 				466F6D0C1BB6CB3A0056F2FA /* SLRSceneGraph */,
 				46FFDDFC1B9B258400E47537 /* HostProgram */,
+				46CAEB611ED2052A00D3F1A7 /* SLR_Test */,
 			);
 		};
 /* End PBXProject section */
@@ -1339,6 +1401,15 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		46CAEB5E1ED2052A00D3F1A7 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				46CAEB6E1ED5C90C00D3F1A7 /* bsdf_tests.cpp in Sources */,
+				46CAEB651ED2052A00D3F1A7 /* main.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		46FFDDF91B9B258400E47537 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -1364,6 +1435,11 @@
 			isa = PBXTargetDependency;
 			target = 466F6CC61BB6C9C10056F2FA /* SLR */;
 			targetProxy = 466F6D2E1BB6CC510056F2FA /* PBXContainerItemProxy */;
+		};
+		46CAEB6B1ED2055900D3F1A7 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 466F6CC61BB6C9C10056F2FA /* SLR */;
+			targetProxy = 46CAEB6A1ED2055900D3F1A7 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -1591,6 +1667,100 @@
 			};
 			name = RelWithAssert;
 		};
+		46CAEB661ED2052A00D3F1A7 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CODE_SIGN_IDENTITY = "";
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				GTEST_LIBDIR = ../googletest_build/googlemock/gtest/Release;
+				GTEST_ROOT = ../googletest/googletest;
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(SRCROOT)",
+					/usr/local/include/OpenEXR,
+					"$(GTEST_ROOT)/include",
+				);
+				LD_RUNPATH_SEARCH_PATHS = "@executable_path";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(SRCROOT)/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)",
+					../googletest_build/googlemock/gtest/Release,
+				);
+				MACOSX_DEPLOYMENT_TARGET = 10.12;
+				OTHER_LDFLAGS = (
+					"-lSLR",
+					"-lgtest",
+				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		46CAEB671ED2052A00D3F1A7 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CODE_SIGN_IDENTITY = "";
+				GTEST_LIBDIR = ../googletest_build/googlemock/gtest/Release;
+				GTEST_ROOT = ../googletest/googletest;
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(SRCROOT)",
+					/usr/local/include/OpenEXR,
+					"$(GTEST_ROOT)/include",
+				);
+				LD_RUNPATH_SEARCH_PATHS = "@executable_path";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(SRCROOT)/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)",
+					../googletest_build/googlemock/gtest/Release,
+				);
+				MACOSX_DEPLOYMENT_TARGET = 10.12;
+				OTHER_LDFLAGS = (
+					"-lSLR",
+					"-lgtest",
+				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+		46CAEB681ED2052A00D3F1A7 /* RelWithAssert */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CODE_SIGN_IDENTITY = "";
+				GTEST_LIBDIR = ../googletest_build/googlemock/gtest/Release;
+				GTEST_ROOT = ../googletest/googletest;
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(SRCROOT)",
+					/usr/local/include/OpenEXR,
+					"$(GTEST_ROOT)/include",
+				);
+				LD_RUNPATH_SEARCH_PATHS = "@executable_path";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(SRCROOT)/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)",
+					../googletest_build/googlemock/gtest/Release,
+				);
+				MACOSX_DEPLOYMENT_TARGET = 10.12;
+				OTHER_LDFLAGS = (
+					"-lSLR",
+					"-lgtest",
+				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = RelWithAssert;
+		};
 		46FFDE021B9B258400E47537 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -1747,6 +1917,15 @@
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
+		};
+		46CAEB691ED2052A00D3F1A7 /* Build configuration list for PBXNativeTarget "SLR_Test" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				46CAEB661ED2052A00D3F1A7 /* Debug */,
+				46CAEB671ED2052A00D3F1A7 /* Release */,
+				46CAEB681ED2052A00D3F1A7 /* RelWithAssert */,
+			);
+			defaultConfigurationIsVisible = 0;
 		};
 		46FFDDF81B9B258400E47537 /* Build configuration list for PBXProject "SLR" */ = {
 			isa = XCConfigurationList;

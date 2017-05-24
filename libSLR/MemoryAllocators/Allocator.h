@@ -14,6 +14,8 @@
 namespace SLR {
     class SLR_API Allocator {
     public:
+        virtual ~Allocator() { }
+        
         template <typename T> using DeleterType = std::function<void(T*)>;
         
         virtual void* alloc(uintptr_t size, uintptr_t align) = 0;

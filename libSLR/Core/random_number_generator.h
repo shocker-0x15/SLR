@@ -27,6 +27,8 @@ namespace SLR {
     template <typename TypeSet>
     class SLR_API RandomNumberGeneratorTemplate {
     public:
+        virtual ~RandomNumberGeneratorTemplate() { }
+        
         virtual typename TypeSet::UInt getUInt() = 0;
         virtual typename TypeSet::Float getFloat0cTo1o();
     };

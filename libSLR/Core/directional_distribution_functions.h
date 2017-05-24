@@ -311,14 +311,15 @@ namespace SLR {
             return fs_sn * snCorrection;
         }
         SampledSpectrum evaluate(const BSDFQuery &query, const Vector3D &dir, SampledSpectrum* rev_fs = nullptr) const {
-            BSDFQuery mQuery = query;
-            mQuery.dirTypeFilter &= sideTest(query.gNormalLocal, query.dirLocal, dir);
-            if (!matches(mQuery.dirTypeFilter)) {
-                if (query.requestReverse)
-                    *rev_fs = SampledSpectrum::Zero;
-                return SampledSpectrum::Zero;
-            }
-            SampledSpectrum fs_sn = evaluateInternal(mQuery, dir, rev_fs);
+//            BSDFQuery mQuery = query;
+//            mQuery.dirTypeFilter &= sideTest(query.gNormalLocal, query.dirLocal, dir);
+//            if (!matches(mQuery.dirTypeFilter)) {
+//                if (query.requestReverse)
+//                    *rev_fs = SampledSpectrum::Zero;
+//                return SampledSpectrum::Zero;
+//            }
+//            SampledSpectrum fs_sn = evaluateInternal(mQuery, dir, rev_fs);
+            SampledSpectrum fs_sn = evaluateInternal(query, dir, rev_fs);
             float snCorrection = (query.adjoint ?
                                   std::fabs(query.dirLocal.z / dot(query.dirLocal, query.gNormalLocal)) :
                                   std::fabs(dir.z / dot(dir, query.gNormalLocal)));
