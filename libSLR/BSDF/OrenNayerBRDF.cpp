@@ -11,11 +11,10 @@
 
 namespace SLR {
     SampledSpectrum OrenNayerBRDF::sampleInternal(const BSDFQuery &query, float uComponent, const float uDir[2], BSDFQueryResult* result) const {
-        bool frontSide = dot(query.dirLocal, query.gNormalLocal) > 0;
         result->dirLocal = cosineSampleHemisphere(uDir[0], uDir[1]);
         result->dirPDF = result->dirLocal.z / M_PI;
         result->sampledType = m_type;
-        result->dirLocal.z *= frontSide ? 1 : -1;
+        result->dirLocal.z *= query.dirLocal.z > 0 ? 1 : -1;
         
         float sinThetaI = 1.0f - result->dirLocal.z * result->dirLocal.z;
         float sinThetaO = 1.0f - query.dirLocal.z * query.dirLocal.z;

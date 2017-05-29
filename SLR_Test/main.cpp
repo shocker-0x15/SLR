@@ -9,7 +9,7 @@
 #include <cstdio>
 #include <iostream>
 
-#include <libSLR/BasicTypes/spectrum_types.h>
+#include <libSLR/BasicTypes/spectrum_base.h>
 
 class CustomPrinter : public ::testing::EmptyTestEventListener {
     

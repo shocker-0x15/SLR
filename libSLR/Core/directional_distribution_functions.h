@@ -270,6 +270,7 @@ namespace SLR {
         virtual float evaluatePDF(const ABDFQuery* query, const Vector3D &dir, float* revPDF = nullptr) const = 0;
         
         virtual bool matches(DirectionType flags) const { return m_type.matches(flags); };
+        bool hasDelta() const { return matches(DirectionType::WholeSphere | DirectionType::Delta); }
         bool hasNonDelta() const { return matches(DirectionType::WholeSphere | DirectionType::NonDelta); }
     };
     

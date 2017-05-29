@@ -105,7 +105,7 @@ namespace SLR {
         bool entering = query.dirLocal.z >= 0.0f;
         int32_t sign = entering ? 1 : -1;
         float expectedDotHV = sign * query.dirLocal.z;
-        return m_D->evaluateSmithG1(query.dirLocal * sign, Normal3D(0, 0, 1)) * m_F.evaluate(expectedDotHV).importance(query.wlHint);
+        return m_F.evaluate(expectedDotHV).importance(query.wlHint);
     }
     
     SampledSpectrum MicrofacetBRDF::getBaseColorInternal(DirectionType flags) const {
@@ -318,9 +318,9 @@ namespace SLR {
     }
     
     float MicrofacetBSDF::weightInternal(const BSDFQuery &query) const {
-        bool entering = query.dirLocal.z >= 0.0f;
-        int32_t sign = entering ? 1 : -1;
-        return m_D->evaluateSmithG1(query.dirLocal * sign, Normal3D(0, 0, 1));
+//        bool entering = query.dirLocal.z >= 0.0f;
+//        int32_t sign = entering ? 1 : -1;
+        return 1.0f;
     }
     
     SampledSpectrum MicrofacetBSDF::getBaseColorInternal(DirectionType flags) const {
