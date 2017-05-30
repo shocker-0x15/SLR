@@ -93,7 +93,7 @@ namespace SLR {
             float mPDF;
             m_base_D->sample(dirV, uDir[0], uDir[1], &m, &mPDF);
             float dotHV = dot(dirV, m);
-            dirL = 2 * dotHV * m - query.dirLocal;
+            dirL = 2 * dotHV * m - dirV;
             result->dirLocal = entering ? dirL : -dirL;
             if (dirL.z * dirV.z <= 0) {
                 result->dirPDF = 0.0f;
@@ -126,7 +126,7 @@ namespace SLR {
             float dotHV = dot(dirV, m);
             float commonPDFTerm = 1.0f / (4 * dotHV);
             
-            dirL = 2 * dotHV * m - query.dirLocal;
+            dirL = 2 * dotHV * m - dirV;
             result->dirLocal = entering ? dirL : -dirL;
             if (dirL.z * dirV.z <= 0) {
                 result->dirPDF = 0.0f;
@@ -205,7 +205,7 @@ namespace SLR {
         // 1.25 scale is used to (roughly) preserve albedo.
         float F_SS90 = m_roughness * dotLH * dotLH;
         float ssFresnel = (1 + (F_SS90 - 1) * fresnelL) * (1 + (F_SS90 - 1) * fresnelV);
-        float ssCoeff = 1.25f * (ssFresnel * (1.0f / (dir.z + query.dirLocal.z) - 0.5f) + 0.5f);
+        float ssCoeff = 1.25f * (ssFresnel * (1.0f / (dirL.z + dirV.z) - 0.5f) + 0.5f);
         
         // Base - Specular Term
         float base_D = m_base_D->evaluate(m);
@@ -222,7 +222,7 @@ namespace SLR {
         float coat_F = 0.04f * (1 - fresnelH) + 1.0f * fresnelH;
         
         // Disney's implementation in BRDF explorer implicitly includes this denominator's value in shadowing-masking factors.
-        float microfacetDenom = 4 * dir.z * query.dirLocal.z;
+        float microfacetDenom = 4 * dirL.z * dirV.z;
         float clearCoatValue = 0.25f * m_clearCoat * coat_F * coat_D * coat_G / microfacetDenom;
         SampledSpectrum baseSpecularValue = base_F * ((base_D * base_G) / microfacetDenom);
         SampledSpectrum baseDiffuseValue = (((1 - m_subsurface) * diffuseFresnel + m_subsurface * ssCoeff) / M_PI * m_baseColor + sheenValue) * (1 - m_metallic);

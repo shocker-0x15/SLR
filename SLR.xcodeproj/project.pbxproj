@@ -230,6 +230,7 @@
 		46BF8CB41E23A72E00EF8E13 /* medium_material.h in Headers */ = {isa = PBXBuildFile; fileRef = 46BF8CB21E23A72E00EF8E13 /* medium_material.h */; };
 		46CAEB651ED2052A00D3F1A7 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 46CAEB641ED2052A00D3F1A7 /* main.cpp */; };
 		46CAEB6E1ED5C90C00D3F1A7 /* bsdf_tests.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 46CAEB6D1ED5C90C00D3F1A7 /* bsdf_tests.cpp */; };
+		46CAEB701EDDDEE900D3F1A7 /* bsdf_headers.h in Headers */ = {isa = PBXBuildFile; fileRef = 46CAEB6F1EDDDEE900D3F1A7 /* bsdf_headers.h */; };
 		46D16E6C1D283E36009C241C /* SBVH.h in Headers */ = {isa = PBXBuildFile; fileRef = 46D16E6B1D283E36009C241C /* SBVH.h */; };
 		46EA72A91D59F22B00738511 /* debugPrintf.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 46EA72A81D59F22B00738511 /* debugPrintf.cpp */; };
 /* End PBXBuildFile section */
@@ -517,6 +518,7 @@
 		46CAEB621ED2052A00D3F1A7 /* SLR_Test */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = SLR_Test; sourceTree = BUILT_PRODUCTS_DIR; };
 		46CAEB641ED2052A00D3F1A7 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		46CAEB6D1ED5C90C00D3F1A7 /* bsdf_tests.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = bsdf_tests.cpp; sourceTree = "<group>"; };
+		46CAEB6F1EDDDEE900D3F1A7 /* bsdf_headers.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = bsdf_headers.h; path = libSLR/BSDF/bsdf_headers.h; sourceTree = SOURCE_ROOT; };
 		46D16E6B1D283E36009C241C /* SBVH.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SBVH.h; path = libSLR/Accelerator/SBVH.h; sourceTree = SOURCE_ROOT; };
 		46D7E0841BC8F58900AFF96F /* Makefile */ = {isa = PBXFileReference; explicitFileType = text; fileEncoding = 4; name = Makefile; path = libSLRSceneGraph/Parser/Makefile; sourceTree = "<group>"; usesTabs = 1; };
 		46EA72A81D59F22B00738511 /* debugPrintf.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = debugPrintf.cpp; path = libSLR/debugPrintf.cpp; sourceTree = SOURCE_ROOT; };
@@ -635,6 +637,7 @@
 		4634EB9A1B9B529B0047AE54 /* BSDF */ = {
 			isa = PBXGroup;
 			children = (
+				46CAEB6F1EDDDEE900D3F1A7 /* bsdf_headers.h */,
 				465D8B271E59D8FA001B8382 /* basic_bsdfs.h */,
 				465D8B261E59D8FA001B8382 /* basic_bsdfs.cpp */,
 				465D8B2F1E59D8FA001B8382 /* OrenNayerBRDF.h */,
@@ -1038,6 +1041,7 @@
 				460A1B331EAE3795000C1A26 /* ArHosekSkyModelData_Spectral.h in Headers */,
 				465D8B731E59DB74001B8382 /* BPTRenderer.h in Headers */,
 				46D16E6C1D283E36009C241C /* SBVH.h in Headers */,
+				46CAEB701EDDDEE900D3F1A7 /* bsdf_headers.h in Headers */,
 				466F6CD31BB6CA070056F2FA /* Quaternion.h in Headers */,
 				465D8A8B1E58E2CB001B8382 /* BoundingBox3D.h in Headers */,
 				465D8AF91E59D3CF001B8382 /* texture_headers.h in Headers */,

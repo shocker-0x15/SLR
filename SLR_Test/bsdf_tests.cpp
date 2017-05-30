@@ -13,11 +13,7 @@
 #include <libSLR/Core/distributions.h>
 #include <libSLR/RNG/XORShiftRNG.h>
 
-#include <libSLR/BSDF/basic_bsdfs.h>
-#include <libSLR/BSDF/OrenNayerBRDF.h>
-#include <libSLR/BSDF/ModifiedWardDurBRDF.h>
-#include <libSLR/BSDF/AshikhminShirleyBRDF.h>
-#include <libSLR/BSDF/microfacet_bsdfs.h>
+#include <libSLR/BSDF/bsdf_headers.h>
 
 #define EXPECT_SAMPLED_SPECTRUM_NEAR(val1, val2, abs_error) \
 do { \
@@ -451,6 +447,56 @@ TEST(BSDFTest, MicrofacetBSDF) {
         WavelengthSamples wls = WavelengthSamples::createWithEqualOffsets((j + 0.5f) / NumWavelengthSamples, rng->getFloat0cTo1o(), &wlPDF);
         
         std::shared_ptr<BSDF> bsdf = createShared<MicrofacetBSDF>(etaExt->evaluate(wls), etaInt->evaluate(wls), D.get());
+        BSDFTest_Function(bsdf.get(), wls, rng, false, false);
+        BSDFTest_Function(bsdf.get(), wls, rng, true, false);
+        BSDFTest_Function(bsdf.get(), wls, rng, false, true);
+        BSDFTest_Function(bsdf.get(), wls, rng, true, true);
+    }
+    
+    delete rng;
+}
+
+TEST(BSDFTest, DisneyBRDF) {
+    using namespace SLR;
+    
+    ArenaAllocator mem;
+    RandomNumberGenerator* rng = new XORShiftRNG(1592814120);
+    
+    AssetSpectrumRef etaExt, etaInt;
+    {
+        SpectrumLibrary::Data data;
+        
+        SpectrumLibrary::queryIoRSpectrum("Air", 0, &data);
+        etaExt = createSpectrumFromData(data);
+        SpectrumLibrary::queryIoRSpectrum("Diamond", 0, &data);
+        etaInt = createSpectrumFromData(data);
+    }
+    
+    std::shared_ptr<MicrofacetDistribution> D = createShared<GGXMicrofacetDistribution>(0.05f, 0.2f);
+    
+    float baseColorXYZ[3];
+    s_commonDataForBSDFTest.FlatReflectance->convertToXYZ(baseColorXYZ);
+    float baseColorLuminance = baseColorXYZ[1];
+    
+    const uint32_t NumWavelengthSamples = 10;
+    for (int j = 0; j < NumWavelengthSamples; ++j) {
+        float wlPDF;
+        WavelengthSamples wls = WavelengthSamples::createWithEqualOffsets((j + 0.5f) / NumWavelengthSamples, rng->getFloat0cTo1o(), &wlPDF);
+        
+        SampledSpectrum baseColor = s_commonDataForBSDFTest.FlatReflectance->evaluate(wls);
+        float subsurface = 0.5f;
+        float metallic = 0.5f;
+        float specular = 1.0f;
+        float specularTint = 0.5f;
+        float roughness = 0.5f;
+        float anisotropic = 1.0f;
+        float sheen = 1.0f;
+        float sheenTint = 0.5f;
+        float clearCoat = 1.0f;
+        float clearCoatGloss = 0.5f;
+        std::shared_ptr<BSDF> bsdf = createShared<DisneyBRDF>(baseColor, baseColorLuminance, 
+                                                              subsurface, metallic, specular, specularTint, roughness, anisotropic, 
+                                                              sheen, sheenTint, clearCoat, clearCoatGloss);
         BSDFTest_Function(bsdf.get(), wls, rng, false, false);
         BSDFTest_Function(bsdf.get(), wls, rng, true, false);
         BSDFTest_Function(bsdf.get(), wls, rng, false, true);
