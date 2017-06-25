@@ -47,7 +47,6 @@ namespace SLRSceneGraph {
     public:
         DensityGridMediumNode(const SLR::BoundingBox3D &region, const AssetSpectrumRef &base_sigma_s, const AssetSpectrumRef &base_sigma_e, 
                               std::vector<std::vector<float>> &&density_grid, uint32_t numX, uint32_t numY, uint32_t numZ, const MediumMaterialRef &material);
-        ~DensityGridMediumNode();
         
         NodeRef copy() const override;
         
@@ -87,6 +86,27 @@ namespace SLRSceneGraph {
     public:
         VacuumMediumNode(const SLR::BoundingBox3D &region);
         ~VacuumMediumNode();
+        
+        NodeRef copy() const override;
+        
+        void prepareForRendering() override;
+    };
+    
+    
+    
+    class SLR_SCENEGRAPH_API CloudMediumNode : public MediumNode {
+        SLR::BoundingBox3D m_region;
+        float m_featureScale;
+        float m_density;
+        uint32_t m_rngSeed;
+        MediumMaterialRef m_material;
+        
+        void allocateRawData() override;
+        void setupRawData() override;
+        void terminateRawData() override;
+    public:
+        CloudMediumNode(const SLR::BoundingBox3D &region, float featureScale, float density, uint32_t rngSeed, const MediumMaterialRef &material);
+        ~CloudMediumNode();
         
         NodeRef copy() const override;
         

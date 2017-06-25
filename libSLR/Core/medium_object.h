@@ -213,7 +213,7 @@ namespace SLR {
         BoundingBox3D m_bounds;
         std::vector<const MediumObject*> m_objLists;
         const MediumObject** m_lightList;
-        std::map<uint32_t, uint32_t> m_objToLightMap;
+        std::map<const MediumObject*, uint32_t> m_objToLightMap;
         uint32_t m_numLights;
         DiscreteDistribution1D* m_lightDist1D;
     public:

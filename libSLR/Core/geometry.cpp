@@ -67,7 +67,7 @@ namespace SLR {
     }
     
     ABDFQuery* SurfacePoint::createABDFQuery(const Vector3D &dirLocal, int16_t selectedWL, DirectionType filter, bool reqRev, bool adjoint, ArenaAllocator &mem) const {
-        return mem.create<BSDFQuery>(dirLocal, toLocal(m_gNormal), selectedWL, filter,reqRev, adjoint);
+        return mem.create<BSDFQuery>(dirLocal, toLocal(m_gNormal), selectedWL, filter, reqRev, adjoint);
     }
     
     void SurfacePoint::applyTransform(const SLR::StaticTransform &transform) {

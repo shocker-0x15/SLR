@@ -23,8 +23,7 @@ namespace SLR {
         SampledSpectrum transmittance = exp(-extCoeff * std::min(distance, segment.distMax - segment.distMin));
         
         *singleWavelength = false;
-        FloatSum sampledDistance = segment.distMin;
-        sampledDistance += distance;
+        float sampledDistance = segment.distMin + distance;
         if (sampledDistance < segment.distMax) {
             queryPoint = ray.org + sampledDistance * ray.dir;
             m_region.calculateLocalCoordinates(queryPoint, &param);

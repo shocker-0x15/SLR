@@ -372,7 +372,7 @@ namespace SLR {
             uint32_t objIdx = lightIndices[i];
             const SurfaceObject* light = objs[objIdx];
             m_lightList[i] = light;
-            m_objToLightMap[objIdx] = i;
+            m_objToLightMap[light] = i;
         }
     }
     
@@ -410,8 +410,8 @@ namespace SLR {
     bool SurfaceObjectAggregate::contains(const Point3D &p, float time) const {
         Ray probeRay(p, Vector3D::Ex, time);
         SurfaceInteraction si;
-        uint32_t closestIndex;
-        bool hit = m_accelerator->intersect(probeRay, RaySegment(), &si, &closestIndex);
+        const SurfaceObject* hitObj;
+        bool hit = m_accelerator->intersect(probeRay, RaySegment(), &si, &hitObj);
         if (!hit)
             return false;
         return dot(si.getGeometricNormal(), probeRay.dir) >= 0.0f;
@@ -425,8 +425,8 @@ namespace SLR {
             Accelerator::traceTraversePrefix += "  ";
         }
 #endif
-        uint32_t objIdx;
-        if (!m_accelerator->intersect(ray, segment, si, &objIdx)) {
+        const SurfaceObject* hitObj;
+        if (!m_accelerator->intersect(ray, segment, si, &hitObj)) {
 #ifdef DEBUG
             if (Accelerator::traceTraverse) {
                 debugPrintf("%snot found\n", Accelerator::traceTraversePrefix.c_str());
@@ -436,8 +436,8 @@ namespace SLR {
 #endif
             return false;
         }
-        if (m_objToLightMap.count(objIdx) > 0) {
-            uint32_t lightIdx = m_objToLightMap.at(objIdx);
+        if (m_objToLightMap.count(hitObj) > 0) {
+            uint32_t lightIdx = m_objToLightMap.at(hitObj);
             si->setLightProb(m_lightDist1D->evaluatePMF(lightIdx) * si->getLightProb());
         }
 #ifdef DEBUG

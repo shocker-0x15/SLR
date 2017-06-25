@@ -415,8 +415,8 @@ namespace SLR {
             return m_bounds;
         }
         
-        bool intersect(const Ray &ray, const RaySegment &segment, SurfaceInteraction* si, uint32_t* closestIndex) const override {
-            *closestIndex = UINT32_MAX;
+        bool intersect(const Ray &ray, const RaySegment &segment, SurfaceInteraction* si, const SurfaceObject** closestObject) const override {
+            *closestObject = nullptr;
             bool dirIsPositive[] = {ray.dir.x >= 0, ray.dir.y >= 0, ray.dir.z >= 0};
             RaySegment isectRange = segment;
             
@@ -443,13 +443,13 @@ namespace SLR {
                         }
 #endif
                         if (m_objLists[node.offsetFirstLeaf + i]->intersect(ray, isectRange, si)) {
-                            *closestIndex = node.offsetFirstLeaf + i;
+                            *closestObject = m_objLists[node.offsetFirstLeaf + i];
                             isectRange.distMax = si->getDistance();
                         }
                     }
                 }
             }
-            return *closestIndex != UINT32_MAX;
+            return *closestObject != nullptr;
         }
     };    
 }

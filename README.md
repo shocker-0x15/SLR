@@ -29,7 +29,10 @@ SLR consists of the following components.
 * Volume Rendering \[Pauly1999, Raab2008, Novák2014\]
     * Participating Media
         * Homogeneous Media
-        * Heterogeneous Media (trilinear-interpolated grid)
+        * Heterogeneous Media
+            * Trilinear-interpolated Grid
+            * ~~Procedurally-generated Clouds~~ (TODO)
+            * Free Path Sampling is accelerated by Super-voxels \[Szirmay-Kalos2011\]
         * Media enclosed by surfaces
     * Phase Functions
         * Isotropic
@@ -43,7 +46,7 @@ SLR consists of the following components.
         * Cell Noise \[Worley1996\] like Voronoi diagram (color & normal & float)
         * Improved Perlin Noise \[Perlin2002\] (float & normal)
 * Bump Mapping (Normal Map)
-* Light Types
+* Light Source Types
     * Area (Polygonal) Light
     * Infinitely Distant Image Based Environmental Light
     * ~~Infinitely Distant Directional Light~~ (TODO)
@@ -67,7 +70,7 @@ SLR consists of the following components.
     * Path Tracing \[Kajiya1986\] with MIS (+ volumetric variant)
     * Bidirectional Path Tracing \[Veach1994, 1997\] (+ volumetric variant)
     * ~~Adaptive MCMC Progressive Photon Mapping~~ \[Hachisuka2011\]  
-(has been dropped from current SLR implementation.)
+      (has been dropped from current SLR implementation.)
 * Correct handling of non-symmetric scattering due to shading normals \[Veach1996, 1997\]
 * SLR Custom Language (C/Python-like syntax) for flexible scene description
 
@@ -108,6 +111,7 @@ There are some scene files loading model data and textures, but those assets are
 [Perlin2002] "Improving Noise"  
 [Raab2008] "Unbiased Global Illumination with Participating Media"  
 [Stich2009] "Spatial Splits in Bounding Volume Hierarchies"  
+[Szirmay-Kalos2011] "Free Path Sampling in High Resolution Inhomogeneous Participating Media"  
 [Veach1994] "Bidirectional Estimators for Light Transport"  
 [Veach1996] "Non-symmetric Scattering in Light Transport Algorithms"  
 [Veach1997] "ROBUST MONTE CARLO METHODS FOR LIGHT TRANSPORT SIMULATION"  

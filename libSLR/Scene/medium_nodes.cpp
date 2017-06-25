@@ -14,6 +14,7 @@
 #include "../MediumDistribution/GridMediumDistribution.h"
 #include "../MediumDistribution/DensityGridMediumDistribution.h"
 #include "../MediumDistribution/VacuumMediumDistribution.h"
+#include "../MediumDistribution/CloudMediumDistribution.h"
 
 namespace SLR {
     HomogeneousMediumNode::HomogeneousMediumNode(const BoundingBox3D &region, const AssetSpectrum* sigma_s, const AssetSpectrum* sigma_e, const MediumMaterial* material) :
@@ -93,6 +94,26 @@ namespace SLR {
     }
     
     void VacuumMediumNode::destroyRenderingData(Allocator *mem) {
+        mem->destroy(m_obj);
+    }
+    
+    
+    
+    CloudMediumNode::CloudMediumNode(const BoundingBox3D &region, float featureScale, float density, uint32_t rngSeed, const MediumMaterial* material) :
+    m_material(material) {
+        m_medium = new CloudMediumDistribution(region, featureScale, density, rngSeed);
+    }
+    
+    CloudMediumNode::~CloudMediumNode() {
+        delete m_medium;
+    }
+    
+    void CloudMediumNode::createRenderingData(Allocator *mem, const Transform *subTF, RenderingData *data) {
+        m_obj = mem->create<SingleMediumObject>(m_medium, m_material);
+        data->medObjs.push_back(m_obj);
+    }
+    
+    void CloudMediumNode::destroyRenderingData(Allocator *mem) {
         mem->destroy(m_obj);
     }
 }

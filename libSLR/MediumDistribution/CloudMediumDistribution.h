@@ -1,67 +1,49 @@
 //
-//  DensityGridMediumDistribution.h
+//  CloudMediumDistribution.h
 //
-//  Created by 渡部 心 on 2017/02/14.
+//  Created by 渡部 心 on 2017/03/24.
 //  Copyright (c) 2017年 渡部 心. All rights reserved.
 //
 
-#ifndef __SLR_DensityGridMediumDistribution__
-#define __SLR_DensityGridMediumDistribution__
+#ifndef __SLR_CloudMediumDistribution__
+#define __SLR_CloudMediumDistribution__
 
 #include "../defines.h"
 #include "../declarations.h"
 #include "../Core/geometry.h"
+#include "../Core/distributions.h"
 
 namespace SLR {
-    class DensityGridMediumDistribution : public MediumDistribution {
+    class CloudMediumDistribution : public MediumDistribution {
         std::array<float, NumStrataForStorage> m_majorantExtinctionCoefficient;
         BoundingBox3D m_region;
-        const AssetSpectrum* m_base_sigma_s;
         const AssetSpectrum* m_base_sigma_e;
-        float m_maxDensity;
-        const float** m_density_grid;
-        uint32_t m_numX, m_numY, m_numZ;
+        const AssetSpectrum* m_albedo;
+        MultiOctaveImprovedPerlinNoise3DGenerator<float> m_distributionGenerator;
+        MultiOctaveImprovedPerlinNoise3DGenerator<float> m_densityGenerator;
         
-        float* m_superVoxels;
-        float* m_maximumDifferences;
-        uint32_t m_svNumX, m_svNumY, m_svNumZ;
-        Vector3D m_superVoxelWidth;
-        
-        float calcDensityInSuperVoxels(const Point3D &param) const;
-        void setupSuperVoxels();
-        bool traverseSuperVoxels(const Ray &ray, const RaySegment &segment, FreePathSampler &sampler, float base_sigma_e, 
-                                 const int32_t step[3], const float delta_t[3], const int32_t outsideIndices[3],   
-                                 float max_t[3], int32_t superVoxel[3], 
-                                 float* sampledDistance, float* majorantAtScattering) const;
-        
+        void saveToFile(const char* fileName, uint32_t resX, uint32_t resY, uint32_t resZ) const;
         float calcDensity(const Point3D &param) const;
     public:
-        DensityGridMediumDistribution(const BoundingBox3D &region, const AssetSpectrum* base_sigma_s, const AssetSpectrum* base_sigma_e, const std::vector<std::vector<float>> &density_grid,
-                                      uint32_t numX, uint32_t numY, uint32_t numZ) :
-        m_region(region), m_base_sigma_s(base_sigma_s), m_base_sigma_e(base_sigma_e), 
-        m_numX(numX), m_numY(numY), m_numZ(numZ) {
-            m_density_grid = new const float*[m_numZ];
-            for (int z = 0; z < m_numZ; ++z)
-                m_density_grid[z] = density_grid[z].data();
+        CloudMediumDistribution(const BoundingBox3D &region, float featureScale, float density, uint32_t rngSeed) : 
+        m_region(region),
+        m_distributionGenerator(10, 1.0f / featureScale, 1.0f, true, 2.0f, 0.5f, -1),
+        m_densityGenerator(3, 1.0f / featureScale, 10.0f * density / featureScale, false, 2.0f, 0.5f, -1) {
+            float sigma_e_values[] = {0.1f, 0.1f};
+            m_base_sigma_e = new RegularContinuousSpectrum(WavelengthLowBound, WavelengthHighBound, sigma_e_values, 2);
+            float albedo_values[] = {0.9f, 0.9f};
+            m_albedo = new RegularContinuousSpectrum(WavelengthLowBound, WavelengthHighBound, albedo_values, 2);
             
-            m_maxDensity = -INFINITY;
-            for (int z = 0; z < numZ; ++z) {
-                for (int y = 0; y < numY; ++y) {
-                    for (int x = 0; x < numX; ++x) {
-                        m_maxDensity = std::max(m_maxDensity, m_density_grid[z][numX * y + x]);
-                    }
-                }
-            }
             m_base_sigma_e->calcBounds(NumStrataForStorage, m_majorantExtinctionCoefficient.data());
             for (int i = 0; i < NumStrataForStorage; ++i)
-                m_majorantExtinctionCoefficient[i] *= m_maxDensity;
-            
-            setupSuperVoxels();
+                m_majorantExtinctionCoefficient[i] *= 200.0f;//m_densityGenerator.getSupValue();
+//            saveToFile("Cloud0_16x16x16.vdg", 16, 16, 16);
+//            saveToFile("Cloud0_64x64x64.vdg", 64, 64, 64);
+//            saveToFile("Cloud0_256x256x256.vdg", 256, 256, 256);
         }
-        ~DensityGridMediumDistribution() {
-            delete[] m_maximumDifferences;
-            delete[] m_superVoxels;
-            delete[] m_density_grid;
+        ~CloudMediumDistribution() {
+            delete m_albedo;
+            delete m_base_sigma_e;
         }
         
         float majorantExtinctionCoefficientAtWavelength(float wl) const override {
@@ -90,4 +72,4 @@ namespace SLR {
     };
 }
 
-#endif /* __SLR_DensityGridMediumDistribution__ */
+#endif /* __SLR_CloudMediumDistribution__ */

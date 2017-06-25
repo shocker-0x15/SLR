@@ -75,6 +75,22 @@ namespace SLR {
         void createRenderingData(Allocator* mem, const Transform* subTF, RenderingData *data) override;
         void destroyRenderingData(Allocator* mem) override;
     };
+    
+    
+    
+    class SLR_API CloudMediumNode : public MediumNode {
+        CloudMediumDistribution* m_medium;
+        const MediumMaterial* m_material;
+        
+        SingleMediumObject* m_obj;
+    public:
+        CloudMediumNode(const BoundingBox3D &region, float featureScale, float density, uint32_t rngSeed, const MediumMaterial* material);
+        ~CloudMediumNode();
+        
+        bool isDirectlyTransformable() const override { return false; }
+        void createRenderingData(Allocator* mem, const Transform* subTF, RenderingData *data) override;
+        void destroyRenderingData(Allocator* mem) override;
+    };
 }
 
 #endif /* __SLR_medium_nodes__ */

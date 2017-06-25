@@ -913,6 +913,12 @@ namespace SLRSceneGraph {
                                                    },
                                                    {
                                                        {"min", Type::Point}, {"max", Type::Point},
+                                                       {"base_sigma_s", Type::Spectrum}, {"base_sigma_e", Type::Spectrum},
+                                                       {"density_grid", Type::String},
+                                                       {"mat", Type::MediumMaterial}
+                                                   },
+                                                   {
+                                                       {"min", Type::Point}, {"max", Type::Point},
                                                        {"sigma_s", Type::Tuple}, {"sigma_e", Type::Tuple}, {"mat", Type::MediumMaterial}
                                                    }
                                                },
@@ -927,6 +933,7 @@ namespace SLRSceneGraph {
                                                        uint32_t numY = args.at("numY").raw<TypeMap::Integer>();
                                                        uint32_t numZ = args.at("numZ").raw<TypeMap::Integer>();
                                                        SLRAssert(numZ == density_grid.numUnnamed(), "The number of z-slices of density_grid and specified grid z dimension do not match.");
+                                                       
                                                        std::vector<std::vector<float>> densityArray;
                                                        densityArray.resize(numZ);
                                                        for (int z = 0; z < numZ; ++z) {
@@ -948,9 +955,64 @@ namespace SLRSceneGraph {
                                                        return Element::createFromReference<TypeMap::MediumNode>(mediumNode);
                                                    },
                                                    [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
+                                                       const auto &minP = args.at("min").raw<TypeMap::Point>();
+                                                       const auto &maxP = args.at("max").raw<TypeMap::Point>();
+                                                       AssetSpectrumRef base_sigma_s = args.at("base_sigma_s").rawRef<TypeMap::Spectrum>();
+                                                       AssetSpectrumRef base_sigma_e = args.at("base_sigma_e").rawRef<TypeMap::Spectrum>();
+                                                       const std::string density_grid = context.absFileDirPath + args.at("density_grid").raw<TypeMap::String>();
+                                                       
+                                                       uint32_t numX, numY, numZ;
+                                                       std::vector<std::vector<float>> densityArray;
+                                                       {
+                                                           FILE* fp = fopen(density_grid.c_str(), "rb");
+                                                           if (fp == nullptr) {
+                                                               char msg[256];
+                                                               sprintf(msg, "failed to read density grid file: %s.", density_grid.c_str());
+                                                               *err = ErrorMessage(msg);
+                                                               return Element();
+                                                           }
+                                                           
+                                                           fread(&numX, sizeof(uint32_t), 1, fp);
+                                                           fread(&numY, sizeof(uint32_t), 1, fp);
+                                                           fread(&numZ, sizeof(uint32_t), 1, fp);
+                                                           
+                                                           densityArray.resize(numZ);
+                                                           for (int iz = 0; iz < numZ; ++iz) {
+                                                               std::vector<float> zSliceArray;
+                                                               zSliceArray.resize(numY * numX);
+                                                               fread(zSliceArray.data(), sizeof(float), numX * numY, fp);
+                                                               densityArray[iz] = std::move(zSliceArray);
+                                                           }
+                                                           
+                                                           fclose(fp);
+                                                       }
+                                                       
+                                                       MediumMaterialRef mat = args.at("mat").rawRef<TypeMap::MediumMaterial>();
+                                                       MediumNodeRef mediumNode = createShared<DensityGridMediumNode>(SLR::BoundingBox3D(minP, maxP), base_sigma_s, base_sigma_e, 
+                                                                                                                      std::move(densityArray), numX, numY, numZ, mat);
+                                                       return Element::createFromReference<TypeMap::MediumNode>(mediumNode);
+                                                   },
+                                                   [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
                                                        SLRAssert_NotImplemented();
                                                        return Element();
                                                    }
+                                               }
+                                               );
+            stack["createCloudMedium"] =
+            Element::create<TypeMap::Function>(1,
+                                               std::vector<ArgInfo>{
+                                                   {"min", Type::Point}, {"max", Type::Point}, 
+                                                   {"scale", Type::RealNumber}, {"density", Type::RealNumber}, {"rng seed", Type::Integer}, 
+                                                   {"mat", Type::MediumMaterial}},
+                                               [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
+                                                   const auto &minP = args.at("min").raw<TypeMap::Point>();
+                                                   const auto &maxP = args.at("max").raw<TypeMap::Point>();
+                                                   auto scale = args.at("scale").raw<TypeMap::RealNumber>();
+                                                   auto density = args.at("density").raw<TypeMap::RealNumber>();
+                                                   auto rngSeed = args.at("rng seed").raw<TypeMap::Integer>(); 
+                                                   MediumMaterialRef mat = args.at("mat").rawRef<TypeMap::MediumMaterial>();
+                                                   MediumNodeRef mediumNode = createShared<CloudMediumNode>(SLR::BoundingBox3D(minP, maxP), scale, density, rngSeed, mat);
+                                                   return Element::createFromReference<TypeMap::MediumNode>(mediumNode);
                                                }
                                                );
             stack["createNode"] =

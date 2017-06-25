@@ -178,8 +178,6 @@ namespace SLR {
         
         while (true) {
             ++pathLength;
-            if (pathLength >= 100)
-                break;
             
             AbstractBDF* abdf = interPt->createAbstractBDF(wls, mem);
             ABDFQuery* abdfQuery = interPt->createABDFQuery(dirOut_local, wls.selectedLambdaIndex, DirectionType::All, false, false, mem);
