@@ -37,11 +37,11 @@ namespace SLR {
         concentricSampleDisk(smp.uPos[0], smp.uPos[1], &lx, &ly);
         Point3D orgLocal = Point3D(m_lensRadius * lx, m_lensRadius * ly, 0.0f);
         
-        Normal3D geometricNormal = staticTF * Normal3D(0, 0, 1);
+        Normal3D geometricNormal = normalize(staticTF * Normal3D(0, 0, 1));
         
         ReferenceFrame shadingFrame;
         shadingFrame.z = (Vector3D)geometricNormal;
-        shadingFrame.x = staticTF * Vector3D(1, 0, 0);// assume the transform doesn't include scaling.
+        shadingFrame.x = normalize(staticTF * Vector3D(1, 0, 0));
         shadingFrame.y = cross(shadingFrame.z, shadingFrame.x);
         
         result->surfPt = SurfacePoint(staticTF * orgLocal, // - position in world coordinate

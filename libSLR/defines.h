@@ -147,9 +147,9 @@ bool realEq(T a, T b, T epsilon) {
     return forAbsolute || forRelative;
 }
 template <typename T>
-bool realGE(T a, T b, T epsilon) { return a > b || realEq(a - b, (T)0, epsilon); }
+bool realGE(T a, T b, T epsilon) { return a > b || realEq(a, b, epsilon); }
 template <typename T>
-bool realLE(T a, T b, T epsilon) { return a < b || realEq(a - b, (T)0, epsilon); }
+bool realLE(T a, T b, T epsilon) { return a < b || realEq(a, b, epsilon); }
 
 inline uint32_t prevPowerOf2(uint32_t x) {
     x = x | (x >> 1);

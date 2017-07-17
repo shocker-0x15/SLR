@@ -42,14 +42,13 @@ namespace SLR {
             param.x > 1 || param.y > 1 || param.z > 1)
             return 0.0f;
         
-        Point3D position = m_region.minP + Vector3D(param) * (m_region.maxP - m_region.minP);
+        Point3D position = m_aspect * param;
         
-        float distributionValue = m_distributionGenerator.evaluate(position.x, position.y, position.z);
+        float distributionValue = m_distributionGenerator.evaluate(position);
         float distributionThreshold = 0.525f;
         if (distributionValue > distributionThreshold)
-            return 200.0f * std::pow((distributionValue - distributionThreshold) / (1 - distributionThreshold), 0.2f);
+            return 1.0;//m_densityGenerator.evaluate(position.x, position.y, position.z);
         return 0.0f;
-//        return m_densityGenerator.evaluate(position.x, position.y, position.z);
     }
     
     bool CloudMediumDistribution::subdivide(Allocator* mem, MediumDistribution** fragments, uint32_t* numFragments) const {
@@ -58,7 +57,7 @@ namespace SLR {
     }
     
     bool CloudMediumDistribution::interact(const Ray &ray, const RaySegment &segment, const WavelengthSamples &wls, LightPathSampler &pathSampler,
-                                                 MediumInteraction *mi, SampledSpectrum *medThroughput, bool* singleWavelength) const {
+                                           MediumInteraction *mi, SampledSpectrum *medThroughput, bool* singleWavelength) const {
         SLRAssert(std::isfinite(segment.distMax), "distanceLimit must be a finite value.");
         FreePathSampler &sampler = pathSampler.getFreePathSampler();
         
@@ -100,7 +99,7 @@ namespace SLR {
     }
     
     SampledSpectrum CloudMediumDistribution::evaluateTransmittance(const Ray &ray, const RaySegment &segment, const WavelengthSamples &wls, SLR::LightPathSampler &pathSampler, 
-                                                                         bool* singleWavelength) const {
+                                                                   bool* singleWavelength) const {
         SLRAssert(std::isfinite(segment.distMax), "distanceLimit must be a finite value.");
         FreePathSampler sampler = pathSampler.getFreePathSampler();
         

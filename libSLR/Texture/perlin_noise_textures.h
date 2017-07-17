@@ -17,7 +17,7 @@ namespace SLR {
     class SLR_API PerlinNoiseNormalTexture : public NormalTexture {
         const Texture3DMapping* m_mapping;
         float m_thetaMax;
-        MultiOctaveImprovedPerlinNoise3DGenerator<float> m_generator[2];
+        MultiOctavePerlinNoise3DGeneratorTemplate<float> m_generator[2];
     public:
         PerlinNoiseNormalTexture(const Texture3DMapping* mapping, float thetaMax, 
                                  uint32_t numOctaves, float initialFrequencyPhi, float initialFrequencyTheta, 
@@ -39,7 +39,7 @@ namespace SLR {
     
     class SLR_API PerlinNoiseFloatTexture : public FloatTexture {
         const Texture3DMapping* m_mapping;
-        MultiOctaveImprovedPerlinNoise3DGenerator<float> m_generator;
+        MultiOctavePerlinNoise3DGeneratorTemplate<float> m_generator;
     public:
         PerlinNoiseFloatTexture(const Texture3DMapping* mapping, uint32_t numOctaves, float initialFrequency, float supValueOrInitialAmplitude, bool supSpecified, 
                                 float frequencyMultiplier, float persistence, int32_t repeat) :  

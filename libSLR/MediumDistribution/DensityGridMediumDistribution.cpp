@@ -203,6 +203,8 @@ namespace SLR {
 //        printf("");
     }
     
+    // References:
+    // Free Path Sampling in High Resolution Inhomogeneous Participating Media
     bool DensityGridMediumDistribution::traverseSuperVoxels(const Ray &ray, const RaySegment &segment, FreePathSampler &sampler, float base_sigma_e, 
                                                             const int32_t step[3], const float delta_t[3], const int32_t outsideIndices[3],   
                                                             float max_t[3], int32_t superVoxel[3], 

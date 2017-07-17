@@ -98,6 +98,8 @@ namespace SLR {
         
         // check intersection between ray segment and bounding volume.
         bool intersect(const RayTemplate<RealType> &r, const RaySegmentTemplate<RealType> &seg) const {
+            if (!isValid())
+                return false;
             RealType dist0 = seg.distMin, dist1 = seg.distMax;
             Vector3DTemplate<RealType> invRayDir = r.dir.reciprocal();
             Vector3DTemplate<RealType> tNear = (minP - r.org) * invRayDir;
@@ -115,6 +117,8 @@ namespace SLR {
         
         // check intersection between ray segment and boundary.
         bool intersectBoundary(const RayTemplate<RealType> &r, const RaySegmentTemplate<RealType> &seg, RealType* distToBoundary, bool* enter) const {
+            if (!isValid())
+                return false;
             RealType dist0 = -INFINITY, dist1 = INFINITY;
             Vector3DTemplate<RealType> invRayDir = r.dir.reciprocal();
             Vector3DTemplate<RealType> tNear = (minP - r.org) * invRayDir;

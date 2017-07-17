@@ -27,12 +27,12 @@ namespace SLR {
         if (m_transform)
             m_transform->sample(query.time, &staticTF);
         
-        Normal3D geometricNormal = staticTF * Normal3D(0, 0, 1);
+        Normal3D geometricNormal = normalize(staticTF * Normal3D(0, 0, 1));
         SLRAssert(geometricNormal.length() < 1.01f, "Transform applied to camera can not include scaling.");
         
         ReferenceFrame shadingFrame;
         shadingFrame.z = (Vector3D)geometricNormal;
-        shadingFrame.x = staticTF * Vector3D(1, 0, 0);// assume the transform doesn't include scaling.
+        shadingFrame.x = normalize(staticTF * Vector3D(1, 0, 0));
         shadingFrame.y = cross(shadingFrame.z, shadingFrame.x);
         
         result->surfPt = SurfacePoint(staticTF * Point3D::Zero, // - position in world coordinate

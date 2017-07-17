@@ -811,6 +811,12 @@ namespace SLRSceneGraph {
                 info.affOperator = [](const Element &v) { return v; };
                 info.negOperator = [](const Element &v) { return Element(-v.raw<TypeMap::Point>()); };
                 
+                info.mulOperator = [](const Element &v0, const Element &v1) {
+                    auto lVal = v0.raw<TypeMap::Point>();
+                    if (v1.isConvertibleTo<TypeMap::RealNumber>())
+                        return Element(lVal * v1.asRaw<TypeMap::RealNumber>());
+                    return Element(ErrorMessage("* operator does not support the right operand type."));
+                };
                 info.eqOperator = [](const Element &v0, const Element &v1) {
                     auto lVal = v0.raw<TypeMap::Point>();
                     if (v1.isConvertibleTo<TypeMap::Point>())

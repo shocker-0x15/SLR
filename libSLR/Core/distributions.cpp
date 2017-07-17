@@ -9,6 +9,7 @@
 
 #include "../BasicTypes/CompensatedSum.h"
 #include "../Helper/bmp_exporter.h"
+#include "../RNG/LinearCongruentialRNG.h"
 
 namespace SLR {
     template <typename RealType>
@@ -377,7 +378,7 @@ namespace SLR {
     
     
     template <typename RealType>
-    RealType MultiOctaveImprovedPerlinNoise3DGenerator<RealType>::gradient(uint32_t hash, RealType xu, RealType yu, RealType zu) {
+    RealType ImprovedPerlinNoise3DGeneratorTemplate<RealType>::gradient(uint32_t hash, RealType xu, RealType yu, RealType zu) {
         switch (hash & 0xF) {
             case 0x0: return  xu + yu;
             case 0x1: return -xu + yu;
@@ -400,7 +401,9 @@ namespace SLR {
     }
     
     template <typename RealType>
-    RealType MultiOctaveImprovedPerlinNoise3DGenerator<RealType>::primaryPerlinNoise(RealType x, RealType y, RealType z) const {
+    RealType ImprovedPerlinNoise3DGeneratorTemplate<RealType>::evaluate(const Point3DTemplate<RealType> &p) const {        
+        RealType x = p.x, y = p.y, z = p.z;
+        
         // If we have any repeat on, change the coordinates to their "local" repetitions.
         if (m_repeat > 0) {
             x = std::fmod(x, m_repeat);
@@ -414,6 +417,11 @@ namespace SLR {
                 z += m_repeat;
         }
         
+        int32_t iEvalCoord[3];
+        iEvalCoord[0] = std::floor(x);
+        iEvalCoord[1] = std::floor(y);
+        iEvalCoord[2] = std::floor(z);
+        
         const auto fade = [](RealType t) {
             // Fade function as defined by Ken Perlin.
             // This eases coordinate values so that they will "ease" towards integral values.
@@ -426,33 +434,33 @@ namespace SLR {
         // The left bound is ( |_x_|,|_y_|,|_z_| ) and the right bound is that plus 1. 
         // Next we calculate the location (from 0.0 to 1.0) in that cube.
         // We also fade the location to smooth the result.
-        int32_t xi = (int32_t)std::floor(x) & 255;
-        int32_t yi = (int32_t)std::floor(y) & 255;
-        int32_t zi = (int32_t)std::floor(z) & 255;
-        RealType xu = x - std::floor(x);
-        RealType yu = y - std::floor(y);
-        RealType zu = z - std::floor(z);
+        RealType xu = x - iEvalCoord[0];
+        RealType yu = y - iEvalCoord[1];
+        RealType zu = z - iEvalCoord[2];
         SLRAssert(xu >= 0 && xu <= 1 && yu >= 0 && yu <= 1 && zu >= 0 && zu <= 1, "xu, yu, zu must be in the unit cube [0, 1]^3.");
         RealType u = fade(xu);
         RealType v = fade(yu);
         RealType w = fade(zu);
         
-        const auto inc = [this](int32_t num) {
-            ++num;
-            if (m_repeat > 0)
-                num %= m_repeat;
-            return num;
-        };
-        
-        uint8_t lll, llu, lul, luu, ull, ulu, uul, uuu;
-        lll = PermutationTable[PermutationTable[PermutationTable[    xi ] +     yi ] +     zi ];
-        llu = PermutationTable[PermutationTable[PermutationTable[    xi ] +     yi ] + inc(zi)];
-        lul = PermutationTable[PermutationTable[PermutationTable[    xi ] + inc(yi)] +     zi ];
-        luu = PermutationTable[PermutationTable[PermutationTable[    xi ] + inc(yi)] + inc(zi)];
-        ull = PermutationTable[PermutationTable[PermutationTable[inc(xi)] +     yi ] +     zi ];
-        ulu = PermutationTable[PermutationTable[PermutationTable[inc(xi)] +     yi ] + inc(zi)];
-        uul = PermutationTable[PermutationTable[PermutationTable[inc(xi)] + inc(yi)] +     zi ];
-        uuu = PermutationTable[PermutationTable[PermutationTable[inc(xi)] + inc(yi)] + inc(zi)];
+        // Code in the reference site uses a permutation table of size 256.
+        // It imposes the repetition pattern of size 256 even if repetition is not specified.
+        // Modified it by instead using a pseudo random number generator based on integer coordinate.
+        uint8_t cornerHashes[8];
+        for (int iz = 0; iz < 2; ++iz) {
+            for (int iy = 0; iy < 2; ++iy) {
+                for (int ix = 0; ix < 2; ++ix) {
+                    int32_t iCoord[3] = {iEvalCoord[0] + ix, iEvalCoord[1] + iy, iEvalCoord[2] + iz};
+                    if (m_repeat > 0) {
+                        iCoord[0] %= m_repeat;
+                        iCoord[1] %= m_repeat;
+                        iCoord[2] %= m_repeat;
+                    }
+                    uint32_t hash = getFNV1Hash32((uint8_t*)iCoord, sizeof(iCoord));
+                    LinearCongruentialRNG rng(hash);
+                    cornerHashes[4 * iz + 2 * iy + ix] = (rng.getUInt() >> 24) & 0xF;
+                }
+            }
+        }
         
         const auto lerp = [](RealType v0, RealType v1, RealType t) {
             return v0 * (1 - t) + v1 * t;
@@ -461,12 +469,12 @@ namespace SLR {
         // The gradient function calculates the dot product between a pseudorandom gradient vector and 
         // the vector from the input coordinate to the 8 surrounding points in its unit cube.
         // This is all then lerped together as a sort of weighted average based on the faded (u,v,w) values we made earlier.
-        RealType _llValue = lerp(gradient(lll, xu, yu, zu), gradient(ull, xu - 1, yu, zu), u);
-        RealType _ulValue = lerp(gradient(lul, xu, yu - 1, zu), gradient(uul, xu - 1, yu - 1, zu), u);
+        RealType _llValue = lerp(gradient(cornerHashes[0], xu, yu, zu), gradient(cornerHashes[1], xu - 1, yu, zu), u);
+        RealType _ulValue = lerp(gradient(cornerHashes[2], xu, yu - 1, zu), gradient(cornerHashes[3], xu - 1, yu - 1, zu), u);
         RealType __lValue = lerp(_llValue, _ulValue, v);
         
-        RealType _luValue = lerp(gradient(llu, xu, yu, zu - 1), gradient(ulu, xu - 1, yu, zu - 1), u);
-        RealType _uuValue = lerp(gradient(luu, xu, yu - 1, zu - 1), gradient(uuu, xu - 1, yu - 1, zu - 1), u);
+        RealType _luValue = lerp(gradient(cornerHashes[4], xu, yu, zu - 1), gradient(cornerHashes[5], xu - 1, yu, zu - 1), u);
+        RealType _uuValue = lerp(gradient(cornerHashes[6], xu, yu - 1, zu - 1), gradient(cornerHashes[7], xu - 1, yu - 1, zu - 1), u);
         RealType __uValue = lerp(_luValue, _uuValue, v);
         
         // For convenience we bound it to 0 - 1 (theoretical min/max before is -1 - 1)
@@ -475,13 +483,18 @@ namespace SLR {
         return ret;
     }
     
+    template class SLR_API ImprovedPerlinNoise3DGeneratorTemplate<float>;
+    template class SLR_API ImprovedPerlinNoise3DGeneratorTemplate<double>;
+    
+    
+    
     template <typename RealType>
-    RealType MultiOctaveImprovedPerlinNoise3DGenerator<RealType>::evaluate(RealType x, RealType y, RealType z) const {
+    RealType MultiOctavePerlinNoise3DGeneratorTemplate<RealType>::evaluate(const Point3DTemplate<RealType> &p) const {
         RealType total = 0;
         RealType frequency = m_initialFrequency;
         RealType amplitude = m_initialAmplitude;
         for (int i = 0; i < m_numOctaves; ++i) {
-            total += primaryPerlinNoise(x * frequency, y * frequency, z * frequency) * amplitude;
+            total += m_primaryNoiseGen.evaluate(frequency * p) * amplitude;
             
             amplitude *= m_persistence;
             frequency *= m_frequencyMultiplier;
@@ -490,6 +503,103 @@ namespace SLR {
         return total;
     }
     
-    template class SLR_API MultiOctaveImprovedPerlinNoise3DGenerator<float>;
-    template class SLR_API MultiOctaveImprovedPerlinNoise3DGenerator<double>;
+    template class SLR_API MultiOctavePerlinNoise3DGeneratorTemplate<float>;
+    template class SLR_API MultiOctavePerlinNoise3DGeneratorTemplate<double>;
+    
+    
+    
+    template <typename RealType>
+    Vector3DTemplate<RealType> CurlNoise3DGeneratorTemplate<RealType>::evaluate(const Point3DTemplate<RealType> &p) const {
+        using Point3DType = Point3DTemplate<RealType>;
+        using Vector3DType = Vector3DTemplate<RealType>;
+        
+        const RealType Offset = 50;
+        const RealType Delta = 1e-3 / m_maxFrequency;
+        
+        const RealType Psi1Base = m_noiseGen.evaluate(Point3DType(p.x, p.y, p.z));
+        const RealType Psi2Base = m_noiseGen.evaluate(Point3DType(p.x + Offset, p.y, p.z));
+        const RealType Psi3Base = m_noiseGen.evaluate(Point3DType(p.x, p.y + Offset, p.z));
+        
+        RealType rPsi1ry = (m_noiseGen.evaluate(Point3DType(p.x, p.y + Delta, p.z)) - Psi1Base) / Delta;
+        RealType rPsi1rz = (m_noiseGen.evaluate(Point3DType(p.x, p.y, p.z + Delta)) - Psi1Base) / Delta;
+        RealType rPsi2rx = (m_noiseGen.evaluate(Point3DType(p.x + Offset + Delta, p.y, p.z)) - Psi2Base) / Delta;
+        RealType rPsi2rz = (m_noiseGen.evaluate(Point3DType(p.x + Offset, p.y, p.z + Delta)) - Psi2Base) / Delta;
+        RealType rPsi3rx = (m_noiseGen.evaluate(Point3DType(p.x + Offset + Delta, p.y, p.z)) - Psi3Base) / Delta;
+        RealType rPsi3ry = (m_noiseGen.evaluate(Point3DType(p.x + Offset, p.y + Delta, p.z)) - Psi3Base) / Delta;
+        
+        return Vector3DType(rPsi3ry - rPsi2rz, rPsi1rz - rPsi3rx, rPsi2rx - rPsi1ry);
+    }
+    
+    template class SLR_API CurlNoise3DGeneratorTemplate<float>;
+    template class SLR_API CurlNoise3DGeneratorTemplate<double>;
+    
+    
+    
+    template <typename RealType>
+    void WorleyNoise3DGeneratorTemplate<RealType>::evaluate(const Point3DTemplate<RealType> &p, RealType* closestDistance, uint32_t* hashOfClosest, uint32_t* closestFPIdx) const {
+        using Point3DType = Point3DTemplate<RealType>;
+        
+        int32_t iEvalCoord[3];
+        iEvalCoord[0] = std::floor(p.x);
+        iEvalCoord[1] = std::floor(p.y);
+        iEvalCoord[2] = std::floor(p.z);
+        
+        // JP: 本来は5 x 5 x 5 - 8 = 127の隣接セルを評価する必要がある。
+        //     評価点があるセル内において評価点が8区画のどれに属するかの情報を用いて最適化しても56セルは評価する必要がある。
+        //     が、27セルでもほとんどうまくいく。
+        // EN: Strictly, this requires evaluation of 5 x 5 x 5 - 8 = 127 adjacent cells.
+        //     It is necessary to evaluate 56 cells even if 
+        //     optimization is applied using information that which of 8 blocks the evaluation point belongs to in the cell where the evaluation point is in.  
+        //     However, it seems evaluating only 27 cells works well.
+        *closestDistance = INFINITY;
+        for (int iz = -1; iz <= 1; ++iz) {
+            for (int iy = -1; iy <= 1; ++iy) {
+                for (int ix = -1; ix <= 1; ++ix) {
+                    int32_t iCoord[3] = {iEvalCoord[0] + ix, iEvalCoord[1] + iy, iEvalCoord[2] + iz};
+                    uint32_t hash = getFNV1Hash32((uint8_t*)iCoord, sizeof(iCoord));
+                    LinearCongruentialRNG rng(hash);
+                    
+                    uint32_t numFeaturePoints = 1 + std::min(int32_t(8 * rng.getFloat0cTo1o()), 8);
+                    for (int i = 0; i < numFeaturePoints; ++i) {
+                        Point3DType fp = Point3DType(iCoord[0] + rng.getFloat0cTo1o(), 
+                                                     iCoord[1] + rng.getFloat0cTo1o(), 
+                                                     iCoord[2] + rng.getFloat0cTo1o());
+                        RealType dist = distance(p, fp);
+                        if (dist < *closestDistance) {
+                            *closestDistance = dist;
+                            *hashOfClosest = hash;
+                            *closestFPIdx = i;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    template class SLR_API WorleyNoise3DGeneratorTemplate<float>;
+    template class SLR_API WorleyNoise3DGeneratorTemplate<double>;
+    
+    
+    
+    template <typename RealType>
+    RealType MultiOctaveWorleyNoise3DGeneratorTemplate<RealType>::evaluate(const Point3DTemplate<RealType> &p) const {
+        RealType total = 0;
+        RealType frequency = m_initialFrequency;
+        RealType amplitude = m_initialAmplitude;
+        for (int i = 0; i < m_numOctaves; ++i) {
+            RealType closestDistance;
+            uint32_t hashOfClosest;
+            uint32_t closestFPIdx;
+            m_primaryNoiseGen.evaluate(frequency * p, &closestDistance, &hashOfClosest, &closestFPIdx);
+            total += (closestDistance / std::sqrt(3.0)) * amplitude;
+            
+            amplitude *= m_persistence;
+            frequency *= m_frequencyMultiplier;
+        }
+        
+        return std::fmin(total, m_clipValue);
+    }
+    
+    template class SLR_API MultiOctaveWorleyNoise3DGeneratorTemplate<float>;
+    template class SLR_API MultiOctaveWorleyNoise3DGeneratorTemplate<double>;
 }

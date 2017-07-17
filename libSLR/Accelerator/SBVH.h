@@ -383,6 +383,15 @@ namespace SLR {
             
             tpStart = std::chrono::system_clock::now();
             
+            if (objs.size() == 0) {
+                m_depth = 1;
+                m_cost = 0;
+                m_nodes.emplace_back();
+                m_nodes[0].initAsLeaf(BoundingBox3D(), UINT32_MAX, UINT32_MAX);
+                m_bounds = BoundingBox3D();
+                return;
+            }
+            
             const uint32_t MemoryBudget = 5;
             Fragment* fragments = new Fragment[MemoryBudget * objs.size()];
             for (int i = 0; i < objs.size(); ++i) {

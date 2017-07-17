@@ -195,6 +195,23 @@ namespace SLRSceneGraph {
     
     
     
+    class SLR_SCENEGRAPH_API WorleyNoiseFloatTexture : public FloatTexture {
+        Texture3DMappingRef m_mapping;
+        uint32_t m_numOctaves;
+        float m_initialFrequency;
+        float m_supValueOrInitialAmplitude;
+        bool m_supSpecified;
+        float m_clipValue;
+        float m_frequencyMultiplier;
+        float m_persistence;
+    public:
+        WorleyNoiseFloatTexture(const Texture3DMappingRef &mapping, 
+                                uint32_t numOctaves, float initialFrequency, float supValueOrInitialAmplitude, bool supSpecified, float clipValue, 
+                                float frequencyMultiplier, float persistence);
+    };
+    
+    
+    
     class SLR_SCENEGRAPH_API PerlinNoiseNormalTexture : public NormalTexture {
         Texture3DMappingRef m_mapping;
         float m_thetaMax;

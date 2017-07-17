@@ -96,6 +96,7 @@ There are some scene files loading model data and textures, but those assets are
 
 ## 参考文献 / References
 [Ashikhmin2000] "An Anisotropic Phong BRDF Model"  
+[Bridson2007] "Curl-Noise for Procedural Fluid Flow"  
 [Burley2012] "Physically-Based Shading at Disney"  
 [Burley2015] "Extending the Disney BRDF to a BSDF with Integrated Subsurface Scattering"  
 [Dammertz2008] "Shallow Bounding Volume Hierarchies for Fast SIMD Ray Tracing of Incoherent Rays"  

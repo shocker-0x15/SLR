@@ -138,7 +138,11 @@ namespace SLR {
     typedef ContinuousDistribution2DTemplate<float> ContinuousDistribution2D;
     typedef RegularConstantContinuousDistribution2DTemplate<float> RegularConstantContinuousDistribution2D;
     typedef MultiContinuousDistribution2DTemplate<float> MultiContinuousDistribution2D;
-    template <typename ReturnRealType> class MultiOctaveImprovedPerlinNoise3DGenerator;
+    template <typename RealType> class ImprovedPerlinNoise3DGeneratorTemplate;
+    template <typename RealType> class MultiOctavePerlinNoise3DGeneratorTemplate;
+    template <typename RealType> class CurlNoise3DGeneratorTemplate;
+    template <typename RealType> class WorleyNoise3DGeneratorTemplate;
+    template <typename RealType> class MultiOctaveWorleyNoise3DGeneratorTemplate;
     
     // Transform
     class Transform;
@@ -383,6 +387,7 @@ namespace SLR {
     class VoronoiSpectrumTexture;
     class VoronoiNormalTexture;
     class VoronoiFloatTexture;
+    class WorleyNoiseFloatTexture;
     class PerlinNoiseNormalTexture;
     class PerlinNoiseFloatTexture;
     class AnalyticSkySpectrumTexture;

@@ -224,6 +224,15 @@ namespace SLR {
         StandardBVH(const std::vector<SurfaceObject*> &objs, Partitioning method = Partitioning::BinnedSAH) {
             m_method = method;
             
+            if (objs.size() == 0) {
+                m_depth = 1;
+                m_cost = 0;
+                m_nodes.emplace_back();
+                m_nodes[0].initAsLeaf(BoundingBox3D(), UINT32_MAX, UINT32_MAX);
+                m_bounds = BoundingBox3D();
+                return;
+            }
+            
             ObjInfos infos;
             infos.objs = &objs;
             infos.bboxes.resize(objs.size());

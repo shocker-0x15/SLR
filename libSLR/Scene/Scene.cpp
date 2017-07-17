@@ -31,7 +31,7 @@ namespace SLR {
             m_camera->setTransform(renderingData.camTransform);
         
         // calculate world bounding sphere and store its radius and disc area.
-        BoundingBox3D worldBounds = m_surfaceAggregate->bounds();
+        BoundingBox3D worldBounds = calcUnion(m_surfaceAggregate->bounds(), m_mediumAggregate->bounds());
         m_worldCenter = worldBounds.centroid();
         m_worldRadius = (worldBounds.maxP - m_worldCenter).length();
         m_worldDiscArea = M_PI * m_worldRadius * m_worldRadius;

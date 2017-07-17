@@ -293,6 +293,34 @@ namespace SLRSceneGraph {
                                                            };
                                                            return configFunc(params, context, err);
                                                        }
+                                                       else if (procedure == "worley") {
+                                                           const static Function configFunc{
+                                                               0, {
+                                                                   {"octaves", Type::Integer},
+                                                                   {"init freq", Type::RealNumber},
+                                                                   {"sup or init amp", Type::RealNumber},
+                                                                   {"sup specified", Type::Bool, true},
+                                                                   {"clip", Type::RealNumber},
+                                                                   {"freq mul", Type::RealNumber},
+                                                                   {"persistence", Type::RealNumber},
+                                                                   {"mapping", Type::Texture3DMapping, worldPos3DMapSharedInstance}                                                                                        
+                                                               },
+                                                               [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
+                                                                   uint32_t numOctaves = args.at("octaves").raw<TypeMap::Integer>();
+                                                                   float initFreq = args.at("init freq").raw<TypeMap::RealNumber>();
+                                                                   float supOrInitAmp = args.at("sup or init amp").raw<TypeMap::RealNumber>();
+                                                                   bool supSpecified = args.at("sup specified").raw<TypeMap::Bool>();
+                                                                   float clip = args.at("clip").raw<TypeMap::RealNumber>();
+                                                                   float freqMul = args.at("freq mul").raw<TypeMap::RealNumber>();
+                                                                   float persistence = args.at("persistence").raw<TypeMap::RealNumber>();
+                                                                   const auto &mapping = args.at("mapping").rawRef<TypeMap::Texture3DMapping>();
+                                                                   FloatTextureRef rawRef = createShared<WorleyNoiseFloatTexture>(mapping, numOctaves, initFreq, supOrInitAmp, supSpecified, clip, 
+                                                                                                                                  freqMul, persistence);
+                                                                   return Element::createFromReference<TypeMap::FloatTexture>(rawRef);
+                                                               }
+                                                           };
+                                                           return configFunc(params, context, err);
+                                                       }
                                                        *err = ErrorMessage("Specified procedure is invalid.");
                                                        return Element();
                                                    }

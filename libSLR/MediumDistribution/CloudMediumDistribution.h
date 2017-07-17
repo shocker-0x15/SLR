@@ -17,26 +17,27 @@ namespace SLR {
     class CloudMediumDistribution : public MediumDistribution {
         std::array<float, NumStrataForStorage> m_majorantExtinctionCoefficient;
         BoundingBox3D m_region;
+        Vector3D m_aspect;
         const AssetSpectrum* m_base_sigma_e;
         const AssetSpectrum* m_albedo;
-        MultiOctaveImprovedPerlinNoise3DGenerator<float> m_distributionGenerator;
-        MultiOctaveImprovedPerlinNoise3DGenerator<float> m_densityGenerator;
+        MultiOctavePerlinNoise3DGeneratorTemplate<float> m_distributionGenerator;
+        MultiOctavePerlinNoise3DGeneratorTemplate<float> m_densityGenerator;
         
         void saveToFile(const char* fileName, uint32_t resX, uint32_t resY, uint32_t resZ) const;
         float calcDensity(const Point3D &param) const;
     public:
         CloudMediumDistribution(const BoundingBox3D &region, float featureScale, float density, uint32_t rngSeed) : 
-        m_region(region),
-        m_distributionGenerator(10, 1.0f / featureScale, 1.0f, true, 2.0f, 0.5f, -1),
-        m_densityGenerator(3, 1.0f / featureScale, 10.0f * density / featureScale, false, 2.0f, 0.5f, -1) {
-            float sigma_e_values[] = {0.1f, 0.1f};
+        m_region(region), m_aspect((region.maxP - region.minP) / (region.maxP.y - region.minP.y)), 
+        m_distributionGenerator(10, 2.0f / featureScale, 1.0f, true, 2.0f, 0.5f, -1),
+        m_densityGenerator(3, 1.0f / featureScale, 1.0f * density, false, 2.0f, 0.5f, -1) {
+            float sigma_e_values[] = {0.01f, 0.01f};
             m_base_sigma_e = new RegularContinuousSpectrum(WavelengthLowBound, WavelengthHighBound, sigma_e_values, 2);
             float albedo_values[] = {0.9f, 0.9f};
             m_albedo = new RegularContinuousSpectrum(WavelengthLowBound, WavelengthHighBound, albedo_values, 2);
             
             m_base_sigma_e->calcBounds(NumStrataForStorage, m_majorantExtinctionCoefficient.data());
             for (int i = 0; i < NumStrataForStorage; ++i)
-                m_majorantExtinctionCoefficient[i] *= 200.0f;//m_densityGenerator.getSupValue();
+                m_majorantExtinctionCoefficient[i] *= m_densityGenerator.getSupValue();
 //            saveToFile("Cloud0_16x16x16.vdg", 16, 16, 16);
 //            saveToFile("Cloud0_64x64x64.vdg", 64, 64, 64);
 //            saveToFile("Cloud0_256x256x256.vdg", 256, 256, 256);
