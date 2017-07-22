@@ -8,8 +8,94 @@
 #include "CloudMediumDistribution.h"
 
 #include "../Core/light_path_sampler.h"
+#include "../Helper/bmp_exporter.h"
 
 namespace SLR {
+    template <typename RealType>
+    class LayeredWorleyNoiseGeneratorTemplate {
+        WorleyNoise3DGeneratorTemplate<RealType> m_primaryNoiseGen;
+        uint32_t m_numOctaves;
+        RealType m_initialFrequency;
+        RealType m_initialVariation;
+        RealType m_clipValue;
+        RealType m_persistence;
+        RealType m_frequencyMultiplier;
+        
+    public:
+        LayeredWorleyNoiseGeneratorTemplate(uint32_t numOctaves, RealType initialFrequency, RealType initialVariation, RealType clipValue, 
+                                            RealType frequencyMultiplier, RealType persistence) : 
+        m_numOctaves(numOctaves), m_initialFrequency(initialFrequency), m_initialVariation(initialVariation), m_clipValue(clipValue),
+        m_persistence(persistence), m_frequencyMultiplier(frequencyMultiplier) { } 
+        
+        RealType evaluate(const Point3DTemplate<RealType> &p) const {
+            RealType total = 1;
+            RealType frequency = m_initialFrequency;
+            RealType variation = m_initialVariation;
+            for (int i = 0; i < m_numOctaves; ++i) {
+                RealType closestSqDistance;
+                uint32_t hashOfClosest;
+                uint32_t closestFPIdx;
+                m_primaryNoiseGen.evaluate(frequency * p, &closestSqDistance, &hashOfClosest, &closestFPIdx);
+                total *= std::fmax(1 - closestSqDistance / 3.0 * variation, 0.0);
+                
+                variation *= m_persistence;
+                frequency *= m_frequencyMultiplier;
+            }
+            
+            return std::fmin(total, m_clipValue);
+        }
+    };
+    
+    
+    
+    template <typename RealType>
+    class PerlinWorleyNoiseGeneratorTemplate {
+        MultiOctavePerlinNoise3DGeneratorTemplate<RealType> m_perlinGen;
+        LayeredWorleyNoiseGeneratorTemplate<RealType> m_worleyGen;
+        
+    public:
+        PerlinWorleyNoiseGeneratorTemplate(uint32_t numOctaves, RealType initialFrequency, RealType initialAmplitude, RealType initialVariation, 
+                                           RealType frequencyMultiplier, RealType persistence) :
+        m_perlinGen(numOctaves, initialFrequency, initialAmplitude, true, frequencyMultiplier, persistence, -1), 
+        m_worleyGen(numOctaves, initialFrequency, initialVariation, 1.0f, frequencyMultiplier, persistence) {
+        }
+        
+        RealType evaluate(const Point3DTemplate<RealType> &p) const {
+            return 0.75f * m_perlinGen.evaluate(p) + 0.25f * m_worleyGen.evaluate(p);
+        }
+    };
+    
+    
+    
+    // For debug visualization.
+    void CloudMediumDistribution::exportBMP(const std::string &filename, float gamma) const {
+//        LayeredWorleyNoiseGeneratorTemplate<float> layeredWorleyGen(3, 10.0f, 8.0f, 1.0f, 2.0f, 0.5f);
+        PerlinWorleyNoiseGeneratorTemplate<float> perlinWorleyGen(3, 10.0f, 1.0f, 8.0f, 2.0f, 0.5f);
+        
+        const uint32_t width = 512;
+        const uint32_t height = 512;
+        uint32_t byteWidth = width * 3 + width % 4;
+        uint8_t* data = (uint8_t*)malloc(height * byteWidth);
+        
+        printf("start to generate a test noise image. ...");
+        for (int i = 0; i < height; ++i) {
+            for (int j = 0; j < width; ++j) {
+                Point3D p(Point3D((j + 0.5f) / width, (i + 0.5f) / height, 0.0f));
+                float value = perlinWorleyGen.evaluate(p);
+//                float value = layeredWorleyGen.evaluate(p);
+                uint8_t pixVal = uint8_t(std::pow(std::fmin(value, 1.0f), 1.0f / gamma) * 255);
+                
+                uint32_t idx = (height - i - 1) * byteWidth + 3 * j;
+                data[idx + 0] = pixVal;
+                data[idx + 1] = pixVal;
+                data[idx + 2] = pixVal;
+            }
+        }
+        saveBMP(filename.c_str(), data, width, height);
+        free(data);
+        printf("done\n");
+    };
+    
     void CloudMediumDistribution::saveToFile(const char* fileName, uint32_t resX, uint32_t resY, uint32_t resZ) const {
         printf("write to %s ...", fileName);
         fflush(stdout);

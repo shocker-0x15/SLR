@@ -13,10 +13,10 @@
 
 namespace SLR {
     SampledSpectrum VoronoiSpectrumTexture::evaluate(const Point3D &p, const WavelengthSamples &wls) const {
-        float closestDistance;
+        float closestSqDistance;
         uint32_t hash;
         uint32_t fpIdx;
-        m_noiseGen.evaluate(p / m_scale, &closestDistance, &hash, &fpIdx);
+        m_noiseGen.evaluate(p / m_scale, &closestSqDistance, &hash, &fpIdx);
         
         LinearCongruentialRNG rng(hash + fpIdx);
         float rgb[3] = {
@@ -54,27 +54,27 @@ namespace SLR {
     }
     
     Normal3D VoronoiNormalTexture::evaluate(const Point3D &p) const {
-        float closestDistance;
+        float closestSqDistance;
         uint32_t hash;
         uint32_t fpIdx;
-        m_noiseGen.evaluate(p / m_scale, &closestDistance, &hash, &fpIdx);
+        m_noiseGen.evaluate(p / m_scale, &closestSqDistance, &hash, &fpIdx);
         
         LinearCongruentialRNG rng(hash + fpIdx);
         return uniformSampleCone(rng.getFloat0cTo1o(), rng.getFloat0cTo1o(), m_cosThetaMax);
     }
     
     float VoronoiFloatTexture::evaluate(const Point3D &p) const {
-        float closestDistance;
+        float closestSqDistance;
         uint32_t hash;
         uint32_t fpIdx;
-        m_noiseGen.evaluate(p, &closestDistance, &hash, &fpIdx);
+        m_noiseGen.evaluate(p, &closestSqDistance, &hash, &fpIdx);
         
         if (m_flat) {
             LinearCongruentialRNG rng(hash + fpIdx);
             return m_valueScale * rng.getFloat0cTo1o();
         }
         else {
-            return (closestDistance / (1.414213562 * m_scale)) * m_valueScale;
+            return (std::sqrt(closestSqDistance / 2.0f) / m_scale) * m_valueScale;
         }
     }
     

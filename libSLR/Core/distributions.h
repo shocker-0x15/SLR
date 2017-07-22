@@ -207,14 +207,36 @@ namespace SLR {
     // http://flafla2.github.io/2014/08/09/perlinnoise.html
     template <typename RealType>
     class ImprovedPerlinNoise3DGeneratorTemplate {
+        static const uint8_t PermutationTable[];
+        
         int32_t m_repeat;
         
+        static uint8_t hash(int32_t x, int32_t y, int32_t z);
         static RealType gradient(uint32_t hash, RealType xu, RealType yu, RealType zu);
         
     public:
         ImprovedPerlinNoise3DGeneratorTemplate(int32_t repeat) : m_repeat(repeat) {}
         
         RealType evaluate(const Point3DTemplate<RealType> &p) const;
+    };
+    
+    // Reference:
+    // Long-Period Hash Functions for Procedural Texturing
+    // Permutation table of the hash function of period 739,024 = lcm(11, 13, 16, 17, 19)
+    template <typename RealType>
+    const uint8_t ImprovedPerlinNoise3DGeneratorTemplate<RealType>::PermutationTable[] = {
+        // table 0: 11 numbers
+        0, 10, 2, 7, 3, 5, 6, 4, 8, 1, 9, 
+        // table 1: 13 numbers
+        5, 11, 6, 8, 1, 10, 12, 9, 3, 7, 0, 4, 2, 
+        // table 2: 16 numbers = the range of the hash function required by Perlin noise.
+        13, 10, 11, 5, 6, 9, 4, 3, 8, 7, 14, 2, 0, 1, 15, 12, 
+        // table 3: 17 numbers
+        1, 13, 5, 14, 12, 3, 6, 16, 0, 8, 9, 2, 11, 4, 15, 7, 10, 
+        // table 4: 19 numbers
+        10, 6, 5, 8, 15, 0, 17, 7, 14, 18, 13, 16, 2, 9, 12, 1, 11, 4, 3,  
+//        // table 6: 23 numbers
+//        20, 21, 4, 5, 0, 18, 14, 2, 6, 22, 10, 17, 3, 7, 8, 16, 19, 11, 9, 13, 1, 15, 12
     };
     
     
@@ -295,7 +317,7 @@ namespace SLR {
     public:
         WorleyNoise3DGeneratorTemplate()  { }
         
-        void evaluate(const Point3DTemplate<RealType> &p, RealType* closestDistance, uint32_t* hashOfClosest, uint32_t* closestFPIdx) const;
+        void evaluate(const Point3DTemplate<RealType> &p, RealType* closestSqDistance, uint32_t* hashOfClosest, uint32_t* closestFPIdx) const;
     };
     
     

@@ -378,6 +378,17 @@ namespace SLR {
     
     
     template <typename RealType>
+    uint8_t ImprovedPerlinNoise3DGeneratorTemplate<RealType>::hash(int32_t x, int32_t y, int32_t z) {
+        uint32_t sum = 0;
+        sum += PermutationTable[ 0 + (PermutationTable[ 0 + (PermutationTable[ 0 + x % 11] + y) % 11] + z) % 11];
+        sum += PermutationTable[11 + (PermutationTable[11 + (PermutationTable[11 + x % 13] + y) % 13] + z) % 13];
+        sum += PermutationTable[24 + (PermutationTable[24 + (PermutationTable[24 + x % 16] + y) % 16] + z) % 16];
+        sum += PermutationTable[40 + (PermutationTable[40 + (PermutationTable[40 + x % 17] + y) % 17] + z) % 17];
+        sum += PermutationTable[57 + (PermutationTable[57 + (PermutationTable[57 + x % 19] + y) % 19] + z) % 19];
+        return sum % 16;
+    }
+    
+    template <typename RealType>
     RealType ImprovedPerlinNoise3DGeneratorTemplate<RealType>::gradient(uint32_t hash, RealType xu, RealType yu, RealType zu) {
         switch (hash & 0xF) {
             case 0x0: return  xu + yu;
@@ -417,6 +428,8 @@ namespace SLR {
                 z += m_repeat;
         }
         
+        // Calculate the "unit cube" that the point asked will be located in.
+        // The left bound is ( |_x_|,|_y_|,|_z_| ) and the right bound is that plus 1.
         int32_t iEvalCoord[3];
         iEvalCoord[0] = std::floor(x);
         iEvalCoord[1] = std::floor(y);
@@ -429,9 +442,7 @@ namespace SLR {
             // 6t^5 - 15t^4 + 10t^3
             return t * t * t * (t * (t * 6 - 15) + 10);
         };
-        
-        // Calculate the "unit cube" that the point asked will be located in.
-        // The left bound is ( |_x_|,|_y_|,|_z_| ) and the right bound is that plus 1. 
+         
         // Next we calculate the location (from 0.0 to 1.0) in that cube.
         // We also fade the location to smooth the result.
         RealType xu = x - iEvalCoord[0];
@@ -442,25 +453,25 @@ namespace SLR {
         RealType v = fade(yu);
         RealType w = fade(zu);
         
-        // Code in the reference site uses a permutation table of size 256.
-        // It imposes the repetition pattern of size 256 even if repetition is not specified.
-        // Modified it by instead using a pseudo random number generator based on integer coordinate.
-        uint8_t cornerHashes[8];
-        for (int iz = 0; iz < 2; ++iz) {
-            for (int iy = 0; iy < 2; ++iy) {
-                for (int ix = 0; ix < 2; ++ix) {
-                    int32_t iCoord[3] = {iEvalCoord[0] + ix, iEvalCoord[1] + iy, iEvalCoord[2] + iz};
-                    if (m_repeat > 0) {
-                        iCoord[0] %= m_repeat;
-                        iCoord[1] %= m_repeat;
-                        iCoord[2] %= m_repeat;
-                    }
-                    uint32_t hash = getFNV1Hash32((uint8_t*)iCoord, sizeof(iCoord));
-                    LinearCongruentialRNG rng(hash);
-                    cornerHashes[4 * iz + 2 * iy + ix] = (rng.getUInt() >> 24) & 0xF;
-                }
-            }
-        }
+        const auto inc = [this](int32_t num) {
+            ++num;
+            if (m_repeat > 0)
+                num %= m_repeat;
+            return num;
+        };
+        
+        const int32_t xi = iEvalCoord[0];
+        const int32_t yi = iEvalCoord[1];
+        const int32_t zi = iEvalCoord[2];
+        uint8_t lll, llu, lul, luu, ull, ulu, uul, uuu;
+        lll = hash(    xi ,     yi ,     zi );
+        ull = hash(inc(xi),     yi ,     zi );
+        lul = hash(    xi , inc(yi),     zi );
+        uul = hash(inc(xi), inc(yi),     zi );
+        llu = hash(    xi ,     yi , inc(zi));
+        ulu = hash(inc(xi),     yi , inc(zi));
+        luu = hash(    xi , inc(yi), inc(zi));
+        uuu = hash(inc(xi), inc(yi), inc(zi));
         
         const auto lerp = [](RealType v0, RealType v1, RealType t) {
             return v0 * (1 - t) + v1 * t;
@@ -469,12 +480,12 @@ namespace SLR {
         // The gradient function calculates the dot product between a pseudorandom gradient vector and 
         // the vector from the input coordinate to the 8 surrounding points in its unit cube.
         // This is all then lerped together as a sort of weighted average based on the faded (u,v,w) values we made earlier.
-        RealType _llValue = lerp(gradient(cornerHashes[0], xu, yu, zu), gradient(cornerHashes[1], xu - 1, yu, zu), u);
-        RealType _ulValue = lerp(gradient(cornerHashes[2], xu, yu - 1, zu), gradient(cornerHashes[3], xu - 1, yu - 1, zu), u);
+        RealType _llValue = lerp(gradient(lll, xu, yu, zu), gradient(ull, xu - 1, yu, zu), u);
+        RealType _ulValue = lerp(gradient(lul, xu, yu - 1, zu), gradient(uul, xu - 1, yu - 1, zu), u);
         RealType __lValue = lerp(_llValue, _ulValue, v);
         
-        RealType _luValue = lerp(gradient(cornerHashes[4], xu, yu, zu - 1), gradient(cornerHashes[5], xu - 1, yu, zu - 1), u);
-        RealType _uuValue = lerp(gradient(cornerHashes[6], xu, yu - 1, zu - 1), gradient(cornerHashes[7], xu - 1, yu - 1, zu - 1), u);
+        RealType _luValue = lerp(gradient(llu, xu, yu, zu - 1), gradient(ulu, xu - 1, yu, zu - 1), u);
+        RealType _uuValue = lerp(gradient(luu, xu, yu - 1, zu - 1), gradient(uuu, xu - 1, yu - 1, zu - 1), u);
         RealType __uValue = lerp(_luValue, _uuValue, v);
         
         // For convenience we bound it to 0 - 1 (theoretical min/max before is -1 - 1)
@@ -536,7 +547,7 @@ namespace SLR {
     
     
     template <typename RealType>
-    void WorleyNoise3DGeneratorTemplate<RealType>::evaluate(const Point3DTemplate<RealType> &p, RealType* closestDistance, uint32_t* hashOfClosest, uint32_t* closestFPIdx) const {
+    void WorleyNoise3DGeneratorTemplate<RealType>::evaluate(const Point3DTemplate<RealType> &p, RealType* closestSqDistance, uint32_t* hashOfClosest, uint32_t* closestFPIdx) const {
         using Point3DType = Point3DTemplate<RealType>;
         
         int32_t iEvalCoord[3];
@@ -551,7 +562,7 @@ namespace SLR {
         //     It is necessary to evaluate 56 cells even if 
         //     optimization is applied using information that which of 8 blocks the evaluation point belongs to in the cell where the evaluation point is in.  
         //     However, it seems evaluating only 27 cells works well.
-        *closestDistance = INFINITY;
+        *closestSqDistance = INFINITY;
         for (int iz = -1; iz <= 1; ++iz) {
             for (int iy = -1; iy <= 1; ++iy) {
                 for (int ix = -1; ix <= 1; ++ix) {
@@ -564,9 +575,9 @@ namespace SLR {
                         Point3DType fp = Point3DType(iCoord[0] + rng.getFloat0cTo1o(), 
                                                      iCoord[1] + rng.getFloat0cTo1o(), 
                                                      iCoord[2] + rng.getFloat0cTo1o());
-                        RealType dist = distance(p, fp);
-                        if (dist < *closestDistance) {
-                            *closestDistance = dist;
+                        RealType dist2 = sqDistance(p, fp);
+                        if (dist2 < *closestSqDistance) {
+                            *closestSqDistance = dist2;
                             *hashOfClosest = hash;
                             *closestFPIdx = i;
                         }
