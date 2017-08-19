@@ -60,8 +60,10 @@ namespace SLR {
     
     
     
-    AnalyticSkySpectrumTexture::AnalyticSkySpectrumTexture(float solarRadius, float solarElevation, float turbidity, const AssetSpectrum* groundAlbedo, const Texture2DMapping* mapping) :
-    m_solarRadius(std::min(solarRadius, (float)M_PI / 2)), m_solarElevation(solarElevation), m_turbidity(turbidity), m_groundAlbedo(groundAlbedo), m_mapping(mapping), 
+    AnalyticSkySpectrumTexture::AnalyticSkySpectrumTexture(float solarRadius, float solarElevation, float turbidity, const AssetSpectrum* groundAlbedo, float extAngleOfHorizon, 
+                                                           const Texture2DMapping* mapping) :
+    m_solarRadius(std::min(solarRadius, (float)M_PI / 2)), m_solarElevation(solarElevation), m_turbidity(turbidity), m_groundAlbedo(groundAlbedo), m_extAngleOfHorizon(extAngleOfHorizon), 
+    m_mapping(mapping), 
     m_distribution(nullptr) {
 #ifdef SLR_Use_Spectral_Representation
         float albedo[NumChannels];
@@ -98,7 +100,8 @@ namespace SLR {
     
     SampledSpectrum AnalyticSkySpectrumTexture::evaluate(const Point3D &p, const WavelengthSamples &wls) const {
         float theta = M_PI * p.y;
-        if (theta >= M_PI / 2)
+        float mappedTheta = theta / (1 + m_extAngleOfHorizon / (M_PI / 2));
+        if (mappedTheta >= M_PI / 2)
             return SampledSpectrum::Zero;
         Vector3D viewVec = Vector3D::fromPolarYUp(2 * M_PI * p.x, theta);
         float gamma = std::acos(std::clamp(dot(viewVec, m_sunDirection), -1.0f, 1.0f));
@@ -111,14 +114,14 @@ namespace SLR {
         }
         else {
             for (int i = 0; i < NumChannels; ++i)
-                sampledValues[i] = arhosekskymodel_radiance(m_skyModelStates[i], theta, gamma, SampledWavelengths[i]);
+                sampledValues[i] = arhosekskymodel_radiance(m_skyModelStates[i], mappedTheta, gamma, SampledWavelengths[i]);
         }
         
         RegularContinuousSpectrum spectrum(SampledWavelengths[0], SampledWavelengths[NumChannels - 1], sampledValues, NumChannels);
 #else
         SampledSpectrum spectrum;
         for (int i = 0; i < NumChannels; ++i)
-            spectrum[i] = RadianceScale * arhosek_tristim_skymodel_radiance(m_skyModelStates[i], theta, gamma, i);
+            spectrum[i] = RadianceScale * arhosek_tristim_skymodel_radiance(m_skyModelStates[i], mappedTheta, gamma, i);
 #endif
         SampledSpectrum ret = spectrum.evaluate(wls);
         ret = max(ret, 0.0f);
@@ -139,15 +142,16 @@ namespace SLR {
         FloatSum accSkyDomeEnergy = 0.0f;
         std::function<float(uint32_t, uint32_t)> pickFunc = [this, &mapWidth, &mapHeight, &accSkyDomeEnergy](uint32_t x, uint32_t y) -> float {
             float theta = M_PI * (y + 0.5f) / mapHeight;
-            if (theta >= M_PI / 2)
+            float mappedTheta = theta / (1 + m_extAngleOfHorizon / (M_PI / 2));
+            if (mappedTheta >= M_PI / 2)
                 return 0.0f;
-            Vector3D viewVec = Vector3D::fromPolarYUp(2 * M_PI * (x + 0.5f) / mapWidth, theta);
+            Vector3D viewVec = Vector3D::fromPolarYUp(2 * M_PI * (x + 0.5f) / mapWidth, mappedTheta);
             float gamma = std::acos(std::clamp(dot(viewVec, m_sunDirection), -1.0f, 1.0f));
             
 #ifdef SLR_Use_Spectral_Representation
             float sampledValues[NumChannels];
             for (int i = 0; i < NumChannels; ++i)
-                sampledValues[i] = arhosekskymodel_radiance(m_skyModelStates[i], theta, gamma, SampledWavelengths[i]);
+                sampledValues[i] = arhosekskymodel_radiance(m_skyModelStates[i], mappedTheta, gamma, SampledWavelengths[i]);
             
             RegularContinuousSpectrum spectrum(SampledWavelengths[0], SampledWavelengths[NumChannels - 1], sampledValues, NumChannels);
             
@@ -163,7 +167,7 @@ namespace SLR {
 #else
             SampledSpectrum spectrum;
             for (int i = 0; i < NumChannels; ++i)
-                spectrum[i] = RadianceScale * arhosek_tristim_skymodel_radiance(m_skyModelStates[i], theta, gamma, i);
+                spectrum[i] = RadianceScale * arhosek_tristim_skymodel_radiance(m_skyModelStates[i], mappedTheta, gamma, i);
             
             float luminance = spectrum.luminance();
 #endif

@@ -217,12 +217,12 @@ namespace SLR {
     public:
         ImprovedPerlinNoise3DGeneratorTemplate(int32_t repeat) : m_repeat(repeat) {}
         
-        RealType evaluate(const Point3DTemplate<RealType> &p) const;
+        RealType evaluate(const Point3DTemplate<RealType> &p, RealType frequency) const;
     };
     
     // Reference:
     // Long-Period Hash Functions for Procedural Texturing
-    // Permutation table of the hash function of period 739,024 = lcm(11, 13, 16, 17, 19)
+    // combined permutation table of the hash function of period 739,024 = lcm(11, 13, 16, 17, 19)
     template <typename RealType>
     const uint8_t ImprovedPerlinNoise3DGeneratorTemplate<RealType>::PermutationTable[] = {
         // table 0: 11 numbers
@@ -253,7 +253,7 @@ namespace SLR {
         
     public:
         MultiOctavePerlinNoise3DGeneratorTemplate(uint32_t numOctaves, RealType initialFrequency, RealType supValueOrInitialAmplitude, bool supSpecified,  
-                                                  RealType frequencyMultiplier, RealType persistence, int32_t repeat) :
+                                                  RealType frequencyMultiplier, RealType persistence, uint32_t repeat) :
         m_primaryNoiseGen(repeat), 
         m_numOctaves(numOctaves), 
         m_initialFrequency(initialFrequency), 
@@ -314,10 +314,13 @@ namespace SLR {
     // A Cellular Texture Basis Function
     template <typename RealType>
     class WorleyNoise3DGeneratorTemplate {
-    public:
-        WorleyNoise3DGeneratorTemplate()  { }
+        uint32_t m_repeat;
         
-        void evaluate(const Point3DTemplate<RealType> &p, RealType* closestSqDistance, uint32_t* hashOfClosest, uint32_t* closestFPIdx) const;
+    public:
+        WorleyNoise3DGeneratorTemplate(uint32_t repeat) : m_repeat(repeat) {}
+        
+        void evaluate(const Point3DTemplate<RealType> &p, RealType frequency, 
+                      RealType* closestSqDistance, uint32_t* hashOfClosest, uint32_t* closestFPIdx) const;
     };
     
     
@@ -335,8 +338,8 @@ namespace SLR {
         
     public:
         MultiOctaveWorleyNoise3DGeneratorTemplate(uint32_t numOctaves, RealType initialFrequency, RealType supValueOrInitialAmplitude, bool supSpecified, RealType clipValue,  
-                                                  RealType frequencyMultiplier, RealType persistence) :
-        m_primaryNoiseGen(), 
+                                                  RealType frequencyMultiplier, RealType persistence, int32_t repeat) :
+        m_primaryNoiseGen(repeat), 
         m_numOctaves(numOctaves), 
         m_initialFrequency(initialFrequency), 
         m_clipValue(clipValue), 

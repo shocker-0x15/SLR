@@ -140,6 +140,25 @@ namespace std {
     }
 }
 
+template <typename RealType>
+RealType saturate(RealType x) {
+    return std::clamp<RealType>(x, 0, 1);
+}
+
+template <typename RealType>
+RealType smoothstep(RealType edge0, RealType edge1, RealType x) {
+    // Scale, bias and saturate x to 0..1 range
+    x = saturate((x - edge0) / (edge1 - edge0)); 
+    // Evaluate polynomial
+    return x * x * (3 - 2 * x);
+}
+
+template <typename RealType>
+RealType remap(RealType orgValue, RealType orgMin, RealType orgMax, RealType newMin, RealType newMax) {
+    RealType percenrage = (orgValue - orgMin) / (orgMax - orgMin);
+    return newMin + percenrage * (newMax - newMin); 
+}
+
 template <typename T>
 bool realEq(T a, T b, T epsilon) {
     bool forAbsolute = std::fabs(a - b) < epsilon;

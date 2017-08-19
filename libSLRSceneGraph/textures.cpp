@@ -118,17 +118,17 @@ namespace SLRSceneGraph {
     
     WorleyNoiseFloatTexture::WorleyNoiseFloatTexture(const Texture3DMappingRef &mapping, 
                                                      uint32_t numOctaves, float initialFrequency, float supValueOrInitialAmplitude, bool supSpecified, float clipValue, 
-                                                     float frequencyMultiplier, float persistence) : 
+                                                     float frequencyMultiplier, float persistence, uint32_t repeat) : 
     m_mapping(mapping), m_numOctaves(numOctaves), 
     m_initialFrequency(initialFrequency), m_supValueOrInitialAmplitude(supValueOrInitialAmplitude), m_supSpecified(supSpecified), m_clipValue(clipValue), 
-    m_frequencyMultiplier(frequencyMultiplier), m_persistence(persistence) {
+    m_frequencyMultiplier(frequencyMultiplier), m_persistence(persistence), m_repeat(repeat) {
         m_rawData = new SLR::WorleyNoiseFloatTexture(mapping->getRaw(), numOctaves, initialFrequency, supValueOrInitialAmplitude, supSpecified, clipValue, 
-                                                     frequencyMultiplier, persistence);
+                                                     frequencyMultiplier, persistence, repeat);
     }
     
     PerlinNoiseNormalTexture::PerlinNoiseNormalTexture(const Texture3DMappingRef &mapping, float thetaMax, 
                                                        uint32_t numOctaves, float initialFrequencyPhi, float initialFrequencyTheta, 
-                                                       float frequencyMultiplier, float persistence, int32_t repeat) : 
+                                                       float frequencyMultiplier, float persistence, uint32_t repeat) : 
     m_mapping(mapping), m_thetaMax(thetaMax),  
     m_numOctaves(numOctaves), m_initialFrequencyPhi(initialFrequencyPhi), m_initialFrequencyTheta(initialFrequencyTheta), 
     m_frequencyMultiplier(frequencyMultiplier), m_persistence(persistence), m_repeat(repeat) {
@@ -139,7 +139,7 @@ namespace SLRSceneGraph {
     
     PerlinNoiseFloatTexture::PerlinNoiseFloatTexture(const Texture3DMappingRef &mapping, 
                                                      uint32_t numOctaves, float initialFrequency, float supValueOrInitialAmplitude, bool supSpecified, 
-                                                     float frequencyMultiplier, float persistence, int32_t repeat) : 
+                                                     float frequencyMultiplier, float persistence, uint32_t repeat) : 
     m_mapping(mapping), m_numOctaves(numOctaves), 
     m_initialFrequency(initialFrequency), m_supValueOrInitialAmplitude(supValueOrInitialAmplitude), m_supSpecified(supSpecified), 
     m_frequencyMultiplier(frequencyMultiplier), m_persistence(persistence), m_repeat(repeat) {
@@ -148,8 +148,8 @@ namespace SLRSceneGraph {
     }
     
     AnalyticSkySpectrumTexture::AnalyticSkySpectrumTexture(const Texture2DMappingRef &mapping, 
-                                                           float solarRadius, float soloarElevation, float turbidity, const AssetSpectrumRef &groundAlbedo) : 
-    m_mapping(mapping), m_solarElevation(soloarElevation), m_turbidity(turbidity), m_groundAlbedo(groundAlbedo) {
-        m_rawData = new SLR::AnalyticSkySpectrumTexture(solarRadius, soloarElevation, turbidity, groundAlbedo.get(), mapping->getRaw());
+                                                           float solarRadius, float soloarElevation, float turbidity, const AssetSpectrumRef &groundAlbedo, float extAngleOfHorizon) : 
+    m_mapping(mapping), m_solarElevation(soloarElevation), m_turbidity(turbidity), m_groundAlbedo(groundAlbedo), m_extAngleOfHorizon(extAngleOfHorizon) {
+        m_rawData = new SLR::AnalyticSkySpectrumTexture(solarRadius, soloarElevation, turbidity, groundAlbedo.get(), extAngleOfHorizon, mapping->getRaw());
     }
 }

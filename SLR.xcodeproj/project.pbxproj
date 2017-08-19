@@ -1938,6 +1938,7 @@
 				46CAEB681ED2052A00D3F1A7 /* RelWithAssert */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		46FFDDF81B9B258400E47537 /* Build configuration list for PBXProject "SLR" */ = {
 			isa = XCConfigurationList;

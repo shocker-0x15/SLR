@@ -21,7 +21,7 @@ namespace SLR {
         float m_brightness;
     public:
         VoronoiSpectrumTexture(const Texture3DMapping* mapping, float scale, float brightness) :
-        m_mapping(mapping), m_noiseGen(), m_scale(scale), m_brightness(brightness) { }
+        m_mapping(mapping), m_noiseGen(0), m_scale(scale), m_brightness(brightness) { }
         
         SampledSpectrum evaluate(const Point3D &p, const WavelengthSamples &wls) const;
         SampledSpectrum evaluate(const SurfacePoint &surfPt, const WavelengthSamples &wls) const override {
@@ -49,7 +49,7 @@ namespace SLR {
         float m_cosThetaMax;
     public:
         VoronoiNormalTexture(const Texture3DMapping* mapping, float scale, float thetaMax) :
-        m_mapping(mapping), m_noiseGen(), m_scale(scale), m_cosThetaMax(std::cos(thetaMax)) { }
+        m_mapping(mapping), m_noiseGen(0), m_scale(scale), m_cosThetaMax(std::cos(thetaMax)) { }
         
         Normal3D evaluate(const Point3D &p) const;
         Normal3D evaluate(const SurfacePoint &surfPt) const override {
@@ -70,7 +70,7 @@ namespace SLR {
         bool m_flat;
     public:
         VoronoiFloatTexture(const Texture3DMapping* mapping, float scale, float valueScale, bool flat) :
-        m_mapping(mapping), m_noiseGen(), m_scale(scale), m_valueScale(valueScale), m_flat(flat) { }
+        m_mapping(mapping), m_noiseGen(0), m_scale(scale), m_valueScale(valueScale), m_flat(flat) { }
         
         float evaluate(const Point3D &p) const;
         float evaluate(const SurfacePoint &surfPt) const override {
@@ -88,8 +88,8 @@ namespace SLR {
         MultiOctaveWorleyNoise3DGeneratorTemplate<float> m_generator;
     public:
         WorleyNoiseFloatTexture(const Texture3DMapping* mapping, uint32_t numOctaves, float initialFrequency, float supValueOrInitialAmplitude, bool supSpecified, float clipValue, 
-                                float frequencyMultiplier, float persistence) :  
-        m_mapping(mapping), m_generator(numOctaves, initialFrequency, supValueOrInitialAmplitude, supSpecified, clipValue, frequencyMultiplier, persistence) { }
+                                float frequencyMultiplier, float persistence, int32_t repeat) :  
+        m_mapping(mapping), m_generator(numOctaves, initialFrequency, supValueOrInitialAmplitude, supSpecified, clipValue, frequencyMultiplier, persistence, repeat) { }
         
         float evaluate(const Point3D &p) const;
         float evaluate(const SurfacePoint &surfPt) const override {

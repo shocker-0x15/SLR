@@ -21,7 +21,7 @@ namespace SLR {
     public:
         PerlinNoiseNormalTexture(const Texture3DMapping* mapping, float thetaMax, 
                                  uint32_t numOctaves, float initialFrequencyPhi, float initialFrequencyTheta, 
-                                 float frequencyMultiplier, float persistence, int32_t repeat) :  
+                                 float frequencyMultiplier, float persistence, uint32_t repeat) :  
         m_mapping(mapping), m_thetaMax(thetaMax), 
         m_generator{{numOctaves, initialFrequencyPhi, 1.0f, true, frequencyMultiplier, persistence, repeat}, 
                     {numOctaves, initialFrequencyTheta, 1.0f, true, frequencyMultiplier, persistence, repeat}} { }
@@ -42,7 +42,7 @@ namespace SLR {
         MultiOctavePerlinNoise3DGeneratorTemplate<float> m_generator;
     public:
         PerlinNoiseFloatTexture(const Texture3DMapping* mapping, uint32_t numOctaves, float initialFrequency, float supValueOrInitialAmplitude, bool supSpecified, 
-                                float frequencyMultiplier, float persistence, int32_t repeat) :  
+                                float frequencyMultiplier, float persistence, uint32_t repeat) :  
         m_mapping(mapping), m_generator(numOctaves, initialFrequency, supValueOrInitialAmplitude, supSpecified, frequencyMultiplier, persistence, repeat) { }
         
         float evaluate(const Point3D &p) const;

@@ -391,49 +391,54 @@ namespace SLR {
     template <typename RealType>
     RealType ImprovedPerlinNoise3DGeneratorTemplate<RealType>::gradient(uint32_t hash, RealType xu, RealType yu, RealType zu) {
         switch (hash & 0xF) {
-            case 0x0: return  xu + yu;
-            case 0x1: return -xu + yu;
-            case 0x2: return  xu - yu;
-            case 0x3: return -xu - yu;
-            case 0x4: return  xu + zu;
-            case 0x5: return -xu + zu;
-            case 0x6: return  xu - zu;
-            case 0x7: return -xu - zu;
-            case 0x8: return  yu + zu;
-            case 0x9: return -yu + zu;
-            case 0xA: return  yu - zu;
-            case 0xB: return -yu - zu;
-            case 0xC: return  yu + xu;
-            case 0xD: return -yu + zu;
-            case 0xE: return  yu - xu;
-            case 0xF: return -yu - zu;
+            // Dot products with 12 vectors defined by the directions from the center of a cube to its edges.
+            case 0x0: return  xu + yu; // ( 1,  1,  0)
+            case 0x1: return -xu + yu; // (-1,  1,  0)
+            case 0x2: return  xu - yu; // ( 1, -1,  0)
+            case 0x3: return -xu - yu; // (-1, -1,  0)
+            case 0x4: return  xu + zu; // ( 1,  0,  1)
+            case 0x5: return -xu + zu; // (-1,  0,  1)
+            case 0x6: return  xu - zu; // ( 1,  0, -1)
+            case 0x7: return -xu - zu; // (-1,  0, -1)
+            case 0x8: return  yu + zu; // ( 0,  1,  1)
+            case 0x9: return -yu + zu; // ( 0, -1,  1)
+            case 0xA: return  yu - zu; // ( 0,  1, -1)
+            case 0xB: return -yu - zu; // ( 0, -1, -1)
+            
+            // To avoid the cost of dividing by 12, we pad to 16 gradient directions.
+            // These form a regular tetrahedron, so adding them redundantly introduces no visual bias in the texture.
+            case 0xC: return  xu + yu; // ( 1,  1,  0)
+            case 0xD: return -yu + zu; // ( 0, -1,  1)
+            case 0xE: return -xu + yu; // (-1 , 1,  0)
+            case 0xF: return -yu - zu; // ( 0, -1, -1)
+                
             default: return 0; // never happens
         }
     }
     
     template <typename RealType>
-    RealType ImprovedPerlinNoise3DGeneratorTemplate<RealType>::evaluate(const Point3DTemplate<RealType> &p) const {        
-        RealType x = p.x, y = p.y, z = p.z;
+    RealType ImprovedPerlinNoise3DGeneratorTemplate<RealType>::evaluate(const Point3DTemplate<RealType> &p, RealType frequency) const {        
+        RealType x = p.x * frequency, y = p.y * frequency, z = p.z * frequency;
+        const uint32_t repeat = (uint32_t)(m_repeat * frequency);
         
         // If we have any repeat on, change the coordinates to their "local" repetitions.
-        if (m_repeat > 0) {
-            x = std::fmod(x, m_repeat);
-            y = std::fmod(y, m_repeat);
-            z = std::fmod(z, m_repeat);
+        if (repeat > 0) {
+            x = std::fmod(x, repeat);
+            y = std::fmod(y, repeat);
+            z = std::fmod(z, repeat);
             if (x < 0)
-                x += m_repeat;
+                x += repeat;
             if (y < 0)
-                y += m_repeat;
+                y += repeat;
             if (z < 0)
-                z += m_repeat;
+                z += repeat;
         }
         
         // Calculate the "unit cube" that the point asked will be located in.
         // The left bound is ( |_x_|,|_y_|,|_z_| ) and the right bound is that plus 1.
-        int32_t iEvalCoord[3];
-        iEvalCoord[0] = std::floor(x);
-        iEvalCoord[1] = std::floor(y);
-        iEvalCoord[2] = std::floor(z);
+        const int32_t xi = std::floor(x);
+        const int32_t yi = std::floor(y);
+        const int32_t zi = std::floor(z);
         
         const auto fade = [](RealType t) {
             // Fade function as defined by Ken Perlin.
@@ -445,24 +450,21 @@ namespace SLR {
          
         // Next we calculate the location (from 0.0 to 1.0) in that cube.
         // We also fade the location to smooth the result.
-        RealType xu = x - iEvalCoord[0];
-        RealType yu = y - iEvalCoord[1];
-        RealType zu = z - iEvalCoord[2];
+        RealType xu = x - xi;
+        RealType yu = y - yi;
+        RealType zu = z - zi;
         SLRAssert(xu >= 0 && xu <= 1 && yu >= 0 && yu <= 1 && zu >= 0 && zu <= 1, "xu, yu, zu must be in the unit cube [0, 1]^3.");
         RealType u = fade(xu);
         RealType v = fade(yu);
         RealType w = fade(zu);
         
-        const auto inc = [this](int32_t num) {
+        const auto inc = [this, repeat](int32_t num) {
             ++num;
-            if (m_repeat > 0)
-                num %= m_repeat;
+            if (repeat > 0)
+                num %= repeat;
             return num;
         };
         
-        const int32_t xi = iEvalCoord[0];
-        const int32_t yi = iEvalCoord[1];
-        const int32_t zi = iEvalCoord[2];
         uint8_t lll, llu, lul, luu, ull, ulu, uul, uuu;
         lll = hash(    xi ,     yi ,     zi );
         ull = hash(inc(xi),     yi ,     zi );
@@ -488,9 +490,8 @@ namespace SLR {
         RealType _uuValue = lerp(gradient(luu, xu, yu - 1, zu - 1), gradient(uuu, xu - 1, yu - 1, zu - 1), u);
         RealType __uValue = lerp(_luValue, _uuValue, v);
         
-        // For convenience we bound it to 0 - 1 (theoretical min/max before is -1 - 1)
-        RealType ret = (lerp(__lValue, __uValue, w) + 1) / 2;
-        SLRAssert(ret >= 0 && ret <= 1.0f, "Return value is invalid.");
+        RealType ret = lerp(__lValue, __uValue, w);
+        SLRAssert(ret >= -1.0f && ret <= 1.0f, "Return value is invalid.");
         return ret;
     }
     
@@ -505,13 +506,13 @@ namespace SLR {
         RealType frequency = m_initialFrequency;
         RealType amplitude = m_initialAmplitude;
         for (int i = 0; i < m_numOctaves; ++i) {
-            total += m_primaryNoiseGen.evaluate(frequency * p) * amplitude;
+            total += m_primaryNoiseGen.evaluate(p, frequency) * amplitude;
             
             amplitude *= m_persistence;
             frequency *= m_frequencyMultiplier;
         }
         
-        return total;
+        return 0.5f * (total + 1);
     }
     
     template class SLR_API MultiOctavePerlinNoise3DGeneratorTemplate<float>;
@@ -525,18 +526,23 @@ namespace SLR {
         using Vector3DType = Vector3DTemplate<RealType>;
         
         const RealType Offset = 50;
+        Point3DType ep1 = Point3DType(p.x, p.y, p.z);
+        Point3DType ep2 = Point3DType(p.x + Offset, p.y, p.z);
+        Point3DType ep3 = Point3DType(p.x, p.y + Offset, p.z);
+        RealType Psi1Base = m_noiseGen.evaluate(ep1);
+        RealType Psi2Base = m_noiseGen.evaluate(ep2);
+        RealType Psi3Base = m_noiseGen.evaluate(ep3);
+
         const RealType Delta = 1e-3 / m_maxFrequency;
-        
-        const RealType Psi1Base = m_noiseGen.evaluate(Point3DType(p.x, p.y, p.z));
-        const RealType Psi2Base = m_noiseGen.evaluate(Point3DType(p.x + Offset, p.y, p.z));
-        const RealType Psi3Base = m_noiseGen.evaluate(Point3DType(p.x, p.y + Offset, p.z));
-        
-        RealType rPsi1ry = (m_noiseGen.evaluate(Point3DType(p.x, p.y + Delta, p.z)) - Psi1Base) / Delta;
-        RealType rPsi1rz = (m_noiseGen.evaluate(Point3DType(p.x, p.y, p.z + Delta)) - Psi1Base) / Delta;
-        RealType rPsi2rx = (m_noiseGen.evaluate(Point3DType(p.x + Offset + Delta, p.y, p.z)) - Psi2Base) / Delta;
-        RealType rPsi2rz = (m_noiseGen.evaluate(Point3DType(p.x + Offset, p.y, p.z + Delta)) - Psi2Base) / Delta;
-        RealType rPsi3rx = (m_noiseGen.evaluate(Point3DType(p.x + Offset + Delta, p.y, p.z)) - Psi3Base) / Delta;
-        RealType rPsi3ry = (m_noiseGen.evaluate(Point3DType(p.x + Offset, p.y + Delta, p.z)) - Psi3Base) / Delta;
+        const Vector3DType dx = Vector3DType(Delta, 0, 0);
+        const Vector3DType dy = Vector3DType(0, Delta, 0);
+        const Vector3DType dz = Vector3DType(0, 0, Delta);
+        RealType rPsi1ry = (m_noiseGen.evaluate(ep1 + dy) - Psi1Base) / Delta;
+        RealType rPsi1rz = (m_noiseGen.evaluate(ep1 + dz) - Psi1Base) / Delta;
+        RealType rPsi2rx = (m_noiseGen.evaluate(ep2 + dx) - Psi2Base) / Delta;
+        RealType rPsi2rz = (m_noiseGen.evaluate(ep2 + dz) - Psi2Base) / Delta;
+        RealType rPsi3rx = (m_noiseGen.evaluate(ep3 + dx) - Psi3Base) / Delta;
+        RealType rPsi3ry = (m_noiseGen.evaluate(ep3 + dy) - Psi3Base) / Delta;
         
         return Vector3DType(rPsi3ry - rPsi2rz, rPsi1rz - rPsi3rx, rPsi2rx - rPsi1ry);
     }
@@ -547,13 +553,31 @@ namespace SLR {
     
     
     template <typename RealType>
-    void WorleyNoise3DGeneratorTemplate<RealType>::evaluate(const Point3DTemplate<RealType> &p, RealType* closestSqDistance, uint32_t* hashOfClosest, uint32_t* closestFPIdx) const {
+    void WorleyNoise3DGeneratorTemplate<RealType>::evaluate(const Point3DTemplate<RealType> &p, RealType frequency, 
+                                                            RealType* closestSqDistance, uint32_t* hashOfClosest, uint32_t* closestFPIdx) const {
         using Point3DType = Point3DTemplate<RealType>;
         
+        RealType x = p.x * frequency, y = p.y * frequency, z = p.z * frequency;
+        const uint32_t repeat = (uint32_t)(m_repeat * frequency);
+        
+        // If we have any repeat on, change the coordinates to their "local" repetitions.
+        if (repeat > 0) {
+            x = std::fmod(x, repeat);
+            y = std::fmod(y, repeat);
+            z = std::fmod(z, repeat);
+            if (x < 0)
+                x += repeat;
+            if (y < 0)
+                y += repeat;
+            if (z < 0)
+                z += repeat;
+        }
+        
         int32_t iEvalCoord[3];
-        iEvalCoord[0] = std::floor(p.x);
-        iEvalCoord[1] = std::floor(p.y);
-        iEvalCoord[2] = std::floor(p.z);
+        iEvalCoord[0] = std::floor(x);
+        iEvalCoord[1] = std::floor(y);
+        iEvalCoord[2] = std::floor(z);
+        Point3DType op(x - iEvalCoord[0], y - iEvalCoord[1], z - iEvalCoord[2]);
         
         // JP: 本来は5 x 5 x 5 - 8 = 127の隣接セルを評価する必要がある。
         //     評価点があるセル内において評価点が8区画のどれに属するかの情報を用いて最適化しても56セルは評価する必要がある。
@@ -561,21 +585,26 @@ namespace SLR {
         // EN: Strictly, this requires evaluation of 5 x 5 x 5 - 8 = 127 adjacent cells.
         //     It is necessary to evaluate 56 cells even if 
         //     optimization is applied using information that which of 8 blocks the evaluation point belongs to in the cell where the evaluation point is in.  
-        //     However, it seems evaluating only 27 cells works well.
+        //     However, it seems evaluating only 27 cells works well in most cases.
         *closestSqDistance = INFINITY;
         for (int iz = -1; iz <= 1; ++iz) {
             for (int iy = -1; iy <= 1; ++iy) {
                 for (int ix = -1; ix <= 1; ++ix) {
                     int32_t iCoord[3] = {iEvalCoord[0] + ix, iEvalCoord[1] + iy, iEvalCoord[2] + iz};
+                    if (repeat > 0) {
+                        iCoord[0] = (iCoord[0] + repeat) % repeat;
+                        iCoord[1] = (iCoord[1] + repeat) % repeat;
+                        iCoord[2] = (iCoord[2] + repeat) % repeat;
+                    }
                     uint32_t hash = getFNV1Hash32((uint8_t*)iCoord, sizeof(iCoord));
                     LinearCongruentialRNG rng(hash);
                     
-                    uint32_t numFeaturePoints = 1 + std::min(int32_t(8 * rng.getFloat0cTo1o()), 8);
+                    uint32_t numFeaturePoints = 1;// + std::min(int32_t(8 * rng.getFloat0cTo1o()), 8);
                     for (int i = 0; i < numFeaturePoints; ++i) {
-                        Point3DType fp = Point3DType(iCoord[0] + rng.getFloat0cTo1o(), 
-                                                     iCoord[1] + rng.getFloat0cTo1o(), 
-                                                     iCoord[2] + rng.getFloat0cTo1o());
-                        RealType dist2 = sqDistance(p, fp);
+                        Point3DType fp = Point3DType(ix + rng.getFloat0cTo1o(), 
+                                                     iy + rng.getFloat0cTo1o(), 
+                                                     iz + rng.getFloat0cTo1o());
+                        RealType dist2 = sqDistance(op, fp);
                         if (dist2 < *closestSqDistance) {
                             *closestSqDistance = dist2;
                             *hashOfClosest = hash;
@@ -601,7 +630,7 @@ namespace SLR {
             RealType closestDistance;
             uint32_t hashOfClosest;
             uint32_t closestFPIdx;
-            m_primaryNoiseGen.evaluate(frequency * p, &closestDistance, &hashOfClosest, &closestFPIdx);
+            m_primaryNoiseGen.evaluate(p, frequency, &closestDistance, &hashOfClosest, &closestFPIdx);
             total += (closestDistance / std::sqrt(3.0)) * amplitude;
             
             amplitude *= m_persistence;

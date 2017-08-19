@@ -33,6 +33,7 @@ namespace SLR {
         float m_solarElevation;
         float m_turbidity;
         const AssetSpectrum* m_groundAlbedo;
+        float m_extAngleOfHorizon;
 #ifdef SLR_Use_Spectral_Representation
         ArHosekSkyModelState* m_skyModelStates[11];
 #else
@@ -45,7 +46,8 @@ namespace SLR {
         mutable SunDiscContinuousDistribution2D* m_sunDiscDistribution;
         mutable RegularConstantContinuousDistribution2D* m_skyDomeDistribution;
     public:
-        AnalyticSkySpectrumTexture(float solarRadius, float solarElevation, float turbidity, const AssetSpectrum* groundAlbedo, const Texture2DMapping* mapping);
+        AnalyticSkySpectrumTexture(float solarRadius, float solarElevation, float turbidity, const AssetSpectrum* groundAlbedo, float extAngleOfHorizon, 
+                                   const Texture2DMapping* mapping);
         ~AnalyticSkySpectrumTexture();
         
         SampledSpectrum evaluate(const Point3D &p, const WavelengthSamples &wls) const;

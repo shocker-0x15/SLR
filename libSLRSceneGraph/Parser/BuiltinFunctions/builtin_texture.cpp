@@ -109,6 +109,7 @@ namespace SLRSceneGraph {
                                                                    {"solar elevation", Type::RealNumber},
                                                                    {"turbidity", Type::RealNumber},
                                                                    {"ground albedo", Type::Spectrum},
+                                                                   {"ext angle", Type::RealNumber, 0.0f}, 
                                                                    {"solar radius", Type::RealNumber, 0.5f * 0.51f * M_PI / 180},
                                                                    {"mapping", Type::Texture2DMapping, tex2DMapSharedInstance}                                                                                        
                                                                },
@@ -116,9 +117,10 @@ namespace SLRSceneGraph {
                                                                    float solarElevation = args.at("solar elevation").raw<TypeMap::RealNumber>();
                                                                    float turbidity = args.at("turbidity").raw<TypeMap::RealNumber>();
                                                                    AssetSpectrumRef groundAlbedo = args.at("ground albedo").rawRef<TypeMap::Spectrum>();
+                                                                   float extAngle = args.at("ext angle").raw<TypeMap::RealNumber>();
                                                                    float solarRadius = args.at("solar radius").raw<TypeMap::RealNumber>();
                                                                    const auto &mapping = args.at("mapping").rawRef<TypeMap::Texture2DMapping>();
-                                                                   SpectrumTextureRef rawRef = createShared<AnalyticSkySpectrumTexture>(mapping, solarRadius, solarElevation, turbidity, groundAlbedo);
+                                                                   SpectrumTextureRef rawRef = createShared<AnalyticSkySpectrumTexture>(mapping, solarRadius, solarElevation, turbidity, groundAlbedo, extAngle);
                                                                    return Element::createFromReference<TypeMap::SpectrumTexture>(rawRef);
                                                                }
                                                            };
@@ -197,7 +199,7 @@ namespace SLRSceneGraph {
                                                                    float initFreqTheta = args.at("init freq theta").raw<TypeMap::RealNumber>();
                                                                    float freqMul = args.at("freq mul").raw<TypeMap::RealNumber>();
                                                                    float persistence = args.at("persistence").raw<TypeMap::RealNumber>();
-                                                                   int32_t repeat = args.at("repeat").raw<TypeMap::Integer>();
+                                                                   uint32_t repeat = args.at("repeat").raw<TypeMap::Integer>();
                                                                    const auto &mapping = args.at("mapping").rawRef<TypeMap::Texture3DMapping>();
                                                                    NormalTextureRef rawRef = createShared<PerlinNoiseNormalTexture>(mapping, thetaMax, numOctaves, initFreqPhi, initFreqTheta, freqMul, persistence, repeat);
                                                                    return Element::createFromReference<TypeMap::NormalTexture>(rawRef);
@@ -284,7 +286,7 @@ namespace SLRSceneGraph {
                                                                    bool supSpecified = args.at("sup specified").raw<TypeMap::Bool>();
                                                                    float freqMul = args.at("freq mul").raw<TypeMap::RealNumber>();
                                                                    float persistence = args.at("persistence").raw<TypeMap::RealNumber>();
-                                                                   int32_t repeat = args.at("repeat").raw<TypeMap::Integer>();
+                                                                   uint32_t repeat = args.at("repeat").raw<TypeMap::Integer>();
                                                                    const auto &mapping = args.at("mapping").rawRef<TypeMap::Texture3DMapping>();
                                                                    FloatTextureRef rawRef = createShared<PerlinNoiseFloatTexture>(mapping, numOctaves, initFreq, supOrInitAmp, supSpecified, 
                                                                                                                                   freqMul, persistence, repeat);
@@ -303,6 +305,7 @@ namespace SLRSceneGraph {
                                                                    {"clip", Type::RealNumber},
                                                                    {"freq mul", Type::RealNumber},
                                                                    {"persistence", Type::RealNumber},
+                                                                   {"repeat", Type::Integer},
                                                                    {"mapping", Type::Texture3DMapping, worldPos3DMapSharedInstance}                                                                                        
                                                                },
                                                                [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
@@ -313,9 +316,10 @@ namespace SLRSceneGraph {
                                                                    float clip = args.at("clip").raw<TypeMap::RealNumber>();
                                                                    float freqMul = args.at("freq mul").raw<TypeMap::RealNumber>();
                                                                    float persistence = args.at("persistence").raw<TypeMap::RealNumber>();
+                                                                   uint32_t repeat = args.at("repeat").raw<TypeMap::Integer>();
                                                                    const auto &mapping = args.at("mapping").rawRef<TypeMap::Texture3DMapping>();
                                                                    FloatTextureRef rawRef = createShared<WorleyNoiseFloatTexture>(mapping, numOctaves, initFreq, supOrInitAmp, supSpecified, clip, 
-                                                                                                                                  freqMul, persistence);
+                                                                                                                                  freqMul, persistence, repeat);
                                                                    return Element::createFromReference<TypeMap::FloatTexture>(rawRef);
                                                                }
                                                            };

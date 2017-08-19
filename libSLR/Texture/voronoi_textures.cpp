@@ -16,7 +16,7 @@ namespace SLR {
         float closestSqDistance;
         uint32_t hash;
         uint32_t fpIdx;
-        m_noiseGen.evaluate(p / m_scale, &closestSqDistance, &hash, &fpIdx);
+        m_noiseGen.evaluate(p, 1.0f / m_scale, &closestSqDistance, &hash, &fpIdx);
         
         LinearCongruentialRNG rng(hash + fpIdx);
         float rgb[3] = {
@@ -36,7 +36,7 @@ namespace SLR {
         float closestDistance;
         uint32_t hash;
         uint32_t fpIdx;
-        m_noiseGen.evaluate(p / m_scale, &closestDistance, &hash, &fpIdx);
+        m_noiseGen.evaluate(p, 1.0f / m_scale, &closestDistance, &hash, &fpIdx);
         
         LinearCongruentialRNG rng(hash + fpIdx);
         float rgb[3] = {
@@ -57,7 +57,7 @@ namespace SLR {
         float closestSqDistance;
         uint32_t hash;
         uint32_t fpIdx;
-        m_noiseGen.evaluate(p / m_scale, &closestSqDistance, &hash, &fpIdx);
+        m_noiseGen.evaluate(p, 1.0f / m_scale, &closestSqDistance, &hash, &fpIdx);
         
         LinearCongruentialRNG rng(hash + fpIdx);
         return uniformSampleCone(rng.getFloat0cTo1o(), rng.getFloat0cTo1o(), m_cosThetaMax);
@@ -67,14 +67,14 @@ namespace SLR {
         float closestSqDistance;
         uint32_t hash;
         uint32_t fpIdx;
-        m_noiseGen.evaluate(p, &closestSqDistance, &hash, &fpIdx);
+        m_noiseGen.evaluate(p, 1.0f / m_scale, &closestSqDistance, &hash, &fpIdx);
         
         if (m_flat) {
             LinearCongruentialRNG rng(hash + fpIdx);
             return m_valueScale * rng.getFloat0cTo1o();
         }
         else {
-            return (std::sqrt(closestSqDistance / 2.0f) / m_scale) * m_valueScale;
+            return std::sqrt(closestSqDistance / 3.0f) * m_valueScale;
         }
     }
     

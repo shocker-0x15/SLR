@@ -204,10 +204,11 @@ namespace SLRSceneGraph {
         float m_clipValue;
         float m_frequencyMultiplier;
         float m_persistence;
+        uint32_t m_repeat;
     public:
         WorleyNoiseFloatTexture(const Texture3DMappingRef &mapping, 
                                 uint32_t numOctaves, float initialFrequency, float supValueOrInitialAmplitude, bool supSpecified, float clipValue, 
-                                float frequencyMultiplier, float persistence);
+                                float frequencyMultiplier, float persistence, uint32_t repeat);
     };
     
     
@@ -220,11 +221,11 @@ namespace SLRSceneGraph {
         float m_initialFrequencyTheta;
         float m_frequencyMultiplier;
         float m_persistence;
-        int32_t m_repeat;
+        uint32_t m_repeat;
     public:
         PerlinNoiseNormalTexture(const Texture3DMappingRef &mapping, float thetaMax, 
                                  uint32_t numOctaves, float initialFrequencyPhi, float initialFrequencyTheta, 
-                                 float frequencyMultiplier, float persistence, int32_t repeat);
+                                 float frequencyMultiplier, float persistence, uint32_t repeat);
     };
     
     class SLR_SCENEGRAPH_API PerlinNoiseFloatTexture : public FloatTexture {
@@ -235,11 +236,11 @@ namespace SLRSceneGraph {
         bool m_supSpecified;
         float m_frequencyMultiplier;
         float m_persistence;
-        int32_t m_repeat;
+        uint32_t m_repeat;
     public:
         PerlinNoiseFloatTexture(const Texture3DMappingRef &mapping, 
                                 uint32_t numOctaves, float initialFrequency, float supValueOrInitialAmplitude, bool supSpecified, 
-                                float frequencyMultiplier, float persistence, int32_t repeat);
+                                float frequencyMultiplier, float persistence, uint32_t repeat);
     };
     
     
@@ -250,9 +251,10 @@ namespace SLRSceneGraph {
         float m_solarElevation;
         float m_turbidity;
         AssetSpectrumRef m_groundAlbedo;
+        float m_extAngleOfHorizon;
     public:
         AnalyticSkySpectrumTexture(const Texture2DMappingRef &mapping, 
-                                   float solarRadius, float soloarElevation, float turbidity, const AssetSpectrumRef &groundAlbedo);
+                                   float solarRadius, float soloarElevation, float turbidity, const AssetSpectrumRef &groundAlbedo, float extAngleOfHorizon);
         
         bool generateLuminanceChannel() override { return false; }
     };
