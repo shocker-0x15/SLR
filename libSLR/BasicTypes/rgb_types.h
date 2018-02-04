@@ -171,7 +171,7 @@ namespace SLR {
         // ----------------------------------------------------------------
         // Methods for compatibility with DiscretizedSpectrumTemplate
         
-        bool hasMinus() const {
+        bool hasNegative() const {
             return r < 0 || g < 0 || b < 0;
         }
         static void init() { };

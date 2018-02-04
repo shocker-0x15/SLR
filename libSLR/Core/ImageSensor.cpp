@@ -159,8 +159,8 @@ namespace SLR {
                     printf("(%u, %u): has an infinite value!\n%s\n", j, i, pix.toString().c_str());
                 if (pix.hasNaN())
                     printf("(%u, %u): has NaN!\n%s\n", j, i, pix.toString().c_str());
-                if (pix.hasMinus())
-                    printf("(%u, %u): has a minus value!\n%s\n", j, i, pix.toString().c_str());
+                if (pix.hasNegative())
+                    printf("(%u, %u): has a negative value!\n%s\n", j, i, pix.toString().c_str());
                 
                 float RGB[3];
                 pix.getRGB(RGB);

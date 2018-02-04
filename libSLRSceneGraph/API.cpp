@@ -1391,7 +1391,7 @@ namespace SLRSceneGraph {
         }
 #else
         SLR_SCENEGRAPH_API AssetSpectrumRef create(SpectrumType spType, ColorSpace space, SpectrumFloat e0, SpectrumFloat e1, SpectrumFloat e2) {
-            SLRAssert(e0 >= 0.0 && e1 >= 0.0 && e2 >= 0.0, "Values should not be minus.");
+            SLRAssert(e0 >= 0.0 && e1 >= 0.0 && e2 >= 0.0, "Values should not be negative.");
             switch (space) {
                 case ColorSpace::sRGB:
                     return createShared<RGBSpectrum>(e0, e1, e2);

@@ -257,7 +257,7 @@ namespace SLR {
                             continue;
                         SLRAssert(MISWeight >= 0 && MISWeight <= 1.0f, "invalid MIS weight: %g", MISWeight);
                         SampledSpectrum contribution = MISWeight * lVtx.alpha * connectionTerm * eVtx.alpha;
-                        SLRAssert(contribution.allFinite() && !contribution.hasMinus(),
+                        SLRAssert(contribution.allFinite() && !contribution.hasNegative(),
                                   "Unexpected value detected: %s\n"
                                   "pix: (%f, %f)", contribution.toString().c_str(), p.x, p.y);
                         if (t > 1) {
@@ -325,7 +325,7 @@ namespace SLR {
                 if (!std::isinf(MISWeight) && !std::isnan(MISWeight)) {
                     SampledSpectrum contribution = MISWeight * alpha * Le0 * Le1;
                     SLRAssert(MISWeight >= 0 && MISWeight <= 1.0f, "invalid MIS weight: %g", MISWeight);
-                    SLRAssert(contribution.allFinite() && !contribution.hasMinus(),
+                    SLRAssert(contribution.allFinite() && !contribution.hasNegative(),
                               "Unexpected value detected: %s\n"
                               "pix: (%f, %f)", contribution.toString().c_str(), curPx, curPy);
                     if (wls.wavelengthSelected())

@@ -472,7 +472,7 @@ namespace SLR {
         bool allFinite() const {
             return !hasNaN() && !hasInf();
         }
-        bool hasMinus() const {
+        bool hasNegative() const {
             for (int i = 0; i < NumSpectralSamples; ++i)
                 if (values[i] < 0)
                     return true;
@@ -680,7 +680,7 @@ namespace SLR {
                     return true;
             return false;
         }
-        bool hasMinus() const {
+        bool hasNegative() const {
             for (int i = 0; i < NumStrataForStorage; ++i)
                 if (values[i] < 0)
                     return true;

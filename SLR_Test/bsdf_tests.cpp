@@ -121,7 +121,7 @@ static void BSDFTest_Function(const SLR::BSDF* bsdf, const SLR::WavelengthSample
                     continue;
                 ++numValidSamples;
                 
-                EXPECT_TRUE(fwdSampledValue.allFinite() && !fwdSampledValue.hasMinus());
+                EXPECT_TRUE(fwdSampledValue.allFinite() && !fwdSampledValue.hasNegative());
                 
                 accumEnergyThroughput += fwdSampledValue * (absDot(result.dirLocal, geomNormalLocal) / result.dirPDF);
                 

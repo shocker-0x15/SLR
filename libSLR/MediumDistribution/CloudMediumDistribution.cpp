@@ -442,7 +442,7 @@ namespace SLR {
             transmittance *= (1.0f - probRealCollision);
             sampledDistance += -std::log(sampler.getSample()) / majorantSelected;
         }
-        SLRAssert(transmittance.allFinite() && !transmittance.hasMinus(), "Invalid transmittance value.");
+        SLRAssert(transmittance.allFinite() && !transmittance.hasNegative(), "Invalid transmittance value.");
         
         return transmittance;
     }

@@ -304,7 +304,7 @@ namespace SLR {
                                   std::fabs(result->dirLocal.z / dot(result->dirLocal, query.gNormalLocal)));
             if (query.requestReverse)
                 result->reverse.value *= snCorrection;
-            SLRAssert(result->dirPDF == 0 || (fs_sn.allFinite() && !fs_sn.hasMinus() && std::isfinite(snCorrection) &&
+            SLRAssert(result->dirPDF == 0 || (fs_sn.allFinite() && !fs_sn.hasNegative() && std::isfinite(snCorrection) &&
                                               std::isfinite(result->dirPDF)),
                       "fs_sn: %s, snCorrection: %g, PDF: %g, wlIdx: %u, qDir: %s, sample: (%g, %g, %g), rDir: %s, gNormal: %s",
                       fs_sn.toString().c_str(), snCorrection, result->dirPDF, query.wlHint,
@@ -324,7 +324,7 @@ namespace SLR {
             float snCorrection = (query.adjoint ?
                                   std::fabs(query.dirLocal.z / dot(query.dirLocal, query.gNormalLocal)) :
                                   std::fabs(dir.z / dot(dir, query.gNormalLocal)));
-            SLRAssert(fs_sn.allFinite() && !fs_sn.hasMinus() && std::isfinite(snCorrection),
+            SLRAssert(fs_sn.allFinite() && !fs_sn.hasNegative() && std::isfinite(snCorrection),
                       "fs_sn: %s, snCorrection: %g, wlIdx: %u, qDir: %s, rDir: %s, gNormal: %s",
                       fs_sn.toString().c_str(), snCorrection, query.wlHint,
                       query.dirLocal.toString().c_str(), dir.toString().c_str(), query.gNormalLocal.toString().c_str());
