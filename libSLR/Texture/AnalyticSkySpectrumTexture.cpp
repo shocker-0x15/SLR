@@ -125,7 +125,7 @@ namespace SLR {
 #endif
         SampledSpectrum ret = spectrum.evaluate(wls);
         ret = max(ret, 0.0f);
-        SLRAssert(ret.allFinite(), "Invalid vaue.");
+        SLRAssert(ret.allFinite(), "Invalid vaue.: %s", ret.toString().c_str());
         
         return ret;
     }

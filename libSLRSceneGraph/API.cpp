@@ -287,6 +287,7 @@ namespace SLRSceneGraph {
             stack["asin"] = BuiltinFunctions::Math::asin;
             stack["acos"] = BuiltinFunctions::Math::acos;
             stack["atan"] = BuiltinFunctions::Math::atan;
+            stack["normalize"] = BuiltinFunctions::Math::normalize;
             stack["dot"] = BuiltinFunctions::Math::dot;
             stack["cross"] = BuiltinFunctions::Math::cross;
             stack["distance"] = BuiltinFunctions::Math::distance;

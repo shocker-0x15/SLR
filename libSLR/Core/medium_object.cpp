@@ -381,7 +381,7 @@ namespace SLR {
                 curMedium = nullptr;
             distToNextBoundary = std::min(distToNextBoundary, segment.distMax);
             if (std::isinf(distToNextBoundary))
-                return false;
+                return transmittance;
             
             if (curMedium) {
                 SampledSpectrum curTransmittance;

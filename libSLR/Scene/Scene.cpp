@@ -32,8 +32,8 @@ namespace SLR {
         
         // calculate world bounding sphere and store its radius and disc area.
         BoundingBox3D worldBounds = calcUnion(m_surfaceAggregate->bounds(), m_mediumAggregate->bounds());
-        m_worldCenter = worldBounds.centroid();
-        m_worldRadius = (worldBounds.maxP - m_worldCenter).length();
+        m_worldCenter = worldBounds.isValid() ? worldBounds.centroid() : Point3D::Zero;
+        m_worldRadius = worldBounds.isValid() ? (worldBounds.maxP - m_worldCenter).length() : 0.0f;
         m_worldDiscArea = M_PI * m_worldRadius * m_worldRadius;
     }
     

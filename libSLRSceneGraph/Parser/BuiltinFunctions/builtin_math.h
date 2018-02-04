@@ -32,6 +32,7 @@ namespace SLRSceneGraph {
             extern const Element asin;
             extern const Element acos;
             extern const Element atan;
+            extern const Element normalize;
             extern const Element dot;
             extern const Element cross;
             extern const Element distance;

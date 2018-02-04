@@ -261,8 +261,8 @@ namespace SLR {
     
     template <typename RealType>
     void RegularConstantContinuousDistribution2DTemplate<RealType>::sample(RealType u0, RealType u1, RealType* d0, RealType* d1, RealType* PDF) const {
-        SLRAssert(u0 >= 0 && u0 < 1, "\"u0\" must be in range [0, 1).");
-        SLRAssert(u1 >= 0 && u1 < 1, "\"u1\" must be in range [0, 1).");
+        SLRAssert(u0 >= 0 && u0 < 1, "\"u0\" must be in range [0, 1).: %g", u0);
+        SLRAssert(u1 >= 0 && u1 < 1, "\"u1\" must be in range [0, 1).: %g", u1);
         RealType topPDF;
         *d1 = m_top1DDist->sample(u1, &topPDF);
         uint32_t idx1D = std::min(uint32_t(m_num1DDists * *d1), m_num1DDists - 1);

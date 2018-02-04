@@ -91,8 +91,8 @@ namespace SLR {
         if (idxIsect == 2)
             ret.unify(maxPos < maxChopPos ? p[2] : p[0]);
         
-        SLRAssert(realGE(ret.minP[chopAxis], minChopPos, 1e-5f) && realLE(ret.maxP[chopAxis], maxChopPos, 1e-5f) &&
-                  realLE(ret.surfaceArea(), baseBBox.surfaceArea(), 1e-5f), "invalid chopped bounds.");
+//        SLRAssert(realGE(ret.minP[chopAxis], minChopPos, 1e-5f) && realLE(ret.maxP[chopAxis], maxChopPos, 1e-5f) &&
+//                  realLE(ret.surfaceArea(), baseBBox.surfaceArea(), 1e-5f), "invalid chopped bounds.");
         
         return ret;
     }
@@ -148,7 +148,7 @@ namespace SLR {
             bbox0->unify(isectPs[i]);
             bbox1->unify(isectPs[i]);
         }
-        SLRAssert(realLE(bbox0->maxP[splitAxis], splitPos, 1e-6f) && realGE(bbox1->minP[splitAxis], splitPos, 1e-6f), "invalid split bounds.");
+//        SLRAssert(realLE(bbox0->maxP[splitAxis], splitPos, 1e-6f) && realGE(bbox1->minP[splitAxis], splitPos, 1e-6f), "invalid split bounds.");
     }
     
     bool TriangleSurfaceShape::preTransformed() const {

@@ -140,6 +140,13 @@ namespace SLRSceneGraph {
                                                        return Element(std::atan2(y, x));
                                                    }
                                                });
+            const Element normalize = 
+            Element::create<TypeMap::Function>(1, 
+                                               std::vector<ArgInfo>{{"v", Type::Vector}},
+                                               [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
+                                                   const SLR::Vector3D &v = args.at("v").raw<TypeMap::Vector>();
+                                                   return Element(SLR::normalize(v));
+                                               });
             const Element dot = 
             Element::create<TypeMap::Function>(1, 
                                                std::vector<ArgInfo>{{"v0", Type::Vector}, {"v1", Type::Vector}},

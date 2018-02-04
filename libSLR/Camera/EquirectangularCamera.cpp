@@ -60,7 +60,7 @@ namespace SLR {
         float phi = m_cam.m_phiAngle * (smp.uDir[0] - 0.5f);
         float theta = 0.5f * M_PI + m_cam.m_thetaAngle * (smp.uDir[1] - 0.5f);
         result->dirLocal = Vector3D::fromPolarYUp(phi, theta);
-        float sinTheta = (1.0f - result->dirLocal.y * result->dirLocal.y);
+        float sinTheta = std::sqrt(1.0f - result->dirLocal.y * result->dirLocal.y);
         result->dirPDF = 1.0f / (m_cam.m_phiAngle * m_cam.m_thetaAngle * sinTheta);
         result->dirType = m_type;
         
