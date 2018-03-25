@@ -34,12 +34,21 @@ namespace SLR {
         virtual IDFSample getIDFSample() = 0;
         virtual BSDFSample getBSDFSample() = 0;
         virtual PFSample getPFSample() = 0;
+        virtual AlphaTestSampler &getAlphaTestSampler() = 0;
         virtual FreePathSampler &getFreePathSampler() = 0;
         virtual float getPathTerminationSample() = 0;
         virtual float getLightSelectionSample() = 0;
         virtual SurfaceLightPosSample getSurfaceLightPosSample() = 0;
         virtual VolumetricLightPosSample getVolumetricLightPosSample() = 0;
         virtual EDFSample getEDFSample() = 0;
+    };
+    
+    class SLR_API AlphaTestSampler {
+        XORShiftRNG &m_rng;
+    public:
+        AlphaTestSampler(XORShiftRNG& rng) : m_rng(rng) { }
+        
+        float getSample() { return m_rng.getFloat0cTo1o(); }
     };
     
     class SLR_API FreePathSampler {
@@ -54,10 +63,11 @@ namespace SLR {
     
     class SLR_API IndependentLightPathSampler : public LightPathSampler {
         XORShiftRNG m_rng;
+        AlphaTestSampler m_alphaTestSampler;
         FreePathSampler m_freePathSampler;
     public:
-        IndependentLightPathSampler() :m_rng() , m_freePathSampler(m_rng) { }
-        IndependentLightPathSampler(uint32_t seed) : m_rng(seed), m_freePathSampler(m_rng) { }
+        IndependentLightPathSampler() :m_rng(), m_alphaTestSampler(m_rng), m_freePathSampler(m_rng) { }
+        IndependentLightPathSampler(uint32_t seed) : m_rng(seed), m_alphaTestSampler(m_rng), m_freePathSampler(m_rng) { }
         
         float getTimeSample(float timeBegin, float timeEnd) override {
             float v = m_rng.getFloat0cTo1o();
@@ -70,6 +80,7 @@ namespace SLR {
         IDFSample getIDFSample() override { return IDFSample(m_rng.getFloat0cTo1o(), m_rng.getFloat0cTo1o()); }
         BSDFSample getBSDFSample() override { return BSDFSample(m_rng.getFloat0cTo1o(), m_rng.getFloat0cTo1o(), m_rng.getFloat0cTo1o()); }
         PFSample getPFSample() override { return PFSample(m_rng.getFloat0cTo1o(), m_rng.getFloat0cTo1o()); }
+        AlphaTestSampler &getAlphaTestSampler() override { return m_alphaTestSampler; }
         FreePathSampler &getFreePathSampler() override { return m_freePathSampler; }
         float getPathTerminationSample() override { return m_rng.getFloat0cTo1o(); }
         float getLightSelectionSample() override { return m_rng.getFloat0cTo1o(); }

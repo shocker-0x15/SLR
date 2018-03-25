@@ -76,12 +76,12 @@ namespace SLR {
         
         virtual float costForIntersect() const = 0;
         virtual bool contains(const Point3D &p, float time) const { return false; }
-        virtual bool intersect(const Ray &ray, const RaySegment &segment, SurfaceInteraction* si) const = 0;
+        virtual bool intersectWithoutAlpha(const Ray &ray, const RaySegment &segment, SurfaceInteraction* si) const = 0;
+        virtual bool intersect(const Ray &ray, const RaySegment &segment, LightPathSampler &pathSampler, SurfaceInteraction* si) const = 0;
+        virtual float testVisibility(const Ray &ray, const RaySegment &segment) const = 0;
         virtual void calculateSurfacePoint(const SurfaceInteraction &si, SurfacePoint* surfPt) const {
             SLRAssert_ShouldNotBeCalled();
         }
-        
-        bool testVisibility(const SurfacePoint &shdP, const SurfacePoint &lightP, float time) const;
     };
     
     
@@ -132,7 +132,9 @@ namespace SLR {
                        EDFQueryResult* edfResult, SampledSpectrum* Le1, Ray* ray, float* epsilon) const override;
         
         float costForIntersect() const override { return m_surface->costForIntersect(); }
-        bool intersect(const Ray &ray, const RaySegment &segment, SurfaceInteraction* si) const override;
+        bool intersectWithoutAlpha(const Ray &ray, const RaySegment &segment, SurfaceInteraction* si) const override;
+        bool intersect(const Ray &ray, const RaySegment &segment, LightPathSampler &pathSampler, SurfaceInteraction* si) const override;
+        float testVisibility(const Ray &ray, const RaySegment &segment) const override;
         void calculateSurfacePoint(const SurfaceInteraction &si, SurfacePoint* surfPt) const override;
         
         // END: SurfaceObject's methods
@@ -222,7 +224,9 @@ namespace SLR {
         
         float costForIntersect() const override { return m_surfObj->costForIntersect(); }
         bool contains(const Point3D &p, float time) const override;
-        bool intersect(const Ray &ray, const RaySegment &segment, SurfaceInteraction* si) const override;
+        bool intersectWithoutAlpha(const Ray &ray, const RaySegment &segment, SurfaceInteraction* si) const override;
+        bool intersect(const Ray &ray, const RaySegment &segment, LightPathSampler &pathSampler, SurfaceInteraction* si) const override;
+        float testVisibility(const Ray &ray, const RaySegment &segment) const override;
         
         // END: SurfaceObject's methods
         // ----------------------------------------------------------------
@@ -257,7 +261,9 @@ namespace SLR {
         
         float costForIntersect() const override;
         bool contains(const Point3D &p, float time) const override;
-        bool intersect(const Ray &ray, const RaySegment &segment, SurfaceInteraction* si) const override;
+        bool intersectWithoutAlpha(const Ray &ray, const RaySegment &segment, SurfaceInteraction* si) const override;
+        bool intersect(const Ray &ray, const RaySegment &segment, LightPathSampler &pathSampler, SurfaceInteraction* si) const override;
+        float testVisibility(const Ray &ray, const RaySegment &segment) const override;
         
         // END: SurfaceObject's methods
         // ----------------------------------------------------------------

@@ -40,10 +40,10 @@ namespace SLR {
         float getWorldRadius() const { return m_worldRadius; }
         float getWorldDiscArea() const { return m_worldDiscArea; }
         
-        bool intersect(const Ray &ray, const RaySegment &segment, SurfaceInteraction* si) const;
+        bool intersect(const Ray &ray, const RaySegment &segment, LightPathSampler &pathSampler, SurfaceInteraction* si) const;
         bool interact(const Ray &ray, const RaySegment &segment, const WavelengthSamples &wls, LightPathSampler &pathSampler, ArenaAllocator &mem,
                       Interaction** interact, SampledSpectrum* medThroughput, bool* singleWavelength) const;
-        bool testVisibility(const SurfacePoint &shdP, const SurfacePoint &lightP, float time) const;
+        bool testVisibility(const SurfacePoint &shdP, const SurfacePoint &lightP, float time, float* fractionalVisibility) const;
         bool testVisibility(const InteractionPoint* shdP, const InteractionPoint* lightP, float time,
                             const WavelengthSamples &wls, LightPathSampler &pathSampler, SampledSpectrum* fractionalVisibility, bool* singleWavelength) const;
         void selectSurfaceLight(float u, float time, SurfaceLight* light, float* prob) const;

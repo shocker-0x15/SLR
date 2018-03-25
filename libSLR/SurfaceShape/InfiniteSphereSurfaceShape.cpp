@@ -32,7 +32,7 @@ namespace SLR {
         return true;
     }
     
-    bool InfiniteSphereSurfaceShape::intersect(const Ray &ray, const RaySegment &segment, SurfaceInteraction *si) const {
+    bool InfiniteSphereSurfaceShape::intersectWithoutAlpha(const Ray &ray, const RaySegment &segment, SurfaceInteraction* si) const {
         if (!std::isinf(segment.distMax))
             return false;
         float theta, phi;
@@ -45,6 +45,25 @@ namespace SLR {
                                  TexCoord2D(phi / (2 * M_PI), theta / M_PI) // - texture coordinate
                                  );
         return true;
+    }
+    
+    bool InfiniteSphereSurfaceShape::intersect(const Ray &ray, const RaySegment &segment, LightPathSampler &pathSampler, SurfaceInteraction *si) const {
+        if (!std::isinf(segment.distMax))
+            return false;
+        float theta, phi;
+        ray.dir.toPolarYUp(&theta, &phi);
+        *si = SurfaceInteraction(ray.time, // ---------------------------------- time
+                                 INFINITY, // ---------------------------------- distance
+                                 Point3D(ray.dir), // -------------------------- position in world coordinate
+                                 -ray.dir, // ---------------------------------- geometric normal in world coordinate
+                                 phi, theta, // -------------------------------- surface parameters
+                                 TexCoord2D(phi / (2 * M_PI), theta / M_PI) // - texture coordinate
+                                 );
+        return true;
+    }
+    
+    float InfiniteSphereSurfaceShape::testVisibility(const Ray &ray, const RaySegment &segment) const {
+        return std::isinf(segment.distMax) ? 0.0f : 1.0f;
     }
     
     void InfiniteSphereSurfaceShape::calculateSurfacePoint(const SurfaceInteraction &si, SurfacePoint *surfPt) const {

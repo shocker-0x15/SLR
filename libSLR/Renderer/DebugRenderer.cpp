@@ -206,7 +206,7 @@ namespace SLR {
         DebugInfo ret;
         
         SurfaceInteraction si;
-        if (!scene.intersect(ray, segment, &si))
+        if (!scene.intersect(ray, segment, pathSampler, &si))
             return DebugInfo();
         si.calculateSurfacePoint(&surfPt);
         ret.surfPt = surfPt;

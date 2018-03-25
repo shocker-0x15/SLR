@@ -235,6 +235,7 @@ namespace SLR {
     // Light Path Sampler
     struct PixelPosition;
     class LightPathSampler;
+    class AlphaTestSampler;
     class FreePathSampler;
     class IndependentLightPathSampler;
     

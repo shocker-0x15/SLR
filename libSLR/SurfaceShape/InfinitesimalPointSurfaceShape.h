@@ -23,7 +23,9 @@ namespace SLR {
         float costForIntersect() const override { return 0.0f; }
         BoundingBox3D bounds() const override { return m_position; }
         bool preTransformed() const override { return true; }
-        bool intersect(const Ray &ray, const RaySegment &segment, SurfaceInteraction* si) const override { return false; }
+        bool intersectWithoutAlpha(const Ray &ray, const RaySegment &segment, SurfaceInteraction* si) const { return false; }
+        bool intersect(const Ray &ray, const RaySegment &segment, LightPathSampler &pathSampler, SurfaceInteraction* si) const override { return false; }
+        float testVisibility(const Ray &ray, const RaySegment &segment) const override { return 1.0f; }
         void calculateSurfacePoint(const SurfaceInteraction &si, SurfacePoint* surfPt) const override;
         float area() const override { return 0.0f; }
         void sample(float u0, float u1, SurfacePoint* surfPt, float* areaPDF, DirectionType* posType) const override;

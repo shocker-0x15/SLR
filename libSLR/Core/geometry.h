@@ -339,7 +339,9 @@ namespace SLR {
             bbox1->minP[splitAxis] = std::max(bbox1->minP[splitAxis], splitPos);
         }
         virtual bool preTransformed() const = 0;
-        virtual bool intersect(const Ray &ray, const RaySegment &segment, SurfaceInteraction* si) const = 0;
+        virtual bool intersectWithoutAlpha(const Ray &ray, const RaySegment &segment, SurfaceInteraction* si) const = 0;
+        virtual bool intersect(const Ray &ray, const RaySegment &segment, LightPathSampler &pathSampler, SurfaceInteraction* si) const = 0;
+        virtual float testVisibility(const Ray &ray, const RaySegment &segment) const = 0;
         virtual void calculateSurfacePoint(const SurfaceInteraction &si, SurfacePoint* surfPt) const = 0;
         virtual float area() const = 0;
         virtual void sample(float u0, float u1, SurfacePoint* surfPt, float* areaPDF, DirectionType* posType) const = 0;

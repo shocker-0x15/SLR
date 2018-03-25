@@ -9,6 +9,7 @@
 
 #include "../BasicTypes/CompensatedSum.h"
 #include "../Core/distributions.h"
+#include "../Core/light_path_sampler.h"
 #include "../Core/surface_object.h"
 #include "../Core/textures.h"
 #include "../Scene/TriangleMeshNode.h"
@@ -155,7 +156,7 @@ namespace SLR {
         return true;
     }
     
-    bool TriangleSurfaceShape::intersect(const Ray &ray, const RaySegment &segment, SurfaceInteraction* si) const {
+    bool TriangleSurfaceShape::intersectWithoutAlpha(const Ray &ray, const RaySegment &segment, SurfaceInteraction* si) const {
         Vertex** v = m_matGroup->vertexReferences.get() + m_index;
         
         const Vertex &v0 = *v[0];
@@ -190,10 +191,57 @@ namespace SLR {
         float b0 = 1.0f - b1 - b2;
         TexCoord2D texCoord = b0 * v0.texCoord + b1 * v1.texCoord + b2 * v2.texCoord;
         
-        // JP: 交叉点のアルファ値がゼロかどうかチェックする。ゼロの場合交叉は起こらない。
-        // EN: Check if an alpha value at the intersection point is zero or not. If zero, intersection doesn't occur.
+        *si = SurfaceInteraction(ray.time, // ------------------------- time
+                                 tt, // ------------------------------- distance
+                                 ray.org + ray.dir * tt, // ----------- position in world coordinate
+                                 normalize(cross(edge01, edge02)), // - geometric normal in world coordinate
+                                 b0, b1, // --------------------------- surface parameters
+                                 texCoord //--------------------------- texture coordinate
+                                 );
+        
+        return true;
+    } 
+    
+    bool TriangleSurfaceShape::intersect(const Ray &ray, const RaySegment &segment, LightPathSampler &pathSampler, SurfaceInteraction* si) const {
+        Vertex** v = m_matGroup->vertexReferences.get() + m_index;
+        
+        const Vertex &v0 = *v[0];
+        const Vertex &v1 = *v[1];
+        const Vertex &v2 = *v[2];
+        
+        Vector3D edge01 = v1.position - v0.position;
+        Vector3D edge02 = v2.position - v0.position;
+        
+        Vector3D p = cross(ray.dir, edge02);
+        float det = dot(edge01, p);
+        if (det == 0.0f)
+            return false;
+        float invDet = 1.0f / det;
+        
+        Vector3D d = ray.org - v0.position;
+        
+        float b1 = dot(d, p) * invDet;
+        if (b1 < 0.0f || b1 > 1.0f)
+            return false;
+        
+        Vector3D q = cross(d, edge01);
+        
+        float b2 = dot(ray.dir, q) * invDet;
+        if (b2 < 0.0f || b1 + b2 > 1.0f)
+            return false;
+        
+        float tt = dot(edge02, q) * invDet;
+        if (tt < segment.distMin || tt > segment.distMax)
+            return false;
+        
+        float b0 = 1.0f - b1 - b2;
+        TexCoord2D texCoord = b0 * v0.texCoord + b1 * v1.texCoord + b2 * v2.texCoord;
+        
+        // JP: 交叉点のアルファ値に応じて確率的に交叉を判定する。
+        // EN: probabilistically detect intersection according to the alpha value of the point of the intersection.
         if (m_matGroup->alphaMap) {
-            if (m_matGroup->alphaMap->evaluate(texCoord) == 0.0f)
+            AlphaTestSampler &alphaSampler = pathSampler.getAlphaTestSampler();
+            if (alphaSampler.getSample() >= m_matGroup->alphaMap->evaluate(texCoord))
                 return false;
         }
         
@@ -206,6 +254,48 @@ namespace SLR {
                                  );
         
         return true;
+    }
+    
+    float TriangleSurfaceShape::testVisibility(const Ray &ray, const RaySegment &segment) const {
+        Vertex** v = m_matGroup->vertexReferences.get() + m_index;
+        
+        const Vertex &v0 = *v[0];
+        const Vertex &v1 = *v[1];
+        const Vertex &v2 = *v[2];
+        
+        Vector3D edge01 = v1.position - v0.position;
+        Vector3D edge02 = v2.position - v0.position;
+        
+        Vector3D p = cross(ray.dir, edge02);
+        float det = dot(edge01, p);
+        if (det == 0.0f)
+            return 1.0f;
+        float invDet = 1.0f / det;
+        
+        Vector3D d = ray.org - v0.position;
+        
+        float b1 = dot(d, p) * invDet;
+        if (b1 < 0.0f || b1 > 1.0f)
+            return 1.0f;
+        
+        Vector3D q = cross(d, edge01);
+        
+        float b2 = dot(ray.dir, q) * invDet;
+        if (b2 < 0.0f || b1 + b2 > 1.0f)
+            return 1.0f;
+        
+        float tt = dot(edge02, q) * invDet;
+        if (tt < segment.distMin || tt > segment.distMax)
+            return 1.0f;
+        
+        float b0 = 1.0f - b1 - b2;
+        TexCoord2D texCoord = b0 * v0.texCoord + b1 * v1.texCoord + b2 * v2.texCoord;
+        
+        if (m_matGroup->alphaMap) {
+            return 1.0f - m_matGroup->alphaMap->evaluate(texCoord);
+        }
+        
+        return 0.0f;
     }
     
     void TriangleSurfaceShape::calculateSurfacePoint(const SurfaceInteraction &si, SurfacePoint* surfPt) const {

@@ -50,17 +50,6 @@ namespace SLR {
     
     
     
-    bool SurfaceObject::testVisibility(const SurfacePoint &shdP, const SurfacePoint &lightP, float time) const {
-        SLRAssert(shdP.atInfinity() == false && lightP.atInfinity() == false, "Points must be in finite region.");
-        float dist = distance(lightP.getPosition(), shdP.getPosition());
-        Ray ray(shdP.getPosition(), (lightP.getPosition() - shdP.getPosition()) / dist, time);
-        RaySegment segment(Ray::Epsilon, dist * (1 - Ray::Epsilon));
-        SurfaceInteraction si;
-        return !intersect(ray, segment, &si);
-    }
-    
-    
-    
     bool SingleSurfaceObject::isEmitting() const {
         return m_material->isEmitting();
     }
@@ -101,7 +90,15 @@ namespace SLR {
         *epsilon = Ray::Epsilon;
     }
     
-    bool SingleSurfaceObject::intersect(const Ray &ray, const RaySegment &segment, SurfaceInteraction* si) const {
+    bool SingleSurfaceObject::intersectWithoutAlpha(const Ray &ray, const RaySegment &segment, SurfaceInteraction* si) const {
+        if (!m_surface->intersectWithoutAlpha(ray, segment, si))
+            return false;
+        
+        si->setObject(this);
+        return true;
+    }
+    
+    bool SingleSurfaceObject::intersect(const Ray &ray, const RaySegment &segment, LightPathSampler &pathSampler, SurfaceInteraction* si) const {
 #ifdef DEBUG
         if (Accelerator::traceTraverse) {
             debugPrintf("%s%p, SingleSurfaceObject::intersect()\n",
@@ -109,7 +106,7 @@ namespace SLR {
             Accelerator::traceTraversePrefix += "  ";
         }
 #endif
-        if (!m_surface->intersect(ray, segment, si)) {
+        if (!m_surface->intersect(ray, segment, pathSampler, si)) {
 #ifdef DEBUG
             if (Accelerator::traceTraverse) {
                 debugPrintf("%snot found\n", Accelerator::traceTraversePrefix.c_str());
@@ -130,6 +127,10 @@ namespace SLR {
         }
 #endif
         return true;
+    }
+    
+    float SingleSurfaceObject::testVisibility(const Ray &ray, const RaySegment &segment) const {
+        return m_surface->testVisibility(ray, segment);
     }
     
     void SingleSurfaceObject::calculateSurfacePoint(const SurfaceInteraction &si, SurfacePoint* surfPt) const {
@@ -312,7 +313,20 @@ namespace SLR {
         return m_surfObj->contains(localP, time);
     }
     
-    bool TransformedSurfaceObject::intersect(const Ray &ray, const RaySegment &segment, SurfaceInteraction* si) const {
+    bool TransformedSurfaceObject::intersectWithoutAlpha(const Ray &ray, const RaySegment &segment, SLR::SurfaceInteraction *si) const {
+        Ray localRay;
+        StaticTransform sampledTF;
+        m_transform->sample(ray.time, &sampledTF);
+        localRay = invert(sampledTF) * ray;
+        
+        if (!m_surfObj->intersectWithoutAlpha(localRay, segment, si))
+            return false;
+            
+        si->applyTransformFromLeft(sampledTF);
+        return true;
+    }
+    
+    bool TransformedSurfaceObject::intersect(const Ray &ray, const RaySegment &segment, LightPathSampler &pathSampler, SurfaceInteraction* si) const {
 #ifdef DEBUG
         if (Accelerator::traceTraverse) {
             debugPrintf("%s%p, TransformedSurfaceObject::intersect()\n",
@@ -324,7 +338,7 @@ namespace SLR {
         StaticTransform sampledTF;
         m_transform->sample(ray.time, &sampledTF);
         localRay = invert(sampledTF) * ray;
-        if (!m_surfObj->intersect(localRay, segment, si)) {
+        if (!m_surfObj->intersect(localRay, segment, pathSampler, si)) {
 #ifdef DEBUG
             if (Accelerator::traceTraverse) {
                 debugPrintf("%snot found\n", Accelerator::traceTraversePrefix.c_str());
@@ -344,6 +358,14 @@ namespace SLR {
         }
 #endif
         return true;
+    }
+    
+    float TransformedSurfaceObject::testVisibility(const Ray &ray, const RaySegment &segment) const {
+        Ray localRay;
+        StaticTransform sampledTF;
+        m_transform->sample(ray.time, &sampledTF);
+        localRay = invert(sampledTF) * ray;
+        return m_surfObj->testVisibility(ray, segment);
     }
     
     
@@ -410,14 +432,17 @@ namespace SLR {
     bool SurfaceObjectAggregate::contains(const Point3D &p, float time) const {
         Ray probeRay(p, Vector3D::Ex, time);
         SurfaceInteraction si;
-        const SurfaceObject* hitObj;
-        bool hit = m_accelerator->intersect(probeRay, RaySegment(), &si, &hitObj);
+        bool hit = m_accelerator->intersectWithoutAlpha(probeRay, RaySegment(), &si);
         if (!hit)
             return false;
         return dot(si.getGeometricNormal(), probeRay.dir) >= 0.0f;
     }
     
-    bool SurfaceObjectAggregate::intersect(const Ray &ray, const RaySegment &segment, SurfaceInteraction* si) const {
+    bool SurfaceObjectAggregate::intersectWithoutAlpha(const Ray &ray, const RaySegment &segment, SurfaceInteraction* si) const {
+        return m_accelerator->intersectWithoutAlpha(ray, segment, si);
+    }
+    
+    bool SurfaceObjectAggregate::intersect(const Ray &ray, const RaySegment &segment, LightPathSampler &pathSampler, SurfaceInteraction* si) const {
 #ifdef DEBUG
         if (Accelerator::traceTraverse) {
             debugPrintf("%s%p, SurfaceObjectAggregate::intersect()\n",
@@ -426,7 +451,7 @@ namespace SLR {
         }
 #endif
         const SurfaceObject* hitObj;
-        if (!m_accelerator->intersect(ray, segment, si, &hitObj)) {
+        if (!m_accelerator->intersect(ray, segment, pathSampler, si, &hitObj)) {
 #ifdef DEBUG
             if (Accelerator::traceTraverse) {
                 debugPrintf("%snot found\n", Accelerator::traceTraversePrefix.c_str());
@@ -449,5 +474,9 @@ namespace SLR {
         }
 #endif
         return true;
+    }
+    
+    float SurfaceObjectAggregate::testVisibility(const Ray &ray, const RaySegment &segment) const {
+        return m_accelerator->testVisibility(ray, segment);
     }
 }

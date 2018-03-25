@@ -149,7 +149,7 @@ namespace SLR {
         uint32_t pathLength = 0;
         
         SurfaceInteraction si;
-        if (!scene.intersect(ray, segment, &si))
+        if (!scene.intersect(ray, segment, pathSampler, &si))
             return SampledSpectrum::Zero;
         si.calculateSurfacePoint(&surfPt);
         
@@ -182,7 +182,8 @@ namespace SLR {
                 SampledSpectrum M = light.sample(lpQuery, pathSampler.getSurfaceLightPosSample(), &lpResult);
                 SLRAssert(!std::isnan(lpResult.areaPDF)/* && !std::isinf(xpResult.areaPDF)*/, "areaPDF: unexpected value detected: %f", lpResult.areaPDF);
                 
-                if (scene.testVisibility(surfPt, lpResult.surfPt, ray.time)) {
+                float fractionalVisibility;
+                if (scene.testVisibility(surfPt, lpResult.surfPt, ray.time, &fractionalVisibility)) {
                     float dist2;
                     Vector3D shadowDir = lpResult.surfPt.getDirectionFrom(surfPt.getPosition(), &dist2);
                     Vector3D shadowDir_l = lpResult.surfPt.toLocal(-shadowDir);
@@ -202,7 +203,7 @@ namespace SLR {
                         MISWeight = (lightPDF * lightPDF) / (lightPDF * lightPDF + bsdfPDF * bsdfPDF);
                     SLRAssert(MISWeight <= 1.0f, "Invalid MIS weight: %g", MISWeight);
                     
-                    float G = absDot(shadowDir_sn, gNorm_sn) * cosLight / dist2;
+                    float G = fractionalVisibility * absDot(shadowDir_sn, gNorm_sn) * cosLight / dist2;
                     sp += alpha * Le * fs * (G * MISWeight / lightPDF);
                     SLRAssert(std::isfinite(G), "G: unexpected value detected: %f", G);
                 }
@@ -228,7 +229,7 @@ namespace SLR {
             
             // find a next intersection point.
             si = SurfaceInteraction();
-            if (!scene.intersect(ray, segment, &si))
+            if (!scene.intersect(ray, segment, pathSampler, &si))
                 break;
             si.calculateSurfacePoint(&surfPt);
             

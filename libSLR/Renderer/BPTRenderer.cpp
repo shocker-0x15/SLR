@@ -199,11 +199,12 @@ namespace SLR {
                         float lExtend2ndDirPDF;
                         float eExtend1stDirPDF = eVtx.ddf->evaluatePDF(eConnectVector, &lExtend2ndDirPDF);
                         
-                        SampledSpectrum connectionTerm = lDDF * G * eDDF;
-                        if (connectionTerm == SampledSpectrum::Zero)
+                        float fractionalVisibility;
+                        if (!scene->testVisibility(eVtx.surfPt, lVtx.surfPt, time, &fractionalVisibility))
                             continue;
                         
-                        if (!scene->testVisibility(eVtx.surfPt, lVtx.surfPt, time))
+                        SampledSpectrum connectionTerm = lDDF * (G * fractionalVisibility) * eDDF;
+                        if (connectionTerm == SampledSpectrum::Zero)
                             continue;
                         
                         if (lVtx.lambdaSelected || eVtx.lambdaSelected)
@@ -296,7 +297,7 @@ namespace SLR {
         SurfaceInteraction si;
         SurfacePoint surfPt;
         float RRProb = 1.0f;
-        while (scene->intersect(ray, segment, &si)) {
+        while (scene->intersect(ray, segment, pathSampler, &si)) {
             si.calculateSurfacePoint(&surfPt);
             
             float dist2 = squaredDistance(vertices.back().surfPt, surfPt);

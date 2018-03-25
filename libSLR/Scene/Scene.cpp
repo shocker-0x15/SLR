@@ -45,17 +45,17 @@ namespace SLR {
         m_rootNode->destroyRenderingData(m_sceneMem);
     }
     
-    bool Scene::intersect(const Ray &ray, const RaySegment &segment, SurfaceInteraction *si) const {
+    bool Scene::intersect(const Ray &ray, const RaySegment &segment, LightPathSampler &pathSampler, SurfaceInteraction *si) const {
         float importances[2] = {m_surfaceAggregate->importance(), 0.0f};
         if (m_envSphere)
             importances[1] = m_envSphere->importance();
         
-        if (m_surfaceAggregate->intersect(ray, segment, si)) {
+        if (m_surfaceAggregate->intersect(ray, segment, pathSampler, si)) {
             si->setLightProb(evaluateProbability(importances, 2, 0) * si->getLightProb());
             return true;
         }
         if (m_envSphere) {
-            if (m_envSphere->intersect(ray, segment, si)) {
+            if (m_envSphere->intersect(ray, segment, pathSampler, si)) {
                 si->setLightProb(evaluateProbability(importances, 2, 1) * si->getLightProb());
                 return true;
             }
@@ -70,7 +70,7 @@ namespace SLR {
             importances[2] = m_envSphere->importance();
         
         SurfaceInteraction si;
-        bool hitSurface = m_surfaceAggregate->intersect(ray, segment, &si);
+        bool hitSurface = m_surfaceAggregate->intersect(ray, segment, pathSampler, &si);
         MediumInteraction mi;
         bool hitMedium = m_mediumAggregate->interact(ray, RaySegment(segment.distMin, si.getDistance()), wls, pathSampler, &mi, medThroughput, singleWavelength);
         if (hitMedium) {
@@ -84,7 +84,7 @@ namespace SLR {
             return true;
         }
         if (m_envSphere) {
-            if (m_envSphere->intersect(ray, segment, &si)) {
+            if (m_envSphere->intersect(ray, segment, pathSampler, &si)) {
                 mi.setLightProb(evaluateProbability(importances, 3, 2) * mi.getLightProb());
                 *interact = mem.create<SurfaceInteraction>(si);
                 return true;
@@ -93,7 +93,7 @@ namespace SLR {
         return false;
     }
     
-    bool Scene::testVisibility(const SurfacePoint &shdP, const SurfacePoint &lightP, float time) const {
+    bool Scene::testVisibility(const SurfacePoint &shdP, const SurfacePoint &lightP, float time, float* fractionalVisibility) const {
         SLRAssert(shdP.atInfinity() == false, "Shading point must be in finite region.");
         Ray ray;
         RaySegment segment;
@@ -106,8 +106,9 @@ namespace SLR {
             ray = Ray(shdP.getPosition(), (lightP.getPosition() - shdP.getPosition()) / dist, time);
             segment = RaySegment(Ray::Epsilon, dist * (1 - Ray::Epsilon));
         }
-        SurfaceInteraction si;
-        return !intersect(ray, segment, &si);
+        
+        *fractionalVisibility = m_surfaceAggregate->testVisibility(ray, segment);
+        return *fractionalVisibility > 0;
     }
     
     bool Scene::testVisibility(const InteractionPoint* shdP, const InteractionPoint* lightP, float time,
@@ -124,11 +125,12 @@ namespace SLR {
             ray = Ray(shdP->getPosition(), (lightP->getPosition() - shdP->getPosition()) / dist, time);
             segment = RaySegment(Ray::Epsilon, dist * (1 - Ray::Epsilon));
         }
-        *fractionalVisibility = SampledSpectrum::Zero;
-        SurfaceInteraction si;
-        if (m_surfaceAggregate->intersect(ray, segment, &si))
+        
+        float alphaVisibility = m_surfaceAggregate->testVisibility(ray, segment);
+        if (alphaVisibility == 0.0f)
             return false;
-        *fractionalVisibility = m_mediumAggregate->evaluateTransmittance(ray, segment, wls, pathSampler, singleWavelength);
+        *fractionalVisibility = SampledSpectrum::Zero;
+        *fractionalVisibility = m_mediumAggregate->evaluateTransmittance(ray, segment, wls, pathSampler, singleWavelength) * alphaVisibility;
         return true;
     }
     

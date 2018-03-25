@@ -183,7 +183,7 @@ namespace SLR {
     bool EnclosedMediumObject::intersectBoundary(const Ray &ray, const RaySegment &segment, float* distToBoundary, bool* enter) const {
         SurfaceInteraction si;
         Ray r = m_medToSurfTF * ray;
-        bool hit = m_boundary->intersect(r, segment, &si);
+        bool hit = m_boundary->intersectWithoutAlpha(r, segment, &si);
         if (!hit)
             return false;
         float distToSurf = si.getDistance();
