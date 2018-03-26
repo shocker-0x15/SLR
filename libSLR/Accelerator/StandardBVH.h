@@ -262,39 +262,8 @@ namespace SLR {
             return m_bounds;
         }
         
-        bool intersectWithoutAlpha(const Ray &ray, const RaySegment &segment, SurfaceInteraction* si) const override {
-            const SurfaceObject* closestObject = nullptr;
-            bool dirIsPositive[] = {ray.dir.x >= 0, ray.dir.y >= 0, ray.dir.z >= 0};
-            RaySegment isectRange = segment;
-            
-            const uint32_t StackSize = 64;
-            uint32_t idxStack[StackSize];
-            uint32_t depth = 0;
-            idxStack[depth++] = 0;
-            while (depth > 0) {
-                const Node &node = m_nodes[idxStack[--depth]];
-                if (!node.bbox.intersect(ray, isectRange))
-                    continue;
-                if (node.numLeaves == 0) {
-                    SLRAssert(depth < StackSize, "StandardBVH::intersectWithoutAlpha: stack overflow");
-                    bool positiveDir = dirIsPositive[node.axis];
-                    idxStack[depth++] = positiveDir ? node.c1 : node.c0;
-                    idxStack[depth++] = positiveDir ? node.c0 : node.c1;
-                }
-                else {
-                    for (uint32_t i = 0; i < node.numLeaves; ++i) {
-                        if (m_objLists[node.offsetFirstLeaf + i]->intersectWithoutAlpha(ray, isectRange, si)) {
-                            closestObject = m_objLists[node.offsetFirstLeaf + i];
-                            isectRange.distMax = si->getDistance();
-                        }
-                    }
-                }
-            }
-            return closestObject != nullptr;
-        }
-        
-        bool intersect(const Ray &ray, const RaySegment &segment, LightPathSampler &pathSampler, SurfaceInteraction* si, const SurfaceObject** closestObject) const override {
-            *closestObject = nullptr;
+        template <typename Procedure>
+        inline void commonProcedure(const Ray &ray, const RaySegment &segment, const Procedure &proc) const {
             bool dirIsPositive[] = {ray.dir.x >= 0, ray.dir.y >= 0, ray.dir.z >= 0};
             RaySegment isectRange = segment;
             
@@ -314,42 +283,47 @@ namespace SLR {
                 }
                 else {
                     for (uint32_t i = 0; i < node.numLeaves; ++i) {
-                        if (m_objLists[node.offsetFirstLeaf + i]->intersect(ray, isectRange, pathSampler, si)) {
-                            *closestObject = m_objLists[node.offsetFirstLeaf + i];
-                            isectRange.distMax = si->getDistance();
-                        }
+                        const SurfaceObject* surfObj = m_objLists[node.offsetFirstLeaf + i];
+                        bool cont = proc(surfObj, ray, &isectRange);
+                        if (!cont)
+                            return;
                     }
                 }
             }
+        }
+        
+        bool intersectWithoutAlpha(const Ray &ray, const RaySegment &segment, SurfaceInteraction* si) const override {
+            const SurfaceObject* closestObject = nullptr;
+            commonProcedure(ray, segment, [&si, &closestObject](const SurfaceObject* surfObj, const Ray &ray, RaySegment* isectRange) {
+                if (surfObj->intersectWithoutAlpha(ray, *isectRange, si)) {
+                    closestObject = surfObj;
+                    isectRange->distMax = si->getDistance();
+                }
+                return true;
+            });
+            return closestObject != nullptr;
+        }
+        
+        bool intersect(const Ray &ray, const RaySegment &segment, LightPathSampler &pathSampler, SurfaceInteraction* si, const SurfaceObject** closestObject) const override {
+            *closestObject = nullptr;
+            commonProcedure(ray, segment, [&pathSampler, &si, &closestObject](const SurfaceObject* surfObj, const Ray &ray, RaySegment* isectRange) {
+                if (surfObj->intersect(ray, *isectRange, pathSampler, si)) {
+                    *closestObject = surfObj;
+                    isectRange->distMax = si->getDistance();
+                }
+                return true;
+            });
             return *closestObject != nullptr;
         }
         
         float testVisibility(const Ray &ray, const RaySegment &segment) const override {
             float fractionalVisibility = 1.0f;
-            bool dirIsPositive[] = {ray.dir.x >= 0, ray.dir.y >= 0, ray.dir.z >= 0};
-            
-            const uint32_t StackSize = 64;
-            uint32_t idxStack[StackSize];
-            uint32_t depth = 0;
-            idxStack[depth++] = 0;
-            while (depth > 0) {
-                const Node &node = m_nodes[idxStack[--depth]];
-                if (!node.bbox.intersect(ray, segment))
-                    continue;
-                if (node.numLeaves == 0) {
-                    SLRAssert(depth < StackSize, "StandardBVH::testVisibility: stack overflow");
-                    bool positiveDir = dirIsPositive[node.axis];
-                    idxStack[depth++] = positiveDir ? node.c1 : node.c0;
-                    idxStack[depth++] = positiveDir ? node.c0 : node.c1;
-                }
-                else {
-                    for (uint32_t i = 0; i < node.numLeaves; ++i) {
-                        fractionalVisibility *= m_objLists[node.offsetFirstLeaf + i]->testVisibility(ray, segment);
-                        if (fractionalVisibility == 0.0f)
-                            return 0.0f;
-                    }
-                }
-            }
+            commonProcedure(ray, segment, [&fractionalVisibility](const SurfaceObject* surfObj, const Ray &ray, RaySegment* isectRange) {
+                fractionalVisibility *= surfObj->testVisibility(ray, *isectRange);
+                if (fractionalVisibility == 0.0f)
+                    return false;
+                return true;
+            });
             return fractionalVisibility;
         }
     };

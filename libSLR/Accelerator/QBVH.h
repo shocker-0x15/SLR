@@ -291,8 +291,8 @@ namespace SLR {
             return m_bounds;
         }
         
-        bool intersectWithoutAlpha(const Ray &ray, const RaySegment &segment, SurfaceInteraction* si) const override {
-            const SurfaceObject* closestObject = nullptr;
+        template <typename Procedure>
+        inline void commonProcedure(const Ray &ray, const RaySegment &segment, const Procedure &proc) const {
             bool dirIsPositive[] = {ray.dir.x >= 0, ray.dir.y >= 0, ray.dir.z >= 0};
             RaySegment isectRange = segment;
             
@@ -331,111 +331,47 @@ namespace SLR {
                     if (!child.isValid() || !child.isLeafNode)
                         continue;
                     for (uint32_t j = 0; j < child.numLeaves; ++j) {
-                        if (m_objLists[child.idx + j]->intersectWithoutAlpha(ray, isectRange, si)) {
-                            closestObject = m_objLists[child.idx + j];
-                            isectRange.distMax = si->getDistance();
-                        }
+                        const SurfaceObject* surfObj = m_objLists[child.idx + j];
+                        bool cont = proc(surfObj, ray, &isectRange);
+                        if (!cont)
+                            return;
                     }
                 }
             }
+        }
+        
+        bool intersectWithoutAlpha(const Ray &ray, const RaySegment &segment, SurfaceInteraction* si) const override {
+            const SurfaceObject* closestObject = nullptr;
+            commonProcedure(ray, segment, [&si, &closestObject](const SurfaceObject* surfObj, const Ray &ray, RaySegment* isectRange) {
+                if (surfObj->intersectWithoutAlpha(ray, *isectRange, si)) {
+                    closestObject = surfObj;
+                    isectRange->distMax = si->getDistance();
+                }
+                return true;
+            });
             return closestObject != nullptr;
         }
         
         bool intersect(const Ray &ray, const RaySegment &segment, LightPathSampler &pathSampler, SurfaceInteraction* si, const SurfaceObject** closestObject) const override {
             *closestObject = nullptr;
-            bool dirIsPositive[] = {ray.dir.x >= 0, ray.dir.y >= 0, ray.dir.z >= 0};
-            RaySegment isectRange = segment;
-            
-            const uint32_t StackSize = 64;
-            uint32_t idxStack[StackSize];
-            uint32_t depth = 0;
-            idxStack[depth++] = 0;
-            while (depth > 0) {
-                const Node &node = m_nodes[idxStack[--depth]];
-                uint32_t hitFlags = node.intersect(ray, isectRange);
-                if (hitFlags == 0)
-                    continue;
-                
-                const uint32_t OrderTable[] = {
-                    0x0123, 0x0132, 0x1023, 0x1032,
-                    0x2301, 0x3201, 0x2310, 0x3210
-                };
-                uint32_t encodedOrder = OrderTable[4 * dirIsPositive[node.topAxis] + 2 * dirIsPositive[node.leftAxis] + 1 * dirIsPositive[node.rightAxis]];
-                uint32_t order[4] = {(encodedOrder >> 0) & 0xF, (encodedOrder >> 4) & 0xF, (encodedOrder >> 8) & 0xF, (encodedOrder >> 12) & 0xF};
-                Children children[] = {node.children[order[0]], node.children[order[1]], node.children[order[2]], node.children[order[3]]};
-                for (int i = 0; i < 4; ++i) {
-                    bool hit = ((hitFlags >> order[i]) & 0x1) == 0x1;
-                    if (!hit)
-                        children[i].asUInt = UINT32_MAX;
+            commonProcedure(ray, segment, [&pathSampler, &si, &closestObject](const SurfaceObject* surfObj, const Ray &ray, RaySegment* isectRange) {
+                if (surfObj->intersect(ray, *isectRange, pathSampler, si)) {
+                    *closestObject = surfObj;
+                    isectRange->distMax = si->getDistance();
                 }
-                
-                for (int i = 3; i >= 0; --i) {
-                    const Children &child = children[i];
-                    if (!child.isValid() || child.isLeafNode)
-                        continue;
-                    SLRAssert(depth < StackSize, "QBVH::intersect: stack overflow");
-                    idxStack[depth++] = child.idx;
-                }
-                for (int i = 0; i < 4; ++i) {
-                    const Children &child = children[i];
-                    if (!child.isValid() || !child.isLeafNode)
-                        continue;
-                    for (uint32_t j = 0; j < child.numLeaves; ++j) {
-                        if (m_objLists[child.idx + j]->intersect(ray, isectRange, pathSampler, si)) {
-                            *closestObject = m_objLists[child.idx + j];
-                            isectRange.distMax = si->getDistance();
-                        }
-                    }
-                }
-            }
+                return true;
+            });
             return *closestObject != nullptr;
         }
         
         float testVisibility(const Ray &ray, const RaySegment &segment) const override {
             float fractionalVisibility = 1.0f;
-            bool dirIsPositive[] = {ray.dir.x >= 0, ray.dir.y >= 0, ray.dir.z >= 0};
-            
-            const uint32_t StackSize = 64;
-            uint32_t idxStack[StackSize];
-            uint32_t depth = 0;
-            idxStack[depth++] = 0;
-            while (depth > 0) {
-                const Node &node = m_nodes[idxStack[--depth]];
-                uint32_t hitFlags = node.intersect(ray, segment);
-                if (hitFlags == 0)
-                    continue;
-                
-                const uint32_t OrderTable[] = {
-                    0x0123, 0x0132, 0x1023, 0x1032,
-                    0x2301, 0x3201, 0x2310, 0x3210
-                };
-                uint32_t encodedOrder = OrderTable[4 * dirIsPositive[node.topAxis] + 2 * dirIsPositive[node.leftAxis] + 1 * dirIsPositive[node.rightAxis]];
-                uint32_t order[4] = {(encodedOrder >> 0) & 0xF, (encodedOrder >> 4) & 0xF, (encodedOrder >> 8) & 0xF, (encodedOrder >> 12) & 0xF};
-                Children children[] = {node.children[order[0]], node.children[order[1]], node.children[order[2]], node.children[order[3]]};
-                for (int i = 0; i < 4; ++i) {
-                    bool hit = ((hitFlags >> order[i]) & 0x1) == 0x1;
-                    if (!hit)
-                        children[i].asUInt = UINT32_MAX;
-                }
-                
-                for (int i = 3; i >= 0; --i) {
-                    const Children &child = children[i];
-                    if (!child.isValid() || child.isLeafNode)
-                        continue;
-                    SLRAssert(depth < StackSize, "QBVH::intersect: stack overflow");
-                    idxStack[depth++] = child.idx;
-                }
-                for (int i = 0; i < 4; ++i) {
-                    const Children &child = children[i];
-                    if (!child.isValid() || !child.isLeafNode)
-                        continue;
-                    for (uint32_t j = 0; j < child.numLeaves; ++j) {
-                        fractionalVisibility *= m_objLists[child.idx + j]->testVisibility(ray, segment);
-                        if (fractionalVisibility == 0.0f)
-                            return 0.0f;
-                    }
-                }
-            }
+            commonProcedure(ray, segment, [&fractionalVisibility](const SurfaceObject* surfObj, const Ray &ray, RaySegment* isectRange) {
+                fractionalVisibility *= surfObj->testVisibility(ray, *isectRange);
+                if (fractionalVisibility == 0.0f)
+                    return false;
+                return true;
+            });
             return fractionalVisibility;
         }
     };
