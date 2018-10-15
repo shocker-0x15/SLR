@@ -103,6 +103,36 @@ namespace SLRSceneGraph {
         }
     }
     
+    void TriangleMeshNode::recalculateNormalAndTangents() {
+        for (int i = 0; i < m_vertices.size(); ++i) {
+            Vertex &v = m_vertices[i];
+            v.normal = SLR::Normal3D::Zero;
+            v.tangent = SLR::Vector3D::Zero;
+        }
+        
+        for (int m = 0; m < m_matGroups.size(); ++m) {
+            const MaterialGroup &matGroup = m_matGroups[m];
+            for (int t = 0; t < matGroup.triangles.size(); ++t) {
+                const Triangle &tri = matGroup.triangles[t];
+                Vertex &v0 = m_vertices[tri.vIdx[0]];
+                Vertex &v1 = m_vertices[tri.vIdx[1]];
+                Vertex &v2 = m_vertices[tri.vIdx[2]];
+                
+                SLR::Normal3D faceNormal = SLR::normalize(SLR::cross(v1.position - v0.position, v2.position - v0.position));
+                v0.normal = v0.normal + faceNormal;
+                v1.normal = v1.normal + faceNormal;
+                v2.normal = v2.normal + faceNormal;
+            }
+        }
+        
+        for (int i = 0; i < m_vertices.size(); ++i) {
+            Vertex &v = m_vertices[i];
+            v.normal.normalize();
+            SLR::Vector3D bitangent;
+            v.normal.makeCoordinateSystem(&v.tangent, &bitangent);
+        }
+    }
+    
     NodeRef TriangleMeshNode::copy() const {
         TriangleMeshNodeRef ret = createShared<TriangleMeshNode>();
         ret->m_vertices = m_vertices;

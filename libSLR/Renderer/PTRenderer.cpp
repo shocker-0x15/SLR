@@ -130,7 +130,12 @@ namespace SLR {
                 SLRAssert(weight.hasNaN() == false && weight.hasInf() == false && weight.hasNegative() == false,
                           "Unexpected value detected: %s\n"
                           "pix: (%f, %f)", weight.toString().c_str(), p.x, p.y);
-                sensor->add(p.x, p.y, wls, weight * C);
+                
+                C *= weight;
+                if (!C.hasInf() && !C.hasNaN())
+                    sensor->add(p.x, p.y, wls, C);
+                else
+                    printf("(%u, %u): Invalid value observed.\nvalue: %s\n", basePixelX + lx, basePixelY + ly, C.toString().c_str());
                 
                 mem.reset();
             }
@@ -188,24 +193,27 @@ namespace SLR {
                     Vector3D shadowDir = lpResult.surfPt.getDirectionFrom(surfPt.getPosition(), &dist2);
                     Vector3D shadowDir_l = lpResult.surfPt.toLocal(-shadowDir);
                     Vector3D shadowDir_sn = surfPt.toLocal(shadowDir);
-                    
-                    EDF* edf = lpResult.surfPt.createEDF(wls, mem);
-                    SampledSpectrum Le = M * edf->evaluate(EDFQuery(), shadowDir_l);
-                    float lightPDF = lightProb * lpResult.areaPDF;
-                    SLRAssert(Le.allFinite(), "Le: unexpected value detected: %s", Le.toString().c_str());
-                    
-                    SampledSpectrum fs = bsdf->evaluate(fsQuery, shadowDir_sn);
+                    float cosShading = absDot(shadowDir_sn, gNorm_sn);
                     float cosLight = lpResult.surfPt.calcCosTerm(-shadowDir);
-                    float bsdfPDF = bsdf->evaluatePDF(fsQuery, shadowDir_sn) * cosLight / dist2;
                     
-                    float MISWeight = 1.0f;
-                    if (!lpResult.posType.isDelta() && !std::isinf(lpResult.areaPDF))
-                        MISWeight = (lightPDF * lightPDF) / (lightPDF * lightPDF + bsdfPDF * bsdfPDF);
-                    SLRAssert(MISWeight <= 1.0f, "Invalid MIS weight: %g", MISWeight);
-                    
-                    float G = fractionalVisibility * absDot(shadowDir_sn, gNorm_sn) * cosLight / dist2;
-                    sp += alpha * Le * fs * (G * MISWeight / lightPDF);
-                    SLRAssert(std::isfinite(G), "G: unexpected value detected: %f", G);
+                    if (cosShading * cosLight > 0) {
+                        EDF* edf = lpResult.surfPt.createEDF(wls, mem);
+                        SampledSpectrum Le = M * edf->evaluate(EDFQuery(), shadowDir_l);
+                        float lightPDF = lightProb * lpResult.areaPDF;
+                        SLRAssert(Le.allFinite(), "Le: unexpected value detected: %s", Le.toString().c_str());
+                        
+                        SampledSpectrum fs = bsdf->evaluate(fsQuery, shadowDir_sn);
+                        float bsdfPDF = bsdf->evaluatePDF(fsQuery, shadowDir_sn) * cosLight / dist2;
+                        
+                        float MISWeight = 1.0f;
+                        if (!lpResult.posType.isDelta() && !std::isinf(lpResult.areaPDF))
+                            MISWeight = (lightPDF * lightPDF) / (lightPDF * lightPDF + bsdfPDF * bsdfPDF);
+                        SLRAssert(MISWeight <= 1.0f, "Invalid MIS weight: %g", MISWeight);
+                        
+                        float G = fractionalVisibility * cosShading * cosLight / dist2;
+                        sp += alpha * Le * fs * (G * MISWeight / lightPDF);
+                        SLRAssert(std::isfinite(G), "G: unexpected value detected: %f", G);   
+                    }
                 }
             }
             

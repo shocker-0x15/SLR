@@ -49,8 +49,12 @@ namespace SLR {
         
         RealType evaluate(const Point3DTemplate<RealType> &p) const {
 //            return m_perlinGen.evaluate(p);
+//            return m_worleyGen.evaluate(p);
 //            return 0.75f * m_perlinGen.evaluate(p) + 0.25f * m_worleyGen.evaluate(p);
 //            return saturate<RealType>(remap<RealType>(m_perlinGen.evaluate(p), 0.0f, 1.0, m_worleyGen.evaluate(p), 1.0)); // Frostbite-like
+            
+            // From Nubis slide:
+            // Our approach, In principle, was to subtract the web like shapes of Worley noise from the low density regions of perlin noise in order to introduce round shapes there.
             return remap<RealType>(m_perlinGen.evaluate(p), 1.0f * (1 - m_worleyGen.evaluate(p)), 1.0, 0.0, 1.0); // Nubis-like
         }
         
@@ -243,6 +247,7 @@ namespace SLR {
             float sigma_e_values[] = {0.1f * density, 0.1f * density};
             m_base_sigma_e = new RegularContinuousSpectrum(WavelengthLowBound, WavelengthHighBound, sigma_e_values, 2);
             float albedo_values[] = {0.999f, 0.999f};
+//            float albedo_values[] = {0.0f, 0.0f};
             m_albedo = new RegularContinuousSpectrum(WavelengthLowBound, WavelengthHighBound, albedo_values, 2);
 
 #if defined(CLOUD_GENERATION)

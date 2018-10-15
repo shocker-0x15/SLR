@@ -859,6 +859,7 @@ namespace SLRSceneGraph {
                                                            return Element();
                                                        mesh->addMaterialGroup(resultMatGroup.material, resultMatGroup.normalMap, resultMatGroup.alphaMap, std::move(resultMatGroup.triangles));
                                                    }
+                                                   mesh->recalculateNormalAndTangents();
                                                    
                                                    if (axisForRadialTangent < -1 || axisForRadialTangent > 2)
                                                        axisForRadialTangent = -1;

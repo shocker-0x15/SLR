@@ -5,7 +5,7 @@ setRenderSettings("width": 1920, "height": 1080, "brightness": 2.0);
 
 setEnvironment("images/Malibu_Overlook_3k_corrected.exr");
 
-plain = load3DModel("models/plain_proto.assbin");
+plain = load3DModel("models/plain_proto.obj");
 addChild(root, plain);
 
 function grass0Material(name, attrs) {
@@ -17,7 +17,7 @@ function grass0Material(name, attrs) {
     t = createSurfaceMaterial("flipped", (tBase,));
     return createSurfaceMaterial("sum", (r, t));
 }
-grass0 = load3DModel("models/grass.assbin", grass0Material);
+grass0 = load3DModel("models/grass.obj", grass0Material);
 function grass1Material(name, attrs) {
     baseColor = Spectrum("Reflectance", "sRGB", 0.7, 0.6, 0.3);
     r = createSurfaceMaterial("matte", (SpectrumTexture(baseColor * 0.7),));
@@ -25,14 +25,14 @@ function grass1Material(name, attrs) {
     t = createSurfaceMaterial("flipped", (tBase,));
     return createSurfaceMaterial("sum", (r, t));
 }
-grass1 = load3DModel("models/grass.assbin", grass1Material);
+grass1 = load3DModel("models/grass.obj", grass1Material);
 
 grass0Reference = createReferenceNode(grass0);
 grass1Reference = createReferenceNode(grass1);
 
-pikachu = load3DModel("models/pikachu_corrected_subdivided.assbin");
+pikachu = load3DModel("models/pikachu_corrected_subdivided.obj");
 pikachuReference = createReferenceNode(pikachu);
-kirby = load3DModel("models/Kirby_Pikachu_Hat/pikachu_hat.assbin");
+kirby = load3DModel("models/Kirby_Pikachu_Hat/pikachu_hat.obj");
 kirbyReference = createReferenceNode(kirby);
 
 function scanCallback(p, t, b, n) {
@@ -80,7 +80,7 @@ function lowpolyTreeMaterial(name, attrs) {
     return createSurfaceMaterial("Ashikhmin", (RdTex, RsTex, nxTex, nyTex));
 }
 lowpolyTreeNode = createNode();
-lowpolyTree = load3DModel("models/lowpoly_tree.assbin", lowpolyTreeMaterial);
+lowpolyTree = load3DModel("models/lowpoly_tree.obj", lowpolyTreeMaterial);
 addChild(lowpolyTreeNode, lowpolyTree);
 setTransform(lowpolyTreeNode, translate(0.3727, 0.8596, 0.8495) * scale(0.25));
 addChild(root, lowpolyTreeNode);
@@ -93,7 +93,7 @@ function toyCarMaterial(name, attrs) {
     return createSurfaceMaterial("Ashikhmin", (RdTex, RsTex, nxTex, nyTex));
 }
 toyCarNode = createNode();
-toyCar = load3DModel("models/toycar.assbin", toyCarMaterial);
+toyCar = load3DModel("models/toycar.obj", toyCarMaterial);
 addChild(toyCarNode, toyCar);
 setTransform(toyCarNode, 
              translate(0.0, 0.72593, 1.4) * 

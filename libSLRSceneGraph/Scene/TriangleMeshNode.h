@@ -47,6 +47,7 @@ namespace SLRSceneGraph {
         uint64_t addVertex(const SLR::Vertex &v);
         void addMaterialGroup(const SurfaceMaterialRef &mat, const NormalTextureRef &normalMap, const FloatTextureRef &alphaMap, 
                               const std::vector<Triangle> &&triangles);
+        void recalculateNormalAndTangents();
         void useOnlyForBoundary(bool b) {
             m_onlyForBoundary = b;
         }

@@ -121,14 +121,19 @@ namespace SLR {
         const RealType binWidth = (m_maxLambda - m_minLambda) / (m_numSamples - 1);
         uint32_t curCMFIdx = 0;
         uint32_t baseIdx = 0;
-        RealType curWL = WavelengthLowBound;
+        RealType curWL = std::min<RealType>(WavelengthLowBound, m_minLambda);
         RealType prev_xbarVal = 0, prev_ybarVal = 0, prev_zbarVal = 0;
         RealType prevValue = 0;
         RealType halfWidth = 0;
         CompensatedSum<RealType> X(0), Y(0), Z(0);
         while (true) {
             RealType xbarValue, ybarValue, zbarValue;
-            if (curWL == WavelengthLowBound + curCMFIdx * CMFBinWidth) {
+            if (curWL < WavelengthLowBound) {
+                xbarValue = 0;
+                ybarValue = 0;
+                zbarValue = 0;
+            }
+            else if (curWL == WavelengthLowBound + curCMFIdx * CMFBinWidth) {
                 xbarValue = xbarReferenceValues[curCMFIdx];
                 ybarValue = ybarReferenceValues[curCMFIdx];
                 zbarValue = zbarReferenceValues[curCMFIdx];
@@ -299,14 +304,19 @@ namespace SLR {
         const RealType CMFBinWidth = (WavelengthHighBound - WavelengthLowBound) / (NumCMFSamples - 1);
         uint32_t curCMFIdx = 0;
         uint32_t baseIdx = 0;
-        RealType curWL = WavelengthLowBound;
+        RealType curWL = std::min<RealType>(WavelengthLowBound, m_lambdas[0]);
         RealType prev_xbarVal = 0, prev_ybarVal = 0, prev_zbarVal = 0;
         RealType prevValue = 0;
         RealType halfWidth = 0;
         CompensatedSum<RealType> X(0), Y(0), Z(0);
         while (true) {
             RealType xbarValue, ybarValue, zbarValue;
-            if (curWL == WavelengthLowBound + curCMFIdx * CMFBinWidth) {
+            if (curWL < WavelengthLowBound) {
+                xbarValue = 0.0f;
+                ybarValue = 0.0f;
+                zbarValue = 0.0f;
+            }
+            else if (curWL == WavelengthLowBound + curCMFIdx * CMFBinWidth) {
                 xbarValue = xbarReferenceValues[curCMFIdx];
                 ybarValue = ybarReferenceValues[curCMFIdx];
                 zbarValue = zbarReferenceValues[curCMFIdx];

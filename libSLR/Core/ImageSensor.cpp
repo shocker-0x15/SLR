@@ -168,17 +168,25 @@ namespace SLR {
                 RGB[1] = RGB[1] < 0.0f ? 0.0f : RGB[1];
                 RGB[2] = RGB[2] < 0.0f ? 0.0f : RGB[2];
                 
-                float Y = sRGB_to_Luminance(RGB[0], RGB[1], RGB[2]);
-                float scaleY = Y != 0 ? (1.0f - std::exp(-Y)) / Y : 0.0f;
-                RGB[0] = std::min(scaleY * RGB[0], 1.0f);
-                RGB[1] = std::min(scaleY * RGB[1], 1.0f);
-                RGB[2] = std::min(scaleY * RGB[2], 1.0f);
+//                float Y = sRGB_to_Luminance(RGB[0], RGB[1], RGB[2]);
+//                float scaleY = Y != 0 ? (1.0f - std::exp(-Y)) / Y : 0.0f;
+//                RGB[0] = std::min(scaleY * RGB[0], 1.0f);
+//                RGB[1] = std::min(scaleY * RGB[1], 1.0f);
+//                RGB[2] = std::min(scaleY * RGB[2], 1.0f);
+                const auto tonemap = [](float x) {
+                    return 1.0f - std::exp(-x);
+//                    const float targetLuminance = INFINITY;//1.0f;
+//                    return x / (1 + x) * (1 + x / (targetLuminance * targetLuminance));
+                };
+                RGB[0] = tonemap(RGB[0]);
+                RGB[1] = tonemap(RGB[1]);
+                RGB[2] = tonemap(RGB[2]);
                 
                 uint32_t idx = (m_height - i - 1) * byteWidth + 3 * j;
                 BMP_RGB &dst = *(BMP_RGB*)(bmp + idx);
-                dst.R = uint8_t(256 * std::min(sRGB_gamma(RGB[0]), 0.999f));
-                dst.G = uint8_t(256 * std::min(sRGB_gamma(RGB[1]), 0.999f));
-                dst.B = uint8_t(256 * std::min(sRGB_gamma(RGB[2]), 0.999f));
+                dst.R = std::min<uint32_t>(255, 256 * sRGB_gamma(RGB[0]));
+                dst.G = std::min<uint32_t>(255, 256 * sRGB_gamma(RGB[1]));
+                dst.B = std::min<uint32_t>(255, 256 * sRGB_gamma(RGB[2]));
             }
         }
         

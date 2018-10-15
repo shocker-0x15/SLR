@@ -37,7 +37,7 @@ namespace SLR {
 //            uint32_t hashOfClosest;
 //            uint32_t closestFPIdx;
 //            m_primaryNoiseGen.evaluate(p, frequency, &closestSqDistance, &hashOfClosest, &closestFPIdx);
-//            total *= std::fmax(1 - closestSqDistance / 3.0 * variation, 0.0);
+//            total *= std::fmax(1 - closestSqDistance * variation, 0.0);
 //            
 //            variation *= m_persistence;
 //            frequency *= m_frequencyMultiplier;
@@ -216,8 +216,8 @@ namespace SLR {
         
         float baseShapeValue = m_baseShapeGenerator.evaluate(position);
         float floorValue = m_baseShapeExtraGenerator.evaluate(position + Vector3D(3, -5, 2));
-        baseShapeValue = remap(baseShapeValue, -floorValue, 1.0f, 0.0f, 1.0f);
-//        baseShapeValue = remap(baseShapeValue, -(1 - floorValue), 1.0f, 0.0f, 1.0f);
+//        baseShapeValue = remap(baseShapeValue, -floorValue, 1.0f, 0.0f, 1.0f);
+        baseShapeValue = remap(baseShapeValue, -(1 - floorValue), 1.0f, 0.0f, 1.0f);
 //        baseShapeValue = remap(baseShapeValue, (1 - floorValue), 1.0f, 0.0f, 1.0f);
         
         return baseShapeValue;
@@ -269,7 +269,7 @@ namespace SLR {
         
         // JP: x:100km x z:100km を基準とする。
         const float DefaultWeatherScale = 1e-5f;
-        const float DefaultBaseShapeScale = 5.314f * 1e-5f * 10;
+        const float DefaultBaseShapeScale = 5.314f * 1e-5f * 5;
         const float DefaultErosionScale = 5.739f * 1e-4f * 10;
         
         float baseShape = m_baseShape.evaluate(DefaultBaseShapeScale * position.x, 
@@ -280,10 +280,13 @@ namespace SLR {
         
         float cloudType = m_cloudType.evaluate(DefaultWeatherScale * position.x, 
                                                DefaultWeatherScale * position.z);
-        float heightGradient = calcHeightGradient(cloudType * 0.666f, position.y);
+        float heightGradient = calcHeightGradient(cloudType * 0.8f, position.y);
         baseShape *= heightGradient;
         if (baseShape <= 0.0f)
             return minimumDensity;
+        
+        float heightFrac = saturate((position.y - CloudBaseAltitude) / (CloudTopAltitude - CloudBaseAltitude));
+//        baseShape *= std::max(0.0f, heightFrac);
         
         float coverage = m_coverage.evaluate(DefaultWeatherScale * position.x, 
                                              DefaultWeatherScale * position.z);
@@ -294,11 +297,11 @@ namespace SLR {
         float erosion = m_erosion.evaluate(DefaultErosionScale * position.x, 
                                            DefaultErosionScale * position.y, 
                                            DefaultErosionScale * position.z);
-        float heightFrac = saturate((position.y - CloudBaseAltitude) / (CloudTopAltitude - CloudBaseAltitude));
         erosion = erosion * (1 - heightFrac) + (1 - erosion) * heightFrac;
         ret = saturate(remap(ret, erosion * 0.2f, 1.0f, 0.0f, 1.0f));
         
-        return std::max(enhanceLower(ret, 0.5f, 0.2f), minimumDensity);
+        return std::max(enhanceLower(ret, 0.5f, 0.5f), minimumDensity);
+//        return std::max(ret, minimumDensity);
         
 //        const auto produceSliceImage = [this](const std::string &filename, std::function<float(float, float, float)> func, uint32_t iy, uint32_t resX, uint32_t resY, uint32_t resZ, float gamma) {
 //            uint32_t byteWidth = resX * 3 + resX % 4;
