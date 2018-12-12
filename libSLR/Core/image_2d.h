@@ -13,9 +13,11 @@
 #include "../MemoryAllocators/Allocator.h"
 #include "../BasicTypes/spectrum_base.h"
 #include "../BasicTypes/spectrum_types.h"
-#include <half.h>
+#include "../External/half.hpp"
 
 namespace SLR {
+    using half = half_float::half;
+
     enum class ColorFormat {
         RGB8x3 = 0,
         RGB_8x4,
@@ -186,9 +188,9 @@ namespace SLR {
                                 float uvs[3];
                                 UpsampledContinuousSpectrum::sRGB_to_uvs(spType, RGB, uvs);
                                 uvs16Fx3 storedVal{(half)uvs[0], (half)uvs[1], (half)(uvs[2] * UPSAMPLED_CONTINOUS_SPECTRUM_SCALE_FACTOR)};
-                                SLRAssert(storedVal.u.isFinite() &&
-                                          storedVal.v.isFinite() &&
-                                          storedVal.s.isFinite(), "Invalid value.");
+                                SLRAssert(isfinite(storedVal.u) &&
+                                          isfinite(storedVal.v) &&
+                                          isfinite(storedVal.s), "Invalid value.");
                                 setInternal(x, y, &storedVal, m_stride);
                             };
 #else
@@ -231,8 +233,8 @@ namespace SLR {
                                 float uvs[3];
                                 UpsampledContinuousSpectrum::sRGB_to_uvs(spType, RGB, uvs);
                                 uvsA16Fx4 storedVal{(half)uvs[0], (half)uvs[1], (half)(uvs[2] * UPSAMPLED_CONTINOUS_SPECTRUM_SCALE_FACTOR), (half)(val.a / 255.0f)};
-                                SLRAssert(storedVal.u.isFinite() && storedVal.v.isFinite() && storedVal.s.isFinite() &&
-                                          storedVal.a.isFinite() && (float)storedVal.a >= 0,
+                                SLRAssert(isfinite(storedVal.u) && isfinite(storedVal.v) && isfinite(storedVal.s) &&
+                                          isfinite(storedVal.a) && (float)storedVal.a >= 0,
                                           "Invalid value: %g, %g, %g, %g", (float)storedVal.u, (float)storedVal.v, (float)storedVal.s, (float)storedVal.a);
                                 setInternal(x, y, &storedVal, m_stride);
                             };
@@ -280,8 +282,8 @@ namespace SLR {
                                 SLRAssert(val.a > 0.0f, "Invalid alpha value.");
                                 UpsampledContinuousSpectrum::sRGB_to_uvs(spType, RGB, uvs);
                                 uvsA16Fx4 storedVal{(half)uvs[0], (half)uvs[1], (half)(uvs[2] * UPSAMPLED_CONTINOUS_SPECTRUM_SCALE_FACTOR), (half)val.a};
-                                SLRAssert(storedVal.u.isFinite() && storedVal.v.isFinite() && storedVal.s.isFinite() &&
-                                          storedVal.a.isFinite() && (float)storedVal.a >= 0,
+                                SLRAssert(isfinite(storedVal.u) && isfinite(storedVal.v) && isfinite(storedVal.s) &&
+                                          isfinite(storedVal.a) && (float)storedVal.a >= 0,
                                           "Invalid value: %g, %g, %g, %g", (float)storedVal.u, (float)storedVal.v, (float)storedVal.s, (float)storedVal.a);
                                 setInternal(x, y, &storedVal, m_stride);
                             };

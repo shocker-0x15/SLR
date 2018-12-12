@@ -265,6 +265,10 @@ namespace SLR {
                         SLRAssert(contribution.allFinite() && !contribution.hasNegative(),
                                   "Unexpected value detected: %s\n"
                                   "pix: (%f, %f)", contribution.toString().c_str(), p.x, p.y);
+                        if (!contribution.allFinite()) {
+                            debugPrintf("Unexpected value detected: %s at (%f, %f)\n", contribution.toString().c_str(), p.x, p.y);
+                            continue;
+                        }
                         if (t > 1) {
                             sensor->add(p.x, p.y, wls, contribution);
                         }

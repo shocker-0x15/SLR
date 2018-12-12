@@ -2,7 +2,7 @@
 //  builtin_texture.cpp
 //
 //  Created by 渡部 心 on 2016/08/20.
-//  Copyright © 2016年 渡部 心. All rights reserved.
+//  Copyright c 2016年 渡部 心. All rights reserved.
 //
 
 #include "builtin_texture.h"
@@ -27,6 +27,22 @@ namespace SLRSceneGraph {
                                                    if (type == "texcoord 2D") {
                                                        Texture2DMappingRef rawRef = Texture2DMapping::sharedInstanceRef();
                                                        return Element::createFromReference<TypeMap::Texture2DMapping>(rawRef);
+                                                   }
+                                                   else if (type == "offset and scale 2D") {
+                                                       const static Function configFunc{
+                                                               0, {
+                                                                   {"offsetX", Type::RealNumber}, {"offsetY", Type::RealNumber}, {"scaleX", Type::RealNumber}, {"scaleY", Type::RealNumber}
+                                                               },
+                                                               [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
+                                                                   float ox = args.at("offsetX").raw<TypeMap::RealNumber>();
+                                                                   float oy = args.at("offsetY").raw<TypeMap::RealNumber>();
+                                                                   float sx = args.at("scaleX").raw<TypeMap::RealNumber>();
+                                                                   float sy = args.at("scaleY").raw<TypeMap::RealNumber>();
+                                                                   Texture2DMappingRef rawRef = createShared<OffsetAndScale2DMapping>(ox, oy, sx, sy);
+                                                                   return Element::createFromReference<TypeMap::Texture2DMapping>(rawRef);
+                                                               }
+                                                       };
+                                                       return configFunc(params, context, err);
                                                    }
                                                    *err = ErrorMessage("Specified type is invalid.");
                                                    return Element();

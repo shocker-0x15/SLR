@@ -2,7 +2,7 @@
 //  VolumetricPTRenderer.cpp
 //
 //  Created by 渡部 心 on 2016/09/19.
-//  Copyright © 2016年 渡部 心. All rights reserved.
+//  Copyright c 2016年 渡部 心. All rights reserved.
 //
 
 #include "VolumetricPTRenderer.h"
@@ -130,7 +130,12 @@ namespace SLR {
                 SLRAssert(weight.hasNaN() == false && weight.hasInf() == false && weight.hasNegative() == false,
                           "Unexpected value detected: %s\n"
                           "pix: (%f, %f)", weight.toString().c_str(), p.x, p.y);
-                sensor->add(p.x, p.y, wls, weight * C);
+
+                C *= weight;
+                if (C.allFinite())
+                    sensor->add(p.x, p.y, wls, C);
+                else
+                    debugPrintf("Unexpected value detected: %s at (%f, %f)\n", C.toString().c_str(), p.x, p.y);
                 
                 mem.reset();
             }

@@ -222,7 +222,7 @@ namespace SLR {
     std::unique_ptr<ContinuousSpectrum> ybarSpectrum;
     
     SLR_API void initializeColorSystem() {
-        DiscretizedSpectrum::init();
+        DiscretizedSpectrum::initialize();
         
         CompensatedSum<SpectrumFloat> cum(0);
         for (int i = 1; i < NumCMFSamples; ++i)

@@ -132,10 +132,10 @@ namespace SLR {
                           "pix: (%f, %f)", weight.toString().c_str(), p.x, p.y);
                 
                 C *= weight;
-                if (!C.hasInf() && !C.hasNaN())
+                if (C.allFinite())
                     sensor->add(p.x, p.y, wls, C);
                 else
-                    printf("(%u, %u): Invalid value observed.\nvalue: %s\n", basePixelX + lx, basePixelY + ly, C.toString().c_str());
+                    debugPrintf("Unexpected value detected: %s at (%f, %f)\n", C.toString().c_str(), p.x, p.y);
                 
                 mem.reset();
             }
@@ -193,8 +193,8 @@ namespace SLR {
                     Vector3D shadowDir = lpResult.surfPt.getDirectionFrom(surfPt.getPosition(), &dist2);
                     Vector3D shadowDir_l = lpResult.surfPt.toLocal(-shadowDir);
                     Vector3D shadowDir_sn = surfPt.toLocal(shadowDir);
-                    float cosShading = absDot(shadowDir_sn, gNorm_sn);
-                    float cosLight = lpResult.surfPt.calcCosTerm(-shadowDir);
+                    float cosShading = surfPt.calcCosTerm(shadowDir);
+                    float cosLight = lpResult.surfPt.calcCosTerm(shadowDir);
                     
                     if (cosShading * cosLight > 0) {
                         EDF* edf = lpResult.surfPt.createEDF(wls, mem);

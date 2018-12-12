@@ -40,7 +40,8 @@ namespace SLRSceneGraph {
     
     SLR_SCENEGRAPH_API void construct(const std::string &filePath, InternalNodeRef &nodeOut,
                                       const CreateMaterialFunction &materialFunc = createMaterialDefaultFunction,
-                                      const MeshCallback &meshCallback = meshCallbackDefaultFunction);
+                                      const MeshCallback &meshCallback = meshCallbackDefaultFunction,
+                                      bool flipUV = false);
 }
 
 #endif /* __SLRSceneGraph_node_constructor__ */

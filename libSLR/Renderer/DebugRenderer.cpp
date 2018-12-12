@@ -77,6 +77,12 @@ namespace SLR {
                 case ExtraChannel::ShadingTangent:
                     chImages[i] = defMem.createUnique<TiledImage2D>(job.imageWidth, job.imageHeight, ColorFormat::RGB8x3, &defMem);
                     break;
+                case ExtraChannel::ShadingFrameLengths:
+                    chImages[i] = defMem.createUnique<TiledImage2D>(job.imageWidth, job.imageHeight, ColorFormat::RGB8x3, &defMem);
+                    break;
+                case ExtraChannel::ShadingFrameOrthogonality:
+                    chImages[i] = defMem.createUnique<TiledImage2D>(job.imageWidth, job.imageHeight, ColorFormat::RGB8x3, &defMem);
+                    break;
                 case ExtraChannel::Distance:
                     chImages[i] = defMem.createUnique<TiledImage2D>(job.imageWidth, job.imageHeight, ColorFormat::Gray8, &defMem);
                     break;
@@ -109,6 +115,12 @@ namespace SLR {
                     break;
                 case ExtraChannel::ShadingTangent:
                     filename = "shading_tangent.bmp";
+                    break;
+                case ExtraChannel::ShadingFrameLengths:
+                    filename = "shading_frame_lengths.bmp";
+                    break;
+                case ExtraChannel::ShadingFrameOrthogonality:
+                    filename = "shading_frame_orthogonality.bmp";
                     break;
                 case ExtraChannel::Distance:
                     filename = "distance.bmp";
@@ -178,6 +190,24 @@ namespace SLR {
                             val.r = (uint8_t)std::clamp((0.5f * shadingTangent.x + 0.5f) * 255, 0.0f, 255.0f);
                             val.g = (uint8_t)std::clamp((0.5f * shadingTangent.y + 0.5f) * 255, 0.0f, 255.0f);
                             val.b = (uint8_t)std::clamp((0.5f * shadingTangent.z + 0.5f) * 255, 0.0f, 255.0f);
+                            chImg->set((int)p.x, (int)p.y, val);
+                            break;
+                        }
+                        case ExtraChannel::ShadingFrameLengths: {
+                            RGB8x3 val;
+                            ReferenceFrame shadingFrame = info.surfPt.getShadingFrame();
+                            val.r = (uint8_t)std::clamp((0.5f * 100 * (shadingFrame.x.length() - 1) + 0.5f) * 255, 0.0f, 255.0f);
+                            val.g = (uint8_t)std::clamp((0.5f * 100 * (shadingFrame.y.length() - 1) + 0.5f) * 255, 0.0f, 255.0f);
+                            val.b = (uint8_t)std::clamp((0.5f * 100 * (shadingFrame.z.length() - 1) + 0.5f) * 255, 0.0f, 255.0f);
+                            chImg->set((int)p.x, (int)p.y, val);
+                            break;
+                        }
+                        case ExtraChannel::ShadingFrameOrthogonality: {
+                            RGB8x3 val;
+                            ReferenceFrame shadingFrame = info.surfPt.getShadingFrame();
+                            val.r = (uint8_t)std::clamp((0.5f * 100 * dot(shadingFrame.x, shadingFrame.y) + 0.5f) * 255, 0.0f, 255.0f);
+                            val.g = (uint8_t)std::clamp((0.5f * 100 * dot(shadingFrame.y, shadingFrame.z) + 0.5f) * 255, 0.0f, 255.0f);
+                            val.b = (uint8_t)std::clamp((0.5f * 100 * dot(shadingFrame.z, shadingFrame.x) + 0.5f) * 255, 0.0f, 255.0f);
                             chImg->set((int)p.x, (int)p.y, val);
                             break;
                         }

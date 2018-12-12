@@ -2,7 +2,7 @@
 //  builtin_texture.h
 //
 //  Created by 渡部 心 on 2016/08/20.
-//  Copyright © 2016年 渡部 心. All rights reserved.
+//  Copyright c 2016年 渡部 心. All rights reserved.
 //
 
 #ifndef SLRSceneGraph_builtin_texture_hpp

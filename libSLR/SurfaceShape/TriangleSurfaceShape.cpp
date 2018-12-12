@@ -313,7 +313,7 @@ namespace SLR {
         shadingFrame.z = normalize(b0 * v0.normal + b1 * v1.normal + b2 * v2.normal);
         int8_t axisForRadialTangent = m_matGroup->parent->getAxisForRadialTangent(); 
         if (axisForRadialTangent == -1) {
-            shadingFrame.x = normalize(b0 * v0.tangent + b1 * v1.tangent + b2 * v2.tangent);
+            shadingFrame.x = b0 * v0.tangent + b1 * v1.tangent + b2 * v2.tangent;
         }
         else {
             // JP: 接線ベクトルを衝突点のローカル座標に基づいて生成する。
@@ -339,8 +339,7 @@ namespace SLR {
         // EN: guarantee the orthogonality between the normal and tangent.
         //     Orthogonality break might be caused by barycentric interpolation?
         float dotNT = dot(shadingFrame.z, shadingFrame.x);
-        if (std::fabs(dotNT) >= 0.01f)
-            shadingFrame.x = normalize(shadingFrame.x - dotNT * shadingFrame.z);
+        shadingFrame.x = normalize(shadingFrame.x - dotNT * shadingFrame.z);
         shadingFrame.y = cross(shadingFrame.z, shadingFrame.x);
         
         *surfPt = SurfacePoint(si, false, shadingFrame, m_texCoord0Dir);

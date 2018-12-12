@@ -68,6 +68,11 @@ namespace SLR {
     public:
         IndependentLightPathSampler() :m_rng(), m_alphaTestSampler(m_rng), m_freePathSampler(m_rng) { }
         IndependentLightPathSampler(uint32_t seed) : m_rng(seed), m_alphaTestSampler(m_rng), m_freePathSampler(m_rng) { }
+
+        // DELETE ME
+        void setSeed(const uint32_t seed[4]) {
+            m_rng.setSeed(seed);
+        }
         
         float getTimeSample(float timeBegin, float timeEnd) override {
             float v = m_rng.getFloat0cTo1o();

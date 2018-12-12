@@ -20,6 +20,8 @@ namespace SLR {
         GeometricNormal,
         ShadingNormal,
         ShadingTangent,
+        ShadingFrameLengths,
+        ShadingFrameOrthogonality,
         Distance,
         NumChannels
     };

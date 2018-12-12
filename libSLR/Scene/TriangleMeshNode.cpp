@@ -2,7 +2,7 @@
 //  TriangleMeshNode.cpp
 //
 //  Created by 渡部 心 on 2017/01/05.
-//  Copyright © 2017年 渡部 心. All rights reserved.
+//  Copyright c 2017年 渡部 心. All rights reserved.
 //
 
 #include "TriangleMeshNode.h"

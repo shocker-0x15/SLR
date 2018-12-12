@@ -311,12 +311,12 @@ namespace SLRSceneGraph {
     }
     
     SLR_SCENEGRAPH_API void construct(const std::string &filePath, InternalNodeRef &nodeOut,
-                                      const CreateMaterialFunction &materialFunc, const MeshCallback &meshCallback) {
+                                      const CreateMaterialFunction &materialFunc, const MeshCallback &meshCallback, bool flipUV) {
         using namespace SLR;
         DefaultAllocator &defMem = DefaultAllocator::instance();
         
         Assimp::Importer importer;
-        const aiScene* scene = importer.ReadFile(filePath, 0);
+        const aiScene* scene = importer.ReadFile(filePath, aiProcess_CalcTangentSpace | (flipUV ? aiProcess_FlipUVs : 0));
         if (!scene) {
             printf("Failed to load %s.\n", filePath.c_str());
             return;

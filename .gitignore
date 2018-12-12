@@ -1,4 +1,4 @@
-### https://raw.github.com/github/gitignore/88a3eb412c07fc09f52168f65ab962bb3119071a/Global/Xcode.gitignore
+﻿### https://raw.github.com/github/gitignore/88a3eb412c07fc09f52168f65ab962bb3119071a/Global/Xcode.gitignore
 
 # Xcode
 #
@@ -27,4 +27,4 @@ xcuserdata/
 *.xccheckout
 *.xcscmblueprint
 
-
+.vs/

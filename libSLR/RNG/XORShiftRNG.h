@@ -25,6 +25,14 @@ namespace SLR {
             m_state[2] = rng.m_state[2];
             m_state[3] = rng.m_state[3];
         };
+
+        // DELETE ME
+        void setSeed(const typename TypeSet::UInt seed[4]) {
+            m_state[0] = seed[0];
+            m_state[1] = seed[1];
+            m_state[2] = seed[2];
+            m_state[3] = seed[3];
+        }
         
         typename TypeSet::UInt getUInt() override;
     };

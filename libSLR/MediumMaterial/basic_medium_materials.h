@@ -2,7 +2,7 @@
 //  basic_medium_materials.h
 //
 //  Created by 渡部 心 on 2017/02/04.
-//  Copyright © 2017年 渡部 心. All rights reserved.
+//  Copyright c 2017年 渡部 心. All rights reserved.
 //
 
 #ifndef __SLR_basic_medium_materials__

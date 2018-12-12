@@ -1,0 +1,84 @@
+Pi = 3.1415926536;
+Width = 1280;
+Height = 720;
+
+//setRenderer("method": "PT", ("samples": 16384,));
+setRenderer("method": "BPT", ("samples": 16384,));
+//setRenderer("method": "debug", ("outputs": ("geometric normal", 
+//                                            "shading normal", 
+//                                            "shading tangent", 
+//                                            "shading frame lengths", 
+//                                            "shading frame orthogonality"),));
+setRenderSettings("width": Width, "height": Height);
+
+//setEnvironment("models/material_test/Chelsea_Stairs_3k.exr");
+
+lightNode = createNode();
+texAlbedo = SpectrumTexture(Spectrum(0.9, 0.9, 0.9));
+scatterMat = createSurfaceMaterial("matte", (texAlbedo,));
+texEmittance = SpectrumTexture(Spectrum("Illuminant", "D65") * 4);
+emitterMat = createEmitterSurfaceProperty("diffuse", (texEmittance,));
+surfMat = createSurfaceMaterial("emitter", (scatterMat, emitterMat));
+lightMesh = createMesh(
+  (
+    ((-0.5, 0, -0.5), (0, 1, 0), (1, 0, 0), (0, 0)), 
+    ((-0.5, 0,  0.5), (0, 1, 0), (1, 0, 0), (0, 1)),
+    (( 0.5, 0,  0.5), (0, 1, 0), (1, 0, 0), (1, 1)),
+    (( 0.5, 0, -0.5), (0, 1, 0), (1, 0, 0), (1, 0))
+  ),
+  (
+    (surfMat, ((0, 1, 2), (0, 2, 3))),
+  )
+);
+addChild(lightNode, lightMesh);
+setTransform(lightNode, translate(0.0, 5.0, 0.0) * rotateX(Pi));
+//setTransform(lightNode, translate(0.0, 5.0, -3.0) * rotateX(Pi / 2));
+addChild(root, lightNode);
+
+function paperMatFunc(name, attrs) {
+    texAlbedo = SpectrumTexture(Image2D("models/material_test/grid_80p_white_18p_gray.png"), Texture2DMapping("offset and scale 2D", (0, 0, 10, 20)));
+    return createSurfaceMaterial("matte", (texAlbedo,));
+}
+
+modelNode = createNode();
+model = load3DModel("models/material_test/paper.obj", paperMatFunc);
+addChild(modelNode, model);
+addChild(root, modelNode);
+
+function knobMatFunc(name, attr) {
+    if (name == "Base") {
+        texAlbedo = SpectrumTexture(Spectrum("Reflectance", 0.18));
+        return createSurfaceMaterial("matte", (texAlbedo,));
+    }
+    else if (name == "Glossy") {
+        texAlbedo = SpectrumTexture(Spectrum("Reflectance", "sRGB", 0.9, 0.4, 0.0));
+        return createSurfaceMaterial("matte", (texAlbedo,));
+    }
+}
+
+//function teapotMatFunc(name, attr) {
+//    albedo = attr["diffuse color"];
+//    texAlbedo = SpectrumTexture(Spectrum("Reflectance", "sRGB", albedo[0], albedo[1], albedo[2]));
+//    mat = createSurfaceMaterial("matte", (texAlbedo,));
+//    normalMap = NormalTexture("voronoi", (0.02, Pi / 8));
+//
+//    return (mat, normalMap);
+//}
+
+modelNode = createNode();
+model = load3DModel("models/utah_teapot/wt_teapot.obj");
+//model = load3DModel("models/Kirby_Pikachu_Hat/pikachu_hat_corrected.obj", true);
+//model = load3DModel("models/material_test/mitsuba_knob.obj", knobMatFunc);
+addChild(modelNode, model);
+setTransform(modelNode, translate(0, 0.041, 0) * scale(2));
+addChild(root, modelNode);
+
+cameraNode = createNode();
+camera = createPerspectiveCamera("aspect": (Width + 0.0) / Height, "fovY": 40 * Pi / 180, "radius": 0.0, 
+                                 "imgDist": 1.0, "objDist": 4.5);
+addChild(cameraNode, camera);
+setTransform(cameraNode, translate(0, 5 / 1.5, 10 / 1.5) * rotateY(Pi) * rotateX(18 * Pi / 180));
+
+addChild(root, cameraNode);
+
+setTransform(root, rotateY(1.5707963268));

@@ -499,7 +499,7 @@ namespace SLRSceneGraph {
                                                    {"type", Type::String, Element::create<TypeMap::String>("Reflectance")}
                                                },
                                                [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
-                                                   std::string path = args.at("path").raw<TypeMap::String>();
+                                                   std::string path = context.absFileDirPath + args.at("path").raw<TypeMap::String>();
                                                    std::string modeStr = args.at("mode").raw<TypeMap::String>();
                                                    std::string typeStr = args.at("type").raw<TypeMap::String>();
                                                    SLR::ImageStoreMode mode;
@@ -1077,11 +1077,14 @@ namespace SLRSceneGraph {
                                                std::vector<ArgInfo>{
                                                    {"path", Type::String},
                                                    {"matProc", Type::Function, Element::createFromReference<TypeMap::Function>(nullptr)},
-                                                   {"meshProc", Type::Function, Element::createFromReference<TypeMap::Function>(nullptr)}},
+                                                   {"meshProc", Type::Function, Element::createFromReference<TypeMap::Function>(nullptr)},
+                                                   {"flipUV", Type::Bool, Element(false)}
+                                               },
                                                [](const std::map<std::string, Element> &args, ExecuteContext &context, ErrorMessage* err) {
                                                    std::string path = context.absFileDirPath + args.at("path").raw<TypeMap::String>();
                                                    auto userMatProcRef = args.at("matProc").rawRef<TypeMap::Function>();
                                                    auto meshProcRef = args.at("meshProc").rawRef<TypeMap::Function>();
+                                                   bool flipUV = args.at("flipUV").raw<TypeMap::Bool>();
                                                    
                                                    CreateMaterialFunction matProc = createMaterialDefaultFunction;
                                                    if (userMatProcRef) {
@@ -1098,7 +1101,7 @@ namespace SLRSceneGraph {
                                                    }
                                                    
                                                    InternalNodeRef modelNode;
-                                                   construct(path, modelNode, matProc, meshCallback);
+                                                   construct(path, modelNode, matProc, meshCallback, flipUV);
                                                    if (!modelNode) {
                                                        *err = ErrorMessage("Some errors occur during loading a 3D model.");
                                                        return Element();
@@ -1279,6 +1282,10 @@ namespace SLRSceneGraph {
                                                                        chFlags[(int)SLR::ExtraChannel::ShadingNormal] = true;
                                                                    else if (chName == "shading tangent")
                                                                        chFlags[(int)SLR::ExtraChannel::ShadingTangent] = true;
+                                                                   else if (chName == "shading frame lengths")
+                                                                       chFlags[(int)SLR::ExtraChannel::ShadingFrameLengths] = true;
+                                                                   else if (chName == "shading frame orthogonality")
+                                                                       chFlags[(int)SLR::ExtraChannel::ShadingFrameOrthogonality] = true;
                                                                    else if (chName == "distance")
                                                                        chFlags[(int)SLR::ExtraChannel::Distance] = true;
                                                                }

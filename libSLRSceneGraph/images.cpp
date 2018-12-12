@@ -2,7 +2,7 @@
 //  images.cpp
 //
 //  Created by 渡部 心 on 2017/05/16.
-//  Copyright © 2017年 渡部 心. All rights reserved.
+//  Copyright c 2017年 渡部 心. All rights reserved.
 //
 
 #include "images.h"

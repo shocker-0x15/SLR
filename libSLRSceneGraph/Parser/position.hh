@@ -108,10 +108,13 @@ namespace SLRSceneGraph {
     /// Compute max(min, lhs+rhs) (provided min <= lhs).
     static unsigned int add_ (unsigned int lhs, int rhs, unsigned int min)
     {
+#pragma warning (push)
+#pragma warning (disable : 4146)
       return (0 < rhs || -static_cast<unsigned int>(rhs) < lhs
               ? rhs + lhs
               : min);
     }
+#pragma warning (pop)
   };
 
   /// Add \a width columns, in place.
