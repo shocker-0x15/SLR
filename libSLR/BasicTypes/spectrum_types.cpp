@@ -1,4 +1,4 @@
-//
+﻿//
 //  spectrum_types.cpp
 //
 //  Created by 渡部 心 on 2016/01/26.

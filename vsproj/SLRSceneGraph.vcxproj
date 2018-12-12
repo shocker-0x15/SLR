@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>15.0</VCProjectVersion>
+    <ProjectGuid>{7D578023-693D-48C6-925C-0DE562C31EC8}</ProjectGuid>
+    <RootNamespace>SLRSceneGraph</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0.17134.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <OutDir>$(SolutionDir)vsproj\$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>$(Platform)\$(ProjectName)_$(Configuration)\</IntDir>
+    <IncludePath>C:\Program Files\Assimp\include;C:\Users\shocker_0x15\Desktop\libraries\install\include\OpenEXR;C:\Users\shocker_0x15\Desktop\libraries\install\include;$(SolutionDir);$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Program Files\Assimp\lib\x64;C:\Users\shocker_0x15\Desktop\libraries\install\lib;$(SolutionDir)vsproj\$(Platform)\$(Configuration)\;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <OutDir>$(SolutionDir)vsproj\$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>$(Platform)\$(ProjectName)_$(Configuration)\</IntDir>
+    <IncludePath>C:\Program Files\Assimp\include;C:\Users\shocker_0x15\Desktop\libraries\install\include\OpenEXR;C:\Users\shocker_0x15\Desktop\libraries\install\include;$(SolutionDir);$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Program Files\Assimp\lib\x64;C:\Users\shocker_0x15\Desktop\libraries\install\lib;$(SolutionDir)vsproj\$(Platform)\$(Configuration)\;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+      <ConformanceMode>true</ConformanceMode>
+      <PreprocessorDefinitions>SLR_SCENEGRAPH_API_EXPORTS;_CRT_SECURE_NO_WARNINGS;_WINDLL;DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>assimp-vc140-mt.lib;IlmImf-2_2.lib;libpng16.lib;SLR.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <ConformanceMode>true</ConformanceMode>
+      <PreprocessorDefinitions>SLR_SCENEGRAPH_API_EXPORTS;_CRT_SECURE_NO_WARNINGS;_WINDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+    </ClCompile>
+    <Link>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>assimp-vc140-mt.lib;IlmImf-2_2.lib;libpng16.lib;SLR.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="..\libSLRSceneGraph\API.cpp" />
+    <ClCompile Include="..\libSLRSceneGraph\Helper\image_loader.cpp" />
+    <ClCompile Include="..\libSLRSceneGraph\images.cpp" />
+    <ClCompile Include="..\libSLRSceneGraph\medium_materials.cpp" />
+    <ClCompile Include="..\libSLRSceneGraph\node_constructor.cpp" />
+    <ClCompile Include="..\libSLRSceneGraph\Parser\BuiltinFunctions\builtin_math.cpp" />
+    <ClCompile Include="..\libSLRSceneGraph\Parser\BuiltinFunctions\builtin_texture.cpp" />
+    <ClCompile Include="..\libSLRSceneGraph\Parser\BuiltinFunctions\builtin_transform.cpp" />
+    <ClCompile Include="..\libSLRSceneGraph\Parser\SceneLexer.yy.cpp" />
+    <ClCompile Include="..\libSLRSceneGraph\Parser\SceneParser.cpp" />
+    <ClCompile Include="..\libSLRSceneGraph\Parser\SceneParser.tab.cc" />
+    <ClCompile Include="..\libSLRSceneGraph\Scene\camera_nodes.cpp" />
+    <ClCompile Include="..\libSLRSceneGraph\Scene\medium_nodes.cpp" />
+    <ClCompile Include="..\libSLRSceneGraph\Scene\node.cpp" />
+    <ClCompile Include="..\libSLRSceneGraph\Scene\Scene.cpp" />
+    <ClCompile Include="..\libSLRSceneGraph\Scene\TriangleMeshNode.cpp" />
+    <ClCompile Include="..\libSLRSceneGraph\surface_materials.cpp" />
+    <ClCompile Include="..\libSLRSceneGraph\textures.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\libSLRSceneGraph\API.h" />
+    <ClInclude Include="..\libSLRSceneGraph\declarations.h" />
+    <ClInclude Include="..\libSLRSceneGraph\Helper\image_loader.h" />
+    <ClInclude Include="..\libSLRSceneGraph\images.h" />
+    <ClInclude Include="..\libSLRSceneGraph\medium_materials.h" />
+    <ClInclude Include="..\libSLRSceneGraph\node_constructor.h" />
+    <ClInclude Include="..\libSLRSceneGraph\Parser\BuiltinFunctions\builtin_math.h" />
+    <ClInclude Include="..\libSLRSceneGraph\Parser\BuiltinFunctions\builtin_texture.h" />
+    <ClInclude Include="..\libSLRSceneGraph\Parser\BuiltinFunctions\builtin_transform.h" />
+    <ClInclude Include="..\libSLRSceneGraph\Parser\location.hh" />
+    <ClInclude Include="..\libSLRSceneGraph\Parser\position.hh" />
+    <ClInclude Include="..\libSLRSceneGraph\Parser\SceneParser.h" />
+    <ClInclude Include="..\libSLRSceneGraph\Parser\SceneParser.tab.hh" />
+    <ClInclude Include="..\libSLRSceneGraph\Parser\SceneParsingDriver.h" />
+    <ClInclude Include="..\libSLRSceneGraph\Parser\stack.hh" />
+    <ClInclude Include="..\libSLRSceneGraph\Scene\camera_nodes.h" />
+    <ClInclude Include="..\libSLRSceneGraph\Scene\medium_nodes.h" />
+    <ClInclude Include="..\libSLRSceneGraph\Scene\node.h" />
+    <ClInclude Include="..\libSLRSceneGraph\Scene\Scene.h" />
+    <ClInclude Include="..\libSLRSceneGraph\Scene\TriangleMeshNode.h" />
+    <ClInclude Include="..\libSLRSceneGraph\surface_materials.h" />
+    <ClInclude Include="..\libSLRSceneGraph\textures.h" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

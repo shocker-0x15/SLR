@@ -1,4 +1,4 @@
-#define ONLY_MSPACES 1
+﻿#define ONLY_MSPACES 1
 //#define NO_MALLINFO 1
 
 /*

@@ -1,4 +1,4 @@
-//
+﻿//
 //  BMPExporter.cpp
 //  OpenCL_PathTracer
 //

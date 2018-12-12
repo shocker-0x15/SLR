@@ -1,0 +1,618 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="..\libSLR\debugPrintf.cpp" />
+    <ClCompile Include="..\libSLR\BasicTypes\Matrix3x3.cpp">
+      <Filter>Basic Types</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libSLR\BasicTypes\Matrix4x4.cpp">
+      <Filter>Basic Types</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libSLR\BasicTypes\Normal3D.cpp">
+      <Filter>Basic Types</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libSLR\BasicTypes\Point3D.cpp">
+      <Filter>Basic Types</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libSLR\BasicTypes\Quaternion.cpp">
+      <Filter>Basic Types</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libSLR\BasicTypes\Ray.cpp">
+      <Filter>Basic Types</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libSLR\BasicTypes\rgb_types.cpp">
+      <Filter>Basic Types</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libSLR\BasicTypes\spectrum_base.cpp">
+      <Filter>Basic Types</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libSLR\BasicTypes\spectrum_library.cpp">
+      <Filter>Basic Types</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libSLR\BasicTypes\spectrum_types.cpp">
+      <Filter>Basic Types</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libSLR\BasicTypes\TexCoord2D.cpp">
+      <Filter>Basic Types</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libSLR\BasicTypes\Vector3D.cpp">
+      <Filter>Basic Types</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libSLR\BasicTypes\Vector4D.cpp">
+      <Filter>Basic Types</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libSLR\BasicTypes\BoundingBox3D.cpp">
+      <Filter>Basic Types</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libSLR\BSDF\basic_bsdfs.cpp">
+      <Filter>BSDF</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libSLR\BSDF\disney_bsdfs.cpp">
+      <Filter>BSDF</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libSLR\BSDF\microfacet_bsdfs.cpp">
+      <Filter>BSDF</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libSLR\BSDF\ModifiedWardDurBRDF.cpp">
+      <Filter>BSDF</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libSLR\BSDF\MultiBSDF.cpp">
+      <Filter>BSDF</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libSLR\BSDF\OrenNayerBRDF.cpp">
+      <Filter>BSDF</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libSLR\BSDF\AshikhminShirleyBRDF.cpp">
+      <Filter>BSDF</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libSLR\Camera\PerspectiveCamera.cpp">
+      <Filter>Camera</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libSLR\Camera\EquirectangularCamera.cpp">
+      <Filter>Camera</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libSLR\Core\camera.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libSLR\Core\directional_distribution_functions.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libSLR\Core\distributions.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libSLR\Core\geometry.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libSLR\Core\image_2d.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libSLR\Core\ImageSensor.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libSLR\Core\light_path_sampler.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libSLR\Core\medium_material.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libSLR\Core\medium_object.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libSLR\Core\object.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libSLR\Core\ProgressReporter.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libSLR\Core\random_number_generator.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libSLR\Core\RenderSettings.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libSLR\Core\surface_material.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libSLR\Core\surface_object.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libSLR\Core\textures.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libSLR\Core\transform.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libSLR\Core\accelerator.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libSLR\EDF\MultiEDF.cpp">
+      <Filter>EDF</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libSLR\EDF\basic_edfs.cpp">
+      <Filter>EDF</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libSLR\EDF\IBLEDF.cpp">
+      <Filter>EDF</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libSLR\External\AnalyticSkyDomeRadiance\ArHosekSkyModel.c">
+      <Filter>External\Analytic Sky Dome Radiance</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libSLR\Helper\bmp_exporter.cpp">
+      <Filter>Helper</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libSLR\MediumDistribution\GridMediumDistribution.cpp">
+      <Filter>Medium Distribution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libSLR\MediumDistribution\HomogeneousMediumDistribution.cpp">
+      <Filter>Medium Distribution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libSLR\MediumDistribution\VacuumMediumDistribution.cpp">
+      <Filter>Medium Distribution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libSLR\MediumDistribution\CloudMediumDistribution.cpp">
+      <Filter>Medium Distribution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libSLR\MediumDistribution\DensityGridMediumDistribution.cpp">
+      <Filter>Medium Distribution</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libSLR\MediumMaterial\basic_medium_materials.cpp">
+      <Filter>Medium Material</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libSLR\MemoryAllocators\ArenaAllocator.cpp">
+      <Filter>Memory Allocators</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libSLR\PhaseFunction\basic_phase_functions.cpp">
+      <Filter>Phase Function</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libSLR\Renderer\PTRenderer.cpp">
+      <Filter>Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libSLR\Renderer\VolumetricBPTRenderer.cpp">
+      <Filter>Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libSLR\Renderer\VolumetricPTRenderer.cpp">
+      <Filter>Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libSLR\Renderer\BPTRenderer.cpp">
+      <Filter>Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libSLR\Renderer\DebugRenderer.cpp">
+      <Filter>Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libSLR\RNG\XORShiftRNG.cpp">
+      <Filter>RNG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libSLR\RNG\LinearCongruentialRNG.cpp">
+      <Filter>RNG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libSLR\Scene\medium_nodes.cpp">
+      <Filter>Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libSLR\Scene\node.cpp">
+      <Filter>Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libSLR\Scene\Scene.cpp">
+      <Filter>Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libSLR\Scene\TriangleMeshNode.cpp">
+      <Filter>Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libSLR\Scene\camera_nodes.cpp">
+      <Filter>Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libSLR\SurfaceMaterial\basic_emitter_surface_properties.cpp">
+      <Filter>Surface Material</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libSLR\SurfaceMaterial\basic_surface_materials.cpp">
+      <Filter>Surface Material</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libSLR\SurfaceMaterial\disney_surface_materials.cpp">
+      <Filter>Surface Material</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libSLR\SurfaceMaterial\IBLEmitterSurfaceProperty.cpp">
+      <Filter>Surface Material</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libSLR\SurfaceMaterial\microfacet_surface_materials.cpp">
+      <Filter>Surface Material</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libSLR\SurfaceMaterial\MixedSurfaceMaterial.cpp">
+      <Filter>Surface Material</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libSLR\SurfaceMaterial\ModifiedWardDurReflectionSurfaceMaterial.cpp">
+      <Filter>Surface Material</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libSLR\SurfaceMaterial\SummedSurfaceMaterial.cpp">
+      <Filter>Surface Material</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libSLR\SurfaceMaterial\AshikhminShirleyReflectionSurfaceMaterial.cpp">
+      <Filter>Surface Material</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libSLR\SurfaceShape\TriangleSurfaceShape.cpp">
+      <Filter>Surface Shape</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libSLR\SurfaceShape\InfinitesimalPointSurfaceShape.cpp">
+      <Filter>Surface Shape</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libSLR\SurfaceShape\InfiniteSphereSurfaceShape.cpp">
+      <Filter>Surface Shape</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libSLR\Texture\checker_board_textures.cpp">
+      <Filter>Texture</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libSLR\Texture\constant_textures.cpp">
+      <Filter>Texture</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libSLR\Texture\image_textures.cpp">
+      <Filter>Texture</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libSLR\Texture\perlin_noise_textures.cpp">
+      <Filter>Texture</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libSLR\Texture\voronoi_textures.cpp">
+      <Filter>Texture</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libSLR\Texture\AnalyticSkySpectrumTexture.cpp">
+      <Filter>Texture</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\libSLR\declarations.h" />
+    <ClInclude Include="..\libSLR\defines.h" />
+    <ClInclude Include="..\libSLR\Accelerator\QBVH.h">
+      <Filter>Accelerator</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libSLR\Accelerator\SBVH.h">
+      <Filter>Accelerator</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libSLR\Accelerator\StandardBVH.h">
+      <Filter>Accelerator</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libSLR\BasicTypes\BoundingBox3D.h">
+      <Filter>Basic Types</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libSLR\BasicTypes\CompensatedSum.h">
+      <Filter>Basic Types</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libSLR\BasicTypes\Matrix3x3.h">
+      <Filter>Basic Types</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libSLR\BasicTypes\Matrix4x4.h">
+      <Filter>Basic Types</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libSLR\BasicTypes\Normal3D.h">
+      <Filter>Basic Types</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libSLR\BasicTypes\Point3D.h">
+      <Filter>Basic Types</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libSLR\BasicTypes\Quaternion.h">
+      <Filter>Basic Types</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libSLR\BasicTypes\Ray.h">
+      <Filter>Basic Types</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libSLR\BasicTypes\rgb_types.h">
+      <Filter>Basic Types</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libSLR\BasicTypes\spectrum_base.h">
+      <Filter>Basic Types</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libSLR\BasicTypes\spectrum_library.h">
+      <Filter>Basic Types</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libSLR\BasicTypes\spectrum_types.h">
+      <Filter>Basic Types</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libSLR\BasicTypes\TexCoord2D.h">
+      <Filter>Basic Types</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libSLR\BasicTypes\Vector3D.h">
+      <Filter>Basic Types</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libSLR\BasicTypes\Vector4D.h">
+      <Filter>Basic Types</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libSLR\BSDF\AshikhminShirleyBRDF.h">
+      <Filter>BSDF</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libSLR\BSDF\basic_bsdfs.h">
+      <Filter>BSDF</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libSLR\BSDF\bsdf_headers.h">
+      <Filter>BSDF</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libSLR\BSDF\disney_bsdfs.h">
+      <Filter>BSDF</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libSLR\BSDF\microfacet_bsdfs.h">
+      <Filter>BSDF</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libSLR\BSDF\ModifiedWardDurBRDF.h">
+      <Filter>BSDF</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libSLR\BSDF\MultiBSDF.h">
+      <Filter>BSDF</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libSLR\BSDF\OrenNayerBRDF.h">
+      <Filter>BSDF</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libSLR\Camera\PerspectiveCamera.h">
+      <Filter>Camera</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libSLR\Camera\EquirectangularCamera.h">
+      <Filter>Camera</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libSLR\Core\camera.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libSLR\Core\directional_distribution_functions.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libSLR\Core\distributions.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libSLR\Core\geometry.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libSLR\Core\image_2d.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libSLR\Core\ImageSensor.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libSLR\Core\light_path_sampler.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libSLR\Core\medium_material.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libSLR\Core\medium_object.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libSLR\Core\object.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libSLR\Core\ProgressReporter.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libSLR\Core\random_number_generator.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libSLR\Core\renderer.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libSLR\Core\RenderSettings.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libSLR\Core\surface_material.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libSLR\Core\surface_object.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libSLR\Core\textures.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libSLR\Core\transform.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libSLR\Core\accelerator.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libSLR\EDF\IBLEDF.h">
+      <Filter>EDF</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libSLR\EDF\MultiEDF.h">
+      <Filter>EDF</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libSLR\EDF\basic_edfs.h">
+      <Filter>EDF</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libSLR\External\AnalyticSkyDomeRadiance\ArHosekSkyModel.h">
+      <Filter>External\Analytic Sky Dome Radiance</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libSLR\External\AnalyticSkyDomeRadiance\ArHosekSkyModelData_CIEXYZ.h">
+      <Filter>External\Analytic Sky Dome Radiance</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libSLR\External\AnalyticSkyDomeRadiance\ArHosekSkyModelData_RGB.h">
+      <Filter>External\Analytic Sky Dome Radiance</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libSLR\External\AnalyticSkyDomeRadiance\ArHosekSkyModelData_Spectral.h">
+      <Filter>External\Analytic Sky Dome Radiance</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libSLR\Helper\bmp_exporter.h">
+      <Filter>Helper</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libSLR\Helper\ThreadPool.h">
+      <Filter>Helper</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libSLR\MediumDistribution\DensityGridMediumDistribution.h">
+      <Filter>Medium Distribution</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libSLR\MediumDistribution\GridMediumDistribution.h">
+      <Filter>Medium Distribution</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libSLR\MediumDistribution\HomogeneousMediumDistribution.h">
+      <Filter>Medium Distribution</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libSLR\MediumDistribution\VacuumMediumDistribution.h">
+      <Filter>Medium Distribution</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libSLR\MediumDistribution\CloudMediumDistribution.h">
+      <Filter>Medium Distribution</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libSLR\MediumMaterial\medium_material_headers.h">
+      <Filter>Medium Material</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libSLR\MediumMaterial\basic_medium_materials.h">
+      <Filter>Medium Material</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libSLR\MemoryAllocators\ArenaAllocator.h">
+      <Filter>Memory Allocators</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libSLR\MemoryAllocators\Allocator.h">
+      <Filter>Memory Allocators</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libSLR\PhaseFunction\basic_phase_functions.h">
+      <Filter>Phase Function</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libSLR\Renderer\DebugRenderer.h">
+      <Filter>Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libSLR\Renderer\PTRenderer.h">
+      <Filter>Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libSLR\Renderer\VolumetricBPTRenderer.h">
+      <Filter>Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libSLR\Renderer\VolumetricPTRenderer.h">
+      <Filter>Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libSLR\Renderer\BPTRenderer.h">
+      <Filter>Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libSLR\RNG\XORShiftRNG.h">
+      <Filter>RNG</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libSLR\RNG\LinearCongruentialRNG.h">
+      <Filter>RNG</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libSLR\Scene\medium_nodes.h">
+      <Filter>Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libSLR\Scene\node.h">
+      <Filter>Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libSLR\Scene\Scene.h">
+      <Filter>Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libSLR\Scene\TriangleMeshNode.h">
+      <Filter>Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libSLR\Scene\camera_nodes.h">
+      <Filter>Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libSLR\SurfaceMaterial\basic_emitter_surface_properties.h">
+      <Filter>Surface Material</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libSLR\SurfaceMaterial\basic_surface_materials.h">
+      <Filter>Surface Material</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libSLR\SurfaceMaterial\disney_surface_materials.h">
+      <Filter>Surface Material</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libSLR\SurfaceMaterial\IBLEmitterSurfaceProperty.h">
+      <Filter>Surface Material</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libSLR\SurfaceMaterial\microfacet_surface_materials.h">
+      <Filter>Surface Material</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libSLR\SurfaceMaterial\MixedSurfaceMaterial.h">
+      <Filter>Surface Material</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libSLR\SurfaceMaterial\ModifiedWardDurReflectionSurfaceMaterial.h">
+      <Filter>Surface Material</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libSLR\SurfaceMaterial\SummedSurfaceMaterial.h">
+      <Filter>Surface Material</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libSLR\SurfaceMaterial\surface_material_headers.h">
+      <Filter>Surface Material</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libSLR\SurfaceMaterial\AshikhminShirleyReflectionSurfaceMaterial.h">
+      <Filter>Surface Material</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libSLR\SurfaceShape\InfiniteSphereSurfaceShape.h">
+      <Filter>Surface Shape</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libSLR\SurfaceShape\TriangleSurfaceShape.h">
+      <Filter>Surface Shape</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libSLR\SurfaceShape\InfinitesimalPointSurfaceShape.h">
+      <Filter>Surface Shape</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libSLR\Texture\checker_board_textures.h">
+      <Filter>Texture</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libSLR\Texture\constant_textures.h">
+      <Filter>Texture</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libSLR\Texture\image_textures.h">
+      <Filter>Texture</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libSLR\Texture\perlin_noise_textures.h">
+      <Filter>Texture</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libSLR\Texture\texture_headers.h">
+      <Filter>Texture</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libSLR\Texture\voronoi_textures.h">
+      <Filter>Texture</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libSLR\Texture\AnalyticSkySpectrumTexture.h">
+      <Filter>Texture</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libSLR\External\half.hpp">
+      <Filter>External</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Accelerator">
+      <UniqueIdentifier>{512efef3-fd51-4c6d-b387-91ddc7876d65}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Basic Types">
+      <UniqueIdentifier>{27ce796b-3904-48b4-990d-4b84bfdfe6ae}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="BSDF">
+      <UniqueIdentifier>{e4f07603-bd41-44fd-910f-09a7a4f7ab98}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Camera">
+      <UniqueIdentifier>{9593e47c-f6d4-4bd2-8a49-ab262ed58768}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Core">
+      <UniqueIdentifier>{d1646c47-e648-4710-86bb-7988ca17e10e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="EDF">
+      <UniqueIdentifier>{e3603644-0b60-4d43-948e-e9607df416e2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="External">
+      <UniqueIdentifier>{e08f6848-46d7-4d92-9c0d-55a7e0ac1190}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Helper">
+      <UniqueIdentifier>{3e9fd5fb-dc41-472c-96f5-d8a29827c2d0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Medium Distribution">
+      <UniqueIdentifier>{6149b09e-6567-4aec-8aef-b16c0c63c713}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Medium Material">
+      <UniqueIdentifier>{70662121-8bae-418b-b659-2f2225b1a016}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Memory Allocators">
+      <UniqueIdentifier>{6dc1d6ac-eb61-49e4-9c22-fbf35db572d1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Phase Function">
+      <UniqueIdentifier>{95501ebc-11b9-47f2-a430-58c3656310a3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Renderer">
+      <UniqueIdentifier>{37c224e7-5c1a-42c4-a5fd-69241fbc052b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="RNG">
+      <UniqueIdentifier>{43c43a4b-ba26-47c8-8223-64b515de3689}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scene">
+      <UniqueIdentifier>{b4c61253-cd48-49f3-b15f-7216de4c237d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Surface Material">
+      <UniqueIdentifier>{b1aeb5ca-33dc-42e5-a67c-4b306f6109d1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Surface Shape">
+      <UniqueIdentifier>{6e58ccfc-cb3b-43af-bcb8-408c602e49e0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Texture">
+      <UniqueIdentifier>{238bb351-0367-499b-81d3-266cf91cda53}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="External\Analytic Sky Dome Radiance">
+      <UniqueIdentifier>{d1914c27-4121-4646-abe4-7a918958f883}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

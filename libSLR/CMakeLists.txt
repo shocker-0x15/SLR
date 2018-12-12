@@ -1,4 +1,4 @@
-set(include_dirs "${EXTLIBS_OpenEXR22_include}")
+﻿set(include_dirs "${EXTLIBS_OpenEXR22_include}")
 set(lib_dirs "${EXTLIBS_OpenEXR22_lib}")
 set(libs "Half")
 

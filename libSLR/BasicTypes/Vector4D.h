@@ -1,4 +1,4 @@
-//
+﻿//
 //  Vector4D.h
 //
 //  Created by 渡部 心 on 11/08/22.

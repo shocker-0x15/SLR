@@ -1,4 +1,4 @@
-This file is part of a sample implementation of the analytical skylight and
+﻿This file is part of a sample implementation of the analytical skylight and
 solar radiance models presented in the SIGGRAPH 2012 paper
 
 

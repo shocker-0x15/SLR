@@ -1,4 +1,4 @@
-/*
+﻿/*
 This source is published under the following 3-clause BSD license.
 
 Copyright (c) 2012 - 2013, Lukas Hosek and Alexander Wilkie

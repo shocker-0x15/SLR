@@ -1,0 +1,272 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>15.0</VCProjectVersion>
+    <ProjectGuid>{919C4FD0-4F5C-435F-875F-203BAAA55CE8}</ProjectGuid>
+    <RootNamespace>SLR</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0.17134.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <IntDir>$(Platform)\$(ProjectName)_$(Configuration)\</IntDir>
+    <OutDir>$(SolutionDir)vsproj\$(Platform)\$(Configuration)\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <IntDir>$(Platform)\$(ProjectName)_$(Configuration)\</IntDir>
+    <OutDir>$(SolutionDir)vsproj\$(Platform)\$(Configuration)\</OutDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+      <ConformanceMode>true</ConformanceMode>
+      <PreprocessorDefinitions>SLR_API_EXPORTS;_CRT_SECURE_NO_WARNINGS;_WINDLL;DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <ConformanceMode>true</ConformanceMode>
+      <PreprocessorDefinitions>SLR_API_EXPORTS;_CRT_SECURE_NO_WARNINGS;_WINDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+    </ClCompile>
+    <Link>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="..\libSLR\BasicTypes\BoundingBox3D.cpp" />
+    <ClCompile Include="..\libSLR\BasicTypes\Matrix3x3.cpp" />
+    <ClCompile Include="..\libSLR\BasicTypes\Matrix4x4.cpp" />
+    <ClCompile Include="..\libSLR\BasicTypes\Normal3D.cpp" />
+    <ClCompile Include="..\libSLR\BasicTypes\Point3D.cpp" />
+    <ClCompile Include="..\libSLR\BasicTypes\Quaternion.cpp" />
+    <ClCompile Include="..\libSLR\BasicTypes\Ray.cpp" />
+    <ClCompile Include="..\libSLR\BasicTypes\rgb_types.cpp" />
+    <ClCompile Include="..\libSLR\BasicTypes\spectrum_base.cpp" />
+    <ClCompile Include="..\libSLR\BasicTypes\spectrum_library.cpp" />
+    <ClCompile Include="..\libSLR\BasicTypes\spectrum_types.cpp" />
+    <ClCompile Include="..\libSLR\BasicTypes\TexCoord2D.cpp" />
+    <ClCompile Include="..\libSLR\BasicTypes\Vector3D.cpp" />
+    <ClCompile Include="..\libSLR\BasicTypes\Vector4D.cpp" />
+    <ClCompile Include="..\libSLR\BSDF\AshikhminShirleyBRDF.cpp" />
+    <ClCompile Include="..\libSLR\BSDF\basic_bsdfs.cpp" />
+    <ClCompile Include="..\libSLR\BSDF\disney_bsdfs.cpp" />
+    <ClCompile Include="..\libSLR\BSDF\microfacet_bsdfs.cpp" />
+    <ClCompile Include="..\libSLR\BSDF\ModifiedWardDurBRDF.cpp" />
+    <ClCompile Include="..\libSLR\BSDF\MultiBSDF.cpp" />
+    <ClCompile Include="..\libSLR\BSDF\OrenNayerBRDF.cpp" />
+    <ClCompile Include="..\libSLR\Camera\EquirectangularCamera.cpp" />
+    <ClCompile Include="..\libSLR\Camera\PerspectiveCamera.cpp" />
+    <ClCompile Include="..\libSLR\Core\accelerator.cpp" />
+    <ClCompile Include="..\libSLR\Core\camera.cpp" />
+    <ClCompile Include="..\libSLR\Core\directional_distribution_functions.cpp" />
+    <ClCompile Include="..\libSLR\Core\distributions.cpp" />
+    <ClCompile Include="..\libSLR\Core\geometry.cpp" />
+    <ClCompile Include="..\libSLR\Core\ImageSensor.cpp" />
+    <ClCompile Include="..\libSLR\Core\image_2d.cpp" />
+    <ClCompile Include="..\libSLR\Core\light_path_sampler.cpp" />
+    <ClCompile Include="..\libSLR\Core\medium_material.cpp" />
+    <ClCompile Include="..\libSLR\Core\medium_object.cpp" />
+    <ClCompile Include="..\libSLR\Core\object.cpp" />
+    <ClCompile Include="..\libSLR\Core\ProgressReporter.cpp" />
+    <ClCompile Include="..\libSLR\Core\random_number_generator.cpp" />
+    <ClCompile Include="..\libSLR\Core\RenderSettings.cpp" />
+    <ClCompile Include="..\libSLR\Core\surface_material.cpp" />
+    <ClCompile Include="..\libSLR\Core\surface_object.cpp" />
+    <ClCompile Include="..\libSLR\Core\textures.cpp" />
+    <ClCompile Include="..\libSLR\Core\transform.cpp" />
+    <ClCompile Include="..\libSLR\debugPrintf.cpp" />
+    <ClCompile Include="..\libSLR\EDF\basic_edfs.cpp" />
+    <ClCompile Include="..\libSLR\EDF\IBLEDF.cpp" />
+    <ClCompile Include="..\libSLR\EDF\MultiEDF.cpp" />
+    <ClCompile Include="..\libSLR\External\AnalyticSkyDomeRadiance\ArHosekSkyModel.c" />
+    <ClCompile Include="..\libSLR\Helper\bmp_exporter.cpp" />
+    <ClCompile Include="..\libSLR\MediumDistribution\CloudMediumDistribution.cpp" />
+    <ClCompile Include="..\libSLR\MediumDistribution\DensityGridMediumDistribution.cpp" />
+    <ClCompile Include="..\libSLR\MediumDistribution\GridMediumDistribution.cpp" />
+    <ClCompile Include="..\libSLR\MediumDistribution\HomogeneousMediumDistribution.cpp" />
+    <ClCompile Include="..\libSLR\MediumDistribution\VacuumMediumDistribution.cpp" />
+    <ClCompile Include="..\libSLR\MediumMaterial\basic_medium_materials.cpp" />
+    <ClCompile Include="..\libSLR\MemoryAllocators\ArenaAllocator.cpp" />
+    <ClCompile Include="..\libSLR\PhaseFunction\basic_phase_functions.cpp" />
+    <ClCompile Include="..\libSLR\Renderer\BPTRenderer.cpp" />
+    <ClCompile Include="..\libSLR\Renderer\DebugRenderer.cpp" />
+    <ClCompile Include="..\libSLR\Renderer\PTRenderer.cpp" />
+    <ClCompile Include="..\libSLR\Renderer\VolumetricBPTRenderer.cpp" />
+    <ClCompile Include="..\libSLR\Renderer\VolumetricPTRenderer.cpp" />
+    <ClCompile Include="..\libSLR\RNG\LinearCongruentialRNG.cpp" />
+    <ClCompile Include="..\libSLR\RNG\XORShiftRNG.cpp" />
+    <ClCompile Include="..\libSLR\Scene\camera_nodes.cpp" />
+    <ClCompile Include="..\libSLR\Scene\medium_nodes.cpp" />
+    <ClCompile Include="..\libSLR\Scene\node.cpp" />
+    <ClCompile Include="..\libSLR\Scene\Scene.cpp" />
+    <ClCompile Include="..\libSLR\Scene\TriangleMeshNode.cpp" />
+    <ClCompile Include="..\libSLR\SurfaceMaterial\AshikhminShirleyReflectionSurfaceMaterial.cpp" />
+    <ClCompile Include="..\libSLR\SurfaceMaterial\basic_emitter_surface_properties.cpp" />
+    <ClCompile Include="..\libSLR\SurfaceMaterial\basic_surface_materials.cpp" />
+    <ClCompile Include="..\libSLR\SurfaceMaterial\disney_surface_materials.cpp" />
+    <ClCompile Include="..\libSLR\SurfaceMaterial\IBLEmitterSurfaceProperty.cpp" />
+    <ClCompile Include="..\libSLR\SurfaceMaterial\microfacet_surface_materials.cpp" />
+    <ClCompile Include="..\libSLR\SurfaceMaterial\MixedSurfaceMaterial.cpp" />
+    <ClCompile Include="..\libSLR\SurfaceMaterial\ModifiedWardDurReflectionSurfaceMaterial.cpp" />
+    <ClCompile Include="..\libSLR\SurfaceMaterial\SummedSurfaceMaterial.cpp" />
+    <ClCompile Include="..\libSLR\SurfaceShape\InfinitesimalPointSurfaceShape.cpp" />
+    <ClCompile Include="..\libSLR\SurfaceShape\InfiniteSphereSurfaceShape.cpp" />
+    <ClCompile Include="..\libSLR\SurfaceShape\TriangleSurfaceShape.cpp" />
+    <ClCompile Include="..\libSLR\Texture\AnalyticSkySpectrumTexture.cpp" />
+    <ClCompile Include="..\libSLR\Texture\checker_board_textures.cpp" />
+    <ClCompile Include="..\libSLR\Texture\constant_textures.cpp" />
+    <ClCompile Include="..\libSLR\Texture\image_textures.cpp" />
+    <ClCompile Include="..\libSLR\Texture\perlin_noise_textures.cpp" />
+    <ClCompile Include="..\libSLR\Texture\voronoi_textures.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\libSLR\Accelerator\QBVH.h" />
+    <ClInclude Include="..\libSLR\Accelerator\SBVH.h" />
+    <ClInclude Include="..\libSLR\Accelerator\StandardBVH.h" />
+    <ClInclude Include="..\libSLR\BasicTypes\BoundingBox3D.h" />
+    <ClInclude Include="..\libSLR\BasicTypes\CompensatedSum.h" />
+    <ClInclude Include="..\libSLR\BasicTypes\Matrix3x3.h" />
+    <ClInclude Include="..\libSLR\BasicTypes\Matrix4x4.h" />
+    <ClInclude Include="..\libSLR\BasicTypes\Normal3D.h" />
+    <ClInclude Include="..\libSLR\BasicTypes\Point3D.h" />
+    <ClInclude Include="..\libSLR\BasicTypes\Quaternion.h" />
+    <ClInclude Include="..\libSLR\BasicTypes\Ray.h" />
+    <ClInclude Include="..\libSLR\BasicTypes\rgb_types.h" />
+    <ClInclude Include="..\libSLR\BasicTypes\spectrum_base.h" />
+    <ClInclude Include="..\libSLR\BasicTypes\spectrum_library.h" />
+    <ClInclude Include="..\libSLR\BasicTypes\spectrum_types.h" />
+    <ClInclude Include="..\libSLR\BasicTypes\TexCoord2D.h" />
+    <ClInclude Include="..\libSLR\BasicTypes\Vector3D.h" />
+    <ClInclude Include="..\libSLR\BasicTypes\Vector4D.h" />
+    <ClInclude Include="..\libSLR\BSDF\AshikhminShirleyBRDF.h" />
+    <ClInclude Include="..\libSLR\BSDF\basic_bsdfs.h" />
+    <ClInclude Include="..\libSLR\BSDF\bsdf_headers.h" />
+    <ClInclude Include="..\libSLR\BSDF\disney_bsdfs.h" />
+    <ClInclude Include="..\libSLR\BSDF\microfacet_bsdfs.h" />
+    <ClInclude Include="..\libSLR\BSDF\ModifiedWardDurBRDF.h" />
+    <ClInclude Include="..\libSLR\BSDF\MultiBSDF.h" />
+    <ClInclude Include="..\libSLR\BSDF\OrenNayerBRDF.h" />
+    <ClInclude Include="..\libSLR\Camera\EquirectangularCamera.h" />
+    <ClInclude Include="..\libSLR\Camera\PerspectiveCamera.h" />
+    <ClInclude Include="..\libSLR\Core\accelerator.h" />
+    <ClInclude Include="..\libSLR\Core\camera.h" />
+    <ClInclude Include="..\libSLR\Core\directional_distribution_functions.h" />
+    <ClInclude Include="..\libSLR\Core\distributions.h" />
+    <ClInclude Include="..\libSLR\Core\geometry.h" />
+    <ClInclude Include="..\libSLR\Core\ImageSensor.h" />
+    <ClInclude Include="..\libSLR\Core\image_2d.h" />
+    <ClInclude Include="..\libSLR\Core\light_path_sampler.h" />
+    <ClInclude Include="..\libSLR\Core\medium_material.h" />
+    <ClInclude Include="..\libSLR\Core\medium_object.h" />
+    <ClInclude Include="..\libSLR\Core\object.h" />
+    <ClInclude Include="..\libSLR\Core\ProgressReporter.h" />
+    <ClInclude Include="..\libSLR\Core\random_number_generator.h" />
+    <ClInclude Include="..\libSLR\Core\renderer.h" />
+    <ClInclude Include="..\libSLR\Core\RenderSettings.h" />
+    <ClInclude Include="..\libSLR\Core\surface_material.h" />
+    <ClInclude Include="..\libSLR\Core\surface_object.h" />
+    <ClInclude Include="..\libSLR\Core\textures.h" />
+    <ClInclude Include="..\libSLR\Core\transform.h" />
+    <ClInclude Include="..\libSLR\declarations.h" />
+    <ClInclude Include="..\libSLR\defines.h" />
+    <ClInclude Include="..\libSLR\EDF\basic_edfs.h" />
+    <ClInclude Include="..\libSLR\EDF\IBLEDF.h" />
+    <ClInclude Include="..\libSLR\EDF\MultiEDF.h" />
+    <ClInclude Include="..\libSLR\External\AnalyticSkyDomeRadiance\ArHosekSkyModel.h" />
+    <ClInclude Include="..\libSLR\External\AnalyticSkyDomeRadiance\ArHosekSkyModelData_CIEXYZ.h" />
+    <ClInclude Include="..\libSLR\External\AnalyticSkyDomeRadiance\ArHosekSkyModelData_RGB.h" />
+    <ClInclude Include="..\libSLR\External\AnalyticSkyDomeRadiance\ArHosekSkyModelData_Spectral.h" />
+    <ClInclude Include="..\libSLR\External\half.hpp" />
+    <ClInclude Include="..\libSLR\Helper\bmp_exporter.h" />
+    <ClInclude Include="..\libSLR\Helper\ThreadPool.h" />
+    <ClInclude Include="..\libSLR\MediumDistribution\CloudMediumDistribution.h" />
+    <ClInclude Include="..\libSLR\MediumDistribution\DensityGridMediumDistribution.h" />
+    <ClInclude Include="..\libSLR\MediumDistribution\GridMediumDistribution.h" />
+    <ClInclude Include="..\libSLR\MediumDistribution\HomogeneousMediumDistribution.h" />
+    <ClInclude Include="..\libSLR\MediumDistribution\VacuumMediumDistribution.h" />
+    <ClInclude Include="..\libSLR\MediumMaterial\basic_medium_materials.h" />
+    <ClInclude Include="..\libSLR\MediumMaterial\medium_material_headers.h" />
+    <ClInclude Include="..\libSLR\MemoryAllocators\Allocator.h" />
+    <ClInclude Include="..\libSLR\MemoryAllocators\ArenaAllocator.h" />
+    <ClInclude Include="..\libSLR\PhaseFunction\basic_phase_functions.h" />
+    <ClInclude Include="..\libSLR\Renderer\BPTRenderer.h" />
+    <ClInclude Include="..\libSLR\Renderer\DebugRenderer.h" />
+    <ClInclude Include="..\libSLR\Renderer\PTRenderer.h" />
+    <ClInclude Include="..\libSLR\Renderer\VolumetricBPTRenderer.h" />
+    <ClInclude Include="..\libSLR\Renderer\VolumetricPTRenderer.h" />
+    <ClInclude Include="..\libSLR\RNG\LinearCongruentialRNG.h" />
+    <ClInclude Include="..\libSLR\RNG\XORShiftRNG.h" />
+    <ClInclude Include="..\libSLR\Scene\camera_nodes.h" />
+    <ClInclude Include="..\libSLR\Scene\medium_nodes.h" />
+    <ClInclude Include="..\libSLR\Scene\node.h" />
+    <ClInclude Include="..\libSLR\Scene\Scene.h" />
+    <ClInclude Include="..\libSLR\Scene\TriangleMeshNode.h" />
+    <ClInclude Include="..\libSLR\SurfaceMaterial\AshikhminShirleyReflectionSurfaceMaterial.h" />
+    <ClInclude Include="..\libSLR\SurfaceMaterial\basic_emitter_surface_properties.h" />
+    <ClInclude Include="..\libSLR\SurfaceMaterial\basic_surface_materials.h" />
+    <ClInclude Include="..\libSLR\SurfaceMaterial\disney_surface_materials.h" />
+    <ClInclude Include="..\libSLR\SurfaceMaterial\IBLEmitterSurfaceProperty.h" />
+    <ClInclude Include="..\libSLR\SurfaceMaterial\microfacet_surface_materials.h" />
+    <ClInclude Include="..\libSLR\SurfaceMaterial\MixedSurfaceMaterial.h" />
+    <ClInclude Include="..\libSLR\SurfaceMaterial\ModifiedWardDurReflectionSurfaceMaterial.h" />
+    <ClInclude Include="..\libSLR\SurfaceMaterial\SummedSurfaceMaterial.h" />
+    <ClInclude Include="..\libSLR\SurfaceMaterial\surface_material_headers.h" />
+    <ClInclude Include="..\libSLR\SurfaceShape\InfinitesimalPointSurfaceShape.h" />
+    <ClInclude Include="..\libSLR\SurfaceShape\InfiniteSphereSurfaceShape.h" />
+    <ClInclude Include="..\libSLR\SurfaceShape\TriangleSurfaceShape.h" />
+    <ClInclude Include="..\libSLR\Texture\AnalyticSkySpectrumTexture.h" />
+    <ClInclude Include="..\libSLR\Texture\checker_board_textures.h" />
+    <ClInclude Include="..\libSLR\Texture\constant_textures.h" />
+    <ClInclude Include="..\libSLR\Texture\image_textures.h" />
+    <ClInclude Include="..\libSLR\Texture\perlin_noise_textures.h" />
+    <ClInclude Include="..\libSLR\Texture\texture_headers.h" />
+    <ClInclude Include="..\libSLR\Texture\voronoi_textures.h" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

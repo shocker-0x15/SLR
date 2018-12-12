@@ -1,4 +1,4 @@
-flex = /usr/local/Cellar/flex/2.6.2/bin/flex
+﻿flex = /usr/local/Cellar/flex/2.6.2/bin/flex
 bison = /usr/local/Cellar/bison/3.0.4/bin/bison
 
 #SceneParser: SceneParser.tab.cc SceneLexer.yy.c

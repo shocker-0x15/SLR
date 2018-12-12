@@ -1,4 +1,4 @@
-// A Bison parser, made by GNU Bison 3.0.4.
+﻿// A Bison parser, made by GNU Bison 3.0.4.
 
 // Skeleton interface for Bison LALR(1) parsers in C++
 

@@ -1,4 +1,4 @@
-//
+﻿//
 //  RenderSettings.h
 //
 //  Created by 渡部 心 on 2015/08/01.

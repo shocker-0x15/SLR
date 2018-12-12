@@ -1,4 +1,4 @@
-/*
+﻿/*
   ========================================================================
   To make a fully customizable malloc.h header file, cut everything
   above this line, put into file malloc.h, edit to suit, and #include it

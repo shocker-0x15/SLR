@@ -1,4 +1,4 @@
-//
+﻿//
 //  XORShiftRNG.h
 //
 //  Created by 渡部 心 on 11/07/21.

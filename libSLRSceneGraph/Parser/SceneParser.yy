@@ -1,4 +1,4 @@
-%skeleton "lalr1.cc"
+﻿%skeleton "lalr1.cc"
 %require "3.0.4"
 %defines
 %define api.namespace {SLRSceneGraph}

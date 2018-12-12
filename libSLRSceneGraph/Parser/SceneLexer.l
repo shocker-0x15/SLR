@@ -1,4 +1,4 @@
-%{
+﻿%{
 #include "SceneParsingDriver.h"
 #include "SceneParser.tab.hh"
 #ifdef SLR_Platform_Windows

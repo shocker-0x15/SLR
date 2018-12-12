@@ -1,4 +1,4 @@
-#ifndef __SLRSceneGraph_SceneParsingDriver__
+﻿#ifndef __SLRSceneGraph_SceneParsingDriver__
 #define __SLRSceneGraph_SceneParsingDriver__
 
 #include <libSLR/defines.h>

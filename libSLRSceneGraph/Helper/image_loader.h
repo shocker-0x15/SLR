@@ -1,4 +1,4 @@
-//
+﻿//
 //  image_loader.h
 //
 //  Created by 渡部 心 on 2014/05/05.

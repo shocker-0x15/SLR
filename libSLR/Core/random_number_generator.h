@@ -1,4 +1,4 @@
-//
+﻿//
 //  random_number_generator.h
 //
 //  Created by 渡部 心 on 2015/06/28.

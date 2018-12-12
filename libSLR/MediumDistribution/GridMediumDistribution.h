@@ -1,4 +1,4 @@
-//
+﻿//
 //  GridMediumDistribution.h
 //
 //  Created by 渡部 心 on 2017/01/04.

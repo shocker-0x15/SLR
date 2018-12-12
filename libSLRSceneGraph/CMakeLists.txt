@@ -1,4 +1,4 @@
-set(include_dirs "${EXTLIBS_Assimp_include};${EXTLIBS_libpng16_include};${EXTLIBS_OpenEXR22_include};${CMAKE_SOURCE_DIR}")
+﻿set(include_dirs "${EXTLIBS_Assimp_include};${EXTLIBS_libpng16_include};${EXTLIBS_OpenEXR22_include};${CMAKE_SOURCE_DIR}")
 set(lib_dirs "${EXTLIBS_Assimp_lib};${EXTLIBS_libpng16_lib};${EXTLIBS_OpenEXR22_lib};")
 set(libs "Assimp;png;Half;IlmImf;SLR")
 

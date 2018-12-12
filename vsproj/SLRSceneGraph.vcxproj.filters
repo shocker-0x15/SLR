@@ -1,0 +1,115 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Scene">
+      <UniqueIdentifier>{72c6d6a6-7deb-404f-ab5d-0e1ed973fa61}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Parser">
+      <UniqueIdentifier>{3a6fab86-c51b-423c-9fb4-9105d44ad6cd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Parser\Builtin Functions">
+      <UniqueIdentifier>{c5402c8f-ed62-4998-8f4d-9a49e0546e1e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Helper">
+      <UniqueIdentifier>{ce831130-61ae-43f4-add8-2433188f2804}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\libSLRSceneGraph\node_constructor.cpp" />
+    <ClCompile Include="..\libSLRSceneGraph\surface_materials.cpp" />
+    <ClCompile Include="..\libSLRSceneGraph\textures.cpp" />
+    <ClCompile Include="..\libSLRSceneGraph\API.cpp" />
+    <ClCompile Include="..\libSLRSceneGraph\images.cpp" />
+    <ClCompile Include="..\libSLRSceneGraph\medium_materials.cpp" />
+    <ClCompile Include="..\libSLRSceneGraph\Scene\node.cpp">
+      <Filter>Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libSLRSceneGraph\Scene\Scene.cpp">
+      <Filter>Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libSLRSceneGraph\Scene\TriangleMeshNode.cpp">
+      <Filter>Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libSLRSceneGraph\Scene\camera_nodes.cpp">
+      <Filter>Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libSLRSceneGraph\Scene\medium_nodes.cpp">
+      <Filter>Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libSLRSceneGraph\Parser\SceneParser.cpp">
+      <Filter>Parser</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libSLRSceneGraph\Parser\SceneParser.tab.cc">
+      <Filter>Parser</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libSLRSceneGraph\Parser\SceneLexer.yy.cpp">
+      <Filter>Parser</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libSLRSceneGraph\Parser\BuiltinFunctions\builtin_texture.cpp">
+      <Filter>Parser\Builtin Functions</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libSLRSceneGraph\Parser\BuiltinFunctions\builtin_transform.cpp">
+      <Filter>Parser\Builtin Functions</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libSLRSceneGraph\Parser\BuiltinFunctions\builtin_math.cpp">
+      <Filter>Parser\Builtin Functions</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libSLRSceneGraph\Helper\image_loader.cpp">
+      <Filter>Helper</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\libSLRSceneGraph\node_constructor.h" />
+    <ClInclude Include="..\libSLRSceneGraph\surface_materials.h" />
+    <ClInclude Include="..\libSLRSceneGraph\textures.h" />
+    <ClInclude Include="..\libSLRSceneGraph\API.h" />
+    <ClInclude Include="..\libSLRSceneGraph\declarations.h" />
+    <ClInclude Include="..\libSLRSceneGraph\images.h" />
+    <ClInclude Include="..\libSLRSceneGraph\medium_materials.h" />
+    <ClInclude Include="..\libSLRSceneGraph\Scene\node.h">
+      <Filter>Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libSLRSceneGraph\Scene\Scene.h">
+      <Filter>Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libSLRSceneGraph\Scene\TriangleMeshNode.h">
+      <Filter>Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libSLRSceneGraph\Scene\camera_nodes.h">
+      <Filter>Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libSLRSceneGraph\Scene\medium_nodes.h">
+      <Filter>Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libSLRSceneGraph\Parser\SceneParser.h">
+      <Filter>Parser</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libSLRSceneGraph\Parser\SceneParser.tab.hh">
+      <Filter>Parser</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libSLRSceneGraph\Parser\SceneParsingDriver.h">
+      <Filter>Parser</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libSLRSceneGraph\Parser\stack.hh">
+      <Filter>Parser</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libSLRSceneGraph\Parser\location.hh">
+      <Filter>Parser</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libSLRSceneGraph\Parser\position.hh">
+      <Filter>Parser</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libSLRSceneGraph\Parser\BuiltinFunctions\builtin_texture.h">
+      <Filter>Parser\Builtin Functions</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libSLRSceneGraph\Parser\BuiltinFunctions\builtin_transform.h">
+      <Filter>Parser\Builtin Functions</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libSLRSceneGraph\Parser\BuiltinFunctions\builtin_math.h">
+      <Filter>Parser\Builtin Functions</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libSLRSceneGraph\Helper\image_loader.h">
+      <Filter>Helper</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
