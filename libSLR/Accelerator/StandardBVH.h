@@ -263,7 +263,7 @@ namespace SLR {
         }
         
         template <typename Procedure>
-        inline void commonProcedure(const Ray &ray, const RaySegment &segment, const Procedure &proc) const {
+        void commonProcedure(const Ray &ray, const RaySegment &segment, const Procedure &proc) const {
             bool dirIsPositive[] = {ray.dir.x >= 0, ray.dir.y >= 0, ray.dir.z >= 0};
             RaySegment isectRange = segment;
             
