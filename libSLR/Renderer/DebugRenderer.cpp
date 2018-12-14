@@ -57,7 +57,7 @@ namespace SLR {
         
         sensor->init(job.imageWidth, job.imageHeight);
         
-        printf("Debug Renderer\n");
+        slrprintf("Debug Renderer\n");
 //        ProgressReporter reporter("Rendering", 1);
         
         DefaultAllocator &defMem = DefaultAllocator::instance();

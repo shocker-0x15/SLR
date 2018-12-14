@@ -118,7 +118,7 @@
     <ClCompile Include="..\libSLR\Core\surface_object.cpp" />
     <ClCompile Include="..\libSLR\Core\textures.cpp" />
     <ClCompile Include="..\libSLR\Core\transform.cpp" />
-    <ClCompile Include="..\libSLR\debugPrintf.cpp" />
+    <ClCompile Include="..\libSLR\devPrintf.cpp" />
     <ClCompile Include="..\libSLR\EDF\basic_edfs.cpp" />
     <ClCompile Include="..\libSLR\EDF\IBLEDF.cpp" />
     <ClCompile Include="..\libSLR\EDF\MultiEDF.cpp" />

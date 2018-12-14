@@ -92,7 +92,7 @@ bool preloadPNG(const std::string &filePath, FILE** fpRet, PNGStructures* pngStr
     
     fp = fopen(filePath.c_str(), "rb");
     if (fp == nullptr) {
-        printf("Failed to open the file.\n%s\n", filePath.c_str());
+        slrprintf("Failed to open the file.\n%s\n", filePath.c_str());
         return false;
     }
     
@@ -100,14 +100,14 @@ bool preloadPNG(const std::string &filePath, FILE** fpRet, PNGStructures* pngStr
     fread(headSignature, 1, sizeof(headSignature), fp);
     if (png_sig_cmp(headSignature, 0, sizeof(headSignature))) {
         fclose(fp);
-        printf("This is not a png file.\n");
+        slrprintf("This is not a png file.\n");
         return false;
     }
     
     pngStruct = png_create_read_struct(PNG_LIBPNG_VER_STRING, nullptr, nullptr, nullptr);
     if (!pngStruct) {
         fclose(fp);
-        printf("libpng: Failed to create a read struct.\n");
+        slrprintf("libpng: Failed to create a read struct.\n");
         return false;
     }
     
@@ -116,7 +116,7 @@ bool preloadPNG(const std::string &filePath, FILE** fpRet, PNGStructures* pngStr
     if (!pngInfo) {
         png_destroy_read_struct(&pngStruct, nullptr, nullptr);
         fclose(fp);
-        printf("libpng: Failed to create an info struct.\n");
+        slrprintf("libpng: Failed to create an info struct.\n");
         return false;
     }
     
@@ -125,14 +125,14 @@ bool preloadPNG(const std::string &filePath, FILE** fpRet, PNGStructures* pngStr
     if (!pngEndInfo) {
         png_destroy_read_struct(&pngStruct, &pngInfo, nullptr);
         fclose(fp);
-        printf("libpng: Failed to create an end info struct.\n");
+        slrprintf("libpng: Failed to create an end info struct.\n");
         return false;
     }
     
     if (setjmp(png_jmpbuf(pngStruct))) {
         png_destroy_read_struct(&pngStruct, &pngInfo, &pngEndInfo);
         fclose(fp);
-        printf("libpng: Error.\n");
+        slrprintf("libpng: Error.\n");
         return false;
     }
     

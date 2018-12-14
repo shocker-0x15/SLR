@@ -280,7 +280,7 @@ namespace SLR {
             elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(tpEnd - tpStart).count();
             
             m_cost = calcSAHCost();
-            printf("depth: %u, cost: %g, time: %g[s]\n", m_depth, m_cost, elapsed * 0.001f);
+            slrDevPrintf("depth: %u, cost: %g, time: %g[s]\n", m_depth, m_cost, elapsed * 0.001f);
         }
         
         float costForIntersect() const override {

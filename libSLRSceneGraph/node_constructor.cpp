@@ -58,7 +58,7 @@ namespace SLRSceneGraph {
         for (int m = 0; m < nodeSrc->mNumMeshes; ++m) {
             const aiMesh* mesh = objSrc->mMeshes[nodeSrc->mMeshes[m]];
             if (mesh->mPrimitiveTypes != aiPrimitiveType_TRIANGLE) {
-                printf("ignored non triangle mesh.\n");
+                slrprintf("ignored non triangle mesh.\n");
                 continue;
             }
             
@@ -259,7 +259,7 @@ namespace SLRSceneGraph {
             return SurfaceAttributeTuple(result.rawRef<TypeMap::SurfaceMaterial>(), nullptr, nullptr);
         }
         
-        printf("User defined material function is invalid, fall back to the default function.\n");
+        slrprintf("User defined material function is invalid, fall back to the default function.\n");
         return createMaterialDefaultFunction(aiMat, pathPrefix, mem);
     }
     
@@ -306,7 +306,7 @@ namespace SLRSceneGraph {
             }
         }
         
-        printf("User defined mesh callback function is invalid, fall back to the default function.\n");
+        slrprintf("User defined mesh callback function is invalid, fall back to the default function.\n");
         return meshCallbackDefaultFunction(name, mesh, minP, maxP);
     }
     
@@ -318,10 +318,10 @@ namespace SLRSceneGraph {
         Assimp::Importer importer;
         const aiScene* scene = importer.ReadFile(filePath, aiProcess_CalcTangentSpace | (flipUV ? aiProcess_FlipUVs : 0));
         if (!scene) {
-            printf("Failed to load %s.\n", filePath.c_str());
+            slrprintf("Failed to load %s.\n", filePath.c_str());
             return;
         }
-        printf("Reading: %s done.\n", filePath.c_str());
+        slrprintf("Reading: %s done.\n", filePath.c_str());
         
         std::string pathPrefix = filePath.substr(0, filePath.find_last_of("/") + 1);
         
@@ -342,6 +342,6 @@ namespace SLRSceneGraph {
         
         nodeOut->setName(filePath);
         
-        printf("Constructing: %s done.\n", filePath.c_str());
+        slrprintf("Constructing: %s done.\n", filePath.c_str());
     }
 }

@@ -87,7 +87,7 @@ namespace SLR {
             uint32_t byteWidth = resX * 3 + resX % 4;
             uint8_t* data = (uint8_t*)malloc(resZ * byteWidth);
             
-            printf("start to generate a test image: %s. ...", filename.c_str());
+            slrprintf("start to generate a test image: %s. ...", filename.c_str());
             for (int i = 0; i < resZ; ++i) {
                 for (int j = 0; j < resX; ++j) {
                     Point3D p((j + 0.5f) / resX, 0.0f, (i + 0.5f) / resZ);
@@ -104,7 +104,7 @@ namespace SLR {
             }
             saveBMP(filename.c_str(), data, resX, resZ);
             free(data);
-            printf("done\n");
+            slrprintf("done\n");
         };
         
         produceSliceImage("cloud_coverage.bmp", std::bind(&CloudMediumDistribution::calcCoverage, this, std::placeholders::_1), WeatherNumX, WeatherNumZ, 1.0f);
@@ -116,7 +116,7 @@ namespace SLR {
     
     void CloudMediumDistribution::saveToFile(const std::string &name) const {
         const auto export2DData = [this](const std::string &fileName, std::function<float(const Point3D &p)> func, uint32_t resX, uint32_t resZ) {
-            printf("write to %s\n", fileName.c_str());
+            slrprintf("write to %s\n", fileName.c_str());
             fflush(stdout);
             FILE* fp = fopen(fileName.c_str(), "wb");
             
@@ -138,11 +138,11 @@ namespace SLR {
             delete[] ySlice;
             
             fclose(fp);
-            printf("done.\n");
+            slrprintf("done.\n");
         };
         
         const auto export3DData = [this](const std::string &fileName, std::function<float(const Point3D &p)> func, uint32_t resX, uint32_t resY, uint32_t resZ) {
-            printf("write to %s\n", fileName.c_str());
+            slrprintf("write to %s\n", fileName.c_str());
             fflush(stdout);
             FILE* fp = fopen(fileName.c_str(), "wb");
             
@@ -165,12 +165,12 @@ namespace SLR {
                 }
                 fwrite(zSlice, sizeof(float), resX * resY, fp);
                 
-                printf("%3u/%3u\n", iz + 1, resZ);
+                slrprintf("%3u/%3u\n", iz + 1, resZ);
             }
             delete[] zSlice;
             
             fclose(fp);
-            printf("done.\n");
+            slrprintf("done.\n");
         };
         
         exportBMPs();
@@ -307,7 +307,7 @@ namespace SLR {
 //            uint32_t byteWidth = resX * 3 + resX % 4;
 //            uint8_t* data = (uint8_t*)malloc(resZ * byteWidth);
 //            
-//            printf("start to generate a test image: %s. ...", filename.c_str());
+//            slrprintf("start to generate a test image: %s. ...", filename.c_str());
 //            for (int i = 0; i < resZ; ++i) {
 //                for (int j = 0; j < resX; ++j) {
 //                    Point3D p((j + 0.5f) / resX + resX, (iy + 0.5f) / resY + resY, (i + 0.5f) / resZ + resZ);
@@ -324,7 +324,7 @@ namespace SLR {
 //            }
 //            saveBMP(filename.c_str(), data, resX, resZ);
 //            free(data);
-//            printf("done\n");  
+//            slrprintf("done\n");  
 //        };
 //        for (int i = 0; i < LowResNumY; ++i) {
 //            char filename[256];
@@ -350,11 +350,11 @@ namespace SLR {
 //                                               DefaultBaseShapeScale * position.y, 
 //                                               DefaultBaseShapeScale * position.z);
 ////        if (density > 0)
-////            printf("(%g, %g, %g): %g\n", 
-////                   DefaultBaseShapeScale * position.x, 
-////                   DefaultBaseShapeScale * position.y, 
-////                   DefaultBaseShapeScale * position.z, 
-////                   baseShape);
+////            slrprintf("(%g, %g, %g): %g\n", 
+////                      DefaultBaseShapeScale * position.x, 
+////                      DefaultBaseShapeScale * position.y, 
+////                      DefaultBaseShapeScale * position.z, 
+////                      baseShape);
 //        density *= baseShape;
 //        if (density <= 0.0f)
 //            return 0.0f;

@@ -94,7 +94,7 @@ namespace SLR {
             elapsed = std::chrono::duration_cast<std::chrono::microseconds>(tpEnd - tpStart).count();
 #ifdef PRINT_PROCESSING_TIME
             if (depth == 1 || depth == 2)
-                printf("calculate parent BBox (%u-%u): %g[ms]\n", start, end, elapsed * 0.001f);
+                slrDevPrintf("calculate parent BBox (%u-%u): %g[ms]\n", start, end, elapsed * 0.001f);
 #endif
             
             if (numObjs == 1) {
@@ -164,7 +164,7 @@ namespace SLR {
                 elapsed = std::chrono::duration_cast<std::chrono::microseconds>(tpEnd - tpStart).count();
 #ifdef PRINT_PROCESSING_TIME
                 if (depth == 1 || depth == 2)
-                    printf("Object Binning: %g[ms]\n", elapsed * 0.001f);
+                    slrDevPrintf("Object Binning: %g[ms]\n", elapsed * 0.001f);
 #endif
             }
             
@@ -237,7 +237,7 @@ namespace SLR {
                 elapsed = std::chrono::duration_cast<std::chrono::microseconds>(tpEnd - tpStart).count();
 #ifdef PRINT_PROCESSING_TIME
                 if (depth == 1 || depth == 2)
-                    printf("Spatial Binning: %g[ms]\n", elapsed * 0.001f);
+                    slrDevPrintf("Spatial Binning: %g[ms]\n", elapsed * 0.001f);
 #endif
             }
             
@@ -261,7 +261,7 @@ namespace SLR {
                 elapsed = std::chrono::duration_cast<std::chrono::microseconds>(tpEnd - tpStart).count();
 #ifdef PRINT_PROCESSING_TIME
                 if (depth == 1 || depth == 2)
-                    printf("Object Partitioning: %g[ms]\n", elapsed * 0.001f);
+                    slrDevPrintf("Object Partitioning: %g[ms]\n", elapsed * 0.001f);
 #endif
                 
                 uint32_t numLeftAdded, numRightAdded;
@@ -335,7 +335,7 @@ namespace SLR {
                 elapsed = std::chrono::duration_cast<std::chrono::microseconds>(tpEnd - tpStart).count();
 #ifdef PRINT_PROCESSING_TIME
                 if (depth == 1 || depth == 2)
-                    printf("Spatial Partitioning: %g[ms]\n", elapsed * 0.001f);
+                    slrDevPrintf("Spatial Partitioning: %g[ms]\n", elapsed * 0.001f);
 #endif
                 
                 uint32_t numLeftAdded, numRightAdded;
@@ -412,7 +412,7 @@ namespace SLR {
             
             m_cost = calcSAHCost();
 //#ifdef DEBUG
-            printf("num fragments: %u => %u, depth: %u, cost: %g, time: %g[s]\n", (uint32_t)objs.size(), (uint32_t)(objs.size() + numAdded), m_depth, m_cost, elapsed * 0.001f);
+            slrDevPrintf("num fragments: %u => %u, depth: %u, cost: %g, time: %g[s]\n", (uint32_t)objs.size(), (uint32_t)(objs.size() + numAdded), m_depth, m_cost, elapsed * 0.001f);
 //#endif
         }
         
@@ -447,8 +447,8 @@ namespace SLR {
                     for (uint32_t i = 0; i < node.numLeaves; ++i) {
 #ifdef DEBUG
                         if (Accelerator::traceTraverse) {
-                            debugPrintf("%s%u\n",
-                                        Accelerator::traceTraversePrefix.c_str(), node.offsetFirstLeaf + i);
+                            slrDevPrintf("%s%u\n",
+                                         Accelerator::traceTraversePrefix.c_str(), node.offsetFirstLeaf + i);
                         }
 #endif
                         const SurfaceObject* surfObj = m_objLists[node.offsetFirstLeaf + i];

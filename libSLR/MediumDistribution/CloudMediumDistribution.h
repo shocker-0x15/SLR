@@ -102,7 +102,7 @@ namespace SLR {
             void open(const std::string &filename) {
                 FILE* fp = fopen(filename.c_str(), "rb");
                 if (fp == nullptr) {
-                    printf("failed to read grid file: %s.", filename.c_str());
+                    slrprintf("failed to read grid file: %s.", filename.c_str());
                     return;
                 }
                 
@@ -161,7 +161,7 @@ namespace SLR {
             void open(const std::string &filename) {
                 FILE* fp = fopen(filename.c_str(), "rb");
                 if (fp == nullptr) {
-                    printf("failed to read grid file: %s.", filename.c_str());
+                    slrprintf("failed to read grid file: %s.", filename.c_str());
                     return;
                 }
                 

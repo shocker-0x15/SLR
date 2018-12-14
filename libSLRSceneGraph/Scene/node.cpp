@@ -49,12 +49,12 @@ namespace SLRSceneGraph {
         // Create a shared_ptr for passing it to contains() with a No-Op deleter so that "this" will not be deleted.
         NodeRef thisRef(this, [](void* ptr){});
         if (node->contains(thisRef) || this == node.get()) {
-            printf("This causes a circular reference.\n");
+            slrprintf("This causes a circular reference.\n");
             return false;
         }
         if (node->isUniqueInTree()) {
             if (contains(node)) {
-                printf("This node already has the given node.\n");
+                slrprintf("This node already has the given node.\n");
                 return false;
             }
         }
@@ -62,7 +62,7 @@ namespace SLRSceneGraph {
             // multiple instances in the same internal node make no sense.
             auto it = std::find(m_childNodes.begin(), m_childNodes.end(), node);
             if (it != m_childNodes.end()) {
-                printf("Another instanced node already exists in this node.\n");
+                slrprintf("Another instanced node already exists in this node.\n");
                 return false;
             }
         }

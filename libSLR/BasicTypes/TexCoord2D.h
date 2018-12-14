@@ -50,8 +50,6 @@ namespace SLR {
         bool hasNaN() const { using std::isnan; return isnan(u) || isnan(v); };
         bool hasInf() const { using std::isinf; return isinf(u) || isinf(v); };
         
-        void print() const { printf("(%g, %g)\n", u, v); };
-        
         static const TexCoord2DTemplate Zero;
         static const TexCoord2DTemplate One;
         static const TexCoord2DTemplate Inf;

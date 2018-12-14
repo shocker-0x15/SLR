@@ -229,7 +229,7 @@ namespace SLR {
         std::array<float, 2> importances{skyDomeEnergy, sunDiscEnergy};
         m_distribution = new MultiContinuousDistribution2D(dists.data(), importances.data(), dists.size());
 #else
-        printf("WARNING: Sun disc is not supported in RGB rendering.");
+        slrprintf("WARNING: Sun disc is not supported in RGB rendering.");
         m_distribution = m_skyDomeDistribution;
 #endif
         

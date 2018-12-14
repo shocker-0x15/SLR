@@ -28,7 +28,7 @@ int main(int argc, const char * argv[]) {
     // print launching time
     using namespace std::chrono;
     std::time_t ctimeLaunch = system_clock::to_time_t(system_clock::now());
-    printf("%s\n", std::ctime(&ctimeLaunch));
+    slrprintf("%s\n", std::ctime(&ctimeLaunch));
     
     SLR::initializeColorSystem();
     
@@ -40,10 +40,10 @@ int main(int argc, const char * argv[]) {
     SLRSceneGraph::RenderingContext context;
     bool readSceneSuccess = SLRSceneGraph::readScene(argv[1], scene, &context);
     if (!readSceneSuccess) {
-        printf("Failed to read a scene file.\n");
+        slrprintf("Failed to read a scene file.\n");
         exit(-1);
     }
-    printf("read scene: %g [s]\n", stopwatch.stop() * 1e-3f);
+    slrprintf("read scene: %g [s]\n", stopwatch.stop() * 1e-3f);
     
     // setup render settings
     SLR::RenderSettings settings;

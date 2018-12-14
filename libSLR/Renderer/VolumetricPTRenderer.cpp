@@ -53,7 +53,7 @@ namespace SLR {
         
         sensor->init(job.imageWidth, job.imageHeight);
         
-        printf("Volumetric Path Tracing: %u[spp]\n", m_samplesPerPixel);
+        slrprintf("Volumetric Path Tracing: %u[spp]\n", m_samplesPerPixel);
         ProgressReporter reporter;
         job.reporter = &reporter;
         
@@ -82,7 +82,7 @@ namespace SLR {
                 sprintf(filename, "%03u.bmp", imgIdx);
                 double elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(reporter.elapsed()).count();
                 sensor->saveImage(filename, settings.getFloat(RenderSettingItem::Brightness) / (s + 1));
-                printf("%u samples: %s, %g[s]\n", exportPass, filename, elapsed * 0.001f);
+                slrprintf("%u samples: %s, %g[s]\n", exportPass, filename, elapsed * 0.001f);
                 reporter.endOtherThreadPrint();
                 
                 ++imgIdx;
@@ -135,7 +135,7 @@ namespace SLR {
                 if (C.allFinite())
                     sensor->add(p.x, p.y, wls, C);
                 else
-                    debugPrintf("Unexpected value detected: %s at (%f, %f)\n", C.toString().c_str(), p.x, p.y);
+                    slrDevPrintf("Unexpected value detected: %s at (%f, %f)\n", C.toString().c_str(), p.x, p.y);
                 
                 mem.reset();
             }

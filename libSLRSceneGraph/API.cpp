@@ -1370,14 +1370,14 @@ namespace SLRSceneGraph {
 //        parser.traceParsing = true;
         StatementsRef statements = parser.parse(filePath);
         if (!statements) {
-            printf("Failed to parse scene file: %s\n", filePath.c_str());
+            slrprintf("Failed to parse scene file: %s\n", filePath.c_str());
             return false;
         }
         
         for (int i = 0; i < statements->size(); ++i) {
             StatementRef statement = statements->at(i);
             if (!statement->perform(executeContext, &errMsg)) {
-                printf("%s\n", errMsg.message.c_str());
+                slrprintf("%s\n", errMsg.message.c_str());
                 return false;
             }
         }

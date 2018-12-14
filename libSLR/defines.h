@@ -71,14 +71,22 @@
 #   define ENABLE_ASSERT
 #endif
 
+// slrDevPrintf
 #ifdef SLR_Platform_Windows_MSVC
-SLR_API void debugPrintf(const char* fmt, ...);
+SLR_API void slrDevPrintf(const char* fmt, ...);
 #else
-#   define debugPrintf(fmt, ...) printf(fmt, ##__VA_ARGS__);
+#   define slrDevPrintf(fmt, ...) printf(fmt, ##__VA_ARGS__)
+#endif
+
+// slrprintf
+#if 1
+#   define slrprintf(fmt, ...) slrDevPrintf(fmt, ##__VA_ARGS__)
+#else
+#   define slrprintf(fmt, ...) printf(fmt, ##__VA_ARGS__)
 #endif
 
 #ifdef ENABLE_ASSERT
-#   define SLRAssert(expr, fmt, ...) if (!(expr)) { debugPrintf("%s @%s: %u:\n", #expr, __FILE__, __LINE__); debugPrintf(fmt"\n", ##__VA_ARGS__); abort(); } 0
+#   define SLRAssert(expr, fmt, ...) if (!(expr)) { slrDevPrintf("%s @%s: %u:\n", #expr, __FILE__, __LINE__); slrDevPrintf(fmt"\n", ##__VA_ARGS__); abort(); } 0
 #else
 #   define SLRAssert(expr, fmt, ...)
 #endif

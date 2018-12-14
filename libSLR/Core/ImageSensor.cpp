@@ -156,11 +156,11 @@ namespace SLR {
                     pixSum += pixel(b, j, i) * scales[b];
                 DiscretizedSpectrum pix = pixSum.result;
                 if (pix.hasInf())
-                    printf("(%u, %u): has an infinite value!\n%s\n", j, i, pix.toString().c_str());
+                    slrprintf("(%u, %u): has an infinite value!\n%s\n", j, i, pix.toString().c_str());
                 if (pix.hasNaN())
-                    printf("(%u, %u): has NaN!\n%s\n", j, i, pix.toString().c_str());
+                    slrprintf("(%u, %u): has NaN!\n%s\n", j, i, pix.toString().c_str());
                 if (pix.hasNegative())
-                    printf("(%u, %u): has a negative value!\n%s\n", j, i, pix.toString().c_str());
+                    slrprintf("(%u, %u): has a negative value!\n%s\n", j, i, pix.toString().c_str());
                 
                 float RGB[3];
                 pix.getRGB(RGB);

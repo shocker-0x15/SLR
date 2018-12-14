@@ -250,7 +250,7 @@ namespace SLR {
             buildRecursive(infos, 0, (uint32_t)objs.size(), 0);
             m_cost = calcSAHCost();
 #ifdef DEBUG
-            printf("depth: %u, cost: %g\n", m_depth, m_cost);
+            slrDevPrintf("depth: %u, cost: %g\n", m_depth, m_cost);
 #endif
         }
         

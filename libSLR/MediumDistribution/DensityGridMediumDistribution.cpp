@@ -156,7 +156,7 @@ namespace SLR {
         delete[] maximumDifferences;
 
 //        // sanity check
-//        printf("start sanity check.\n");
+//        slrDevPrintf("start sanity check.\n");
 //        for (int siz = 0; siz < m_svNumZ; ++siz) {
 //            float pz = (float)siz / (m_svNumZ - 1);
 //            for (int siy = 0; siy < m_svNumY; ++siy) {
@@ -165,7 +165,7 @@ namespace SLR {
 //                    float px = (float)six / (m_svNumX - 1);
 //                    float coarseDensity = calcDensityInSuperVoxels(Point3D(px, py, pz));
 //                    if (coarseDensity < 0.0f)
-//                        printf("%g at (%g, %g, %g)\n", coarseDensity, px, py, pz);
+//                        slrDevPrintf("%g at (%g, %g, %g)\n", coarseDensity, px, py, pz);
 //                }
 //            }
 //        }
@@ -182,8 +182,8 @@ namespace SLR {
 //                    float actualDensity = calcDensity(param);
 //                    float coarseDensity = calcDensityInSuperVoxels(param);
 //                    if (actualDensity > coarseDensity || (coarseDensity == 0.0f && actualDensity > 0))
-//                        printf("%g, %g / %g at (%g, %g, %g)\n", actualDensity / coarseDensity, actualDensity, coarseDensity, 
-//                               param.x * (m_svNumX - 1), param.y * (m_svNumY - 1), param.z * (m_svNumZ - 1));
+//                        slrDevPrintf("%g, %g / %g at (%g, %g, %g)\n", actualDensity / coarseDensity, actualDensity, coarseDensity, 
+//                                     param.x * (m_svNumX - 1), param.y * (m_svNumY - 1), param.z * (m_svNumZ - 1));
 //                    avgNaiveRatio += actualDensity / m_maxDensity;
 //                    if (coarseDensity > 0.0f) {
 //                        avgRatio += actualDensity / coarseDensity;
@@ -199,8 +199,8 @@ namespace SLR {
 //                }
 //            }
 //        }
-//        printf("Avg Ratio: %g, (%g)\n", avgRatio / numValidPoints, avgNaiveRatio / (m_numZ * m_numY * m_numX * 64));
-//        printf("");
+//        slrDevPrintf("Avg Ratio: %g, (%g)\n", avgRatio / numValidPoints, avgNaiveRatio / (m_numZ * m_numY * m_numX * 64));
+//        slrDevPrintf("");
     }
     
     // References:

@@ -27,7 +27,7 @@ namespace SLR {
                     char buffer[2 + entireLength];
                     
                     if (m_numLastLines > 0)
-                        printf("\033[%uF", m_numLastLines);
+                        slrprintf("\033[%uF", m_numLastLines);
                     
                     for (int i = (int32_t)m_jobStask.size() - 1; i >= 0; --i) {
                         Job &job = m_jobStask[i];
@@ -55,14 +55,14 @@ namespace SLR {
                             m_printCondVar.notify_one();
                         }
                         
-                        printf("%s\n", buffer);
+                        slrprintf("%s\n", buffer);
                     }
                     m_numLastLines = (uint32_t)m_jobStask.size();
                     
                     fflush(stdout);
                 }
             }
-            printf("\n");
+            slrprintf("\n");
         });
     }
     
@@ -83,11 +83,11 @@ namespace SLR {
     
     void ProgressReporter::beginOtherThreadPrint() {
         std::lock_guard<std::mutex> lock(m_jobMutex);
-        printf("\033[%uF", m_numLastLines);
+        slrprintf("\033[%uF", m_numLastLines);
         for (int i = 0; i < m_numLastLines; ++i)
-            printf("                                "
-                   "                                \n"); // 64 spaces
-        printf("\033[%uF", m_numLastLines);
+            slrprintf("                                "
+                      "                                \n"); // 64 spaces
+        slrprintf("\033[%uF", m_numLastLines);
         m_sleep = true;
     }
     

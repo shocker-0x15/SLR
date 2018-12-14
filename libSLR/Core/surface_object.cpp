@@ -101,15 +101,15 @@ namespace SLR {
     bool SingleSurfaceObject::intersect(const Ray &ray, const RaySegment &segment, LightPathSampler &pathSampler, SurfaceInteraction* si) const {
 #ifdef DEBUG
         if (Accelerator::traceTraverse) {
-            debugPrintf("%s%p, SingleSurfaceObject::intersect()\n",
-                        Accelerator::traceTraversePrefix.c_str(), this);
+            slrDevPrintf("%s%p, SingleSurfaceObject::intersect()\n",
+                         Accelerator::traceTraversePrefix.c_str(), this);
             Accelerator::traceTraversePrefix += "  ";
         }
 #endif
         if (!m_surface->intersect(ray, segment, pathSampler, si)) {
 #ifdef DEBUG
             if (Accelerator::traceTraverse) {
-                debugPrintf("%snot found\n", Accelerator::traceTraversePrefix.c_str());
+                slrDevPrintf("%snot found\n", Accelerator::traceTraversePrefix.c_str());
                 size_t newLength = Accelerator::traceTraversePrefix.length() - 2;
                 Accelerator::traceTraversePrefix.resize(newLength);
             }
@@ -120,8 +120,8 @@ namespace SLR {
         si->setLightProb(isEmitting() ? 1.0f : 0.0f);
 #ifdef DEBUG
         if (Accelerator::traceTraverse) {
-            debugPrintf("%sfound: %g, %g\n",
-                        Accelerator::traceTraversePrefix.c_str(), segment.distMax, si->getDistance());
+            slrDevPrintf("%sfound: %g, %g\n",
+                         Accelerator::traceTraversePrefix.c_str(), segment.distMax, si->getDistance());
             size_t newLength = Accelerator::traceTraversePrefix.length() - 2;
             Accelerator::traceTraversePrefix.resize(newLength);
         }
@@ -329,8 +329,8 @@ namespace SLR {
     bool TransformedSurfaceObject::intersect(const Ray &ray, const RaySegment &segment, LightPathSampler &pathSampler, SurfaceInteraction* si) const {
 #ifdef DEBUG
         if (Accelerator::traceTraverse) {
-            debugPrintf("%s%p, TransformedSurfaceObject::intersect()\n",
-                        Accelerator::traceTraversePrefix.c_str(), this);
+            slrDevPrintf("%s%p, TransformedSurfaceObject::intersect()\n",
+                         Accelerator::traceTraversePrefix.c_str(), this);
             Accelerator::traceTraversePrefix += "  ";
         }
 #endif
@@ -341,7 +341,7 @@ namespace SLR {
         if (!m_surfObj->intersect(localRay, segment, pathSampler, si)) {
 #ifdef DEBUG
             if (Accelerator::traceTraverse) {
-                debugPrintf("%snot found\n", Accelerator::traceTraversePrefix.c_str());
+                slrDevPrintf("%snot found\n", Accelerator::traceTraversePrefix.c_str());
                 size_t newLength = Accelerator::traceTraversePrefix.length() - 2;
                 Accelerator::traceTraversePrefix.resize(newLength);
             }
@@ -351,8 +351,8 @@ namespace SLR {
         si->applyTransformFromLeft(sampledTF);
 #ifdef DEBUG
         if (Accelerator::traceTraverse) {
-            debugPrintf("%sfound: %g\n",
-                        Accelerator::traceTraversePrefix.c_str(), segment.distMax);
+            slrDevPrintf("%sfound: %g\n",
+                         Accelerator::traceTraversePrefix.c_str(), segment.distMax);
             size_t newLength = Accelerator::traceTraversePrefix.length() - 2;
             Accelerator::traceTraversePrefix.resize(newLength);
         }
@@ -445,8 +445,8 @@ namespace SLR {
     bool SurfaceObjectAggregate::intersect(const Ray &ray, const RaySegment &segment, LightPathSampler &pathSampler, SurfaceInteraction* si) const {
 #ifdef DEBUG
         if (Accelerator::traceTraverse) {
-            debugPrintf("%s%p, SurfaceObjectAggregate::intersect()\n",
-                        Accelerator::traceTraversePrefix.c_str(), this);
+            slrDevPrintf("%s%p, SurfaceObjectAggregate::intersect()\n",
+                         Accelerator::traceTraversePrefix.c_str(), this);
             Accelerator::traceTraversePrefix += "  ";
         }
 #endif
@@ -454,7 +454,7 @@ namespace SLR {
         if (!m_accelerator->intersect(ray, segment, pathSampler, si, &hitObj)) {
 #ifdef DEBUG
             if (Accelerator::traceTraverse) {
-                debugPrintf("%snot found\n", Accelerator::traceTraversePrefix.c_str());
+                slrDevPrintf("%snot found\n", Accelerator::traceTraversePrefix.c_str());
                 size_t newLength = Accelerator::traceTraversePrefix.length() - 2;
                 Accelerator::traceTraversePrefix.resize(newLength);
             }
@@ -467,8 +467,8 @@ namespace SLR {
         }
 #ifdef DEBUG
         if (Accelerator::traceTraverse) {
-            debugPrintf("%sfound: %g\n",
-                        Accelerator::traceTraversePrefix.c_str(), segment.distMax);
+            slrDevPrintf("%sfound: %g\n",
+                         Accelerator::traceTraversePrefix.c_str(), segment.distMax);
             size_t newLength = Accelerator::traceTraversePrefix.length() - 2;
             Accelerator::traceTraversePrefix.resize(newLength);
         }
