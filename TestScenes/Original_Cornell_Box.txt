@@ -3,7 +3,7 @@
 
 setRenderer("method": "PT", ("samples": 16384,));
 //setRenderer("method": "BPT", ("samples": 16384,));
-setRenderSettings("width": 1024, "height": 1024, "brightness": 20);
+setRenderSettings("width": 1024, "height": 1024, "brightness": 10);
 
 lambdas = (400, 404, 408, 412, 416, 420, 424, 428, 432, 436, 
            440, 444, 448, 452, 456, 460, 464, 468, 472, 476, 
@@ -43,8 +43,8 @@ greenMat = createSurfaceMaterial("matte", (SpectrumTexture(green), FloatTexture(
 redMat = createSurfaceMaterial("matte", (SpectrumTexture(red), FloatTexture(0.0)));
 lightMat = createSurfaceMaterial("emitter", 
                                  (createSurfaceMaterial("matte", (SpectrumTexture(Spectrum("Reflectance", 0.78)), FloatTexture(0.0))), 
-                                  createEmitterSurfaceProperty("diffuse", (SpectrumTexture(Spectrum("Illuminant", (400.0, 500.0, 600.0, 700.0), (0.0, 8.0, 15.6, 18.4))),))
-                                  //createEmitterSurfaceProperty("diffuse", (SpectrumTexture(Spectrum("Illuminant", "D65", 0)),))
+                                  //createEmitterSurfaceProperty("diffuse", (SpectrumTexture(Spectrum("LightSource", (400.0, 500.0, 600.0, 700.0), (0.0, 8.0, 15.6, 18.4))),))
+                                  createEmitterSurfaceProperty("diffuse", (SpectrumTexture(Spectrum("Illuminant", "D65", 0)),))
                                   ));
 
 cornellBoxNode = createNode();

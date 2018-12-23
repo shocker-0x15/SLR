@@ -28,7 +28,7 @@ namespace SLR {
             case SpectrumType::Reflectance:
                 XYZ_to_sRGB_E(XYZ, RGB);
                 break;
-            case SpectrumType::Illuminant:
+            case SpectrumType::LightSource:
                 XYZ_to_sRGB(XYZ, RGB);
                 break;
             case SpectrumType::IndexOfRefraction:
@@ -495,7 +495,7 @@ namespace SLR {
                     case SpectrumType::Reflectance:
                         sRGB_E_to_XYZ(RGB, XYZ);
                         break;
-                    case SpectrumType::Illuminant:
+                    case SpectrumType::LightSource:
                         sRGB_to_XYZ(RGB, XYZ);
                         break;
                     default:

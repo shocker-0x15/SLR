@@ -33,7 +33,7 @@ namespace SLR {
     
     enum class SpectrumType : uint32_t {
         Reflectance = 0,
-        Illuminant,
+        LightSource,
         IndexOfRefraction,
     };
     

@@ -53,8 +53,8 @@ namespace SLRSceneGraph {
     static bool strToSpectrumType(const std::string &str, SLR::SpectrumType* type) {
         if (str == "Reflectance")
             *type = SLR::SpectrumType::Reflectance;
-        else if (str == "Illuminant")
-            *type = SLR::SpectrumType::Illuminant;
+        else if (str == "LightSource")
+            *type = SLR::SpectrumType::LightSource;
         else if (str == "IndexOfRefraction" || str == "IoR" || str == "IOR")
             *type = SLR::SpectrumType::IndexOfRefraction;
         else
@@ -448,12 +448,12 @@ namespace SLRSceneGraph {
                                                        std::string type = args.at("type").raw<TypeMap::String>();
                                                        std::string name = args.at("name").raw<TypeMap::String>();
                                                        auto idx = args.at("idx").raw<TypeMap::Integer>();
-                                                       SpectrumType spType = SpectrumType::Illuminant;
+                                                       SpectrumType spType = SpectrumType::LightSource;
                                                        SpectrumLibrary::Data data;
                                                        bool success = true;
                                                        if (type == "Illuminant") {
                                                            success = SpectrumLibrary::queryIlluminantSpectrum(name, idx, &data);
-                                                           spType = SpectrumType::Illuminant;
+                                                           spType = SpectrumType::LightSource;
                                                        }
                                                        else if (type == "Reflectance") {
                                                            success = SpectrumLibrary::queryReflectanceSpectrum(name, idx, &data);
@@ -1341,7 +1341,7 @@ namespace SLRSceneGraph {
                                                        std::string path = context.absFileDirPath + args.at("path").raw<TypeMap::String>();
                                                        float scale = args.at("scale").raw<TypeMap::RealNumber>();
                                                        
-                                                       Image2DRef img = createImage2D(path, SLR::ImageStoreMode::AsIs, SLR::SpectrumType::Illuminant, false);
+                                                       Image2DRef img = createImage2D(path, SLR::ImageStoreMode::AsIs, SLR::SpectrumType::LightSource, false);
                                                        const Texture2DMappingRef &mapping = Texture2DMapping::sharedInstanceRef();
                                                        SpectrumTextureRef IBLTex = createShared<ImageSpectrumTexture>(mapping, img);
                                                        std::weak_ptr<Scene> sceneWRef = context.scene;
@@ -1424,7 +1424,7 @@ namespace SLRSceneGraph {
                         case SpectrumType::Reflectance:
                             XYZ_to_sRGB_E(XYZ, RGB);
                             break;
-                        case SpectrumType::Illuminant:
+                        case SpectrumType::LightSource:
                             XYZ_to_sRGB(XYZ, RGB);
                             break;
                         case SpectrumType::IndexOfRefraction:
